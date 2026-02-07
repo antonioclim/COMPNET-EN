@@ -1,0 +1,21 @@
+@startuml
+title IoT runtime scenario (containers)
+
+skinparam shadowing false
+
+node "Docker Host" {
+
+  node "sensor container" {
+  }
+
+  node "broker container" {
+  }
+
+  node "actuator container" {
+  }
+}
+
+"sensor container" --> "broker container" : publish temperature
+"broker container" --> "actuator container" : threshold command
+
+@enduml

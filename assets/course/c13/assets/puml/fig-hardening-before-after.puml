@@ -1,0 +1,20 @@
+@startuml
+title System hardening: before vs after
+
+skinparam shadowing false
+
+state "Unhardened system" as U {
+  U : open ports
+  U : default credentials
+  U : unnecessary services
+}
+
+state "Hardened system" as H {
+  H : minimal services
+  H : authentication
+  H : restricted access
+}
+
+U --> H : hardening measures
+
+@enduml

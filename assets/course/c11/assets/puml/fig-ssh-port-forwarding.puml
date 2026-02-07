@@ -1,0 +1,45 @@
+@startuml
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title SSH: port forwarding (local vs remote vs dynamic)
+
+actor User
+node "Client machine" as C
+node "SSH Server\n(bastion)" as B
+node "Internal service\n(db, http, etc)" as I
+
+rectangle "Local forwarding" as L {
+  User -> C : connect localhost:9000
+  C -> B : SSH tunnel
+  B -> I : connect internal:5432
+  note right of L
+  L: local_port -> remote_target
+  Acces la servicii interne prin bastion
+  end note
+}
+
+rectangle "Remote forwarding" as R {
+  User -> B : connect server:9000
+  B -> C : SSH tunnel
+  C -> I : connect local/internal
+  note right of R
+  R: remote_port -> client_target
+  Expui un serviciu de pe client prin server
+  end note
+}
+
+rectangle "Dynamic (SOCKS)" as D {
+  User -> C : browser -> localhost:1080
+  C -> B : SSH tunnel (SOCKS)
+  B -> I : conexiuni dinamice
+  note right of D
+  Proxy general prin SSH
+  end note
+}
+
+@enduml

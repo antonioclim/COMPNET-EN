@@ -1,0 +1,41 @@
+@startuml
+title E-mail system overview (SMTP + mailbox + POP3/IMAP/WebMail)
+
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam defaultTextAlignment center
+
+actor User
+
+package "Sender side" {
+  [MUA\n(Mail User Agent)] as MUA
+  [MSA/MTA\n(Outgoing SMTP)] as OutMTA
+}
+
+package "Internet" {
+  [DNS\n(MX lookup)] as DNS
+}
+
+package "Receiver side" {
+  [MTA\n(Incoming SMTP)] as InMTA
+  [Mailbox\n(Maildir/DB)] as MB
+  [IMAP server\n(Dovecot)] as IMAP
+  [POP3 server\n(Dovecot)] as POP3
+  [WebMail\n(HTTP UI)] as WEB
+}
+
+User --> MUA : compose + send
+MUA --> OutMTA : SMTP submission\n(587/465)
+OutMTA --> DNS : query MX for domain
+DNS --> OutMTA : MX + IP
+OutMTA --> InMTA : SMTP relay\n(25)
+InMTA --> MB : store message
+
+User --> IMAP : read/sync (online)
+IMAP --> MB : fetch + flags
+User --> POP3 : download (offline style)
+POP3 --> MB : fetch + (optionally) delete
+User --> WEB : browser access
+WEB --> IMAP : IMAP backend
+
+@enduml

@@ -1,0 +1,28 @@
+@startuml
+title POP3 session (download style)
+
+skinparam shadowing false
+
+participant "Client\n(MUA)" as C
+participant "POP3 Server" as S
+database "Mailbox" as MB
+
+C -> S : TCP connect :110 / :995
+S --> C : +OK server ready
+C -> S : USER alice
+S --> C : +OK
+C -> S : PASS ********
+S --> C : +OK mailbox locked
+C -> S : STAT
+S --> C : +OK <count> <bytes>
+C -> S : LIST
+S --> C : +OK\n1 <bytes>\n.\n
+C -> S : RETR 1
+S --> C : +OK\n<message>\n.\n
+C -> S : DELE 1 (optional)
+S --> C : +OK marked deleted
+C -> S : QUIT
+S -> MB : apply deletions (optional)
+S --> C : +OK bye
+
+@enduml

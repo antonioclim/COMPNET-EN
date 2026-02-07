@@ -1,0 +1,38 @@
+@startuml
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title SSH: conexiune unica, canale multiple (multiplexare)
+
+actor Client
+node "SSH Server" as S
+
+Client -> S : TCP 22\nSSH transport (encrypted)
+
+rectangle "In interiorul conexiunii SSH" {
+  component "Channel: shell" as CH1
+  component "Channel: exec" as CH2
+  component "Channel: SFTP" as CH3
+  component "Channel: port forward" as CH4
+}
+
+Client --> CH1
+Client --> CH2
+Client --> CH3
+Client --> CH4
+CH1 --> S
+CH2 --> S
+CH3 --> S
+CH4 --> S
+
+note right of S
+Un singur TCP
+canale logice multiple
+fiecare cu flux separat
+end note
+
+@enduml

@@ -1,0 +1,26 @@
+@startuml
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title FTP: conexiune de control vs conexiune de date
+
+actor Client
+node "FTP Server" as S
+
+Client -> S : TCP 21 (control)\nUSER/PASS, PWD, LIST, RETR/STOR
+note right of S
+Conexiune lunga
+comenzi + raspunsuri
+end note
+
+Client -> S : TCP (data)\nLIST / RETR / STOR
+note right of S
+Conexiune separata
+doar transfer efectiv
+end note
+
+@enduml
