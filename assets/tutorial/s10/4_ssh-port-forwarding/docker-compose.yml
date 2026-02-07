@@ -1,0 +1,21 @@
+
+version: "3.9"
+
+services:
+  web:
+    image: python:3.10-slim
+    working_dir: /app
+    command: ["python", "-m", "http.server", "8000"]
+    expose:
+      - "8000"
+    volumes:
+      - ./web-content:/app
+
+  ssh-bastion:
+    build:
+      context: ./ssh-bastion
+    container_name: ssh-bastion
+    ports:
+      - "2222:22"
+    depends_on:
+      - web

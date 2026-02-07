@@ -1,0 +1,43 @@
+version: "3.8"
+
+services:
+  ftp-server:
+    image: python:3.12-alpine
+    container_name: seminar9_ftp_server
+    working_dir: /app
+    volumes:
+      - ./pyftpd_server.py:/app/pyftpd_server.py:ro
+      - ./server-data:/app/test
+      - ./server-anon:/app/nobody
+    command: sh -c "pip install pyftpdlib && python pyftpd_server.py"
+    ports:
+      - "2121:2121"   # expunem FTP control port pe host
+    networks:
+      - ftpnet
+
+  client1:
+    image: python:3.12-alpine
+    container_name: seminar9_client1
+    working_dir: /app
+    volumes:
+      - ./pyftpd_multi_client.py:/app/pyftpd_multi_client.py:ro
+      - ./client1-data:/app/client-data
+    command: sh -c "tail -f /dev/null"
+    networks:
+      - ftpnet
+
+  client2:
+    image: python:3.12-alpine
+    container_name: seminar9_client2
+    working_dir: /app
+    volumes:
+      - ./pyftpd_multi_client.py:/app/pyftpd_multi_client.py:ro
+      - ./client2-data:/app/client-data
+    command: sh -c "tail -f /dev/null"
+    networks:
+      - ftpnet
+
+networks:
+  ftpnet:
+    driver: bridge
+

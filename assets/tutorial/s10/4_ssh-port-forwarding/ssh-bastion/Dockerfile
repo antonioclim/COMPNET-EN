@@ -1,0 +1,13 @@
+
+FROM ubuntu:22.04
+
+RUN apt-get update && apt-get install -y openssh-server curl && \
+    mkdir /var/run/sshd
+
+# user de laborator
+RUN useradd -m labuser && echo "labuser:labpass" | chpasswd
+
+RUN sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config && \
+    sed -i 's/PasswordAuthentication no/#PasswordAuthentication no/' /etc/ssh/sshd_config
+
+CMD ["/usr/sbin/sshd", "-D"]
