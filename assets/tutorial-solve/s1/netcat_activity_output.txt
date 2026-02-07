@@ -1,0 +1,13 @@
+null@freyja:~/@ase/@comp-net$ nc localhost 9100
+aaaa
+aaa
+
+null@freyja:~$ nc -l -p 9100
+aaaa
+aaa
+
+null@freyja:~$ nc -l -u -p 9101
+aaa
+
+null@freyja:~/@ase/@comp-net$ nc -u localhost 9101
+aaa
