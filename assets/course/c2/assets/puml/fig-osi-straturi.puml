@@ -1,0 +1,24 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Modelul OSI (7 straturi)
+
+rectangle "7. Aplicatie" as L7
+rectangle "6. Prezentare" as L6
+rectangle "5. Sesiune" as L5
+rectangle "4. Transport" as L4
+rectangle "3. Retea" as L3
+rectangle "2. Legatura de date" as L2
+rectangle "1. Fizic" as L1
+
+L7 -down-> L6
+L6 -down-> L5
+L5 -down-> L4
+L4 -down-> L3
+L3 -down-> L2
+L2 -down-> L1
+@enduml

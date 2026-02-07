@@ -1,0 +1,25 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title CSMA/CD (Ethernet half-duplex) - flux
+
+start
+:Asculta mediul (Carrier Sense);
+if (Mediu liber?) then (da)
+  :Transmite cadru;
+  if (Coliziune detectata?) then (da)
+    :Trimite jamming signal;
+    :Asteapta backoff aleator;
+    :Reincearca;
+  else (nu)
+    :Transmitere reusita;
+  endif
+else (nu)
+  :Asteapta pana devine liber;
+endif
+stop
+@enduml

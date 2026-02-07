@@ -1,0 +1,28 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Cadru Ethernet (format conceptual)
+
+rectangle "Preambul\n7B" as pre
+rectangle "SFD\n1B" as sfd
+rectangle "Dest MAC\n6B" as dmac
+rectangle "Src MAC\n6B" as smac
+rectangle "Type/Len\n2B" as typ
+rectangle "Payload\n46-1500B" as pay
+rectangle "FCS (CRC)\n4B" as fcs
+
+pre --> sfd
+sfd --> dmac
+dmac --> smac
+smac --> typ
+typ --> pay
+pay --> fcs
+
+note bottom of typ
+  EtherType (>= 1536) sau lungime (< 1500)
+end note
+@enduml

@@ -1,0 +1,27 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Switch: invatare tabela CAM (concept)
+
+[Host A\nMAC_A] as A
+[Host B\nMAC_B] as B
+[Host C\nMAC_C] as C
+[Switch] as SW
+
+A -- SW
+B -- SW
+C -- SW
+
+note right of SW
+  1) Cand primeste un cadru
+     invata: MAC_sursa -> port
+  2) Daca MAC_dest e cunoscut:
+     trimite doar pe portul respectiv
+  3) Daca nu e cunoscut:
+     flood pe celelalte porturi
+end note
+@enduml

@@ -1,0 +1,16 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title L2: Incapsulare in cadru (frame)
+
+rectangle "Pachet L3\n(IP)" as L3
+rectangle "Cadru L2\n[Header L2 | (L3) | FCS]" as L2
+rectangle "Biti L1" as L1
+
+L3 --> L2 : incapsulare
+L2 --> L1 : serializare
+@enduml

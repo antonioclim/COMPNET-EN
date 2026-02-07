@@ -1,0 +1,32 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Unde se implementeaza straturile OSI (orientativ)
+
+package "Aplicatie" {
+  rectangle "L7 Aplicatie" as L7
+  rectangle "L6 Prezentare" as L6
+  rectangle "L5 Sesiune" as L5
+}
+
+package "Sistem de operare" {
+  rectangle "L4 Transport\n(TCP/UDP)" as L4
+  rectangle "L3 Retea\n(IP)" as L3
+}
+
+package "Driver NIC / hardware" {
+  rectangle "L2 Legatura de date\n(Ethernet/Wi-Fi)" as L2
+  rectangle "L1 Fizic\n(cablu / radio)" as L1
+}
+
+L7 -down-> L6
+L6 -down-> L5
+L5 -down-> L4
+L4 -down-> L3
+L3 -down-> L2
+L2 -down-> L1
+@enduml

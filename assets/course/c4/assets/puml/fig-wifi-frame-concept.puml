@@ -1,0 +1,33 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title 802.11: cadru (concept)
+
+rectangle "Frame Control\n(versiune, tip, subtip,\nToDS/FromDS, flags)" as fc
+rectangle "Duration/ID" as dur
+rectangle "Addr1\n(destinatie)" as a1
+rectangle "Addr2\n(sursa)" as a2
+rectangle "Addr3\n(BSSID/AP)" as a3
+rectangle "Seq Control" as seq
+rectangle "Addr4\n(optional)" as a4
+rectangle "Payload" as pay
+rectangle "FCS (CRC)" as fcs
+
+fc --> dur
+dur --> a1
+a1 --> a2
+a2 --> a3
+a3 --> seq
+seq --> a4
+a4 --> pay
+pay --> fcs
+
+note right of a4
+  Exista doar in anumite cazuri
+  (in functie de ToDS/FromDS)
+end note
+@enduml

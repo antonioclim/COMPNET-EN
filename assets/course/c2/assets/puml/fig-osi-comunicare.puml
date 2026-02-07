@@ -1,0 +1,41 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Comunicarea intre straturi (concept)
+
+package "Gazda A" {
+  rectangle "Aplicatie" as A7
+  rectangle "Transport" as A4
+  rectangle "Retea" as A3
+  rectangle "Legatura de date" as A2
+  rectangle "Fizic" as A1
+
+  A7 -down-> A4
+  A4 -down-> A3
+  A3 -down-> A2
+  A2 -down-> A1
+}
+
+package "Gazda B" {
+  rectangle "Aplicatie" as B7
+  rectangle "Transport" as B4
+  rectangle "Retea" as B3
+  rectangle "Legatura de date" as B2
+  rectangle "Fizic" as B1
+
+  B7 -down-> B4
+  B4 -down-> B3
+  B3 -down-> B2
+  B2 -down-> B1
+}
+
+A7 ..> B7 : "comunicare logica"
+A4 ..> B4 : "comunicare logica"
+A3 ..> B3 : "comunicare logica"
+A2 ..> B2 : "comunicare logica"
+A1 ..> B1 : "semnal / biti"
+@enduml

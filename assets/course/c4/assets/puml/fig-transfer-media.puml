@@ -1,0 +1,46 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Medii de transmisie (transfer media)
+
+package "Ghidat" {
+  [Cupru\n(twisted pair)] as copper
+  [Cupru\n(coaxial)] as coax
+  [Fibra optica] as fiber
+}
+
+package "Neghidat" {
+  [Aer / radio] as air
+}
+
+[Sender] as S
+[Receiver] as R
+
+S --> copper
+copper --> R
+
+S --> coax
+coax --> R
+
+S --> fiber
+fiber --> R
+
+S ~~ air
+air ~~ R
+
+note right of fiber
+  Semnal optic
+end note
+
+note right of copper
+  Semnal electric
+end note
+
+note right of air
+  Semnal electromagnetic
+end note
+@enduml

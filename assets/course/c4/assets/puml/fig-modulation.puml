@@ -1,0 +1,25 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Modulare (concept): AM / FM / PM
+
+rectangle "Semnal de baza (date)\n(bits / simboluri)" as base
+rectangle "Purtatoare (carrier)\n(sinus la o frecventa)" as carrier
+
+rectangle "AM\nAmplitude Modulation\nvariaza amplitudinea" as am
+rectangle "FM\nFrequency Modulation\nvariaza frecventa" as fm
+rectangle "PM\nPhase Modulation\nvariaza faza" as pm
+
+base --> am
+carrier --> am
+
+base --> fm
+carrier --> fm
+
+base --> pm
+carrier --> pm
+@enduml

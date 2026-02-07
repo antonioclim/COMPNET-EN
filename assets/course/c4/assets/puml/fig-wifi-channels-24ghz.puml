@@ -1,0 +1,21 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Wi-Fi 2.4 GHz: canale si suprapuneri (concept)
+
+rectangle "Canal 1\n2412 MHz" as c1
+rectangle "Canal 6\n2437 MHz" as c6
+rectangle "Canal 11\n2462 MHz" as c11
+
+c1 --> c6 : distanta ~25 MHz
+c6 --> c11 : distanta ~25 MHz
+
+note bottom
+  In practica, combinatia 1/6/11 minimizeaza suprapunerea
+  (in multe regiuni).
+end note
+@enduml

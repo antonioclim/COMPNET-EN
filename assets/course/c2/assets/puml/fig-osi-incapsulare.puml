@@ -1,0 +1,32 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Incapsulare in OSI (unitati de transfer)
+
+rectangle "Aplicatie:\nMesaj" as app
+rectangle "Transport:\n[H4 | Date]" as l4
+rectangle "Retea:\n[H3 | (L4)]" as l3
+rectangle "Legatura de date:\n[H2 | (L3) | FCS]" as l2
+rectangle "Fizic:\nBiti / semnal" as l1
+
+app --> l4 : adauga header L4
+l4 --> l3 : adauga header L3
+l3 --> l2 : adauga header L2 + FCS
+l2 --> l1 : transmite ca biti
+
+note right of l4
+  Unitate L4:\nsegment / datagrama
+end note
+
+note right of l3
+  Unitate L3:\npachet
+end note
+
+note right of l2
+  Unitate L2:\ncadru (frame)
+end note
+@enduml

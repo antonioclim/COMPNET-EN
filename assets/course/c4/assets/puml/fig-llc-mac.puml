@@ -1,0 +1,22 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title L2: LLC si MAC
+
+rectangle "L3 Retea\n(IP)" as L3
+
+package "L2 Legatura de date" {
+  rectangle "LLC\n(IEEE 802.2)\ninterfata cu L3\nmultiplexare" as LLC
+  rectangle "MAC\n(acces la mediu)\nincapsulare cadre\nadresare MAC\nCRC" as MAC
+  LLC -down-> MAC
+}
+
+rectangle "L1 Fizic\n(mediu)" as L1
+
+L3 -down-> LLC
+MAC -down-> L1
+@enduml

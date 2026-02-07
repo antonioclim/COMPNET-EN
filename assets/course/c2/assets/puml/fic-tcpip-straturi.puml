@@ -1,0 +1,18 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Modelul TCP/IP (4 straturi)
+
+rectangle "Aplicatie\n(HTTP, DNS, SMTP, ...)" as A
+rectangle "Transport\n(TCP, UDP)" as T
+rectangle "Internet\n(IP, ICMP, ...)" as I
+rectangle "Acces la retea\n(Ethernet, Wi-Fi, ...)" as N
+
+A -down-> T
+T -down-> I
+I -down-> N
+@enduml

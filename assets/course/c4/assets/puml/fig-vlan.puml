@@ -1,0 +1,32 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title VLAN: segmentare logica peste aceeasi infrastructura
+
+package "VLAN 10" {
+  [PC A] as A
+  [PC B] as B
+}
+
+package "VLAN 20" {
+  [PC C] as C
+  [PC D] as D
+}
+
+[Switch cu VLAN] as SW
+
+A -- SW
+B -- SW
+C -- SW
+D -- SW
+
+note right of SW
+  Porturi "access" in VLAN 10 / VLAN 20
+  Trunk: cadre cu tag 802.1Q
+  Domenii de broadcast separate
+end note
+@enduml
