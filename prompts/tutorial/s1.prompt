@@ -1,0 +1,6 @@
+For the first tutorial, the title was: Analiză de reţea. WiresharkItshark, netcat TCPIUDP, debugging trafic
+
+The first stage is an explanation of the expectations of the course. We will skip that for now and i will draft it.
+The second thing we must do is cover basic tools in the operating system: ping, netstat, nslookup. Give me a scenario in markdown to showcase said tools. The way this should work is we have a short explanation, then a series of commands, then another explanation (notice that...). 
+
+After this stage we need to test student involvement with a short scenario where they use these tools and produce an outcome (which they can then upload somewhere)

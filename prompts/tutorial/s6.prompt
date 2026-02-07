@@ -1,0 +1,3 @@
+Let's continue to 6 Seminar 6 - SDN. Componente ale arhitecturilor de reţea. Topologii simulate, analiză trafic într-un simulator.
+We're mostly going to do this over mininet and we want some additional oomph, which we will get by using some actual python servers in the automation. That is, apart from the actual sdn, we will run python servers/clients inside the mininet nodes. 
+Again, the tutorial is 80 minutes long, so we should have enough content for that. Please propose an outline.

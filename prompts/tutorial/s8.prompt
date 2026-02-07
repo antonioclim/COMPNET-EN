@@ -1,0 +1,8 @@
+Next up, we will move onto 
+Seminar 8 - Servicii Internet: implementarea unui server HTTP. Reverse proxies.
+
+Please propose an outline, but take into account we need to handle the following things (feel free to rearrange them)
+- testing tools for http (curl)
+- writing a (basic) http server with the http server package in python
+- writing a (simple) http with sockets (this probably only reads files and returns them to the client and probably handles the minimum amount of headers, but it can be used with a browser as a client)
+- some configuration over an actual server (this will be nginx). the nginx will be run with a docker compose file so we will have to introduce docker as well. the file should only handle 1 container for now

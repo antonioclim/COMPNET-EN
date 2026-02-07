@@ -1,0 +1,207 @@
+we'll refine these later if need be, we will proceed to the next tutorial "Programare pe socket-uri: broadcast şi multicast UDP, TCP tunnel simplu."
+
+First off, there is something missing here:
+- we need to implement a multiclient tcp server with threads. i will give you the code. in conjunction with this we can use either netcat our the client written in the previous tutorial
+
+Following that, the stages we will go through are:
+- a udp broadcast sender and receiver (over ipv4)
+- a udp multicast sender and receiver
+- a simple tunneling application. i will give you the code for this but you can modify it if simplification is needed
+
+Code:
+
+Multi client tcp:
+import socket
+import threading
+
+HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
+PORT = 3333  # Port to listen on (non-privileged ports are > 1023)
+
+is_running = True
+
+def handle_client(client):
+  with client:
+    while True:
+      if client == None:
+        break
+      data = client.recv(1024)
+      if not data:
+          break
+      client.sendall(data.capitalize())
+
+def accept(server):
+  while is_running:
+    client, addr = server.accept()
+    print(f"{addr} has connected")
+    client_thread = threading.Thread(target=handle_client, args=(client,))
+    client_thread.start()
+
+def main():
+  try:
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.bind((HOST, PORT))
+    server.listen()
+    accept_thread = threading.Thread(target=accept, args=(server,))
+    accept_thread.start()
+    accept_thread.join()
+  except BaseException as err:
+    print(err)
+  finally:
+    if server:
+      server.close()
+
+if __name__ == '__main__':
+  main()
+
+Udp broadcast:
+import socket
+
+BCAST_ADDR = '255.255.255.255'
+BCAST_PORT = 5007
+
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+sock.sendto(b'Hello, World!', (BCAST_ADDR, BCAST_PORT))
+
+
+Udp multicast sender:
+import socket
+
+MCAST_GRP = '224.0.0.1'
+MCAST_PORT = 5001
+
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 32)
+sock.sendto(b'Hello, World!', (MCAST_GRP, MCAST_PORT))
+
+
+Udp multicast receiver:
+import socket
+import struct
+# Set up the multicast address and port number
+multicast_group = '224.0.0.1'
+server_address = ((multicast_group, 5001))
+
+# Create a UDP socket
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+# Bind to the server address
+sock.bind(server_address)
+
+# Add the socket to the multicast group
+group = socket.inet_aton(multicast_group)
+mreq = struct.pack('4sL', group, socket.INADDR_ANY)
+sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
+
+# Receive data in a loop
+while True:
+    data, address = sock.recvfrom(1024)
+    print(f'Received {len(data)} bytes from {address}: {data.decode()}')
+
+
+Udp anycast over ipv6 sender:
+import socket
+# sudo ip -6 addr add 2001:db8::1/64 dev lo
+ANYCAST_ADDR = "2001:db8::1"  # Simulated anycast address
+PORT = 5007
+
+def anycast_client():
+    """Send a message to the anycast address."""
+    sock = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM)
+
+    message = b"Hello, anycast server!"
+    sock.sendto(message, (ANYCAST_ADDR, PORT))
+
+    data, addr = sock.recvfrom(1024)
+    print(f"Received response: '{data.decode()}' from {addr}")
+
+if __name__ == "__main__":
+    anycast_client()
+
+Udp anycast receiver:
+import socket
+
+ANYCAST_ADDR = "::"  # Simulated anycast address
+PORT = 5007
+
+def anycast_server():
+    """Simulated IPv6 anycast server."""
+    sock = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM)
+    sock.bind((ANYCAST_ADDR, PORT))
+    print(f"Anycast Server listening on [{ANYCAST_ADDR}]:{PORT}")
+
+    while True:
+        data, addr = sock.recvfrom(1024)
+        print(f"Received '{data.decode()}' from {addr}")
+        sock.sendto(b"Reply from anycast server", addr)
+
+if __name__ == "__main__":
+    anycast_server()
+
+Tcp proxy (tunneling)
+import socket
+import threading
+import sys
+
+HOST = '127.0.0.1'  # Standard loopback interface address (localhost)
+
+is_running = True
+
+def handle_client(client_socket, client):
+  with client:
+    while True:
+      if client == None:
+        break
+      data = client.recv(1024)
+      if not data:
+          break
+      print(data)
+      client_socket.sendall(data)
+
+def process_connection(server_socket, client_socket):
+  while is_running:
+    client, addr = server_socket.accept()
+    print(f'{addr} has connected')
+    client_thread = threading.Thread(target=handle_client, args=(client_socket, client))
+    client_thread.start()
+    # client_thread.join()
+
+tunnels = []
+
+def tunnel(source_port, destination_port):
+  server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+  try:
+    server_socket.bind((HOST, source_port))
+    server_socket.listen()
+    print('started server for ', source_port)
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
+    client_socket.connect((HOST, destination_port))
+    print('connected to ', destination_port)
+    accept_thread = threading.Thread(target=process_connection, args=(server_socket, client_socket))
+    accept_thread.start()
+    accept_thread.join()
+  except BaseException as err:
+    print(err)
+  finally:
+    if server_socket:
+      server_socket.close()
+
+def main():
+  finished = False
+  while not finished:
+    command = input('connect <source_port> <destination_port> -> ')
+    if command.strip() == 'exit':
+      is_running = False
+      finished = True
+    else:
+      if command.strip() == 'list':
+        print(tunnels)
+      else:
+        (_, source_port, destination_port) = command.strip().split(' ')
+        print('connecting ', source_port, ' to ', destination_port)
+        tunnel_thread = threading.Thread(target=tunnel, args=(int(source_port), int(destination_port), ))
+        tunnel_thread.start()
+        tunnels.append((source_port, destination_port))
+
+if __name__ == '__main__':
+  main()

@@ -1,0 +1,108 @@
+the second tutorial is called "Programare pe socket-uri: implementarea unui server concurent TCP şi UDP şi a clienţilor aferenţi plus analiza traficului."
+
+our stages in accmplishing this are going to be:
+- running a provided tcp server in python (this is with a request handler, so pretty basic). this will be initially tested with netcat
+- running a provided tcp client and testing it with our server
+- running a provided udp server, initially tested with netcat
+- running a provided udp client and testing it with the server
+
+I will give you the existing source code. What must be done:
+- adding comprehensive comments to the code
+- formulating student tasks, including the templates they will start with, if necessary
+- using wireshark capture where appropriate
+
+The code:
+
+Request tcp server:
+
+import socketserver
+
+class MyTCPHandler(socketserver.BaseRequestHandler):
+    """
+    The request handler class for our server.
+
+    It is instantiated once per connection to the server, and must
+    override the handle() method to implement communication to the
+    client.
+    """
+
+    def handle(self):
+        # self.request is the TCP socket connected to the client
+        self.data = self.request.recv(1024).strip()
+        print("{} wrote:".format(self.client_address[0]))
+        print(self.data)
+        # just send back the same data, but upper-cased
+        self.request.sendall(self.data.upper())
+
+class MyTCPServer(socketserver.TCPServer):
+    allow_reuse_address = True
+
+if __name__ == "__main__":
+    HOST, PORT = "localhost", 12345
+    socketserver.TCPServer.allow_reuse_address = True
+
+    # Create the server, binding to localhost on port 9999
+    with MyTCPServer((HOST, PORT), MyTCPHandler) as server:
+        # Activate the server; this will keep running until you
+        # interrupt the program with Ctrl-C
+        try:
+					server.serve_forever()
+				except KeyboardInterrupt:
+					server.shutdown()
+
+Tcp client:
+import socket
+
+HOST = "127.0.0.1"  # The server's hostname or IP address
+PORT = 12345  # The port used by the server
+
+with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+    s.connect((HOST, PORT))
+    s.sendall(b"Hello, world")
+    data = s.recv(1024)
+
+print(f"Received {data!r}")
+
+Udp server:
+import socket
+import random
+import sys
+
+def main():
+  if len(sys.argv) < 2:
+    print('not enough args')
+  else:
+    PORT = sys.argv[1]
+    PORT = int(PORT)
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as server_socket:
+      server_socket.bind(('', 12345))
+      while True:
+        message, address = server_socket.recvfrom(1024)
+        server_socket.sendto(message.upper(), address)
+
+
+if __name__ == '__main__':
+  main()
+
+Udp client:
+import socket
+import random
+import sys
+
+def main():
+  if len(sys.argv) < 4:
+    print('not enough args')
+  else:
+    (HOST, PORT) = sys.argv[2:4]
+    PORT = int(PORT)
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as client_socket:
+      while True:
+        data = input("Please enter the message:\n")
+        client_socket.sendto(data.encode('utf-8'), (HOST, 12345))
+        message, address = client_socket.recvfrom(1024)
+        print(message)
+
+
+if __name__ == '__main__':
+  main()
+

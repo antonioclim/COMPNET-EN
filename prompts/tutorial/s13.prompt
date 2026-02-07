@@ -1,0 +1,16 @@
+Awesome, one more and we're done:
+Seminar 13 - Securitatea în reţele de calculatoare: scanare de porturi, testarea vulnerabilităţilor simple.
+
+We should focus on pen testing. We should use available tools, maybe for ease of use load them up with docker compose. As an alternative, if we dont have an easier option, maybe use kali linux (since this is at least a vm it will be harder to make the infrastructure available.)
+
+We should go through the usual steps:
+- initial investigation (e.g. port scanning)
+- app identification
+- vulnerability identification
+- vulnerability exploitation
+
+we can use something a bit older so we can easily exploit it.
+
+additionally, maybe there's an argument to write some little tool ourselves.
+
+let's start with an outline proposal
