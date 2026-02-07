@@ -1,0 +1,24 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title NDP (IPv6): NS/NA + RS/RA (concept)
+
+[Host IPv6] as H
+[Router IPv6] as R
+[Alt host] as H2
+
+H --> R : RS (Router Solicitation)
+R --> H : RA (Router Advertisement)\nprefix, gateway, flags
+
+H -[#333333,dashed]-> H2 : NS (Neighbor Solicitation)\n(catre multicast)
+H2 -[#333333,dashed]-> H : NA (Neighbor Advertisement)
+
+note bottom
+  NDP foloseste ICMPv6.
+  Inlocuieste ARP + parte din configurare.
+end note
+@enduml

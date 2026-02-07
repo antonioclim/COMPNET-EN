@@ -1,0 +1,22 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title ARP (IPv4): IP -> MAC in LAN
+
+[Host A\nIP_A, MAC_A] as A
+[Switch] as SW
+[Host B\nIP_B, MAC_B] as B
+
+A -- SW
+B -- SW
+
+A -[#333333,dashed]-> SW : ARP Request (broadcast)\n"Cine are IP_B?"
+SW -[#333333,dashed]-> B : broadcast
+
+B -[#333333,dashed]-> SW : ARP Reply (unicast)\n"IP_B este la MAC_B"
+SW -[#333333,dashed]-> A : unicast
+@enduml

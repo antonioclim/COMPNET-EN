@@ -1,0 +1,24 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Rolul unui router
+
+[LAN A] as lana
+[Router] as r
+[LAN B] as lanb
+
+lana --> r : pachete IP
+r --> lanb : pachete IP
+
+note right of r
+  Router:
+  - conecteaza retele
+  - decide next hop / interfata
+  - foloseste tabela de rutare
+  - poate filtra / modifica (NAT, ACL)
+end note
+@enduml

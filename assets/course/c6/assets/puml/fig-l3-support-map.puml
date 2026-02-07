@@ -1,0 +1,32 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Nivelul retea: IP + protocoale de suport (overview)
+
+rectangle "IP\n(IPv4 / IPv6)\ntransport pachete" as IP
+
+rectangle "ARP\n(IPv4)\nIP -> MAC" as ARP
+rectangle "NDP\n(IPv6)\nNS/NA, RS/RA" as NDP
+rectangle "ICMP\n(IPv4)\nerori + diagnostic" as ICMP
+rectangle "ICMPv6\n(erori + NDP)" as ICMP6
+rectangle "DHCP\n(IPv4)\nalocare configurare" as DHCP
+rectangle "DHCPv6\n(IPv6)\nconfig suplimentar" as DHCP6
+rectangle "NAT / PAT\n(tranzitie IPv4)" as NAT
+
+ARP --> IP
+NDP --> IP
+ICMP --> IP
+ICMP6 --> IP
+DHCP --> IP
+DHCP6 --> IP
+NAT --> IP
+
+note bottom of IP
+  IP livreaza pachete intre retele.
+  Restul sunt protocoale de suport: configurare, rezolutii, erori.
+end note
+@enduml

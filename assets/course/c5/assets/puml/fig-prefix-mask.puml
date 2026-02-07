@@ -1,0 +1,24 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Prefix si masca (IPv4): retea vs host
+
+rectangle "Adresa IP\nex: 10.2.10.233" as ip
+rectangle "Masca\nex: 255.0.0.0 (/8)" as mask
+rectangle "Retea = IP AND Masca\nex: 10.0.0.0" as net
+rectangle "Host = IP AND (NOT Masca)\nex: 2.10.233" as host
+
+ip --> net : AND
+mask --> net : AND
+
+ip --> host : AND
+mask --> host : NOT + AND
+
+note bottom
+  Prefix /n = numarul de biti 1 din masca, de la stanga la dreapta.
+end note
+@enduml

@@ -1,0 +1,32 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Link-state: idee (OSPF)
+
+[Router A] as A
+[Router B] as B
+[Router C] as C
+[Router D] as D
+
+A -- B
+B -- C
+C -- D
+A -- D
+B -- D
+
+note right of A
+  Fiecare router:
+  - construieste LSDB (topologie completa)
+  - ruleaza Dijkstra local
+  - obtine tabela de rutare
+end note
+
+note bottom
+  Mesajele link-state sunt flood-uite
+  catre toate routerele din aria.
+end note
+@enduml

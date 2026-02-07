@@ -1,0 +1,18 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title ICMP: rol (diagnostic + erori)
+
+rectangle "IP (IPv4)" as IP
+rectangle "ICMP\n(erori + control)" as ICMP
+rectangle "Instrumente\nping, traceroute" as TOOLS
+rectangle "Mesaje tipice:\n- Echo req/rep\n- Destination Unreachable\n- Time Exceeded" as MSG
+
+ICMP --> IP : encapsulat in IP
+TOOLS --> ICMP : folosesc ICMP
+MSG --> ICMP
+@enduml

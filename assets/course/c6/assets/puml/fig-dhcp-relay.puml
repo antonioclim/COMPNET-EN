@@ -1,0 +1,28 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title DHCP Relay (server in alta retea)
+
+package "LAN client" {
+  [Client] as C
+  [Router (Relay)] as R
+  C --> R
+}
+
+package "Retea server" {
+  [DHCP Server] as S
+}
+
+R --> S : forward DHCP (unicast)\ncu relay info
+S --> R : Offer/Ack
+R --> C : broadcast/unicast local
+
+note right of R
+  Broadcast-ul nu trece de router.
+  Relay intermediaza cererea.
+end note
+@enduml

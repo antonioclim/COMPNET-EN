@@ -1,0 +1,30 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title NAT static (1:1)
+
+package "LAN privat" {
+  [Server intern\n192.168.1.100] as SINT
+  [Router NAT\nWAN: 203.0.113.10] as R
+  SINT --> R
+}
+
+package "Internet" {
+  [Client extern] as C
+}
+
+C --> R : catre 203.0.113.10
+R --> SINT : DNAT catre 192.168.1.100
+
+SINT --> R : raspuns
+R --> C : SNAT din 192.168.1.100 in 203.0.113.10
+
+note bottom of R
+  Mapare fixa:
+  203.0.113.10 <-> 192.168.1.100
+end note
+@enduml

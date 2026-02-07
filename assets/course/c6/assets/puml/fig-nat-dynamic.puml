@@ -1,0 +1,28 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title NAT dinamic (pool de adrese publice)
+
+package "LAN privat" {
+  [Host A\n192.168.0.11] as A
+  [Host B\n192.168.0.12] as B
+  [Router NAT\nPool: 203.0.113.20-203.0.113.29] as R
+  A --> R
+  B --> R
+}
+
+package "Internet" {
+  [Server] as S
+}
+
+R --> S : conexiuni iesire
+
+note right of R
+  Aloca temporar o adresa publica
+  din pool pentru fiecare host activ
+end note
+@enduml
