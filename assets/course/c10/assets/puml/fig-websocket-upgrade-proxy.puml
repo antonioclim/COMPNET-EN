@@ -1,0 +1,16 @@
+@startuml
+title WebSocket handshake via HTTP proxy
+
+participant Browser
+participant "Nginx\nReverse Proxy" as Nginx
+participant "WebSocket Server" as WS
+
+Browser -> Nginx : GET /chat\nUpgrade: websocket
+Nginx -> WS : GET /chat\nUpgrade: websocket
+WS --> Nginx : 101 Switching Protocols
+Nginx --> Browser : 101 Switching Protocols
+
+== WebSocket Protocol ==
+Browser <-> WS : framed messages (JSON)
+
+@enduml

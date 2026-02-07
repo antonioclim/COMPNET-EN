@@ -1,0 +1,19 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+participant Client
+participant Server
+
+Client -> Server : SYN\nSeq = x
+Server -> Client : SYN + ACK\nSeq = y, Ack = x+1
+Client -> Server : ACK\nAck = y+1
+
+note over Client,Server
+TCP connection established
+end note
+
+@enduml

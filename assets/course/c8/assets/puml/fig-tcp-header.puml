@@ -1,0 +1,23 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+rectangle "TCP Header" {
+  rectangle "Source Port\n(16 bits)" as sp
+  rectangle "Destination Port\n(16 bits)" as dp
+  rectangle "Sequence Number\n(32 bits)" as seq
+  rectangle "Acknowledgement Number\n(32 bits)" as ack
+  rectangle "Data Offset\n(4)" as do
+  rectangle "Reserved\n(4)" as res
+  rectangle "Flags\n(8)" as flags
+  rectangle "Window\n(16 bits)" as win
+  rectangle "Checksum\n(16 bits)" as chk
+  rectangle "Urgent Pointer\n(16 bits)" as urg
+  rectangle "Options\n(0–40 bytes)" as opt
+  rectangle "Padding" as pad
+}
+
+@enduml

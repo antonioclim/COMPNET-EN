@@ -1,0 +1,34 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+rectangle "Application object\n(e.g. a struct / dict)" as obj
+rectangle "Serialization\n(JSON / XML / Protobuf)" as ser
+rectangle "Text encoding\n(UTF-8)" as enc
+rectangle "Compression\n(gzip / br)" as cmp
+rectangle "Transport payload\n(bytes on the wire)" as wire
+
+obj --> ser
+ser --> enc
+enc --> cmp
+cmp --> wire
+
+note right of ser
+Structure and types
+(endpoints must agree)
+end note
+
+note right of enc
+Characters to bytes
+(charset matters)
+end note
+
+note right of cmp
+Less traffic
+(more CPU)
+end note
+
+@enduml

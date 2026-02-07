@@ -1,0 +1,27 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+participant "Sender" as S
+participant "Receiver" as R
+
+S -> R : Segment 1 (bytes 0..999)
+S -> R : Segment 2 (bytes 1000..1999)
+S -x R : Segment 3 (bytes 2000..2999) LOST
+S -> R : Segment 4 (bytes 3000..3999)
+S -> R : Segment 5 (bytes 4000..4999)
+
+R -> S : ACK = 2000\nSACK blocks: [3000..5000)
+
+note right of R
+ACK (cumulative): next expected byte = 2000
+SACK says: I already have bytes 3000..4999
+end note
+
+S -> R : Retransmit Segment 3 (bytes 2000..2999)
+R -> S : ACK = 5000
+
+@enduml

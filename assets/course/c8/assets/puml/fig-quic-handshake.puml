@@ -1,0 +1,21 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+participant Client
+participant Server
+
+Client -> Server : Initial (ClientHello)\nQUIC over UDP
+Server -> Client : Initial + Handshake\n(ServerHello, Finished)
+Client -> Server : Handshake Finished
+
+Client -> Server : Application Data (0-RTT / 1-RTT)
+
+note over Client,Server
+TLS 1.3 integrated in QUIC
+end note
+
+@enduml
