@@ -1,0 +1,55 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Hub vs Switch vs Router
+
+package "Hub (L1 - repetor multipunct)" {
+  [Host A] as ha
+  [Host B] as hb
+  [Host C] as hc
+  [Hub] as hub
+
+  ha -- hub
+  hb -- hub
+  hc -- hub
+
+  note bottom of hub
+    Trimite pe toate porturile
+    Coliziuni posibile
+  end note
+}
+
+package "Switch (L2)" {
+  [Host A] as sa
+  [Host B] as sb
+  [Host C] as sc
+  [Switch] as sw
+
+  sa -- sw
+  sb -- sw
+  sc -- sw
+
+  note bottom of sw
+    Trimite doar pe portul
+    corespunzator MAC
+  end note
+}
+
+package "Router (L3)" {
+  [LAN 1] as lan1
+  [Router] as r
+  [LAN 2] as lan2
+
+  lan1 --> r
+  r --> lan2
+
+  note bottom of r
+    Conecteaza retele diferite
+    (L3, IP, rutare)
+  end note
+}
+@enduml

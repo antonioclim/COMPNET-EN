@@ -1,0 +1,32 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Incapsulare (stiva de protocoale)
+
+rectangle "Aplicatie\n(Mesaj)" as app
+rectangle "Transport\n(TCP/UDP)\n[Header L4 | Date]" as l4
+rectangle "Retea\n(IP)\n[Header L3 | (L4)]" as l3
+rectangle "Legatura de date\n(Ethernet)\n[Header L2 | (L3) | FCS]" as l2
+rectangle "Fizic\n(biti / semnal)" as l1
+
+app --> l4 : adauga header L4
+l4 --> l3 : adauga header L3
+l3 --> l2 : adauga header L2 + FCS
+l2 --> l1 : transmite biti
+
+note right of l2
+  Cadru (frame)\nunitatea L2
+end note
+
+note right of l3
+  Pachet (packet)\nunitatea L3
+end note
+
+note right of l4
+  Segment/Datagrama\nunitatea L4
+end note
+@enduml

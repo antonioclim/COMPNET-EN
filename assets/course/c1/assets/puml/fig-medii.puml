@@ -1,0 +1,35 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Medii de transmisie
+
+package "Ghidat" {
+  [Cupru\n(coaxial / twisted pair)] as copper
+  [Fibra optica] as fiber
+}
+
+package "Neghidat" {
+  [Aer / unde radio] as air
+}
+
+[Host A] as a
+[Host B] as b
+
+a --> copper : semnal electric
+copper --> b : semnal electric
+
+a --> fiber : semnal optic
+fiber --> b : semnal optic
+
+a ~~ air : semnal electromagnetic
+air ~~ b : semnal electromagnetic
+
+note right of air
+  Wireless: interferente, coliziuni,
+  partajarea spectrului
+end note
+@enduml

@@ -1,0 +1,29 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Retea vs sistem
+
+package "Un sistem de calcul (intern)" {
+  [CPU] as cpu
+  [Memorie] as mem
+  [Magistrala / chipset] as bus
+
+  cpu --> bus
+  mem --> bus
+}
+
+package "Retea (intre sisteme)" {
+  [Sistem A\n(NIC)] as a
+  [Switch] as sw
+  [Sistem B\n(NIC)] as b
+  [Router (optional)] as r
+
+  a --> sw
+  sw --> b
+  sw --> r
+}
+@enduml

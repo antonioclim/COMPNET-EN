@@ -1,0 +1,57 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Topologii (fizice / logice)
+
+package "Magistrala (bus)" {
+  [N1] as b1
+  [N2] as b2
+  [N3] as b3
+  [Mediu comun] as bus
+
+  b1 -- bus
+  b2 -- bus
+  b3 -- bus
+}
+
+package "Stea (star)" {
+  [N1] as s1
+  [N2] as s2
+  [N3] as s3
+  [Centru\n(switch/hub)] as center
+
+  s1 -- center
+  s2 -- center
+  s3 -- center
+}
+
+package "Inel (ring)" {
+  [N1] as r1
+  [N2] as r2
+  [N3] as r3
+  [N4] as r4
+
+  r1 -- r2
+  r2 -- r3
+  r3 -- r4
+  r4 -- r1
+}
+
+package "Plasa (mesh)" {
+  [N1] as m1
+  [N2] as m2
+  [N3] as m3
+  [N4] as m4
+
+  m1 -- m2
+  m1 -- m3
+  m1 -- m4
+  m2 -- m3
+  m2 -- m4
+  m3 -- m4
+}
+@enduml
