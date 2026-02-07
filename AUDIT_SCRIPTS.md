@@ -4,7 +4,7 @@ _Generat: 2026-02-07 14:27:24_
 ## Rezumat rapid
 - Scripturi/config identificate: **169** (Python: 117, Shell: 23, YAML: 16, Dockerfile: 11)
 - Scopul acestui audit: să notez, pe fiecare fişier de tip script/config, **ce face**, **cum se rulează**, **în ce context poate eşua** şi **de ce**.
-- Observaţie: unele fişiere cu extensia `.py` sunt de fapt **scenarii text**; în arhiva revizuită le-am făcut *parseabile* Python (docstring), fără să le schimb conţinutul.
+- Observaţie: unele fişiere cu extensia `.py` sunt de fapt **scenarii text**; în arhiva revizuită le-am făcut *parsabile* Python (docstring), fără să le schimb conţinutul.
 
 ## Index fişiere
 - `assets/course/c1/assets/render.sh`
