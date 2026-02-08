@@ -14,8 +14,18 @@ ping -c 4 google.com
 
 #### 2. Afișarea conexiunilor și porturilor cu `netstat`
 
+##### A. Afișarea conexiunilor și porturilor cu `netstat` sub linux/unix
 ```
 netstat -tulnp
+```
+##### B. Afișarea conexiunilor și porturilor cu `Get-NetTCPConnection` & ~Get-NetUDPEndpoint~ sub Windows
+```
+$(Get-NetTCPConnection -State Listen; Get-NetUDPEndpoint) | 
+Select-Object LocalAddress, LocalPort, OwningProcess, 
+    @{Name="ProcessName";Expression={(Get-Process -Id $_.OwningProcess -ErrorAction SilentlyContinue).Name}}, 
+    @{Name="Protocol";Expression={if($_.CreationTime){"TCP"}else{"UDP"}}} | 
+Sort-Object LocalAddress, LocalPort | 
+Format-Table -Property LocalPort, Protocol, ProcessName, OwningProcess -GroupBy LocalAddress
 ```
 
 ```
