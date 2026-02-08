@@ -18,7 +18,7 @@ ping -c 4 google.com
 ```
 netstat -tulnp
 ```
-##### B. Afișarea conexiunilor și porturilor cu `Get-NetTCPConnection` & ~Get-NetUDPEndpoint~ sub Windows
+##### B. Afișarea conexiunilor și porturilor cu `Get-NetTCPConnection` & `Get-NetUDPEndpoint` sub Windows
 ```
 $(Get-NetTCPConnection -State Listen; Get-NetUDPEndpoint) | 
 Select-Object LocalAddress, LocalPort, OwningProcess, 
