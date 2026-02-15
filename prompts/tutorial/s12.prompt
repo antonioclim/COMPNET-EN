@@ -1,3 +1,0 @@
-Sa trecem la Seminar 12 - Apelul de metode la distanţă: concepte RPC, implementare folosind un framework.
-
-Sa incepem cu un outline. Dupa cate stiu in python nu sunt asa de multe variante. Ar trebui sa includem cel putin un client rpc cu un serviciu disponibil pe internet (in caz ca exista) precum si un 'server' in sensul unei functionalitati expuse pe rpc.

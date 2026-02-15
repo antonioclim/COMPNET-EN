@@ -1,7 +1,0 @@
-we'll get back to each seminar in the future. for now let's proceed to Seminar 1O - Servicii de reţea: DNS, SSH, FTP în containere orchestrate cu
-
-propose  an outline given the following:
-- we could do ssh with paramiko
-- we've already done quite a lot of ftp stuff, so i dont think we should focus on it
-- we can 'write our own dns' but we cant go too complex on that either. 
-- maybe propose some additional protocol or examples

@@ -1,9 +1,0 @@
-it's fine we'll continue to Seminar 5 - Adresare şi rutare. Subnetting IPv.4IIPv6, introducere simulator de reţea. Configurarea unei infrastructuri de reţea
-
-Again the tutorial is 80 minutes. We have the following things to cover:
-- ip addressing and subnetting, maybe using an online calculator
-- we need a simulation environment. i've used mininet and can give you some examples with that. one alternative is to use docker compose instead. i'm open to suggestions on your side as well
-
-what would be an appropriate outline?
-
----------------
