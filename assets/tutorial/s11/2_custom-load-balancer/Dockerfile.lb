@@ -1,7 +1,0 @@
-FROM python:3.11-alpine
-
-WORKDIR /app
-
-COPY simple_lb.py /app/simple_lb.py
-
-CMD ["python3", "simple_lb.py"]
