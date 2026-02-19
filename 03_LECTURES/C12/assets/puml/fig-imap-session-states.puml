@@ -1,0 +1,21 @@
+@startuml
+title IMAP session states (high-level)
+
+skinparam shadowing false
+
+[*] --> NonAuthenticated : TCP connect
+NonAuthenticated --> Authenticated : LOGIN / AUTHENTICATE
+Authenticated --> Selected : SELECT mailbox
+Selected --> Authenticated : CLOSE / UNSELECT
+Authenticated --> Logout : LOGOUT
+Selected --> Logout : LOGOUT
+Logout --> [*]
+
+note right of Selected
+Most mailbox operations happen here:
+- FETCH headers/body
+- STORE flags (\\Seen, \\Deleted, ...)
+- SEARCH
+end note
+
+@enduml

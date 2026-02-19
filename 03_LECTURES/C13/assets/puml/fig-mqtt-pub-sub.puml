@@ -1,0 +1,24 @@
+@startuml
+title MQTT publish/subscribe model
+
+skinparam shadowing false
+
+actor Publisher
+actor Subscriber1
+actor Subscriber2
+
+component "MQTT Broker" {
+}
+
+Publisher --> "MQTT Broker" : PUBLISH topic/data
+"MQTT Broker" --> Subscriber1 : data (subscribed topic)
+"MQTT Broker" --> Subscriber2 : data (subscribed topic)
+
+note right of "MQTT Broker"
+Broker responsibilities:
+- topic matching
+- message routing
+- QoS handling
+end note
+
+@enduml
