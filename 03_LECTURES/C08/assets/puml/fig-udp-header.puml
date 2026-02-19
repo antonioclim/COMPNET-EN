@@ -1,0 +1,15 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+rectangle "UDP Header" {
+  rectangle "Source Port\n(16 bits)"
+  rectangle "Destination Port\n(16 bits)"
+  rectangle "Length\n(16 bits)"
+  rectangle "Checksum\n(16 bits)"
+}
+
+@enduml

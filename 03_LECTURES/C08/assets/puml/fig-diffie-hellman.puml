@@ -1,0 +1,32 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+participant "Alice" as A
+participant "Bob" as B
+
+note left of A
+Public: p, g
+Private: a
+Compute: A_pub = g^a mod p
+end note
+
+note right of B
+Public: p, g
+Private: b
+Compute: B_pub = g^b mod p
+end note
+
+A -> B : A_pub = g^a mod p
+B -> A : B_pub = g^b mod p
+
+note over A,B
+Shared secret:
+K = (B_pub)^a mod p
+  = (A_pub)^b mod p
+end note
+
+@enduml

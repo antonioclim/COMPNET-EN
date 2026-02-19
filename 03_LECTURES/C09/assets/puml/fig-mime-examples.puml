@@ -1,0 +1,42 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title MIME types: examples
+
+map "text/*" as text {
+  text/plain => .txt, README
+  text/html => .html web pages
+  text/css => .css stylesheets
+  text/csv => .csv data
+}
+
+map "application/*" as apptype {
+  application/json => .json API data
+  application/pdf => .pdf documents
+  application/octet-stream => generic binary
+  application/xml => .xml structured data
+}
+
+map "image/*" as img {
+  image/png => .png lossless
+  image/jpeg => .jpg lossy
+  image/svg+xml => .svg vector
+}
+
+map "audio / video" as media {
+  audio/mpeg => .mp3
+  video/mp4 => .mp4
+  multipart/form-data => file uploads
+}
+
+note bottom of text
+  Format: type/subtype
+  Registered by IANA.
+  Used in HTTP Content-Type
+  and email headers.
+end note
+@enduml

@@ -1,0 +1,24 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Role of a router
+
+[LAN A] as lana
+[Router] as r
+[LAN B] as lanb
+
+lana --> r : IP packets
+r --> lanb : IP packets
+
+note right of r
+  Router:
+  - connects networks
+  - decides next hop / interface
+  - uses the routing table
+  - can filter / modify (NAT, ACL)
+end note
+@enduml

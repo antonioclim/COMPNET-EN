@@ -1,0 +1,5 @@
+{
+  "message": "hello",
+  "items": [1, 2, 3],
+  "note": "json payload"
+}

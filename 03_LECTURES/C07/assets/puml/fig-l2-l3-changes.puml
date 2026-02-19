@@ -1,0 +1,23 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title During routing: L2 changes, L3 stays the same
+
+[Host S\nIP_S\nMAC_S] as S
+[Router 1\nMAC_R1a/MAC_R1b] as R1
+[Router 2\nMAC_R2a/MAC_R2b] as R2
+[Host D\nIP_D\nMAC_D] as D
+
+S --> R1 : L2 frame:\nMAC_S -> MAC_R1a\nL3 packet:\nIP_S -> IP_D
+R1 --> R2 : L2 frame:\nMAC_R1b -> MAC_R2a\nL3 packet:\nIP_S -> IP_D
+R2 --> D : L2 frame:\nMAC_R2b -> MAC_D\nL3 packet:\nIP_S -> IP_D
+
+note bottom
+  Source/destination IP remain identical end-to-end.
+  Source/destination MAC reflect the current hop.
+end note
+@enduml

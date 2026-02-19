@@ -1,0 +1,20 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+participant Client
+participant Server
+
+Client -> Server : FIN
+Server -> Client : ACK
+Server -> Client : FIN
+Client -> Server : ACK
+
+note over Client
+TIME-WAIT
+end note
+
+@enduml

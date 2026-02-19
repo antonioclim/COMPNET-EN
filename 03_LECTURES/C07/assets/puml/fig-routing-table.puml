@@ -1,0 +1,30 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Routing table (concept)
+
+rectangle "Incoming packet\nDest = 10.20.0.5" as pkt
+rectangle "Table lookup" as lookup
+rectangle "Decision:\nnext hop / interface" as decision
+
+pkt --> lookup
+lookup --> decision
+
+note right of lookup
+  Lookup based on:
+  - prefix (longest prefix match)
+  - metric / cost
+  - default route (0.0.0.0/0)
+end note
+
+note right of decision
+  Result:
+  - forward on interface X
+  - or towards next hop Y
+  - or drop (no matching route)
+end note
+@enduml

@@ -1,0 +1,37 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title OSPF: areas and backbone (concept)
+
+package "Area 1" {
+  [R-A1] as A1
+  [R-A1-2] as A12
+  A1 -- A12
+}
+
+package "Area 0 (Backbone)" {
+  [ABR 1] as ABR1
+  [Core] as CORE
+  [ABR 2] as ABR2
+  ABR1 -- CORE
+  CORE -- ABR2
+}
+
+package "Area 2" {
+  [R-A2] as A2
+  [R-A2-2] as A22
+  A2 -- A22
+}
+
+A12 -- ABR1
+ABR2 -- A2
+
+note bottom
+  Traffic between areas passes through Area 0 (backbone).
+  ABR = Area Border Router.
+end note
+@enduml

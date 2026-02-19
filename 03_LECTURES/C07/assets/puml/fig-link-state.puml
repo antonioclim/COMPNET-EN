@@ -1,0 +1,32 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Link-state: concept (OSPF)
+
+[Router A] as A
+[Router B] as B
+[Router C] as C
+[Router D] as D
+
+A -- B
+B -- C
+C -- D
+A -- D
+B -- D
+
+note right of A
+  Each router:
+  - builds the LSDB (full topology)
+  - runs Dijkstra locally
+  - derives its routing table
+end note
+
+note bottom
+  Link-state advertisements are flooded
+  to every router within the area.
+end note
+@enduml

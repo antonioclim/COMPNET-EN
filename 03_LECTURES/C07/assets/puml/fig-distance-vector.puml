@@ -1,0 +1,30 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Distance-vector: concept (RIP)
+
+[Router A] as A
+[Router B] as B
+[Router C] as C
+[Destination\nNetwork X] as X
+
+A -- B
+B -- C
+C -- X
+
+note right of A
+  A knows:
+  - distance to X
+  - next hop: B
+  It does not know the full topology.
+end note
+
+note right of B
+  Routers periodically exchange
+  their distance vectors (tables).
+end note
+@enduml
