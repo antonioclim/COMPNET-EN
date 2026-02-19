@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="ASE-CSIE Computer Networks" name="author"/>
+<meta content="Revolvix" name="generator"/>
+<title>Week 10: HTTP, REST and SOAP – Computer Networks</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&amp;family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<style>
+        :root {
+            --primary: #0f172a;
+            --primary-light: #1e293b;
+            --secondary: #0ea5e9;
+            --secondary-dark: #0284c7;
+            --accent: #f59e0b;
+            --accent-warm: #ea580c;
+            --success: #10b981;
+            --success-dark: #059669;
+            --danger: #ef4444;
+            --purple: #8b5cf6;
+            --purple-dark: #7c3aed;
+            --bg-light: #f8fafc;
+            --bg-cool: #f0f9ff;
+            --bg-warm: #fffbeb;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --text-on-dark: #f1f5f9;
+            --text-on-dark-muted: #cbd5e1;
+            --text-on-dark-heading: #ffffff;
+            --gradient-primary: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --gradient-accent: linear-gradient(135deg, #0ea5e9 0%, #8b5cf6 100%);
+            --font-heading: 'Source Serif 4', Georgia, serif;
+            --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; overflow: hidden; }
+        body { font-family: var(--font-body); background: var(--bg-light); color: var(--text-dark); line-height: 1.7; }
+        .presentation { width: 100vw; height: 100vh; position: relative; overflow: hidden; }
+        .progress-bar { position: fixed; top: 0; left: 0; width: 100%; height: 4px; background: var(--border); z-index: 1000; }
+        .progress-fill { height: 100%; background: var(--gradient-accent); width: 0%; transition: width 0.4s; }
+        .course-id { position: fixed; top: 20px; left: 40px; font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted); z-index: 100; }
+        .slide-counter { position: fixed; top: 20px; right: 40px; font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-muted); z-index: 100; }
+        .slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; padding: 4rem; display: none; flex-direction: column; background: var(--bg-light); overflow-y: auto; }
+        .slide.active { display: flex; animation: slideIn 0.45s ease; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+        .slide-title-page { background: var(--gradient-primary); justify-content: center; align-items: center; text-align: center; }
+        .slide-title-page h1 { font-family: var(--font-heading); font-size: 3.5rem; font-weight: 700; color: var(--text-on-dark-heading); margin-bottom: 1rem; }
+        .slide-title-page .subtitle { font-size: 1.4rem; color: var(--text-on-dark); margin-bottom: 2rem; }
+        .slide-title-page .meta { font-size: 1rem; color: var(--text-on-dark-muted); }
+        .slide-section { background: var(--gradient-primary); justify-content: center; padding-left: 8rem; }
+        .slide-section .section-number { font-family: var(--font-mono); font-size: 1rem; color: var(--secondary); margin-bottom: 1rem; }
+        .slide-section h2 { font-family: var(--font-heading); font-size: 3rem; font-weight: 700; color: var(--text-on-dark-heading); margin-bottom: 1rem; }
+        .slide-section .section-desc { font-size: 1.2rem; color: var(--text-on-dark-muted); max-width: 600px; }
+        h1 { font-family: var(--font-heading); font-size: 2.5rem; font-weight: 700; color: var(--primary); margin-bottom: 1.5rem; }
+        h2 { font-family: var(--font-heading); font-size: 1.8rem; font-weight: 600; color: var(--primary); margin-bottom: 1rem; }
+        h3 { font-family: var(--font-heading); font-size: 1.4rem; font-weight: 600; color: var(--primary-light); margin-bottom: 0.75rem; }
+        p { margin-bottom: 1rem; }
+        .lead { font-size: 1.15rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+        strong { font-weight: 600; color: var(--primary); }
+        code { font-family: var(--font-mono); font-size: 0.9em; background: #e2e8f0; padding: 0.15em 0.4em; border-radius: 4px; }
+        .content { flex: 1; }
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin: 1rem 0; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin: 1rem 0; }
+        ul, ol { margin-left: 1.5rem; margin-bottom: 1rem; }
+        li { margin-bottom: 0.5rem; }
+        .card { background: white; border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow-md); border-left: 4px solid var(--border); transition: transform 0.3s, box-shadow 0.3s; }
+        .card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+        .card-accent { border-left-color: var(--accent); }
+        .card-success { border-left-color: var(--success); }
+        .card-danger { border-left-color: var(--danger); }
+        .card-purple { border-left-color: var(--purple); }
+        .card-secondary { border-left-color: var(--secondary); }
+        .card-title { font-family: var(--font-heading); font-size: 1.1rem; font-weight: 600; color: var(--primary); margin-bottom: 0.75rem; }
+        .card-content { color: var(--text-dark); font-size: 0.95rem; }
+        .card-content ul { margin-left: 1.25rem; margin-top: 0.5rem; }
+        .highlight-box { background: var(--gradient-accent); color: white; padding: 1.5rem; border-radius: var(--radius-lg); margin: 1rem 0; }
+        .highlight-box h3 { color: white; margin-bottom: 0.5rem; }
+        .highlight-box p { color: rgba(255,255,255,0.95); }
+        .definition-box { background: linear-gradient(135deg, #ecfdf5, #d1fae5); border-left: 4px solid var(--success); padding: 1.5rem; border-radius: var(--radius-md); margin: 1rem 0; }
+        .definition-box .term { font-weight: 700; color: var(--success-dark); margin-bottom: 0.5rem; }
+        .story-box { background: linear-gradient(135deg, #f5f3ff, #ede9fe); border-left: 4px solid var(--purple); padding: 1.5rem; border-radius: var(--radius-md); margin: 1rem 0; }
+        .story-box .story-title { font-weight: 600; color: var(--purple-dark); margin-bottom: 0.5rem; }
+        .warning-box { background: linear-gradient(135deg, #fffbeb, #fef3c7); border-left: 4px solid var(--accent); padding: 1.5rem; border-radius: var(--radius-md); margin: 1rem 0; }
+        .warning-box .warning-title { font-weight: 600; color: var(--accent-warm); margin-bottom: 0.5rem; }
+        .insight-box { background: linear-gradient(135deg, #fef2f2, #fee2e2); border-left: 4px solid var(--danger); padding: 1.5rem; border-radius: var(--radius-md); margin: 1rem 0; }
+        .insight-box .insight-title { font-weight: 600; color: var(--danger); margin-bottom: 0.5rem; }
+        pre, .code-block { background: linear-gradient(135deg, #0f172a, #1e293b); color: #e2e8f0; padding: 1.25rem; border-radius: var(--radius-md); font-family: var(--font-mono); font-size: 0.9rem; line-height: 1.7; overflow-x: auto; margin: 1rem 0; white-space: pre; }
+        .code-block .keyword { color: #c084fc; }
+        .code-block .string { color: #86efac; }
+        .code-block .number { color: #fdba74; }
+        .code-block .comment { color: #94a3b8; font-style: italic; }
+        .code-block .function { color: #7dd3fc; }
+        .table-container { overflow-x: auto; margin: 1rem 0; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); }
+        table { width: 100%; border-collapse: collapse; background: white; }
+        thead { background: var(--gradient-primary); }
+        th { padding: 1rem; text-align: left; color: var(--text-on-dark-heading); font-weight: 600; text-transform: uppercase; font-size: 0.8rem; }
+        th:first-child { border-radius: var(--radius-lg) 0 0 0; }
+        th:last-child { border-radius: 0 var(--radius-lg) 0 0; }
+        td { padding: 0.9rem 1rem; border-bottom: 1px solid var(--border); }
+        tr:hover td { background: var(--bg-cool); }
+        .diagram-container { margin: 1.5rem 0; text-align: center; }
+        .diagram-container svg { max-width: 100%; min-height: 180px; }
+        .quiz-container { background: white; border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow-md); margin: 1rem 0; }
+        .quiz-question { font-weight: 600; color: var(--primary); margin-bottom: 1rem; }
+        .quiz-options { display: flex; flex-direction: column; gap: 0.5rem; }
+        .quiz-option { padding: 0.9rem 1.25rem; background: var(--bg-light); border: 2px solid var(--border); border-radius: var(--radius-md); cursor: pointer; transition: all 0.2s; }
+        .quiz-option:hover { border-color: var(--secondary); background: var(--bg-cool); }
+        .quiz-option.correct { background: linear-gradient(135deg, #ecfdf5, #d1fae5); border-color: var(--success); color: var(--success-dark); }
+        .quiz-option.incorrect { background: linear-gradient(135deg, #fef2f2, #fee2e2); border-color: var(--danger); color: var(--danger); }
+        .quiz-feedback { margin-top: 1rem; padding: 1rem; border-radius: var(--radius-md); display: none; background: linear-gradient(135deg, #ecfdf5, #d1fae5); color: var(--success-dark); }
+        .quiz-feedback.show { display: block; }
+        .reveal-btn { background: var(--gradient-accent); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: var(--radius-md); font-family: var(--font-body); font-size: 0.9rem; cursor: pointer; transition: transform 0.2s; }
+        .reveal-btn:hover { transform: scale(1.05); }
+        .reveal-content { display: none; margin-top: 1rem; padding: 1rem; background: var(--bg-cool); border-radius: var(--radius-md); border-left: 4px solid var(--secondary); }
+        .reveal-content.show { display: block; animation: fadeUp 0.3s ease; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .interactive-panel { background: white; border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow-lg); margin: 1rem 0; }
+        .slider-group { margin-bottom: 1rem; }
+        .slider-group label { display: block; font-weight: 500; margin-bottom: 0.5rem; color: var(--primary); }
+        .slider-group input[type="range"] { width: 100%; height: 8px; border-radius: 4px; background: var(--border); outline: none; -webkit-appearance: none; }
+        .slider-group input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: var(--secondary); cursor: pointer; }
+        .slider-value { font-family: var(--font-mono); font-weight: 600; color: var(--secondary); margin-left: 0.5rem; }
+        .result-display { background: var(--gradient-primary); color: #f1f5f9; padding: 1.25rem; border-radius: var(--radius-md); margin-top: 1rem; font-family: var(--font-mono); }
+        .result-display p, .result-display span, .result-display strong { color: #f1f5f9; }
+        .result-display .result-label { font-size: 0.8rem; color: #cbd5e1; margin-bottom: 0.25rem; }
+        .result-display .result-value { font-size: 1.5rem; font-weight: 600; color: #ffffff; }
+        .navigation { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%); display: flex; gap: 1rem; z-index: 100; background: white; padding: 0.75rem 1.5rem; border-radius: 50px; box-shadow: var(--shadow-lg); }
+        .nav-btn { background: var(--bg-light); border: 1px solid var(--border); color: var(--text-dark); padding: 0.6rem 1.25rem; border-radius: 25px; font-family: var(--font-body); font-size: 0.85rem; cursor: pointer; transition: all 0.2s; }
+        .nav-btn:hover:not(:disabled) { background: var(--secondary); color: white; border-color: var(--secondary); }
+        .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .nav-btn.primary { background: var(--gradient-accent); color: white; border: none; }
+        .toc-modal { position: fixed; inset: 0; background: rgba(15,23,42,0.8); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 2000; }
+        .toc-modal.show { display: flex; }
+        .toc-content { background: white; border-radius: var(--radius-lg); padding: 2rem; max-width: 700px; width: 90%; max-height: 80vh; overflow-y: auto; }
+        .toc-content h2 { margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid var(--border); }
+        .toc-section { margin-bottom: 1.5rem; }
+        .toc-section-title { font-weight: 600; color: var(--secondary); font-size: 0.9rem; text-transform: uppercase; margin-bottom: 0.75rem; }
+        .toc-items { display: flex; flex-direction: column; gap: 0.25rem; }
+        .toc-item { padding: 0.6rem 1rem; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s; }
+        .toc-item:hover { background: var(--bg-cool); color: var(--secondary); }
+        .toc-item span { color: var(--text-muted); font-family: var(--font-mono); font-size: 0.8rem; margin-right: 0.75rem; }
+        .toc-close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; }
+        .footer-credit { position: fixed; bottom: 20px; left: 40px; font-size: 0.75rem; color: var(--text-muted); z-index: 50; }
+        .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+        .badge-success { background: #dcfce7; color: var(--success-dark); }
+        .badge-warning { background: #fef3c7; color: var(--accent-warm); }
+        .badge-danger { background: #fee2e2; color: var(--danger); }
+        .badge-info { background: #e0f2fe; color: var(--secondary-dark); }
+        .mt-1 { margin-top: 0.5rem; }
+        .mt-2 { margin-top: 1rem; }
+        .mt-3 { margin-top: 1.5rem; }
+        @media (max-width: 1200px) {
+            .slide { padding: 3rem; }
+            h1 { font-size: 2rem; }
+            .grid-3 { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 768px) {
+            .slide { padding: 2rem; }
+            h1 { font-size: 1.75rem; }
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+            .slide-title-page h1 { font-size: 2.5rem; }
+            .course-id, .slide-counter { display: none; }
+        }
+    </style>
+</head>
+<body>
+<div class="presentation">
+<div aria-valuemin="1" class="progress-bar" role="progressbar"><div class="progress-fill" id="progressBar"></div></div>
+<div class="course-id">WEEK 10 • COMPUTER NETWORKS</div>
+<div aria-live="polite" class="slide-counter" id="slideCounter">1 / 55</div>
+<div class="footer-credit">by Revolvix</div>
+<!-- SLIDE 1: Title -->
+<div class="slide slide-title-page active">
+<h1>Application Layer Protocols</h1>
+<p class="subtitle">HTTP, REST and SOAP — The Language of the Web</p>
+<p class="meta">Computer Networks • Week 10<br/>Bachelor in Economic Informatics, Year 3, Semester 2<br/>Bucharest University of Economic Studies – Faculty CSIE</p>
+</div>
+<!-- SLIDE 2: Historical Hook -->
+<div class="slide">
+<h1>A Protocol Born in 24 Hours</h1>
+<div class="content">
+<div class="story-box">
+<div class="story-title">📜 Context Historically</div>
+<p>In 1991, Tim Berners-Lee needed a simple way for physicists at CERN to share documents. He sketched HTTP in less than a day — a protocol so minimal it didn't even have headers or status codes in its first version (HTTP/0.9).</p>
+<p style="margin-top: 0.75rem;">That "quick hack" now carries <strong>over 80% of all Internet traffic</strong> and underpins a global economy worth trillions.</p>
+</div>
+<div class="grid-2 mt-3">
+<div class="card card-secondary">
+<div class="card-title">HTTP/0.9 (1991)</div>
+<div class="card-content"><ul><li>Single method: GET</li><li>No headers whatsoever</li><li>Answer was raw HTML</li><li>Connection closed after each request</li></ul></div>
+</div>
+<div class="card card-accent">
+<div class="card-title">HTTP/3 (2022)</div>
+<div class="card-content"><ul><li>Dozens of methods &amp; headers</li><li>Built on QUIC (UDP-based)</li><li>Multiplexing, compression, encryption</li><li>0-RTT connection resumption</li></ul></div>
+</div>
+</div>
+</div>
+</div>
+<!-- SLIDE 3: Why It Matters -->
+<div class="slide">
+<h1>Why Every Developer Must Understanding HTTP</h1>
+<div class="content">
+<p class="lead">HTTP isn't just for web developers — it's the universal interface for distributed systems.</p>
+<div class="grid-3 mt-2">
+<div class="card card-success">
+<div class="card-title">🔍 Debugging</div>
+<div class="card-content">Diagnose why API calls fail: is it the client, server, proxy, or CORS? Understandinging HTTP semantics cuts debugging time from hours to minutess.</div>
+</div>
+<div class="card card-accent">
+<div class="card-title">⚡ Performance</div>
+<div class="card-content">Every millisecond matters. Knowing when to use caching headers, connection keep-alive, or HTTP/2 multiplexing can 10× your application's speed.</div>
+</div>
+<div class="card card-purple">
+<div class="card-title">🏗️ Architecture</div>
+<div class="card-content">Designing APIs that last decades requires understanding REST constraints, idempotency, and the difference between resources and operations.</div>
+</div>
+</div>
+<div class="highlight-box mt-3">
+<h3>The Hidden Cost of Not Knowing</h3>
+<p>"It works in Postman but not in the browser" — this phrase has wasted millions of developer hours. After today, you'll immediately recognise this as a CORS issue.</p>
+</div>
+</div>
+</div>
+<!-- SLIDE 4: Learning objectives -->
+<div class="slide">
+<h1>Learning Objectives</h1>
+<div class="content">
+<p class="lead">By the end of this lecture, you will be able to:</p>
+<div class="grid-2">
+<div>
+<h3 style="color: var(--success);">Remember &amp; Understand</h3>
+<ul>
+<li><strong>Define</strong> the HTTP request-response model and its position in the network stack</li>
+<li><strong>Identify</strong> the purpose of HTTP methods, status codes, and headers</li>
+<li><strong>Explain</strong> the difference between HTTP/1.1, HTTP/2, and WebSocket</li>
+<li><strong>Describe</strong> the six REST architectural constraints</li>
+</ul>
+</div>
+<div>
+<h3 style="color: var(--secondary);">Apply &amp; Analyse</h3>
+<ul>
+<li><strong>Calculate</strong> the latency impact of TLS handshakes</li>
+<li><strong>Diagnose</strong> common HTTP errors using status codes</li>
+<li><strong>Compare</strong> REST and SOAP for different scenarios</li>
+<li><strong>Implement</strong> a API RESTful using Python</li>
+</ul>
+</div>
+</div>
+<div class="definition-box mt-3">
+<div class="term">Prerequisites</div>
+<p>This lecture assumes familiarity with: TCP/IP fundamentals (Week 5-7), socket programming (Week 3), and basic cryptography concepts.</p>
+</div>
+</div>
+</div>
+<!-- SLIDE 5: Course Roadmap -->
+<div class="slide">
+<h1>Course Roadmap — Where We Are</h1>
+<div class="content">
+<div class="diagram-container">
+<svg style="max-width: 900px; min-height: 200px;" viewbox="0 0 850 220">
+<rect fill="#f0f9ff" height="160" rx="10" stroke="#0ea5e9" stroke-dasharray="4" stroke-width="1" width="200" x="10" y="30"></rect>
+<rect fill="#f0f9ff" height="160" rx="10" stroke="#0ea5e9" stroke-dasharray="4" stroke-width="1" width="200" x="220" y="30"></rect>
+<rect fill="#ecfdf5" height="160" rx="10" stroke="#10b981" stroke-width="2" width="200" x="430" y="30"></rect>
+<rect fill="#f5f3ff" height="160" rx="10" stroke="#8b5cf6" stroke-dasharray="4" stroke-width="1" width="200" x="640" y="30"></rect>
+<text fill="#0ea5e9" font-size="11" font-weight="600" text-anchor="middle" x="110" y="55">WEEKS 1-4</text>
+<text fill="#0ea5e9" font-size="11" font-weight="600" text-anchor="middle" x="320" y="55">WEEKS 5-7</text>
+<text fill="#10b981" font-size="11" font-weight="700" text-anchor="middle" x="530" y="55">WEEKS 8-12</text>
+<text fill="#8b5cf6" font-size="11" font-weight="600" text-anchor="middle" x="740" y="55">WEEKS 13-14</text>
+<text fill="#1e293b" font-size="12" font-weight="600" text-anchor="middle" x="110" y="80">Foundations</text>
+<text fill="#1e293b" font-size="12" font-weight="600" text-anchor="middle" x="320" y="80">Network Layer</text>
+<text fill="#059669" font-size="12" font-weight="700" text-anchor="middle" x="530" y="80">Application Layer</text>
+<text fill="#1e293b" font-size="12" font-weight="600" text-anchor="middle" x="740" y="80">Security &amp; IoT</text>
+<text fill="#64748b" font-size="10" text-anchor="middle" x="110" y="105">OSI/TCP-IP Models</text>
+<text fill="#64748b" font-size="10" text-anchor="middle" x="320" y="105">IP Addressing</text>
+<text fill="#064e3b" font-size="10" text-anchor="middle" x="530" y="105">TCP, UDP, TLS</text>
+<text fill="#059669" font-size="11" font-weight="600" text-anchor="middle" x="530" y="120">→ HTTP, REST, SOAP</text>
+<text fill="#64748b" font-size="10" text-anchor="middle" x="740" y="105">Network Security</text>
+<rect fill="#10b981" height="35" rx="8" width="140" x="460" y="140"></rect>
+<text fill="white" font-size="12" font-weight="600" text-anchor="middle" x="530" y="162">📍 Week 10</text>
+</svg>
+</div>
+<div class="insight-box">
+<div class="insight-title">🎯 Today's Focus</div>
+<p>We're at the <strong>Application Layer</strong> — the highest level where your code directly interacts with network protocols.</p>
+</div>
+</div>
+</div>
+<!-- SLIDE 6: Section - HTTP Foundations -->
+<div class="slide slide-section">
+<div class="section-number">SECTION 01</div>
+<h2>HTTP Fundamentals</h2>
+<p class="section-desc">Understandinging the protocol that powers the modern web — from request structure to the cost of every byte.</p>
+</div>
+<!-- SLIDE 7: HTTP in the Stack -->
+<div class="slide">
+<h1>HTTP in the Network Stack</h1>
+<div class="content">
+<div class="grid-2">
+<div>
+<p>HTTP operates at <strong>Layer 7 (Application)</strong> of the OSI model, depending on layers beneath:</p>
+<div class="table-container mt-2">
+<table>
+<thead><tr><th>Layer</th><th>Protocol</th><th>Role</th></tr></thead>
+<tbody>
+<tr><td><strong>7 - Application</strong></td><td>HTTP/HTTPS</td><td>Request/Answer semantics</td></tr>
+<tr><td>6 - Presentation</td><td>TLS/SSL</td><td>Encryption (HTTPS)</td></tr>
+<tr><td><strong>4 - Transport</strong></td><td>TCP (UDP for HTTP/3)</td><td>Reliable delivery</td></tr>
+<tr><td>3 - Network</td><td>IP</td><td>Routing</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<div>
+<div class="warning-box">
+<div class="warning-title">⚠️ Common Misconception</div>
+<p>Many developers think HTTP "just works" over the Internet. In reality, a single HTTP request involves DNS resolution, TCP handshake, possibly TLS negotiation, and routing through multiple autonomous systems.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- SLIDE 8: Cost of HTTPS -->
+<div class="slide">
+<h1>The True Cost of an HTTPS Request</h1>
+<div class="content">
+<p class="lead">Before your browser can display a single pixel, multiple round-trips must complete.</p>
+<div class="grid-2">
+<div>
+<div class="table-container">
+<table>
+<thead><tr><th>Step</th><th>RTT</th><th>@50ms</th></tr></thead>
+<tbody>
+<tr><td>DNS Lookup</td><td>1 RTT</td><td>50 ms</td></tr>
+<tr><td>TCP Handshake</td><td>1 RTT</td><td>50 ms</td></tr>
+<tr><td>TLS Handshake</td><td>1-2 RTT</td><td>50-100 ms</td></tr>
+<tr><td>HTTP Request</td><td>1 RTT</td><td>50 ms</td></tr>
+<tr style="background: #ecfdf5;"><td><strong>Total (Cold)</strong></td><td><strong>4-5 RTT</strong></td><td><strong>200-250 ms</strong></td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<div>
+<div class="interactive-panel">
+<h3>🧮 Latency Calculator</h3>
+<div class="slider-group">
+<label>Round-Trip Time (RTT): <span class="slider-value" id="rttValue">50</span> ms</label>
+<input id="rttSlider" max="200" min="10" oninput="calculateLatency()" type="range" value="50"/>
+</div>
+<div class="result-display">
+<div class="result-label">Minimum First-Byte Latency</div>
+<div class="result-value" id="latencyResult">200 ms</div>
+</div>
+</div>
+</div>
+</div>
+<div class="highlight-box mt-2">
+<h3>💡 Why It Matters</h3>
+<p>Google found that a 100ms delay reduces conversions by 7%. For trans-Atlantic requests (RTT ≈ 80ms), cold-start latency exceeds 300ms!</p>
+</div>
+</div>
+</div>
+<!-- SLIDE 9: Request anatomy -->
+<div class="slide">
+<h1>Anatomy of an HTTP Request</h1>
+<div class="content">
+<p>Every HTTP request consists of three parts: request line, headers, and optional body.</p>
+<div class="code-block" data-lang="http"><span class="keyword">GET</span> /api/users/42 <span class="string">HTTP/1.1</span>
+<span class="function">Host</span>: api.example.com
+<span class="function">User-Agent</span>: Mozilla/5.0 (Windows NT 10.0; Win64; x64)
+<span class="function">Accept</span>: application/json
+<span class="function">Autorizare</span>: Bearer eyJhbGciOiJIUzI1NiIs...
+<span class="function">Cache-Control</span>: no-cache</div>
+<div class="grid-3 mt-2">
+<div class="card card-secondary">
+<div class="card-title">Request Line</div>
+<div class="card-content"><code>METHOD path HTTP/version</code><p class="mt-1">Specifies action and resource.</p></div>
+</div>
+<div class="card card-accent">
+<div class="card-title">Headers</div>
+<div class="card-content"><code>Name: value</code><p class="mt-1">Metadata: auth, content type, caching.</p></div>
+</div>
+<div class="card card-purple">
+<div class="card-title">Corp</div>
+<div class="card-content"><code>{ "data": ... }</code><p class="mt-1">Optional payload for POST/PUT/PATCH.</p></div>
+</div>
+</div>
+</div>
+</div>
+<!-- SLIDE 10: Answer Anatomy -->
+<div class="slide">
+<h1>Anatomy of an HTTP Answer</h1>
+<div class="content">
+<div class="code-block" data-lang="http"><span class="string">HTTP/1.1</span> <span class="number">200</span> <span class="keyword">OK</span>
+<span class="function">Date</span>: Mon, 05 Jan 2026 14:30:00 GMT
+<span class="function">Content-Type</span>: application/json; charset=utf-8
+<span class="function">Cache-Control</span>: max-age=3600, must-revalidata
+<span class="function">ETag</span>: "abc123"
+
+{
+    <span class="string">"id"</span>: <span class="number">42</span>,
+    <span class="string">"name"</span>: <span class="string">"Alice Johnson"</span>,
+    <span class="string">"email"</span>: <span class="string">"alice@example.com"</span>
+}</div>
+<div class="grid-2 mt-2">
+<div>
+<h3>Status Line Components</h3>
+<ul><li><strong>HTTP Version</strong>: Protocol version</li><li><strong>Status Code</strong>: 3-digit result (200, 404, 500)</li><li><strong>Reason Phrase</strong>: Human-readable (OK, Not Found)</li></ul>
+</div>
+<div>
+<h3>Critical response headers</h3>
+<ul><li><strong>Content-Type</strong>: MIME type of body</li><li><strong>Cache-Control</strong>: Memtimere in cache behaviour</li><li><strong>ETag</strong>: Resurs version identifier</li></ul>
+</div>
+</div>
+</div>
+</div>
+<!-- SLIDE 11: Metode HTTP -->
+<div class="slide">
+<h1>Metode HTTP — The Verbs of the Web</h1>
+<div class="content">
+<p class="lead">HTTP methods define the intended action. Choosing correctly affects caching, retries, and security.</p>
+<div class="table-container">
+<table>
+<thead><tr><th>Method</th><th>Purpose</th><th>Safe?</th><th>Idempotent?</th><th>Corp?</th></tr></thead>
+<tbody>
+<tr><td><code>GET</code></td><td>Retrieve resource</td><td><span class="badge badge-success">Yes</span></td><td><span class="badge badge-success">Yes</span></td><td><span class="badge badge-danger">No</span></td></tr>
+<tr><td><code>POST</code></td><td>Creare resource / submit data</td><td><span class="badge badge-danger">No</span></td><td><span class="badge badge-danger">No</span></td><td><span class="badge badge-success">Yes</span></td></tr>
+<tr><td><code>PUT</code></td><td>Replace resource entirely</td><td><span class="badge badge-danger">No</span></td><td><span class="badge badge-success">Yes</span></td><td><span class="badge badge-success">Yes</span></td></tr>
+<tr><td><code>PATCH</code></td><td>Partial modification</td><td><span class="badge badge-danger">No</span></td><td><span class="badge badge-warning">Depends</span></td><td><span class="badge badge-success">Yes</span></td></tr>
+<tr><td><code>DELETE</code></td><td>Remove resource</td><td><span class="badge badge-danger">No</span></td><td><span class="badge badge-success">Yes</span></td><td><span class="badge badge-warning">Optional</span></td></tr>
+<tr><td><code>OPTIONS</code></td><td>Query allowed methods (CORS)</td><td><span class="badge badge-success">Yes</span></td><td><span class="badge badge-success">Yes</span></td><td><span class="badge badge-danger">No</span></td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- SLIDE 12: Safe vs Idempotent -->
+<div class="slide">
+<h1>Safe vs Idempotent — Critical Distinctions</h1>
+<div class="content">
+<div class="grid-2">
+<div class="definition-box">
+<div class="term">Safe Method</div>
+<p>A method is <strong>safe</strong> if calling it does not modify server state. Safe methods can be cached, prefetched, and crawled.</p>
+<p class="mt-1"><strong>Safe methods:</strong> GET, HEAD, OPTIONS, TRACE</p>
+</div>
+<div class="definition-box">
+<div class="term">Idempotent Method</div>
+<p>A method is <strong>idempotent</strong> if calling it multiple times produces the same result as calling it once.</p>
+<p class="mt-1"><strong>Idempotent:</strong> GET, HEAD, PUT, DELETE, OPTIONS</p>
+</div>
+</div>
+<div class="story-box mt-2">
+<div class="story-title">🎯 Real-World Analogy</div>
+<p><strong>Safe:</strong> Looking at a light switch doesn't change whether it's on or off.</p>
+<p><strong>Idempotent:</strong> Pressing "ON" multiple times still results in the light being on.</p>
+<p><strong>Neither:</strong> Adding £10 to your bank account is not idempotent — doing it twice gives you £20.</p>
+</div>
+<div class="warning-box mt-2">
+<div class="warning-title">⚠️ Why Idempotency Matters</div>
+<p>Network failures happen. For <strong>idempotent</strong> methods, it's safe to retry. For <code>POST</code>, retrying might create duplicate records — leading to double charges or data corruption.</p>
+</div>
+</div>
+</div>
+<!-- SLIDE 13: Coduri of Stare -->
+<div class="slide">
+<h1>Coduri of Stare HTTP — Speaking in Numbers</h1>
+<div class="content">
+<p class="lead">Status codes communicate the result. The first digit indicates the category.</p>
+<div class="grid-2">
+<div>
+<div class="card card-secondary" style="margin-bottom: 1rem;">
+<div class="card-title">1xx — Informational</div>
+<div class="card-content"><code>100 Continue</code> — Client should continue<br/><code>101 Switching Protocols</code> — Upgrade to WebSocket</div>
+</div>
+<div class="card card-success" style="margin-bottom: 1rem;">
+<div class="card-title">2xx — Success</div>
+<div class="card-content"><code>200 OK</code> — Request succeeded<br/><code>201 Creared</code> — Resurs created<br/><code>204 No Content</code> — Success, no body</div>
+</div>
+<div class="card card-accent">
+<div class="card-title">3xx — Redirection</div>
+<div class="card-content"><code>301 Moved Permanently</code> — New URL forever<br/><code>304 Not Modified</code> — Use cached version</div>
+</div>
+</div>
+<div>
+<div class="card card-danger" style="margin-bottom: 1rem;">
+<div class="card-title">4xx — Client Errors</div>
+<div class="card-content"><code>400 Bad Request</code> — Malformed syntax<br/><code>401 Aauthorized</code> — Auth required<br/><code>403 Forbidden</code> — Authenticated but denied<br/><code>404 Not Found</code> — Resurs doesn't exist<br/><code>429 Too Many Requests</code> — Rate limited</div>
+</div>
+<div class="card card-purple">
+<div class="card-title">5xx — Server Errors</div>
+<div class="card-content"><code>500 Internal Server Error</code> — Generic failure<br/><code>502 Bad Gateway</code> — Upstream failure<br/><code>503 Service Aavailable</code> — Overloaded</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- SLIDE 14: 401 vs 403 -->
+<div class="slide">
+<h1>401 vs 403 — A Critical Distinction</h1>
+<div class="content">
+<div class="grid-2">
+<div class="card card-accent">
+<div class="card-title">401 Aauthorized</div>
+<div class="card-content">
+<p><strong>Meaning:</strong> "I don't know who you are. Please authenticate."</p>
+<p class="mt-1"><strong>Action:</strong> Client should provide credentials.</p>
+<p class="mt-1"><strong>Example:</strong> Accessing an API without a Bearer token.</p>
+</div>
+</div>
+<div class="card card-danger">
+<div class="card-title">403 Forbidden</div>
+<div class="card-content">
+<p><strong>Meaning:</strong> "I know who you are, but you're not allowed."</p>
+<p class="mt-1"><strong>Action:</strong> Re-authenticating won't help. Need different permissions.</p>
+<p class="mt-1"><strong>Example:</strong> Regular user accessing admin endpoints.</p>
+</div>
+</div>
+</div>
+<div class="quiz-container mt-2">
+<div class="quiz-question">A logged-in user tries to delete another user's profile. Which status code?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkQuiz(this, false)">401 Aauthorized</div>
+<div class="quiz-option" onclick="checkQuiz(this, true)">403 Forbidden</div>
+<div class="quiz-option" onclick="checkQuiz(this, false)">404 Not Found</div>
+</div>
+<div class="quiz-feedback">✓ correct! The user is authenticated but lacks permission. 403 is appropriate.</div>
+</div>
+</div>
+</div>
+<!-- SLIDE 15: CORS -->
+<div class="slide">
+<h1>CORS — Cross-Origin Resurs Sharing</h1>
+<div class="content">
+<p class="lead">"It works in Postman but not in the browser" — this is almost always CORS.</p>
+<div class="definition-box">
+<div class="term">Same-Origin Policy</div>
+<p>Browsers block JavaScript from making requests to a different origin (protocol + domain + port). This prevents malicious websites from stealing data from your sessions.</p>
+</div>
+<div class="grid-2 mt-2">
+<div>
+<h3>The Problem</h3>
+<div class="code-block"><span class="comment">// Page loaded from https://myapp.com</span>
+<span class="keyword">fetch</span>(<span class="string">'https://api.other.com/data'</span>)
+  .then(r =&gt; r.json())
+  .catch(err =&gt; console.<span class="function">error</span>(<span class="string">'CORS!'</span>));
+<span class="comment">// Blocked unless api.other.com allows it</span></div>
+</div>
+<div>
+<h3>The Solution</h3>
+<div class="code-block"><span class="comment"># Server response headers</span>
+Access-Control-Allow-Origin: https://myapp.com
+Access-Control-Allow-Methods: GET, POST, PUT
+Access-Control-Allow-Headers: Content-Type</div>
+</div>
+</div>
+<div class="warning-box mt-2">
+<div class="warning-title">⚠️ Preflight Requests</div>
+<p>For "non-simple" requests (custom headers, methods other than GET/POST), the browser first sends an <code>OPTIONS</code> request. Your server must handle this.</p>
+</div>
+</div>
+</div>
+<!-- SLIDE 16: Section - HTTP Evolution -->
+<div class="slide slide-section">
+<div class="section-number">SECTION 02</div>
+<h2>Evolutia HTTP</h2>
+<p class="section-desc">From HTTP/1.0's connection-per-request to HTTP/3's QUIC — how the protocol adapted.</p>
+</div>
+<!-- SLIDE 17: HTTP/1.1 Limitations -->
+<div class="slide">
+<h1>HTTP/1.1 — Limitations That Shaped the Future</h1>
+<div class="content">
+<p class="lead">HTTP/1.1 served us for 15 years, but its design shows its 1997 origins.</p>
+<div class="grid-2">
+<div class="card card-danger">
+<div class="card-title">🐌 Head-of-Line Blocking</div>
+<div class="card-content">Requests must complete in order. A slow response blocks all subsequent requests on that connection.</div>
+</div>
+<div class="card card-danger">
+<div class="card-title">📝 Text headers</div>
+<div class="card-content">Headers are sent as uncompressed ASCII text, repeated with every request. ~500-800 bytes overhead per request.</div>
+</div>
+<div class="card card-accent">
+<div class="card-title">🔄 No Server Push</div>
+<div class="card-content">Server can only respond to requests — cannot proactively send resources it knows the client will need.</div>
+</div>
+<div class="card card-accent">
+<div class="card-title">🔗 Connection Overhead</div>
+<div class="card-content">Even with keep-alive, each connection has TCP + TLS overhead. Browsers open 6 parallel connections per domain.</div>
+</div>
+</div>
+</div>
+</div>
+<!-- SLIDE 18: HTTP/2 -->
+<div class="slide">
+<h1>HTTP/2 — The Multiplexing Revolution</h1>
+<div class="content">
+<p class="lead">Standardised in 2015, HTTP/2 addressed HTTP/1.1's performance bottlenecks while maintaining backwards-compatible semantics.</p>
+<div class="grid-2">
+<div>
+<div class="card card-success" style="margin-bottom: 1rem;">
+<div class="card-title">Multiplexing</div>
+<div class="card-content">Multiple requests/responses share a single TCP connection as independent "streams". No HTTP-layer head-of-line blocking.</div>
+</div>
+<div class="card card-success" style="margin-bottom: 1rem;">
+<div class="card-title">Header Compression (HPACK)</div>
+<div class="card-content">Headers are compressed using static and dynamic tables. Repeated headers aren't resent.</div>
+</div>
+<div class="card card-success">
+<div class="card-title">Server Push</div>
+<div class="card-content">Server can proactively send resources before client requests them.</div>
+</div>
+</div>
+<div>
+<div class="diagram-container">
+<svg style="max-width: 300px; min-height: 200px;" viewbox="0 0 300 220">
+<text fill="#ef4444" font-size="11" font-weight="600" text-anchor="middle" x="75" y="20">HTTP/1.1</text>
+<rect fill="#fee2e2" height="20" rx="4" stroke="#ef4444" width="110" x="20" y="30"></rect>
+<rect fill="#fecaca" height="30" rx="4" stroke="#ef4444" width="110" x="20" y="55"></rect>
+<rect fill="#fee2e2" height="20" rx="4" stroke="#ef4444" width="110" x="20" y="90"></rect>
+<rect fill="#fecaca" height="25" rx="4" stroke="#ef4444" width="110" x="20" y="115"></rect>
+<text fill="#64748b" font-size="10" text-anchor="middle" x="75" y="160">Sequential</text>
+<text fill="#10b981" font-size="11" font-weight="600" text-anchor="middle" x="225" y="20">HTTP/2</text>
+<rect fill="#f0fdf4" height="110" rx="8" stroke="#10b981" stroke-width="2" width="110" x="170" y="30"></rect>
+<rect fill="#dcfce7" height="80" rx="4" stroke="#10b981" width="35" x="180" y="45"></rect>
+<rect fill="#bbf7d0" height="55" rx="4" stroke="#10b981" width="25" x="220" y="45"></rect>
+<rect fill="#86efac" height="40" rx="4" stroke="#10b981" width="20" x="250" y="45"></rect>
+<text fill="#64748b" font-size="10" text-anchor="middle" x="225" y="160">Parallel streams</text>
+</svg>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- SLIDE 19: HTTP/3 -->
+<div class="slide">
+<h1>HTTP/3 — Built on QUIC (UDP)</h1>
+<div class="content">
+<p class="lead">HTTP/3 replaces TCP with QUIC — solving TCP's head-of-line blocking and enabling 0-RTT connections.</p>
+<div class="definition-box">
+<div class="term">QUIC (Quick UDP Internet Connections)</div>
+<p>A transport protocol providing reliable, encrypted, multiplexed connections over UDP, with TLS 1.3 built-in.</p>
+</div>
+<div class="grid-2 mt-2">
+<div class="card card-success">
+<div class="card-title">✓ No TCP Head-of-Line Blocking</div>
+<div class="card-content">QUIC streams are independent — a lost packet only affects one stream, not all.</div>
+</div>
+<div class="card card-success">
+<div class="card-title">✓ 0-RTT Connection Resumption</div>
+<div class="card-content">Returning clients can send data immediately without waiting for handshake.</div>
+</div>
+<div class="card card-success">
+<div class="card-title">✓ Connection Migration</div>
+<div class="card-content">Connections survive IP address changes (e.g., Wi-Fi to mobile).</div>
+</div>
+<div class="card card-success">
+<div class="card-title">✓ Always Encrypted</div>
+<div class="card-content">TLS 1.3 is mandatory and integrated. Even metadata is encrypted.</div>
+</div>
+</div>
+</div>
+</div>
+<!-- SLIDE 20: WebSocket -->
+<div class="slide">
+<h1>WebSocket — When HTTP Isn't Enewgh</h1>
+<div class="content">
+<p class="lead">HTTP's request-response model doesn't fit real-time bidirectional communication.</p>
+<div class="grid-2">
+<div>
+<h3>Use Cases</h3>
+<ul>
+<li><strong>Live chat</strong> — Messages push instantly</li>
+<li><strong>Real-time dashboards</strong> — Stock prices, analytics</li>
+<li><strong>Online games</strong> — Low-latency state sync</li>
+<li><strong>Collabtimetive editing</strong> — Google Docs-style</li>
+</ul>
+<div class="definition-box mt-2">
+<div class="term">The Upgrade</div>
+<p>WebSocket starts as HTTP with <code>Upgrade: websocket</code>. After handshake, the connection switches protocols — no more HTTP overhead.</p>
+</div>
+</div>
+<div>
+<div class="code-block"><span class="comment"># Client request</span>
+<span class="keyword">GET</span> /chat <span class="string">HTTP/1.1</span>
+Upgrade: websocket
+Connection: Upgrade
+Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==
+
+<span class="comment"># Server response</span>
+<span class="string">HTTP/1.1</span> <span class="number">101</span> Switching Protocols
+Upgrade: websocket
+Connection: Upgrade
+Sec-WebSocket-Accept: s3pPLMBiTxaQ9k...</div>
+</div>
+</div>
+</div>
+</div>
+<!-- SLIDE 21: Section - REST -->
+<div class="slide slide-section">
+<div class="section-number">SECTION 03</div>
+<h2>REST Architecture</h2>
+<p class="section-desc">Understandinging REST as an architectural style, not just "JSON over HTTP" — and why most APIs aren't truly RESTful.</p>
+</div>
+<!-- SLIDE 22: REST Definitie -->
+<div class="slide">
+<h1>REST — Representational State Transfer</h1>
+<div class="content">
+<div class="story-box">
+<div class="story-title">📚 Origin Story</div>
+<p>REST was defined by Roy Fielding in his 2000 PhD dissertation. Fielding was a main architect of HTTP/1.1 and co-founder of Apache HTTP Server.</p>
+<p class="mt-1">REST is <em>not</em> a standard — it's a set of <strong>constraints</strong> that yield scalability, simplicity, and evolvability.</p>
+</div>
+<div class="definition-box mt-2">
+<div class="term">The Six REST Constraints</div>
+<ol style="margin-left: 1.5rem; margin-top: 0.5rem;">
+<li><strong>Client-Server</strong> — Separation of concerns</li>
+<li><strong>Without stare</strong> — Each request contains all needed context</li>
+<li><strong>Cacheabil</strong> — Answers must declare cacheability</li>
+<li><strong>Interfat Aiforma</strong> — Standardised interactions (key constraint)</li>
+<li><strong>Layered System</strong> — Intermediaries transparent</li>
+<li><strong>Code on Demand</strong> (optional) — Server can send executable code</li>
+</ol>
+</div>
+<div class="insight-box mt-2">
+<div class="insight-title">🎯 The Acomfortable Truth</div>
+<p>Most "API RESTs" are actually RPC-over-HTTP. True REST requires <strong>hypermedia</strong> (HATEOAS) — responses includes links telling clients what actions are available.</p>
+</div>
+</div>
+</div>
+<!-- SLIDE 23: Richardson Model -->
+<div class="slide">
+<h1>Richardson Maturity Model</h1>
+<div class="content">
+<p class="lead">Leonard Richardson proposed a model for classifying API designs by how much they embrace REST.</p>
+<div class="diagram-container">
+<svg style="max-width: 850px; min-height: 180px;" viewbox="0 0 800 200">
+<rect fill="#fee2e2" height="60" rx="8" stroke="#ef4444" stroke-width="2" width="170" x="20" y="120"></rect>
+<text fill="#ef4444" font-size="14" font-weight="700" text-anchor="middle" x="105" y="145">Level 0</text>
+<text fill="#1e293b" font-size="10" text-anchor="middle" x="105" y="165">One URI, one method</text>
+<rect fill="#fef3c7" height="90" rx="8" stroke="#f59e0b" stroke-width="2" width="170" x="210" y="90"></rect>
+<text fill="#f59e0b" font-size="14" font-weight="700" text-anchor="middle" x="295" y="115">Level 1</text>
+<text fill="#1e293b" font-size="10" text-anchor="middle" x="295" y="135">Multiple URIs (Resursas)</text>
+<text fill="#64748b" font-size="10" text-anchor="middle" x="295" y="150">Still one method</text>
+<rect fill="#dcfce7" height="120" rx="8" stroke="#10b981" stroke-width="2" width="170" x="400" y="60"></rect>
+<text fill="#10b981" font-size="14" font-weight="700" text-anchor="middle" x="485" y="85">Level 2</text>
+<text fill="#1e293b" font-size="10" text-anchor="middle" x="485" y="105">HTTP Verbs</text>
+<text fill="#64748b" font-size="10" text-anchor="middle" x="485" y="120">GET, POST, PUT, DELETE</text>
+<text fill="#64748b" font-size="10" text-anchor="middle" x="485" y="135">Correct status codes</text>
+<text fill="#059669" font-size="9" font-style="italic" text-anchor="middle" x="485" y="155">Most APIs stop here</text>
+<rect fill="#ede9fe" height="150" rx="8" stroke="#8b5cf6" stroke-width="2" width="170" x="590" y="30"></rect>
+<text fill="#8b5cf6" font-size="14" font-weight="700" text-anchor="middle" x="675" y="55">Level 3</text>
+<text fill="#1e293b" font-size="10" text-anchor="middle" x="675" y="75">HATEOAS</text>
+<text fill="#64748b" font-size="10" text-anchor="middle" x="675" y="90">Links in responses</text>
+<text fill="#64748b" font-size="10" text-anchor="middle" x="675" y="105">Discoverable actions</text>
+<text fill="#7c3aed" font-size="10" font-weight="600" text-anchor="middle" x="675" y="125">True REST</text>
+</svg>
+</div>
+</div>
+</div>
+<!-- SLIDE 24: Level 0-1 Examples -->
+<div class="slide">
+<h1>Level 0 &amp; 1 — The Anti-Patterns</h1>
+<div class="content">
+<div class="grid-2">
+<div>
+<h3>Level 0: RPC over HTTP</h3>
+<div class="code-block"><span class="keyword">POST</span> /api <span class="string">HTTP/1.1</span>
+
+{
+    <span class="string">"action"</span>: <span class="string">"getUser"</span>,
+    <span class="string">"userId"</span>: <span class="number">42</span>
+}</div>
+<div class="insight-box mt-1">
+<div class="insight-title">🚫 Problems</div>
+<ul><li>Can't cache (everything is POST)</li><li>Can't retry safely</li><li>URLs meaningless for debugging</li></ul>
+</div>
+</div>
+<div>
+<h3>Level 1: Resursas</h3>
+<div class="code-block"><span class="keyword">POST</span> /users/42 <span class="string">HTTP/1.1</span>
+
+{<span class="string">"action"</span>: <span class="string">"updata"</span>, <span class="string">"name"</span>: <span class="string">"Alice"</span>}</div>
+<div class="card card-success mt-1">
+<div class="card-title">✓ Progress</div>
+<div class="card-content">Resursas have identities. <code>/users/42</code> always refers to the same user.</div>
+</div>
+<div class="card card-danger mt-1">
+<div class="card-title">✗ Still Wrong</div>
+<div class="card-content">Still using POST everywhere. Can't distinguish read from write.</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- SLIDE 25: Level 2 -->
+<div class="slide">
+<h1>Level 2 — HTTP Verbs &amp; Coduri of Stare</h1>
+<div class="content">
+<p class="lead">This is where most "API RESTs" live — using HTTP methods correctly.</p>
+<div class="code-block"><span class="comment"># List users</span>
+<span class="keyword">GET</span> /users <span class="string">HTTP/1.1</span>  →  <span class="number">200</span> OK + JSON array
+
+<span class="comment"># Get specific user</span>
+<span class="keyword">GET</span> /users/42  →  <span class="number">200</span> OK  or  <span class="number">404</span> Not Found
+
+<span class="comment"># Creare user</span>
+<span class="keyword">POST</span> /users
+{<span class="string">"name"</span>: <span class="string">"Alice"</span>}  →  <span class="number">201</span> Creared + Location: /users/43
+
+<span class="comment"># Actualizare user</span>
+<span class="keyword">PUT</span> /users/42  →  <span class="number">200</span> OK + updatad object
+
+<span class="comment"># Stergere user</span>
+<span class="keyword">DELETE</span> /users/42  →  <span class="number">204</span> No Content</div>
+<div class="highlight-box mt-2">
+<h3>💡 Benefits of Level 2</h3>
+<p>GET requests can be cached. PUT and DELETE can be retried safely. Proxies understand semantics. Standard HTTP tooling just works.</p>
+</div>
+</div>
+</div>
+<!-- SLIDE 26: Level 3 HATEOAS -->
+<div class="slide">
+<h1>Level 3 — HATEOAS (Hypermedia)</h1>
+<div class="content">
+<p class="lead">Answers includes links telling clients what actions are available next.</p>
+<div class="grid-2">
+<div>
+<div class="code-block">{
+    <span class="string">"id"</span>: <span class="number">42</span>,
+    <span class="string">"name"</span>: <span class="string">"Alice Johnson"</span>,
+    <span class="string">"email"</span>: <span class="string">"alice@example.com"</span>,
+    <span class="string">"_links"</span>: {
+        <span class="string">"self"</span>: {<span class="string">"href"</span>: <span class="string">"/users/42"</span>},
+        <span class="string">"updata"</span>: {
+            <span class="string">"href"</span>: <span class="string">"/users/42"</span>,
+            <span class="string">"method"</span>: <span class="string">"PUT"</span>
+        },
+        <span class="string">"orders"</span>: {<span class="string">"href"</span>: <span class="string">"/users/42/orders"</span>}
+    }
+}</div>
+</div>
+<div>
+<div class="definition-box">
+<div class="term">HATEOAS</div>
+<p><strong>H</strong>ypermedia <strong>A</strong>s <strong>T</strong>he <strong>E</strong>ngine <strong>O</strong>f <strong>A</strong>pplication <strong>S</strong>tate</p>
+<p class="mt-1">Clients follow links like navigating the web.</p>
+</div>
+<div class="card card-success mt-2">
+<div class="card-title">✓ Why It Matters</div>
+<div class="card-content"><ul><li>API can evolve URLs without breaking clients</li><li>Clients discover capabilities at runtime</li><li>Documentation embedded in responses</li></ul></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- SLIDE 27: Section - SOAP -->
+<div class="slide slide-section">
+<div class="section-number">SECTION 04</div>
+<h2>SOAP — Cand REST Nu Is Suficient</h2>
+<p class="section-desc">Enterprise integration patterns, formal contracts, and why SOAP survives in regulated industries.</p>
+</div>
+<!-- SLIDE 28: SOAP Prezentare General -->
+<div class="slide">
+<h1>SOAP — Simple Object Access Protocol</h1>
+<div class="content">
+<p class="lead">SOAP is an XML-based messaging protocol for enterprise interoperability with formal contracts.</p>
+<div class="grid-2">
+<div>
+<div class="definition-box">
+<div class="term">SOAP Message Structure</div>
+<ul style="margin-top: 0.5rem;">
+<li><strong>Plic</strong> — Root element</li>
+<li><strong>Header</strong> (optional) — Metadata, security</li>
+<li><strong>Corp</strong> — The actual payload</li>
+<li><strong>Fault</strong> — Error information</li>
+</ul>
+</div>
+</div>
+<div>
+<div class="code-block" style="font-size: 0.85rem;"><span class="keyword">&lt;soap:Plic&gt;</span>
+<span class="keyword">&lt;soap:Header&gt;</span>
+<span class="keyword">&lt;auth:Token&gt;</span>abc123<span class="keyword">&lt;/auth:Token&gt;</span>
+<span class="keyword">&lt;/soap:Header&gt;</span>
+<span class="keyword">&lt;soap:Corp&gt;</span>
+<span class="keyword">&lt;m:GetUser&gt;</span>
+<span class="keyword">&lt;m:UserId&gt;</span>42<span class="keyword">&lt;/m:UserId&gt;</span>
+<span class="keyword">&lt;/m:GetUser&gt;</span>
+<span class="keyword">&lt;/soap:Corp&gt;</span>
+<span class="keyword">&lt;/soap:Plic&gt;</span></div>
+</div>
+</div>
+</div>
+</div>
+<!-- SLIDE 29: REST vs SOAP -->
+<div class="slide">
+<h1>REST vs SOAP — When to Use Each</h1>
+<div class="content">
+<div class="table-container">
+<table>
+<thead><tr><th>Aspect</th><th>REST</th><th>SOAP</th></tr></thead>
+<tbody>
+<tr><td><strong>Protocol</strong></td><td>Architectural style over HTTP</td><td>Protocol with strict standards</td></tr>
+<tr><td><strong>Data Format</strong></td><td>Usually JSON (lightweight)</td><td>Always XML (verbose)</td></tr>
+<tr><td><strong>Contract</strong></td><td>Optional (OpenAPI/Swagger)</td><td>Mandatory (WSDL)</td></tr>
+<tr><td><strong>Transport</strong></td><td>HTTP only</td><td>HTTP, SMTP, TCP, JMS...</td></tr>
+<tr><td><strong>Security</strong></td><td>HTTPS + custom auth</td><td>WS-Security (message-level)</td></tr>
+<tr><td><strong>Memtimere in cache</strong></td><td>HTTP caching</td><td>Not supported</td></tr>
+</tbody>
+</table>
+</div>
+<div class="grid-2 mt-2">
+<div class="highlight-box" style="background: var(--gradient-accent);">
+<h3>Choose REST When...</h3>
+<ul><li>Building public APIs or mobile backends</li><li>Simplicity and performance matter</li><li>You need HTTP-layer caching</li></ul>
+</div>
+<div class="highlight-box" style="background: var(--gradient-primary);">
+<h3>Choose SOAP When...</h3>
+<ul><li>Enterprise integration with legacy systems</li><li>Formal contracts are legally required</li><li>Need distributed transactions (ACID)</li></ul>
+</div>
+</div>
+</div>
+</div>
+<!-- SLIDE 30: Section - Debugging -->
+<div class="slide slide-section">
+<div class="section-number">SECTION 05</div>
+<h2>Debugginga HTTP</h2>
+<p class="section-desc">Essential tools and techniques for diagnosing HTTP issues — from curl to Wireshark.</p>
+</div>
+<!-- SLIDE 31: curl -->
+<div class="slide">
+<h1>curl — The Swiss Army Knife</h1>
+<div class="content">
+<p class="lead"><code>curl</code> is the most versatile command-line HTTP client. Master it to test any API.</p>
+<div class="code-block"><span class="comment"># Basic GET request</span>
+curl https://api.example.com/users
+
+<span class="comment"># GET with verbose output (see headers)</span>
+curl -v https://api.example.com/users
+
+<span class="comment"># POST with JSON body</span>
+curl -X POST https://api.example.com/users \
+  -H <span class="string">"Content-Type: application/json"</span> \
+  -d <span class="string">'{"name": "Alice", "email": "alice@example.com"}'</span>
+<span class="comment"># PUT with authentication</span>
+curl -X PUT https://api.example.com/users/42 \
+  -H <span class="string">"Authorization: Bearer eyJhbGci..."</span> \
+  -H <span class="string">"Content-Type: application/json"</span> \
+  -d <span class="string">'{"name": "Alice Actualizared"}'</span>
+<span class="comment"># Ignore SSL certificate (testing only!)</span>
+curl -k https://localhost:8443/api</div>
+<div class="grid-2 mt-2">
+<div class="card card-secondary"><div class="card-title">Essential Flags</div><div class="card-content"><code>-v</code> verbose • <code>-X</code> method • <code>-H</code> header • <code>-d</code> data • <code>-L</code> follow redirects • <code>-k</code> insecure</div></div>
+<div class="card card-accent"><div class="card-title">Pro Tip</div><div class="card-content">Browser DevTools can "Copy as cURL" — right-click any request in the Network tab.</div></div>
+</div>
+</div>
+</div>
+<!-- SLIDE 32: Common Issues -->
+<div class="slide">
+<h1>Common HTTP Issues — Quick Diagnosis</h1>
+<div class="content">
+<div class="grid-2">
+<div class="card card-danger">
+<div class="card-title">"Connection refused"</div>
+<div class="card-content"><p><strong>Cause:</strong> Server not running or wrong port</p><p><strong>Check:</strong> <code>netstat -tlnp | grep PORT</code></p></div>
+</div>
+<div class="card card-danger">
+<div class="card-title">"Connection timed out"</div>
+<div class="card-content"><p><strong>Cause:</strong> Firewall blocking, wrong IP</p><p><strong>Check:</strong> <code>ping host</code>, <code>telnet host port</code></p></div>
+</div>
+<div class="card card-accent">
+<div class="card-title">"SSL certificate problem"</div>
+<div class="card-content"><p><strong>Cause:</strong> Self-signed, expired, or wrong hostname</p><p><strong>Check:</strong> <code>openssl s_client -connect host:443</code></p></div>
+</div>
+<div class="card card-accent">
+<div class="card-title">"CORS error"</div>
+<div class="card-content"><p><strong>Cause:</strong> Server not sending CORS headers</p><p><strong>Check:</strong> Server must send <code>Access-Control-Allow-Origin</code></p></div>
+</div>
+<div class="card card-purple">
+<div class="card-title">405 Method Not Allowed</div>
+<div class="card-content"><p><strong>Cause:</strong> Using wrong HTTP method</p><p><strong>Check:</strong> API documentation</p></div>
+</div>
+<div class="card card-purple">
+<div class="card-title">415 Asupported Media Type</div>
+<div class="card-content"><p><strong>Cause:</strong> Missing <code>Content-Type</code> header</p><p><strong>Check:</strong> Add <code>Content-Type: application/json</code></p></div>
+</div>
+</div>
+</div>
+</div>
+<!-- SLIDE 33: Section - Practic -->
+<div class="slide slide-section">
+<div class="section-number">SECTION 06</div>
+<h2>applications Practice</h2>
+<p class="section-desc">Hands-on exercises from the Week 10 starterkit — building and testing HTTP servers.</p>
+</div>
+<!-- SLIDE 34: Starterkit -->
+<div class="slide">
+<h1>Week 10 Starterkit</h1>
+<div class="content">
+<div class="grid-2">
+<div>
+<div class="code-block">WEEK10/
+├── python/exercises/
+│   ├── ex_10_01_https.py    <span class="comment"># HTTPS server</span>
+│   └── ex_10_02_rest_levels.py  <span class="comment"># REST maturity</span>
+├── docker/
+│   ├── docker-compose.yml
+│   ├── dns-server/
+│   └── ssh-server/
+├── docs/cheatsheet/
+└── Makefile</div>
+</div>
+<div>
+<div class="card card-secondary">
+<div class="card-title">Exercise 1: HTTPS Server</div>
+<div class="card-content"><ul><li>SSL/TLS context configuration</li><li>REST-style endpoints</li><li>JSON request/response handling</li><li>Cache-Control demonstration</li></ul></div>
+</div>
+<div class="card card-accent mt-2">
+<div class="card-title">Exercise 2: REST Maturity</div>
+<div class="card-content"><ul><li>Level 0: RPC over HTTP</li><li>Level 1: Resursas</li><li>Level 2: HTTP Verbs</li><li>Level 3: HATEOAS</li></ul></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- SLIDE 35: Running Exercises -->
+<div class="slide">
+<h1>Running the Exercises</h1>
+<div class="content">
+<div class="code-block"><span class="comment"># Navigate to starterkit</span>
+cd WEEK10
+
+<span class="comment"># Exercise 1: HTTPS Server</span>
+python python/exercises/ex_10_01_https.py serve --port 8443
+
+<span class="comment"># Test with curl</span>
+curl -k https://localhost:8443/health
+curl -k -X POST https://localhost:8443/resources \
+  -H <span class="string">"Content-Type: application/json"</span> \
+  -d <span class="string">'{"name": "Test"}'</span>
+<span class="comment"># Exercise 2: REST Maturity Levels</span>
+python python/exercises/ex_10_02_rest_levels.py serve --level 2 --port 8080
+
+<span class="comment"># Run self-tests</span>
+python python/exercises/ex_10_01_https.py selftest
+python python/exercises/ex_10_02_rest_levels.py selftest</div>
+</div>
+</div>
+<!-- SLIDE 36: Quiz 1 -->
+<div class="slide">
+<h1>Knowledge Check</h1>
+<div class="content">
+<div class="quiz-container">
+<div class="quiz-question">1. Which HTTP method is both safe AND idempotent?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkQuiz(this, false)">POST</div>
+<div class="quiz-option" onclick="checkQuiz(this, true)">GET</div>
+<div class="quiz-option" onclick="checkQuiz(this, false)">PATCH</div>
+<div class="quiz-option" onclick="checkQuiz(this, false)">DELETE</div>
+</div>
+<div class="quiz-feedback">✓ correct! GET is both safe (no side effects) and idempotent (multiple calls = same result).</div>
+</div>
+<div class="quiz-container mt-2">
+<div class="quiz-question">2. What status code should be returned when creating a new resource via POST?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkQuiz(this, false)">200 OK</div>
+<div class="quiz-option" onclick="checkQuiz(this, true)">201 Creared</div>
+<div class="quiz-option" onclick="checkQuiz(this, false)">204 No Content</div>
+<div class="quiz-option" onclick="checkQuiz(this, false)">202 Accepted</div>
+</div>
+<div class="quiz-feedback">✓ correct! 201 Creared indicates successful resource creation, typically with a Location header.</div>
+</div>
+<div class="quiz-container mt-2">
+<div class="quiz-question">3. At which Richardson level do most "API RESTs" operate?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkQuiz(this, false)">Level 0</div>
+<div class="quiz-option" onclick="checkQuiz(this, false)">Level 1</div>
+<div class="quiz-option" onclick="checkQuiz(this, true)">Level 2</div>
+<div class="quiz-option" onclick="checkQuiz(this, false)">Level 3</div>
+</div>
+<div class="quiz-feedback">✓ correct! Most APIs use HTTP verbs and status codes (Level 2) but don't implement HATEOAS (Level 3).</div>
+</div>
+</div>
+</div>
+<!-- SLIDE 37: Section - Summary -->
+<div class="slide slide-section">
+<div class="section-number">SECTION 07</div>
+<h2>Sumar and Pasi Urmatori</h2>
+<p class="section-desc">Key takeaways and preparation for next week.</p>
+</div>
+<!-- SLIDE 38: Key Conclusions -->
+<div class="slide">
+<h1>Key Conclusions</h1>
+<div class="content">
+<div class="grid-2">
+<div>
+<div class="card card-success" style="margin-bottom: 1rem;"><div class="card-title">1. HTTP Is a Protocol, Not Magic</div><div class="card-content">Understandinging methods, headers, and status codes enables effective debugging.</div></div>
+<div class="card card-success" style="margin-bottom: 1rem;"><div class="card-title">2. Idempotency Enables Reliability</div><div class="card-content">GET, PUT, DELETE can be retried. POST cannot — design accordingly.</div></div>
+<div class="card card-success" style="margin-bottom: 1rem;"><div class="card-title">3. CORS Protects Users</div><div class="card-content">Browser security, not a bug. Server must explicitly allow cross-origin requests.</div></div>
+<div class="card card-success"><div class="card-title">4. HTTP/2 Multiplexes Efficiently</div><div class="card-content">Single connection, multiple streams. Semantics unchanged.</div></div>
+</div>
+<div>
+<div class="card card-accent" style="margin-bottom: 1rem;"><div class="card-title">5. WebSocket for Real-Time</div><div class="card-content">When request-response isn't enewgh, upgrade to bidirectional.</div></div>
+<div class="card card-accent" style="margin-bottom: 1rem;"><div class="card-title">6. REST Is Philosophy, Not Spec</div><div class="card-content">Level 2 is sufficient for most APIs. True REST with HATEOAS is rare.</div></div>
+<div class="card card-accent" style="margin-bottom: 1rem;"><div class="card-title">7. SOAP Survives in Enterprise</div><div class="card-content">Formal contracts and WS-Security keep SOAP relevant.</div></div>
+<div class="card card-accent"><div class="card-title">8. Master Your Tools</div><div class="card-content">curl, DevTools, and tshark are essential for debugging.</div></div>
+</div>
+</div>
+</div>
+</div>
+<!-- SLIDE 39: Next Week -->
+<div class="slide">
+<h1>Next Week: Network Services in Containers</h1>
+<div class="content">
+<p class="lead">Week 11 focuses on deploying and orchestrating network services using Docker.</p>
+<div class="grid-3">
+<div class="card card-secondary"><div class="card-title">🌐 DNS</div><div class="card-content"><ul><li>DNS resolution mechanics</li><li>Running DNS in Docker</li><li>Record types (A, AAAA, CNAME, MX)</li></ul></div></div>
+<div class="card card-accent"><div class="card-title">🔐 SSH</div><div class="card-content"><ul><li>SSH protocol architecture</li><li>Key-based authentication</li><li>Paramiko for Python automation</li></ul></div></div>
+<div class="card card-purple"><div class="card-title">📁 FTP</div><div class="card-content"><ul><li>FTP vs SFTP vs FTPS</li><li>Active vs passive mode</li><li>Custom FTP server in Python</li></ul></div></div>
+</div>
+<div class="highlight-box mt-3">
+<h3>🐳 Docker Focus</h3>
+<p>You'll learn to orchestrare multiple network services using <code>docker-compose.yml</code> and capture traffic between containers.</p>
+</div>
+</div>
+</div>
+<!-- SLIDE 40: References -->
+<div class="slide">
+<h1>References &amp; Supplementary reading</h1>
+<div class="content">
+<div class="grid-2">
+<div>
+<h3>Core Textbooks</h3>
+<ul>
+<li><strong>Kurose &amp; Ross</strong> — Computer Networking: A Top-Down Approach, 8th Ed.</li>
+<li><strong>Rhodes &amp; Goerzen</strong> — Foundations of Python Network Programming</li>
+</ul>
+<h3 class="mt-2">RFCs (Standards)</h3>
+<ul><li><strong>RFC 7230-7235</strong> — HTTP/1.1</li><li><strong>RFC 7540</strong> — HTTP/2</li><li><strong>RFC 6455</strong> — WebSocket Protocol</li></ul>
+</div>
+<div>
+<h3>Online Resursas</h3>
+<ul>
+<li><strong>MDN Web Docs</strong> — developer.mozilla.org</li>
+<li><strong>API REST Tutorial</strong> — restfulapi.net</li>
+<li><strong>Fielding's Dissertation</strong> — ics.uci.edu/~fielding</li>
+</ul>
+<h3 class="mt-2">Tools</h3>
+<ul><li><strong>curl</strong> — curl.se</li><li><strong>Postman</strong> — postman.com</li><li><strong>httpbin</strong> — httpbin.org (testing)</li></ul>
+</div>
+</div>
+</div>
+</div>
+<!-- SLIDE 41: Thank You -->
+<div class="slide slide-title-page">
+<h1>Thank You</h1>
+<p class="subtitle">Questions &amp; Discussion</p>
+<p class="meta">Week 10: HTTP, REST and SOAP<br/><br/>Computer Networks • Bachelor in Economic Informatics<br/>Bucharest University of Economic Studies – Faculty CSIE<br/><br/><span style="font-size: 0.9rem; opacity: 0.8;">Next week: DNS, SSH, FTP — Network Services in Docker</span></p>
+</div>
+</div><!-- End slides container -->
+<!-- TABLE OF CONTENTS MODAL -->
+<div class="toc-modal" id="tocModal">
+<div class="toc-content">
+<button class="toc-close" onclick="closeToc()">×</button>
+<h2>Contents</h2>
+<div class="toc-section">
+<div class="toc-section-title">Introduction (1-5)</div>
+<div class="toc-items">
+<div class="toc-item" onclick="goToSlide(1)"><span>01</span> Title</div>
+<div class="toc-item" onclick="goToSlide(2)"><span>02</span> Context Historically</div>
+<div class="toc-item" onclick="goToSlide(3)"><span>03</span> Why It Matters</div>
+<div class="toc-item" onclick="goToSlide(4)"><span>04</span> Learning Objectives</div>
+<div class="toc-item" onclick="goToSlide(5)"><span>05</span> Course Roadmap</div>
+</div>
+</div>
+<div class="toc-section">
+<div class="toc-section-title">HTTP Foundations (6-15)</div>
+<div class="toc-items">
+<div class="toc-item" onclick="goToSlide(6)"><span>06</span> Section: HTTP Foundations</div>
+<div class="toc-item" onclick="goToSlide(7)"><span>07</span> HTTP in the Stack</div>
+<div class="toc-item" onclick="goToSlide(8)"><span>08</span> Cost of HTTPS</div>
+<div class="toc-item" onclick="goToSlide(9)"><span>09</span> Request Anatomy</div>
+<div class="toc-item" onclick="goToSlide(10)"><span>10</span> Answer Anatomy</div>
+<div class="toc-item" onclick="goToSlide(11)"><span>11</span> Metode HTTP</div>
+<div class="toc-item" onclick="goToSlide(12)"><span>12</span> Safe vs Idempotent</div>
+<div class="toc-item" onclick="goToSlide(13)"><span>13</span> Coduri of Stare</div>
+<div class="toc-item" onclick="goToSlide(14)"><span>14</span> 401 vs 403</div>
+<div class="toc-item" onclick="goToSlide(15)"><span>15</span> CORS</div>
+</div>
+</div>
+<div class="toc-section">
+<div class="toc-section-title">HTTP Evolution (16-20)</div>
+<div class="toc-items">
+<div class="toc-item" onclick="goToSlide(16)"><span>16</span> Section: Evolution</div>
+<div class="toc-item" onclick="goToSlide(17)"><span>17</span> HTTP/1.1 Limitations</div>
+<div class="toc-item" onclick="goToSlide(18)"><span>18</span> HTTP/2 Features</div>
+<div class="toc-item" onclick="goToSlide(19)"><span>19</span> HTTP/3 and QUIC</div>
+<div class="toc-item" onclick="goToSlide(20)"><span>20</span> WebSocket</div>
+</div>
+</div>
+<div class="toc-section">
+<div class="toc-section-title">REST Architecture (21-26)</div>
+<div class="toc-items">
+<div class="toc-item" onclick="goToSlide(21)"><span>21</span> Section: REST</div>
+<div class="toc-item" onclick="goToSlide(22)"><span>22</span> REST Definition</div>
+<div class="toc-item" onclick="goToSlide(23)"><span>23</span> Richardson Model</div>
+<div class="toc-item" onclick="goToSlide(24)"><span>24</span> Levels 0-1</div>
+<div class="toc-item" onclick="goToSlide(25)"><span>25</span> Level 2</div>
+<div class="toc-item" onclick="goToSlide(26)"><span>26</span> Level 3 HATEOAS</div>
+</div>
+</div>
+<div class="toc-section">
+<div class="toc-section-title">SOAP &amp; Debugging (27-35)</div>
+<div class="toc-items">
+<div class="toc-item" onclick="goToSlide(27)"><span>27</span> Section: SOAP</div>
+<div class="toc-item" onclick="goToSlide(28)"><span>28</span> SOAP General Overview</div>
+<div class="toc-item" onclick="goToSlide(29)"><span>29</span> REST vs SOAP</div>
+<div class="toc-item" onclick="goToSlide(30)"><span>30</span> Section: Debugging</div>
+<div class="toc-item" onclick="goToSlide(31)"><span>31</span> curl</div>
+<div class="toc-item" onclick="goToSlide(32)"><span>32</span> Common Issues</div>
+<div class="toc-item" onclick="goToSlide(33)"><span>33</span> Section: Practica</div>
+<div class="toc-item" onclick="goToSlide(34)"><span>34</span> Starterkit</div>
+<div class="toc-item" onclick="goToSlide(35)"><span>35</span> Running Exercises</div>
+</div>
+</div>
+<div class="toc-section">
+<div class="toc-section-title">Summary (36-41)</div>
+<div class="toc-items">
+<div class="toc-item" onclick="goToSlide(36)"><span>36</span> Quiz</div>
+<div class="toc-item" onclick="goToSlide(37)"><span>37</span> Section: Summary</div>
+<div class="toc-item" onclick="goToSlide(38)"><span>38</span> Key Conclusions</div>
+<div class="toc-item" onclick="goToSlide(39)"><span>39</span> Next Week Preview</div>
+<div class="toc-item" onclick="goToSlide(40)"><span>40</span> References</div>
+<div class="toc-item" onclick="goToSlide(41)"><span>41</span> Thank You</div>
+</div>
+</div>
+</div>
+</div>
+<!-- NAVIGATION -->
+<div class="navigation">
+<button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">← Previous</button>
+<button class="nav-btn" onclick="openToc()">☰ Contents</button>
+<button class="nav-btn" onclick="toggleFullscreen()">⛶ Fullscreen</button>
+<button class="nav-btn primary" id="nextBtn" onclick="changeSlide(1)">Next →</button>
+</div>
+<!-- JAVASCRIPT -->
+<script>
+        let currentSlide = 1;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        function updateSlide() {
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active');
+                if (index + 1 === currentSlide) slide.classList.add('active');
+            });
+            document.getElementById('slideCounter').textContent = currentSlide + ' / ' + totalSlides;
+            document.getElementById('progressBar').style.width = (currentSlide / totalSlides * 100) + '%';
+            document.getElementById('prevBtn').disabled = currentSlide === 1;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides;
+        }
+
+        function changeSlide(delta) {
+            const newSlide = currentSlide + delta;
+            if (newSlide >= 1 && newSlide <= totalSlides) {
+                currentSlide = newSlide;
+                updateSlide();
+            }
+        }
+
+        function goToSlide(n) {
+            if (n >= 1 && n <= totalSlides) {
+                currentSlide = n;
+                updateSlide();
+                closeToc();
+            }
+        }
+
+        function openToc() { document.getElementById('tocModal').classList.add('show'); }
+        function closeToc() { document.getElementById('tocModal').classList.remove('show'); }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => console.log('Fullscreen not supported'));
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            switch(e.key) {
+                case 'ArrowRight': case ' ': e.preventDefault(); changeSlide(1); break;
+                case 'ArrowLeft': e.preventDefault(); changeSlide(-1); break;
+                case 'Home': e.preventDefault(); goToSlide(1); break;
+                case 'End': e.preventDefault(); goToSlide(totalSlides); break;
+                case 'f': case 'F': e.preventDefault(); toggleFullscreen(); break;
+                case 't': case 'T': e.preventDefault(); document.getElementById('tocModal').classList.contains('show') ? closeToc() : openToc(); break;
+                case 'Escape': closeToc(); break;
+            }
+        });
+
+        document.getElementById('tocModal').addEventListener('click', function(e) {
+            if (e.target === this) closeToc();
+        });
+
+        function checkQuiz(element, isCorrect) {
+            const container = element.closest('.quiz-container');
+            container.querySelectorAll('.quiz-option').forEach(opt => opt.classList.remove('correct', 'incorrect'));
+            element.classList.add(isCorrect ? 'correct' : 'incorrect');
+            if (isCorrect) container.querySelector('.quiz-feedback').classList.add('show');
+        }
+
+        function toggleReveal(id) {
+            document.getElementById(id).classList.toggle('show');
+        }
+
+        function calculateLatency() {
+            const rtt = parseInt(document.getElementById('rttSlider').value);
+            document.getElementById('rttValue').textContent = rtt;
+            const totalRtt = 4; // DNS + TCP + TLS + HTTP
+            document.getElementById('latencyResult').textContent = (totalRtt * rtt) + ' ms (' + totalRtt + ' RTT)';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateSlide();
+            if (document.getElementById('rttSlider')) calculateLatency();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="ASE-CSIE Teaching Collective" name="author"/>
+<meta content="Revolvix" name="generator"/>
+<title>Week 5 – Network Layer: IP addressingv4/IPv6, CIDR, Subnetworks | Computer Networks</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;family=Source+Serif+4:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+    :root {
+      --primary: #0f172a;
+      --primary-light: #1e293b;
+      --secondary: #0ea5e9;
+      --secondary-dark: #0284c7;
+      --accent: #f59e0b;
+      --accent-warm: #ea580c;
+      --success: #10b981;
+      --success-dark: #059669;
+      --danger: #ef4444;
+      --purple: #8b5cf6;
+      --purple-dark: #7c3aed;
+      --bg-light: #f8fafc;
+      --bg-cool: #f0f9ff;
+      --bg-warm: #fffbeb;
+      --text-dark: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --font-heading: 'Source Serif 4', Georgia, serif;
+      --font-body: 'Inter', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', 'Consolas', monospace;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; font-family: var(--font-body); background: var(--bg-light); color: var(--text-dark); overflow: hidden; line-height: 1.6; }
+    body::before { content: ''; position: fixed; inset: 0; background: radial-gradient(ellipse at 15% 15%, rgba(14,165,233,0.04) 0%, transparent 50%), radial-gradient(ellipse at 85% 85%, rgba(139,92,246,0.03) 0%, transparent 50%); pointer-events: none; z-index: 0; }
+    .progress-bar { position: fixed; top: 0; left: 0; height: 4px; background: linear-gradient(90deg, var(--secondary), var(--purple)); width: 0%; z-index: 1000; transition: width 0.3s ease; }
+    .course-id { position: fixed; top: 1rem; left: 1.5rem; font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); z-index: 100; }
+    .slide-counter { position: fixed; top: 1rem; right: 1.5rem; font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-muted); background: white; padding: 0.35rem 0.75rem; border-radius: 8px; border: 1px solid var(--border); z-index: 100; }
+    .presentation { position: relative; z-index: 1; height: 100vh; overflow: hidden; }
+    .slide { display: none; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; padding: 4rem 6rem 5rem; animation: slideIn 0.45s cubic-bezier(0.4,0,0.2,1); }
+    .slide.active { display: flex; }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .slide-content { max-width: 1100px; width: 100%; animation: fadeUp 0.6s cubic-bezier(0.4,0,0.2,1); }
+    h1 { font-family: var(--font-heading); font-size: 3.25rem; font-weight: 700; color: var(--primary); margin-bottom: 1.5rem; line-height: 1.15; }
+    h1.gradient-text { background: linear-gradient(135deg, var(--secondary) 0%, var(--purple) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    h2 { font-family: var(--font-heading); font-size: 2.25rem; font-weight: 600; color: var(--primary); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; }
+    h2::before { content: ''; display: inline-block; width: 5px; height: 2rem; background: linear-gradient(180deg, var(--secondary), var(--purple)); border-radius: 3px; }
+    h3 { font-family: var(--font-heading); font-size: 1.4rem; font-weight: 600; color: var(--primary-light); margin-bottom: 0.85rem; margin-top: 1.25rem; }
+    h4 { font-family: var(--font-body); font-size: 1.15rem; font-weight: 600; color: var(--primary); margin-bottom: 0.5rem; }
+    p { font-size: 1.2rem; line-height: 1.75; color: var(--text-dark); margin-bottom: 0.85rem; }
+    .lead { font-size: 1.35rem; color: var(--primary-light); font-weight: 400; }
+    .subtitle { font-size: 1.5rem; color: var(--text-muted); margin-bottom: 1rem; }
+    .meta { font-size: 1rem; color: var(--text-muted); }
+    ul, ol { list-style: none; margin: 1rem 0; }
+    li { position: relative; padding-left: 1.75rem; margin-bottom: 0.75rem; font-size: 1.15rem; color: var(--text-dark); line-height: 1.65; }
+    ul li::before { content: '▸'; position: absolute; left: 0; color: var(--secondary); font-weight: bold; }
+    ol { counter-reset: item; }
+    ol li::before { content: counter(item); counter-increment: item; position: absolute; left: 0; color: var(--secondary); font-weight: 700; font-size: 1rem; }
+    .highlight { color: var(--secondary); font-weight: 600; }
+    .warn { color: var(--accent); font-weight: 500; }
+    .danger { color: var(--danger); font-weight: 500; }
+    .success { color: var(--success); font-weight: 500; }
+    .code { font-family: var(--font-mono); background: var(--bg-cool); padding: 0.15rem 0.5rem; border-radius: 6px; font-size: 0.95em; color: var(--secondary-dark); border: 1px solid var(--border); }
+    .code-block { font-family: var(--font-mono); background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); padding: 1.5rem 1.75rem; border-radius: 16px; font-size: 1.05rem; line-height: 1.7; color: #e2e8f0; margin: 1.25rem 0; overflow-x: auto; position: relative; box-shadow: 0 10px 25px -5px rgba(15,23,42,0.15); }
+    .code-block::before { content: attr(data-lang); position: absolute; top: 0.6rem; right: 1rem; font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
+    .code-block .comment { color: #64748b; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #4ade80; }
+    .code-block .number { color: #fbbf24; }
+    .code-block .function { color: #38bdf8; }
+    .code-block .builtin { color: #f472b6; }
+    .table-container { margin: 1.5rem 0; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.08); border: 1px solid var(--border); }
+    table { width: 100%; border-collapse: collapse; font-size: 1.05rem; background: white; }
+    th { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); color: white; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.05em; padding: 1rem 1.25rem; text-align: left; }
+    th:first-child { border-radius: 16px 0 0 0; }
+    th:last-child { border-radius: 0 16px 0 0; }
+    td { padding: 0.9rem 1.25rem; border-bottom: 1px solid var(--border); color: var(--text-dark); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--bg-cool); }
+    .card { background: white; border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; margin: 0.75rem 0; transition: all 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+    .card:hover { transform: translateY(-6px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; margin: 1.5rem 0; }
+    .highlight-box { background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-dark) 100%); color: white; padding: 1.5rem 1.75rem; border-radius: 16px; margin: 1.5rem 0; box-shadow: 0 10px 25px -5px rgba(14,165,233,0.3); }
+    .highlight-box h4 { color: white; }
+    .highlight-box p { color: rgba(255,255,255,0.95); }
+    .definition-box { background: linear-gradient(135deg, rgba(16,185,129,0.08) 0%, rgba(16,185,129,0.04) 100%); border-left: 4px solid var(--success); padding: 1.25rem 1.5rem; border-radius: 0 16px 16px 0; margin: 1.25rem 0; }
+    .definition-box .def-term { font-weight: 700; color: var(--success-dark); font-size: 1.1rem; margin-bottom: 0.5rem; }
+    .story-box { background: linear-gradient(135deg, rgba(139,92,246,0.08) 0%, rgba(139,92,246,0.04) 100%); border-left: 4px solid var(--purple); padding: 1.25rem 1.5rem; border-radius: 0 16px 16px 0; margin: 1.25rem 0; }
+    .story-box .story-title { font-weight: 600; color: var(--purple-dark); font-size: 1rem; margin-bottom: 0.5rem; }
+    .warning-box { background: linear-gradient(135deg, rgba(245,158,11,0.1) 0%, rgba(245,158,11,0.04) 100%); border-left: 4px solid var(--accent); padding: 1.25rem 1.5rem; border-radius: 0 16px 16px 0; margin: 1.25rem 0; }
+    .warning-box .warning-title { font-weight: 600; color: var(--accent-warm); font-size: 1rem; margin-bottom: 0.5rem; }
+    .insight-box { background: linear-gradient(135deg, rgba(239,68,68,0.08) 0%, rgba(239,68,68,0.04) 100%); border-left: 4px solid var(--danger); padding: 1.25rem 1.5rem; border-radius: 0 16px 16px 0; margin: 1.25rem 0; }
+    .insight-box .insight-title { font-weight: 600; color: var(--danger); font-size: 1rem; margin-bottom: 0.5rem; }
+    .two-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; margin: 1rem 0; }
+    .three-columns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin: 1rem 0; }
+    .diagram-container { background: white; border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; margin: 1.5rem 0; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+    .diagram-container svg { max-width: 100%; height: auto; }
+    .header-structure { display: flex; flex-wrap: wrap; border: 2px solid var(--primary-light); border-radius: 12px; overflow: hidden; margin: 1.25rem 0; background: white; }
+    .header-field { display: flex; flex-direction: column; align-items: center; padding: 0.75rem; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); background: linear-gradient(180deg, var(--bg-light) 0%, white 100%); flex: 1; min-width: 80px; }
+    .header-field:last-child { border-right: none; }
+    .header-field .field-name { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .header-field .field-value { font-family: var(--font-mono); font-weight: 600; font-size: 0.95rem; color: var(--primary); }
+    .header-field .field-bits { font-size: 0.65rem; color: var(--secondary); font-weight: 500; }
+    .span-2 { flex: 2; min-width: 140px; }
+    .span-4 { flex: 4; min-width: 260px; }
+    .quiz-container { background: white; border: 1px solid var(--border); border-radius: 20px; padding: 2rem; margin: 1.5rem 0; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.08); }
+    .quiz-question { font-size: 1.25rem; font-weight: 500; color: var(--primary); margin-bottom: 1.5rem; line-height: 1.5; }
+    .quiz-options { display: grid; gap: 0.75rem; }
+    .quiz-option { padding: 1rem 1.5rem; background: var(--bg-light); border: 2px solid var(--border); border-radius: 12px; cursor: pointer; transition: all 0.25s cubic-bezier(0.4,0,0.2,1); font-size: 1.05rem; color: var(--text-dark); }
+    .quiz-option:hover { border-color: var(--secondary); background: var(--bg-cool); transform: translateX(6px); }
+    .quiz-option.correct { border-color: var(--success); background: rgba(16,185,129,0.15); color: var(--success-dark); }
+    .quiz-option.wrong { border-color: var(--danger); background: rgba(239,68,68,0.15); color: var(--danger); }
+    .quiz-feedback { margin-top: 1rem; padding: 1rem 1.25rem; border-radius: 10px; display: none; font-size: 1.05rem; font-weight: 500; }
+    .quiz-feedback.show { display: block; }
+    .quiz-feedback.correct { background: rgba(16,185,129,0.15); color: var(--success-dark); }
+    .quiz-feedback.wrong { background: rgba(239,68,68,0.15); color: var(--danger); }
+    .reveal-container { background: white; border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; margin: 1rem 0; }
+    .reveal-question { font-size: 1.15rem; font-weight: 500; color: var(--accent-warm); margin-bottom: 1rem; }
+    .reveal-content { display: none; padding: 1rem; background: var(--bg-light); border-radius: 10px; margin-top: 1rem; color: var(--text-dark); }
+    .reveal-content.show { display: block; }
+    .reveal-btn { padding: 0.6rem 1.5rem; background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-dark) 100%); border: none; border-radius: 10px; color: white; font-weight: 600; cursor: pointer; font-size: 0.95rem; transition: all 0.25s cubic-bezier(0.4,0,0.2,1); }
+    .reveal-btn:hover { transform: scale(1.08); box-shadow: 0 10px 25px -5px rgba(14,165,233,0.4); }
+    .interactive-panel { background: white; border: 1px solid var(--border); border-radius: 20px; padding: 2rem; margin: 1.5rem 0; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.08); }
+    .slider-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .slider-label span { font-size: 1.15rem; color: var(--text-dark); }
+    .slider-value { font-family: var(--font-mono); font-size: 2rem; font-weight: 700; color: var(--secondary); }
+    input[type="range"] { width: 100%; height: 10px; background: linear-gradient(90deg, var(--bg-cool), var(--border)); border-radius: 5px; outline: none; -webkit-appearance: none; }
+    input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 28px; height: 28px; background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-dark) 100%); border-radius: 50%; cursor: pointer; box-shadow: 0 4px 12px rgba(14,165,233,0.4); transition: transform 0.2s; }
+    input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+    .result-display { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1.5rem; }
+    .result-item { text-align: center; padding: 1.25rem; background: var(--bg-light); border-radius: 12px; border: 1px solid var(--border); }
+    .result-label { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .result-value { font-family: var(--font-mono); font-size: 1.35rem; font-weight: 600; color: var(--primary); }
+    .title-slide { text-align: center; }
+    .title-slide h1 { font-size: 3.5rem; margin-bottom: 1rem; }
+    .nav { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 1rem; background: white; padding: 0.75rem 1.25rem; border-radius: 50px; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.15); border: 1px solid var(--border); z-index: 100; }
+    .nav-btn { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: var(--bg-light); border: 1px solid var(--border); border-radius: 50%; cursor: pointer; font-size: 1.25rem; color: var(--primary); transition: all 0.25s cubic-bezier(0.4,0,0.2,1); }
+    .nav-btn:hover:not(:disabled) { background: var(--secondary); color: white; border-color: var(--secondary); transform: scale(1.12); }
+    .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .nav-text-btn { padding: 0.5rem 1rem; background: transparent; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 500; color: var(--text-muted); transition: all 0.2s; }
+    .nav-text-btn:hover { background: var(--bg-light); color: var(--primary); }
+    .footer { position: fixed; bottom: 0.75rem; left: 1.5rem; font-size: 0.7rem; color: var(--text-muted); opacity: 0.5; z-index: 50; }
+    .toc-modal { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.7); backdrop-filter: blur(8px); z-index: 2000; justify-content: center; align-items: center; padding: 2rem; }
+    .toc-modal.show { display: flex; }
+    .toc-content { background: white; border-radius: 24px; padding: 2.5rem; max-width: 700px; width: 100%; max-height: 80vh; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); position: relative; }
+    .toc-content h3 { font-family: var(--font-heading); font-size: 1.5rem; color: var(--primary); margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 2px solid var(--border); }
+    .toc-section { margin-bottom: 1.5rem; }
+    .toc-section-title { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem; }
+    .toc-item { padding: 0.6rem 1rem; cursor: pointer; border-radius: 8px; transition: all 0.2s; font-size: 1rem; color: var(--text-dark); }
+    .toc-item:hover { background: var(--bg-cool); color: var(--secondary-dark); padding-left: 1.5rem; }
+    .toc-close { position: absolute; top: 1.5rem; right: 1.5rem; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: var(--bg-light); border: none; border-radius: 50%; cursor: pointer; font-size: 1.25rem; color: var(--text-muted); }
+    .toc-close:hover { background: var(--danger); color: white; }
+    @media (max-width: 1200px) { .slide { padding: 3rem 4rem 4.5rem; } h1 { font-size: 2.75rem; } h2 { font-size: 2rem; } }
+    @media (max-width: 768px) { .slide { padding: 2.5rem 2rem 4rem; } h1 { font-size: 2.25rem; } h2 { font-size: 1.75rem; } .two-columns, .three-columns { grid-template-columns: 1fr; } .code-block { font-size: 0.9rem; } }
+    @media print { .nav, .progress-bar, .toc-modal, .footer, .course-id, .slide-counter { display: none !important; } .slide { display: block !important; page-break-after: always; } }
+  </style>
+</head>
+<body>
+<div aria-valuemin="1" class="progress-bar" id="progress" role="progressbar"></div>
+<div class="course-id">ASE-CSIE • Computer Networks</div>
+<div aria-live="polite" class="slide-counter"><span id="currentSlide">1</span> / <span id="totalSlides">50</span></div>
+<div class="presentation">
+<!-- SLIDE 1: Title -->
+<div class="slide active" data-slide="1">
+<div class="slide-content title-slide">
+<p class="subtitle">Week 5 • Computer Networks</p>
+<h1 class="gradient-text">Network Layer:<br/>IP addressingv4/IPv6</h1>
+<p class="subtitle">CIDR • Subnetworks FLSM and VLSM</p>
+<p class="meta" style="margin-top: 3rem;">Bucharest University of Economic Studies • CSIE Faculty<br/>Bachelor in Economic Informatics • Year 3 • Semester 2</p>
+<p class="meta" style="margin-top: 1.5rem; font-size: 0.9rem;">Duration: ~80 minutes • 50 slides</p>
+</div>
+</div>
+<!-- SLIDE 2: Historical Hook -->
+<div class="slide" data-slide="2">
+<div class="slide-content">
+<h2>A Day That Changed the Internet</h2>
+<div class="story-box">
+<div class="story-title">📜 3 Februarie 2011 — The Last /8 Block</div>
+<p>In January 2011, IANA allocated the final five /8 blocks of IPv4 address space to the Regional Internet Registries. After decades of growth, the pool of publicly routable IPv4 addresses was effectively exhausted.</p>
+</div>
+<p>Today's presentation explains <em>why</em> this happened and <em>how</em> engineers handled — and will continue to handle — this fundamental constraint of Internet architecture.</p>
+<p>Understanding IP addressing is not merely an academic curiosity: it is essential for configuring cloud infrastructure, debugging connectivity problems and designing scalable networks.</p>
+</div>
+</div>
+<!-- SLIDE 3: Learning Objectives -->
+<div class="slide" data-slide="3">
+<div class="slide-content">
+<h2>Learning Objectives</h2>
+<p class="lead">La finalul acestei sessions, veti fi capabili sa:</p>
+<div class="two-columns" style="margin-top: 1.5rem;">
+<div>
+<h3>Understanding &amp; Explain</h3>
+<ul>
+<li><strong>Identificati</strong> role Layer 3 in modelele OSI and TCP/IP</li>
+<li><strong>Differentiate</strong> between MAC addressing (L2) and IP addressing (L3)</li>
+<li><strong>Dewritesti</strong> IPv4 and IPv6 header structure</li>
+<li><strong>Explicati</strong> of ce addressinga on clase a became inoldta</li>
+</ul>
+</div>
+<div>
+<h3>Application &amp; Analysis</h3>
+<ul>
+<li><strong>Calculati</strong> address of network, broadcast and intervalul of hosts from CIDR</li>
+<li><strong>Aplicati</strong> tehnicile of subnets FLSM and VLSM</li>
+<li><strong>Configurati</strong> topologii with subnets multiple in Mininet</li>
+<li><strong>Proiectati</strong> scheme of addressing eficiente for organizatii</li>
+</ul>
+</div>
+</div>
+<div class="highlight-box" style="margin-top: 1.5rem;">
+<h4>Reference Starterkit</h4>
+<p>All hands-on exercises refer to the code from <span class="code" style="background: rgba(255,255,255,0.2); border: none;">WEEK5/python/exercises/</span></p>
+</div>
+</div>
+</div>
+<!-- SLIDE 4: Why It Matters -->
+<div class="slide" data-slide="4">
+<div class="slide-content">
+<h2>Why It Matters for Software Developers</h2>
+<div class="card-grid">
+<div class="card" style="border-left: 4px solid var(--secondary);">
+<h4>☁️ Cloud Architecture</h4>
+<p>AWS VPCs, Azure VNets, networks GCP — definiti subnetsle using notatia CIDR. Configurati wrong, and servicesle not vor putea comunica.</p>
+</div>
+<div class="card" style="border-left: 4px solid var(--purple);">
+<h4>🐳 Orchestrare Containere</h4>
+<p>Kubernetes pods receive IP addresses from CIDR blocks configured when the cluster is created. Understanding subnets helps prevent address exhaustion.</p>
+</div>
+<div class="card" style="border-left: 4px solid var(--success);">
+<h4>🔍 Debugging</h4>
+<p>„Network unreachable" vs „Connection refused" — diferenta const in if IP destination is rutabil from subthe network dumneavoastra.</p>
+</div>
+<div class="card" style="border-left: 4px solid var(--accent);">
+<h4>🔒 security</h4>
+<p>Firewall rules, security groups and access control lists specify permitted and denied traffic using CIDR blocks.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- SLIDE 5: Layer 3 in Context -->
+<div class="slide" data-slide="5">
+<div class="slide-content">
+<h2>Network Layer in Context</h2>
+<div class="diagram-container">
+<svg viewbox="0 0 800 280">
+<defs>
+<lineargradient id="l3grad" x1="0%" x2="100%" y1="0%" y2="0%">
+<stop offset="0%" style="stop-color:#0ea5e9"></stop>
+<stop offset="100%" style="stop-color:#8b5cf6"></stop>
+</lineargradient>
+</defs>
+<rect fill="#f8fafc" height="38" rx="8" stroke="#e2e8f0" width="600" x="100" y="20"></rect>
+<text fill="#64748b" font-size="13" x="120" y="44">Layer 7</text>
+<text fill="#64748b" font-size="13" text-anchor="middle" x="400" y="44">application (HTTP, DNS, SSH, FTP)</text>
+<rect fill="#f8fafc" height="38" rx="8" stroke="#e2e8f0" width="600" x="100" y="65"></rect>
+<text fill="#64748b" font-size="13" x="120" y="89">Layer 4</text>
+<text fill="#64748b" font-size="13" text-anchor="middle" x="400" y="89">Transport (TCP, UDP, SCTP)</text>
+<rect fill="url(#l3grad)" height="50" rx="8" width="600" x="100" y="110"></rect>
+<text fill="white" font-size="14" font-weight="700" x="120" y="140">Layer 3</text>
+<text fill="white" font-size="15" font-weight="600" text-anchor="middle" x="400" y="140">NETWORK — IP, ICMP, Protocols of routing</text>
+<rect fill="#f8fafc" height="38" rx="8" stroke="#e2e8f0" width="600" x="100" y="167"></rect>
+<text fill="#64748b" font-size="13" x="120" y="191">Layer 2</text>
+<text fill="#64748b" font-size="13" text-anchor="middle" x="400" y="191">Link layer of Date (Ethernet, Wi-Fi, addresses MAC)</text>
+<rect fill="#f8fafc" height="38" rx="8" stroke="#e2e8f0" width="600" x="100" y="212"></rect>
+<text fill="#64748b" font-size="13" x="120" y="236">Layer 1</text>
+<text fill="#64748b" font-size="13" text-anchor="middle" x="400" y="236">Physical (cables, where radio, signof)</text>
+</svg>
+</div>
+<div class="definition-box">
+<div class="def-term">the level 3 — Network Layer</div>
+<p style="margin: 0;">Responsabil for <strong>addressinga logica</strong> (addresses IP) and <strong>routing</strong> — determining path on which packageele il parcurg through networksle interconectate.</p>
+</div>
+</div>
+</div>
+<!-- SLIDE 6: MAC vs IP -->
+<div class="slide" data-slide="6">
+<div class="slide-content">
+<h2>addresses MAC vs addresses IP</h2>
+<div class="table-container">
+<table>
+<thead>
+<tr><th>Characteristic</th><th>MAC Address (the level 2)</th><th>Adres IP (the level 3)</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>length</strong></td><td>48 bits (6 bytes)</td><td>32 bits (IPv4) / 128 bits (IPv6)</td></tr>
+<tr><td><strong>Atribuire</strong></td><td>Inscris permanent of manufacturer</td><td>Configurabil — static or dinamic (DHCP)</td></tr>
+<tr><td><strong>Domeniu</strong></td><td>Local segment only (LAN)</td><td>End-to-end across the entire Internet</td></tr>
+<tr><td><strong>Ierarhie</strong></td><td>Plat — routing imposibila</td><td>Ierarhic — allows aggregation and routinga</td></tr>
+<tr><td><strong>Example</strong></td><td><span class="code">00:1A:2B:3C:4D:5E</span></td><td><span class="code">192.168.1.100</span></td></tr>
+</tbody>
+</table>
+</div>
+<div class="insight-box">
+<div class="insight-title">🔴 Critical Misconception</div>
+<p>Routerele <strong>rescriu</strong> MAC source and destination at each hop, in time ce addressesle IP raman constante of at source pan at destinatia finala.</p>
+</div>
+</div>
+</div>
+<!-- SLIDE 7: IPv4 Structure -->
+<div class="slide" data-slide="7">
+<div class="slide-content">
+<h2>IPv4 Address Structure</h2>
+<div class="definition-box">
+<div class="def-term">IPv4 Address</div>
+<p style="margin: 0;">A 32-bit number, typically expressed in <strong>dotted-decimal notation</strong>: four bytes (8 bits each) separated by periods.</p>
+</div>
+<div class="code-block" data-lang="binary">
+<span class="comment"># Example: 192.168.10.14</span>
+
+Decimal:    192      .  168      .  10       .  14
+Binary:     11000000 .  10101000 .  00001010 .  00001110
+            └────────────────────┘  └────────────────────┘
+               Network Portion          Host Portion
+</div>
+<p><strong>Each byte:</strong> ranges from 0 to 255 (2⁸ - 1 = 255)</p>
+<p><strong>Total address space:</strong> 2³² = 4,294,967,296 addresses (approximately 4.3 billion)</p>
+<div class="warning-box">
+<div class="warning-title">⚠️ Address Exhaustion</div>
+<p>With over 8 billion humans and tens of billions of IoT devices, 4.3 billion addresses are woefully insufficient.</p>
+</div>
+</div>
+</div>
+<!-- SLIDE 8: IPv4 Header -->
+<div class="slide" data-slide="8">
+<div class="slide-content">
+<h2>IPv4 Packet Header (20 bytes)</h2>
+<div class="header-structure" style="font-size: 0.9rem;">
+<div class="header-field"><span class="field-name">Version</span><span class="field-value">4</span><span class="field-bits">4 bits</span></div>
+<div class="header-field"><span class="field-name">IHL</span><span class="field-value">5-15</span><span class="field-bits">4 bits</span></div>
+<div class="header-field"><span class="field-name">ToS/DSCP</span><span class="field-value">QoS</span><span class="field-bits">8 bits</span></div>
+<div class="header-field span-2"><span class="field-name">Total Length</span><span class="field-value">20-65535</span><span class="field-bits">16 bits</span></div>
+</div>
+<div class="header-structure" style="font-size: 0.9rem;">
+<div class="header-field"><span class="field-name">TTL</span><span class="field-value">1-255</span><span class="field-bits">8 bits</span></div>
+<div class="header-field"><span class="field-name">Protocol</span><span class="field-value">TCP=6</span><span class="field-bits">8 bits</span></div>
+<div class="header-field span-2"><span class="field-name">Header Checksum</span><span class="field-value">Integrity</span><span class="field-bits">16 bits</span></div>
+</div>
+<div class="header-structure" style="font-size: 0.9rem;">
+<div class="header-field span-4"><span class="field-name">Source IP Address</span><span class="field-value">192.168.10.14</span><span class="field-bits">32 bits</span></div>
+</div>
+<div class="header-structure" style="font-size: 0.9rem;">
+<div class="header-field span-4"><span class="field-name">Destination IP Address</span><span class="field-value">10.0.5.100</span><span class="field-bits">32 bits</span></div>
+</div>
+<p class="meta" style="margin-top: 1rem;">RFC 791 (September 1981) — still in use over 40 years later!</p>
+</div>
+</div>
+<!-- SLIDE 9: Historical Classes -->
+<div class="slide" data-slide="9">
+<div class="slide-content">
+<h2>Historical Address Classes (Deprecated)</h2>
+<div class="table-container">
+<table>
+<thead><tr><th>Class</th><th>First Octet Range</th><th>Default Prefix</th><th>Networks × Hosts</th></tr></thead>
+<tbody>
+<tr><td><strong>A</strong></td><td>1 – 126</td><td>/8</td><td>128 networks × 16,777,214 hosts</td></tr>
+<tr><td><strong>B</strong></td><td>128 – 191</td><td>/16</td><td>16,384 networks × 65,534 hosts</td></tr>
+<tr><td><strong>C</strong></td><td>192 – 223</td><td>/24</td><td>2,097,152 networks × 254 hosts</td></tr>
+<tr><td><strong>D</strong></td><td>224 – 239</td><td>—</td><td>Multicast groups</td></tr>
+<tr><td><strong>E</strong></td><td>240 – 255</td><td>—</td><td>Reserved / Experimental</td></tr>
+</tbody>
+</table>
+</div>
+<div class="insight-box">
+<div class="insight-title">🔴 De Ce Au Esuat Clasele</div>
+<p>O alocare of Clas B oferea of a organizatii 65.534 hosts — often much more much decat era necessary, risipind addresses. O Clas C with 254 hosts era prea small for multi. Aceast inflexibilitate a dus at adoption CIDR in 1993 (RFC 1519).</p>
+</div>
+</div>
+</div>
+<!-- SLIDE 10: CIDR Introduction -->
+<div class="slide" data-slide="10">
+<div class="slide-content">
+<h2>CIDR: routing Inter-Domenii without Clase</h2>
+<div class="definition-box">
+<div class="def-term">CIDR (RFC 4632)</div>
+<p style="margin: 0;">A method of allocating IP addresses that abandons fixed class boundaries, allowing networks of <strong>any size</strong> to be defined using a variable-length prefix.</p>
+</div>
+<div class="two-columns" style="margin-top: 1.5rem;">
+<div>
+<h3>Notation Format</h3>
+<p><span class="code">IP_ADDRESS/PREFIX_LENGTH</span></p>
+<p>Examples:</p>
+<ul>
+<li><span class="code">192.168.10.0/24</span></li>
+<li><span class="code">10.0.0.0/8</span></li>
+<li><span class="code">172.16.50.0/26</span></li>
+</ul>
+</div>
+<div>
+<h3>Ce Inseamn Prefixul</h3>
+<p>Numarul of after slash indic cati bits identifies <strong>portiunea of network</strong>.</p>
+<p>Remaining bits = <strong>host portion</strong></p>
+<p>For a /24: 24 network bits, 8 host bits</p>
+</div>
+</div>
+</div>
+</div>
+<!-- SLIDE 11: Subnet Mask -->
+<div class="slide" data-slide="11">
+<div class="slide-content">
+<h2>CIDR Prefix and Subnet Mask</h2>
+<p>the length prefix corespunde direct of a <strong>masti of subnetwork</strong> — o valoare on 32 of bits with 1 consecutivi urmati of 0.</p>
+<div class="code-block" data-lang="binary">
+<span class="comment"># /24 prefix example</span>
+Prefix:     /24 (24 network bits, 8 host bits)
+Mask (bin): <span class="keyword">11111111.11111111.11111111</span>.<span class="string">00000000</span>
+            └────────── 24 ones ─────────┘└─ 8 zeros ─┘
+Mask (dec): 255.255.255.0
+
+<span class="comment"># /26 prefix example</span>
+Prefix:     /26 (26 network bits, 6 host bits)
+Mask (bin): <span class="keyword">11111111.11111111.11111111.11</span><span class="string">000000</span>
+Mask (dec): 255.255.255.192
+</div>
+<div class="highlight-box">
+<h4>Key Insight</h4>
+<p>Subnet Mask actioneaz ca un <strong>filtru bit with bit</strong>: aplicati AND between IP and netmask for a extrage address of network. Inversul (mask wildcard) extrage portiunea of host.</p>
+</div>
+</div>
+</div>
+<!-- SLIDE 12: Calculating Parameters -->
+<div class="slide" data-slide="12">
+<div class="slide-content">
+<h2>Calculating Parameters of Network</h2>
+<p>Given <span class="code">192.168.10.14/26</span>, we calculate:</p>
+<div class="table-container">
+<table>
+<thead><tr><th>Parameter</th><th>Formula / Method</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td><strong>Prefix Length</strong></td><td>Given in notation</td><td>/26</td></tr>
+<tr><td><strong>Subnet Mask</strong></td><td>26 bits set to 1</td><td>255.255.255.192</td></tr>
+<tr><td><strong>Host Bits</strong></td><td>32 − 26</td><td>6 bits</td></tr>
+<tr><td><strong>Total Addresses</strong></td><td>2<sup>host bits</sup> = 2⁶</td><td>64</td></tr>
+<tr><td><strong>Usable Hosts</strong></td><td>2<sup>host bits</sup> − 2</td><td><span class="highlight">62</span></td></tr>
+<tr><td><strong>Network Address</strong></td><td>IP AND mask</td><td>192.168.10.0</td></tr>
+<tr><td><strong>Broadcast Address</strong></td><td>Network OR wildcard</td><td>192.168.10.63</td></tr>
+<tr><td><strong>First/Last Host</strong></td><td>Network+1 / Broadcast-1</td><td>.1 – .62</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- SLIDE 13: De Ce -2 -->
+<div class="slide" data-slide="13">
+<div class="slide-content">
+<h2>De Ce 2<sup>n</sup> − 2 for Gazde Utilizabile?</h2>
+<p class="lead">Two addresses in every subnet are reserved and cannot be assigned to hosts.</p>
+<div class="two-columns" style="margin-top: 1.5rem;">
+<div class="card" style="border-left: 4px solid var(--danger);">
+<h4>Network Address (All Host Bits = 0)</h4>
+<p>identifies the subnet itself. Used in routing tables to refer to the entire network.</p>
+<p><span class="code">192.168.10.0</span> for /26</p>
+</div>
+<div class="card" style="border-left: 4px solid var(--accent);">
+<h4>Broadcast Address (All Host Bits = 1)</h4>
+<p>Pachetele trimise aici are livrate <em>tuturor</em> hosts from subnetwork.</p>
+<p><span class="code">192.168.10.63</span> for /26</p>
+</div>
+</div>
+<div class="warning-box" style="margin-top: 1.5rem;">
+<div class="warning-title">⚠️ Exception: /31 and /32</div>
+<p>For point-to-point links, <strong>/31</strong> (RFC 3021) allows 2 usable addresses. A <strong>/32</strong> identifies a single host.</p>
+</div>
+</div>
+</div>
+<!-- SLIDE 14: Quiz 1 -->
+<div class="slide" data-slide="14">
+<div class="slide-content">
+<h2>Knowledge Check: Gazde Utilizabile</h2>
+<div class="quiz-container" id="quiz1">
+<div class="quiz-question">Cate <strong>hosts utilizabile</strong> can be adresate in the network <span class="code">10.0.0.0/28</span>?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkQuiz(this, 'quiz1', false)">16 hosts</div>
+<div class="quiz-option" onclick="checkQuiz(this, 'quiz1', true)">14 hosts</div>
+<div class="quiz-option" onclick="checkQuiz(this, 'quiz1', false)">30 hosts</div>
+<div class="quiz-option" onclick="checkQuiz(this, 'quiz1', false)">15 hosts</div>
+</div>
+<div class="quiz-feedback" id="quiz1-feedback"></div>
+</div>
+<div class="reveal-container" style="margin-top: 1rem;">
+<div class="reveal-question">💡 Need a hint?</div>
+<button class="reveal-btn" onclick="toggleReveal('hint1')">Afiseaz Calculul</button>
+<div class="reveal-content" id="hint1">
+<p><strong>/28</strong> means host bits = 32 − 28 = <strong>4 bits</strong></p>
+<p>Total addresses = 2⁴ = 16</p>
+<p>Usable hosts = 16 − 2 = <strong>14</strong></p>
+</div>
+</div>
+</div>
+</div>
+<!-- SLIDE 15: Interactive Calculator -->
+<div class="slide" data-slide="15">
+<div class="slide-content">
+<h2>Interactive: Explore CIDR Prefixes</h2>
+<div class="interactive-panel">
+<div class="slider-label">
+<span>CIDR Prefix Length:</span>
+<span class="slider-value" id="prefix-value">/24</span>
+</div>
+<input max="30" min="8" oninput="updataPrefix(this.value)" type="range" value="24"/>
+<div class="result-display">
+<div class="result-item"><div class="result-label">addresses Totof</div><div class="result-value" id="total-addr">256</div></div>
+<div class="result-item"><div class="result-label">Gazde Utilizabile</div><div class="result-value" id="valid-hosts">254</div></div>
+<div class="result-item"><div class="result-label">Netmask of Subnetwork</div><div class="result-value" id="mask">255.255.255.0</div></div>
+</div>
+</div>
+<p style="text-align: center; color: var(--text-muted); margin-top: 1rem;">Trageti cursorul for a vedea how lungimile prefixes afecteaz hosts availablee.</p>
+</div>
+</div>
+<!-- SLIDE 16: Common Prefixes -->
+<div class="slide" data-slide="16">
+<div class="slide-content">
+<h2>Reference Prefixe CIDR Comune</h2>
+<div class="table-container">
+<table>
+<thead><tr><th>Prefix</th><th>Subnet Mask</th><th>Usable Hosts</th><th>Typical Use</th></tr></thead>
+<tbody>
+<tr><td><span class="code">/8</span></td><td>255.0.0.0</td><td>16,777,214</td><td>ISPs, legacy Class A</td></tr>
+<tr><td><span class="code">/16</span></td><td>255.255.0.0</td><td>65,534</td><td>Large enterprises</td></tr>
+<tr><td><span class="code">/24</span></td><td>255.255.255.0</td><td>254</td><td>Typical office LAN</td></tr>
+<tr><td><span class="code">/25</span></td><td>255.255.255.128</td><td>126</td><td>Department subnet</td></tr>
+<tr><td><span class="code">/26</span></td><td>255.255.255.192</td><td>62</td><td>Small office</td></tr>
+<tr><td><span class="code">/27</span></td><td>255.255.255.224</td><td>30</td><td>Lab / VLAN</td></tr>
+<tr><td><span class="code">/28</span></td><td>255.255.255.240</td><td>14</td><td>Small VLAN</td></tr>
+<tr><td><span class="code">/30</span></td><td>255.255.255.252</td><td>2</td><td>Link punct-la-punct</td></tr>
+</tbody>
+</table>
+</div>
+<p class="meta">Formula: Usable Hosts = 2<sup>(32−prefix)</sup> − 2</p>
+</div>
+</div>
+<!-- SLIDE 17: Private Addresses -->
+<div class="slide" data-slide="17">
+<div class="slide-content">
+<h2>Private vs Public Addresses (RFC 1918)</h2>
+<p class="lead">Certain address ranges are reserved for private networks and are <strong>not routable</strong> on the public Internet.</p>
+<div class="table-container">
+<table>
+<thead><tr><th>Range</th><th>CIDR Block</th><th>Addresses</th><th>Common Usage</th></tr></thead>
+<tbody>
+<tr><td><strong>10.0.0.0 – 10.255.255.255</strong></td><td><span class="code">10.0.0.0/8</span></td><td>16.7 million</td><td>Large enterprises, AWS VPCs</td></tr>
+<tr><td><strong>172.16.0.0 – 172.31.255.255</strong></td><td><span class="code">172.16.0.0/12</span></td><td>1 million</td><td>Corptimete networks, Docker</td></tr>
+<tr><td><strong>192.168.0.0 – 192.168.255.255</strong></td><td><span class="code">192.168.0.0/16</span></td><td>65,536</td><td>Home networks, small offices</td></tr>
+</tbody>
+</table>
+</div>
+<div class="highlight-box" style="margin-top: 1rem;">
+<h4>Why Private Addresses Matter</h4>
+<p>They enable organisations to build arbitrarily large internal networks without consuming public IP space. NAT bridges private networks to the public Internet.</p>
+</div>
+</div>
+</div>
+<!-- SLIDE 18: Subnetting Introduction -->
+<div class="slide" data-slide="18">
+<div class="slide-content">
+<h2>Subnetting: Dividing Networks</h2>
+<div class="definition-box">
+<div class="def-term">Subnetworks</div>
+<p style="margin: 0;">The practice of dividing a single network into smaller, logically distinct subnets. This is achieved by "borrowing" bits from the host portion to extend the network prefix.</p>
+</div>
+<div class="two-columns" style="margin-top: 1.5rem;">
+<div>
+<h3>Benefits of Subnetting</h3>
+<ul>
+<li><strong>Traffic isolation:</strong> Smaller broadcast domains</li>
+<li><strong>Security:</strong> Departments can be separated</li>
+<li><strong>Address efficiency:</strong> Allocate only what's needed</li>
+<li><strong>Simplified management:</strong> Logical organisation</li>
+</ul>
+</div>
+<div>
+<h3>Two Approaches</h3>
+<ul>
+<li><strong>FLSM:</strong> Fixed-Length Subnet Masking — all subnets equal size</li>
+<li><strong>VLSM:</strong> Variable-Length Subnet Masking — subnets of different sizes</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<!-- SLIDE 19: FLSM Concept -->
+<div class="slide" data-slide="19">
+<div class="slide-content">
+<h2>FLSM: Netmask of Subnetwork with length Fixa</h2>
+<p class="lead">All subnetsle receive un <strong>numar egal</strong> of addresses of host.</p>
+<div class="diagram-container">
+<svg viewbox="0 0 800 180">
+<rect fill="var(--bg-cool)" height="45" rx="8" stroke="var(--secondary)" stroke-width="2" width="700" x="50" y="20"></rect>
+<text fill="var(--primary)" font-size="13" font-weight="600" text-anchor="middle" x="400" y="48">192.168.100.0/24 (256 addresses)</text>
+<path d="M400 70 L400 95" marker-end="url(#arrow)" stroke="var(--text-muted)" stroke-width="2"></path>
+<text fill="var(--text-muted)" font-size="11" x="430" y="85">FLSM /26</text>
+<rect fill="rgba(16,185,129,0.15)" height="45" rx="6" stroke="var(--success)" width="165" x="50" y="105"></rect>
+<text fill="var(--success-dark)" font-size="11" font-weight="500" text-anchor="middle" x="132" y="130">.0/26 (62 hosts)</text>
+<rect fill="rgba(16,185,129,0.15)" height="45" rx="6" stroke="var(--success)" width="165" x="225" y="105"></rect>
+<text fill="var(--success-dark)" font-size="11" font-weight="500" text-anchor="middle" x="307" y="130">.64/26 (62 hosts)</text>
+<rect fill="rgba(16,185,129,0.15)" height="45" rx="6" stroke="var(--success)" width="165" x="400" y="105"></rect>
+<text fill="var(--success-dark)" font-size="11" font-weight="500" text-anchor="middle" x="482" y="130">.128/26 (62 hosts)</text>
+<rect fill="rgba(16,185,129,0.15)" height="45" rx="6" stroke="var(--success)" width="165" x="575" y="105"></rect>
+<text fill="var(--success-dark)" font-size="11" font-weight="500" text-anchor="middle" x="657" y="130">.192/26 (62 hosts)</text>
+<defs><marker id="arrow" markerheight="7" markerwidth="10" orient="auto" refx="9" refy="3.5"><polygon fill="var(--text-muted)" points="0 0, 10 3.5, 0 7"></polygon></marker></defs>
+</svg>
+</div>
+<div class="definition-box">
+<div class="def-term">Calcul FLSM</div>
+<p style="margin: 0;">for a imparti in <em>n</em> subnets: imprumutati ⌈log₂(n)⌉ bits. Prefix new = prefix old + bits imprumutati.</p>
+</div>
+</div>
+</div>
+<!-- SLIDE 20: FLSM Example -->
+<div class="slide" data-slide="20">
+<div class="slide-content">
+<h2>Example FLSM: Impartirea /24 in 4 Subnetworks</h2>
+<div class="code-block" data-lang="python">
+<span class="keyword">import</span> ipaddress
+
+network = ipaddress.ip_network(<span class="string">'192.168.100.0/24'</span>)
+subnets = <span class="builtin">list</span>(network.subnets(prefixlen_diff=<span class="number">2</span>))  <span class="comment"># +2 bits = 4 subnets</span>
+<span class="keyword">for</span> i, subnet <span class="keyword">in</span> <span class="builtin">enumerate</span>(subnets):
+    <span class="builtin">print</span>(<span class="string">f"Subnet {i+1}: {subnet}"</span>)
+    <span class="builtin">print</span>(<span class="string">f"  Range: {subnet.network_address+1} - {subnet.broadcast_address-1}"</span>)
+</div>
+<div class="table-container" style="margin-top: 1rem;">
+<table>
+<thead><tr><th>Subnetwork</th><th>Adres of Network</th><th>Broadcast</th><th>Interval Gazde</th><th>Utilizabile</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>192.168.100.0/26</td><td>.63</td><td>.1 – .62</td><td>62</td></tr>
+<tr><td>2</td><td>192.168.100.64/26</td><td>.127</td><td>.65 – .126</td><td>62</td></tr>
+<tr><td>3</td><td>192.168.100.128/26</td><td>.191</td><td>.129 – .190</td><td>62</td></tr>
+<tr><td>4</td><td>192.168.100.192/26</td><td>.255</td><td>.193 – .254</td><td>62</td></tr>
+</tbody>
+</table>
+</div>
+<p class="meta">Starterkit: <span class="code">python3 python/exercises/ex_5_01_cidr_flsm.py flsm 192.168.100.0/24 4</span></p>
+</div>
+</div>
+<!-- SLIDE 21: VLSM Concept -->
+<div class="slide" data-slide="21">
+<div class="slide-content">
+<h2>VLSM: Netmask of Subnetwork with length Variabila</h2>
+<div class="definition-box">
+<div class="def-term">VLSM</div>
+<p style="margin: 0;">O tehnic of subnets which aloc subnets of <strong>dimensiuni different</strong> in function of cerintele reof. Groups more large receive subnets more large; groups more small receive subnets more small.</p>
+</div>
+<div class="diagram-container" style="margin-top: 1rem;">
+<svg viewbox="0 0 800 150">
+<rect fill="var(--bg-cool)" height="35" rx="8" stroke="var(--secondary)" stroke-width="2" width="700" x="50" y="15"></rect>
+<text fill="var(--primary)" font-size="12" font-weight="600" text-anchor="middle" x="400" y="38">172.16.0.0/24 (256 addresses)</text>
+<path d="M400 55 L400 70" stroke="var(--text-muted)" stroke-width="2"></path>
+<rect fill="rgba(139,92,246,0.15)" height="40" rx="6" stroke="var(--purple)" width="280" x="50" y="80"></rect>
+<text fill="var(--purple-dark)" font-size="11" font-weight="500" text-anchor="middle" x="190" y="105">.0/26 — 62 hosts (HR dept)</text>
+<rect fill="rgba(14,165,233,0.15)" height="40" rx="6" stroke="var(--secondary)" width="140" x="340" y="80"></rect>
+<text fill="var(--secondary-dark)" font-size="11" font-weight="500" text-anchor="middle" x="410" y="105">.64/27 — 30 hosts</text>
+<rect fill="rgba(16,185,129,0.15)" height="40" rx="6" stroke="var(--success)" width="70" x="490" y="80"></rect>
+<text fill="var(--success-dark)" font-size="10" font-weight="500" text-anchor="middle" x="525" y="105">.96/28</text>
+<rect fill="rgba(245,158,11,0.15)" height="40" rx="6" stroke="var(--accent)" width="35" x="570" y="80"></rect>
+<text fill="var(--accent-warm)" font-size="9" font-weight="500" text-anchor="middle" x="587" y="105">/30</text>
+<rect fill="rgba(100,116,139,0.1)" height="40" rx="6" stroke="var(--text-muted)" stroke-dasharray="4" width="135" x="615" y="80"></rect>
+<text fill="var(--text-muted)" font-size="10" text-anchor="middle" x="682" y="105">Nealocat</text>
+</svg>
+</div>
+<div class="highlight-box" style="margin-top: 1rem;">
+<h4>Algoritmul VLSM</h4>
+<p>1. Sortati cerintele after size (the more large primele). 2. Calculati cel more small prefix for each. 3. Alocati secvential. 4. Repetati pan when all are satisfacute.</p>
+</div>
+</div>
+</div>
+<!-- SLIDE 22: VLSM Example -->
+<div class="slide" data-slide="22">
+<div class="slide-content">
+<h2>Example VLSM: 60, 20, 10 and 2 Gazde</h2>
+<p>Dat fiind <span class="code">172.16.0.0/24</span>, alocati for: 60, 20, 10 and 2 hosts.</p>
+<div class="table-container">
+<table>
+<thead><tr><th>Pas</th><th>requirement</th><th>Prefix necessary</th><th>Subnetwork Alocata</th><th>Utilizabile</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>60 hosts</td><td>/26 (62 ≥ 60)</td><td><span class="code">172.16.0.0/26</span></td><td>62</td></tr>
+<tr><td>2</td><td>20 hosts</td><td>/27 (30 ≥ 20)</td><td><span class="code">172.16.0.64/27</span></td><td>30</td></tr>
+<tr><td>3</td><td>10 hosts</td><td>/28 (14 ≥ 10)</td><td><span class="code">172.16.0.96/28</span></td><td>14</td></tr>
+<tr><td>4</td><td>2 hosts</td><td>/30 (2)</td><td><span class="code">172.16.0.112/30</span></td><td>2</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>Total utilizat:</strong> 64 + 32 + 16 + 4 = 116 | <strong>Ramas:</strong> 140 addresses</p>
+<p class="meta">Starterkit: <span class="code">python3 python/exercises/ex_5_02_vlsm_ipv6.py vlsm 172.16.0.0/24 60 20 10 2</span></p>
+</div>
+</div>
+<!-- SLIDE 23: Quiz 2 -->
+<div class="slide" data-slide="23">
+<div class="slide-content">
+<h2>Knowledge Check: Selectie VLSM</h2>
+<div class="quiz-container" id="quiz2">
+<div class="quiz-question">Aveti need of o subnetwork for <strong>25 of hosts</strong>. Which is <strong>cel more small prefix</strong> which va acomoda this numar?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkQuiz(this, 'quiz2', false)">/26 (62 hosts utilizabile)</div>
+<div class="quiz-option" onclick="checkQuiz(this, 'quiz2', true)">/27 (30 hosts utilizabile)</div>
+<div class="quiz-option" onclick="checkQuiz(this, 'quiz2', false)">/28 (14 hosts utilizabile)</div>
+<div class="quiz-option" onclick="checkQuiz(this, 'quiz2', false)">/25 (126 hosts utilizabile)</div>
+</div>
+<div class="quiz-feedback" id="quiz2-feedback"></div>
+</div>
+<div class="reveal-container" style="margin-top: 1rem;">
+<div class="reveal-question">💡 De ce /27?</div>
+<button class="reveal-btn" onclick="toggleReveal('hint2')">Afiseaz Explicatia</button>
+<div class="reveal-content" id="hint2">
+<p>/28 offers only 14 hosts utilizabile — insuficient for 25.</p>
+<p>/27 offers 30 hosts utilizabile — suficient, with risip minima.</p>
+<p><strong>Principiu:</strong> Alegeti always cel more small prefix which satisface requirement.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- SLIDE 24: FLSM vs VLSM -->
+<div class="slide" data-slide="24">
+<div class="slide-content">
+<h2>FLSM vs VLSM: Cand to Folositi each</h2>
+<div class="table-container">
+<table>
+<thead><tr><th>Aspect</th><th>FLSM</th><th>VLSM</th></tr></thead>
+<tbody>
+<tr><td><strong>Dimensiuni Subnetworks</strong></td><td>All identice</td><td>Variabile, in function of requiresti</td></tr>
+<tr><td><strong>Eficient addresses</strong></td><td>Mai scazut — alocare fixa</td><td>Mai ridicat — dimensionate correct</td></tr>
+<tr><td><strong>Complexitate</strong></td><td>simple of planificat</td><td>Necesit urmarire atenta</td></tr>
+<tr><td><strong>Potrivit for</strong></td><td>Departamente uniforme</td><td>Organizatii reof with nevoi variate</td></tr>
+</tbody>
+</table>
+</div>
+<div class="two-columns" style="margin-top: 1rem;">
+<div class="card" style="border-left: 4px solid var(--success);"><h4>Folositi FLSM Cand:</h4><ul><li>All groups au dimensiuni similare</li><li>Simplitatea is primordiala</li></ul></div>
+<div class="card" style="border-left: 4px solid var(--purple);"><h4>Folositi VLSM Cand:</h4><ul><li>Groups variaz semnificativ ca size</li><li>Spatiul of addresses is limitat</li></ul></div>
+</div>
+</div>
+</div>
+<!-- SLIDE 25: Common Mistakes -->
+<div class="slide" data-slide="25">
+<div class="slide-content">
+<h2>Greseli Comune in Subnetworks</h2>
+<div class="table-container">
+<table>
+<thead><tr><th>Greseala</th><th>Consecinta</th><th>solution</th></tr></thead>
+<tbody>
+<tr><td>Forgetting lui −2</td><td>Allocation /28 for 16 hosts</td><td>Folositi intotdeauna: 2<sup>n</sup> − 2</td></tr>
+<tr><td>Subnetworks suprapuse</td><td>Conflicte of routing</td><td>Verificati: broadcast &lt; next network</td></tr>
+<tr><td>Gateway wrong</td><td>„Network unreachable"</td><td>Gateway must to fie in aceeasi subnetwork</td></tr>
+<tr><td>Forwarding IP dezactiveata</td><td>Routerul not forwards</td><td><span class="code">sysctl -w net.ipv4.ip_forward=1</span></td></tr>
+<tr><td>Atribuirea network/broadcast</td><td>Gazd unreachable</td><td>Nu atribuiti never .0 or .255 in /24</td></tr>
+</tbody>
+</table>
+</div>
+<div class="insight-box">
+<div class="insight-title">🔴 Type of Debugging</div>
+<p>La diagnosing conectivitatii: faceti <span class="code">ping</span> at gateway more intai. If fails, verificati the configuration subnets lopath. If gateway raspunde but hosts remote nu, verificati tabelele of routing.</p>
+</div>
+</div>
+</div>
+<!-- SLIDE 26: IPv6 Introduction -->
+<div class="slide" data-slide="26">
+<div class="slide-content">
+<h2>IPv6: the protocol of Nou Generatie</h2>
+<div class="definition-box">
+<div class="def-term">IPv6 (RFC 8200)</div>
+<p style="margin: 0;">Succesorul IPv4, using <strong>addresses on 128 of bits</strong> for a oferi un spatiu of addresses practic nelimitat. Proiectat for a rezolva exhaustion IPv4 and a simplifica routinga.</p>
+</div>
+<div class="two-columns" style="margin-top: 1.5rem;">
+<div>
+<h3>Address Space Comparison</h3>
+<p><strong>IPv4:</strong> 2³² ≈ 4.3 × 10⁹</p>
+<p><strong>IPv6:</strong> 2¹²⁸ ≈ 3.4 × 10³⁸</p>
+<p class="meta">Sufficient to assign 5 × 10²⁸ addresses to every person on Earth.</p>
+</div>
+<div>
+<h3>Imbunatatiri Cheie</h3>
+<ul>
+<li>Simplified header (40 bytes fixed)</li>
+<li>No broadcast — multicast instead</li>
+<li>Built-in IPsec support</li>
+<li>Stateless autoconfiguration (SLAAC)</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<!-- SLIDE 27: IPv6 Format -->
+<div class="slide" data-slide="27">
+<div class="slide-content">
+<h2>Formatul Adresei IPv6</h2>
+<p class="lead">128 bits as eight 16-bit hexadecimal groups separated by colons.</p>
+<div class="code-block" data-lang="ipv6">
+<span class="comment"># Full notation (32 hex digits)</span>
+2001:0db8:0000:0000:0000:0000:0000:0001
+
+<span class="comment"># Comprimat (leading zeros in each group removed)</span>
+2001:db8:0:0:0:0:0:1
+
+<span class="comment"># Fully compressed (consecutive zero groups → ::)</span>
+2001:db8::1
+
+<span class="comment"># Structure</span>
+2001:0db8 : 0000:0000 : 0000:0000 : 0000:0001
+└───────────────────┘   └───────────────────┘
+   Network prefix            Interface ID
+     (64 bits)                (64 bits)
+</div>
+<div class="warning-box">
+<div class="warning-title">⚠️ Compression Rules</div>
+<p>The <span class="code">::</span> can appear <strong>only once</strong> in an address. Leading zeros in each group can be omitted.</p>
+</div>
+</div>
+</div>
+<!-- SLIDE 28: IPv6 Address Types -->
+<div class="slide" data-slide="28">
+<div class="slide-content">
+<h2>types of addresses IPv6</h2>
+<div class="table-container">
+<table>
+<thead><tr><th>Type</th><th>Prefix</th><th>Scope</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><strong>Global Aicast</strong></td><td><span class="code">2000::/3</span></td><td>Internet</td><td>Equivaslow to public IPv4</td></tr>
+<tr><td><strong>Link-Local</strong></td><td><span class="code">fe80::/10</span></td><td>Single link</td><td>Auto-configured; not routed</td></tr>
+<tr><td><strong>Aique Local (ULA)</strong></td><td><span class="code">fc00::/7</span></td><td>Private</td><td>Like RFC 1918 private addresses</td></tr>
+<tr><td><strong>Multicast</strong></td><td><span class="code">ff00::/8</span></td><td>Various</td><td>Livrare of at unu at multi</td></tr>
+<tr><td><strong>Loopback</strong></td><td><span class="code">::1/128</span></td><td>Host</td><td>Equivaslow to 127.0.0.1</td></tr>
+</tbody>
+</table>
+</div>
+<p class="meta">Starterkit: <span class="code">python3 python/exercises/ex_5_02_vlsm_ipv6.py ipv6-types</span></p>
+</div>
+</div>
+<!-- SLIDE 29: IPv6 Transition -->
+<div class="slide" data-slide="29">
+<div class="slide-content">
+<h2>IPv4 to IPv6 Transition Mechanisms</h2>
+<p class="lead">The Internet cannot switch overnight. Coexistence strategies enable gradual migration.</p>
+<div class="card-grid">
+<div class="card" style="border-left: 4px solid var(--secondary);">
+<h4>Dual-Stack</h4>
+<p>Devices run both IPv4 and IPv6 simultaneously. Applications choose based on destination availability.</p>
+</div>
+<div class="card" style="border-left: 4px solid var(--purple);">
+<h4>Tunelare</h4>
+<p>IPv6 packets encapsulated inside IPv4 for transport across IPv4-only networks. Examples: 6to4, Teredo.</p>
+</div>
+<div class="card" style="border-left: 4px solid var(--accent);">
+<h4>Translation (NAT64)</h4>
+<p>Translates between IPv6 and IPv4 at network boundaries, allowing IPv6-only clients to reach IPv4 servers.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- SLIDE 30: Quiz 3 -->
+<div class="slide" data-slide="30">
+<div class="slide-content">
+<h2>Knowledge Check: addresses Private</h2>
+<div class="quiz-container" id="quiz3">
+<div class="quiz-question">Is the address <span class="code">172.16.50.100</span> part of the RFC 1918 private range?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkQuiz(this, 'quiz3', true)">Yes — it falls within 172.16.0.0/12</div>
+<div class="quiz-option" onclick="checkQuiz(this, 'quiz3', false)">No — it is a public address</div>
+<div class="quiz-option" onclick="checkQuiz(this, 'quiz3', false)">Yes — but within the 10.x.x.x block</div>
+<div class="quiz-option" onclick="checkQuiz(this, 'quiz3', false)">Depends on NAT configuration</div>
+</div>
+<div class="quiz-feedback" id="quiz3-feedback"></div>
+</div>
+<div class="reveal-container" style="margin-top: 1rem;">
+<div class="reveal-question">💡 RFC 1918 Private Ranges</div>
+<button class="reveal-btn" onclick="toggleReveal('hint3')">Show Ranges</button>
+<div class="reveal-content" id="hint3">
+<p><span class="code">10.0.0.0/8</span> — 10.0.0.0 to 10.255.255.255</p>
+<p><span class="code">172.16.0.0/12</span> — 172.16.0.0 to 172.31.255.255</p>
+<p><span class="code">192.168.0.0/16</span> — 192.168.0.0 to 192.168.255.255</p>
+<p>172.16.50.100 falls within the /12 block.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- SLIDE 31: Linux Commands -->
+<div class="slide" data-slide="31">
+<div class="slide-content">
+<h2>Essential Linux Networking Commands</h2>
+<div class="table-container">
+<table>
+<thead><tr><th>Command</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><span class="code">ip addr show</span></td><td>Display all IP addresses on all interfaces</td></tr>
+<tr><td><span class="code">ip route show</span></td><td>Display the routing table</td></tr>
+<tr><td><span class="code">ping -c 3 10.0.5.100</span></td><td>Test ICMP connectivity</td></tr>
+<tr><td><span class="code">traceroute 10.0.5.100</span></td><td>Trace the path packets take</td></tr>
+<tr><td><span class="code">tcpdump -ni eth0 icmp</span></td><td>Capture ICMP packets</td></tr>
+<tr><td><span class="code">nmap -sP 192.168.1.0/24</span></td><td>Discover active hosts in a subnet</td></tr>
+</tbody>
+</table>
+</div>
+<p class="meta">Full reference: <span class="code">WEEK5/docs/cheatsheet.md</span></p>
+</div>
+</div>
+<!-- SLIDE 32: Mininet Topology -->
+<div class="slide" data-slide="32">
+<div class="slide-content">
+<h2>Week 5 Mininet Topology</h2>
+<div class="diagram-container">
+<svg viewbox="0 0 800 180">
+<rect fill="rgba(16,185,129,0.1)" height="90" rx="12" stroke="var(--success)" stroke-width="2" width="280" x="50" y="40"></rect>
+<text fill="var(--success-dark)" font-size="12" font-weight="600" text-anchor="middle" x="190" y="30">10.0.5.0/25 (Subnet A)</text>
+<circle cx="120" cy="85" fill="var(--bg-light)" r="25" stroke="var(--primary-light)" stroke-width="2"></circle>
+<text fill="var(--primary)" font-size="11" font-weight="600" text-anchor="middle" x="120" y="90">h1</text>
+<text fill="var(--text-muted)" font-size="10" text-anchor="middle" x="120" y="120">.11</text>
+<rect fill="var(--secondary)" height="50" rx="8" width="50" x="200" y="60"></rect>
+<text fill="white" font-size="11" font-weight="700" text-anchor="middle" x="225" y="90">r1</text>
+<text fill="var(--text-muted)" font-size="9" text-anchor="middle" x="225" y="125">.1 | .129</text>
+<line stroke="var(--primary-light)" stroke-width="2" x1="145" x2="200" y1="85" y2="85"></line>
+<rect fill="rgba(139,92,246,0.1)" height="90" rx="12" stroke="var(--purple)" stroke-width="2" width="280" x="470" y="40"></rect>
+<text fill="var(--purple-dark)" font-size="12" font-weight="600" text-anchor="middle" x="610" y="30">10.0.5.128/25 (Subnet B)</text>
+<circle cx="680" cy="85" fill="var(--bg-light)" r="25" stroke="var(--primary-light)" stroke-width="2"></circle>
+<text fill="var(--primary)" font-size="11" font-weight="600" text-anchor="middle" x="680" y="90">h2</text>
+<text fill="var(--text-muted)" font-size="10" text-anchor="middle" x="680" y="120">.140</text>
+<line stroke="var(--primary-light)" stroke-dasharray="8" stroke-width="2" x1="250" x2="470" y1="85" y2="85"></line>
+<line stroke="var(--primary-light)" stroke-width="2" x1="655" x2="550" y1="85" y2="85"></line>
+<text fill="var(--text-muted)" font-size="10" text-anchor="middle" x="360" y="80">routing</text>
+<text fill="var(--text-dark)" font-size="11" text-anchor="middle" x="400" y="165">Two subnets connected via router r1 with IP forwarding enabled</text>
+</svg>
+</div>
+<div class="code-block" data-lang="bash">
+<span class="comment"># Launch base topology</span>
+sudo python3 mininet/topologies/topo_5_base.py --cli
+
+<span class="comment"># Inside Mininet CLI</span>
+mininet&gt; h1 ping -c 3 10.0.5.140   <span class="comment"># Ping h2 across router</span>
+mininet&gt; r1 tcpdump -ni r1-eth0 icmp &amp;  <span class="comment"># Capture on router</span>
+</div>
+</div>
+</div>
+<!-- SLIDE 33: Python ipaddress -->
+<div class="slide" data-slide="33">
+<div class="slide-content">
+<h2>Python ipaddress Module</h2>
+<p class="lead">The standard library <span class="code">ipaddress</span> modulee provides powerful tools for IP manipulation.</p>
+<div class="code-block" data-lang="python">
+<span class="keyword">import</span> ipaddress
+
+<span class="comment"># Working with interfaces (IP + prefix)</span>
+interface = ipaddress.ip_interface(<span class="string">'192.168.10.14/26'</span>)
+
+<span class="builtin">print</span>(<span class="string">f"IP: {interface.ip}"</span>)              <span class="comment"># 192.168.10.14</span>
+<span class="builtin">print</span>(<span class="string">f"Network: {interface.network}"</span>)     <span class="comment"># 192.168.10.0/26</span>
+<span class="builtin">print</span>(<span class="string">f"Netmask: {interface.netmask}"</span>)     <span class="comment"># 255.255.255.192</span>
+<span class="builtin">print</span>(<span class="string">f"Broadcast: {interface.network.broadcast_address}"</span>)
+
+<span class="comment"># Check if address is private</span>
+<span class="builtin">print</span>(<span class="string">f"Private: {interface.ip.is_private}"</span>)  <span class="comment"># True</span>
+</div>
+<p class="meta">This modulee is used extensively in the starterkit. See <span class="code">python/utils/net_utils.py</span></p>
+</div>
+</div>
+<!-- SLIDE 34: Starterkit Exercises -->
+<div class="slide" data-slide="34">
+<div class="slide-content">
+<h2>Starterkit Exercises Summary</h2>
+<div class="table-container">
+<table>
+<thead><tr><th>Exercise</th><th>Focus Area</th><th>Command</th></tr></thead>
+<tbody>
+<tr><td><strong>ex_5_01</strong></td><td>CIDR analysis, FLSM</td><td><span class="code">make demo-cidr &amp;&amp; make demo-flsm</span></td></tr>
+<tr><td><strong>ex_5_02</strong></td><td>VLSM allocation, IPv6</td><td><span class="code">make demo-vlsm &amp;&amp; make demo-ipv6</span></td></tr>
+<tr><td><strong>ex_5_03</strong></td><td>Interactive quiz</td><td><span class="code">make quiz</span></td></tr>
+<tr><td><strong>topo_5_base</strong></td><td>Two-subnet topology</td><td><span class="code">sudo make mininet-base</span></td></tr>
+<tr><td><strong>topo_5_extended</strong></td><td>VLSM + IPv6</td><td><span class="code">sudo make mininet-extended-ipv6</span></td></tr>
+</tbody>
+</table>
+</div>
+<div class="highlight-box" style="margin-top: 1rem;">
+<h4>Getting Started</h4>
+<p>Clone: <span class="code" style="background: rgba(255,255,255,0.2); border: none;">cd ~ &amp;&amp; git clone ... WEEK5</span> — full instructions in README.md</p>
+</div>
+</div>
+</div>
+<!-- SLIDE 35: Design Challenge -->
+<div class="slide" data-slide="35">
+<div class="slide-content">
+<h2>Design Challenge: Allocate a Company Network</h2>
+<div class="story-box">
+<div class="story-title">📋 Scenario</div>
+<p>Your company has <span class="code">10.50.0.0/22</span> (1024 addresses). Design subnets for: Engineering (200 hosts), Sofs (80), Marketing (40), Management (15), and two point-to-point router links.</p>
+</div>
+<div class="reveal-container" style="margin-top: 1rem;">
+<div class="reveal-question">💡 Ready to see a solution?</div>
+<button class="reveal-btn" onclick="toggleReveal('design-solution')">Show VLSM Solution</button>
+<div class="reveal-content" id="design-solution">
+<table style="width: 100%; font-size: 0.95rem;">
+<tr><td><strong>Engineering (200)</strong></td><td>10.50.0.0/24</td><td>254 hosts</td></tr>
+<tr><td><strong>Sofs (80)</strong></td><td>10.50.1.0/25</td><td>126 hosts</td></tr>
+<tr><td><strong>Marketing (40)</strong></td><td>10.50.1.128/26</td><td>62 hosts</td></tr>
+<tr><td><strong>Management (15)</strong></td><td>10.50.1.192/27</td><td>30 hosts</td></tr>
+<tr><td><strong>Link 1</strong></td><td>10.50.1.224/30</td><td>2 hosts</td></tr>
+<tr><td><strong>Link 2</strong></td><td>10.50.1.228/30</td><td>2 hosts</td></tr>
+</table>
+<p style="margin-top: 0.5rem;"><strong>Used:</strong> 488 | <strong>Remaining:</strong> 536 addresses</p>
+</div>
+</div>
+</div>
+</div>
+<!-- SLIDE 36: Troubleshooting -->
+<div class="slide" data-slide="36">
+<div class="slide-content">
+<h2>Troubleshooting Common Issues</h2>
+<div class="table-container">
+<table>
+<thead><tr><th>Symptom</th><th>Likely Cause</th><th>Solution</th></tr></thead>
+<tbody>
+<tr><td>„Network unreachable"</td><td>Without route to destination</td><td>Check <span class="code">ip route</span>; add gateway</td></tr>
+<tr><td>"Host unreachable"</td><td>ARP failure — wrong subnet</td><td>Verify IP/mask on both ends</td></tr>
+<tr><td>Mininet hangs at "Waiting..."</td><td>Zombie OVS bridges</td><td><span class="code">sudo ./scripts/ovs_reset.sh</span></td></tr>
+<tr><td>Inter-subnet ping fails</td><td>IP forwarding disabled</td><td><span class="code">sysctl -w net.ipv4.ip_forward=1</span></td></tr>
+</tbody>
+</table>
+</div>
+<div class="code-block" data-lang="bash" style="margin-top: 1rem;">
+<span class="comment"># Complete Mininet reset</span>
+sudo mn -c
+sudo ./scripts/ovs_reset.sh
+sudo systemctl restart openvswitch-switch
+</div>
+</div>
+</div>
+<!-- SLIDE 37: Key Takeaways -->
+<div class="slide" data-slide="37">
+<div class="slide-content">
+<h2>Puncte Cheie</h2>
+<div class="card-grid">
+<div class="card" style="border-top: 4px solid var(--secondary);">
+<h4>IPv4 &amp; CIDR</h4>
+<p>32-bit addresses in dotted-decimal; CIDR notation enables flexible network sizing; calculate network, broadcast, and host range from any prefix.</p>
+</div>
+<div class="card" style="border-top: 4px solid var(--purple);">
+<h4>Subnetting</h4>
+<p>FLSM for uniform allocations; VLSM for efficient variable sizing. Always sort requirements largest-first for VLSM.</p>
+</div>
+<div class="card" style="border-top: 4px solid var(--success);">
+<h4>IPv6</h4>
+<p>128-bit addresses solve exhaustion; link-local addresses auto-configure; transition mechanisms enable coexistence.</p>
+</div>
+<div class="card" style="border-top: 4px solid var(--accent);">
+<h4>Practical Skills</h4>
+<p>Python <span class="code">ipaddress</span> modulee for calculations; Mininet for simulation; <span class="code">ip</span> commands for configuration.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- SLIDE 38: Career Relevance -->
+<div class="slide" data-slide="38">
+<div class="slide-content">
+<h2>Where This Fits in Your Career</h2>
+<ul>
+<li><span class="highlight">DevOps/Cloud Engineers:</span> Configure VPCs, subnets, security groups — CIDR notation daily</li>
+<li><span class="highlight">Backend Developers:</span> Debug "Connection refused" vs "No route to host" — subnet awareness matters</li>
+<li><span class="highlight">Microservices Architects:</span> Service mesh, Kubernetes networking = advanced subnetting</li>
+<li><span class="highlight">Security Engineers:</span> Firewall rules, allowlists, blocklists — all CIDR-based</li>
+<li><span class="highlight">IoT Developers:</span> Billions of devices → IPv6 becomes mandatory</li>
+</ul>
+<div class="highlight-box" style="margin-top: 1.5rem;">
+<h4>Industry Certifications</h4>
+<p>CCNA, AWS Solutions Architect, Azure Administrator — all require strong IP addressing fundamentals.</p>
+</div>
+</div>
+</div>
+<!-- SLIDE 39: Next Week Preview -->
+<div class="slide" data-slide="39">
+<div class="slide-content">
+<h2>Coming Next: Week 6</h2>
+<p class="lead">NAT, ICMP, DHCP, BOOTP — The Supporting Protocols</p>
+<div class="card-grid">
+<div class="card"><h4>NAT/PAT</h4><p>How private addresses map to public IPs; port translation; NAT traversal challenges.</p></div>
+<div class="card"><h4>ICMP</h4><p>Error reporting; ping and traceroute mechanics; ICMP message types.</p></div>
+<div class="card"><h4>DHCP</h4><p>Dynamic address assignment; DORA process; relay agents; lease management.</p></div>
+</div>
+<div class="story-box" style="margin-top: 1rem;">
+<div class="story-title">🔗 Connection to This Week</div>
+<p>NAT exists <em>because</em> of IPv4 exhaustion. DHCP automates the addressing you learned to calculate manually.</p>
+</div>
+</div>
+</div>
+<!-- SLIDE 40: References -->
+<div class="slide" data-slide="40">
+<div class="slide-content">
+<h2>References &amp; Further Reading</h2>
+<div class="two-columns">
+<div>
+<h3>Essential RFCs</h3>
+<ul>
+<li><strong>RFC 791</strong> — Internet Protocol (IPv4)</li>
+<li><strong>RFC 1918</strong> — Private Address Space</li>
+<li><strong>RFC 4632</strong> — CIDR</li>
+<li><strong>RFC 8200</strong> — IPv6 Specification</li>
+<li><strong>RFC 4291</strong> — IPv6 Addressing Architecture</li>
+</ul>
+</div>
+<div>
+<h3>Books &amp; Resources</h3>
+<ul>
+<li>Kurose &amp; Ross — <em>Computer Networking</em></li>
+<li>Rhodes &amp; Goerzen — <em>Foundations of Python Network Programming</em></li>
+<li>Python docs: <span class="code">docs.python.org/3/library/ipaddress</span></li>
+<li>Mininet: <span class="code">mininet.org/walkthrough</span></li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<!-- SLIDE 41: Final Quiz -->
+<div class="slide" data-slide="41">
+<div class="slide-content">
+<h2>Final Knowledge Check</h2>
+<div class="quiz-container" id="quiz4">
+<div class="quiz-question">An organisation needs subnets for 100, 50, 25, and 10 hosts. Using VLSM from <span class="code">192.168.0.0/24</span>, what prefix for the 100-host requirement?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkQuiz(this, 'quiz4', true)">/25 (126 hosts utilizabile)</div>
+<div class="quiz-option" onclick="checkQuiz(this, 'quiz4', false)">/26 (62 hosts utilizabile)</div>
+<div class="quiz-option" onclick="checkQuiz(this, 'quiz4', false)">/24 (254 usable hosts)</div>
+<div class="quiz-option" onclick="checkQuiz(this, 'quiz4', false)">/27 (30 hosts utilizabile)</div>
+</div>
+<div class="quiz-feedback" id="quiz4-feedback"></div>
+</div>
+</div>
+</div>
+<!-- SLIDE 42: Q&A -->
+<div class="slide" data-slide="42">
+<div class="slide-content title-slide">
+<h1 class="gradient-text">Questions?</h1>
+<p class="subtitle">IP Addressing • CIDR • Subnetting FLSM/VLSM • IPv6</p>
+<p style="margin-top: 3rem; color: var(--text-muted);">Next week: NAT, ICMP, DHCP, BOOTP</p>
+<p class="meta" style="margin-top: 2rem;">Labtimetory: Experiments in Mininet + Python Exercises<br/><span class="code">make demo &amp;&amp; sudo make mininet-base</span></p>
+</div>
+</div>
+</div>
+<!-- Table of Contents Modal -->
+<div class="toc-modal" id="tocModal">
+<div class="toc-content">
+<button class="toc-close" onclick="closeTOC()">×</button>
+<h3>Contents</h3>
+<div class="toc-section">
+<div class="toc-section-title">Introduction</div>
+<div class="toc-item" onclick="goToSlide(1)">1. Titlu</div>
+<div class="toc-item" onclick="goToSlide(2)">2. Context Historically</div>
+<div class="toc-item" onclick="goToSlide(3)">3. Learning Objectives</div>
+<div class="toc-item" onclick="goToSlide(4)">4. Why It Matters</div>
+</div>
+<div class="toc-section">
+<div class="toc-section-title">Layer 3 Foundations</div>
+<div class="toc-item" onclick="goToSlide(5)">5. Network Layer in Context</div>
+<div class="toc-item" onclick="goToSlide(6)">6. MAC vs IP Addresses</div>
+<div class="toc-item" onclick="goToSlide(7)">7. IPv4 Structure</div>
+<div class="toc-item" onclick="goToSlide(8)">8. IPv4 Packet Header</div>
+<div class="toc-item" onclick="goToSlide(9)">9. Historical Classes</div>
+</div>
+<div class="toc-section">
+<div class="toc-section-title">Notatia CIDR</div>
+<div class="toc-item" onclick="goToSlide(10)">10. Introduction CIDR</div>
+<div class="toc-item" onclick="goToSlide(11)">11. Relation with the Subnet Mask</div>
+<div class="toc-item" onclick="goToSlide(12)">12. Calculating Parameters</div>
+<div class="toc-item" onclick="goToSlide(13)">13. De Ce 2^n - 2</div>
+<div class="toc-item" onclick="goToSlide(14)">14. Test: Gazde Utilizabile</div>
+<div class="toc-item" onclick="goToSlide(15)">15. computer Interactive</div>
+<div class="toc-item" onclick="goToSlide(16)">16. Prefixe Comune</div>
+<div class="toc-item" onclick="goToSlide(17)">17. Private vs Publice</div>
+</div>
+<div class="toc-section">
+<div class="toc-section-title">Subnetworks</div>
+<div class="toc-item" onclick="goToSlide(18)">18. Introduction Subnetworks</div>
+<div class="toc-item" onclick="goToSlide(19)">19. Conceptul FLSM</div>
+<div class="toc-item" onclick="goToSlide(20)">20. Example FLSM</div>
+<div class="toc-item" onclick="goToSlide(21)">21. Conceptul VLSM</div>
+<div class="toc-item" onclick="goToSlide(22)">22. Example VLSM</div>
+<div class="toc-item" onclick="goToSlide(23)">23. Test: VLSM</div>
+<div class="toc-item" onclick="goToSlide(24)">24. FLSM vs VLSM</div>
+<div class="toc-item" onclick="goToSlide(25)">25. Greseli Comune</div>
+</div>
+<div class="toc-section">
+<div class="toc-section-title">IPv6</div>
+<div class="toc-item" onclick="goToSlide(26)">26. Introduction IPv6</div>
+<div class="toc-item" onclick="goToSlide(27)">27. Formatul IPv6</div>
+<div class="toc-item" onclick="goToSlide(28)">28. types of addresses IPv6</div>
+<div class="toc-item" onclick="goToSlide(29)">29. Tranzitia IPv6</div>
+<div class="toc-item" onclick="goToSlide(30)">30. Test: addresses Private</div>
+</div>
+<div class="toc-section">
+<div class="toc-section-title">application Practica</div>
+<div class="toc-item" onclick="goToSlide(31)">31. commands Linux</div>
+<div class="toc-item" onclick="goToSlide(32)">32. topology Mininet</div>
+<div class="toc-item" onclick="goToSlide(33)">33. Python ipaddress</div>
+<div class="toc-item" onclick="goToSlide(34)">34. Exercises Starterkit</div>
+<div class="toc-item" onclick="goToSlide(35)">35. Challenge of Proiectare</div>
+<div class="toc-item" onclick="goToSlide(36)">36. Debugging</div>
+</div>
+<div class="toc-section">
+<div class="toc-section-title">Incheiere</div>
+<div class="toc-item" onclick="goToSlide(37)">37. Puncte Cheie</div>
+<div class="toc-item" onclick="goToSlide(38)">38. Relevant Cariera</div>
+<div class="toc-item" onclick="goToSlide(39)">39. Preview: next week</div>
+<div class="toc-item" onclick="goToSlide(40)">40. References</div>
+<div class="toc-item" onclick="goToSlide(41)">41. Test Final</div>
+<div class="toc-item" onclick="goToSlide(42)">42. questions and Answeruri</div>
+</div>
+</div>
+</div>
+<!-- Navigation -->
+<nav class="nav">
+<button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">←</button>
+<button class="nav-text-btn" onclick="openTOC()">TOC</button>
+<button class="nav-text-btn" onclick="toggleFullscreen()">⛶</button>
+<button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">→</button>
+</nav>
+<div class="footer">by Revolvix</div>
+<script>
+    let currentSlide = 1;
+    const totalSlides = document.querySelectorAll('.slide').length;
+    
+    document.getElementById('totalSlides').textContent = totalSlides;
+    
+    function showSlide(n) {
+      const slides = document.querySelectorAll('.slide');
+      if (n < 1) n = 1;
+      if (n > totalSlides) n = totalSlides;
+      
+      slides.forEach(s => s.classList.remove('active'));
+      slides[n - 1].classList.add('active');
+      
+      currentSlide = n;
+      document.getElementById('currentSlide').textContent = n;
+      document.getElementById('prevBtn').disabled = (n === 1);
+      document.getElementById('nextBtn').disabled = (n === totalSlides);
+      
+      const progress = (n / totalSlides) * 100;
+      document.getElementById('progress').style.width = progress + '%';
+    }
+    
+    function changeSlide(delta) {
+      showSlide(currentSlide + delta);
+    }
+    
+    function goToSlide(n) {
+      showSlide(n);
+      closeTOC();
+    }
+    
+    function openTOC() {
+      document.getElementById('tocModal').classList.add('show');
+    }
+    
+    function closeTOC() {
+      document.getElementById('tocModal').classList.remove('show');
+    }
+    
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault();
+        changeSlide(1);
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        changeSlide(-1);
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        showSlide(1);
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        showSlide(totalSlides);
+      } else if (e.key === 'f' || e.key === 'F') {
+        toggleFullscreen();
+      } else if (e.key === 't' || e.key === 'T') {
+        openTOC();
+      } else if (e.key === 'Escape') {
+        closeTOC();
+      }
+    });
+    
+    function checkQuiz(element, quizId, isCorrect) {
+      const quiz = document.getElementById(quizId);
+      const options = quiz.querySelectorAll('.quiz-option');
+      const feedback = document.getElementById(quizId + '-feedback');
+      
+      options.forEach(opt => {
+        opt.style.pointerEvents = 'none';
+        opt.classList.remove('correct', 'wrong');
+      });
+      
+      if (isCorrect) {
+        element.classList.add('correct');
+        feedback.textContent = '✓ Corect! Bine lucrat!';
+        feedback.className = 'quiz-feedback show correct';
+      } else {
+        element.classList.add('wrong');
+        feedback.textContent = '✗ Incorrect. Revizuiti formula.';
+        feedback.className = 'quiz-feedback show wrong';
+        options.forEach(opt => {
+          if (opt.getAttribute('onclick').includess('true')) {
+            opt.classList.add('correct');
+          }
+        });
+      }
+    }
+    
+    function updataPrefix(value) {
+      document.getElementById('prefix-value').textContent = '/' + value;
+      
+      const prefix = parseInt(value);
+      const hostBits = 32 - prefix;
+      const totalAddr = Math.pow(2, hostBits);
+      const validHosts = totalAddr - 2;
+      
+      document.getElementById('total-addr').textContent = totalAddr.toLopathString();
+      document.getElementById('valid-hosts').textContent = validHosts > 0 ? validHosts.toLopathString() : '0';
+      
+      const maskBinary = '1'.repeat(prefix) + '0'.repeat(hostBits);
+      const bytes = [];
+      for (let i = 0; i < 4; i++) {
+        bytes.push(parseInt(maskBinary.substr(i * 8, 8), 2));
+      }
+      document.getElementById('mask').textContent = bytes.join('.');
+    }
+    
+    function toggleReveal(id) {
+      const elem = document.getElementById(id);
+      elem.classList.toggle('show');
+    }
+    
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
+    }
+    
+    // Initialize
+    showSlide(1);
+  </script>
+</body>
+</html>

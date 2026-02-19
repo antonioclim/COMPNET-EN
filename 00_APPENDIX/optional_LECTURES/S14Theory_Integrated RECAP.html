@@ -1,0 +1,2414 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="by Revolvix" name="author"/>
+<title>Week 14 - Review Integrat | Computer Networks</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;family=Source+Serif+4:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+        /* === CSS Variables === */
+        :root {
+            --primary: #0f172a;
+            --primary-light: #1e293b;
+            --secondary: #0ea5e9;
+            --secondary-dark: #0284c7;
+            --accent: #f59e0b;
+            --accent-warm: #ea580c;
+            --success: #10b981;
+            --success-dark: #059669;
+            --danger: #ef4444;
+            --purple: #8b5cf6;
+            --purple-dark: #7c3aed;
+            --bg-light: #f8fafc;
+            --bg-cool: #f0f9ff;
+            --bg-warm: #fffbeb;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            
+            /* High-visibility text on dark backgrounds */
+            --text-on-dark: #f1f5f9;
+            --text-on-dark-muted: #cbd5e1;
+            --text-on-dark-heading: #ffffff;
+            
+            /* Gradients */
+            --gradient-primary: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --gradient-secondary: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            --gradient-accent: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+            --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        
+        /* === Reset & Base === */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+        
+        /* === Typography === */
+        h1, h2, h3, h4 {
+            font-family: 'Source Serif 4', Georgia, serif;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+        
+        code, pre, .code-block {
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+        }
+        
+        /* === Presentation Container === */
+        .presentation {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* === Progress Bar === */
+        .progress-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--border);
+            z-index: 1000;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: var(--gradient-secondary);
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+        
+        /* === Top Bar === */
+        .top-bar {
+            position: fixed;
+            top: 4px;
+            left: 0;
+            right: 0;
+            height: 48px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            z-index: 999;
+        }
+        
+        .course-id {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        
+        .slide-counter {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        /* === Slides === */
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 5rem 4rem 6rem;
+            display: none;
+            flex-direction: column;
+            background: var(--bg-light);
+            overflow-y: auto;
+        }
+        
+        .slide.active {
+            display: flex;
+            animation: slideIn 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+        .delay-5 { animation-delay: 0.5s; }
+        .delay-6 { animation-delay: 0.6s; }
+        
+        /* === Slide Types === */
+        .slide-title {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: var(--gradient-primary);
+        }
+        
+        .slide-title h1 {
+            font-size: 3.2rem;
+            color: var(--text-on-dark-heading);
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+        
+        .slide-title .subtitle {
+            font-size: 1.4rem;
+            color: var(--text-on-dark);
+            font-weight: 400;
+        }
+        
+        .slide-title .meta {
+            font-size: 1rem;
+            color: var(--text-on-dark-muted);
+            margin-top: 2rem;
+        }
+        
+        .slide-section {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: var(--gradient-primary);
+        }
+        
+        .slide-section h1 {
+            font-size: 2.8rem;
+            color: var(--text-on-dark-heading);
+            margin-bottom: 0.5rem;
+        }
+        
+        .slide-section .section-number {
+            font-size: 1rem;
+            color: var(--secondary);
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+        
+        .slide-section .section-desc {
+            font-size: 1.2rem;
+            color: var(--text-on-dark-muted);
+            max-width: 600px;
+        }
+        
+        /* === Content Styles === */
+        .slide h1 {
+            font-size: 2.2rem;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+        }
+        
+        /* Override for dark background slides - MUST come after .slide h1 */
+        .slide.slide-title h1,
+        .slide.slide-section h1 {
+            color: #ffffff !important;
+        }
+        
+        .slide h2 {
+            font-size: 1.6rem;
+            color: var(--primary-light);
+            margin-bottom: 1rem;
+        }
+        
+        .slide h3 {
+            font-size: 1.25rem;
+            color: var(--secondary-dark);
+            margin-bottom: 0.75rem;
+        }
+        
+        .slide p {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+        }
+        
+        .slide ul, .slide ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .slide li {
+            font-size: 1.05rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+        
+        /* === Layout Helpers === */
+        .two-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            margin-top: 1.5rem;
+        }
+        
+        .three-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+        
+        .asymmetric-left {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 3rem;
+            margin-top: 1.5rem;
+        }
+        
+        .asymmetric-right {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 3rem;
+            margin-top: 1.5rem;
+        }
+        
+        /* === Box Components === */
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, rgba(2, 132, 199, 0.15) 100%);
+            border-left: 4px solid var(--secondary);
+            padding: 1.5rem 2rem;
+            border-radius: 0 16px 16px 0;
+            margin: 1.5rem 0;
+        }
+        
+        .highlight-box p {
+            color: var(--primary);
+            margin-bottom: 0;
+        }
+        
+        .definition-box {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.12) 100%);
+            border-left: 4px solid var(--success);
+            padding: 1.5rem 2rem;
+            border-radius: 0 16px 16px 0;
+            margin: 1.5rem 0;
+        }
+        
+        .definition-box .def-term {
+            font-weight: 700;
+            color: var(--success-dark);
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .story-box {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(124, 58, 237, 0.12) 100%);
+            border-left: 4px solid var(--purple);
+            padding: 1.5rem 2rem;
+            border-radius: 0 16px 16px 0;
+            margin: 1.5rem 0;
+        }
+        
+        .story-box .story-title {
+            font-weight: 600;
+            color: var(--purple-dark);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.75rem;
+        }
+        
+        .warning-box {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(234, 88, 12, 0.12) 100%);
+            border-left: 4px solid var(--accent);
+            padding: 1.5rem 2rem;
+            border-radius: 0 16px 16px 0;
+            margin: 1.5rem 0;
+        }
+        
+        .warning-box .warning-title {
+            font-weight: 600;
+            color: var(--accent-warm);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.75rem;
+        }
+        
+        .insight-box {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(220, 38, 38, 0.12) 100%);
+            border-left: 4px solid var(--danger);
+            padding: 1.5rem 2rem;
+            border-radius: 0 16px 16px 0;
+            margin: 1.5rem 0;
+        }
+        
+        .insight-box .insight-title {
+            font-weight: 600;
+            color: var(--danger);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.75rem;
+        }
+        
+        /* === Code Blocks === */
+        pre, .code-block {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+            padding: 1.25rem;
+            border-radius: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            overflow-x: auto;
+            margin: 1rem 0;
+            position: relative;
+            white-space: pre;
+            word-wrap: normal;
+        }
+        
+        .code-block .keyword { color: #f472b6; }
+        .code-block .string { color: #a5d6ff; }
+        .code-block .number { color: #fcd34d; }
+        .code-block .comment { color: #6b7280; font-style: italic; }
+        .code-block .function { color: #67e8f9; }
+        .code-block .prompt { color: #4ade80; }
+        
+        .code-lang {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.75rem;
+            font-size: 0.75rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        code.inline {
+            background: rgba(15, 23, 42, 0.08);
+            color: var(--primary);
+            padding: 0.2rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.9em;
+        }
+        
+        /* === Tables === */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 1rem;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .data-table thead {
+            background: var(--gradient-primary);
+        }
+        
+        .data-table th {
+            color: var(--text-on-dark);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            padding: 1rem 1.25rem;
+            text-align: left;
+        }
+        
+        .data-table td {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-dark);
+        }
+        
+        .data-table tbody tr:hover {
+            background: var(--bg-cool);
+        }
+        
+        .data-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        /* === OSI Layer Stack === */
+        .osi-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-width: 700px;
+            margin: 1.5rem auto;
+        }
+        
+        .osi-layer {
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-size: 1rem;
+        }
+        
+        .osi-layer:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .osi-layer.l7 { background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%); }
+        .osi-layer.l6 { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); }
+        .osi-layer.l5 { background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%); }
+        .osi-layer.l4 { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+        .osi-layer.l3 { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); }
+        .osi-layer.l2 { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
+        .osi-layer.l1 { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }
+        
+        .layer-name { font-weight: 600; }
+        .layer-example { font-size: 0.9rem; opacity: 0.9; }
+        
+        /* === Quiz Components === */
+        .quiz-container {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.03) 0%, rgba(30, 41, 59, 0.06) 100%);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            border: 1px solid var(--border);
+        }
+        
+        .quiz-question {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+        }
+        
+        .quiz-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .quiz-option {
+            padding: 1rem 1.25rem;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1rem;
+        }
+        
+        .quiz-option:hover {
+            border-color: var(--secondary);
+            background: var(--bg-cool);
+            transform: translateY(-2px);
+        }
+        
+        .quiz-option.correct {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: var(--success);
+        }
+        
+        .quiz-option.wrong {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: var(--danger);
+        }
+        
+        .quiz-feedback {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            display: none;
+            font-size: 1rem;
+        }
+        
+        .quiz-feedback.show { display: block; }
+        .quiz-feedback.correct {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success-dark);
+        }
+        .quiz-feedback.wrong {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+        }
+        
+        /* === Reveal Components === */
+        .reveal-container {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(234, 88, 12, 0.05) 100%);
+            border: 2px dashed var(--accent);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+        
+        .reveal-btn {
+            background: var(--gradient-accent);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            margin-top: 1rem;
+        }
+        
+        .reveal-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+        
+        .reveal-content {
+            display: none;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            text-align: left;
+        }
+        
+        .reveal-content.show { display: block; }
+        
+        /* === Diagram Container === */
+        .diagram-container {
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+        
+        .diagram-container svg {
+            max-width: 100%;
+            min-height: 180px;
+        }
+        
+        /* === TCP Diagram === */
+        .tcp-handshake {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 2rem;
+            padding: 2rem;
+            background: var(--bg-cool);
+            border-radius: 16px;
+            margin: 1.5rem 0;
+        }
+        
+        .endpoint-box {
+            background: var(--gradient-primary);
+            color: var(--text-on-dark);
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            font-weight: 600;
+            text-align: center;
+            min-width: 100px;
+        }
+        
+        .arrows-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            padding: 0.5rem 0;
+        }
+        
+        .arrow-item {
+            display: flex;
+            align-items: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+        }
+        
+        .arrow-right { color: var(--success); }
+        .arrow-left { color: var(--secondary); }
+        
+        /* === Stat Cards === */
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-4px);
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--secondary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+        
+        /* === Interactive Panels === */
+        .interactive-panel {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin: 1.5rem 0;
+        }
+        
+        .interactive-panel label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+        
+        .interactive-panel input[type="range"] {
+            width: 100%;
+            margin: 0.5rem 0;
+        }
+        
+        .result-display {
+            background: var(--gradient-primary);
+            color: #f1f5f9;
+            padding: 1.25rem;
+            border-radius: 12px;
+            margin-top: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .result-display p,
+        .result-display span,
+        .result-display strong,
+        .result-display code {
+            color: #f1f5f9;
+        }
+        
+        /* === Checklist === */
+        .checklist {
+            list-style: none;
+            margin-left: 0;
+        }
+        
+        .checklist li {
+            padding: 0.75rem 0;
+            padding-left: 2.5rem;
+            position: relative;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .checklist li:last-child {
+            border-bottom: none;
+        }
+        
+        .checklist li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--success);
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+        
+        /* === Navigation === */
+        .nav-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            z-index: 999;
+        }
+        
+        .nav-btn {
+            background: var(--gradient-secondary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .nav-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+        }
+        
+        .nav-btn:disabled {
+            background: var(--border);
+            color: var(--text-muted);
+            cursor: not-allowed;
+        }
+        
+        .nav-btn.secondary {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--border);
+        }
+        
+        .nav-btn.secondary:hover {
+            border-color: var(--secondary);
+            color: var(--secondary);
+        }
+        
+        /* === Footer Attribution === */
+        .footer-credit {
+            position: fixed;
+            bottom: 1rem;
+            left: 2rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            z-index: 998;
+        }
+        
+        /* === TOC Modal === */
+        .toc-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .toc-modal.show { display: flex; }
+        
+        .toc-content {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            width: 90%;
+        }
+        
+        .toc-content h2 {
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+        }
+        
+        .toc-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .toc-section-title {
+            font-weight: 600;
+            color: var(--secondary-dark);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.75rem;
+        }
+        
+        .toc-item {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: background 0.2s;
+            font-size: 0.95rem;
+        }
+        
+        .toc-item:hover {
+            background: var(--bg-cool);
+            color: var(--secondary);
+        }
+        
+        .toc-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+        
+        /* === Responsive === */
+        @media (max-width: 1200px) {
+            .slide {
+                padding: 5rem 3rem 6rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .slide {
+                padding: 5rem 1.5rem 6rem;
+            }
+            
+            .two-columns, .three-columns {
+                grid-template-columns: 1fr;
+            }
+            
+            .slide h1 {
+                font-size: 1.8rem;
+            }
+            
+            .quiz-options {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* === Keyboard Hints === */
+        .keyboard-hint {
+            position: fixed;
+            bottom: 5rem;
+            right: 2rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-align: right;
+        }
+        
+        kbd {
+            background: var(--bg-cool);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 0.15rem 0.4rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+        }
+    </style>
+</head>
+<body>
+<div class="presentation">
+<!-- Progress Bar -->
+<div class="progress-container">
+<div aria-valuemin="1" class="progress-bar" id="progressBar" role="progressbar"></div>
+</div>
+<!-- Top Bar -->
+<div class="top-bar">
+<span class="course-id">CSIE-ASE • Computer Networks • Week 14</span>
+<span class="slide-counter"><span id="currentSlide">1</span> / <span id="totalSlides">54</span></span>
+</div>
+<!-- ===================== SLIDES ===================== -->
+<!-- SLIDE 1: Title -->
+<div class="slide slide-title active" data-slide="1">
+<h1>🎓 Week 14: Integrated Review</h1>
+<p class="subtitle">Computer Networks — Course Synthesis</p>
+<p class="meta">Duration: 90 minutess • Bachelor in Economic Informatics, Year 3</p>
+</div>
+<!-- SLIDE 2: Historical Hook -->
+<div class="slide" data-slide="2">
+<h1>🚀 From "LO" to 400 Exabytes per Month</h1>
+<div class="story-box">
+<div class="story-title">📜 The First Network Message</div>
+<p>On 29 October 1969, at 22:30, programmer Charley Kline at UCLA attempted to send the word "LOGIN" to a computer at Stanford Research Institute via ARPANET. The system crashed after transmitting just two letters: "LO". An hour later, the full message finally went through. Today, the Internet carries over <strong>400 exabytes of traffic monthly</strong>—a billion-fold increase. What happened in between? Layers, protocols, and engineers who learnt from failures.</p>
+</div>
+<div class="highlight-box">
+<p>Week 14 adds no new concepts—it <strong>integrates</strong> everything into a reproducible diagnostic process: from symptom to probable cause, with verifiable evidence (captures, logs, measurements).</p>
+</div>
+</div>
+<!-- SLIDE 3: Learning objectives -->
+<div class="slide" data-slide="3">
+<h1>🎯 Learning Objectives</h1>
+<p>By the end of this session, you will be able to:</p>
+<div class="two-columns">
+<div>
+<h3>Knowledge &amp; Understandinging</h3>
+<ul>
+<li><strong>Reconstruct</strong> the complete path of a message: Application → Socket → TCP/UDP → IP → Ethernet/ARP</li>
+<li><strong>Explain</strong> the role of each OSI/TCP-IP layer in troubleshooting</li>
+<li><strong>Identify</strong> common network symptoms and their root causes</li>
+</ul>
+</div>
+<div>
+<h3>Application &amp; Analysis</h3>
+<ul>
+<li><strong>Apply</strong> a diagnostic checklist in logical order: L3 connectivity → ports → capture → application</li>
+<li><strong>Interpret</strong> pcap captures and correlate symptoms with causes</li>
+<li><strong>Justify</strong> technical decisions in a project presentation</li>
+</ul>
+</div>
+</div>
+</div>
+<!-- SLIDE 4: Course Roadmap -->
+<div class="slide" data-slide="4">
+<h1>🗺️ Course Roadmap — Where We've Been</h1>
+<div class="diagram-container">
+<svg style="max-width: 900px; min-height: 260px;" viewbox="0 0 900 280">
+<!-- Timeline base -->
+<line stroke="#e2e8f0" stroke-linecap="round" stroke-width="4" x1="50" x2="850" y1="140" y2="140"></line>
+<!-- Week markers -->
+<g>
+<!-- W1-2: Fundamentals -->
+<circle cx="100" cy="140" fill="#3b82f6" r="18"></circle>
+<text fill="white" font-size="11" font-weight="600" text-anchor="middle" x="100" y="145">1-2</text>
+<text fill="#1e293b" font-size="11" font-weight="600" text-anchor="middle" x="100" y="90">Fundamentals</text>
+<text fill="#64748b" font-size="10" text-anchor="middle" x="100" y="105">OSI/TCP-IP</text>
+<!-- W3-4: Sockets -->
+<circle cx="220" cy="140" fill="#8b5cf6" r="18"></circle>
+<text fill="white" font-size="11" font-weight="600" text-anchor="middle" x="220" y="145">3-4</text>
+<text fill="#1e293b" font-size="11" font-weight="600" text-anchor="middle" x="220" y="175">Sockets</text>
+<text fill="#64748b" font-size="10" text-anchor="middle" x="220" y="190">Programming</text>
+<!-- W5-6: Network Layer -->
+<circle cx="340" cy="140" fill="#22c55e" r="18"></circle>
+<text fill="white" font-size="11" font-weight="600" text-anchor="middle" x="340" y="145">5-6</text>
+<text fill="#1e293b" font-size="11" font-weight="600" text-anchor="middle" x="340" y="90">Network</text>
+<text fill="#64748b" font-size="10" text-anchor="middle" x="340" y="105">IP, Routing</text>
+<!-- W7-8: Transport -->
+<circle cx="460" cy="140" fill="#f59e0b" r="18"></circle>
+<text fill="white" font-size="11" font-weight="600" text-anchor="middle" x="460" y="145">7-8</text>
+<text fill="#1e293b" font-size="11" font-weight="600" text-anchor="middle" x="460" y="175">Transport</text>
+<text fill="#64748b" font-size="10" text-anchor="middle" x="460" y="190">TCP, UDP</text>
+<!-- W9-11: Application -->
+<circle cx="580" cy="140" fill="#14b8a6" r="18"></circle>
+<text fill="white" font-size="11" font-weight="600" text-anchor="middle" x="580" y="145">9-11</text>
+<text fill="#1e293b" font-size="11" font-weight="600" text-anchor="middle" x="580" y="90">Application</text>
+<text fill="#64748b" font-size="10" text-anchor="middle" x="580" y="105">HTTP, DNS</text>
+<!-- W12-13: Advanced -->
+<circle cx="700" cy="140" fill="#ef4444" r="18"></circle>
+<text fill="white" font-size="11" font-weight="600" text-anchor="middle" x="700" y="145">12-13</text>
+<text fill="#1e293b" font-size="11" font-weight="600" text-anchor="middle" x="700" y="175">Advanced</text>
+<text fill="#64748b" font-size="10" text-anchor="middle" x="700" y="190">LB, Security</text>
+<!-- W14: Review (highlighted) -->
+<circle cx="820" cy="140" fill="#0ea5e9" r="22" stroke="#0284c7" stroke-width="3"></circle>
+<text fill="white" font-size="12" font-weight="700" text-anchor="middle" x="820" y="145">14</text>
+<text fill="#0284c7" font-size="12" font-weight="700" text-anchor="middle" x="820" y="90">Review</text>
+<text fill="#0ea5e9" font-size="10" text-anchor="middle" x="820" y="105">YOU ARE HERE</text>
+</g>
+<!-- Legend -->
+<text fill="#64748b" font-size="11" text-anchor="middle" x="450" y="250">
+                        From individual concepts → integrated diagnostic skills
+                    </text>
+</svg>
+</div>
+</div>
+<!-- SLIDE 5: Why It Matters -->
+<div class="slide" data-slide="5">
+<h1>💡 Why It Matters for Programmers</h1>
+<p>Network defects manifest as application bugs: inexplicable timeouts, intermittent errors, unstable performance. A programmer who understands the layer beneath the socket API can:</p>
+<div class="two-columns">
+<div>
+<h3 style="color: var(--danger);">Without Network Knowledge</h3>
+<ul>
+<li>Debugging takes hours or days</li>
+<li>"I don't know why it times out"</li>
+<li>Vague communication with DevOps</li>
+<li>Fragile services in production</li>
+</ul>
+</div>
+<div>
+<h3 style="color: var(--success);">With Network Knowledge</h3>
+<ul>
+<li>Diagnosis in minutess</li>
+<li>"I see RST immediately after SYN"</li>
+<li>Precise terms, fast solutions</li>
+<li>Informed retries, timeouts, health checks</li>
+</ul>
+</div>
+</div>
+<div class="insight-box">
+<div class="insight-title">Perspectiv of Cariera</div>
+<p>Technical interviews at companies like Google, Amazon, and Microsoft frequently test exactly these diagnostic skills. Understandinging "what happens when you type a URL" is a gateway question.</p>
+</div>
+</div>
+<!-- SLIDE 6: Section Divider - Layers Review -->
+<div class="slide slide-section" data-slide="6">
+<div class="section-number">Section 1</div>
+<h1>The Layered Model</h1>
+<p class="section-desc">Reviewing the mental map that makes troubleshooting systematic</p>
+</div>
+<!-- SLIDE 7: OSI Stack -->
+<div class="slide" data-slide="7">
+<h1>🏗️ The Layered Model — Mental Map</h1>
+<div class="osi-stack">
+<div class="osi-layer l7">
+<span class="layer-name">L7 — Application</span>
+<span class="layer-example">HTTP, DNS, SMTP, SSH, FTP</span>
+</div>
+<div class="osi-layer l4">
+<span class="layer-name">L4 — Transport</span>
+<span class="layer-example">TCP, UDP, QUIC, SCTP</span>
+</div>
+<div class="osi-layer l3">
+<span class="layer-name">L3 — Network</span>
+<span class="layer-example">IP, ICMP, routing protocols</span>
+</div>
+<div class="osi-layer l2">
+<span class="layer-name">L2 — Data Link</span>
+<span class="layer-example">Ethernet, MAC, ARP, switches</span>
+</div>
+<div class="osi-layer l1">
+<span class="layer-name">L1 — Physical</span>
+<span class="layer-example">Cables, signals, connectors</span>
+</div>
+</div>
+<p style="text-align: center; color: var(--text-muted); margin-top: 1rem;">Each layer solves a specific problem and communicates only with its neighbours.</p>
+</div>
+<!-- SLIDE 8: Encapsulation -->
+<div class="slide" data-slide="8">
+<h1>📦 Encapsulation — What Gets Added at Each Layer</h1>
+<div class="code-block">
+<span class="code-lang">Concept</span>
+<span class="comment">Application</span>  → [<span class="string">User Data</span>]
+<span class="comment">Transport</span>   → [<span class="keyword">TCP/UDP Header</span> | Data] = <span class="string">Segment/Datagram</span>
+<span class="comment">Network</span>     → [<span class="keyword">IP Header</span> | Segment] = <span class="string">Packet</span>
+<span class="comment">Link</span>        → [<span class="keyword">Antet Ethernet</span> | Packet | <span class="keyword">CRC</span>] = <span class="string">Frame</span>
+</div>
+<div class="reveal-container">
+<h3>🤔 Think Before You Answer</h3>
+<p>What is the minimum total overhead for a TCP packet? (Ethernet + IP + TCP)</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer</button>
+<div class="reveal-content">
+<p><strong>14 bytes (Ethernet) + 20 bytes (IP minimum) + 20 bytes (TCP minimum) = 54 bytes minimum</strong></p>
+<p>For a 1-byte payload, that's ~98% overhead! This is why Nagle's algorithm combines small messages and why you should batch small writes.</p>
+</div>
+</div>
+</div>
+<!-- SLIDE 9: Address Types -->
+<div class="slide" data-slide="9">
+<h1>🔢 Address Types — Each Layer Has Its Own</h1>
+<table class="data-table">
+<thead>
+<tr>
+<th>Layer</th>
+<th>Tip address</th>
+<th>Size</th>
+<th>Example</th>
+<th>Resolution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>L2 (Link)</td>
+<td>MAC</td>
+<td>48 bits</td>
+<td><code class="inline">aa:bb:cc:dd:ee:ff</code></td>
+<td>ARP</td>
+</tr>
+<tr>
+<td>L3 (Network)</td>
+<td>IP</td>
+<td>32 / 128 bits</td>
+<td><code class="inline">192.168.1.100</code></td>
+<td>DNS, routing</td>
+</tr>
+<tr>
+<td>L4 (Transport)</td>
+<td>Port</td>
+<td>16 bits</td>
+<td><code class="inline">80, 443, 22</code></td>
+<td>Application</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-box">
+<p><strong>Key insight:</strong> A full socket address combines IP + Port (e.g., <code class="inline">192.168.1.100:8080</code>). The combination uniquely identifies a process endpoint on the Internet.</p>
+</div>
+</div>
+<!-- SLIDE 10: ARP Deep Dive -->
+<div class="slide" data-slide="10">
+<h1>🔍 ARP — The Bridge Between L2 and L3</h1>
+<div class="definition-box">
+<div class="def-term">Address Resolution Protocol (ARP)</div>
+<p>A protocol that maps Network layer addresses (IPv4) to Data Link layer addresses (MAC) within a local network segment. It enables IP packets to be encapsulated in Ethernet frames for transmission.</p>
+</div>
+<div class="two-columns">
+<div>
+<h3>How ARP Works</h3>
+<p><strong>Request (broadcast):</strong><br/>"Who has IP 10.0.0.2? Tell 10.0.0.1"</p>
+<p><strong>Reply (unicast):</strong><br/>"10.0.0.2 is at aa:bb:cc:dd:ee:ff"</p>
+<p style="margin-top: 1rem;"><strong>Verification:</strong></p>
+<code class="inline">ip neigh</code> or <code class="inline">arp -a</code>
+</div>
+<div>
+<div class="warning-box">
+<div class="warning-title">⚠️ Security Vulnerability</div>
+<p>ARP has <strong>no authentication</strong>. Anyone on the LAN can send false ARP replies and "poison" neighbours' caches—the basis of Man-in-the-Middle attacks on unsecured Wi-Fi networks (CVE-1999-0667).</p>
+</div>
+</div>
+</div>
+</div>
+<!-- SLIDE 11: Quiz - ARP -->
+<div class="slide" data-slide="11">
+<h1>🧠 Knowledge Check — ARP</h1>
+<div class="quiz-container">
+<p class="quiz-question">Why must ARP be used before sending an IP packet to another host on the same subnet?</p>
+<div class="quiz-options">
+<div class="quiz-option" data-correct="false" onclick="checkQuiz(this, false)">A) To encrypt the packet for security</div>
+<div class="quiz-option" data-correct="true" onclick="checkQuiz(this, true)">B) To get the destination's MAC address for the Ethernet frame</div>
+<div class="quiz-option" data-correct="false" onclick="checkQuiz(this, false)">C) To verify the IP address is valid</div>
+<div class="quiz-option" data-correct="false" onclick="checkQuiz(this, false)">D) To establish a TCP connection first</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+<!-- SLIDE 12: Section Divider - Transport -->
+<div class="slide slide-section" data-slide="12">
+<div class="section-number">Section 2</div>
+<h1>Transport Layer Review</h1>
+<p class="section-desc">TCP vs UDP — choosing the right tool for the job</p>
+</div>
+<!-- SLIDE 13: TCP vs UDP -->
+<div class="slide" data-slide="13">
+<h1>⚔️ TCP vs UDP — The Right Choice</h1>
+<table class="data-table">
+<thead>
+<tr>
+<th>Characteristic</th>
+<th>TCP</th>
+<th>UDP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Connection</td>
+<td>Yes (3-way handshake)</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Reliability</td>
+<td>Guaranteed (ACK + retransmissions)</td>
+<td>Best-effort</td>
+</tr>
+<tr>
+<td>Ordering</td>
+<td>Guaranteed (sequence numbers)</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Control Flux</td>
+<td>Yes (sliding window)</td>
+<td>No</td>
+</tr>
+<tr>
+<td>size Antet</td>
+<td>20+ bytes</td>
+<td>8 bytes</td>
+</tr>
+<tr>
+<td>Typical Usage</td>
+<td>HTTP, SSH, FTP, Email</td>
+<td>DNS, VoIP, Gaming, Video</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- SLIDE 14: TCP Handshake -->
+<div class="slide" data-slide="14">
+<h1>🤝 TCP 3-Way Handshake</h1>
+<div class="tcp-handshake">
+<div class="endpoint-box">🖥️ Client</div>
+<div class="arrows-container">
+<div class="arrow-item arrow-right">→ SYN (seq=x) →</div>
+<div class="arrow-item arrow-left">← SYN-ACK (seq=y, ack=x+1) ←</div>
+<div class="arrow-item arrow-right">→ ACK (ack=y+1) →</div>
+</div>
+<div class="endpoint-box">🖥️ Server</div>
+</div>
+<div class="story-box">
+<div class="story-title">📜 Historical Incident: Panix SYN Flood (1996)</div>
+<p>The first major documented DDoS attack: attackers sent avalanches of fake SYN packets, exhausting the connection table. The solution? <strong>SYN Cookies</strong>—the server encodes connection state in the TCP sequence number itself, eliminating the need to store state for incomplete handshakes.</p>
+</div>
+</div>
+<!-- SLIDE 15: TCP Connection Termination -->
+<div class="slide" data-slide="15">
+<h1>👋 TCP Connection Termination</h1>
+<div class="two-columns">
+<div>
+<h3>Graceful Close (FIN)</h3>
+<div class="tcp-handshake" style="flex-direction: column; align-items: center; padding: 1rem;">
+<p style="font-family: 'JetBrains Mono', monospace; font-size: 0.9rem;">
+                            Client → FIN → Server<br/>
+                            Client ← ACK ← Server<br/>
+                            Client ← FIN ← Server<br/>
+                            Client → ACK → Server
+                        </p>
+</div>
+<p>Both sides agree to close. Data integrity preserved.</p>
+</div>
+<div>
+<h3>Abrupt Close (RST)</h3>
+<div class="insight-box">
+<div class="insight-title">What RST means</div>
+<p>An RST (Reset) packet indicates something went wrong:</p>
+<ul style="margin-top: 0.5rem;">
+<li>Port not listening</li>
+<li>Connection rejected by firewall</li>
+<li>Application crashed</li>
+<li>Invalid segment received</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<!-- SLIDE 16: Quiz - TCP -->
+<div class="slide" data-slide="16">
+<h1>🧠 Knowledge Check — TCP</h1>
+<div class="quiz-container">
+<p class="quiz-question">What does an RST packet in a TCP capture indicate?</p>
+<div class="quiz-options">
+<div class="quiz-option" data-correct="false" onclick="checkQuiz(this, false)">A) The connection was closed normally (graceful shutdown)</div>
+<div class="quiz-option" data-correct="true" onclick="checkQuiz(this, true)">B) Forced reset — port closed or error condition</div>
+<div class="quiz-option" data-correct="false" onclick="checkQuiz(this, false)">C) Retransmission request</div>
+<div class="quiz-option" data-correct="false" onclick="checkQuiz(this, false)">D) Acknowledgement received</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+<!-- SLIDE 17: Common Ports -->
+<div class="slide" data-slide="17">
+<h1>🔌 Well-Known Ports to Remember</h1>
+<div class="three-columns">
+<div class="stat-card">
+<div class="stat-number">22</div>
+<div class="stat-label">SSH<br/>(Secure Shell)</div>
+</div>
+<div class="stat-card">
+<div class="stat-number">53</div>
+<div class="stat-label">DNS<br/>(UDP + TCP)</div>
+</div>
+<div class="stat-card">
+<div class="stat-number">80</div>
+<div class="stat-label">HTTP<br/>(Web)</div>
+</div>
+<div class="stat-card">
+<div class="stat-number">443</div>
+<div class="stat-label">HTTPS<br/>(Secure Web)</div>
+</div>
+<div class="stat-card">
+<div class="stat-number">25</div>
+<div class="stat-label">SMTP<br/>(Email Send)</div>
+</div>
+<div class="stat-card">
+<div class="stat-number">3306</div>
+<div class="stat-label">MySQL<br/>(Database)</div>
+</div>
+</div>
+<div class="highlight-box" style="margin-top: 2rem;">
+<p><strong>Port ranges:</strong> 0-1023 (well-known, require root), 1024-49151 (registered), 49152-65535 (ephemeral/dynamic)</p>
+</div>
+</div>
+<!-- SLIDE 18: Section Divider - Network Layer -->
+<div class="slide slide-section" data-slide="18">
+<div class="section-number">Section 3</div>
+<h1>Network Layer Review</h1>
+<p class="section-desc">IP addressing, subnetting, and routing fundamentals</p>
+</div>
+<!-- SLIDE 19: Routing Fundamentals -->
+<div class="slide" data-slide="19">
+<h1>🗺️ Routing — How Packets Find Their Way</h1>
+<div class="two-columns">
+<div>
+<h3>Routing Table Components</h3>
+<ul>
+<li><strong>Destination + Mask:</strong> Network to match</li>
+<li><strong>Next-hop:</strong> Where to forward</li>
+<li><strong>Interface:</strong> Which NIC to use</li>
+<li><strong>Metric:</strong> Cost/preference</li>
+</ul>
+<div class="code-block" style="margin-top: 1rem;">
+<span class="code-lang">Bash</span>
+<span class="prompt">$</span> ip route
+default via 192.168.1.1 dev eth0
+10.0.14.0/24 dev mn-h1 scope link
+172.16.0.0/16 via 10.0.14.1 dev eth0
+                    </div>
+</div>
+<div>
+<h3>Longest Prefix Match</h3>
+<p>The most specific route wins.</p>
+<div class="definition-box">
+<p><strong>Example:</strong> For destination 10.0.0.5:</p>
+<ul style="margin-top: 0.5rem;">
+<li>0.0.0.0/0 → matches (/0)</li>
+<li>10.0.0.0/8 → matches (/8)</li>
+<li>10.0.0.0/24 → <strong>CHOSEN</strong> (/24)</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<!-- SLIDE 20: CIDR Calculator -->
+<div class="slide" data-slide="20">
+<h1>🧮 CIDR Quick Reference</h1>
+<div class="interactive-panel">
+<label for="cidrSlider">Select CIDR prefix length: <span id="cidrValue">/24</span></label>
+<input id="cidrSlider" max="30" min="16" oninput="updataCIDR()" type="range" value="24"/>
+<div class="result-display">
+<p><strong>Network mask:</strong> <span id="netmask">255.255.255.0</span></p>
+<p><strong>Total addresses:</strong> <span id="totalAddrs">256</span></p>
+<p><strong>Usable hosts:</strong> <span id="usableHosts">254</span></p>
+</div>
+</div>
+<div class="two-columns" style="margin-top: 1rem;">
+<div class="highlight-box">
+<p><strong>/24</strong> = 256 addresses, 254 usable hosts (most common for small networks)</p>
+</div>
+<div class="highlight-box">
+<p><strong>/16</strong> = 65,536 addresses (traditional Class B network)</p>
+</div>
+</div>
+</div>
+<!-- SLIDE 21: BGP Story -->
+<div class="slide" data-slide="21">
+<h1>🌐 BGP — When Routing Goes Wrong</h1>
+<div class="story-box">
+<div class="story-title">⚡ Incident: YouTube-Pakistan (2008)</div>
+<p>Pakistan Telecom attempted to block YouTube locally by annewncing a more specific BGP prefix for YouTube's IP range. The annewncement leaked through PCCW to the global Internet. For approximately 2 hours, YouTube traffic worldwide was black-holed into Pakistan's network. BGP, by design, has no built-in verification of annewncement legitimacy.</p>
+</div>
+<div class="warning-box">
+<div class="warning-title">Lesson Learned</div>
+<p>Modern networks depend on trust and filtering. Initiatives like <strong>RPKI (Resource Public Key Infrastructure)</strong> add cryptographic validation to BGP annewncements, but adoption remains incomplete.</p>
+</div>
+</div>
+<!-- SLIDE 22: Section Divider - Application Layer -->
+<div class="slide slide-section" data-slide="22">
+<div class="section-number">Section 4</div>
+<h1>Application Layer Review</h1>
+<p class="section-desc">HTTP, DNS, and the protocols that power the web</p>
+</div>
+<!-- SLIDE 23: HTTP Prezentare General -->
+<div class="slide" data-slide="23">
+<h1>🌍 HTTP — The Protocol That Moves the Web</h1>
+<div class="code-block">
+<span class="code-lang">HTTP</span>
+<span class="comment"># Request</span>
+<span class="keyword">GET</span> /api/users HTTP/1.1
+Host: api.example.com
+Accept: application/json
+User-Agent: curl/7.68.0
+
+<span class="comment"># Response</span>
+HTTP/1.1 <span class="number">200</span> <span class="string">OK</span>
+Content-Type: application/json
+Content-Length: 256
+
+{<span class="string">"users"</span>: [...]}
+            </div>
+<div class="three-columns" style="margin-top: 1.5rem;">
+<div class="stat-card" style="border-left: 4px solid var(--success);">
+<div class="stat-number" style="color: var(--success);">2xx</div>
+<div class="stat-label">Success</div>
+</div>
+<div class="stat-card" style="border-left: 4px solid var(--accent);">
+<div class="stat-number" style="color: var(--accent);">4xx</div>
+<div class="stat-label">error Client</div>
+</div>
+<div class="stat-card" style="border-left: 4px solid var(--danger);">
+<div class="stat-number" style="color: var(--danger);">5xx</div>
+<div class="stat-label">error Server</div>
+</div>
+</div>
+</div>
+<!-- SLIDE 24: HTTP Codes for Debugging -->
+<div class="slide" data-slide="24">
+<h1>📊 HTTP Status Codes for Debugging</h1>
+<table class="data-table">
+<thead>
+<tr>
+<th>Code</th>
+<th>Name</th>
+<th>What It Means for Debugging</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span style="color: var(--success); font-weight: 600;">200</span></td>
+<td>OK</td>
+<td>All good—check response body content</td>
+</tr>
+<tr>
+<td><span style="color: var(--accent); font-weight: 600;">301/302</span></td>
+<td>Redirect</td>
+<td>Follow the Location header</td>
+</tr>
+<tr>
+<td><span style="color: var(--accent); font-weight: 600;">404</span></td>
+<td>Not Found</td>
+<td>Wrong path—verify the URL</td>
+</tr>
+<tr>
+<td><span style="color: var(--danger); font-weight: 600;">500</span></td>
+<td>error Server Intern</td>
+<td>Server-side bug—check server logs</td>
+</tr>
+<tr>
+<td><span style="color: var(--danger); font-weight: 600;">502</span></td>
+<td>Gateway Nevalid</td>
+<td>Proxy/LB cannot reach backend</td>
+</tr>
+<tr>
+<td><span style="color: var(--danger); font-weight: 600;">504</span></td>
+<td>Timeout Gateway</td>
+<td>Backend too slow or down</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- SLIDE 25: DNS -->
+<div class="slide" data-slide="25">
+<h1>🔤 DNS — From Names to Addresses</h1>
+<div class="story-box">
+<div class="story-title">🏛️ Context Historically</div>
+<p>Atil 1983, name-to-IP translation was done via a single HOSTS.TXT file, manually copied to every computer on ARPANET. Paul Mockapetris proposed DNS—a distributed, hierarchical database with caching. The first version had only 7 top-level domains (.com, .edu, .gov, .mil, .net, .org, .arpa).</p>
+</div>
+<div class="code-block">
+<span class="code-lang">Bash</span>
+<span class="comment"># Query A record</span>
+<span class="prompt">$</span> dig example.com +short
+93.184.216.34
+
+<span class="comment"># Query with full details</span>
+<span class="prompt">$</span> dig example.com
+
+<span class="comment"># Use specific DNS server</span>
+<span class="prompt">$</span> dig @8.8.8.8 example.com
+            </div>
+</div>
+<!-- SLIDE 26: DNS as Failure Point -->
+<div class="slide" data-slide="26">
+<h1>⚠️ DNS as a Failure Point</h1>
+<div class="code-block">
+<span class="code-lang">Demo</span>
+<span class="comment"># Working DNS</span>
+<span class="prompt">$</span> curl http://example.com/
+<!DOCTYPE html>
+...
+
+<span class="comment"># Broken DNS (bad nameserver)</span>
+<span class="prompt">$</span> echo "nameserver 1.2.3.4" | sudo tee /etc/resolv.conf
+<span class="prompt">$</span> curl http://example.com/
+curl: (6) Could not resolve host: example.com
+
+<span class="comment"># Bypass DNS with direct IP</span>
+<span class="prompt">$</span> curl http://93.184.216.34/
+<!DOCTYPE html>
+...
+            </div>
+<div class="insight-box">
+<div class="insight-title">Tip of Diagnostic</div>
+<p>If curl/wget fails with "could not resolve host" but works with an IP address, DNS is the problem—not the network or the server.</p>
+</div>
+</div>
+<!-- SLIDE 27: Section Divider - Diagnostics -->
+<div class="slide slide-section" data-slide="27">
+<div class="section-number">Section 5</div>
+<h1>Metodologie of Diagnostic</h1>
+<p class="section-desc">A systematic approach to "it doesn't work"</p>
+</div>
+<!-- SLIDE 28: Diagnostic Checklist -->
+<div class="slide" data-slide="28">
+<h1>✅ Diagnostic Checklist</h1>
+<p>When something "doesn't work", apply in order:</p>
+<div class="code-block">
+<span class="code-lang">Methodology</span>
+1. <span class="keyword">Minimal Reproduction</span>
+   └─ Same request, same topology, same version?
+
+2. <span class="keyword">L3 Connectivity</span>
+   └─ ping &lt;ip&gt;
+   └─ ip route get &lt;ip&gt;
+   └─ ip neigh (ARP cache)
+
+3. <span class="keyword">Ports and Sockets</span>
+   └─ ss -lntp (what's listening?)
+   └─ ss -tnp (active connections)
+
+4. <span class="keyword">Capture at Boundary</span>
+   └─ tcpdump -i &lt;iface&gt; host &lt;ip&gt; -w capture.pcap
+   └─ tshark -r capture.pcap -Y "tcp.port==80"
+
+5. <span class="keyword">Interpretation</span>
+   └─ Complete handshake? Retransmissions? RST? HTTP codes?
+
+6. <span class="keyword">Remediation + Validation</span>
+   └─ Small change → measurement → comparison
+            </div>
+</div>
+<!-- SLIDE 29: Symptom to Cause -->
+<div class="slide" data-slide="29">
+<h1>🔗 Symptoms → Causes → Evidence</h1>
+<table class="data-table">
+<thead>
+<tr>
+<th>Simptom application</th>
+<th>Real Cause</th>
+<th>Cum Se Manifesta</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code class="inline">Connection timeout</code></td>
+<td>Firewall blocks SYN</td>
+<td>pcap: SYN without SYN-ACK</td>
+</tr>
+<tr>
+<td><code class="inline">Connection refused</code></td>
+<td>Port not listening</td>
+<td>ss: not in LISTEN state</td>
+</tr>
+<tr>
+<td><code class="inline">504 Gateway Timeout</code></td>
+<td>Slow/down backend</td>
+<td>LB log + pcap to backend</td>
+</tr>
+<tr>
+<td>Variable latency</td>
+<td>TCP retransmissions</td>
+<td>pcap: duplicate packets</td>
+</tr>
+<tr>
+<td><code class="inline">Port already in use</code></td>
+<td>Previous process active</td>
+<td><code class="inline">lsof -i :PORT</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- SLIDE 30: Demo 1 -->
+<div class="slide" data-slide="30">
+<h1>🔬 Demo 1: TCP Handshake vs Timeout</h1>
+<div class="code-block">
+<span class="code-lang">Demo</span>
+<span class="comment"># Terminal 1: Start a simple HTTP server</span>
+<span class="prompt">$</span> python3 -m http.server 8000
+
+<span class="comment"># Terminal 2: Capture traffic</span>
+<span class="prompt">$</span> sudo tcpdump -i lo port 8000 -nn
+
+<span class="comment"># Terminal 3: Make a request</span>
+<span class="prompt">$</span> curl http://localhost:8000/
+
+<span class="comment"># Observe in tcpdump:</span>
+<span class="comment"># SYN → SYN-ACK → ACK → GET / HTTP/1.1 → 200 OK → FIN</span>
+</div>
+<div class="highlight-box">
+<p><strong>Expected output:</strong> A complete TCP handshake followed by HTTP request/response, then graceful connection close with FIN packets.</p>
+</div>
+</div>
+<!-- SLIDE 31: Demo 2 -->
+<div class="slide" data-slide="31">
+<h1>🔬 Demo 2: Refused vs Timeout</h1>
+<div class="code-block">
+<span class="code-lang">Demo</span>
+<span class="comment"># Closed port (immediate refusal)</span>
+<span class="prompt">$</span> curl http://localhost:9999/
+curl: (7) Failed to connect to localhost port 9999: Connection refused
+<span class="comment"># → Immediate RST packet</span>
+<span class="comment"># Filtered port (timeout) - simulate with iptables</span>
+<span class="prompt">$</span> sudo iptables -A INPUT -p tcp --dport 8888 -j DROP
+<span class="prompt">$</span> curl --connect-timeout 3 http://localhost:8888/
+curl: (28) Connection timed out after 3001 milliseconds
+<span class="comment"># → SYN packets without any response</span>
+<span class="comment"># Clean up</span>
+<span class="prompt">$</span> sudo iptables -D INPUT -p tcp --dport 8888 -j DROP
+            </div>
+<div class="insight-box">
+<div class="insight-title">Distinctie Cheie</div>
+<p><strong>Connection refused</strong> = immediate RST = port not listening. <strong>Timeout</strong> = no response = firewall/routing issue.</p>
+</div>
+</div>
+<!-- SLIDE 32: PCAP Analysis -->
+<div class="slide" data-slide="32">
+<h1>📡 Analysing PCAP Captures</h1>
+<div class="code-block">
+<span class="code-lang">Bash</span>
+<span class="comment"># Capture traffic to file</span>
+<span class="prompt">$</span> sudo tcpdump -i eth0 host 10.0.14.100 -w capture.pcap
+
+<span class="comment"># Analyse TCP conversations</span>
+<span class="prompt">$</span> tshark -r capture.pcap -q -z conv,tcp
+
+<span class="comment"># Filter HTTP requests</span>
+<span class="prompt">$</span> tshark -r capture.pcap -Y "http.request" \
+    -T fields -e ip.src -e http.request.uri
+
+<span class="comment"># Find initial handshakes (SYN only)</span>
+<span class="prompt">$</span> tshark -r capture.pcap -Y "tcp.flags.syn==1 &amp;&amp; tcp.flags.ack==0"
+
+<span class="comment"># Count retransmissions</span>
+<span class="prompt">$</span> tshark -r capture.pcap -Y "tcp.analysis.retransmission" | wc -l
+            </div>
+</div>
+<!-- SLIDE 33: Quiz - PCAP -->
+<div class="slide" data-slide="33">
+<h1>🧠 Knowledge Check — PCAP Interpretation</h1>
+<div class="quiz-container">
+<p class="quiz-question">In a capture you see: SYN → SYN → SYN → (nothing). What does this indicate?</p>
+<div class="quiz-options">
+<div class="quiz-option" data-correct="false" onclick="checkQuiz(this, false)">A) The server is busy and processing slowly</div>
+<div class="quiz-option" data-correct="false" onclick="checkQuiz(this, false)">B) The connection was established successfully</div>
+<div class="quiz-option" data-correct="true" onclick="checkQuiz(this, true)">C) Firewall is blocking — SYN without SYN-ACK</div>
+<div class="quiz-option" data-correct="false" onclick="checkQuiz(this, false)">D) The server sent an RST</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+<!-- SLIDE 34: Prediction Exercise -->
+<div class="slide" data-slide="34">
+<h1>🤔 Think Before You Implement</h1>
+<div class="reveal-container">
+<h3>Scenario:</h3>
+<p>An HTTP client receives "Connection refused" when running<br/><code class="inline">curl http://10.0.14.100:8080/</code></p>
+<p style="margin-top: 1rem;"><strong>What do you check FIRST?</strong></p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Layeregy</button>
+<div class="reveal-content">
+<ol>
+<li><strong>SSH to the server</strong> (10.0.14.100) and run <code class="inline">ss -lntp | grep 8080</code></li>
+<li>If not listening → start the service</li>
+<li>If listening on 127.0.0.1 → rebind to 0.0.0.0</li>
+<li>If listening correctly → check firewall with <code class="inline">iptables -L -n</code></li>
+</ol>
+</div>
+</div>
+</div>
+<!-- SLIDE 35: Section Divider - Patterns -->
+<div class="slide slide-section" data-slide="35">
+<div class="section-number">Section 6</div>
+<h1>Tipare Architectural</h1>
+<p class="section-desc">Load balancing and reverse proxies in practice</p>
+</div>
+<!-- SLIDE 36: Load Balancer Pattern -->
+<div class="slide" data-slide="36">
+<h1>⚖️ Pattern: Load Balancer / Reverse Proxy</h1>
+<div class="diagram-container">
+<svg style="max-width: 910px; min-height: 340px;" viewbox="0 0 700 280">
+<!-- Client -->
+<rect fill="#0ea5e9" height="50" rx="8" stroke="#0284c7" stroke-width="2" width="140" x="280" y="20"></rect>
+<text fill="white" font-size="14" font-weight="600" text-anchor="middle" x="350" y="50">Client</text>
+<!-- Arrow to LB -->
+<line marker-end="url(#arrowhead)" stroke="#1e293b" stroke-width="2" x1="350" x2="350" y1="70" y2="100"></line>
+<!-- Load Balancer -->
+<rect fill="#f59e0b" height="60" rx="10" stroke="#d97706" stroke-width="2" width="200" x="250" y="100"></rect>
+<text fill="white" font-size="13" font-weight="600" text-anchor="middle" x="350" y="125">Load Balancer</text>
+<text fill="white" font-size="11" opacity="0.9" text-anchor="middle" x="350" y="145">:8080 (Round-robin)</text>
+<!-- Arrows to backends -->
+<line stroke="#1e293b" stroke-width="2" x1="300" x2="200" y1="160" y2="200"></line>
+<line stroke="#1e293b" stroke-width="2" x1="400" x2="500" y1="160" y2="200"></line>
+<!-- Backend 1 -->
+<rect fill="#22c55e" height="60" rx="8" stroke="#16a34a" stroke-width="2" width="160" x="120" y="200"></rect>
+<text fill="white" font-size="13" font-weight="600" text-anchor="middle" x="200" y="225">Backend 1</text>
+<text fill="white" font-size="11" opacity="0.9" text-anchor="middle" x="200" y="245">app1:8000</text>
+<!-- Backend 2 -->
+<rect fill="#22c55e" height="60" rx="8" stroke="#16a34a" stroke-width="2" width="160" x="420" y="200"></rect>
+<text fill="white" font-size="13" font-weight="600" text-anchor="middle" x="500" y="225">Backend 2</text>
+<text fill="white" font-size="11" opacity="0.9" text-anchor="middle" x="500" y="245">app2:8000</text>
+<!-- Arrow marker -->
+<defs>
+<marker id="arrowhead" markerheight="7" markerwidth="10" orient="auto" refx="9" refy="3.5">
+<polygon fill="#1e293b" points="0 0, 10 3.5, 0 7"></polygon>
+</marker>
+</defs>
+</svg>
+</div>
+<div class="highlight-box">
+<p><strong>In the starterkit:</strong> <code class="inline">WEEK14/python/apps/lb_proxy.py</code> — a complete Python implementation of round-robin load balancing with passive health checks.</p>
+</div>
+</div>
+<!-- SLIDE 37: LB Code -->
+<div class="slide" data-slide="37">
+<h1>💻 Load Balancer: Key Algorithm</h1>
+<div class="code-block">
+<span class="code-lang">Python</span>
+<span class="comment"># From lb_proxy.py — Round-robin distribution</span>
+<span class="keyword">def</span> <span class="function">get_next_backend</span>(self) -&gt; Optional[Backend]:
+    <span class="string">"""Returns next healthy backend (round-robin)."""</span>
+<span class="keyword">with</span> self._lock:
+        healthy = [b <span class="keyword">for</span> b <span class="keyword">in</span> self.backends <span class="keyword">if</span> b.healthy]
+        <span class="keyword">if not</span> healthy:
+            healthy = self.backends  <span class="comment"># Fallback: try any</span>
+<span class="keyword">if not</span> healthy:
+            <span class="keyword">return</span> <span class="keyword">None</span>
+        
+        backend = healthy[self._current_index % len(healthy)]
+        self._current_index = (self._current_index + <span class="number">1</span>) % len(healthy)
+        <span class="keyword">return</span> backend
+            </div>
+<div class="warning-box">
+<div class="warning-title">Passive Health Check</div>
+<p>After 3 consecutive failures, a backend is marked unhealthy: <code class="inline">backend.mark_failure()</code>. Success resets the counter: <code class="inline">backend.mark_success()</code>.</p>
+</div>
+</div>
+<!-- SLIDE 38: Forwarding Headers -->
+<div class="slide" data-slide="38">
+<h1>📨 Proxy Headers — Preserving Client Identity</h1>
+<div class="two-columns">
+<div>
+<h3>Why Headers Matter</h3>
+<p>When a proxy forwards requests, the backend sees the proxy's IP, not the client's. Standard headers preserve original client information:</p>
+<ul>
+<li><code class="inline">X-Forwarded-For</code>: Client IP chain</li>
+<li><code class="inline">X-Real-IP</code>: Original client IP</li>
+<li><code class="inline">X-Forwarded-Host</code>: Original Host header</li>
+<li><code class="inline">X-Forwarded-Proto</code>: http or https</li>
+</ul>
+</div>
+<div>
+<div class="code-block">
+<span class="code-lang">Python</span>
+<span class="comment"># Adding headers in lb_proxy.py</span>
+
+client_ip = self.client_address[<span class="number">0</span>]
+headers[<span class="string">"X-Forwarded-For"</span>] = client_ip
+headers[<span class="string">"X-Real-IP"</span>] = client_ip
+headers[<span class="string">"X-Forwarded-Host"</span>] = \
+    self.headers.get(<span class="string">"Host"</span>, <span class="string">""</span>)
+                    </div>
+</div>
+</div>
+</div>
+<!-- SLIDE 39: Mininet Topology -->
+<div class="slide" data-slide="39">
+<h1>🔬 Week 14 Mininet Topology</h1>
+<div class="diagram-container">
+<svg style="max-width: 1000px; min-height: 300px;" viewbox="0 0 800 260">
+<!-- Network cloud label -->
+<text fill="#64748b" font-size="12" font-weight="600" text-anchor="middle" x="400" y="25">
+                        10.0.14.0/24 Network
+                    </text>
+<!-- Client -->
+<rect fill="#fff" height="55" rx="6" stroke="#1e293b" stroke-width="2" width="100" x="50" y="100"></rect>
+<text fill="#1e293b" font-size="12" font-weight="600" text-anchor="middle" x="100" y="125">cli</text>
+<text fill="#64748b" font-size="10" text-anchor="middle" x="100" y="142">10.0.14.11</text>
+<!-- Switch s1 -->
+<rect fill="#e0f2fe" height="55" rx="6" stroke="#0ea5e9" stroke-width="2" width="80" x="220" y="100"></rect>
+<text fill="#0284c7" font-size="12" font-weight="600" text-anchor="middle" x="260" y="130">s1</text>
+<!-- Load Balancer -->
+<rect fill="#fef3c7" height="55" rx="6" stroke="#f59e0b" stroke-width="2" width="80" x="220" y="190"></rect>
+<text fill="#d97706" font-size="11" font-weight="600" text-anchor="middle" x="260" y="215">lb</text>
+<text fill="#92400e" font-size="10" text-anchor="middle" x="260" y="232">10.0.14.1</text>
+<!-- Switch s2 -->
+<rect fill="#e0f2fe" height="55" rx="6" stroke="#0ea5e9" stroke-width="2" width="80" x="400" y="100"></rect>
+<text fill="#0284c7" font-size="12" font-weight="600" text-anchor="middle" x="440" y="130">s2</text>
+<!-- Backend 1 -->
+<rect fill="#dcfce7" height="55" rx="6" stroke="#22c55e" stroke-width="2" width="100" x="550" y="60"></rect>
+<text fill="#166534" font-size="11" font-weight="600" text-anchor="middle" x="600" y="85">app1</text>
+<text fill="#15803d" font-size="10" text-anchor="middle" x="600" y="102">10.0.14.100</text>
+<!-- Backend 2 -->
+<rect fill="#dcfce7" height="55" rx="6" stroke="#22c55e" stroke-width="2" width="100" x="550" y="140"></rect>
+<text fill="#166534" font-size="11" font-weight="600" text-anchor="middle" x="600" y="165">app2</text>
+<text fill="#15803d" font-size="10" text-anchor="middle" x="600" y="182">10.0.14.101</text>
+<!-- Connections -->
+<line stroke="#1e293b" stroke-width="2" x1="150" x2="220" y1="127" y2="127"></line>
+<line stroke="#1e293b" stroke-width="2" x1="300" x2="400" y1="127" y2="127"></line>
+<line stroke="#1e293b" stroke-width="2" x1="260" x2="260" y1="155" y2="190"></line>
+<line stroke="#1e293b" stroke-width="2" x1="480" x2="550" y1="110" y2="87"></line>
+<line stroke="#1e293b" stroke-width="2" x1="480" x2="550" y1="140" y2="167"></line>
+</svg>
+</div>
+<div class="code-block">
+<span class="code-lang">Bash</span>
+<span class="comment"># Start the topology</span>
+<span class="prompt">$</span> cd WEEK14
+<span class="prompt">$</span> sudo python3 mininet/topologies/topo_14_recap.py --cli
+            </div>
+</div>
+<!-- SLIDE 40: Section Divider - Project -->
+<div class="slide slide-section" data-slide="40">
+<div class="section-number">Section 7</div>
+<h1>Project Presentation</h1>
+<p class="section-desc">Guidelines for demonstrating your work</p>
+</div>
+<!-- SLIDE 41: Project Structure -->
+<div class="slide" data-slide="41">
+<h1>📁 Project Presentation Structure (7-10 min)</h1>
+<div class="osi-stack" style="max-width: 800px;">
+<div class="osi-layer l7" style="justify-content: flex-start; gap: 1.5rem;">
+<span>1️⃣</span>
+<div>
+<strong>Topology Diagram</strong> (1-2 min)
+                        <p style="font-size: 0.85rem; opacity: 0.9;">Hosts, switches, IP addresses, services</p>
+</div>
+</div>
+<div class="osi-layer l4" style="justify-content: flex-start; gap: 1.5rem;">
+<span>2️⃣</span>
+<div>
+<strong>Explicatie Componente</strong> (2-3 min)
+                        <p style="font-size: 0.85rem; opacity: 0.9;">What each element does, how they communicate</p>
+</div>
+</div>
+<div class="osi-layer l3" style="justify-content: flex-start; gap: 1.5rem;">
+<span>3️⃣</span>
+<div>
+<strong>Live Demonstration</strong> (3-4 min)
+                        <p style="font-size: 0.85rem; opacity: 0.9;">Startup, functionality test, interpreted capture</p>
+</div>
+</div>
+<div class="osi-layer l2" style="justify-content: flex-start; gap: 1.5rem;">
+<span>4️⃣</span>
+<div>
+<strong>Conclusions &amp; Q&amp;A</strong> (1-2 min)
+                        <p style="font-size: 0.85rem; opacity: 0.9;">What works, limitations, answers to questions</p>
+</div>
+</div>
+</div>
+</div>
+<!-- SLIDE 42: What to Bring -->
+<div class="slide" data-slide="42">
+<h1>📋 What to Bring to Evaluation</h1>
+<div class="two-columns">
+<div>
+<h3 style="color: var(--success);">✓ Required</h3>
+<ul class="checklist">
+<li>Clear README.md: install, start, test</li>
+<li>Demo plan with steps and commands</li>
+<li>Interpreted pcap capture</li>
+<li>Source code with clear structure</li>
+</ul>
+</div>
+<div>
+<h3 style="color: var(--secondary);">★ Bonus</h3>
+<ul class="checklist">
+<li>Visual diagrams (topology, flow)</li>
+<li>Makefile for automation</li>
+<li>Automated verification script</li>
+<li>Creative extensions</li>
+</ul>
+</div>
+</div>
+</div>
+<!-- SLIDE 43: Defence Questions -->
+<div class="slide" data-slide="43">
+<h1>❓ Defence Questions — Be Prepared</h1>
+<div class="quiz-container" style="background: var(--bg-cool);">
+<p style="font-size: 1.1rem; margin-bottom: 1rem;">Typical questions you may be asked:</p>
+<ul style="font-size: 1.05rem;">
+<li style="padding: 0.75rem 0; border-bottom: 1px solid var(--border);">"Why did you choose TCP instead of UDP for this component?"</li>
+<li style="padding: 0.75rem 0; border-bottom: 1px solid var(--border);">"What happens if a backend fails? Demonstrare."</li>
+<li style="padding: 0.75rem 0; border-bottom: 1px solid var(--border);">"Show me in the capture where the TCP handshake occurs."</li>
+<li style="padding: 0.75rem 0; border-bottom: 1px solid var(--border);">"How would you debug if the client receives a 502?"</li>
+<li style="padding: 0.75rem 0;">"What role does ARP play in your scenario?"</li>
+</ul>
+</div>
+</div>
+<!-- SLIDE 44: Common Mistakes -->
+<div class="slide" data-slide="44">
+<h1>🚫 Common Mistakes to Avoid</h1>
+<table class="data-table">
+<thead>
+<tr>
+<th>Mistake</th>
+<th>Consequence</th>
+<th>How to Avoid</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Demo without clean restart</td>
+<td>"Works only on my machine"</td>
+<td>Test from <code class="inline">make clean</code></td>
+</tr>
+<tr>
+<td>Ping OK = Service OK</td>
+<td>Testing wrong layer</td>
+<td>Test with <code class="inline">curl</code>/client</td>
+</tr>
+<tr>
+<td>Capture without interpretation</td>
+<td>"I have pcap but don't know what it shows"</td>
+<td>Prepare 2-3 key observations</td>
+</tr>
+<tr>
+<td>Ignoring retransmissions</td>
+<td>Missing congestion/packet loss</td>
+<td><code class="inline">tshark -z io,stat,1</code></td>
+</tr>
+<tr>
+<td>Hardcoded paths/IPs</td>
+<td>Fails on different machine</td>
+<td>Use config files or arguments</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- SLIDE 45: Section Divider - Exercises -->
+<div class="slide slide-section" data-slide="45">
+<div class="section-number">Section 8</div>
+<h1>Practical Exercises</h1>
+<p class="section-desc">Hands-on activeities from the starterkit</p>
+</div>
+<!-- SLIDE 46: Quiz Engine Code -->
+<div class="slide" data-slide="46">
+<h1>💻 Quiz Engine: Code Structure</h1>
+<div class="code-block">
+<span class="code-lang">Python</span>
+<span class="comment"># From ex_14_01.py — Question bank structure</span>
+
+QUESTIONS: List[Tuple[str, List[str], int, str]] = [
+    (
+        <span class="string">"Which OSI layer is responsible for logical addressing (IP)?"</span>,
+        [<span class="string">"Link (2)"</span>, <span class="string">"Network (3)"</span>, <span class="string">"Transport (4)"</span>, <span class="string">"Application (7)"</span>],
+        <span class="number">1</span>,  <span class="comment"># Correct answer index</span>
+<span class="string">"The Network layer (3) manages IP addressing and routing."</span>
+    ),
+    <span class="comment"># ... 22 questions total</span>
+]
+
+<span class="keyword">def</span> <span class="function">run_selftest</span>() -&gt; Tuple[int, int]:
+    random.shuffle(questions)
+    <span class="keyword">for</span> q, opts, ans_idx, explanation <span class="keyword">in</span> questions:
+        <span class="comment"># Display question, get user input, check answer</span>
+        ...
+            </div>
+</div>
+<!-- SLIDE 47: TCP Echo Demo -->
+<div class="slide" data-slide="47">
+<h1>🔄 TCP Echo: Client-Server Pattern</h1>
+<div class="two-columns">
+<div>
+<h3>Server Code Pattern</h3>
+<div class="code-block">
+<span class="code-lang">Python</span>
+<span class="comment"># tcp_echo_server.py</span>
+<span class="keyword">import</span> socket
+
+server = socket.socket(
+    socket.AF_INET,
+    socket.SOCK_STREAM
+)
+server.bind((<span class="string">'0.0.0.0'</span>, <span class="number">9090</span>))
+server.listen(<span class="number">5</span>)
+
+<span class="keyword">while</span> <span class="keyword">True</span>:
+    conn, addr = server.accept()
+    data = conn.recv(<span class="number">1024</span>)
+    conn.sendall(data)  <span class="comment"># Echo</span>
+    conn.close()
+                    </div>
+</div>
+<div>
+<h3>Tipar Cod Client</h3>
+<div class="code-block">
+<span class="code-lang">Python</span>
+<span class="comment"># tcp_echo_client.py</span>
+<span class="keyword">import</span> socket
+
+client = socket.socket(
+    socket.AF_INET,
+    socket.SOCK_STREAM
+)
+client.connect((
+    <span class="string">'10.0.14.100'</span>,
+    <span class="number">9090</span>
+))
+client.sendall(<span class="string">b'Hello!'</span>)
+response = client.recv(<span class="number">1024</span>)
+<span class="keyword">print</span>(response)
+client.close()
+                    </div>
+</div>
+</div>
+</div>
+<!-- SLIDE 48: Quiz - Ports -->
+<div class="slide" data-slide="48">
+<h1>🧠 Knowledge Check — Ports</h1>
+<div class="quiz-container">
+<p class="quiz-question">On which standard port does DNS listen?</p>
+<div class="quiz-options">
+<div class="quiz-option" data-correct="false" onclick="checkQuiz(this, false)">A) 22</div>
+<div class="quiz-option" data-correct="true" onclick="checkQuiz(this, true)">B) 53</div>
+<div class="quiz-option" data-correct="false" onclick="checkQuiz(this, false)">C) 80</div>
+<div class="quiz-option" data-correct="false" onclick="checkQuiz(this, false)">D) 443</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+<!-- SLIDE 49: Ce Am Invatat -->
+<div class="slide" data-slide="49">
+<h1>🎓 Ce Am Invatat This Semester</h1>
+<div class="two-columns">
+<div>
+<h3>Fundamental Concepts</h3>
+<ul class="checklist">
+<li>Layered model OSI/TCP-IP</li>
+<li>Addressing (MAC, IP, Port)</li>
+<li>Transport (TCP vs UDP)</li>
+<li>Routing and NAT</li>
+<li>Application protocols (HTTP, DNS, SSH)</li>
+<li>Security fundamentals</li>
+</ul>
+</div>
+<div>
+<h3>Practical Competencies</h3>
+<ul class="checklist">
+<li>Socket programming (Python)</li>
+<li>Traffic analysis (Wireshark, tshark)</li>
+<li>Network simulation (Mininet)</li>
+<li>Systematic diagnosis</li>
+<li>Containerisation (Docker)</li>
+<li>Load balancing patterns</li>
+</ul>
+</div>
+</div>
+<div class="highlight-box" style="margin-top: 2rem;">
+<p>Networks are not "magic"—they are layered systems with well-defined protocols, each solving a specific problem.</p>
+</div>
+</div>
+<!-- SLIDE 50: Key Conclusions -->
+<div class="slide" data-slide="50">
+<h1>🔑 Key Conclusions</h1>
+<div class="three-columns">
+<div class="insight-box" style="margin: 0;">
+<div class="insight-title">Debugging</div>
+<p>Always work layer by layer. Start with L3 connectivity before checking application logic.</p>
+</div>
+<div class="warning-box" style="margin: 0;">
+<div class="warning-title">Communication</div>
+<p>Use precise terms: "SYN without SYN-ACK" tells more than "it doesn't connect".</p>
+</div>
+<div class="definition-box" style="margin: 0;">
+<div class="def-term">solidness</div>
+<p>Set informed timeouts, implement retries with backoff, add health checks.</p>
+</div>
+</div>
+<div class="story-box" style="margin-top: 2rem;">
+<div class="story-title">Preparation Cariera</div>
+<p>Technical interviews at major companies test exactly these diagnostic skills. "What happens when you type a URL in a browser?" is a gateway question that separates candidatas who understand networks from those who don't.</p>
+</div>
+</div>
+<!-- SLIDE 51: Final Quiz 1 -->
+<div class="slide" data-slide="51">
+<h1>🧠 Final Knowledge Check (1/2)</h1>
+<div class="quiz-container">
+<p class="quiz-question">What does "longest prefix match" mean in routing?</p>
+<div class="quiz-options">
+<div class="quiz-option" data-correct="false" onclick="checkQuiz(this, false)">A) The route with the highest metric is chosen</div>
+<div class="quiz-option" data-correct="true" onclick="checkQuiz(this, true)">B) The most specific route (longest subnet mask) is chosen</div>
+<div class="quiz-option" data-correct="false" onclick="checkQuiz(this, false)">C) The first matching route in the table is chosen</div>
+<div class="quiz-option" data-correct="false" onclick="checkQuiz(this, false)">D) The route with the longest path is avoided</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+<!-- SLIDE 52: Final Quiz 2 -->
+<div class="slide" data-slide="52">
+<h1>🧠 Final Knowledge Check (2/2)</h1>
+<div class="quiz-container">
+<p class="quiz-question">A client receives HTTP 502 Bad Gateway. Where is the problem most likely located?</p>
+<div class="quiz-options">
+<div class="quiz-option" data-correct="false" onclick="checkQuiz(this, false)">A) The client's DNS resolver</div>
+<div class="quiz-option" data-correct="false" onclick="checkQuiz(this, false)">B) The client's network interface</div>
+<div class="quiz-option" data-correct="true" onclick="checkQuiz(this, true)">C) The connection between proxy/LB and backend</div>
+<div class="quiz-option" data-correct="false" onclick="checkQuiz(this, false)">D) The client's TCP stack</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+<!-- SLIDE 53: References -->
+<div class="slide" data-slide="53">
+<h1>📚 References &amp; Supplementary reading</h1>
+<div class="two-columns">
+<div>
+<h3>Manuof of Baza</h3>
+<ul>
+<li>Kurose, J. F. &amp; Ross, K. W. (2017). <em>Computer Networking: A Top-Down Approach</em> (7th ed.). Pearson.</li>
+<li>Stevens, W. R. (1994). <em>TCP/IP Illulayered, Volume 1</em>. Addison-Wesley.</li>
+<li>Rhodes, B. &amp; Goetzen, J. (2014). <em>Foundations of Python Network Programming</em>. Apress.</li>
+</ul>
+</div>
+<div>
+<h3>Essential RFCs</h3>
+<ul>
+<li>RFC 791 — Internet Protocol (IP)</li>
+<li>RFC 793 — Transmission Control Protocol (TCP)</li>
+<li>RFC 768 — User Datagram Protocol (UDP)</li>
+<li>RFC 826 — Address Resolution Protocol (ARP)</li>
+<li>RFC 2616 — HTTP/1.1</li>
+<li>RFC 1035 — Domain Name System (DNS)</li>
+</ul>
+</div>
+</div>
+</div>
+<!-- SLIDE 54: Thank You -->
+<div class="slide slide-title" data-slide="54">
+<p class="subtitle" style="font-size: 1.8rem; margin-bottom: 0.5rem;">🙏 Thank you!</p>
+<h1>🎯 Good Luck with Your Evaluation!</h1>
+<p class="subtitle">Computer Networks — Week 14</p>
+<p class="meta" style="margin-top: 2rem;">
+                Prepare: README, reproducible demo, interpreted capture.<br/>
+                Apply the diagnostic checklist. Communicate precisely.
+            </p>
+<p style="color: var(--text-on-dark-muted); margin-top: 3rem; font-size: 1rem;">
+                Questions? Use the Q&amp;A session or contact your seminar instructor.
+            </p>
+</div>
+<!-- ===================== END SLIDES ===================== -->
+</div>
+<!-- Navigation -->
+<div class="nav-container">
+<button class="nav-btn secondary" id="prevBtn" onclick="prevSlide()">← Previous</button>
+<button class="nav-btn secondary" onclick="openTOC()">📑 Contents</button>
+<button class="nav-btn secondary" onclick="toggleFullscreen()">⛶ Fullscreen</button>
+<button class="nav-btn" id="nextBtn" onclick="nextSlide()">Next →</button>
+</div>
+<!-- Footer -->
+<div class="footer-credit">by Revolvix</div>
+<!-- Keyboard Hints -->
+<div class="keyboard-hint">
+<kbd>←</kbd> <kbd>→</kbd> Navigate  |  <kbd>F</kbd> Fullscreen  |  <kbd>T</kbd> TOC
+    </div>
+<!-- TOC Modal -->
+<div class="toc-modal" id="tocModal">
+<div class="toc-content">
+<button class="toc-close" onclick="closeTOC()">×</button>
+<h2>Contents</h2>
+<div class="toc-section">
+<div class="toc-section-title">Introduction</div>
+<div class="toc-item" onclick="goToSlide(1)">1. Title</div>
+<div class="toc-item" onclick="goToSlide(2)">2. Historical Hook</div>
+<div class="toc-item" onclick="goToSlide(3)">3. Learning Objectives</div>
+<div class="toc-item" onclick="goToSlide(4)">4. Course Roadmap</div>
+<div class="toc-item" onclick="goToSlide(5)">5. Why It Matters</div>
+</div>
+<div class="toc-section">
+<div class="toc-section-title">Section 1: Layered Model</div>
+<div class="toc-item" onclick="goToSlide(7)">7. OSI Stack</div>
+<div class="toc-item" onclick="goToSlide(8)">8. Encapsulation</div>
+<div class="toc-item" onclick="goToSlide(9)">9. Address Types</div>
+<div class="toc-item" onclick="goToSlide(10)">10. ARP Deep Dive</div>
+</div>
+<div class="toc-section">
+<div class="toc-section-title">Section 2: Transport Layer</div>
+<div class="toc-item" onclick="goToSlide(13)">13. TCP vs UDP</div>
+<div class="toc-item" onclick="goToSlide(14)">14. TCP Handshake</div>
+<div class="toc-item" onclick="goToSlide(15)">15. Connection Termination</div>
+<div class="toc-item" onclick="goToSlide(17)">17. Well-Known Ports</div>
+</div>
+<div class="toc-section">
+<div class="toc-section-title">Section 3: Network Layer</div>
+<div class="toc-item" onclick="goToSlide(19)">19. Routing Fundamentals</div>
+<div class="toc-item" onclick="goToSlide(20)">20. CIDR computer</div>
+<div class="toc-item" onclick="goToSlide(21)">21. BGP Story</div>
+</div>
+<div class="toc-section">
+<div class="toc-section-title">Section 4: Application Layer</div>
+<div class="toc-item" onclick="goToSlide(23)">23. HTTP General Overview</div>
+<div class="toc-item" onclick="goToSlide(24)">24. HTTP Status Codes</div>
+<div class="toc-item" onclick="goToSlide(25)">25. DNS</div>
+</div>
+<div class="toc-section">
+<div class="toc-section-title">Section 5: Diagnostics</div>
+<div class="toc-item" onclick="goToSlide(28)">28. Diagnostic Checklist</div>
+<div class="toc-item" onclick="goToSlide(29)">29. Symptoms → Causes</div>
+<div class="toc-item" onclick="goToSlide(30)">30-31. Demos</div>
+<div class="toc-item" onclick="goToSlide(32)">32. PCAP Analysis</div>
+</div>
+<div class="toc-section">
+<div class="toc-section-title">Section 6: Patterns</div>
+<div class="toc-item" onclick="goToSlide(36)">36. Load Balancer Pattern</div>
+<div class="toc-item" onclick="goToSlide(39)">39. Mininet Topology</div>
+</div>
+<div class="toc-section">
+<div class="toc-section-title">Section 7: Project</div>
+<div class="toc-item" onclick="goToSlide(41)">41. Presentation Structure</div>
+<div class="toc-item" onclick="goToSlide(42)">42. What to Bring</div>
+<div class="toc-item" onclick="goToSlide(43)">43. Defence Questions</div>
+<div class="toc-item" onclick="goToSlide(44)">44. Common Mistakes</div>
+</div>
+<div class="toc-section">
+<div class="toc-section-title">Wrap-up</div>
+<div class="toc-item" onclick="goToSlide(49)">49. Ce Am Invatat</div>
+<div class="toc-item" onclick="goToSlide(50)">50. Key Conclusions</div>
+<div class="toc-item" onclick="goToSlide(53)">53. References</div>
+<div class="toc-item" onclick="goToSlide(54)">54. Final Slide</div>
+</div>
+</div>
+</div>
+<script>
+        // ===================== NAVIGATION =====================
+        let currentSlide = 1;
+        const totalSlides = 54;
+        
+        function updateSlide() {
+            // Updata active slide
+            document.querySelectorAll('.slide').forEach((slide, index) => {
+                slide.classList.remove('active');
+                if (index + 1 === currentSlide) {
+                    slide.classList.add('active');
+                }
+            });
+            
+            // Updata progress bar
+            const progress = (currentSlide / totalSlides) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+            
+            // Updata counter
+            document.getElementById('currentSlide').textContent = currentSlide;
+            document.getElementById('totalSlides').textContent = totalSlides;
+            
+            // Updata nav buttons
+            document.getElementById('prevBtn').disabled = currentSlide === 1;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides;
+        }
+        
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                currentSlide++;
+                updateSlide();
+            }
+        }
+        
+        function prevSlide() {
+            if (currentSlide > 1) {
+                currentSlide--;
+                updateSlide();
+            }
+        }
+        
+        function goToSlide(n) {
+            if (n >= 1 && n <= totalSlides) {
+                currentSlide = n;
+                updateSlide();
+                closeTOC();
+            }
+        }
+        
+        // ===================== TOC =====================
+        function openTOC() {
+            document.getElementById('tocModal').classList.add('show');
+        }
+        
+        function closeTOC() {
+            document.getElementById('tocModal').classList.remove('show');
+        }
+        
+        // ===================== FULLSCREEN =====================
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+        
+        // ===================== KEYBOARD =====================
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                prevSlide();
+            } else if (e.key === 'f' || e.key === 'F') {
+                toggleFullscreen();
+            } else if (e.key === 't' || e.key === 'T') {
+                openTOC();
+            } else if (e.key === 'Escape') {
+                closeTOC();
+            } else if (e.key === 'Home') {
+                goToSlide(1);
+            } else if (e.key === 'End') {
+                goToSlide(totalSlides);
+            }
+        });
+        
+        // ===================== QUIZ =====================
+        function checkQuiz(element, isCorrect) {
+            const container = element.closest('.quiz-container');
+            const options = container.querySelectorAll('.quiz-option');
+            const feedback = container.querySelector('.quiz-feedback');
+            
+            // Disable all options
+            options.forEach(opt => {
+                opt.style.pointerEvents = 'none';
+                if (opt.getAttribute('data-correct') === 'true') {
+                    opt.classList.add('correct');
+                }
+            });
+            
+            // Show result
+            if (isCorrect) {
+                feedback.className = 'quiz-feedback show correct';
+                feedback.textContent = '✓ Corect! Well done.';
+            } else {
+                element.classList.add('wrong');
+                feedback.className = 'quiz-feedback show wrong';
+                feedback.textContent = '✗ Incorrect. The correct answer is highlighted.';
+            }
+        }
+        
+        // ===================== REVEAL =====================
+        function toggleReveal(btn) {
+            const content = btn.nextElementSibling;
+            content.classList.toggle('show');
+            btn.textContent = content.classList.contains('show') ? 'Hide Answer' : 'Reveal Answer';
+        }
+        
+        // ===================== CIDR CALCULATOR =====================
+        function updataCIDR() {
+            const prefix = parseInt(document.getElementById('cidrSlider').value);
+            document.getElementById('cidrValue').textContent = '/' + prefix;
+            
+            // Calculate mask
+            const maskBits = prefix;
+            const mask = [];
+            for (let i = 0; i < 4; i++) {
+                const bits = Math.min(8, Math.max(0, maskBits - i * 8));
+                mask.push(256 - Math.pow(2, 8 - bits));
+            }
+            document.getElementById('netmask').textContent = mask.join('.');
+            
+            // Calculate addresses
+            const hostBits = 32 - prefix;
+            const totalAddrs = Math.pow(2, hostBits);
+            const usableHosts = Math.max(0, totalAddrs - 2);
+            
+            document.getElementById('totalAddrs').textContent = totalAddrs.toLopathString();
+            document.getElementById('usableHosts').textContent = usableHosts.toLopathString();
+        }
+        
+        // ===================== INIT =====================
+        updateSlide();
+        updataCIDR();
+        
+        // Close TOC on click outside
+        document.getElementById('tocModal').addEventListener('click', (e) => {
+            if (e.target.id === 'tocModal') {
+                closeTOC();
+            }
+        });
+    </script>
+</body>
+</html>
