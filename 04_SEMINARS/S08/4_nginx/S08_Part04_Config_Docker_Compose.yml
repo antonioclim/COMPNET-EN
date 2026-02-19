@@ -1,0 +1,9 @@
+version: '3.8'
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: seminar8_nginx
+    network_mode: host
+    volumes:
+    - ./S08_Part04_Config_Nginx.conf:/etc/nginx/nginx.conf:ro
+    restart: unless-stopped
