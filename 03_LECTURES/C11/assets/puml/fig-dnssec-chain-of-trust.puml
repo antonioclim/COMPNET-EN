@@ -1,0 +1,36 @@
+@startuml
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title DNSSEC: chain of trust (concept)
+
+rectangle "Root zone" as R {
+  [Root DNSKEY] as RKEY
+}
+
+rectangle ".com zone" as T {
+  [TLD DNSKEY] as TKEY
+  [DS record for example.com] as DS
+}
+
+rectangle "example.com zone" as Z {
+  [Zone DNSKEY] as ZKEY
+  [Signed RRsets\n(RRSIG)] as SIG
+}
+
+RKEY --> TKEY : validates via DS in root\n(concept)
+TKEY --> DS : publishes DS for child
+DS --> ZKEY : DS matches child DNSKEY
+ZKEY --> SIG : verifies signatures over RRsets
+note right of Z
+The resolver validates:
+- DS -> DNSKEY
+- DNSKEY -> RRSIG
+If validation fails: response is "bogus"
+end note
+
+@enduml

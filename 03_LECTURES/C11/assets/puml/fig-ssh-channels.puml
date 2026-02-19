@@ -1,0 +1,38 @@
+@startuml
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title SSH: a single connection with multiple channels (multiplexing)
+
+actor Client
+node "SSH Server" as S
+
+Client -> S : TCP 22\nSSH transport (encrypted)
+
+rectangle "Inside the SSH connection" {
+  component "Channel: shell" as CH1
+  component "Channel: exec" as CH2
+  component "Channel: SFTP" as CH3
+  component "Channel: port forward" as CH4
+}
+
+Client --> CH1
+Client --> CH2
+Client --> CH3
+Client --> CH4
+CH1 --> S
+CH2 --> S
+CH3 --> S
+CH4 --> S
+
+note right of S
+A single TCP connection
+multiple logical channels
+each with a separate stream
+end note
+
+@enduml

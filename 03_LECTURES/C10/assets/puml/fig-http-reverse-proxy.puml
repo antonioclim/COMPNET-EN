@@ -1,0 +1,22 @@
+@startuml
+title HTTP via a reverse proxy (nginx)
+
+participant Browser
+participant "Nginx\nReverse Proxy" as Nginx
+participant "API Service\n(container)" as API
+participant "Web App\n(container)" as Web
+
+Browser -> Nginx : GET /
+Nginx --> Browser : 302 Redirect /app/
+
+Browser -> Nginx : GET /app/
+Nginx -> Web : GET / (rewrite /app -> /)
+Web --> Nginx : 200 HTML
+Nginx --> Browser : 200 HTML
+
+Browser -> Nginx : GET /api/users
+Nginx -> API : GET /users\n(add X-Forwarded-For)
+API --> Nginx : 200 JSON
+Nginx --> Browser : 200 JSON
+
+@enduml

@@ -1,0 +1,36 @@
+@startuml
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title FTP: active vs passive (which side initiates the data connection)
+
+actor Client
+node "FTP Server" as S
+
+rectangle "Active mode" as A {
+  Client -> S : TCP 21 (control)
+  Client -> S : PORT client_ip:client_port
+  S -> Client : TCP data\nserver:20 -> client:client_port
+  note right of A
+  Typical problem:
+  client is behind NAT/firewall
+  inbound connections to client may be blocked
+  end note
+}
+
+rectangle "Passive mode" as P {
+  Client -> S : TCP 21 (control)
+  Client -> S : PASV
+  S -> Client : "use server_ip:server_port"
+  Client -> S : TCP data\nclient:ephemeral -> server:server_port
+  note right of P
+  More NAT/firewall-friendly:
+  client initiates both control and data
+  end note
+}
+
+@enduml
