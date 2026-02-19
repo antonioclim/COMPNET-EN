@@ -1,0 +1,22 @@
+version: '3.9'
+services:
+  ssh-server:
+    build:
+      context: ./ssh-server
+      dockerfile: S10_Part03_Config_Dockerfile
+    container_name: ssh-server
+    ports:
+    - '2222:22'
+    volumes:
+    - ssh_data:/home/labuser/storage
+  ssh-client:
+    build:
+      context: ./ssh-client
+      dockerfile: S10_Part03_Config_Dockerfile
+    container_name: ssh-client
+    depends_on:
+    - ssh-server
+    stdin_open: true
+    tty: true
+volumes:
+  ssh_data: null
