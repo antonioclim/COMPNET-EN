@@ -1,0 +1,26 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title NAT (concept): address rewriting
+
+package "Private LAN" {
+  [Host\n192.168.0.10] as H
+  [NAT Router\nLAN: 192.168.0.1\nWAN: 203.0.113.5] as R
+  H --> R
+}
+
+package "Internet" {
+  [Server\n198.51.100.20] as S
+}
+
+R --> S : IP packet
+
+note right of R
+  SNAT:
+  192.168.0.10 -> 203.0.113.5
+end note
+@enduml

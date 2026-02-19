@@ -1,0 +1,24 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title NDP (IPv6): NS/NA + RS/RA (concept)
+
+[IPv6 Host] as H
+[IPv6 Router] as R
+[Other host] as H2
+
+H --> R : RS (Router Solicitation)
+R --> H : RA (Router Advertisement)\nprefix, gateway, flags
+
+H -[#333333,dashed]-> H2 : NS (Neighbour Solicitation)\n(to multicast)
+H2 -[#333333,dashed]-> H : NA (Neighbour Advertisement)
+
+note bottom
+  NDP uses ICMPv6.
+  It replaces ARP and part of autoconfiguration.
+end note
+@enduml

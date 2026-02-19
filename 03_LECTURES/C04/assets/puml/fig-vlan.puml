@@ -1,0 +1,32 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title VLAN: logical segmentation over the same infrastructure
+
+package "VLAN 10" {
+  [PC A] as A
+  [PC B] as B
+}
+
+package "VLAN 20" {
+  [PC C] as C
+  [PC D] as D
+}
+
+[Switch with VLAN] as SW
+
+A -- SW
+B -- SW
+C -- SW
+D -- SW
+
+note right of SW
+  Access ports in VLAN 10 / VLAN 20
+  Trunk: frames with 802.1Q tag
+  Separate broadcast domains
+end note
+@enduml

@@ -1,0 +1,22 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title L2: LLC and MAC
+
+rectangle "L3 Network\n(IP)" as L3
+
+package "L2 Data Link" {
+  rectangle "LLC\n(IEEE 802.2)\ninterface with L3\nmultiplexing" as LLC
+  rectangle "MAC\n(medium access)\nframe encapsulation\nMAC addressing\nCRC" as MAC
+  LLC -down-> MAC
+}
+
+rectangle "L1 Physical\n(medium)" as L1
+
+L3 -down-> LLC
+MAC -down-> L1
+@enduml

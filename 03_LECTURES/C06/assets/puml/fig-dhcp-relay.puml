@@ -1,0 +1,28 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title DHCP Relay (server in another network)
+
+package "Client LAN" {
+  [Client] as C
+  [Router (Relay)] as R
+  C --> R
+}
+
+package "Server network" {
+  [DHCP Server] as S
+}
+
+R --> S : forward DHCP (unicast)\nwith relay info
+S --> R : Offer/Ack
+R --> C : broadcast/unicast local
+
+note right of R
+  Broadcasts do not cross routers.
+  The relay mediates the request.
+end note
+@enduml

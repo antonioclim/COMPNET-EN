@@ -1,0 +1,24 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Prefix and mask (IPv4): network vs host
+
+rectangle "IP Address\nex: 10.2.10.233" as ip
+rectangle "Mask\nex: 255.0.0.0 (/8)" as mask
+rectangle "Network = IP AND Mask\nex: 10.0.0.0" as net
+rectangle "Host = IP AND (NOT Mask)\nex: 2.10.233" as host
+
+ip --> net : AND
+mask --> net : AND
+
+ip --> host : AND
+mask --> host : NOT + AND
+
+note bottom
+  Prefix /n = the number of 1-bits in the mask, from left to right.
+end note
+@enduml

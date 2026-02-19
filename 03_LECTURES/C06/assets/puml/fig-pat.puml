@@ -1,0 +1,29 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title PAT (NAT overload): IP + port rewriting
+
+package "Private LAN" {
+  [Host A\n192.168.0.11:51000] as A
+  [Host B\n192.168.0.12:51001] as B
+  [PAT Router\nWAN: 203.0.113.5] as R
+  A --> R
+  B --> R
+}
+
+package "Internet" {
+  [Server\n198.51.100.20:80] as S
+}
+
+R --> S : TCP/UDP connections
+
+note right of R
+  PAT table example:
+  192.168.0.11:51000 -> 203.0.113.5:62001
+  192.168.0.12:51001 -> 203.0.113.5:62002
+end note
+@enduml

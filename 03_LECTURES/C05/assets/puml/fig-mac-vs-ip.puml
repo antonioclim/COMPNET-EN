@@ -1,0 +1,35 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title MAC vs IP (local vs global)
+
+package "LAN A" {
+  [Host A\nMAC_A\nIP_A] as A
+  [Switch] as SW
+  [Router R\n(iface LAN A)\nMAC_R1\nIP_R1] as R1
+  A -- SW
+  SW -- R1
+}
+
+package "LAN B" {
+  [Router R\n(iface LAN B)\nMAC_R2\nIP_R2] as R2
+  [Switch] as SW2
+  [Host B\nMAC_B\nIP_B] as B
+  R2 -- SW2
+  SW2 -- B
+}
+
+R1 --> R2 : L3: IP packet\nIP_A -> IP_B
+
+note bottom of A
+  L2: frames to next hop (MAC)\nMAC changes at each hop
+end note
+
+note bottom of R1
+  L3: source/destination IP remains\nunchanged end-to-end
+end note
+@enduml

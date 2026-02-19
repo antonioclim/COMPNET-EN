@@ -1,0 +1,31 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Proxy ARP (router replies on behalf of the host)
+
+package "LAN 1" {
+  [Host A\nIP_A] as A
+  [Router\nIP_R1 / MAC_R1] as R
+  A -- R
+}
+
+package "LAN 2" {
+  [Host B\nIP_B] as B
+  [Router\nIP_R2 / MAC_R2] as R2
+  R2 -- B
+}
+
+R --> R2 : routing
+
+A -[#333333,dashed]-> R : ARP Request\n"Who has IP_B?"
+R -[#333333,dashed]-> A : ARP Reply\n"IP_B is at MAC_R1"\n(proxy)
+
+note bottom of R
+  A then sends frames to MAC_R1,
+  and the router forwards them to B.
+end note
+@enduml

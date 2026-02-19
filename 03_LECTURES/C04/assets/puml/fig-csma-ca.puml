@@ -1,0 +1,27 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title CSMA/CA (Wi-Fi) - flow
+
+start
+:Listen to medium (Carrier Sense);
+if (Medium free?) then (yes)
+  :Wait DIFS;
+  :Choose random backoff;
+  :Count backoff while medium remains free;
+  :Transmit frame;
+  if (ACK received?) then (yes)
+    :Success;
+  else (no)
+    :Exponential backoff;
+    :Retry;
+  endif
+else (no)
+  :Wait until free;
+endif
+stop
+@enduml

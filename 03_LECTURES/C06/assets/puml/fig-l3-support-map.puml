@@ -1,0 +1,32 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Network layer: IP + support protocols (overview)
+
+rectangle "IP\n(IPv4 / IPv6)\npacket transport" as IP
+
+rectangle "ARP\n(IPv4)\nIP -> MAC" as ARP
+rectangle "NDP\n(IPv6)\nNS/NA, RS/RA" as NDP
+rectangle "ICMP\n(IPv4)\nerrors + diagnostics" as ICMP
+rectangle "ICMPv6\n(errors + NDP)" as ICMP6
+rectangle "DHCP\n(IPv4)\nconfiguration allocation" as DHCP
+rectangle "DHCPv6\n(IPv6)\nsupplementary config" as DHCP6
+rectangle "NAT / PAT\n(IPv4 transition)" as NAT
+
+ARP --> IP
+NDP --> IP
+ICMP --> IP
+ICMP6 --> IP
+DHCP --> IP
+DHCP6 --> IP
+NAT --> IP
+
+note bottom of IP
+  IP delivers packets between networks.
+  The rest are support protocols: configuration, resolution, errors.
+end note
+@enduml

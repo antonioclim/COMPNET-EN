@@ -1,0 +1,21 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Wi-Fi 2.4 GHz: channels and overlap (concept)
+
+rectangle "Channel 1\n2412 MHz" as c1
+rectangle "Channel 6\n2437 MHz" as c6
+rectangle "Channel 11\n2462 MHz" as c11
+
+c1 --> c6 : gap ~25 MHz
+c6 --> c11 : gap ~25 MHz
+
+note bottom
+  In practice, the 1/6/11 combination minimises overlap
+  (in many regions).
+end note
+@enduml

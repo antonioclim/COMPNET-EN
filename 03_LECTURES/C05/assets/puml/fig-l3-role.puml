@@ -1,0 +1,25 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Network layer (L3): role and position
+
+rectangle "L4 Transport\n(TCP/UDP)" as L4
+rectangle "L3 Network\n(IP)\n(packets, routing)" as L3
+rectangle "L2 Data Link\n(Ethernet/Wi-Fi)" as L2
+rectangle "L1 Physical\n(medium)" as L1
+
+L4 -down-> L3
+L3 -down-> L2
+L2 -down-> L1
+
+note right of L3
+  Typical functions:
+  - hierarchical addressing (IP)
+  - routing between networks
+  - fragmentation (IPv4)
+end note
+@enduml

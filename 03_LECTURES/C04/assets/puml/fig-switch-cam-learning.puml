@@ -1,0 +1,27 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Switch: CAM table learning (concept)
+
+[Host A\nMAC_A] as A
+[Host B\nMAC_B] as B
+[Host C\nMAC_C] as C
+[Switch] as SW
+
+A -- SW
+B -- SW
+C -- SW
+
+note right of SW
+  1) When a frame arrives
+     learns: source MAC -> port
+  2) If destination MAC is known:
+     forwards only on that port
+  3) If unknown:
+     floods on all other ports
+end note
+@enduml

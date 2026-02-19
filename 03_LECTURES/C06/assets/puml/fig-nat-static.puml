@@ -1,0 +1,30 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Static NAT (1:1)
+
+package "Private LAN" {
+  [Internal server\n192.168.1.100] as SINT
+  [NAT Router\nWAN: 203.0.113.10] as R
+  SINT --> R
+}
+
+package "Internet" {
+  [External client] as C
+}
+
+C --> R : towards 203.0.113.10
+R --> SINT : DNAT to 192.168.1.100
+
+SINT --> R : reply
+R --> C : SNAT from 192.168.1.100 to 203.0.113.10
+
+note bottom of R
+  Fixed mapping:
+  203.0.113.10 <-> 192.168.1.100
+end note
+@enduml

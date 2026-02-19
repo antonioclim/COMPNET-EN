@@ -1,0 +1,17 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title DHCP (IPv4): DORA
+
+participant Client as C
+participant "DHCP Server" as S
+
+C -> S : Discover (broadcast)\nUDP 68 -> 67
+S -> C : Offer\nIP, mask, lease, gateway, DNS
+C -> S : Request (broadcast)\naccept offer
+S -> C : Ack\nlease confirmed
+@enduml

@@ -1,0 +1,46 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Transmission media (transfer media)
+
+package "Guided" {
+  [Copper\n(twisted pair)] as copper
+  [Copper\n(coaxial)] as coax
+  [Optical fibre] as fiber
+}
+
+package "Unguided" {
+  [Air / radio] as air
+}
+
+[Sender] as S
+[Receiver] as R
+
+S --> copper
+copper --> R
+
+S --> coax
+coax --> R
+
+S --> fiber
+fiber --> R
+
+S ~~ air
+air ~~ R
+
+note right of fiber
+  Optical signal
+end note
+
+note right of copper
+  Electrical signal
+end note
+
+note right of air
+  Electromagnetic signal
+end note
+@enduml

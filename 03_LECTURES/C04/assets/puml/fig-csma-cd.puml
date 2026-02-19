@@ -1,0 +1,25 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title CSMA/CD (Ethernet half-duplex) - flow
+
+start
+:Listen to medium (Carrier Sense);
+if (Medium free?) then (yes)
+  :Transmit frame;
+  if (Collision detected?) then (yes)
+    :Send jamming signal;
+    :Wait random backoff;
+    :Retry;
+  else (no)
+    :Transmission successful;
+  endif
+else (no)
+  :Wait until free;
+endif
+stop
+@enduml

@@ -1,0 +1,25 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Modulation (concept): AM / FM / PM
+
+rectangle "Baseband signal (data)\n(bits / symbols)" as base
+rectangle "Carrier\n(sine wave at a frequency)" as carrier
+
+rectangle "AM\nAmplitude Modulation\nvaries amplitude" as am
+rectangle "FM\nFrequency Modulation\nvaries frequency" as fm
+rectangle "PM\nPhase Modulation\nvaries phase" as pm
+
+base --> am
+carrier --> am
+
+base --> fm
+carrier --> fm
+
+base --> pm
+carrier --> pm
+@enduml

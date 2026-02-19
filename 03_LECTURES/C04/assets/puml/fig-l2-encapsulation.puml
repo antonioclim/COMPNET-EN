@@ -1,0 +1,16 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title L2: Encapsulation into a frame
+
+rectangle "L3 Packet\n(IP)" as L3
+rectangle "L2 Frame\n[L2 Header | (L3) | FCS]" as L2
+rectangle "L1 Bits" as L1
+
+L3 --> L2 : encapsulation
+L2 --> L1 : serialisation
+@enduml

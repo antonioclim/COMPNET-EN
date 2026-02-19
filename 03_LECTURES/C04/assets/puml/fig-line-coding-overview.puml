@@ -1,0 +1,19 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Line coding (concept): NRZ, NRZI, Manchester
+
+rectangle "Bits:\n1 0 0 1 1 0" as bits
+
+rectangle "NRZ\n- constant level for the bit duration\n- sensitive to synchronisation" as nrz
+rectangle "NRZI\n- transition for 1 (or 0)\n- more robust for long sequences" as nrzi
+rectangle "Manchester\n- transition at mid-bit\n- self-synchronising\n- higher bandwidth" as man
+
+bits --> nrz
+bits --> nrzi
+bits --> man
+@enduml
