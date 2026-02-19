@@ -1,0 +1,70 @@
+# requirements.txt for Computer Networks Project
+# Install: pip install -r requirements.txt
+#
+# Usage:
+#   pip install -r requirements.txt        # Install all
+#   pip install -r requirements.txt --upgrade  # Update all
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# CORE DEPENDENCIES
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Configuration management
+pyyaml>=6.0.1
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# TESTING
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Test framework
+pytest>=7.4.0
+pytest-cov>=4.1.0
+pytest-timeout>=2.2.0
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# CODE QUALITY
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Linter (modern, fast)
+ruff>=0.1.9
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PROJECT-SPECIFIC (uncomment as needed)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Network packet manipulation (P03, P07, P14, P19)
+# scapy>=2.5.0
+
+# SDN/Mininet support (P01, P02, P06, P11)
+# mininet>=2.3.0
+
+# gRPC support (P13)
+# grpcio>=1.60.0
+# grpcio-tools>=1.60.0
+# protobuf>=4.25.0
+
+# MQTT support (P15, P20)
+# paho-mqtt>=1.6.1
+
+# Cryptography (P04)
+# cryptography>=41.0.0
+
+# HTTP/Web (P08, P12)
+# requests>=2.31.0
+# flask>=3.0.0
+
+# Docker SDK (P10, P12)
+# docker>=7.0.0
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# OPTIONAL DEVELOPMENT TOOLS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Type checking (optional but recommended)
+# mypy>=1.8.0
+
+# Documentation generation
+# sphinx>=7.2.0
+
+# Interactive development
+# ipython>=8.20.0
