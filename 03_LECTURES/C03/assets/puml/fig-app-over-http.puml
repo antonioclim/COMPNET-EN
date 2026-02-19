@@ -1,0 +1,30 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Application built on top of HTTP
+
+rectangle "Custom Application\n(REST client / RPC stub)" as app
+rectangle "HTTP\n(requests & responses)" as http
+rectangle "TCP\n(reliable stream)" as tcp
+rectangle "IP\n(routing)" as ip
+
+app --> http : uses HTTP as\napplication channel
+http --> tcp
+tcp --> ip
+
+note right of app
+  The programmer ignores
+  layers below HTTP.
+  E.g., REST API, JSON-RPC
+  over HTTP.
+end note
+
+note right of http
+  Standard methods:
+  GET, POST, PUT, DELETE
+end note
+@enduml

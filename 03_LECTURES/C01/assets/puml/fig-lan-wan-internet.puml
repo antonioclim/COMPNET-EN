@@ -1,0 +1,33 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title LAN – WAN – Internet (scale)
+
+package "LAN (room / building)" {
+  [PC] as lan1
+  [Switch] as lansw
+  [Server] as lan2
+  lan1 --> lansw 
+  lansw --> lan2
+}
+
+package "WAN (between LANs)" {
+  [Router R1] as r1
+  [Router R2] as r2
+  r1 <--> r2 : WAN link
+}
+
+cloud "Internet" as inet
+
+lansw --> r1
+r2 --> inet
+
+note bottom of inet
+  Internet = global interconnection
+  of many networks (WANs, ISPs, ASes)
+end note
+@enduml

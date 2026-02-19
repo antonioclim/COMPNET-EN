@@ -1,0 +1,37 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam activityDiamondFontSize 13
+
+title TCP server flow (listen / accept / recv / send)
+
+start
+
+:socket(AF_INET, SOCK_STREAM);
+:bind((host, port));
+:listen(backlog);
+
+repeat
+  :conn, addr = accept();
+  note right: blocks until a\nclient connects
+
+  repeat
+    :data = recv(buffer_size);
+    if (data == b"") then (yes – client closed)
+      :close(conn);
+      break
+    else (no)
+      :process(data);
+      :send(response);
+    endif
+  repeat while (connection alive?)
+
+repeat while (server running?)
+
+:close(server_socket);
+
+stop
+@enduml

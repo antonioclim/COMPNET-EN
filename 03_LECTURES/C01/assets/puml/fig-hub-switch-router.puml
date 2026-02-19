@@ -1,0 +1,55 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Hub vs Switch vs Router
+
+package "Hub (L1 – multipoint repeater)" {
+  [Host A] as ha
+  [Host B] as hb
+  [Host C] as hc
+  [Hub] as hub
+
+  ha -- hub
+  hb -- hub
+  hc -- hub
+
+  note bottom of hub
+    Forwards on all ports
+    Collisions possible
+  end note
+}
+
+package "Switch (L2)" {
+  [Host A] as sa
+  [Host B] as sb
+  [Host C] as sc
+  [Switch] as sw
+
+  sa -- sw
+  sb -- sw
+  sc -- sw
+
+  note bottom of sw
+    Forwards only on the port
+    matching the MAC address
+  end note
+}
+
+package "Router (L3)" {
+  [LAN 1] as lan1
+  [Router] as r
+  [LAN 2] as lan2
+
+  lan1 --> r
+  r --> lan2
+
+  note bottom of r
+    Connects distinct networks
+    (L3, IP, routing)
+  end note
+}
+@enduml

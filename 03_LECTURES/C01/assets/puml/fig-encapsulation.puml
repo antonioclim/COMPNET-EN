@@ -1,0 +1,32 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Encapsulation (protocol stack)
+
+rectangle "Application\n(Message)" as app
+rectangle "Transport\n(TCP/UDP)\n[Header L4 | Data]" as l4
+rectangle "Network\n(IP)\n[Header L3 | (L4)]" as l3
+rectangle "Data link\n(Ethernet)\n[Header L2 | (L3) | FCS]" as l2
+rectangle "Physical\n(bits / signal)" as l1
+
+app --> l4 : add L4 header
+l4 --> l3 : add L3 header
+l3 --> l2 : add L2 header + FCS
+l2 --> l1 : transmit bits
+
+note right of l2
+  Frame\nL2 transfer unit
+end note
+
+note right of l3
+  Packet\nL3 transfer unit
+end note
+
+note right of l4
+  Segment / Datagram\nL4 transfer unit
+end note
+@enduml

@@ -1,0 +1,24 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title OSI model (7 layers)
+
+rectangle "7. Application" as L7
+rectangle "6. Presentation" as L6
+rectangle "5. Session" as L5
+rectangle "4. Transport" as L4
+rectangle "3. Network" as L3
+rectangle "2. Data link" as L2
+rectangle "1. Physical" as L1
+
+L7 -down-> L6
+L6 -down-> L5
+L5 -down-> L4
+L4 -down-> L3
+L3 -down-> L2
+L2 -down-> L1
+@enduml

@@ -1,0 +1,35 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Transmission media
+
+package "Guided" {
+  [Copper\n(coaxial / twisted pair)] as copper
+  [Optical fibre] as fiber
+}
+
+package "Unguided" {
+  [Air / radio waves] as air
+}
+
+[Host A] as a
+[Host B] as b
+
+a --> copper : electrical signal
+copper --> b : electrical signal
+
+a --> fiber : optical signal
+fiber --> b : optical signal
+
+a ~~ air : electromagnetic signal
+air ~~ b : electromagnetic signal
+
+note right of air
+  Wireless: interference, collisions,
+  spectrum sharing
+end note
+@enduml

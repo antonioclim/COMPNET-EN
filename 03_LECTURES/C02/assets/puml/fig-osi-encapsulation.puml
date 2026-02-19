@@ -1,0 +1,32 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Encapsulation in OSI (transfer units)
+
+rectangle "Application:\nMessage" as app
+rectangle "Transport:\n[H4 | Data]" as l4
+rectangle "Network:\n[H3 | (L4)]" as l3
+rectangle "Data link:\n[H2 | (L3) | FCS]" as l2
+rectangle "Physical:\nBits / signal" as l1
+
+app --> l4 : add L4 header
+l4 --> l3 : add L3 header
+l3 --> l2 : add L2 header + FCS
+l2 --> l1 : transmit as bits
+
+note right of l4
+  L4 unit:\nsegment / datagram
+end note
+
+note right of l3
+  L3 unit:\npacket
+end note
+
+note right of l2
+  L2 unit:\nframe
+end note
+@enduml

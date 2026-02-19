@@ -1,0 +1,32 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title RAW sockets – operating below the transport layer
+
+rectangle "Application" as app
+rectangle "Transport (TCP/UDP)" as l4
+rectangle "Network (IP)" as l3
+rectangle "Data link (Ethernet)" as l2
+rectangle "Physical" as l1
+
+app --> l4 : normal\nsocket()
+l4 --> l3
+l3 --> l2
+l2 --> l1
+
+rectangle "RAW socket\n(SOCK_RAW)" as raw #LightYellow
+
+raw --> l3 : bypasses L4\ndirect IP access
+raw --> l2 : or even L2\n(AF_PACKET on Linux)
+
+note right of raw
+  Requires root / CAP_NET_RAW.
+  Used for diagnostics (ping),
+  packet crafting (Scapy),
+  and custom protocol research.
+end note
+@enduml

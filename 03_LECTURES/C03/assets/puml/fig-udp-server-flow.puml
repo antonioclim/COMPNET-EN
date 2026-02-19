@@ -1,0 +1,27 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title UDP server flow (recvfrom / sendto)
+
+start
+
+:socket(AF_INET, SOCK_DGRAM);
+:bind((host, port));
+
+note right: No listen() or accept()\nUDP is connectionless
+
+repeat
+  :data, addr = recvfrom(buffer_size);
+  note right: blocks until a\ndatagram arrives
+  :process(data);
+  :sendto(response, addr);
+repeat while (server running?)
+
+:close(socket);
+
+stop
+@enduml

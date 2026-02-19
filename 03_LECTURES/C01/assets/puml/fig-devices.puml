@@ -1,0 +1,35 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Communication devices (overview)
+
+package "End nodes" {
+  [PC / Server] as host
+  [NIC (network interface card)] as nic
+  host --> nic
+}
+
+package "Intermediary devices" {
+  [Repeater] as rep
+  [Hub] as hub
+  [Switch] as sw
+  [Router] as r
+}
+
+nic --> rep : amplifies signal
+rep --> hub : multipoint
+hub --> sw : L2 switching
+sw --> r : L3 routing
+
+note right of sw
+  Switch: selects port\nbased on MAC (L2)
+end note
+
+note right of r
+  Router: selects next hop\nbased on IP (L3)
+end note
+@enduml

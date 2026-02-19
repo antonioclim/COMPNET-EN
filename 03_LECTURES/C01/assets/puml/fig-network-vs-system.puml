@@ -1,0 +1,29 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Network vs computing system
+
+package "A computing system (internal)" {
+  [CPU] as cpu
+  [Memory] as mem
+  [Bus / chipset] as bus
+
+  cpu --> bus
+  mem --> bus
+}
+
+package "Network (between systems)" {
+  [System A\n(NIC)] as a
+  [Switch] as sw
+  [System B\n(NIC)] as b
+  [Router (optional)] as r
+
+  a --> sw
+  sw --> b
+  sw --> r
+}
+@enduml

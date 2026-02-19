@@ -1,0 +1,41 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Communication between layers (concept)
+
+package "Host A" {
+  rectangle "Application" as A7
+  rectangle "Transport" as A4
+  rectangle "Network" as A3
+  rectangle "Data link" as A2
+  rectangle "Physical" as A1
+
+  A7 -down-> A4
+  A4 -down-> A3
+  A3 -down-> A2
+  A2 -down-> A1
+}
+
+package "Host B" {
+  rectangle "Application" as B7
+  rectangle "Transport" as B4
+  rectangle "Network" as B3
+  rectangle "Data link" as B2
+  rectangle "Physical" as B1
+
+  B7 -down-> B4
+  B4 -down-> B3
+  B3 -down-> B2
+  B2 -down-> B1
+}
+
+A7 ..> B7 : "logical communication"
+A4 ..> B4 : "logical communication"
+A3 ..> B3 : "logical communication"
+A2 ..> B2 : "logical communication"
+A1 ..> B1 : "signal / bits"
+@enduml

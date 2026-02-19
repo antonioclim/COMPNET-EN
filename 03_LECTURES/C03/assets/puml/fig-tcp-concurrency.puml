@@ -1,0 +1,47 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title TCP concurrency models
+
+rectangle "Main thread\n(accept loop)" as main
+
+package "Thread per client" as tpc {
+  rectangle "Thread 1\nhandle(client_1)" as t1
+  rectangle "Thread 2\nhandle(client_2)" as t2
+  rectangle "Thread N\nhandle(client_N)" as tn
+}
+
+package "Process per client" as ppc {
+  rectangle "Process 1\nfork → handle" as p1
+  rectangle "Process 2\nfork → handle" as p2
+}
+
+package "Async / event loop" as async {
+  rectangle "select / epoll\nsingle thread\nmultiplexed I/O" as sel
+}
+
+main --> t1
+main --> t2
+main --> tn
+
+main --> p1
+main --> p2
+
+main --> sel
+
+note bottom of tpc
+  Simple, but thread
+  overhead grows with
+  number of clients
+end note
+
+note bottom of async
+  Scalable, but more
+  complex programming
+  model
+end note
+@enduml

@@ -1,0 +1,57 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Topologies (physical / logical)
+
+package "Bus" {
+  [N1] as b1
+  [N2] as b2
+  [N3] as b3
+  [Shared medium] as bus
+
+  b1 -- bus
+  b2 -- bus
+  b3 -- bus
+}
+
+package "Star" {
+  [N1] as s1
+  [N2] as s2
+  [N3] as s3
+  [Centre\n(switch/hub)] as center
+
+  s1 -- center
+  s2 -- center
+  s3 -- center
+}
+
+package "Ring" {
+  [N1] as r1
+  [N2] as r2
+  [N3] as r3
+  [N4] as r4
+
+  r1 -- r2
+  r2 -- r3
+  r3 -- r4
+  r4 -- r1
+}
+
+package "Mesh" {
+  [N1] as m1
+  [N2] as m2
+  [N3] as m3
+  [N4] as m4
+
+  m1 -- m2
+  m1 -- m3
+  m1 -- m4
+  m2 -- m3
+  m2 -- m4
+  m3 -- m4
+}
+@enduml

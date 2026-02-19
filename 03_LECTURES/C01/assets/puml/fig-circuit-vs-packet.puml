@@ -1,0 +1,46 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+
+title Circuit switching vs packet switching
+
+package "Circuit switching" {
+  [A] as ca
+  [Switch 1] as cs1
+  [Switch 2] as cs2
+  [B] as cb
+
+  ca --> cs1 : dedicated channel
+  cs1 --> cs2 : dedicated channel
+  cs2 --> cb : dedicated channel
+
+  note bottom of cs1
+    Resources reserved for the
+    duration of the call
+  end note
+}
+
+package "Packet switching" {
+  [A] as pa
+  [Router 1] as pr1
+  [Router 2] as pr2
+  [Router 3] as pr3
+  [B] as pb
+
+  pa --> pr1
+
+  pr1 --> pr2 : packet 1
+  pr2 --> pb : packet 1
+
+  pr1 --> pr3 : packet 2
+  pr3 --> pb : packet 2
+
+  note bottom of pr1
+    Each packet may follow
+    a different route
+  end note
+}
+@enduml
