@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDN Traffic Analysis: TCP vs UDP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; /* Slate 900 */
+            color: #e2e8f0; /* Slate 200 */
+        }
+
+        .terminal {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: #000;
+            border: 1px solid #334155;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        .terminal-text {
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .packet {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            z-index: 50;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 8px currentColor;
+        }
+
+        .host-box {
+            transition: all 0.3s ease;
+        }
+        .host-box.active {
+            border-color: #22c55e;
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.2);
+        }
+
+        /* Connection Line Animation */
+        .connection-line {
+            stroke-dasharray: 10;
+            animation: dash 1s linear infinite;
+            opacity: 0.6;
+        }
+
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -20;
+            }
+        }
+
+        .switch-table-row {
+            transition: background-color 0.2s;
+        }
+        .switch-table-row:hover {
+            background-color: rgba(255,255,255,0.05);
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden">
+
+    <!-- Header -->
+    <header class="bg-slate-800 border-b border-slate-700 p-4 shadow-md z-10">
+        <div class="flex justify-between items-center max-w-7xl mx-auto">
+            <div>
+                <h1 class="text-xl font-bold text-sky-400">SDN Traffic Analysis</h1>
+                <p class="text-xs text-slate-400">Stage 3: Application-Aware Filtering (TCP vs UDP)</p>
+            </div>
+            <div class="flex gap-4">
+                <button onclick="resetLab()" class="px-3 py-1 text-xs bg-slate-700 hover:bg-slate-600 rounded border border-slate-600 transition">
+                    Reset Simulation
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex overflow-hidden">
+        
+        <!-- Left Panel: Topology & Controls -->
+        <section class="flex-1 relative bg-slate-900 p-6 flex flex-col items-center justify-center overflow-hidden">
+            
+            <!-- Topology Container -->
+            <div class="relative w-full max-w-4xl h-[500px] select-none">
+                
+                <!-- SVG Layer for Cables (Moved inside relative container for correct coordinates) -->
+                <svg class="absolute inset-0 w-full h-full pointer-events-none" id="network-lines" style="z-index: 0;">
+                    <!-- Lines will be drawn dynamically via JS -->
+                </svg>
+
+                <!-- Switch S1 (Center) -->
+                <div id="node-s1" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-slate-800 border-2 border-indigo-500 rounded-lg flex flex-col items-center justify-center shadow-lg z-10 group cursor-help">
+                    <div class="text-indigo-400 font-bold text-lg">s1</div>
+                    <div class="text-[10px] text-slate-400">OpenFlow Switch</div>
+                    <!-- Tooltip -->
+                    <div class="absolute bottom-full mb-2 hidden group-hover:block w-64 bg-slate-800 text-xs p-2 rounded border border-slate-600 shadow-xl z-50">
+                        The Os-ken controller installs flows here. It inspects ip_proto (6 for TCP, 17 for UDP).
+                    </div>
+                </div>
+
+                <!-- Host H1 (Client) -->
+                <div id="node-h1" class="absolute left-10 top-1/2 -translate-y-1/2 w-48 bg-slate-800 border border-slate-600 rounded-lg p-3 shadow-lg z-10 host-box flex flex-col gap-2">
+                    <div class="flex justify-between items-center border-b border-slate-700 pb-1">
+                        <span class="font-bold text-sky-400">h1 (Client)</span>
+                        <span class="text-[10px] text-slate-500">10.0.10.1</span>
+                    </div>
+                    
+                    <!-- TCP Controls -->
+                    <div class="space-y-1">
+                        <div class="text-[10px] uppercase font-bold text-slate-500">TCP Client</div>
+                        <div class="flex gap-1">
+                            <input type="text" id="tcp-target-ip" value="10.0.10.2" class="w-20 bg-slate-900 border border-slate-700 text-xs px-1 rounded text-slate-300" placeholder="Target IP">
+                            <button onclick="runTcpClient()" id="btn-tcp-connect" class="flex-1 bg-sky-700 hover:bg-sky-600 text-[10px] text-white py-1 rounded transition">Connect</button>
+                        </div>
+                        <div class="flex gap-1">
+                             <input type="text" id="tcp-msg" value="Hello TCP" class="w-20 bg-slate-900 border border-slate-700 text-xs px-1 rounded text-slate-300" placeholder="Message">
+                             <button onclick="sendTcpMessage()" id="btn-tcp-send" disabled class="flex-1 bg-slate-700 text-[10px] text-slate-400 py-1 rounded cursor-not-allowed">Send</button>
+                        </div>
+                    </div>
+
+                    <!-- UDP Controls -->
+                    <div class="space-y-1 mt-2 border-t border-slate-700 pt-2">
+                        <div class="text-[10px] uppercase font-bold text-slate-500">UDP Client</div>
+                        <div class="flex gap-1">
+                            <input type="text" id="udp-target-ip" value="10.0.10.3" class="w-20 bg-slate-900 border border-slate-700 text-xs px-1 rounded text-slate-300" placeholder="Target IP">
+                        </div>
+                        <div class="flex gap-1">
+                            <input type="text" id="udp-msg" value="Hello UDP" class="w-20 bg-slate-900 border border-slate-700 text-xs px-1 rounded text-slate-300" placeholder="Message">
+                            <button onclick="sendUdpMessage()" class="flex-1 bg-orange-700 hover:bg-orange-600 text-[10px] text-white py-1 rounded transition">Sendto</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Host H2 (TCP Server) -->
+                <div id="node-h2" class="absolute right-10 top-10 w-44 bg-slate-800 border border-slate-600 rounded-lg p-3 shadow-lg z-10 host-box">
+                    <div class="flex justify-between items-center border-b border-slate-700 pb-1 mb-2">
+                        <span class="font-bold text-green-400">h2</span>
+                        <span class="text-[10px] text-slate-500">10.0.10.2</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-slate-300">TCP Server</span>
+                        <button id="btn-h2-server" onclick="toggleServer('h2')" class="text-[10px] bg-red-900/50 text-red-200 px-2 py-0.5 rounded border border-red-800 hover:bg-red-900 transition">Stopped</button>
+                    </div>
+                    <div class="mt-1 text-[10px] text-slate-500">Port: 5000</div>
+                </div>
+
+                <!-- Host H3 (UDP Server) -->
+                <div id="node-h3" class="absolute right-10 bottom-10 w-44 bg-slate-800 border border-slate-600 rounded-lg p-3 shadow-lg z-10 host-box">
+                    <div class="flex justify-between items-center border-b border-slate-700 pb-1 mb-2">
+                        <span class="font-bold text-orange-400">h3</span>
+                        <span class="text-[10px] text-slate-500">10.0.10.3</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-slate-300">UDP Server</span>
+                        <button id="btn-h3-server" onclick="toggleServer('h3')" class="text-[10px] bg-red-900/50 text-red-200 px-2 py-0.5 rounded border border-red-800 hover:bg-red-900 transition">Stopped</button>
+                    </div>
+                    <div class="mt-1 text-[10px] text-slate-500">Port: 6000</div>
+                </div>
+
+            </div>
+
+            <!-- SDN Controller Panel -->
+            <div class="absolute bottom-4 left-4 bg-slate-800/90 backdrop-blur border border-slate-600 rounded-lg p-4 w-80 shadow-2xl z-20">
+                <h3 class="text-sm font-bold text-indigo-400 mb-2 border-b border-slate-600 pb-1">SDN Controller (Os-ken) Logic</h3>
+                
+                <div class="space-y-2 text-xs">
+                    <div class="flex items-center justify-between switch-table-row p-1 rounded">
+                        <div>
+                            <span class="text-sky-400 font-mono">ip_proto=6</span> (TCP)
+                            <div class="text-[10px] text-slate-400">Dst: 10.0.10.3</div>
+                        </div>
+                        <span class="px-2 py-0.5 bg-red-900 text-red-200 rounded text-[10px] border border-red-700">DROP</span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between switch-table-row p-1 rounded">
+                        <div>
+                            <span class="text-orange-400 font-mono">ip_proto=17</span> (UDP)
+                            <div class="text-[10px] text-slate-400">Dst: 10.0.10.3</div>
+                        </div>
+                        <!-- Toggle for Task 4 -->
+                        <button id="btn-sdn-udp-rule" onclick="toggleSdnRule()" class="px-2 py-0.5 bg-red-900 text-red-200 rounded text-[10px] border border-red-700 hover:brightness-110 transition">
+                            DROP (Default)
+                        </button>
+                    </div>
+                </div>
+                <div class="mt-3 text-[10px] text-slate-500 italic">
+                    Click the UDP action button to modify the controller code (Task 4).
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Right Panel: Terminals & Theory -->
+        <section class="w-96 bg-slate-950 border-l border-slate-700 flex flex-col">
+            
+            <!-- Terminals Container -->
+            <div class="flex-1 flex flex-col overflow-y-auto p-4 gap-4">
+                
+                <!-- H1 Terminal -->
+                <div class="flex flex-col">
+                    <label class="text-xs font-mono text-slate-500 mb-1">h1@mininet:~$</label>
+                    <div id="term-h1" class="terminal h-32 rounded p-2 overflow-y-auto text-green-500 terminal-text"></div>
+                </div>
+
+                <!-- H2 Terminal -->
+                <div class="flex flex-col">
+                    <label class="text-xs font-mono text-slate-500 mb-1">h2@mininet:~$</label>
+                    <div id="term-h2" class="terminal h-32 rounded p-2 overflow-y-auto text-slate-300 terminal-text"></div>
+                </div>
+
+                <!-- H3 Terminal -->
+                <div class="flex flex-col">
+                    <label class="text-xs font-mono text-slate-500 mb-1">h3@mininet:~$</label>
+                    <div id="term-h3" class="terminal h-32 rounded p-2 overflow-y-auto text-slate-300 terminal-text"></div>
+                </div>
+
+            </div>
+
+            <!-- Explanation Box -->
+            <div class="h-1/3 bg-slate-900 border-t border-slate-700 p-4 overflow-y-auto">
+                <h3 class="text-sm font-bold text-white mb-2">Lab Guide</h3>
+                <div class="prose prose-invert prose-xs text-slate-400">
+                    <p><strong>Stage 3: App-Layer Traffic</strong></p>
+                    <p>Unlike standard L2/L3 routing, SDN allows policies based on application protocols.</p>
+                    <ul class="list-disc pl-4 mt-2 space-y-1">
+                        <li><span class="text-sky-400">TCP to h2:</span> Allowed.</li>
+                        <li><span class="text-red-400">TCP to h3:</span> Blocked by controller.</li>
+                        <li><span class="text-orange-400">UDP to h3:</span> Initial policy is DROP. Use the controller panel to update the flow table to ALLOW.</li>
+                    </ul>
+                    <p class="mt-2 text-[10px] italic">Notice how TCP requires a handshake (blocked immediately), while UDP sends data regardless of the receiver's state.</p>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <script>
+        // --- Configuration & State ---
+        const hosts = {
+            h1: { ip: '10.0.10.1', x: 0, y: 0, el: document.getElementById('node-h1') },
+            h2: { ip: '10.0.10.2', x: 0, y: 0, el: document.getElementById('node-h2') },
+            h3: { ip: '10.0.10.3', x: 0, y: 0, el: document.getElementById('node-h3') },
+            s1: { ip: 'Switch', x: 0, y: 0, el: document.getElementById('node-s1') }
+        };
+
+        const state = {
+            h2ServerRunning: false,
+            h3ServerRunning: false,
+            sdnUdpAllowed: false, // Initially false (Drop)
+            tcpConnected: false, // h1 -> h2 connection state
+            tcpTarget: null // Store who we are connected to
+        };
+
+        // --- DOM Elements ---
+        const terminals = {
+            h1: document.getElementById('term-h1'),
+            h2: document.getElementById('term-h2'),
+            h3: document.getElementById('term-h3'),
+        };
+
+        const svgCanvas = document.getElementById('network-lines');
+
+        // --- Initialization ---
+        function init() {
+            updateCoordinates();
+            drawLines();
+            window.addEventListener('resize', () => {
+                updateCoordinates();
+                drawLines();
+            });
+            log('h1', 'Mininet ready. Use controls to start scripts.', 'system');
+        }
+
+        function updateCoordinates() {
+            for (let key in hosts) {
+                const rect = hosts[key].el.getBoundingClientRect();
+                const containerRect = hosts[key].el.parentElement.getBoundingClientRect();
+                
+                // Calculate center relative to container
+                hosts[key].x = rect.left + rect.width / 2 - containerRect.left;
+                hosts[key].y = rect.top + rect.height / 2 - containerRect.top;
+            }
+        }
+
+        function drawLines() {
+            // Draw lines from s1 to h1, h2, h3
+            let html = '';
+            ['h1', 'h2', 'h3'].forEach(hostKey => {
+                const h = hosts[hostKey];
+                const s = hosts.s1;
+                
+                // Base line
+                html += `<line x1="${h.x}" y1="${h.y}" x2="${s.x}" y2="${s.y}" stroke="#334155" stroke-width="2" />`;
+                
+                // TCP Active Connection Line (Visual feedback)
+                if (hostKey === 'h1' && state.tcpConnected) {
+                     html += `<line x1="${h.x}" y1="${h.y}" x2="${s.x}" y2="${s.y}" stroke="#0ea5e9" stroke-width="2" class="connection-line" />`;
+                }
+                if (state.tcpConnected && state.tcpTarget === hosts[hostKey].ip) {
+                     html += `<line x1="${s.x}" y1="${s.y}" x2="${h.x}" y2="${h.y}" stroke="#0ea5e9" stroke-width="2" class="connection-line" />`;
+                }
+            });
+            svgCanvas.innerHTML = html;
+        }
+
+        // --- Logging System ---
+        function log(host, message, type = 'info') {
+            const el = terminals[host];
+            const line = document.createElement('div');
+            
+            const timestamp = new Date().toLocaleTimeString('en-GB', { hour12: false });
+            let colorClass = 'text-slate-300';
+            
+            if (type === 'error') colorClass = 'text-red-400';
+            if (type === 'success') colorClass = 'text-green-400';
+            if (type === 'system') colorClass = 'text-slate-500 italic';
+            if (type === 'tx') colorClass = 'text-sky-300';
+            if (type === 'rx') colorClass = 'text-orange-300';
+
+            line.className = `${colorClass} mb-1`;
+            line.innerHTML = `<span class="opacity-50">[${timestamp}]</span> ${message}`;
+            el.appendChild(line);
+            el.scrollTop = el.scrollHeight;
+        }
+
+        // --- Animation Engine ---
+        function animatePacket(from, to, type, onComplete, onDrop) {
+            const start = hosts[from];
+            const end = hosts[to];
+            const switchNode = hosts.s1;
+            
+            // 1. Host to Switch
+            createPacket(start, switchNode, type, () => {
+                
+                // CHECK SDN RULES AT SWITCH
+                let allow = checkSdnRules(from, to, type);
+
+                if (allow) {
+                    // 2. Switch to Dest
+                    createPacket(switchNode, end, type, () => {
+                        if (onComplete) onComplete();
+                    });
+                } else {
+                    // Drop Animation
+                    showDropEffect(switchNode);
+                    if (onDrop) onDrop();
+                }
+            });
+        }
+
+        function createPacket(startNode, endNode, type, callback) {
+            const packet = document.createElement('div');
+            packet.className = 'packet';
+            
+            // Color based on protocol
+            if (type === 'tcp') packet.style.backgroundColor = '#0ea5e9'; // Sky blue
+            if (type === 'udp') packet.style.backgroundColor = '#f97316'; // Orange
+            if (type === 'ack') packet.style.backgroundColor = '#22c55e'; // Green
+
+            // Start position
+            const container = document.querySelector('.relative.w-full.max-w-4xl');
+            container.appendChild(packet);
+
+            const duration = 800; // ms
+            const startTime = performance.now();
+
+            function step(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+
+                const currentX = startNode.x + (endNode.x - startNode.x) * progress;
+                const currentY = startNode.y + (endNode.y - startNode.y) * progress;
+
+                packet.style.left = `${currentX}px`;
+                packet.style.top = `${currentY}px`;
+
+                if (progress < 1) {
+                    requestAnimationFrame(step);
+                } else {
+                    packet.remove();
+                    if (callback) callback();
+                }
+            }
+            requestAnimationFrame(step);
+        }
+
+        function showDropEffect(node) {
+            const drop = document.createElement('div');
+            drop.className = 'absolute text-red-500 font-bold text-xl z-50 pointer-events-none';
+            drop.innerHTML = 'X';
+            drop.style.left = `${node.x}px`;
+            drop.style.top = `${node.y}px`;
+            drop.style.transform = 'translate(-50%, -50%)';
+            
+            const container = document.querySelector('.relative.w-full.max-w-4xl');
+            container.appendChild(drop);
+
+            // Simple fade out
+            drop.animate([
+                { opacity: 1, transform: 'translate(-50%, -50%) scale(1)' },
+                { opacity: 0, transform: 'translate(-50%, -50%) scale(2)' }
+            ], {
+                duration: 500,
+                fill: 'forwards'
+            });
+
+            setTimeout(() => drop.remove(), 500);
+            log('h1', 'Packet dropped at s1 (Policy DENY)', 'system');
+        }
+
+        // --- Logic & Simulation ---
+
+        function checkSdnRules(from, to, type) {
+            const targetIp = hosts[to].ip;
+
+            // Rule 1: Allow TCP to h2
+            if (type === 'tcp' && targetIp === '10.0.10.2') return true;
+            if (type === 'ack' && from === 'h2') return true; // Return traffic
+
+            // Rule 2: Block TCP to h3 (Always blocked in this lab)
+            if (type === 'tcp' && targetIp === '10.0.10.3') return false;
+
+            // Rule 3: UDP to h3 (Dynamic)
+            if (type === 'udp' && targetIp === '10.0.10.3') {
+                return state.sdnUdpAllowed;
+            }
+            if (type === 'ack' && from === 'h3') return true; // Return echo
+
+            return false;
+        }
+
+        // --- Server Controls ---
+        function toggleServer(host) {
+            const btn = document.getElementById(`btn-${host}-server`);
+            const isH2 = host === 'h2';
+            const isRunning = isH2 ? state.h2ServerRunning : state.h3ServerRunning;
+            
+            if (isRunning) {
+                // Stop server
+                if (isH2) state.h2ServerRunning = false; else state.h3ServerRunning = false;
+                btn.innerText = "Stopped";
+                btn.className = "text-[10px] bg-red-900/50 text-red-200 px-2 py-0.5 rounded border border-red-800 hover:bg-red-900 transition";
+                log(host, `${isH2 ? 'TCP' : 'UDP'} Server stopped.`, 'system');
+                
+                // If TCP server stops, kill connection
+                if (isH2 && state.tcpConnected) {
+                    state.tcpConnected = false;
+                    document.getElementById('btn-tcp-send').disabled = true;
+                    document.getElementById('btn-tcp-connect').innerText = "Connect";
+                    document.getElementById('btn-tcp-connect').disabled = false;
+                    log('h1', '[TCP CLIENT] Server closed connection', 'error');
+                    drawLines();
+                }
+
+            } else {
+                // Start server
+                if (isH2) state.h2ServerRunning = true; else state.h3ServerRunning = true;
+                btn.innerText = "Running";
+                btn.className = "text-[10px] bg-green-900/50 text-green-200 px-2 py-0.5 rounded border border-green-800 hover:bg-green-900 transition";
+                const port = isH2 ? 5000 : 6000;
+                log(host, `${isH2 ? 'TCP' : 'UDP'} SERVER Listening on 0.0.0.0:${port}`, 'success');
+            }
+        }
+
+        function toggleSdnRule() {
+            state.sdnUdpAllowed = !state.sdnUdpAllowed;
+            const btn = document.getElementById('btn-sdn-udp-rule');
+            
+            if (state.sdnUdpAllowed) {
+                btn.innerText = "OUTPUT:3 (Allowed)";
+                btn.className = "px-2 py-0.5 bg-green-900 text-green-200 rounded text-[10px] border border-green-700 hover:brightness-110 transition";
+                log('h1', 'SDN Controller updated: Installing flow ipv4_dst=10.0.10.3, ip_proto=17, actions=output:3', 'system');
+            } else {
+                btn.innerText = "DROP (Default)";
+                btn.className = "px-2 py-0.5 bg-red-900 text-red-200 rounded text-[10px] border border-red-700 hover:brightness-110 transition";
+                log('h1', 'SDN Controller updated: Removing custom flow. Fallback to DROP.', 'system');
+            }
+        }
+
+        // --- Client Operations ---
+
+        // TCP CONNECT
+        function runTcpClient() {
+            const targetIp = document.getElementById('tcp-target-ip').value;
+            let targetHost = null;
+            if (targetIp === '10.0.10.2') targetHost = 'h2';
+            if (targetIp === '10.0.10.3') targetHost = 'h3';
+
+            if (!targetHost) {
+                log('h1', `Unknown IP: ${targetIp}`, 'error');
+                return;
+            }
+
+            const btn = document.getElementById('btn-tcp-connect');
+            btn.disabled = true;
+            btn.innerText = "Connecting...";
+            
+            log('h1', `[TCP CLIENT] Connecting to ${targetIp}:5000 ...`, 'info');
+
+            // Simulate TCP Handshake / Packet Flow
+            animatePacket('h1', targetHost, 'tcp', 
+                // On Arrival at Dest
+                () => {
+                    // Check if server is running
+                    const serverRunning = targetHost === 'h2' ? state.h2ServerRunning : state.h3ServerRunning; // h3 is UDP but lets assume we check socket
+                    
+                    if (targetHost === 'h2' && serverRunning) {
+                        // Success
+                        log(targetHost, `[TCP SERVER] Connection from 10.0.10.1`, 'info');
+                        
+                        // Send SynAck back
+                        animatePacket(targetHost, 'h1', 'ack', () => {
+                            state.tcpConnected = true;
+                            state.tcpTarget = targetIp;
+                            btn.innerText = "Connected";
+                            btn.className = "flex-1 bg-green-700 text-[10px] text-white py-1 rounded cursor-default";
+                            document.getElementById('btn-tcp-send').disabled = false;
+                            document.getElementById('btn-tcp-send').className = "flex-1 bg-sky-700 hover:bg-sky-600 text-[10px] text-white py-1 rounded transition";
+                            log('h1', `[TCP CLIENT] Connected. Type messages.`, 'success');
+                            drawLines();
+                        });
+
+                    } else if (targetHost === 'h3') {
+                        // Though UDP server might be on, TCP request to it fails or no listener
+                        log('h1', `[TCP CLIENT] Connection failed: Connection refused`, 'error');
+                        btn.disabled = false;
+                        btn.innerText = "Connect";
+                    } else {
+                        log('h1', `[TCP CLIENT] Connection failed: Connection refused (Server down)`, 'error');
+                        btn.disabled = false;
+                        btn.innerText = "Connect";
+                    }
+                },
+                // On Drop at Switch
+                () => {
+                    log('h1', `[TCP CLIENT] Connection failed: Timed out (Packet Dropped)`, 'error');
+                    btn.disabled = false;
+                    btn.innerText = "Connect";
+                }
+            );
+        }
+
+        // TCP SEND
+        function sendTcpMessage() {
+            if (!state.tcpConnected) return;
+            const msg = document.getElementById('tcp-msg').value;
+            const targetIp = state.tcpTarget;
+            const targetHost = targetIp === '10.0.10.2' ? 'h2' : 'h3';
+
+            log('h1', `[TCP CLIENT] Sending: ${msg}`, 'tx');
+            
+            animatePacket('h1', targetHost, 'tcp', () => {
+                log(targetHost, `[TCP SERVER] Received: ${msg}`, 'rx');
+                
+                // Echo back
+                animatePacket(targetHost, 'h1', 'ack', () => {
+                    log('h1', `[TCP CLIENT] Received Echo: ${msg}`, 'rx');
+                });
+            });
+        }
+
+        // UDP SEND
+        function sendUdpMessage() {
+            const targetIp = document.getElementById('udp-target-ip').value;
+            const msg = document.getElementById('udp-msg').value;
+            let targetHost = null;
+            if (targetIp === '10.0.10.2') targetHost = 'h2';
+            if (targetIp === '10.0.10.3') targetHost = 'h3';
+
+            if (!targetHost) {
+                log('h1', `Unknown IP: ${targetIp}`, 'error');
+                return;
+            }
+
+            log('h1', `[UDP CLIENT] Sending to ${targetIp}:6000`, 'tx');
+
+            animatePacket('h1', targetHost, 'udp', 
+                // On Arrival
+                () => {
+                    const serverRunning = targetHost === 'h3' ? state.h3ServerRunning : false;
+                    
+                    if (serverRunning) {
+                         log(targetHost, `[UDP SERVER] From 10.0.10.1: ${msg}`, 'rx');
+                         // Echo back
+                         animatePacket(targetHost, 'h1', 'ack', () => {
+                             log('h1', `[UDP CLIENT] Received from ${targetIp}: ${msg}`, 'rx');
+                         });
+                    } else {
+                        // Packet arrived but no listener. 
+                        // UDP is connectionless, so client often gets nothing, or ICMP Port Unreachable.
+                        // Here we just don't echo back.
+                        log('h1', `(Packet sent, but no response - Server might be down)`, 'system');
+                    }
+                },
+                // On Drop
+                () => {
+                    // UDP client just sends and forgets. If dropped, it just doesn't get a reply.
+                     log('h1', `(Packet sent, but dropped by Network)`, 'system');
+                }
+            );
+        }
+
+        function resetLab() {
+            location.reload();
+        }
+
+        // Start
+        init();
+
+    </script>
+</body>
+</html>

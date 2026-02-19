@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Nginx Reverse Proxy Simulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- Phosphor Icons for modern look -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #e2e8f0; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+        /* Animation Keyframes */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+            100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        }
+        
+        .packet {
+            position: absolute;
+            z-index: 50;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+        }
+
+        .packet-req { background: #3b82f6; border: 2px solid #93c5fd; border-radius: 4px; padding: 2px 6px; }
+        .packet-res { background: #10b981; border: 2px solid #6ee7b7; border-radius: 4px; padding: 2px 6px; }
+        
+        .fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
+        .fade-enter-from, .fade-leave-to { opacity: 0; }
+    </style>
+</head>
+<body class="overflow-hidden">
+
+<div id="app" class="h-screen flex flex-col">
+    
+    <!-- Top Header -->
+    <header class="bg-slate-900 border-b border-slate-700 p-4 shrink-0 flex justify-between items-center shadow-lg z-30">
+        <div>
+            <h1 class="text-xl font-bold text-white flex items-center gap-3">
+                <i class="ph ph-arrows-split text-blue-500 text-2xl"></i>
+                Nginx Reverse Proxy Lab
+            </h1>
+            <p class="text-xs text-slate-400 mt-1 flex gap-2 items-center">
+                <span class="bg-slate-800 px-2 py-0.5 rounded text-blue-300 border border-slate-700">Docker Host Networking</span>
+                <span class="bg-slate-800 px-2 py-0.5 rounded text-green-300 border border-slate-700">Header Injection</span>
+            </p>
+        </div>
+        
+        <div class="flex gap-6">
+            <!-- Service Controls -->
+            <div class="flex gap-4">
+                <div class="flex flex-col items-end">
+                    <div class="text-[10px] uppercase text-slate-500 font-bold mb-1 tracking-wider">Frontend Service</div>
+                    <button @click="toggleNginx" 
+                        class="px-4 py-2 rounded font-mono text-xs font-bold transition-all border flex items-center gap-2 shadow-sm"
+                        :class="nginxRunning ? 'bg-green-950/40 border-green-500/50 text-green-400 hover:bg-green-900/40' : 'bg-slate-800 border-slate-600 text-slate-400 hover:bg-slate-700'">
+                        <i class="ph-fill ph-docker-logo text-lg"></i>
+                        NGINX :8080
+                        <span class="w-2 h-2 rounded-full ml-1 transition-colors" :class="nginxRunning ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-slate-600'"></span>
+                    </button>
+                </div>
+
+                <div class="flex flex-col items-end">
+                    <div class="text-[10px] uppercase text-slate-500 font-bold mb-1 tracking-wider">Backend Service</div>
+                    <button @click="toggleBackend" 
+                        class="px-4 py-2 rounded font-mono text-xs font-bold transition-all border flex items-center gap-2 shadow-sm"
+                        :class="backendRunning ? 'bg-blue-950/40 border-blue-500/50 text-blue-400 hover:bg-blue-900/40' : 'bg-slate-800 border-slate-600 text-slate-400 hover:bg-slate-700'">
+                        <i class="ph-fill ph-file-code text-lg"></i>
+                        PYTHON :8000
+                        <span class="w-2 h-2 rounded-full ml-1 transition-colors" :class="backendRunning ? 'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]' : 'bg-slate-600'"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <div class="flex-1 flex overflow-hidden relative bg-[#0b1120]">
+        
+        <!-- Packet Animation Layer -->
+        <div v-if="animating" class="absolute inset-0 pointer-events-none z-20 overflow-hidden">
+            <div class="packet" :class="packetType === 'req' ? 'packet-req' : 'packet-res'" :style="packetStyle">
+                <i class="ph-bold mr-1" :class="packetType === 'req' ? 'ph-arrow-right' : 'ph-arrow-left'"></i>
+                {{ packetLabel }}
+            </div>
+        </div>
+
+        <!-- 1. LEFT PANEL: CLIENT TERMINAL -->
+        <div class="w-[30%] flex flex-col border-r border-slate-800 bg-[#0d1117]">
+            <div class="p-3 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
+                <div class="font-bold text-slate-300 text-sm flex items-center gap-2">
+                    <i class="ph-fill ph-terminal-window text-lg text-slate-400"></i>
+                    Client Terminal
+                </div>
+                <div class="text-[10px] text-slate-500 mono">/bin/zsh</div>
+            </div>
+            
+            <div class="flex-1 p-4 overflow-y-auto font-mono text-xs leading-5" ref="terminalScroll">
+                <div class="text-slate-500 mb-4"># Select a command to execute:</div>
+                
+                <!-- Command Buttons -->
+                <div class="grid grid-cols-1 gap-3 mb-6">
+                    <button @click="runSimulation(8000)" :disabled="animating" 
+                        class="group text-left border border-slate-700 rounded p-3 hover:border-blue-500 hover:bg-blue-900/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-green-400 font-bold">$</span>
+                            <span class="text-slate-200">curl -v http://localhost:8000/</span>
+                        </div>
+                        <div class="text-[10px] text-slate-500 group-hover:text-blue-400 transition-colors">
+                            Direct access to Python backend. Bypasses Nginx.
+                        </div>
+                    </button>
+
+                    <button @click="runSimulation(8080)" :disabled="animating" 
+                        class="group text-left border border-slate-700 rounded p-3 hover:border-green-500 hover:bg-green-900/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-green-400 font-bold">$</span>
+                            <span class="text-slate-200">curl -v http://localhost:8080/</span>
+                        </div>
+                        <div class="text-[10px] text-slate-500 group-hover:text-green-400 transition-colors">
+                            Access via Nginx Reverse Proxy. Inspects headers.
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Terminal Output Simulation -->
+                <div v-for="(line, idx) in terminalLines" :key="idx" class="break-words animate-fade-in">
+                    <span v-if="line.type === 'cmd'" class="text-slate-300"><span class="text-green-400 font-bold mr-2">$</span>{{ line.text }}</span>
+                    <span v-else-if="line.type === 'info'" class="text-blue-400">* {{ line.text }}</span>
+                    <span v-else-if="line.type === 'out'" class="text-slate-400">> {{ line.text }}</span>
+                    <span v-else-if="line.type === 'in'" class="text-slate-300">< {{ line.text }}</span>
+                    <span v-else-if="line.type === 'body'" class="text-slate-500">{{ line.text }}</span>
+                    <span v-else-if="line.type === 'error'" class="text-red-400 font-bold">{{ line.text }}</span>
+                </div>
+                <div v-if="animating" class="animate-pulse text-blue-400 mt-2">▋</div>
+            </div>
+        </div>
+
+        <!-- 2. CENTER PANEL: NGINX PROXY -->
+        <div class="w-[40%] flex flex-col border-r border-slate-800 relative bg-[#111621]">
+            <div class="p-3 border-b border-slate-800 flex justify-between items-center bg-slate-900/50 backdrop-blur z-10">
+                <div class="font-bold text-slate-300 text-sm flex items-center gap-2">
+                    <i class="ph-fill ph-cube text-lg text-green-500"></i>
+                    Docker Container: nginx:alpine
+                </div>
+                <div class="flex items-center gap-2 text-[10px] font-mono bg-black/40 px-2 py-1 rounded border border-slate-700">
+                    <span class="w-1.5 h-1.5 rounded-full" :class="nginxRunning ? 'bg-green-500' : 'bg-red-500'"></span>
+                    {{ nginxRunning ? 'UP 0.0.0.0:8080' : 'EXITED (0)' }}
+                </div>
+            </div>
+
+            <div class="flex-1 flex flex-col p-4 overflow-y-auto">
+                
+                <!-- Visual Container Box -->
+                <div id="nginx-node" class="mx-auto w-32 h-32 mb-6 rounded-xl border-2 flex flex-col items-center justify-center transition-all duration-500 relative"
+                     :class="nginxRunning ? 'border-green-500/50 bg-green-900/10 shadow-[0_0_30px_rgba(34,197,94,0.1)]' : 'border-slate-700 bg-slate-800/50 opacity-50 grayscale'">
+                    <i class="ph ph-arrows-left-right text-4xl mb-2" :class="nginxRunning ? 'text-green-400' : 'text-slate-600'"></i>
+                    <div class="text-xs font-bold text-slate-300">Reverse Proxy</div>
+                </div>
+
+                <!-- Config Editor -->
+                <div class="flex-1 flex flex-col min-h-0 bg-[#0d1117] rounded-lg border border-slate-700 overflow-hidden shadow-inner mb-4">
+                    <div class="bg-slate-800 px-3 py-1.5 text-xs text-slate-400 border-b border-slate-700 flex justify-between items-center">
+                        <span class="flex items-center gap-2"><i class="ph-bold ph-file-text"></i> /etc/nginx/S08_Part04_Config_Nginx.conf</span>
+                        <span v-if="configChanged" class="text-yellow-400 text-[10px] font-bold animate-pulse">● Unsaved</span>
+                    </div>
+                    <div class="relative flex-1 group">
+                        <textarea v-model="nginxConfig" @input="configChanged = true"
+                            class="w-full h-full bg-transparent text-slate-300 mono text-[11px] p-3 resize-none focus:outline-none leading-5 selection:bg-blue-500/30" 
+                            spellcheck="false"></textarea>
+                    </div>
+                    <div class="bg-slate-800 p-2 border-t border-slate-700 flex justify-end">
+                        <button v-if="configChanged" @click="applyConfig" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded text-xs font-bold transition-colors flex items-center gap-1">
+                            <i class="ph-bold ph-arrow-clockwise"></i> Reload Nginx
+                        </button>
+                        <span v-else class="text-[10px] text-slate-500 flex items-center gap-1"><i class="ph-fill ph-check-circle text-green-500"></i> Active Configuration</span>
+                    </div>
+                </div>
+
+                <!-- Nginx Access Logs -->
+                <div class="h-32 bg-black rounded-lg border border-slate-800 p-2 font-mono text-[10px] overflow-y-auto text-slate-400">
+                    <div class="text-slate-600 border-b border-slate-800 pb-1 mb-1 sticky top-0 bg-black w-full">/var/log/nginx/access.log</div>
+                    <div v-if="nginxLogs.length === 0" class="italic text-slate-700 p-2">Waiting for traffic...</div>
+                    <div v-for="(log, i) in nginxLogs" :key="i" class="mb-0.5 whitespace-nowrap hover:bg-slate-900 px-1 rounded">
+                        <span class="text-slate-500">{{ log.ip }}</span> - - [{{ log.time }}] "<span class="text-green-400">{{ log.req }}</span>" <span :class="log.status >= 500 ? 'text-red-400' : 'text-blue-400'">{{ log.status }}</span> {{ log.bytes }} "-" "{{ log.ua }}"
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. RIGHT PANEL: BACKEND PYTHON -->
+        <div class="w-[30%] flex flex-col bg-[#0d1117]">
+            <div class="p-3 border-b border-slate-800 flex justify-between items-center bg-slate-900/50 z-10">
+                <div class="font-bold text-slate-300 text-sm flex items-center gap-2">
+                    <i class="ph-fill ph-hard-drives text-lg text-blue-500"></i>
+                    Host: Python Backend
+                </div>
+                <div class="flex items-center gap-2 text-[10px] font-mono bg-black/40 px-2 py-1 rounded border border-slate-700">
+                     <span class="w-1.5 h-1.5 rounded-full" :class="backendRunning ? 'bg-blue-500' : 'bg-red-500'"></span>
+                    {{ backendRunning ? 'PID 1234 :8000' : 'STOPPED' }}
+                </div>
+            </div>
+
+            <div class="flex-1 flex flex-col p-4 items-center">
+                 <!-- Visual Backend Box -->
+                 <div id="backend-node" class="w-24 h-24 mb-6 mt-4 rounded-xl border-2 flex flex-col items-center justify-center transition-all duration-500 relative"
+                     :class="backendRunning ? 'border-blue-500/50 bg-blue-900/10 shadow-[0_0_30px_rgba(59,130,246,0.1)]' : 'border-slate-700 bg-slate-800/50 opacity-50 grayscale'">
+                    <i class="ph-fill ph-python-logo text-4xl mb-2" :class="backendRunning ? 'text-blue-400' : 'text-slate-600'"></i>
+                    <div class="text-xs font-bold text-slate-300">http.server</div>
+                </div>
+
+                <!-- Backend Stdout -->
+                <div class="w-full flex-1 bg-black rounded-lg border border-slate-800 p-3 font-mono text-[10px] overflow-y-auto text-slate-300 leading-4">
+                    <div class="text-slate-500 border-b border-slate-800 pb-1 mb-2">stderr / stdout</div>
+                    <div v-if="!backendRunning" class="text-slate-600 italic">Process terminated with signal SIGTERM</div>
+                    <div v-for="(log, idx) in backendLogs" :key="idx" class="mb-1 break-all">
+                        <span class="text-slate-500">{{log.ip}}</span> - - [{{log.time}}] <span class="text-yellow-100">{{log.msg}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Educational Analysis Bar -->
+    <div class="h-auto min-h-[60px] bg-slate-900 border-t border-slate-700 p-3 flex items-center justify-between z-40 shadow-[0_-5px_15px_rgba(0,0,0,0.3)]">
+        <div class="flex items-center gap-4 flex-1">
+            <div class="bg-slate-800 p-2 rounded-lg border border-slate-700 shrink-0">
+                <i class="ph-fill ph-monitor-play text-xl text-blue-400"></i>
+            </div>
+            <div>
+                <div class="text-[10px] uppercase text-slate-500 font-bold tracking-wider mb-0.5">Live Network Analysis</div>
+                <div class="text-sm font-medium text-slate-200 animate-fade-in" key="statusText">{{ statusMessage }}</div>
+            </div>
+        </div>
+        
+        <!-- Step Indicators -->
+        <div class="flex items-center gap-1" v-if="animating">
+            <div v-for="s in 5" :key="s" class="w-12 h-1 rounded-full transition-all duration-300" 
+                :class="currentStep >= s ? 'bg-blue-500' : 'bg-slate-700'"></div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const { createApp, ref, computed, nextTick, onMounted } = Vue;
+
+    createApp({
+        setup() {
+            // -- State --
+            const nginxRunning = ref(true);
+            const backendRunning = ref(true);
+            const animating = ref(false);
+            const configChanged = ref(false);
+            const terminalLines = ref([]);
+            const nginxLogs = ref([]);
+            const backendLogs = ref([]);
+            const statusMessage = ref("System Ready. Select a request simulation above.");
+            const currentStep = ref(0);
+            
+            // Animation Props
+            const packetStyle = ref({ top: '0px', left: '0px', opacity: 0 });
+            const packetType = ref('req'); // req | res
+            const packetLabel = ref('GET');
+            const terminalScroll = ref(null);
+
+            // Default Config
+            const defaultConfig = 
+`events {}
+
+http {
+    server {
+        listen 8080;
+        server_name localhost;
+
+        location / {
+            # Route to host network
+            proxy_pass http://127.0.0.1:8000;
+            
+            # Forwarding Headers
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+
+            # --- STUDENT TASK ---
+            # Task 5: Modify this header
+            add_header X-Student-Lab "Seminar8";
+        }
+    }
+}`;
+            const nginxConfig = ref(defaultConfig);
+
+            // -- Lifecycle --
+            onMounted(() => {
+                addBackendLog("0.0.0.0", "Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/) ...");
+            });
+
+            // -- Helpers --
+            const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+            
+            const getPos = (id) => {
+                const el = document.getElementById(id);
+                if(!el) return {x:0,y:0};
+                const rect = el.getBoundingClientRect();
+                return { x: rect.left + rect.width/2, y: rect.top + rect.height/2 };
+            };
+
+            const scrollToBottom = () => {
+                nextTick(() => {
+                    if(terminalScroll.value) terminalScroll.value.scrollTop = terminalScroll.value.scrollHeight;
+                });
+            };
+
+            // -- Logging --
+            const logTerminal = (type, text) => {
+                terminalLines.value.push({ type, text });
+                scrollToBottom();
+            };
+
+            const addBackendLog = (ip, msg) => {
+                const now = new Date();
+                // Python http.server log format
+                const timeStr = `${now.getDate()}/${now.toLocaleString('en-us', {month:'short'})}/${now.getFullYear()} ${now.toTimeString().split(' ')[0]}`;
+                backendLogs.value.push({ ip, time: timeStr, msg });
+                if(backendLogs.value.length > 8) backendLogs.value.shift();
+            };
+
+            const addNginxLog = (req, status, bytes) => {
+                const now = new Date();
+                // CLF Format
+                const timeStr = `${now.getDate()}/${now.toLocaleString('en-us', {month:'short'})}/${now.getFullYear()}:${now.toTimeString().split(' ')[0]} +0000`;
+                nginxLogs.value.push({
+                    ip: '172.17.0.1',
+                    time: timeStr,
+                    req,
+                    status,
+                    bytes,
+                    ua: 'curl/7.64.1'
+                });
+                if(nginxLogs.value.length > 5) nginxLogs.value.shift();
+            };
+
+            // -- Controls --
+            const toggleNginx = () => {
+                nginxRunning.value = !nginxRunning.value;
+                statusMessage.value = nginxRunning.value ? "Nginx Container Started." : "Nginx Container Stopped.";
+            };
+
+            const toggleBackend = () => {
+                backendRunning.value = !backendRunning.value;
+                if(backendRunning.value) addBackendLog("0.0.0.0", "Serving HTTP on 0.0.0.0 port 8000 ...");
+                else addBackendLog("-", "Server stopped.");
+            };
+
+            const applyConfig = async () => {
+                configChanged.value = false;
+                statusMessage.value = "Reloading Nginx Configuration...";
+                // Visual reload effect
+                const wasRunning = nginxRunning.value;
+                nginxRunning.value = false;
+                await sleep(600);
+                if(wasRunning) nginxRunning.value = true;
+                statusMessage.value = "Configuration applied successfully.";
+            };
+
+            // -- Simulation Engine --
+            const runSimulation = async (port) => {
+                if(animating.value) return;
+                
+                // Reset
+                animating.value = true;
+                terminalLines.value = []; // Clear terminal for clarity
+                currentStep.value = 1;
+                const isProxy = port === 8080;
+
+                // 1. Client Init
+                statusMessage.value = `Client: Initializing curl request to port ${port}...`;
+                logTerminal('cmd', `curl -v http://localhost:${port}/`);
+                await sleep(400);
+                logTerminal('info', `Trying 127.0.0.1:${port}...`);
+                
+                // Check connection
+                const targetRunning = isProxy ? nginxRunning.value : backendRunning.value;
+                if(!targetRunning) {
+                    await sleep(400);
+                    logTerminal('info', `connect to 127.0.0.1 port ${port} failed: Connection refused`);
+                    logTerminal('info', `Failed to connect to localhost port ${port}: Connection refused`);
+                    logTerminal('error', `curl: (7) Failed to connect to localhost port ${port}: Connection refused`);
+                    statusMessage.value = "Connection Failed: Target service is offline.";
+                    animating.value = false;
+                    return;
+                }
+
+                logTerminal('info', `Connected to localhost (${port}) port ${port} (#0)`);
+                await sleep(300);
+                logTerminal('out', `GET / HTTP/1.1`);
+                logTerminal('out', `Host: localhost:${port}`);
+                logTerminal('out', `User-Agent: curl/7.64.1`);
+                logTerminal('out', `Accept: */*`);
+                logTerminal('out', ``);
+
+                // Setup Animation Start
+                const clientNode = { x: 50, y: window.innerHeight / 2 }; // approximate
+                const nginxNode = getPos('nginx-node');
+                const backendNode = getPos('backend-node');
+                
+                packetType.value = 'req';
+                packetLabel.value = 'GET /';
+                
+                // --- DIRECT FLOW (8000) ---
+                if(!isProxy) {
+                    currentStep.value = 2;
+                    statusMessage.value = "Network: Sending packet directly to Python Backend...";
+                    await animatePacket(clientNode, backendNode);
+                    
+                    currentStep.value = 3;
+                    statusMessage.value = "Backend: Python http.server processing request...";
+                    await sleep(500);
+                    addBackendLog("127.0.0.1", '"GET / HTTP/1.1" 200 -');
+                    
+                    currentStep.value = 4;
+                    packetType.value = 'res';
+                    packetLabel.value = '200 OK';
+                    packetStyle.value.opacity = 0; // hide briefly to swap style
+                    await nextTick();
+                    
+                    statusMessage.value = "Network: Returning HTML content to Client...";
+                    await animatePacket(backendNode, clientNode);
+                    
+                    finishSuccess(200, 'SimpleHTTP/0.6 Python/3.9.1');
+                    return;
+                }
+
+                // --- PROXY FLOW (8080) ---
+                
+                // A. Client -> Nginx
+                currentStep.value = 2;
+                statusMessage.value = "Network: Packet entering Docker Container (Port 8080)...";
+                await animatePacket(clientNode, nginxNode);
+
+                // B. Nginx Logic
+                currentStep.value = 3;
+                statusMessage.value = "Nginx: Parsing headers & matching 'location /' block...";
+                await sleep(600);
+                
+                if(!backendRunning.value) {
+                    // 502 Bad Gateway
+                    statusMessage.value = "Nginx Error: Upstream (Backend) is unreachable.";
+                    addNginxLog('GET / HTTP/1.1', 502, 157);
+                    
+                    packetType.value = 'res';
+                    packetLabel.value = '502 Bad Gateway';
+                    await sleep(200);
+                    
+                    statusMessage.value = "Nginx: Returning 502 Bad Gateway error page...";
+                    await animatePacket(nginxNode, clientNode);
+                    
+                    finishError502();
+                    return;
+                }
+
+                // C. Nginx -> Backend
+                statusMessage.value = "Nginx: Proxy Pass -> Forwarding request to 127.0.0.1:8000...";
+                await animatePacket(nginxNode, backendNode);
+
+                // D. Backend Process
+                currentStep.value = 4;
+                statusMessage.value = "Backend: Python server handling proxied request...";
+                await sleep(500);
+                addBackendLog("127.0.0.1", '"GET / HTTP/1.1" 200 -');
+
+                // E. Backend -> Nginx
+                packetType.value = 'res';
+                packetLabel.value = 'HTML Content';
+                statusMessage.value = "Backend: Responding with content...";
+                await animatePacket(backendNode, nginxNode);
+
+                // F. Nginx Header Injection
+                currentStep.value = 5;
+                statusMessage.value = "Nginx: Injecting custom 'add_header' directives...";
+                await sleep(600);
+                
+                // Determine header value from config
+                const match = nginxConfig.value.match(/add_header\s+X-Student-Lab\s+"([^"]+)";/);
+                const headerVal = match ? match[1] : 'Seminar8';
+
+                addNginxLog('GET / HTTP/1.1', 200, 612);
+
+                // G. Nginx -> Client
+                packetLabel.value = '200 OK';
+                statusMessage.value = "Network: Final response sent to Client.";
+                await animatePacket(nginxNode, clientNode);
+
+                finishSuccess(200, 'nginx/1.23.1', headerVal);
+            };
+
+            const animatePacket = async (from, to) => {
+                packetStyle.value = {
+                    left: `${from.x}px`,
+                    top: `${from.y}px`,
+                    opacity: 1,
+                    transform: 'translate(-50%, -50%) scale(1)'
+                };
+                await nextTick();
+                await sleep(50); // allow browser paint
+                
+                packetStyle.value = {
+                    left: `${to.x}px`,
+                    top: `${to.y}px`,
+                    opacity: 1,
+                    transform: 'translate(-50%, -50%) scale(1)'
+                };
+                await sleep(600); // Wait for transition
+            };
+
+            const finishSuccess = (code, server, customHeader = null) => {
+                logTerminal('in', `HTTP/1.1 ${code} OK`);
+                logTerminal('in', `Server: ${server}`);
+                logTerminal('in', `Date: ${new Date().toUTCString()}`);
+                logTerminal('in', `Content-Type: text/html`);
+                if(customHeader) {
+                    logTerminal('in', `X-Student-Lab: ${customHeader}`);
+                }
+                logTerminal('in', `Content-Length: 612`);
+                logTerminal('in', `Connection: keep-alive`);
+                logTerminal('in', ``);
+                logTerminal('body', `<!DOCTYPE html>`);
+                logTerminal('body', `<html>...<h1>Server HTTP implementat...</h1>...</html>`);
+                logTerminal('info', `Connection #0 to host localhost left intact`);
+                
+                statusMessage.value = "Simulation Complete: Response received successfully.";
+                packetStyle.value.opacity = 0;
+                animating.value = false;
+                currentStep.value = 0;
+            };
+
+            const finishError502 = () => {
+                logTerminal('in', `HTTP/1.1 502 Bad Gateway`);
+                logTerminal('in', `Server: nginx/1.23.1`);
+                logTerminal('in', `Content-Type: text/html`);
+                logTerminal('in', `Content-Length: 157`);
+                logTerminal('in', ``);
+                logTerminal('body', `<html><head><title>502 Bad Gateway</title>...`);
+                
+                statusMessage.value = "Simulation Complete: 502 Bad Gateway received.";
+                packetStyle.value.opacity = 0;
+                animating.value = false;
+                currentStep.value = 0;
+            };
+
+            return {
+                nginxRunning, backendRunning, animating, configChanged,
+                nginxConfig, terminalLines, nginxLogs, backendLogs,
+                statusMessage, currentStep,
+                packetStyle, packetType, packetLabel, terminalScroll,
+                toggleNginx, toggleBackend, applyConfig, runSimulation
+            };
+        }
+    }).mount('#app');
+</script>
+</body>
+</html>

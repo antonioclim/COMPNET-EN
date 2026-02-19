@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTTP Socket Server Simulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #e2e8f0; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .highlight-line { background-color: #374151; border-left: 4px solid #3b82f6; }
+        .fade-enter-active, .fade-leave-active { transition: opacity 0.5s ease; }
+        .fade-enter-from, .fade-leave-to { opacity: 0; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+    </style>
+</head>
+<body>
+
+<div id="app" class="h-screen flex flex-col overflow-hidden">
+    
+    <!-- Header -->
+    <header class="bg-slate-900 border-b border-slate-700 p-4 flex justify-between items-center shrink-0">
+        <div>
+            <h1 class="text-xl font-bold text-white flex items-center gap-2">
+                <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 01-2 2v4a2 2 0 012 2h14a2 2 0 012-2v-4a2 2 0 01-2-2m-2-4h.01M17 16h.01"></path></svg>
+                HTTP Socket Server Manual Implementation
+            </h1>
+            <p class="text-sm text-slate-400">Understanding TCP, Parsing, and Content-Length</p>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="px-3 py-1 rounded bg-slate-800 border border-slate-600 text-xs mono">
+                Port: <span class="text-yellow-400">8000</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full" :class="serverStatus === 'OFF' ? 'bg-red-500' : 'bg-green-500 animate-pulse'"></span>
+                <span class="text-sm font-semibold">{{ serverStatus === 'OFF' ? 'Server Stopped' : 'Server Running' }}</span>
+            </div>
+            <button @click="toggleServer" 
+                class="px-4 py-2 rounded font-semibold text-sm transition-colors"
+                :class="serverStatus === 'OFF' ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'">
+                {{ serverStatus === 'OFF' ? 'Start Server' : 'Stop Server' }}
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <div class="flex-1 grid grid-cols-12 gap-0 overflow-hidden">
+
+        <!-- Left Column: Client Simulator -->
+        <div class="col-span-3 bg-slate-900 border-r border-slate-700 flex flex-col">
+            <div class="p-4 bg-slate-800 border-b border-slate-700 font-semibold text-slate-200">
+                1. Client (Browser/Curl)
+            </div>
+            <div class="p-6 flex-1 flex flex-col gap-6 overflow-y-auto">
+                <!-- Address Bar -->
+                <div class="bg-slate-800 p-4 rounded-lg border border-slate-700 shadow-sm">
+                    <label class="block text-xs uppercase tracking-wide text-slate-400 mb-2">Request URL</label>
+                    <div class="flex gap-2">
+                        <div class="flex-1 bg-slate-900 border border-slate-600 rounded flex items-center px-3 text-sm mono text-slate-300">
+                            <span class="text-slate-500 select-none">http://localhost:8000</span>
+                            <input v-model="requestPath" type="text" class="bg-transparent border-none focus:outline-none text-white w-full ml-1" placeholder="/index.html">
+                        </div>
+                        <button @click="sendRequest" :disabled="serverStatus === 'OFF' || isProcessing" 
+                            class="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded text-sm font-bold shadow-lg shadow-blue-900/50">
+                            GO
+                        </button>
+                    </div>
+                    <div class="mt-2 flex gap-2 text-xs">
+                        <button @click="requestPath='/index.html'" class="text-blue-400 hover:underline">/index.html</button>
+                        <button @click="requestPath='/missing.html'" class="text-red-400 hover:underline">/missing.html</button>
+                        <button @click="requestPath='/'" class="text-blue-400 hover:underline">/</button>
+                    </div>
+                </div>
+
+                <!-- Browser View -->
+                <div class="bg-white rounded-lg overflow-hidden h-64 flex flex-col shadow-lg">
+                    <div class="bg-slate-100 border-b border-slate-300 p-2 flex gap-2 items-center">
+                        <div class="w-2.5 h-2.5 rounded-full bg-red-400"></div>
+                        <div class="w-2.5 h-2.5 rounded-full bg-yellow-400"></div>
+                        <div class="w-2.5 h-2.5 rounded-full bg-green-400"></div>
+                    </div>
+                    <div class="flex-1 p-4 overflow-auto text-slate-900 relative">
+                        <div v-if="browserContent" v-html="browserContent"></div>
+                        <div v-else class="absolute inset-0 flex items-center justify-center text-slate-400 text-sm">
+                            Waiting for response...
+                        </div>
+                        
+                        <!-- Loading Overlay -->
+                        <div v-if="isProcessing" class="absolute inset-0 bg-white/80 flex flex-col items-center justify-center gap-2">
+                            <svg class="animate-spin h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                            <span class="text-xs font-bold text-slate-600">WAITING FOR SERVER...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Client Tips -->
+                <div class="bg-blue-900/30 border border-blue-800 rounded p-3 text-xs text-blue-200">
+                    <p><strong>Tip:</strong> Browsers ignore the raw headers, but verify <code>Content-Length</code> to know when to stop loading.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Middle Column: The "Wire" / Logs -->
+        <div class="col-span-5 bg-black flex flex-col border-r border-slate-700 relative">
+            <div class="p-4 bg-slate-800 border-b border-slate-700 font-semibold text-slate-200 flex justify-between">
+                <span>2. Network / Socket Log</span>
+                <span class="text-xs font-normal text-slate-400 self-center">Raw Bytes Stream</span>
+            </div>
+            
+            <div class="flex-1 p-4 mono text-sm overflow-y-auto space-y-4" ref="logContainer">
+                <div v-if="logs.length === 0" class="text-slate-600 italic text-center mt-10">System logs will appear here...</div>
+                
+                <div v-for="(log, idx) in logs" :key="idx" class="border-l-2 pl-3 py-1 animate-fade-in" 
+                    :class="{
+                        'border-green-500 text-green-400': log.type === 'success',
+                        'border-blue-500 text-blue-300': log.type === 'info',
+                        'border-yellow-500 text-yellow-300': log.type === 'data-in',
+                        'border-purple-500 text-purple-300': log.type === 'data-out',
+                        'border-red-500 text-red-400': log.type === 'error'
+                    }">
+                    <div class="text-[10px] opacity-50 mb-1">{{ log.timestamp }}</div>
+                    <div class="whitespace-pre-wrap leading-relaxed">{{ log.message }}</div>
+                    
+                    <!-- Visualization of Raw Data Packets -->
+                    <div v-if="log.packet" class="mt-2 bg-slate-900 p-2 rounded border border-slate-700 text-xs">
+                        <div class="text-slate-500 mb-1 border-b border-slate-800 pb-1">Raw Packet Content (Bytes)</div>
+                        <span v-for="(char, cIdx) in log.packet" :key="cIdx"
+                              :class="char === '\\r' || char === '\\n' ? 'text-red-500 font-bold' : 'text-slate-300'">{{ char }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Connection Status Overlay -->
+            <div v-if="connectionStatus" class="absolute bottom-4 right-4 bg-slate-800 border border-slate-600 px-3 py-1 rounded-full text-xs text-white shadow-xl flex items-center gap-2">
+                <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                {{ connectionStatus }}
+            </div>
+        </div>
+
+        <!-- Right Column: Server Logic (Python Representation) -->
+        <div class="col-span-4 bg-[#1e1e1e] flex flex-col">
+            <div class="p-4 bg-slate-800 border-b border-slate-700 font-semibold text-slate-200">
+                3. Server Logic (Python)
+            </div>
+            <div class="flex-1 overflow-auto relative">
+                <div class="absolute top-0 left-0 w-full h-full p-4 mono text-xs leading-6 text-slate-400">
+                    
+                    <!-- Code Block -->
+                    <div :class="{'highlight-line text-white': activeStep === 0}" class="pl-2 transition-all">
+                        <span class="text-purple-400">import</span> socket, os<br>
+                        sock = socket.socket(AF_INET, SOCK_STREAM)
+                    </div>
+
+                    <div :class="{'highlight-line text-white': activeStep === 1}" class="pl-2 transition-all">
+                        sock.bind((<span class="text-green-300">'0.0.0.0'</span>, <span class="text-orange-300">8000</span>))<br>
+                        sock.listen(5) <span class="text-slate-500"># Server listening...</span>
+                    </div>
+
+                    <div :class="{'highlight-line text-white': activeStep === 2}" class="pl-2 transition-all mt-2">
+                        <span class="text-purple-400">while</span> <span class="text-blue-400">True</span>:<br>
+                        &nbsp;&nbsp;conn, addr = sock.accept() <span class="text-slate-500"># Blocking call</span>
+                    </div>
+
+                    <div :class="{'highlight-line text-white': activeStep === 3}" class="pl-2 transition-all mt-2">
+                        &nbsp;&nbsp;<span class="text-slate-500"># 1. Read Request Bytes</span><br>
+                        &nbsp;&nbsp;data = conn.recv(4096)<br>
+                        &nbsp;&nbsp;request = data.decode(<span class="text-green-300">'utf-8'</span>)
+                    </div>
+
+                    <div :class="{'highlight-line text-white': activeStep === 4}" class="pl-2 transition-all mt-2">
+                        &nbsp;&nbsp;<span class="text-slate-500"># 2. Parse First Line</span><br>
+                        &nbsp;&nbsp;first_line = request.split(<span class="text-green-300">'\r\n'</span>)[0]<br>
+                        &nbsp;&nbsp;method, path, _ = first_line.split(<span class="text-green-300">' '</span>)
+                    </div>
+
+                    <div :class="{'highlight-line text-white': activeStep === 5}" class="pl-2 transition-all mt-2">
+                        &nbsp;&nbsp;<span class="text-slate-500"># 3. Handle File Path</span><br>
+                        &nbsp;&nbsp;<span class="text-purple-400">if</span> path == <span class="text-green-300">'/'</span>: path = <span class="text-green-300">'/index.html'</span><br>
+                        &nbsp;&nbsp;filepath = <span class="text-green-300">'static'</span> + path
+                    </div>
+
+                    <div :class="{'highlight-line text-white': activeStep === 6}" class="pl-2 transition-all mt-2">
+                        &nbsp;&nbsp;<span class="text-purple-400">if</span> os.path.exists(filepath):<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;status = <span class="text-green-300">'200 OK'</span><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;content = open(filepath).read()<br>
+                        &nbsp;&nbsp;<span class="text-purple-400">else</span>:<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;status = <span class="text-green-300">'404 Not Found'</span><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;content = <span class="text-green-300">'&lt;h1&gt;404 Not Found&lt;/h1&gt;'</span>
+                    </div>
+
+                    <div :class="{'highlight-line text-white': activeStep === 7}" class="pl-2 transition-all mt-2">
+                        &nbsp;&nbsp;<span class="text-slate-500"># 4. Construct Headers</span><br>
+                        &nbsp;&nbsp;headers = <span class="text-green-300">f"HTTP/1.1 {status}\r\n"</span><br>
+                        &nbsp;&nbsp;headers += <span class="text-green-300">f"Content-Length: {len(content)}\r\n\r\n"</span>
+                    </div>
+
+                    <div :class="{'highlight-line text-white': activeStep === 8}" class="pl-2 transition-all mt-2">
+                        &nbsp;&nbsp;<span class="text-slate-500"># 5. Send Bytes</span><br>
+                        &nbsp;&nbsp;conn.sendall(headers.encode() + content)<br>
+                        &nbsp;&nbsp;conn.close()
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Variable Watcher -->
+            <div class="h-40 bg-[#2d2d2d] border-t border-slate-700 p-3 overflow-y-auto">
+                <div class="text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-1">Runtime Variables</div>
+                <div class="grid grid-cols-1 gap-1 text-xs mono">
+                    <div class="flex"><span class="w-20 text-blue-400">path:</span> <span class="text-orange-300">"{{ currentPath || 'None' }}"</span></div>
+                    <div class="flex"><span class="w-20 text-blue-400">status:</span> <span class="text-orange-300">"{{ currentStatus || 'None' }}"</span></div>
+                    <div class="flex"><span class="w-20 text-blue-400">len(body):</span> <span class="text-orange-300">{{ currentContentLength !== null ? currentContentLength : 'None' }}</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Virtual File System Modal (Always Visible Conceptually) -->
+    <div v-if="showFileModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="bg-slate-800 rounded-lg p-6 max-w-lg w-full">
+            <h3 class="text-lg font-bold mb-4">Static Directory Content</h3>
+            <div class="bg-black p-4 rounded mono text-sm text-green-400 mb-4">
+                ./static/<br>
+                ├── index.html <span class="text-slate-500">(241 bytes)</span><br>
+            </div>
+            <button @click="showFileModal = false" class="bg-blue-600 px-4 py-2 rounded text-sm hover:bg-blue-500 text-white w-full">Close</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const { createApp, ref, computed, nextTick } = Vue;
+
+    const STATIC_FILES = {
+        '/index.html': `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Manual HTTP Server</title>
+    <style>body{font-family:sans-serif; padding:2rem; color:#333;}</style>
+</head>
+<body>
+    <h1 style="color:#2563eb">HTTP Server Implemented with Sockets!</h1>
+    <p>This is the page served manually from the <code>static/</code> directory.</p>
+    <p>Status: <strong>Loaded via TCP Socket</strong></p>
+</body>
+</html>`
+    };
+
+    createApp({
+        setup() {
+            const serverStatus = ref('OFF');
+            const logs = ref([]);
+            const requestPath = ref('/index.html');
+            const browserContent = ref('');
+            const isProcessing = ref(false);
+            const activeStep = ref(null);
+            const connectionStatus = ref(null);
+            const logContainer = ref(null);
+
+            // Watcher variables for the Python panel
+            const currentPath = ref(null);
+            const currentStatus = ref(null);
+            const currentContentLength = ref(null);
+            const showFileModal = ref(false);
+
+            const addLog = (message, type = 'info', packet = null) => {
+                const timestamp = new Date().toLocaleTimeString('en-GB', { hour12: false }) + '.' + new Date().getMilliseconds().toString().padStart(3, '0');
+                logs.value.push({ message, type, timestamp, packet });
+                nextTick(() => {
+                    if (logContainer.value) logContainer.value.scrollTop = logContainer.value.scrollHeight;
+                });
+            };
+
+            const toggleServer = () => {
+                if (serverStatus.value === 'OFF') {
+                    serverStatus.value = 'RUNNING';
+                    activeStep.value = 1; // Listen
+                    addLog("Initializing socket...", "info");
+                    setTimeout(() => {
+                        addLog("Socket Bound to 0.0.0.0:8000", "success");
+                        addLog("Listening for incoming connections...", "info");
+                        activeStep.value = 2; // Accept loop
+                    }, 800);
+                } else {
+                    serverStatus.value = 'OFF';
+                    activeStep.value = 0;
+                    addLog("Server stopped. Socket closed.", "error");
+                    resetState();
+                }
+            };
+
+            const resetState = () => {
+                isProcessing.value = false;
+                connectionStatus.value = null;
+                currentPath.value = null;
+                currentStatus.value = null;
+                currentContentLength.value = null;
+            };
+
+            const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+            const sendRequest = async () => {
+                if (serverStatus.value === 'OFF') {
+                    addLog("Error: Connection Refused (Server is offline)", "error");
+                    return;
+                }
+
+                // Reset display
+                browserContent.value = '';
+                isProcessing.value = true;
+                currentPath.value = null;
+                currentStatus.value = null;
+                currentContentLength.value = null;
+
+                // Step 1: Network Connection
+                connectionStatus.value = "Establishing TCP Connection...";
+                await sleep(500);
+                addLog("New client connected from 127.0.0.1:54321", "info");
+                connectionStatus.value = "Connected";
+                
+                // Step 2: Receive Data
+                activeStep.value = 3; // recv
+                const rawRequest = `GET ${requestPath.value} HTTP/1.1\r\nHost: localhost:8000\r\nUser-Agent: curl/8.0\r\nAccept: */*\r\n\r\n`;
+                // Visualize the invisible chars
+                const visRequest = rawRequest.replace(/\r/g, '\\r').replace(/\n/g, '\\n\n');
+                
+                await sleep(800);
+                addLog("Received 89 bytes from client", "data-in", visRequest);
+                
+                // Step 3: Parse
+                activeStep.value = 4; // split
+                await sleep(800);
+                const pathPart = requestPath.value;
+                addLog(`Parsed Request Line:\nMethod: GET\nPath: ${pathPart}\nProtocol: HTTP/1.1`, "info");
+                
+                // Step 4: Logic / File Lookup
+                activeStep.value = 5; // normalize path
+                await sleep(500);
+                
+                let actualPath = pathPart;
+                if (actualPath === '/') actualPath = '/index.html';
+                currentPath.value = actualPath;
+                
+                activeStep.value = 6; // check existence
+                await sleep(600);
+                
+                let body = "";
+                let statusLine = "";
+                
+                if (STATIC_FILES[actualPath]) {
+                    currentStatus.value = "200 OK";
+                    body = STATIC_FILES[actualPath];
+                    statusLine = "HTTP/1.1 200 OK";
+                    addLog(`File found at static${actualPath}. Reading content...`, "success");
+                } else {
+                    currentStatus.value = "404 Not Found";
+                    body = "<h1>404 Not Found</h1>";
+                    statusLine = "HTTP/1.1 404 Not Found";
+                    addLog(`File NOT found at static${actualPath}. Generating 404.`, "error");
+                }
+                
+                // Step 5: Headers Construction
+                activeStep.value = 7; 
+                await sleep(800);
+                currentContentLength.value = body.length;
+                
+                const headers = `${statusLine}\r\nContent-Type: text/html\r\nContent-Length: ${body.length}\r\nConnection: close\r\n\r\n`;
+                const visHeaders = headers.replace(/\r/g, '\\r').replace(/\n/g, '\\n\n');
+                addLog("Constructing Response Headers:", "info", visHeaders);
+                
+                // Step 6: Send
+                activeStep.value = 8;
+                await sleep(800);
+                addLog(`Sending ${headers.length + body.length} bytes to client...`, "data-out");
+                
+                // Step 7: Close
+                await sleep(500);
+                addLog("Closing connection.", "info");
+                connectionStatus.value = null;
+                
+                // Update Client View
+                browserContent.value = body;
+                isProcessing.value = false;
+                
+                // Return to listen loop
+                activeStep.value = 2; 
+            };
+
+            return {
+                serverStatus,
+                logs,
+                requestPath,
+                browserContent,
+                isProcessing,
+                toggleServer,
+                sendRequest,
+                logContainer,
+                activeStep,
+                connectionStatus,
+                currentPath,
+                currentStatus,
+                currentContentLength,
+                showFileModal
+            };
+        }
+    }).mount('#app');
+</script>
+</body>
+</html>

@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TCP Connect Scanner Simulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; /* Slate 900 */
+            color: #e2e8f0;
+        }
+
+        .font-mono {
+            font-family: 'Fira Code', monospace;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+
+        /* Animation Keyframes */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        }
+
+        @keyframes packet-move-right {
+            0% { left: 10%; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { left: 90%; opacity: 0; }
+        }
+
+        @keyframes packet-move-left {
+            0% { left: 90%; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { left: 10%; opacity: 0; }
+        }
+
+        @keyframes fade-out {
+            0% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        .packet {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            z-index: 10;
+        }
+
+        .packet-syn { background-color: #facc15; box-shadow: 0 0 8px #facc15; } /* Yellow */
+        .packet-ack { background-color: #4ade80; box-shadow: 0 0 8px #4ade80; } /* Green */
+        .packet-rst { background-color: #f87171; box-shadow: 0 0 8px #f87171; } /* Red */
+
+        .packet-right { animation: packet-move-right 1s linear forwards; }
+        .packet-left { animation: packet-move-left 1s linear forwards; }
+        
+        .server-node {
+            position: relative;
+        }
+        
+        .server-node::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 50%;
+            animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+            z-index: -1;
+        }
+
+        .status-badge {
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden">
+
+    <!-- Header -->
+    <header class="bg-slate-800 border-b border-slate-700 p-4 shadow-lg shrink-0 z-20">
+        <div class="flex items-center justify-between max-w-7xl mx-auto">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-blue-600 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-white">TCP Connect Scanner</h1>
+                    <p class="text-xs text-slate-400">Network Security • Seminar 7 • Stage 4</p>
+                </div>
+            </div>
+            <div class="flex gap-4">
+                 <button onclick="resetSimulation()" class="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors border border-slate-600 rounded flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Randomize & Reset
+                 </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex overflow-hidden">
+        
+        <!-- Left Column: Controls & Visualization -->
+        <section class="flex-1 flex flex-col p-6 gap-6 overflow-y-auto min-w-[600px]">
+            
+            <!-- Setup Panel -->
+            <div class="bg-slate-800 rounded-xl border border-slate-700 p-6 shadow-sm">
+                <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <span class="bg-slate-700 text-slate-300 w-6 h-6 rounded-full flex items-center justify-center text-xs">1</span>
+                    Scanner Configuration
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+                    <div class="md:col-span-1">
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Target IP</label>
+                        <input type="text" value="10.0.10.2" readonly class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-slate-300 focus:outline-none cursor-not-allowed opacity-70">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Start Port</label>
+                        <input type="number" id="startPort" value="1" min="1" max="65535" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">End Port</label>
+                        <input type="number" id="endPort" value="1024" min="1" max="65535" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Timeout (s)</label>
+                        <input type="number" id="timeoutVal" value="0.5" step="0.1" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Speed</label>
+                        <select id="speedMode" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all">
+                            <option value="1">1x (Visual)</option>
+                            <option value="25" selected>25x (Fast)</option>
+                            <option value="100">100x (Turbo)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900/50 rounded-lg p-4 border border-slate-700/50 mb-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <h3 class="text-sm font-medium text-slate-300">Ground Truth (Server State)</h3>
+                            <p class="text-xs text-slate-400">Includes Expected Services + Random Anomalies</p>
+                        </div>
+                        <span class="text-[10px] bg-slate-800 text-slate-500 px-2 py-1 rounded border border-slate-700">Randomized on Reset</span>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-2 max-h-[120px] overflow-y-auto pr-2 custom-scrollbar" id="portRulesContainer">
+                        <!-- Port Rules generated here -->
+                    </div>
+                    
+                    <div class="mt-3 flex gap-2 border-t border-slate-800 pt-3">
+                        <input type="number" id="newRulePort" placeholder="Port" class="w-20 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-white">
+                        <select id="newRuleState" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-white">
+                            <option value="OPEN">OPEN</option>
+                            <option value="FILTERED">FILTERED</option>
+                        </select>
+                        <button onclick="addPortRule()" class="bg-slate-700 hover:bg-slate-600 text-white px-3 py-1 rounded text-xs transition-colors">Add Custom</button>
+                    </div>
+                </div>
+
+                <button id="scanBtn" onclick="startScan()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-3 rounded-lg shadow-lg shadow-blue-900/20 transition-all flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    Run python3 port_scanner.py
+                </button>
+            </div>
+
+            <!-- Visualization Area -->
+            <div class="bg-slate-800 rounded-xl border border-slate-700 p-6 shadow-sm flex-1 min-h-[300px] flex flex-col relative">
+                <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <span class="bg-slate-700 text-slate-300 w-6 h-6 rounded-full flex items-center justify-center text-xs">2</span>
+                    Network Visualisation
+                </h2>
+
+                <!-- Network Diagram -->
+                <div class="flex-1 flex items-center justify-between px-12 relative bg-slate-900/30 rounded-lg border border-slate-800/50">
+                    
+                    <!-- Connection Line -->
+                    <div class="absolute top-1/2 left-[100px] right-[100px] h-0.5 bg-slate-700 z-0"></div>
+
+                    <!-- Client Node -->
+                    <div class="relative z-10 flex flex-col items-center gap-3">
+                        <div class="w-20 h-20 bg-slate-800 rounded-xl border-2 border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.2)] flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <div class="text-center">
+                            <div class="font-bold text-sm">Scanner (You)</div>
+                            <div class="font-mono text-xs text-slate-500">10.0.10.1</div>
+                        </div>
+                    </div>
+
+                    <!-- Animation Container -->
+                    <div id="packetContainer" class="flex-1 h-20 relative mx-4">
+                        <!-- Packets injected here via JS -->
+                    </div>
+
+                    <!-- Server Node -->
+                    <div class="relative z-10 flex flex-col items-center gap-3 server-node">
+                        <div class="w-20 h-20 bg-slate-800 rounded-xl border-2 border-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.2)] flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
+                            </svg>
+                        </div>
+                        <div class="text-center">
+                            <div class="font-bold text-sm">Target</div>
+                            <div class="font-mono text-xs text-slate-500">10.0.10.2</div>
+                        </div>
+                        
+                        <!-- Port Status Overlay -->
+                        <div id="targetStatusBadge" class="absolute -top-4 -right-4 bg-slate-700 text-xs px-2 py-1 rounded shadow hidden">
+                            Port 80: OPEN
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Text -->
+                <div class="mt-4 text-center h-8">
+                    <span id="scanStatusText" class="text-sm font-mono text-blue-400">Ready to scan...</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Column: Terminal & Education -->
+        <aside class="w-[450px] bg-slate-900 border-l border-slate-800 flex flex-col">
+            
+            <!-- Terminal Output -->
+            <div class="h-1/2 flex flex-col border-b border-slate-800">
+                <div class="bg-slate-800 px-4 py-2 border-b border-slate-700 flex items-center justify-between">
+                    <span class="text-xs font-mono text-slate-400">scanner@mininet:~$</span>
+                    <div class="flex gap-1.5">
+                        <div class="w-2.5 h-2.5 rounded-full bg-red-500/50"></div>
+                        <div class="w-2.5 h-2.5 rounded-full bg-yellow-500/50"></div>
+                        <div class="w-2.5 h-2.5 rounded-full bg-green-500/50"></div>
+                    </div>
+                </div>
+                <div id="terminal" class="flex-1 bg-black p-4 overflow-y-auto font-mono text-sm leading-relaxed text-slate-300">
+                    <div class="opacity-50 text-xs mb-2"># System ready. Configure parameters and click Start.</div>
+                </div>
+            </div>
+
+            <!-- Education / Theory -->
+            <div class="h-1/2 overflow-y-auto p-6 bg-slate-800/30">
+                <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4 border-b border-slate-700 pb-2">Theory & Analysis</h3>
+                
+                <div class="space-y-4">
+                    <!-- Concept 1 -->
+                    <div class="group">
+                        <h4 class="text-blue-400 font-medium text-sm mb-1">Code Logic Mapping</h4>
+                        <ul class="text-xs text-slate-400 space-y-1 ml-2 list-disc list-inside">
+                            <li><code class="bg-slate-800 px-1 rounded text-emerald-400">connect() success</code> ➔ <strong>OPEN</strong><br><span class="opacity-70 ml-4">Target sent SYN-ACK.</span></li>
+                            <li><code class="bg-slate-800 px-1 rounded text-red-400">ConnectionRefused</code> ➔ <strong>CLOSED</strong><br><span class="opacity-70 ml-4">Target sent RST (Reset). No service.</span></li>
+                            <li><code class="bg-slate-800 px-1 rounded text-yellow-400">socket.timeout</code> ➔ <strong>FILTERED</strong><br><span class="opacity-70 ml-4">No response. Dropped by firewall.</span></li>
+                        </ul>
+                    </div>
+
+                    <!-- Concept 2 -->
+                    <div class="bg-slate-800 p-3 rounded border border-slate-700">
+                        <h4 class="text-white font-medium text-xs mb-2">Real World Scenario</h4>
+                        <p class="text-xs text-slate-400 leading-relaxed">
+                            Every time you reset this lab, we inject random "ghost" services.
+                            <br><br>
+                            Real networks aren't clean. They have:
+                            <ul class="list-disc list-inside mt-1 ml-1 text-slate-500">
+                                <li>Old dev servers (High ports open)</li>
+                                <li>Forgotten admin tools (Filtered)</li>
+                                <li>Misconfigured firewalls</li>
+                            </ul>
+                            <span class="block mt-2 text-blue-400">Try to find the anomalies!</span>
+                        </p>
+                    </div>
+
+                     <!-- Concept 3 -->
+                     <div class="bg-slate-800 p-3 rounded border border-slate-700">
+                        <h4 class="text-white font-medium text-xs mb-2">Reflection: Connect vs SYN</h4>
+                        <p class="text-xs text-slate-400 leading-relaxed">
+                            <strong>Connect Scan:</strong> Full 3-way handshake. Logs on server. User privs ok.<br>
+                            <strong>SYN Scan:</strong> Half-open (SYN -> SYN-ACK -> RST). Stealthier. Root required.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </aside>
+
+    </main>
+
+    <script>
+        // --- State Management ---
+        const state = {
+            targetIP: "10.0.10.2",
+            targetRules: {}, // Will be populated by init
+            isScanning: false,
+            speedMultiplier: 25,
+            results: []
+        };
+
+        // --- DOM Elements ---
+        const terminal = document.getElementById('terminal');
+        const packetContainer = document.getElementById('packetContainer');
+        const statusText = document.getElementById('scanStatusText');
+        const portRulesContainer = document.getElementById('portRulesContainer');
+        const targetStatusBadge = document.getElementById('targetStatusBadge');
+
+        // --- Initialization ---
+        function init() {
+            generateRandomRules();
+        }
+
+        // --- Logic: Random Rule Generation ---
+        function generateRandomRules() {
+            // 1. Establish the "Ground Truth" (Expected Results)
+            // These are constant rules defined in the prompt
+            const newRules = {
+                21: 'CLOSED',
+                22: 'FILTERED',
+                80: 'OPEN',
+                443: 'OPEN'
+            };
+
+            const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+            const existingPorts = Object.keys(newRules).map(Number);
+
+            // 2. Add "Accidental" OPEN ports (1-10 random ports)
+            // Range 1-1024 to make them discoverable in a standard scan
+            const numOpen = randomInt(1, 10);
+            for(let i=0; i<numOpen; i++) {
+                let p = randomInt(1, 1024);
+                // Avoid overwriting base rules or picking same random port twice
+                while(existingPorts.includes(p) || newRules[p]) {
+                    p = randomInt(1, 1024);
+                }
+                newRules[p] = 'OPEN';
+            }
+
+            // 3. Add "Accidental" FILTERED ports (1-10 random ports)
+            const numFiltered = randomInt(1, 10);
+            for(let i=0; i<numFiltered; i++) {
+                let p = randomInt(1, 1024);
+                while(existingPorts.includes(p) || newRules[p]) {
+                    p = randomInt(1, 1024);
+                }
+                newRules[p] = 'FILTERED';
+            }
+            
+            state.targetRules = newRules;
+            renderPortRules();
+            log("[Simulation Reset] New network topology generated.", 'system');
+            log(`[DEBUG] Added ${numOpen} random OPEN ports and ${numFiltered} random FILTERED ports.`, 'system');
+        }
+
+        // --- Configuration Logic ---
+        function addPortRule() {
+            const portInput = document.getElementById('newRulePort');
+            const stateInput = document.getElementById('newRuleState');
+            const port = parseInt(portInput.value);
+            
+            if (port && port > 0 && port <= 65535) {
+                state.targetRules[port] = stateInput.value;
+                portInput.value = '';
+                renderPortRules();
+            } else {
+                alert("Please enter a valid port number (1-65535).");
+            }
+        }
+
+        function removeRule(port) {
+            delete state.targetRules[port];
+            renderPortRules();
+        }
+
+        function renderPortRules() {
+            portRulesContainer.innerHTML = '';
+            
+            // Sort keys for display
+            const ports = Object.keys(state.targetRules).sort((a,b) => parseInt(a) - parseInt(b));
+
+            if (ports.length === 0) {
+                portRulesContainer.innerHTML = '<span class="text-xs text-slate-500 italic">No special rules. All ports will be CLOSED.</span>';
+                return;
+            }
+
+            ports.forEach(port => {
+                const status = state.targetRules[port];
+                let colorClass = 'bg-slate-700 text-slate-300';
+                let typeLabel = "Random";
+
+                if (status === 'OPEN') {
+                    colorClass = 'bg-emerald-900 text-emerald-200 border-emerald-700';
+                } else if (status === 'FILTERED') {
+                    colorClass = 'bg-yellow-900 text-yellow-200 border-yellow-700';
+                } else if (status === 'CLOSED') {
+                    colorClass = 'bg-red-900 text-red-200 border-red-700';
+                }
+
+                // Highlight Base Rules
+                const isBase = [21, 22, 80, 443].includes(parseInt(port));
+                if (isBase) {
+                    typeLabel = "Expected";
+                    // Make border brighter or different style
+                    colorClass += " border-l-4"; 
+                }
+
+                const badge = document.createElement('div');
+                badge.className = `flex items-center gap-2 border px-2 py-1 rounded text-xs ${colorClass} min-w-max`;
+                badge.innerHTML = `
+                    <div class="flex flex-col leading-none">
+                        <span class="font-mono font-bold text-sm">${port}</span>
+                        <span class="text-[9px] opacity-70 uppercase">${typeLabel}</span>
+                    </div>
+                    <span class="font-medium">${status}</span>
+                    <button onclick="removeRule(${port})" class="hover:text-white opacity-60 hover:opacity-100 font-bold ml-1 text-lg">×</button>
+                `;
+                portRulesContainer.appendChild(badge);
+            });
+        }
+
+        function getPortState(port) {
+            // Default is CLOSED unless specified otherwise in rules
+            return state.targetRules[port] || 'CLOSED';
+        }
+
+        // --- Terminal Logic ---
+        function log(message, type = 'info') {
+            const line = document.createElement('div');
+            line.className = 'font-mono mb-1 animate-fade-in';
+            
+            if (type === 'cmd') {
+                line.innerHTML = `<span class="text-blue-400">➜</span> <span class="text-white">${message}</span>`;
+            } else if (type === 'result') {
+                const parts = message.split(' ');
+                if (parts.length >= 3) {
+                    const status = parts[2];
+                    let color = 'text-slate-400';
+                    if (status === 'OPEN') color = 'text-emerald-400 font-bold';
+                    if (status === 'CLOSED') color = 'text-red-400';
+                    if (status === 'FILTERED') color = 'text-yellow-400';
+                    line.innerHTML = `${parts[0]} <span class="text-blue-300">${parts[1]}</span> <span class="${color}">${status}</span>`;
+                } else {
+                    line.textContent = message;
+                }
+            } else if (type === 'system') {
+                line.className += ' text-slate-500 italic text-xs mt-2';
+                line.textContent = `[System] ${message}`;
+            } else {
+                line.textContent = message;
+            }
+            
+            terminal.appendChild(line);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function clearTerminal() {
+            terminal.innerHTML = '';
+        }
+
+        // --- Animation Logic ---
+        function createPacket(type, direction, duration) {
+            if (state.speedMultiplier >= 100) return;
+
+            const packet = document.createElement('div');
+            packet.className = `packet ${type} ${direction}`;
+            packet.style.animationDuration = `${duration}ms`;
+            packetContainer.appendChild(packet);
+            
+            setTimeout(() => {
+                if(packet.parentNode) packet.parentNode.removeChild(packet);
+            }, duration + 50); 
+        }
+
+        function delay(ms) {
+            const scaledMs = ms / state.speedMultiplier;
+            return new Promise(resolve => setTimeout(resolve, scaledMs));
+        }
+
+        // --- Core Scanning Logic ---
+        async function startScan() {
+            if (state.isScanning) return;
+            
+            const startPort = parseInt(document.getElementById('startPort').value);
+            const endPort = parseInt(document.getElementById('endPort').value);
+            const timeoutVal = parseFloat(document.getElementById('timeoutVal').value) * 1000; 
+            const speedVal = parseInt(document.getElementById('speedMode').value);
+            
+            state.speedMultiplier = speedVal;
+
+            if (startPort > endPort) {
+                alert("Start Port cannot be greater than End Port");
+                return;
+            }
+            if ((endPort - startPort) > 100 && state.speedMultiplier === 1) {
+                 if(!confirm("Scanning >100 ports at 1x speed will take a long time. \n\nWe recommend switching 'Speed' to 25x or 100x.\n\nContinue with slow speed?")) return;
+            }
+
+            state.isScanning = true;
+            document.getElementById('scanBtn').disabled = true;
+            document.getElementById('scanBtn').classList.add('opacity-50', 'cursor-not-allowed');
+            document.getElementById('speedMode').disabled = true;
+            
+            clearTerminal();
+            log(`python3 port_scanner.py ${state.targetIP} ${startPort} ${endPort} --speed ${state.speedMultiplier}x`, 'cmd');
+            log(`[INFO] Scanez host-ul ${state.targetIP} pe porturile ${startPort}-${endPort} ...`, 'system');
+
+            state.results = [];
+
+            for (let port = startPort; port <= endPort; port++) {
+                if (!state.isScanning) break; 
+                await scanPort(port, timeoutVal);
+            }
+
+            log(`[INFO] Scanare terminata.`, 'system');
+            
+            const openCount = state.results.filter(r => r === 'OPEN').length;
+            const closedCount = state.results.filter(r => r === 'CLOSED').length;
+            const filteredCount = state.results.filter(r => r === 'FILTERED').length;
+            
+            log(`--------------------------`, 'system');
+            log(`SUMMARY: ${openCount} OPEN, ${closedCount} CLOSED, ${filteredCount} FILTERED`, 'system');
+
+            state.isScanning = false;
+            document.getElementById('scanBtn').disabled = false;
+            document.getElementById('scanBtn').classList.remove('opacity-50', 'cursor-not-allowed');
+            document.getElementById('speedMode').disabled = false;
+            statusText.textContent = "Scan complete.";
+        }
+
+        async function scanPort(port, timeoutMs) {
+            statusText.textContent = `Scanning Port ${port}...`;
+            const trueState = getPortState(port);
+            
+            const baseTravelTime = 600; 
+            const baseProcessTime = 200;
+
+            // 1. Client sends SYN 
+            createPacket('packet-syn', 'packet-right', baseTravelTime / state.speedMultiplier);
+            await delay(baseTravelTime);
+
+            // 2. Server Logic
+            if (trueState === 'OPEN') {
+                if(state.speedMultiplier < 100) {
+                    targetStatusBadge.textContent = `Port ${port}: OPEN`;
+                    targetStatusBadge.classList.remove('hidden');
+                }
+                
+                await delay(baseProcessTime);
+                createPacket('packet-ack', 'packet-left', baseTravelTime / state.speedMultiplier);
+                await delay(baseTravelTime);
+                
+                log(`PORT ${port} OPEN`, 'result');
+                state.results.push('OPEN');
+                if(state.speedMultiplier < 100) targetStatusBadge.classList.add('hidden');
+
+                createPacket('packet-ack', 'packet-right', baseTravelTime / state.speedMultiplier); 
+                await delay(baseProcessTime);
+
+            } else if (trueState === 'CLOSED') {
+                if(state.speedMultiplier < 100) {
+                    targetStatusBadge.textContent = `Port ${port}: CLOSED`;
+                    targetStatusBadge.classList.remove('hidden');
+                }
+                
+                await delay(baseProcessTime);
+                createPacket('packet-rst', 'packet-left', baseTravelTime / state.speedMultiplier);
+                await delay(baseTravelTime);
+                
+                log(`PORT ${port} CLOSED`, 'result');
+                state.results.push('CLOSED');
+                if(state.speedMultiplier < 100) targetStatusBadge.classList.add('hidden');
+
+            } else if (trueState === 'FILTERED') {
+                if(state.speedMultiplier < 100) {
+                    targetStatusBadge.textContent = `Port ${port}: FILTERED (DROP)`;
+                    targetStatusBadge.classList.remove('hidden');
+                }
+                
+                if (state.speedMultiplier < 25) {
+                    const steps = 5;
+                    for(let i=0; i<steps; i++) {
+                       statusText.textContent = `Scanning Port ${port}... Waiting (${Math.round((i/steps)*timeoutMs)}ms)`; 
+                       await delay(timeoutMs / steps);
+                    }
+                } else {
+                    await delay(timeoutMs);
+                }
+
+                log(`PORT ${port} FILTERED`, 'result');
+                state.results.push('FILTERED');
+                if(state.speedMultiplier < 100) targetStatusBadge.classList.add('hidden');
+            }
+        }
+
+        function resetSimulation() {
+            state.isScanning = false;
+            clearTerminal();
+            statusText.textContent = "Ready to scan...";
+            document.getElementById('scanBtn').disabled = false;
+            document.getElementById('scanBtn').classList.remove('opacity-50', 'cursor-not-allowed');
+            document.getElementById('speedMode').disabled = false;
+            document.getElementById('startPort').value = 1;
+            document.getElementById('endPort').value = 1024;
+            
+            // Randomize rules again
+            generateRandomRules();
+        }
+
+        // Run Init
+        init();
+
+    </script>
+</body>
+</html>

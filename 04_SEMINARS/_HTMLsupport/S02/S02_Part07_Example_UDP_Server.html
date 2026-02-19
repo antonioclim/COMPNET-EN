@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UDP Server Visualizer</title>
+    <style>
+        :root {
+            --bg-primary: #1e1e1e;
+            --bg-secondary: #252526;
+            --accent-udp: #d16969; /* Reddish for UDP to distinguish from TCP Blue */
+            --accent-green: #6a9955;
+            --accent-orange: #ce9178;
+            --text-main: #d4d4d4;
+            --text-dim: #858585;
+            --border: #3e3e42;
+            --font-mono: 'Consolas', 'Monaco', 'Courier New', monospace;
+            --font-sans: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --code-bg: #101010;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- Header --- */
+        header {
+            background-color: var(--bg-secondary);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+        }
+
+        h1 { font-size: 1.1rem; font-weight: 600; color: #fff; }
+
+        /* --- Main Canvas --- */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: radial-gradient(circle at center, #2a2a2a 0%, #1e1e1e 70%);
+        }
+
+        /* --- Dynamic Code Card --- */
+        .code-card {
+            position: absolute;
+            top: 2rem;
+            background-color: var(--code-bg);
+            border: 1px solid var(--accent-udp);
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            max-width: 800px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+            z-index: 10;
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        
+        .code-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .code-card h3 {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            margin-bottom: 0.5rem;
+            letter-spacing: 1px;
+        }
+
+        .code-snippet {
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            white-space: pre-wrap;
+            line-height: 1.5;
+        }
+
+        /* Syntax Highlighting */
+        .kw { color: #569cd6; } /* keyword */
+        .cls { color: #4ec9b0; } /* class */
+        .str { color: #ce9178; } /* string */
+        .fn { color: #dcdcaa; } /* function */
+        .num { color: #b5cea8; } /* number */
+        .cmt { color: #6a9955; } /* comment */
+        .var { color: #9cdcfe; } /* variable */
+
+        /* --- Network Diagram --- */
+        .diagram-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 80%;
+            max-width: 800px;
+            height: 300px;
+            position: relative;
+        }
+
+        .node {
+            width: 120px;
+            height: 120px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .node.active { box-shadow: 0 0 20px rgba(209, 105, 105, 0.3); }
+
+        .node-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .node-label { font-size: 1rem; font-weight: 600; color: #fff; }
+        .node-status { font-size: 0.75rem; color: var(--text-dim); margin-top: 4px; }
+        
+        /* Connection Line (Dashed for UDP) */
+        .connection-track {
+            position: absolute;
+            left: 120px; 
+            right: 120px;
+            top: 50%;
+            height: 0;
+            border-top: 2px dashed #444; /* Dashed to represent connectionless */
+            z-index: 1;
+        }
+
+        .packet {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: var(--accent-udp);
+            color: #fff;
+            padding: 6px 16px;
+            border-radius: 4px; /* Squarer for datagrams */
+            font-size: 0.85rem;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            z-index: 5;
+            transition: left 1s ease-in-out, transform 0.2s;
+            white-space: nowrap;
+        }
+
+        /* --- Controls Bar --- */
+        footer {
+            background-color: var(--bg-secondary);
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            z-index: 20;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 0.5rem;
+            background: #111;
+            padding: 0.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        button {
+            background-color: var(--bg-secondary);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            padding: 0.6rem 1.2rem;
+            cursor: pointer;
+            border-radius: 6px;
+            font-family: var(--font-sans);
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        button:hover:not(:disabled) { background-color: var(--accent-udp); color: #fff; border-color: var(--accent-udp); }
+        button:disabled { opacity: 0.4; cursor: not-allowed; }
+        
+        button.stop-btn:hover:not(:disabled) { background-color: #f48771; border-color: #f48771; }
+
+        input[type="text"] {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 0.6rem;
+            border-radius: 6px;
+            width: 200px;
+        }
+        input[type="text"]:focus { outline: 1px solid var(--accent-udp); }
+
+        /* --- Log Toast --- */
+        .log-toast {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        @media (max-width: 700px) {
+            .diagram-container { flex-direction: column; height: 400px; width: 100%; }
+            .connection-track { width: 2px; height: auto; top: 120px; bottom: 120px; left: 50%; right: auto; border-top: none; border-left: 2px dashed #444; }
+            .code-card { width: 95%; top: 1rem; font-size: 0.8rem; }
+            footer { flex-direction: column; align-items: stretch; }
+            .control-group { flex-direction: column; }
+            input[type="text"] { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>UDP Server <span style="font-weight:400; color:#888; margin-left:10px;">Connectionless Datagrams</span></h1>
+</header>
+
+<main>
+    <!-- Code Highlight Overlay -->
+    <div class="code-card" id="codeCard">
+        <h3 id="codeTitle">Current Python Operation</h3>
+        <div class="code-snippet" id="codeContent"></div>
+    </div>
+
+    <!-- Visual Diagram -->
+    <div class="diagram-container">
+        <!-- Client -->
+        <div class="node" id="clientNode" style="border-color: var(--border)">
+            <div class="node-icon">📡</div>
+            <div class="node-label">Client</div>
+            <div class="node-status" id="clientStatus">Idle</div>
+        </div>
+
+        <!-- Connection Line -->
+        <div class="connection-track"></div>
+        
+        <!-- Packet -->
+        <div class="packet" id="packet">DATAGRAM</div>
+
+        <!-- Server -->
+        <div class="node" id="serverNode" style="border-color: var(--border)">
+            <div class="node-icon">🖥️</div>
+            <div class="node-label">Server</div>
+            <div class="node-status" id="serverStatus">Stopped</div>
+        </div>
+    </div>
+
+    <div class="log-toast" id="logToast">Waiting to bind socket...</div>
+</main>
+
+<footer>
+    <div class="control-group">
+        <button id="btnStart" onclick="startServer()">1. Bind Server</button>
+        <button class="stop-btn" id="btnStop" onclick="stopServer()" disabled>Stop</button>
+    </div>
+
+    <div class="control-group">
+        <!-- Note: No "Connect" button for UDP! -->
+        <input type="text" id="msgInput" placeholder="Datagram content..." disabled value="hello udp">
+        <button id="btnSend" onclick="sendDatagram()" disabled>2. Send Datagram</button>
+    </div>
+</footer>
+
+<script>
+    // State
+    let isServerRunning = false;
+
+    // Elements
+    const codeCard = document.getElementById('codeCard');
+    const codeTitle = document.getElementById('codeTitle');
+    const codeContent = document.getElementById('codeContent');
+    const logToast = document.getElementById('logToast');
+    const packet = document.getElementById('packet');
+
+    // Snippets Dictionary
+    const snippets = {
+        BIND: `
+<span class="cmt"># Create UDP Socket (SOCK_DGRAM)</span>
+<span class="kw">with</span> socket.socket(socket.AF_INET, socket.SOCK_DGRAM) <span class="kw">as</span> server_socket:
+    server_socket.bind((<span class="str">''</span>, <span class="num">12345</span>))
+    <span class="kw">print</span>(<span class="str">"[INFO] UDP server listening..."</span>)`,
+        
+        RECV: `
+<span class="kw">while</span> <span class="kw">True</span>:
+    <span class="cmt"># Blocks until a packet arrives.</span>
+    <span class="cmt"># Returns data AND address of sender.</span>
+    message, address = server_socket.recvfrom(<span class="num">1024</span>)`,
+
+        PROCESS: `
+    <span class="cmt"># Process data</span>
+    <span class="kw">print</span>(<span class="str">f"Received {len(message)} bytes from {address}"</span>)
+    response = message.upper()`,
+
+        SEND: `
+    <span class="cmt"># Send back to the specific address</span>
+    server_socket.sendto(response, address)`,
+    };
+
+    // Helper: Show Code
+    function showCode(key, title) {
+        codeContent.innerHTML = snippets[key];
+        codeTitle.innerText = title;
+        codeCard.classList.add('visible');
+    }
+
+    // Helper: Log
+    function log(msg) {
+        logToast.innerText = msg;
+        logToast.style.opacity = 1;
+    }
+
+    // Helper: Update Node Visuals
+    function setNodeStatus(nodeId, statusId, isActive, text, color) {
+        const node = document.getElementById(nodeId);
+        const status = document.getElementById(statusId);
+        
+        if (isActive) {
+            node.style.borderColor = color;
+            node.classList.add('active');
+            status.style.color = color;
+        } else {
+            node.style.borderColor = 'var(--border)';
+            node.classList.remove('active');
+            status.style.color = 'var(--text-dim)';
+        }
+        status.innerText = text;
+    }
+
+    // --- Actions ---
+
+    function startServer() {
+        isServerRunning = true;
+        
+        // Buttons
+        document.getElementById('btnStart').disabled = true;
+        document.getElementById('btnStop').disabled = false;
+        
+        // Enable sending immediately (Connectionless!)
+        document.getElementById('btnSend').disabled = false;
+        document.getElementById('msgInput').disabled = false;
+
+        // Visuals
+        setNodeStatus('serverNode', 'serverStatus', true, 'Bound :12345 (UDP)', 'var(--accent-udp)');
+        
+        // Code
+        showCode('BIND', 'Socket Creation & Bind');
+        log("Server bound to port 12345. Waiting for datagrams...");
+
+        setTimeout(() => {
+            if (isServerRunning) {
+                showCode('RECV', 'Waiting Loop');
+            }
+        }, 2500);
+    }
+
+    async function sendDatagram() {
+        const input = document.getElementById('msgInput');
+        const text = input.value;
+        if (!text) return;
+
+        // Lock UI
+        input.disabled = true;
+        document.getElementById('btnSend').disabled = true;
+        
+        // Client Visuals - Note: Client is just "Sending", not "Connected"
+        setNodeStatus('clientNode', 'clientStatus', true, 'Sending...', 'var(--accent-orange)');
+
+        // 1. Packet: Client -> Server
+        log(`Sending Datagram: "${text}"`);
+        await animatePacket(text, 'client', 'server');
+
+        // 2. Server Processes
+        showCode('PROCESS', 'Processing Datagram');
+        log(`Server received packet from ('127.0.0.1', 59999)`);
+        await wait(1500);
+
+        // 3. Server Sends Back
+        showCode('SEND', 'Sending Response');
+        const response = text.toUpperCase();
+        log(`Sending back to sender: "${response}"`);
+        await animatePacket(response, 'server', 'client');
+
+        // 4. Back to Waiting State
+        showCode('RECV', 'Waiting Loop');
+        log("Datagram handled. Ready for next packet.");
+        
+        // Reset Client Visuals (Client goes idle immediately in UDP usually)
+        setNodeStatus('clientNode', 'clientStatus', false, 'Idle', '');
+
+        // Unlock UI
+        input.disabled = false;
+        document.getElementById('btnSend').disabled = false;
+        input.focus();
+    }
+
+    function stopServer() {
+        isServerRunning = false;
+
+        // Buttons
+        document.getElementById('btnStart').disabled = false;
+        document.getElementById('btnStop').disabled = true;
+        document.getElementById('btnSend').disabled = true;
+        document.getElementById('msgInput').disabled = true;
+
+        // Visuals
+        setNodeStatus('serverNode', 'serverStatus', false, 'Stopped', '');
+        setNodeStatus('clientNode', 'clientStatus', false, 'Idle', '');
+        
+        codeCard.classList.remove('visible');
+        log("Server socket closed.");
+    }
+
+    // --- Animation Utils ---
+
+    function wait(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function animatePacket(text, from, to) {
+        return new Promise(resolve => {
+            packet.innerText = text;
+            packet.style.transform = 'translate(-50%, -50%) scale(1)'; // Show
+            
+            // Check orientation (desktop vs mobile)
+            const isMobile = window.innerWidth <= 700;
+            
+            // Define positions (0% = left/top, 100% = right/bottom)
+            const startPos = from === 'client' ? '15%' : '85%';
+            const endPos = from === 'client' ? '85%' : '15%';
+
+            // Reset position
+            if (isMobile) {
+                packet.style.left = '50%';
+                packet.style.top = startPos;
+            } else {
+                packet.style.top = '50%';
+                packet.style.left = startPos;
+            }
+
+            // Force reflow
+            void packet.offsetWidth;
+
+            // Animate
+            if (isMobile) {
+                packet.style.transition = 'top 0.8s ease-in-out';
+                packet.style.top = endPos;
+            } else {
+                packet.style.transition = 'left 0.8s ease-in-out';
+                packet.style.left = endPos;
+            }
+
+            // Cleanup after animation
+            setTimeout(() => {
+                packet.style.transform = 'translate(-50%, -50%) scale(0)'; // Hide
+                resolve();
+            }, 800);
+        });
+    }
+
+</script>
+
+</body>
+</html>

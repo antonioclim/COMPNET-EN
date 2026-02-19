@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Nginx Load Balancer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; /* Slate 900 */
+            color: #e2e8f0; /* Slate 200 */
+        }
+
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Grid Background Pattern */
+        .bg-grid {
+            background-image: linear-gradient(to right, #1e293b 1px, transparent 1px),
+                              linear-gradient(to bottom, #1e293b 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        /* Animation Classes */
+        .packet {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background-color: #3b82f6; /* Blue 500 */
+            color: white;
+            border-radius: 50%;
+            z-index: 50;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            pointer-events: none;
+            opacity: 0;
+            transition: all 0.5s linear; /* Smooth linear movement */
+        }
+
+        .packet.response {
+            background-color: #10b981; /* Emerald 500 */
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
+        }
+
+        .packet.error {
+            background-color: #ef4444; /* Red 500 */
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.6);
+        }
+
+        .server-node {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .server-node:hover {
+            transform: translateY(-2px);
+        }
+
+        .server-node.active {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
+            border-color: #60a5fa;
+            transform: scale(1.05);
+        }
+
+        .server-node.offline {
+            opacity: 0.5;
+            filter: grayscale(1);
+            border-color: #ef4444;
+            border-style: dashed;
+        }
+
+        .connection-line {
+            position: absolute;
+            height: 2px;
+            background-color: #334155; /* Slate 700 */
+            z-index: 0;
+            transform-origin: 0 50%;
+            transition: background-color 0.3s;
+        }
+
+        .connection-line.active {
+            background-color: #60a5fa; /* Blue 400 */
+            height: 3px;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569; 
+        }
+
+        .code-block {
+            background-color: #111827;
+            color: #d1d5db;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            line-height: 1.6;
+            overflow-x: auto;
+            border: 1px solid #374151;
+        }
+
+        .keyword { color: #93c5fd; font-weight: bold; } /* light blue */
+        .string { color: #86efac; } /* light green */
+        .comment { color: #6b7280; font-style: italic; } /* gray */
+        .property { color: #fca5a5; } /* light red */
+
+        .network-zone {
+            border: 2px dashed #334155;
+            border-radius: 1rem;
+            position: relative;
+        }
+        
+        .next-indicator {
+            position: absolute;
+            left: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #facc15; /* Yellow 400 */
+            font-size: 1.2rem;
+            animation: bounce-right 1s infinite;
+        }
+
+        @keyframes bounce-right {
+            0%, 100% { transform: translate(0, -50%); }
+            50% { transform: translate(-5px, -50%); }
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden bg-slate-900">
+
+    <!-- Header -->
+    <header class="bg-slate-900 border-b border-slate-800 p-4 flex justify-between items-center shrink-0 shadow-md z-50">
+        <div class="flex items-center gap-3">
+            <div class="bg-blue-600 p-2.5 rounded-lg text-white shadow-lg shadow-blue-900/50">
+                <i class="fa-solid fa-server"></i>
+            </div>
+            <div>
+                <h1 class="text-lg font-bold text-white tracking-wide">NGINX REVERSE PROXY</h1>
+                <p class="text-xs text-slate-400 font-mono">Stage 2: Load Balancing Simulation</p>
+            </div>
+        </div>
+        <div class="flex gap-3">
+            <button onclick="app.showTheory('intro')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm text-slate-200 transition border border-slate-700 flex items-center gap-2">
+                <i class="fa-solid fa-graduation-cap text-blue-400"></i> Concepts
+            </button>
+            <button onclick="app.showTheory('config')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm text-slate-200 transition border border-slate-700 flex items-center gap-2">
+                <i class="fa-solid fa-file-code text-green-400"></i> Configuration
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex overflow-hidden relative">
+        
+        <!-- Simulation Canvas -->
+        <div class="flex-1 bg-grid relative p-6 flex flex-col items-center overflow-y-auto" id="simulation-area">
+            
+            <!-- Packet Container (Overlay) -->
+            <div id="packet-layer" class="absolute inset-0 pointer-events-none z-50 overflow-hidden"></div>
+            <!-- Lines Container (Underlay) -->
+            <div id="lines-layer" class="absolute inset-0 pointer-events-none z-0"></div>
+
+            <!-- Controls -->
+            <div class="sticky top-0 z-40 mb-10 w-full max-w-2xl flex justify-center">
+                <div class="bg-slate-800/90 backdrop-blur border border-slate-600 p-2 rounded-xl flex gap-4 shadow-2xl">
+                    <button id="btn-send" onclick="app.sendRequest()" class="bg-blue-600 hover:bg-blue-500 text-white px-8 py-2.5 rounded-lg font-bold shadow-lg shadow-blue-900/50 transition transform active:scale-95 flex items-center gap-3">
+                        <i class="fa-solid fa-play"></i> Send HTTP Request
+                    </button>
+                    <button onclick="app.reset()" class="bg-slate-700 hover:bg-slate-600 text-white px-5 py-2.5 rounded-lg font-semibold transition border border-slate-600 hover:border-slate-500">
+                        <i class="fa-solid fa-rotate-right"></i> Reset
+                    </button>
+                </div>
+            </div>
+
+            <!-- Architecture Diagram -->
+            <div class="flex flex-col md:flex-row items-center justify-center gap-16 w-full max-w-6xl relative z-10 px-8">
+                
+                <!-- Client Zone -->
+                <div class="flex flex-col items-center gap-4 relative group">
+                    <div class="absolute -top-10 text-slate-500 text-xs font-mono uppercase tracking-widest">Public Internet</div>
+                    <div id="node-client" class="server-node bg-slate-800 border-2 border-slate-600 p-6 rounded-2xl w-40 h-40 flex flex-col items-center justify-center relative shadow-2xl z-20">
+                        <div class="bg-slate-700 p-3 rounded-full mb-3">
+                            <i class="fa-solid fa-laptop-code text-3xl text-slate-300"></i>
+                        </div>
+                        <span class="font-bold text-sm text-white">Client</span>
+                        <span class="text-xs text-slate-500 font-mono mt-1">curl/browser</span>
+                    </div>
+                    
+                    <!-- Client Terminal Display -->
+                    <div class="w-48 bg-black rounded-lg border border-slate-700 p-3 font-mono text-xs shadow-xl">
+                        <div class="flex gap-1.5 mb-2">
+                            <div class="w-2.5 h-2.5 rounded-full bg-red-500"></div>
+                            <div class="w-2.5 h-2.5 rounded-full bg-yellow-500"></div>
+                            <div class="w-2.5 h-2.5 rounded-full bg-green-500"></div>
+                        </div>
+                        <div id="client-display" class="text-slate-400 h-6 flex items-center truncate">
+                            $ _
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gateway Zone (Nginx) -->
+                <div class="flex flex-col items-center gap-4 relative z-20">
+                    <div class="absolute -top-12 bg-purple-900/50 text-purple-200 text-[10px] px-2 py-1 rounded border border-purple-500/30 uppercase font-bold tracking-wider">
+                        Entrypoint :8080
+                    </div>
+                    <div id="node-nginx" class="server-node bg-slate-800 border-2 border-green-500 p-6 rounded-2xl w-40 h-40 flex flex-col items-center justify-center relative shadow-[0_0_30px_rgba(34,197,94,0.15)]">
+                        <div class="bg-green-900/30 p-3 rounded-full mb-3 border border-green-500/30">
+                            <i class="fa-solid fa-arrows-split-up-and-left text-3xl text-green-400"></i>
+                        </div>
+                        <span class="font-bold text-sm text-white">Nginx Proxy</span>
+                        <span class="text-xs text-green-400 font-mono mt-1">Load Balancer</span>
+                        
+                        <!-- LB Algorithm Badge -->
+                        <div class="absolute -bottom-3 bg-slate-900 text-blue-400 text-[10px] px-3 py-1 rounded-full border border-blue-900 shadow-sm font-mono">
+                            Round Robin
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Internal Network Zone -->
+                <div class="network-zone p-8 pt-10 relative bg-slate-800/20 w-full max-w-md">
+                    <div class="absolute -top-3 left-4 bg-slate-900 text-slate-400 text-xs px-2 py-0.5 border border-dashed border-slate-600 rounded font-mono">
+                        <i class="fa-brands fa-docker mr-1"></i> Docker Internal Network
+                    </div>
+
+                    <div class="flex flex-col gap-6">
+                        <!-- Backend 1 -->
+                        <div class="relative">
+                            <div id="arrow-web1" class="next-indicator hidden"><i class="fa-solid fa-caret-right"></i></div>
+                            <div id="node-web1" class="server-node bg-slate-800 border border-slate-600 hover:border-slate-500 p-4 rounded-xl flex items-center justify-between shadow-lg relative z-20">
+                                <div class="flex items-center gap-4">
+                                    <div class="bg-blue-900/20 p-2.5 rounded-lg border border-blue-500/20">
+                                        <i class="fa-brands fa-python text-xl text-blue-400"></i>
+                                    </div>
+                                    <div>
+                                        <div class="font-bold text-sm text-slate-200">web1</div>
+                                        <div class="text-[10px] text-slate-500 font-mono">IP: 172.18.0.2:8000</div>
+                                    </div>
+                                </div>
+                                <button onclick="app.toggleServer(0)" id="toggle-web1" class="w-8 h-8 rounded-full flex items-center justify-center bg-slate-700 hover:bg-slate-600 transition text-green-500" title="Power On/Off">
+                                    <i class="fa-solid fa-power-off text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Backend 2 -->
+                        <div class="relative">
+                            <div id="arrow-web2" class="next-indicator hidden"><i class="fa-solid fa-caret-right"></i></div>
+                            <div id="node-web2" class="server-node bg-slate-800 border border-slate-600 hover:border-slate-500 p-4 rounded-xl flex items-center justify-between shadow-lg relative z-20">
+                                <div class="flex items-center gap-4">
+                                    <div class="bg-blue-900/20 p-2.5 rounded-lg border border-blue-500/20">
+                                        <i class="fa-brands fa-python text-xl text-blue-400"></i>
+                                    </div>
+                                    <div>
+                                        <div class="font-bold text-sm text-slate-200">web2</div>
+                                        <div class="text-[10px] text-slate-500 font-mono">IP: 172.18.0.3:8000</div>
+                                    </div>
+                                </div>
+                                <button onclick="app.toggleServer(1)" id="toggle-web2" class="w-8 h-8 rounded-full flex items-center justify-center bg-slate-700 hover:bg-slate-600 transition text-green-500" title="Power On/Off">
+                                    <i class="fa-solid fa-power-off text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Backend 3 -->
+                        <div class="relative">
+                            <div id="arrow-web3" class="next-indicator hidden"><i class="fa-solid fa-caret-right"></i></div>
+                            <div id="node-web3" class="server-node bg-slate-800 border border-slate-600 hover:border-slate-500 p-4 rounded-xl flex items-center justify-between shadow-lg relative z-20">
+                                <div class="flex items-center gap-4">
+                                    <div class="bg-blue-900/20 p-2.5 rounded-lg border border-blue-500/20">
+                                        <i class="fa-brands fa-python text-xl text-blue-400"></i>
+                                    </div>
+                                    <div>
+                                        <div class="font-bold text-sm text-slate-200">web3</div>
+                                        <div class="text-[10px] text-slate-500 font-mono">IP: 172.18.0.4:8000</div>
+                                    </div>
+                                </div>
+                                <button onclick="app.toggleServer(2)" id="toggle-web3" class="w-8 h-8 rounded-full flex items-center justify-center bg-slate-700 hover:bg-slate-600 transition text-green-500" title="Power On/Off">
+                                    <i class="fa-solid fa-power-off text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Logger Panel -->
+            <div class="mt-12 w-full max-w-5xl bg-black rounded-xl border border-slate-800 shadow-2xl overflow-hidden flex flex-col z-30 h-64">
+                <div class="bg-slate-900 px-4 py-2 border-b border-slate-800 flex justify-between items-center">
+                    <span class="text-xs text-slate-400 font-mono flex items-center gap-2">
+                        <i class="fa-solid fa-terminal"></i> Server Logs (tail -f)
+                    </span>
+                    <button onclick="app.clearLogs()" class="text-xs text-slate-500 hover:text-white transition">Clear Logs</button>
+                </div>
+                <div id="logs-content" class="p-4 overflow-y-auto flex-1 font-mono text-xs space-y-1.5 bg-[#0c0c0c]">
+                    <div class="text-slate-600 italic"># System initialised. Waiting for incoming traffic...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Sidebar (Collapsible) -->
+        <div id="sidebar" class="fixed inset-y-0 right-0 w-96 bg-slate-900 border-l border-slate-800 shadow-2xl transform translate-x-full transition-transform duration-300 z-50 flex flex-col">
+            <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-900">
+                <h2 id="sidebar-title" class="font-bold text-white tracking-wide text-sm uppercase">Theory</h2>
+                <button onclick="app.closeSidebar()" class="w-8 h-8 rounded-full hover:bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="sidebar-content" class="p-6 overflow-y-auto flex-1 prose prose-invert prose-sm max-w-none text-slate-300">
+                <!-- Content injected via JS -->
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // --- Theory Content (English) ---
+        const contentData = {
+            intro: `
+                <div class="space-y-6">
+                    <section>
+                        <h3 class="text-blue-400 text-base font-bold mb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-circle-question text-xs"></i> 1. What is a Reverse Proxy?
+                        </h3>
+                        <p class="leading-relaxed mb-3">
+                            A <strong>Reverse Proxy</strong> is a server that sits in front of one or more backend web servers. It intercepts requests from clients (like browsers) and forwards them to the appropriate backend server.
+                        </p>
+                        <div class="bg-slate-800 p-4 rounded-lg border border-slate-700 font-mono text-xs text-blue-200">
+                            Client -> [ Reverse Proxy ] -> ( Backend Server )
+                        </div>
+                        <p class="mt-3 text-xs text-slate-400">
+                            <strong>Difference from Forward Proxy:</strong> A <em>Forward Proxy</em> sits in front of a client (protecting the user), while a <em>Reverse Proxy</em> sits in front of the server (protecting the application).
+                        </p>
+                    </section>
+                    
+                    <section>
+                        <h3 class="text-blue-400 text-base font-bold mb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-scale-balanced text-xs"></i> 2. Load Balancing (Round Robin)
+                        </h3>
+                        <p class="leading-relaxed mb-3">
+                            <strong>Load Balancing</strong> is the process of distributing network traffic efficiently across multiple servers. This ensures no single server bears too much demand.
+                        </p>
+                        <p class="mb-3">
+                            In this simulation, we use the <strong>Round Robin</strong> algorithm, which cycles through servers in order:
+                        </p>
+                        <ul class="list-disc pl-5 space-y-1 text-slate-300 marker:text-blue-500">
+                            <li>Request 1 → web1</li>
+                            <li>Request 2 → web2</li>
+                            <li>Request 3 → web3</li>
+                            <li>Request 4 → web1 (cycle repeats)</li>
+                        </ul>
+                    </section>
+
+                    <div class="bg-yellow-900/20 border border-yellow-700/50 p-3 rounded-lg flex gap-3 items-start">
+                        <i class="fa-solid fa-lightbulb text-yellow-500 mt-1"></i>
+                        <p class="text-xs text-yellow-100/80">
+                            <strong>Try it out:</strong> Turn off one of the backend servers using the power button and watch how Nginx automatically detects the failure (or tries to route to it) depending on configuration!
+                        </p>
+                    </div>
+                </div>
+            `,
+            config: `
+                <div class="space-y-6">
+                    <section>
+                        <h3 class="text-green-400 text-base font-bold mb-2 font-mono text-sm">/etc/nginx/S11_Part01_Config_Nginx.conf</h3>
+                        <p class="mb-2 text-xs text-slate-400">Defining the "Upstream" group (the list of backends):</p>
+                        <div class="code-block">
+<span class="keyword">http</span> {
+    <span class="keyword">upstream</span> backend_pool {
+        <span class="comment"># List of Docker service names</span>
+        <span class="keyword">server</span> web1:8000;
+        <span class="keyword">server</span> web2:8000;
+        <span class="keyword">server</span> web3:8000;
+    }
+
+    <span class="keyword">server</span> {
+        <span class="keyword">listen</span> 80;
+
+        <span class="keyword">location</span> / {
+            <span class="comment"># Forward traffic to the pool</span>
+            <span class="property">proxy_pass</span> http://backend_pool;
+            
+            <span class="comment"># Pass original client info</span>
+            <span class="property">proxy_set_header</span> Host $host;
+            <span class="property">proxy_set_header</span> X-Real-IP $remote_addr;
+        }
+    }
+}
+                        </div>
+                    </section>
+                    
+                    <section>
+                        <h3 class="text-blue-400 text-base font-bold mb-2 font-mono text-sm">docker-compose.yml</h3>
+                        <p class="mb-2 text-xs text-slate-400">The architecture is defined here. Note that backends do NOT expose ports to the host, only Nginx does.</p>
+                        <div class="code-block">
+<span class="keyword">services</span>:
+  <span class="string">web1</span>:
+    <span class="property">image</span>: python:3.11-alpine
+    <span class="property">command</span>: ["python3", "-m", "http.server", "8000"]
+    <span class="comment"># No 'ports' section here!</span>
+    
+  <span class="string">nginx</span>:
+    <span class="property">image</span>: nginx:latest
+    <span class="property">ports</span>:
+      - "8080:80" <span class="comment"># Only Nginx is public</span>
+    <span class="property">depends_on</span>:
+      - web1
+      - web2
+      - web3
+                        </div>
+                    </section>
+                </div>
+            `
+        };
+
+        // --- Application Logic ---
+        class App {
+            constructor() {
+                this.servers = [
+                    { id: 'web1', active: true, el: document.getElementById('node-web1'), toggleBtn: document.getElementById('toggle-web1'), ip: '172.18.0.2' },
+                    { id: 'web2', active: true, el: document.getElementById('node-web2'), toggleBtn: document.getElementById('toggle-web2'), ip: '172.18.0.3' },
+                    { id: 'web3', active: true, el: document.getElementById('node-web3'), toggleBtn: document.getElementById('toggle-web3'), ip: '172.18.0.4' }
+                ];
+                this.currentIndex = 0; // Round Robin pointer
+                this.isProcessing = false;
+                
+                // Initialize View
+                this.updateNextIndicator();
+                this.drawLines();
+                window.addEventListener('resize', () => this.drawLines());
+            }
+
+            // --- Logging System ---
+            log(message, type = 'info') {
+                const logsEl = document.getElementById('logs-content');
+                const div = document.createElement('div');
+                div.className = 'font-mono text-xs border-l-2 pl-2 py-0.5 leading-tight animate-fade-in';
+                
+                const now = new Date();
+                const time = now.toLocaleTimeString('en-US', { hour12: false }) + '.' + String(now.getMilliseconds()).padStart(3, '0');
+                
+                if (type === 'cmd') {
+                    div.className += ' border-transparent text-slate-300 mt-2';
+                    div.innerHTML = `<span class="text-blue-500 font-bold">$</span> ${message}`;
+                } else if (type === 'nginx') {
+                    div.className += ' border-green-500 text-green-100 bg-green-900/10';
+                    div.innerHTML = `<span class="text-green-500 font-bold">nginx_1  |</span> ${time} [info] ${message}`;
+                } else if (type === 'backend') {
+                    div.className += ' border-blue-500 text-blue-100 bg-blue-900/10';
+                    div.innerHTML = `<span class="text-blue-400 font-bold">${message.split(':')[0]} |</span> ${time} ${message.split(':')[1] || ''}`;
+                } else if (type === 'error') {
+                    div.className += ' border-red-500 text-red-200 bg-red-900/10';
+                    div.innerHTML = `<span class="text-red-500 font-bold">nginx_1  |</span> ${time} [error] ${message}`;
+                } else if (type === 'access') {
+                    div.className += ' border-transparent text-slate-400';
+                    div.innerHTML = `${message}`;
+                }
+                
+                logsEl.appendChild(div);
+                logsEl.scrollTop = logsEl.scrollHeight;
+            }
+
+            clearLogs() {
+                document.getElementById('logs-content').innerHTML = '<div class="text-slate-600 italic"># Logs cleared.</div>';
+            }
+
+            // --- Server State Management ---
+            toggleServer(index) {
+                const s = this.servers[index];
+                s.active = !s.active;
+                
+                if (s.active) {
+                    s.el.classList.remove('offline');
+                    s.toggleBtn.innerHTML = '<i class="fa-solid fa-power-off text-xs"></i>';
+                    s.toggleBtn.className = "w-8 h-8 rounded-full flex items-center justify-center bg-slate-700 hover:bg-slate-600 transition text-green-500 shadow-inner";
+                    this.log(`${s.id}_1  : Server started at ${s.ip}:8000`, 'backend');
+                } else {
+                    s.el.classList.add('offline');
+                    s.toggleBtn.innerHTML = '<i class="fa-solid fa-power-off text-xs"></i>';
+                    s.toggleBtn.className = "w-8 h-8 rounded-full flex items-center justify-center bg-slate-800 border border-slate-700 transition text-red-500 shadow-inner";
+                    this.log(`${s.id}_1  : Received SIGTERM. Shutting down...`, 'backend');
+                }
+            }
+
+            updateNextIndicator() {
+                // Hide all first
+                this.servers.forEach(s => {
+                    document.getElementById(`arrow-${s.id}`).classList.add('hidden');
+                });
+                
+                // Show for current index
+                const currentServer = this.servers[this.currentIndex];
+                document.getElementById(`arrow-${currentServer.id}`).classList.remove('hidden');
+            }
+
+            getNextServer() {
+                // Try up to 3 times to find an active server based on Round Robin
+                let attempts = 0;
+                let foundServer = null;
+
+                while (attempts < 3) {
+                    const server = this.servers[this.currentIndex];
+                    // Always advance RR pointer (Nginx behaviour)
+                    this.currentIndex = (this.currentIndex + 1) % 3;
+                    this.updateNextIndicator();
+
+                    if (server.active) {
+                        foundServer = server;
+                        break;
+                    }
+                    this.log(`connect() to ${server.ip}:8000 failed (Connection refused)`, 'error');
+                    attempts++;
+                }
+                return foundServer;
+            }
+
+            // --- Simulation Flow ---
+            async sendRequest() {
+                if (this.isProcessing) return;
+                this.isProcessing = true;
+                const btn = document.getElementById('btn-send');
+                btn.classList.add('opacity-50', 'cursor-not-allowed', 'scale-95');
+
+                // UI Reset
+                const clientDisplay = document.getElementById('client-display');
+                clientDisplay.innerHTML = '<span class="animate-pulse text-yellow-400">Sending...</span>';
+
+                // 1. Client -> Nginx
+                this.log('curl -v http://localhost:8080', 'cmd');
+                const packet = await this.animatePacket('node-client', 'node-nginx', 'http');
+                
+                // 2. Nginx Processing
+                this.log('client 172.17.0.1 sent request: "GET / HTTP/1.1"', 'access');
+                await this.wait(300);
+
+                const targetServer = this.getNextServer();
+
+                if (!targetServer) {
+                    // All servers down
+                    this.log('no live upstreams while connecting to upstream', 'error');
+                    
+                    // Error response: Nginx -> Client
+                    await this.animatePacket('node-nginx', 'node-client', 'error');
+                    
+                    clientDisplay.innerHTML = '<span class="text-red-500 font-bold">HTTP/1.1 502 Bad Gateway</span>';
+                    this.log('<span class="text-red-400">HTTP/1.1 502 Bad Gateway</span>', 'access');
+                } else {
+                    // Success path
+                    this.log(`upstream request: ${targetServer.ip}:8000`, 'nginx');
+                    
+                    // 3. Nginx -> Backend
+                    await this.animatePacket('node-nginx', `node-${targetServer.id}`, 'http');
+                    
+                    // 4. Backend Processing
+                    targetServer.el.classList.add('active');
+                    this.highlightLine('node-nginx', `node-${targetServer.id}`, true);
+                    
+                    await this.wait(600);
+                    
+                    this.log(`${targetServer.id}: "GET / HTTP/1.1" 200 -`, 'backend');
+                    targetServer.el.classList.remove('active');
+                    this.highlightLine('node-nginx', `node-${targetServer.id}`, false);
+
+                    // 5. Backend -> Nginx
+                    await this.animatePacket(`node-${targetServer.id}`, 'node-nginx', 'response');
+
+                    // 6. Nginx -> Client
+                    await this.animatePacket('node-nginx', 'node-client', 'response');
+                    
+                    const responseText = `&lt;h1&gt;Hello from ${targetServer.id}&lt;/h1&gt;`;
+                    this.log(`HTTP/1.1 200 OK. Body: ${responseText}`, 'access');
+                    
+                    clientDisplay.innerHTML = `<span class="text-green-400">${responseText}</span>`;
+                }
+
+                this.isProcessing = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed', 'scale-95');
+            }
+
+            // --- Animation Utilities ---
+            async animatePacket(fromId, toId, type = 'http') {
+                return new Promise(resolve => {
+                    const fromEl = document.getElementById(fromId);
+                    const toEl = document.getElementById(toId);
+                    const layer = document.getElementById('packet-layer');
+                    
+                    const startRect = fromEl.getBoundingClientRect();
+                    const endRect = toEl.getBoundingClientRect();
+                    const containerRect = document.getElementById('simulation-area').getBoundingClientRect();
+
+                    const packet = document.createElement('div');
+                    
+                    // Style based on type
+                    if (type === 'http') {
+                        packet.className = 'packet';
+                        packet.innerHTML = '<i class="fa-solid fa-envelope"></i>';
+                    } else if (type === 'response') {
+                        packet.className = 'packet response';
+                        packet.innerHTML = '<i class="fa-solid fa-file-code"></i>';
+                    } else if (type === 'error') {
+                        packet.className = 'packet error';
+                        packet.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+                    }
+                    
+                    // Initial Position
+                    // Offset by scroll position of container if needed (though overflow hidden mostly)
+                    const startX = startRect.left + startRect.width / 2 - containerRect.left - 12;
+                    const startY = startRect.top + startRect.height / 2 - containerRect.top - 12;
+                    
+                    const endX = endRect.left + endRect.width / 2 - containerRect.left - 12;
+                    const endY = endRect.top + endRect.height / 2 - containerRect.top - 12;
+
+                    packet.style.left = `${startX}px`;
+                    packet.style.top = `${startY}px`;
+                    packet.style.opacity = '1';
+
+                    layer.appendChild(packet);
+
+                    // Force Reflow
+                    packet.getBoundingClientRect();
+
+                    // Animate
+                    requestAnimationFrame(() => {
+                        packet.style.left = `${endX}px`;
+                        packet.style.top = `${endY}px`;
+                    });
+
+                    setTimeout(() => {
+                        packet.style.opacity = '0';
+                        setTimeout(() => packet.remove(), 200);
+                        resolve();
+                    }, 500); // Duration matches CSS transition
+                });
+            }
+
+            drawLines() {
+                const layer = document.getElementById('lines-layer');
+                layer.innerHTML = ''; // Clear old lines
+                const containerRect = document.getElementById('simulation-area').getBoundingClientRect();
+
+                const draw = (id1, id2) => {
+                    const el1 = document.getElementById(id1);
+                    const el2 = document.getElementById(id2);
+                    if(!el1 || !el2) return;
+
+                    const r1 = el1.getBoundingClientRect();
+                    const r2 = el2.getBoundingClientRect();
+
+                    const x1 = r1.left + r1.width / 2 - containerRect.left;
+                    const y1 = r1.top + r1.height / 2 - containerRect.top;
+                    const x2 = r2.left + r2.width / 2 - containerRect.left;
+                    const y2 = r2.top + r2.height / 2 - containerRect.top;
+
+                    const length = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+                    const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+
+                    const line = document.createElement('div');
+                    line.className = 'connection-line';
+                    line.id = `line-${id1}-${id2}`;
+                    line.style.width = `${length}px`;
+                    line.style.left = `${x1}px`;
+                    line.style.top = `${y1}px`;
+                    line.style.transform = `rotate(${angle}deg)`;
+                    layer.appendChild(line);
+                };
+
+                draw('node-client', 'node-nginx');
+                draw('node-nginx', 'node-web1');
+                draw('node-nginx', 'node-web2');
+                draw('node-nginx', 'node-web3');
+            }
+
+            highlightLine(id1, id2, active) {
+                // Since lines are drawn from id1 to id2, or vice versa, we might need to check both IDs
+                let line = document.getElementById(`line-${id1}-${id2}`) || document.getElementById(`line-${id2}-${id1}`);
+                if (line) {
+                    if (active) line.classList.add('active');
+                    else line.classList.remove('active');
+                }
+            }
+
+            wait(ms) {
+                return new Promise(r => setTimeout(r, ms));
+            }
+
+            showTheory(key) {
+                const titleEl = document.getElementById('sidebar-title');
+                const contentEl = document.getElementById('sidebar-content');
+                const sidebar = document.getElementById('sidebar');
+
+                titleEl.textContent = key === 'intro' ? 'Core Concepts' : 'Configuration Files';
+                contentEl.innerHTML = contentData[key];
+                
+                sidebar.classList.remove('translate-x-full');
+            }
+
+            closeSidebar() {
+                document.getElementById('sidebar').classList.add('translate-x-full');
+            }
+
+            reset() {
+                this.currentIndex = 0;
+                this.servers.forEach((s, i) => {
+                    if (!s.active) this.toggleServer(i);
+                });
+                this.updateNextIndicator();
+                this.clearLogs();
+                document.getElementById('client-display').innerHTML = '$ _';
+                this.log('System reset. Environment ready.', 'info');
+            }
+        }
+
+        // Initialize App on Load
+        let app;
+        window.onload = () => {
+            app = new App();
+            // Initial log
+            setTimeout(() => app.log('Docker Compose environment started', 'info'), 500);
+        };
+
+    </script>
+</body>
+</html>

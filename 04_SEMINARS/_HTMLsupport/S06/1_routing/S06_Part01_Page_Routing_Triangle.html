@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Triangle Routing Simulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #e2e8f0;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .terminal-font {
+            font-family: 'Fira Code', monospace;
+        }
+
+        /* CRT Effect */
+        .scanline {
+            width: 100%;
+            height: 100px;
+            z-index: 10;
+            background: linear-gradient(0deg, rgba(0,0,0,0) 0%, rgba(51, 255, 51, 0.02) 50%, rgba(0,0,0,0) 100%);
+            opacity: 0.1;
+            position: absolute;
+            bottom: 100%;
+            animation: scanline 10s linear infinite;
+            pointer-events: none;
+        }
+        @keyframes scanline {
+            0% { bottom: 100%; }
+            100% { bottom: -100px; }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+        /* Nodes & Topology */
+        .node-container {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            z-index: 20;
+            transition: transform 0.2s;
+        }
+        .node-container:hover {
+            transform: translate(-50%, -50%) scale(1.05);
+        }
+
+        .packet {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            background-color: #fbbf24;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #fbbf24;
+            z-index: 50;
+            transform: translate(-50%, -50%);
+            transition: left 0.5s linear, top 0.5s linear;
+        }
+        .packet.reply { background-color: #34d399; box-shadow: 0 0 10px #34d399; }
+        .packet.error { background-color: #ef4444; box-shadow: 0 0 10px #ef4444; }
+
+        .cable {
+            stroke-dasharray: 10;
+            animation: flow 30s linear infinite;
+        }
+        @keyframes flow { to { stroke-dashoffset: -200; } }
+
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 1.2em;
+            background-color: #4ade80;
+            animation: blink 1s step-end infinite;
+            vertical-align: middle;
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        /* Routing Table Mini-View */
+        .routing-table-mini {
+            font-size: 0.65rem;
+            background: rgba(0,0,0,0.8);
+            padding: 4px;
+            border-radius: 4px;
+            margin-top: 4px;
+            font-family: 'Fira Code', monospace;
+            border: 1px solid #334155;
+            display: none;
+        }
+        .node-container:hover .routing-table-mini {
+            display: block;
+        }
+    </style>
+</head>
+<body class="flex flex-col h-screen">
+
+    <!-- Header -->
+    <header class="bg-slate-900 border-b border-slate-700 p-3 flex justify-between items-center shrink-0 h-16">
+        <div class="flex items-center gap-3">
+            <div class="bg-indigo-600 p-2 rounded-lg">
+                <i class="fas fa-project-diagram text-white text-lg"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-lg text-white leading-tight">Triangle Routing Simulator</h1>
+                <p class="text-xs text-slate-400">Lab: Static Routing & Traceroute</p>
+            </div>
+        </div>
+        <div class="flex gap-3">
+             <button onclick="app.resetSimulation(true)" class="px-3 py-1.5 bg-green-700 hover:bg-green-600 text-white rounded text-xs transition border border-green-600 flex items-center gap-2">
+                <i class="fas fa-play"></i> Initial State (Default Routes)
+            </button>
+            <button onclick="app.resetSimulation(false)" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded text-xs transition border border-slate-600 flex items-center gap-2">
+                <i class="fas fa-eraser"></i> Clear All Routes
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="flex-1 flex overflow-hidden">
+        
+        <!-- Topology (Left) -->
+        <section class="flex-1 bg-slate-800 relative shadow-inner" id="topology-container">
+            <div class="absolute top-4 left-4 z-10 text-slate-500 text-xs font-mono pointer-events-none">
+                <div>Subnets: /30 P2P Links</div>
+                <div class="flex items-center gap-2 mt-1"><span class="w-3 h-0.5 bg-blue-500"></span> 10.0.1.0 (h1-r1)</div>
+                <div class="flex items-center gap-2"><span class="w-3 h-0.5 bg-purple-500"></span> 10.0.12.0 (r1-r2)</div>
+                <div class="flex items-center gap-2"><span class="w-3 h-0.5 bg-orange-500"></span> 10.0.23.0 (r2-r3)</div>
+                <div class="flex items-center gap-2"><span class="w-3 h-0.5 bg-pink-500"></span> 10.0.13.0 (r1-r3)</div>
+                <div class="flex items-center gap-2"><span class="w-3 h-0.5 bg-green-500"></span> 10.0.3.0 (r3-h3)</div>
+            </div>
+
+            <!-- SVG Connections -->
+            <svg width="100%" height="100%" class="absolute inset-0 pointer-events-none">
+                <!-- h1-r1 -->
+                <line x1="15%" y1="50%" x2="35%" y2="30%" stroke="#3b82f6" stroke-width="3" class="cable opacity-40"/>
+                <!-- r1-r2 -->
+                <line x1="35%" y1="30%" x2="65%" y2="30%" stroke="#a855f7" stroke-width="3" class="cable opacity-40"/>
+                <!-- r2-r3 -->
+                <line x1="65%" y1="30%" x2="50%" y2="70%" stroke="#f97316" stroke-width="3" class="cable opacity-40"/>
+                <!-- r1-r3 -->
+                <line x1="35%" y1="30%" x2="50%" y2="70%" stroke="#ec4899" stroke-width="3" class="cable opacity-40"/>
+                <!-- r3-h3 -->
+                <line x1="50%" y1="70%" x2="50%" y2="90%" stroke="#22c55e" stroke-width="3" class="cable opacity-40"/>
+            </svg>
+
+            <!-- Nodes -->
+            <!-- H1 -->
+            <div class="node-container" style="left: 15%; top: 50%;" onclick="app.typeCommand('h1 ip a')">
+                <div class="w-16 h-16 bg-slate-700 rounded-lg border-2 border-blue-500 flex items-center justify-center shadow-lg relative">
+                    <i class="fas fa-laptop text-2xl text-blue-400"></i>
+                    <span class="absolute -top-2 -right-2 bg-slate-900 text-blue-200 text-xs px-1.5 rounded border border-blue-500 font-bold">h1</span>
+                </div>
+                <div class="text-[10px] text-slate-300 mt-1 font-mono">10.0.1.2</div>
+            </div>
+
+            <!-- R1 -->
+            <div class="node-container" style="left: 35%; top: 30%;" onclick="app.typeCommand('r1 ip route')">
+                <div class="w-20 h-20 bg-slate-700 rounded-full border-4 border-indigo-500 flex items-center justify-center shadow-xl relative z-20">
+                    <i class="fas fa-network-wired text-3xl text-indigo-300"></i>
+                    <span class="absolute -top-1 -right-1 bg-slate-900 text-indigo-200 text-xs px-2 py-0.5 rounded-full border border-indigo-500 font-bold">r1</span>
+                </div>
+                <div class="routing-table-mini text-indigo-300" id="rt-r1">Routes: ...</div>
+            </div>
+
+            <!-- R2 -->
+            <div class="node-container" style="left: 65%; top: 30%;" onclick="app.typeCommand('r2 ip route')">
+                <div class="w-20 h-20 bg-slate-700 rounded-full border-4 border-indigo-500 flex items-center justify-center shadow-xl relative z-20">
+                    <i class="fas fa-network-wired text-3xl text-indigo-300"></i>
+                    <span class="absolute -top-1 -right-1 bg-slate-900 text-indigo-200 text-xs px-2 py-0.5 rounded-full border border-indigo-500 font-bold">r2</span>
+                </div>
+                <div class="routing-table-mini text-indigo-300" id="rt-r2">Routes: ...</div>
+            </div>
+
+            <!-- R3 -->
+            <div class="node-container" style="left: 50%; top: 70%;" onclick="app.typeCommand('r3 ip route')">
+                <div class="w-20 h-20 bg-slate-700 rounded-full border-4 border-indigo-500 flex items-center justify-center shadow-xl relative z-20">
+                    <i class="fas fa-network-wired text-3xl text-indigo-300"></i>
+                    <span class="absolute -top-1 -right-1 bg-slate-900 text-indigo-200 text-xs px-2 py-0.5 rounded-full border border-indigo-500 font-bold">r3</span>
+                </div>
+                <div class="routing-table-mini text-indigo-300" id="rt-r3">Routes: ...</div>
+            </div>
+
+            <!-- H3 -->
+            <div class="node-container" style="left: 50%; top: 90%;" onclick="app.typeCommand('h3 ip a')">
+                <div class="w-16 h-16 bg-slate-700 rounded-lg border-2 border-green-500 flex items-center justify-center shadow-lg relative">
+                    <i class="fas fa-laptop text-2xl text-green-400"></i>
+                    <span class="absolute -top-2 -right-2 bg-slate-900 text-green-200 text-xs px-1.5 rounded border border-green-500 font-bold">h3</span>
+                </div>
+                <div class="text-[10px] text-slate-300 mt-1 font-mono">10.0.3.2</div>
+            </div>
+
+            <!-- Packet Layer -->
+            <div id="packet-layer" class="absolute inset-0 pointer-events-none overflow-hidden"></div>
+            
+            <!-- Toast Notification Area -->
+            <div id="toast-area" class="absolute bottom-4 right-4 flex flex-col gap-2 items-end pointer-events-none"></div>
+        </section>
+
+        <!-- Sidebar (Tasks) -->
+        <aside class="w-80 bg-slate-900 border-l border-slate-700 flex flex-col shrink-0 text-sm">
+            <div class="p-4 border-b border-slate-700 font-bold text-slate-200 bg-slate-800">
+                <i class="fas fa-clipboard-list mr-2 text-indigo-400"></i> Lab Tasks
+            </div>
+            <div class="flex-1 overflow-y-auto p-4 space-y-6">
+                
+                <!-- Task 1 -->
+                <div class="task-group" id="task-1">
+                    <div class="flex items-start gap-2 mb-2">
+                        <div class="mt-0.5"><i class="far fa-circle text-slate-500 status-icon"></i></div>
+                        <div>
+                            <h3 class="font-semibold text-slate-200">1. Verify IP Configuration</h3>
+                            <p class="text-xs text-slate-400 mt-1">Check interfaces on all nodes.</p>
+                        </div>
+                    </div>
+                    <div class="pl-6 space-y-1">
+                        <code class="block bg-slate-800 p-1.5 rounded text-xs text-indigo-300 cursor-pointer hover:bg-slate-700 border border-slate-700" onclick="app.typeCommand('r1 ip a')">r1 ip a</code>
+                        <code class="block bg-slate-800 p-1.5 rounded text-xs text-indigo-300 cursor-pointer hover:bg-slate-700 border border-slate-700" onclick="app.typeCommand('r2 ip a')">r2 ip a</code>
+                        <code class="block bg-slate-800 p-1.5 rounded text-xs text-indigo-300 cursor-pointer hover:bg-slate-700 border border-slate-700" onclick="app.typeCommand('r3 ip a')">r3 ip a</code>
+                    </div>
+                </div>
+
+                <!-- Task 2 -->
+                <div class="task-group" id="task-2">
+                    <div class="flex items-start gap-2 mb-2">
+                        <div class="mt-0.5"><i class="far fa-circle text-slate-500 status-icon"></i></div>
+                        <div>
+                            <h3 class="font-semibold text-slate-200">2. Configure Indirect Path</h3>
+                            <p class="text-xs text-slate-400 mt-1">Set routes via r2 (r1->r2->r3).</p>
+                        </div>
+                    </div>
+                    <div class="pl-6 space-y-1">
+                        <code class="block bg-slate-800 p-1.5 rounded text-xs text-indigo-300 cursor-pointer hover:bg-slate-700 border border-slate-700" onclick="app.typeCommand('r1 ip route add 10.0.3.0/30 via 10.0.12.2')">r1 ip route add ... via r2</code>
+                        <code class="block bg-slate-800 p-1.5 rounded text-xs text-indigo-300 cursor-pointer hover:bg-slate-700 border border-slate-700" onclick="app.typeCommand('r2 ip route add 10.0.3.0/30 via 10.0.23.2')">r2 ip route add ... via r3</code>
+                        <code class="block bg-slate-800 p-1.5 rounded text-xs text-indigo-300 cursor-pointer hover:bg-slate-700 border border-slate-700" onclick="app.typeCommand('r2 ip route add 10.0.1.0/30 via 10.0.12.1')">r2 return route to h1</code>
+                        <code class="block bg-slate-800 p-1.5 rounded text-xs text-indigo-300 cursor-pointer hover:bg-slate-700 border border-slate-700" onclick="app.typeCommand('r3 ip route add 10.0.1.0/30 via 10.0.23.1')">r3 return route via r2</code>
+                    </div>
+                </div>
+
+                <!-- Task 3 -->
+                <div class="task-group" id="task-3">
+                    <div class="flex items-start gap-2 mb-2">
+                        <div class="mt-0.5"><i class="far fa-circle text-slate-500 status-icon"></i></div>
+                        <div>
+                            <h3 class="font-semibold text-slate-200">3. Test Connectivity</h3>
+                            <p class="text-xs text-slate-400 mt-1">Ping from h1 to h3.</p>
+                        </div>
+                    </div>
+                    <div class="pl-6">
+                         <code class="block bg-slate-800 p-1.5 rounded text-xs text-indigo-300 cursor-pointer hover:bg-slate-700 border border-slate-700" onclick="app.typeCommand('h1 ping -c 3 10.0.3.2')">h1 ping -c 3 10.0.3.2</code>
+                    </div>
+                </div>
+
+                <!-- Task 4 -->
+                <div class="task-group" id="task-4">
+                    <div class="flex items-start gap-2 mb-2">
+                        <div class="mt-0.5"><i class="far fa-circle text-slate-500 status-icon"></i></div>
+                        <div>
+                            <h3 class="font-semibold text-slate-200">4. Trace the Path</h3>
+                            <p class="text-xs text-slate-400 mt-1">Verify which path is taken.</p>
+                        </div>
+                    </div>
+                    <div class="pl-6">
+                        <code class="block bg-slate-800 p-1.5 rounded text-xs text-indigo-300 cursor-pointer hover:bg-slate-700 border border-slate-700" onclick="app.typeCommand('h1 traceroute 10.0.3.2')">h1 traceroute 10.0.3.2</code>
+                    </div>
+                </div>
+
+                 <!-- Task 5 -->
+                 <div class="task-group" id="task-5">
+                    <div class="flex items-start gap-2 mb-2">
+                        <div class="mt-0.5"><i class="far fa-circle text-slate-500 status-icon"></i></div>
+                        <div>
+                            <h3 class="font-semibold text-slate-200">5. Switch Route (Direct)</h3>
+                            <p class="text-xs text-slate-400 mt-1">Change r1 to go directly to r3.</p>
+                        </div>
+                    </div>
+                    <div class="pl-6 space-y-1">
+                        <code class="block bg-slate-800 p-1.5 rounded text-xs text-red-300 cursor-pointer hover:bg-slate-700 border border-slate-700" onclick="app.typeCommand('r1 ip route del 10.0.3.0/30')">Delete current route</code>
+                        <code class="block bg-slate-800 p-1.5 rounded text-xs text-indigo-300 cursor-pointer hover:bg-slate-700 border border-slate-700" onclick="app.typeCommand('r1 ip route add 10.0.3.0/30 via 10.0.13.2')">Add route via 10.0.13.2 (r3)</code>
+                        <code class="block bg-slate-800 p-1.5 rounded text-xs text-indigo-300 cursor-pointer hover:bg-slate-700 border border-slate-700" onclick="app.typeCommand('r3 ip route add 10.0.1.0/30 via 10.0.13.1')">Return path via r1 (Direct)</code>
+                    </div>
+                </div>
+
+            </div>
+        </aside>
+    </main>
+
+    <!-- Terminal -->
+    <div class="h-64 bg-black border-t border-slate-700 p-2 terminal-font text-sm flex flex-col relative shrink-0">
+        <div class="scanline"></div>
+        <div class="flex-1 overflow-y-auto mb-2" id="terminal-output">
+            <div class="text-slate-500 mb-1">Mininet 2.3.0 - Triangle Topology</div>
+            <div class="text-slate-300 mb-4">Type commands or click tasks on the right. <br>Try <span class="text-indigo-400">h1 traceroute 10.0.3.2</span> to see the path.</div>
+        </div>
+        <div class="flex items-center gap-2 text-green-400 font-bold border-t border-slate-800 pt-2">
+            <span>mininet></span>
+            <input type="text" id="terminal-input" class="bg-transparent border-none outline-none flex-1 text-green-400 font-normal" autofocus placeholder="..." autocomplete="off">
+            <div class="cursor"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- Simulation Core ---
+
+        class Node {
+            constructor(name, interfaces) {
+                this.name = name;
+                this.interfaces = interfaces; // { 'eth0': {ip: '10.0.0.1', mask: 30} }
+                this.routes = []; // { dest: '10.0.0.0/30', gw: '10.0.0.2', dev: 'eth0' }
+            }
+
+            addRoute(dest, gw) {
+                // Simplification: Remove existing route to same dest to avoid complexity in this UI
+                this.routes = this.routes.filter(r => r.dest !== dest);
+                this.routes.push({ dest, gw });
+            }
+
+            delRoute(dest) {
+                this.routes = this.routes.filter(r => r.dest !== dest);
+            }
+        }
+
+        const app = {
+            nodes: {},
+            tasksCompleted: new Set(),
+            
+            init() {
+                this.setupNetwork(true); // Default with basic routes
+                this.setupEventListeners();
+                this.renderRoutingTables();
+            },
+
+            setupNetwork(withDefaults) {
+                // Topology defined in 1a and 1b
+                this.nodes = {
+                    h1: new Node('h1', { 'h1-eth0': { ip: '10.0.1.2', mask: 30 } }),
+                    r1: new Node('r1', { 
+                        'r1-eth0': { ip: '10.0.1.1', mask: 30 }, // connect h1
+                        'r1-eth1': { ip: '10.0.12.1', mask: 30 }, // connect r2
+                        'r1-eth2': { ip: '10.0.13.1', mask: 30 }  // connect r3
+                    }),
+                    r2: new Node('r2', {
+                        'r2-eth0': { ip: '10.0.12.2', mask: 30 }, // connect r1
+                        'r2-eth1': { ip: '10.0.23.1', mask: 30 }  // connect r3
+                    }),
+                    r3: new Node('r3', {
+                        'r3-eth1': { ip: '10.0.23.2', mask: 30 }, // connect r2
+                        'r3-eth2': { ip: '10.0.13.2', mask: 30 }, // connect r1
+                        'r3-eth0': { ip: '10.0.3.1', mask: 30 }   // connect h3
+                    }),
+                    h3: new Node('h3', { 'h3-eth0': { ip: '10.0.3.2', mask: 30 } })
+                };
+
+                // Host default gateways
+                this.nodes.h1.addRoute('0.0.0.0/0', '10.0.1.1');
+                this.nodes.h3.addRoute('0.0.0.0/0', '10.0.3.1');
+
+                if (withDefaults) {
+                    // Python script sets up DIRECT link by default
+                    this.nodes.r1.addRoute('10.0.3.0/30', '10.0.13.2'); // via r3 direct
+                    this.nodes.r3.addRoute('10.0.1.0/30', '10.0.13.1'); // via r1 direct
+                    this.printToTerminal("Network reset to Initial State (Direct path configured).", "text-blue-400");
+                } else {
+                    this.printToTerminal("Network reset. Routing tables cleared (except host GWs).", "text-yellow-400");
+                }
+                
+                this.tasksCompleted.clear();
+                this.updateTaskUI();
+                this.renderRoutingTables();
+            },
+
+            resetSimulation(withDefaults) {
+                this.setupNetwork(withDefaults);
+            },
+
+            // --- Command Processing ---
+
+            setupEventListeners() {
+                const input = document.getElementById('terminal-input');
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        const cmd = input.value.trim();
+                        if (cmd) {
+                            this.executeCommand(cmd);
+                            input.value = '';
+                        }
+                    }
+                });
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('button') && !e.target.closest('code') && !e.target.closest('.node-container')) {
+                        input.focus();
+                    }
+                });
+            },
+
+            typeCommand(cmd) {
+                const input = document.getElementById('terminal-input');
+                input.value = cmd;
+                input.focus();
+            },
+
+            executeCommand(rawCmd) {
+                this.printToTerminal(`mininet> ${rawCmd}`, "font-bold text-white");
+                const parts = rawCmd.split(' ');
+                const hostName = parts[0];
+                const node = this.nodes[hostName];
+
+                if (!node) {
+                    this.printToTerminal(`Node ${hostName} not found.`, "text-red-400");
+                    return;
+                }
+
+                const args = parts.slice(1);
+                
+                if (args[0] === 'ip') {
+                    if (args[1] === 'a' || args[1] === 'addr') {
+                        this.showIpAddr(node);
+                        this.tasksCompleted.add(1);
+                        this.updateTaskUI();
+                    } 
+                    else if (args[1] === 'route') {
+                        if (args[2] === 'add') this.handleAddRoute(node, args);
+                        else if (args[2] === 'del') this.handleDelRoute(node, args);
+                        else this.showRoutes(node);
+                    }
+                } 
+                else if (args[0] === 'ping') {
+                    this.handlePing(hostName, args);
+                }
+                else if (args[0] === 'traceroute') {
+                    this.handleTraceroute(hostName, args);
+                }
+                else {
+                    this.printToTerminal(`Command not recognised. Try 'ip a', 'ip route', 'ping', 'traceroute'.`, "text-yellow-500");
+                }
+            },
+
+            showIpAddr(node) {
+                let out = `<div class="text-blue-300">Interfaces for ${node.name}:</div>`;
+                Object.entries(node.interfaces).forEach(([name, cfg]) => {
+                    out += `<div>${name}: inet ${cfg.ip}/${cfg.mask} scope global</div>`;
+                });
+                this.printToTerminal(out);
+            },
+
+            showRoutes(node) {
+                let out = `<div class="text-indigo-300">Kernel IP routing table (${node.name})</div>`;
+                out += `<div class="text-xs text-slate-500">Destination     Gateway         Genmask         Flags Metric Ref    Use Iface</div>`;
+                
+                // Show connected routes (implicit)
+                Object.entries(node.interfaces).forEach(([iface, cfg]) => {
+                    // Hacky subnet calc for display
+                    const subnet = cfg.ip.substring(0, cfg.ip.lastIndexOf('.')) + '.0'; 
+                    out += `<div>${subnet.padEnd(15)} 0.0.0.0         255.255.255.252 U     0      0        0 ${iface}</div>`;
+                });
+
+                // Show static routes
+                node.routes.forEach(r => {
+                     // Normalize dest display
+                     const dest = r.dest.split('/')[0];
+                     out += `<div>${dest.padEnd(15)} ${r.gw.padEnd(15)} 255.255.255.252 UG    0      0        0 eth?</div>`;
+                });
+                this.printToTerminal(out);
+            },
+
+            handleAddRoute(node, args) {
+                // r1 ip route add 10.0.3.0/30 via 10.0.12.2
+                const dest = args[3];
+                const via = args[4]; // 'via'
+                const gw = args[5];
+
+                if (via !== 'via' || !gw) {
+                    this.printToTerminal("Usage: ip route add <subnet> via <gateway>", "text-red-400");
+                    return;
+                }
+                node.addRoute(dest, gw);
+                this.renderRoutingTables();
+                this.printToTerminal(""); // Success
+                this.checkTaskProgress();
+            },
+
+            handleDelRoute(node, args) {
+                // r1 ip route del 10.0.3.0/30
+                const dest = args[3];
+                node.delRoute(dest);
+                this.renderRoutingTables();
+                this.printToTerminal("");
+            },
+
+            handlePing(srcName, args) {
+                // ping -c 3 10.0.3.2
+                const destIP = args[args.length - 1];
+                this.printToTerminal(`PING ${destIP} (${destIP}) 56(84) bytes of data.`);
+                
+                let count = 3;
+                let seq = 1;
+                const interval = setInterval(() => {
+                    if (seq > count) {
+                        clearInterval(interval);
+                        this.printToTerminal(`--- ${destIP} ping statistics ---`);
+                        this.printToTerminal(`${count} packets transmitted, check log for loss`);
+                        return;
+                    }
+                    
+                    this.simulatePacket(srcName, destIP, 64, (success, trace) => {
+                        if (success) {
+                            this.printToTerminal(`64 bytes from ${destIP}: icmp_seq=${seq} ttl=64 time=${Math.floor(Math.random()*10)}ms`);
+                            this.tasksCompleted.add(3);
+                            this.updateTaskUI();
+                        } else {
+                            this.printToTerminal(`From ${trace[trace.length-1]}: icmp_seq=${seq} Destination Host Unreachable`, "text-red-400");
+                        }
+                    });
+                    seq++;
+                }, 1500);
+            },
+
+            handleTraceroute(srcName, args) {
+                // traceroute 10.0.3.2
+                const destIP = args[args.length - 1];
+                this.printToTerminal(`traceroute to ${destIP} (${destIP}), 30 hops max`);
+
+                let ttl = 1;
+                const maxTTL = 5;
+                
+                const nextHop = () => {
+                    if (ttl > maxTTL) return;
+
+                    this.simulatePacket(srcName, destIP, ttl, (success, trace, reachedDest) => {
+                        const hopIP = trace[trace.length - 1]; // The node where it died or reached
+                        const hopName = this.getNodeNameByIP(hopIP) || "*";
+                        
+                        setTimeout(() => {
+                            this.printToTerminal(` ${ttl}  ${hopName} (${hopIP})  ${Math.random().toFixed(3)} ms`);
+                            
+                            if (reachedDest) {
+                                this.tasksCompleted.add(4);
+                                this.updateTaskUI();
+                                return; // Done
+                            }
+                            
+                            // If we didn't reach dest, but packet died (TTL), continue
+                            // If packet was dropped due to no route, stop
+                            if (!success && !reachedDest && trace.length > 0) {
+                                // Logic: if it died because TTL=0, we continue. 
+                                // In this sim, simulatePacket returns success=false if TTL expired OR no route.
+                                // Real traceroute continues incrementing TTL.
+                                ttl++;
+                                nextHop();
+                            }
+                        }, 500);
+                    });
+                };
+                nextHop();
+            },
+
+            // --- Packet Engine ---
+
+            simulatePacket(srcName, destIP, ttl, callback) {
+                // Trace contains IPs visited
+                const trace = []; 
+                let currentNode = this.nodes[srcName];
+                let currentTTL = ttl;
+
+                const step = () => {
+                    if (!currentNode) {
+                        callback(false, trace, false);
+                        return;
+                    }
+
+                    // Am I the destination? (Check all interfaces)
+                    const myIPs = Object.values(currentNode.interfaces).map(i => i.ip);
+                    if (myIPs.includes(destIP)) {
+                        callback(true, trace, true); // Reached dest
+                        return;
+                    }
+
+                    // Decrement TTL (except source)
+                    if (currentNode.name !== srcName) {
+                        currentTTL--;
+                        if (currentTTL <= 0) {
+                            // TTL Expired at this node
+                            // In real life, we send ICMP Time Exceeded from the interface we arrived on
+                            // Here we just return the IP of one of its interfaces
+                            const reportingIP = Object.values(currentNode.interfaces)[0].ip;
+                            trace.push(reportingIP);
+                            callback(false, trace, false); 
+                            return;
+                        }
+                    }
+
+                    // Routing Logic
+                    let nextHopIP = null;
+                    let nextNodeName = null;
+
+                    // 1. Is dest directly connected?
+                    const directSubnet = this.isDirectlyConnected(currentNode, destIP);
+                    if (directSubnet) {
+                        nextHopIP = destIP; // Deliver to host
+                        nextNodeName = this.getNodeNameByIP(destIP);
+                    } else {
+                        // 2. Look in routing table
+                        const route = currentNode.routes.find(r => r.dest === this.getSubnet(destIP)); // Simple /30 matching
+                        if (route) {
+                            nextHopIP = route.gw;
+                            nextNodeName = this.getNodeNameByIP(route.gw);
+                        } else {
+                            // Default route? (0.0.0.0/0)
+                            const def = currentNode.routes.find(r => r.dest === '0.0.0.0/0');
+                            if (def) {
+                                nextHopIP = def.gw;
+                                nextNodeName = this.getNodeNameByIP(def.gw);
+                            }
+                        }
+                    }
+
+                    if (nextHopIP && nextNodeName) {
+                        // Animate
+                        this.animatePacket(currentNode.name, nextNodeName, () => {
+                            currentNode = this.nodes[nextNodeName];
+                            // Record the IP we *arrived* at (or the node's main ID) for traceroute purposes
+                            // Usually traceroute shows the ingress interface IP of the hop
+                            const ingressIP = Object.values(this.nodes[nextNodeName].interfaces)[0].ip; 
+                            trace.push(ingressIP);
+                            step();
+                        });
+                    } else {
+                        // Drop
+                        this.animateDrop(currentNode.name);
+                        callback(false, trace, false);
+                    }
+                };
+
+                step();
+            },
+
+            // --- Helpers ---
+
+            isDirectlyConnected(node, targetIP) {
+                // Check if targetIP is in any of the connected subnets
+                // Simplified for this lab: assume strict /30 matching
+                // 10.0.1.0/30 -> .1 and .2
+                const targetSubnet = this.getSubnet(targetIP);
+                for (const cfg of Object.values(node.interfaces)) {
+                    const mySubnet = this.getSubnet(cfg.ip);
+                    if (mySubnet === targetSubnet) return true;
+                }
+                return false;
+            },
+
+            getSubnet(ip) {
+                // Hacky /30 subnet calculator
+                const parts = ip.split('.').map(Number);
+                // Last octet & 252
+                parts[3] = parts[3] & 252;
+                return parts.join('.') + '/30';
+            },
+
+            getNodeNameByIP(ip) {
+                for (const [name, node] of Object.entries(this.nodes)) {
+                    for (const cfg of Object.values(node.interfaces)) {
+                        if (cfg.ip === ip) return name;
+                    }
+                }
+                return null;
+            },
+
+            // --- UI & Animation ---
+
+            animatePacket(from, to, onComplete) {
+                const el = document.getElementById('packet-layer');
+                const p = document.createElement('div');
+                p.className = 'packet';
+                
+                const start = this.getCoords(from);
+                const end = this.getCoords(to);
+
+                p.style.left = start.x + '%';
+                p.style.top = start.y + '%';
+                el.appendChild(p);
+
+                // Force layout
+                p.getBoundingClientRect();
+
+                p.style.left = end.x + '%';
+                p.style.top = end.y + '%';
+
+                setTimeout(() => {
+                    p.remove();
+                    onComplete();
+                }, 500);
+            },
+
+            animateDrop(at) {
+                const el = document.getElementById('packet-layer');
+                const p = document.createElement('div');
+                p.className = 'packet error';
+                const c = this.getCoords(at);
+                p.style.left = c.x + '%';
+                p.style.top = c.y + '%';
+                el.appendChild(p);
+                setTimeout(() => p.remove(), 500);
+            },
+
+            getCoords(name) {
+                const map = {
+                    'h1': {x: 15, y: 50},
+                    'r1': {x: 35, y: 30},
+                    'r2': {x: 65, y: 30},
+                    'r3': {x: 50, y: 70},
+                    'h3': {x: 50, y: 90}
+                };
+                return map[name];
+            },
+
+            renderRoutingTables() {
+                ['r1', 'r2', 'r3'].forEach(r => {
+                    const node = this.nodes[r];
+                    const div = document.getElementById(`rt-${r}`);
+                    if (node.routes.length === 0) {
+                        div.innerHTML = "No Static Routes";
+                    } else {
+                        div.innerHTML = node.routes.map(rt => 
+                            `Dst: ${rt.dest}<br>Via: ${rt.gw}`
+                        ).join('<br><div class="h-px bg-slate-600 my-1"></div>');
+                    }
+                });
+            },
+
+            printToTerminal(msg, cls="text-slate-300") {
+                const term = document.getElementById('terminal-output');
+                const div = document.createElement('div');
+                div.className = cls;
+                div.innerHTML = msg;
+                term.appendChild(div);
+                term.scrollTop = term.scrollHeight;
+            },
+
+            checkTaskProgress() {
+                // Rudimentary check for task 2 completion
+                // Check if r1 has route via r2
+                const r1 = this.nodes.r1;
+                const r2path = r1.routes.find(r => r.dest === '10.0.3.0/30' && r.gw === '10.0.12.2');
+                if (r2path) {
+                    this.tasksCompleted.add(2);
+                    this.updateTaskUI();
+                }
+                
+                // Check Task 5 (Direct path)
+                const r1Direct = r1.routes.find(r => r.dest === '10.0.3.0/30' && r.gw === '10.0.13.2');
+                if (r1Direct) {
+                    this.tasksCompleted.add(5);
+                    this.updateTaskUI();
+                }
+            },
+
+            updateTaskUI() {
+                for (let i=1; i<=5; i++) {
+                    const el = document.getElementById(`task-${i}`);
+                    const icon = el.querySelector('.status-icon');
+                    if (this.tasksCompleted.has(i)) {
+                        icon.className = 'fas fa-check-circle text-green-400 status-icon';
+                        el.classList.add('opacity-100');
+                    } else {
+                        icon.className = 'far fa-circle text-slate-500 status-icon';
+                        el.classList.remove('opacity-100');
+                    }
+                }
+            }
+        };
+
+        window.onload = () => app.init();
+
+    </script>
+</body>
+</html>

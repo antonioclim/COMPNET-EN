@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>gRPC Master Class: Calculator Service</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Vue.js 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; /* Slate 900 */
+            color: #e2e8f0;
+        }
+        .code-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .terminal-scroll::-webkit-scrollbar {
+            width: 8px;
+        }
+        .terminal-scroll::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        .terminal-scroll::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+        /* Custom Animations */
+        @keyframes flow-h {
+            0% { background-position: 0 0; }
+            100% { background-position: 20px 0; }
+        }
+        .animate-flow {
+            background: repeating-linear-gradient(90deg, #475569 0, #475569 10px, transparent 10px, transparent 20px);
+            background-size: 20px 2px;
+            animation: flow-h 1s linear infinite;
+        }
+        .fade-enter-active, .fade-leave-active {
+            transition: opacity 0.5s ease;
+        }
+        .fade-enter-from, .fade-leave-to {
+            opacity: 0;
+        }
+        .slide-up-enter-active, .slide-up-leave-active {
+            transition: all 0.3s ease-out;
+        }
+        .slide-up-enter-from, .slide-up-leave-to {
+            transform: translateY(20px);
+            opacity: 0;
+        }
+        /* Hide number input spinners */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        [v-cloak] { display: none; }
+        
+        .glow-text {
+            text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden">
+
+    <div id="app" v-cloak class="flex flex-col h-full">
+
+        <!-- Header -->
+        <header class="bg-slate-900 border-b border-slate-700 p-4 shadow-lg flex justify-between items-center z-20">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-600 p-2 rounded-lg shadow-lg shadow-blue-500/20">
+                    <i class="fa-solid fa-cubes-stacked text-white text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-white tracking-tight">gRPC Interactive Lab</h1>
+                    <p class="text-slate-400 text-xs font-medium">Seminar 12 • Stage 4 & 5 • Protocol Buffers</p>
+                </div>
+            </div>
+            
+            <div class="flex gap-4 items-center">
+                 <!-- Learning Progress Step -->
+                 <div class="bg-slate-800 px-4 py-2 rounded-full border border-slate-700 flex items-center gap-3">
+                    <span class="text-xs font-bold text-slate-500 uppercase">Current Step:</span>
+                    <span class="text-sm font-semibold text-blue-400 animate-pulse">{{ currentStepText }}</span>
+                 </div>
+
+                <div class="h-6 w-px bg-slate-700"></div>
+
+                <button @click="showProto = !showProto" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-md text-sm transition border border-slate-700 flex items-center gap-2">
+                    <i class="fa-regular fa-file-code text-green-400"></i> S12_Part02_Config_Calculator.proto
+                </button>
+                <button @click="resetSim" class="px-3 py-2 bg-red-900/30 hover:bg-red-900/50 text-red-400 border border-red-900/50 rounded-md text-sm transition flex items-center gap-2">
+                    <i class="fa-solid fa-rotate-right"></i> Reset
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Grid -->
+        <main class="flex-1 flex overflow-hidden relative bg-slate-950">
+            
+            <!-- .proto Overlay Modal -->
+            <transition name="fade">
+                <div v-if="showProto" class="absolute inset-0 bg-black/80 z-50 flex items-center justify-center p-10 backdrop-blur-sm" @click.self="showProto = false">
+                    <div class="bg-slate-900 rounded-xl shadow-2xl w-full max-w-2xl border border-slate-700 overflow-hidden transform scale-100 transition-all">
+                        <div class="bg-slate-800 p-4 flex justify-between items-center border-b border-slate-700">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-file-code text-green-500"></i>
+                                <span class="text-slate-200 text-sm font-bold font-mono">S12_Part02_Config_Calculator.proto</span>
+                            </div>
+                            <button @click="showProto = false" class="text-slate-400 hover:text-white transition"><i class="fa-solid fa-xmark text-lg"></i></button>
+                        </div>
+                        <div class="p-0 overflow-auto max-h-[60vh] bg-[#0d1117]">
+<pre class="p-6 text-sm code-font text-slate-300 leading-relaxed">
+<span class="text-purple-400">syntax</span> = <span class="text-green-300">"proto3"</span>;
+
+<span class="text-slate-500">// The service definition</span>
+<span class="text-purple-400">service</span> <span class="text-yellow-300">Calculator</span> {
+  <span class="text-slate-500">// Unary RPC: One request, one response</span>
+  <span class="text-purple-400">rpc</span> <span class="text-blue-400">Add</span> (<span class="text-yellow-300">AddRequest</span>) <span class="text-purple-400">returns</span> (<span class="text-yellow-300">AddResponse</span>);
+  <span class="text-purple-400">rpc</span> <span class="text-blue-400">Multiply</span> (<span class="text-yellow-300">MultiplyRequest</span>) <span class="text-purple-400">returns</span> (<span class="text-yellow-300">MultiplyResponse</span>);
+  <span class="text-purple-400">rpc</span> <span class="text-blue-400">Power</span> (<span class="text-yellow-300">PowerRequest</span>) <span class="text-purple-400">returns</span> (<span class="text-yellow-300">PowerResponse</span>);
+}
+
+<span class="text-purple-400">message</span> <span class="text-yellow-300">AddRequest</span> {
+  <span class="text-red-400">int32</span> <span class="text-blue-300">a</span> = <span class="text-orange-400">1</span>; <span class="text-slate-500">// Tag 1</span>
+  <span class="text-red-400">int32</span> <span class="text-blue-300">b</span> = <span class="text-orange-400">2</span>; <span class="text-slate-500">// Tag 2</span>
+}
+</pre>
+                        </div>
+                    </div>
+                </div>
+            </transition>
+
+            <!-- LEFT COLUMN: Client (Python) -->
+            <!-- RESTORED WIDTH: w-[30%] -->
+            <div class="w-[30%] bg-slate-900 border-r border-slate-800 flex flex-col z-10 shadow-2xl relative">
+                <!-- Node Header -->
+                <div class="p-4 bg-slate-800 border-b border-slate-700 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-blue-400 font-bold text-lg flex items-center gap-2">
+                            <i class="fa-brands fa-python"></i> Client Node
+                        </h2>
+                        <p class="text-xs text-slate-400 font-mono mt-0.5">S12_Part03_Script_g_RPC_Client.py</p>
+                    </div>
+                    <div class="h-2 w-2 rounded-full" :class="clientConnected ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.6)]' : 'bg-red-500'"></div>
+                </div>
+
+                <div class="flex-1 overflow-y-auto p-5 space-y-6">
+                    
+                    <!-- 1. Connection Step -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                            Step 1: Channel Setup
+                        </div>
+                        <div class="bg-slate-950 rounded-lg border border-slate-700 p-3 shadow-inner relative overflow-hidden group">
+                            <div v-if="clientConnected" class="absolute top-0 left-0 w-1 h-full bg-green-500"></div>
+                            <code class="text-xs code-font text-slate-300 block mb-3">
+                                <span class="text-purple-400">import</span> grpc<br>
+                                channel = grpc.<span class="text-blue-300">insecure_channel</span>(<span class="text-green-300">"localhost:50051"</span>)<br>
+                                stub = CalculatorStub(channel)
+                            </code>
+                            <button 
+                                @click="toggleClientConnection" 
+                                :disabled="isAnimating"
+                                class="w-full py-2 rounded font-semibold text-xs transition flex items-center justify-center gap-2"
+                                :class="clientConnected ? 'bg-red-900/20 text-red-400 border border-red-900/50 hover:bg-red-900/40' : 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/50'">
+                                <i class="fa-solid" :class="clientConnected ? 'fa-plug-circle-xmark' : 'fa-plug'"></i>
+                                {{ clientConnected ? 'Disconnect Channel' : 'Initialize Channel & Stub' }}
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 2. Method Calls -->
+                    <div class="space-y-3 transition-all duration-500" :class="{ 'opacity-50 blur-[1px] pointer-events-none': !clientConnected }">
+                        <div class="flex justify-between text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                            Step 2: Remote Procedure Calls
+                        </div>
+
+                        <!-- Add RPC -->
+                        <div class="bg-slate-800/50 rounded-lg border border-slate-700 p-3 hover:border-blue-500/50 transition group">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-xs font-mono text-blue-300 font-bold">stub.Add(request)</span>
+                                <i class="fa-solid fa-arrow-right text-slate-600 group-hover:text-blue-500 transition"></i>
+                            </div>
+                            <!-- Small, centered inputs -->
+                            <div class="flex gap-2 mb-2 items-center justify-center">
+                                <input v-model.number="inputs.add.a" type="number" class="w-20 bg-black/40 border border-slate-600 rounded px-2 py-1 text-center text-sm font-semibold text-white focus:border-blue-500 outline-none placeholder-slate-600" placeholder="a">
+                                <span class="text-slate-500 font-bold">+</span>
+                                <input v-model.number="inputs.add.b" type="number" class="w-20 bg-black/40 border border-slate-600 rounded px-2 py-1 text-center text-sm font-semibold text-white focus:border-blue-500 outline-none placeholder-slate-600" placeholder="b">
+                            </div>
+                            <button @click="triggerRPC('Add')" :disabled="isAnimating" class="w-full bg-slate-700 hover:bg-blue-600 text-white text-xs py-1.5 rounded transition">Execute</button>
+                        </div>
+
+                        <!-- Multiply RPC -->
+                        <div class="bg-slate-800/50 rounded-lg border border-slate-700 p-3 hover:border-purple-500/50 transition group">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-xs font-mono text-purple-300 font-bold">stub.Multiply(request)</span>
+                                <i class="fa-solid fa-arrow-right text-slate-600 group-hover:text-purple-500 transition"></i>
+                            </div>
+                            <div class="flex gap-2 mb-2 items-center justify-center">
+                                <input v-model.number="inputs.mult.a" type="number" class="w-20 bg-black/40 border border-slate-600 rounded px-2 py-1 text-center text-sm font-semibold text-white focus:border-purple-500 outline-none placeholder-slate-600" placeholder="a">
+                                <span class="text-slate-500 font-bold">×</span>
+                                <input v-model.number="inputs.mult.b" type="number" class="w-20 bg-black/40 border border-slate-600 rounded px-2 py-1 text-center text-sm font-semibold text-white focus:border-purple-500 outline-none placeholder-slate-600" placeholder="b">
+                            </div>
+                            <button @click="triggerRPC('Multiply')" :disabled="isAnimating" class="w-full bg-slate-700 hover:bg-purple-600 text-white text-xs py-1.5 rounded transition">Execute</button>
+                        </div>
+
+                        <!-- Power RPC -->
+                        <div class="bg-slate-800/50 rounded-lg border border-slate-700 p-3 hover:border-orange-500/50 transition group">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-xs font-mono text-orange-300 font-bold">stub.Power(request)</span>
+                                <i class="fa-solid fa-arrow-right text-slate-600 group-hover:text-orange-500 transition"></i>
+                            </div>
+                            <div class="flex gap-2 mb-2 items-center justify-center">
+                                <input v-model.number="inputs.pow.base" type="number" class="w-20 bg-black/40 border border-slate-600 rounded px-2 py-1 text-center text-sm font-semibold text-white focus:border-orange-500 outline-none placeholder-slate-600" placeholder="Base">
+                                <span class="text-slate-500 text-xs font-bold">^</span>
+                                <input v-model.number="inputs.pow.exp" type="number" class="w-20 bg-black/40 border border-slate-600 rounded px-2 py-1 text-center text-sm font-semibold text-white focus:border-orange-500 outline-none placeholder-slate-600" placeholder="Exp">
+                            </div>
+                            <button @click="triggerRPC('Power')" :disabled="isAnimating" class="w-full bg-slate-700 hover:bg-orange-600 text-white text-xs py-1.5 rounded transition">Execute</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Client Terminal -->
+                <div class="h-40 bg-[#0d1117] border-t border-slate-700 flex flex-col font-mono text-xs">
+                    <div class="px-3 py-1.5 bg-slate-800 text-slate-400 flex justify-between items-center border-b border-slate-700">
+                        <span class="flex items-center gap-2"><i class="fa-solid fa-terminal"></i> grpc_client_log.txt</span>
+                        <button @click="clientLogs=[]" class="hover:text-white"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                    <div class="flex-1 overflow-y-auto p-2 terminal-scroll" ref="clientTerminal">
+                        <div v-if="clientLogs.length === 0" class="text-slate-600 italic">Waiting for connection...</div>
+                        <div v-for="(log, i) in clientLogs" :key="i" class="mb-1">
+                            <span class="text-slate-500">[{{ log.time }}]</span>
+                            <span :class="log.color">{{ log.text }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MIDDLE COLUMN: Network & Educational Layer -->
+            <!-- RESTORED WIDTH: w-[40%] -->
+            <div class="w-[40%] flex flex-col relative bg-[#0b0f19]">
+                
+                <!-- Background Grid -->
+                <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(#3b82f6 1px, transparent 1px); background-size: 30px 30px;"></div>
+
+                <!-- Info/Learning Panel (Dynamic) -->
+                <div class="h-[35%] border-b border-slate-800 bg-slate-900/80 backdrop-blur p-6 flex flex-col justify-center items-center text-center relative z-20 shadow-xl">
+                    <transition name="slide-up" mode="out-in">
+                        <div :key="infoPanel.title" class="max-w-md">
+                            <div class="inline-block px-3 py-1 rounded-full bg-slate-800 text-[10px] font-bold tracking-widest uppercase text-slate-400 mb-3 border border-slate-700">
+                                {{ infoPanel.category }}
+                            </div>
+                            <h3 class="text-xl font-bold text-white mb-2">{{ infoPanel.title }}</h3>
+                            <p class="text-sm text-slate-400 leading-relaxed" v-html="infoPanel.content"></p>
+                        </div>
+                    </transition>
+                </div>
+
+                <!-- Network Simulation Area -->
+                <div class="flex-1 relative flex items-center justify-center">
+                    
+                    <!-- Wire Representation -->
+                    <div class="absolute w-[80%] h-0.5 bg-slate-700"></div>
+
+                    <!-- Client Interface Point -->
+                    <div class="absolute left-[10%] w-3 h-3 rounded-full bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.8)] z-10"></div>
+                    <!-- Server Interface Point -->
+                    <div class="absolute right-[10%] w-3 h-3 rounded-full bg-green-500 shadow-[0_0_15px_rgba(34,197,94,0.8)] z-10"></div>
+
+                    <!-- Labels -->
+                    <div class="absolute left-[5%] top-[40%] text-[10px] text-slate-500 uppercase tracking-widest">Port Ephemeral</div>
+                    <div class="absolute right-[5%] top-[40%] text-[10px] text-slate-500 uppercase tracking-widest">Port 50051</div>
+
+                    <!-- HTTP/2 Frame Visualization (The Packet) -->
+                    <div 
+                        v-if="packet.active"
+                        class="absolute z-30 transition-all duration-75 ease-linear"
+                        :style="{ 
+                            left: packet.progress + '%',
+                            transform: 'translate(-50%, -50%)'
+                        }"
+                    >
+                        <!-- The Packet Box -->
+                        <div class="relative group">
+                            <div 
+                                class="px-4 py-2 rounded shadow-2xl border flex items-center gap-3 min-w-[180px]"
+                                :class="packet.type === 'req' ? 'bg-blue-900/90 border-blue-500 text-blue-100' : 'bg-green-900/90 border-green-500 text-green-100'"
+                            >
+                                <div class="text-xl">
+                                    <i class="fa-solid" :class="packet.type === 'req' ? 'fa-envelope-open-text' : 'fa-box-open'"></i>
+                                </div>
+                                <div class="flex flex-col text-left">
+                                    <span class="text-[10px] opacity-75 font-bold tracking-wider">HTTP/2 DATA FRAME</span>
+                                    <span class="text-xs font-mono font-bold">{{ packet.binaryPreview }}</span>
+                                </div>
+                            </div>
+
+                            <!-- Popover Details on Hover (Simulated) -->
+                            <div class="absolute -top-24 left-1/2 -translate-x-1/2 bg-black/90 text-white text-xs p-3 rounded w-48 border border-slate-600 opacity-0 group-hover:opacity-100 transition pointer-events-none z-40">
+                                <div class="font-bold border-b border-slate-700 pb-1 mb-1 text-slate-300">Header Compression (HPACK)</div>
+                                <div class="font-mono text-[10px] space-y-1">
+                                    <div class="text-yellow-400">:method: POST</div>
+                                    <div class="text-yellow-400">:scheme: http</div>
+                                    <div class="text-yellow-400">:path: /Calculator/{{ packet.method }}</div>
+                                    <div class="text-blue-300">content-type: application/grpc</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Flow Animation -->
+                    <div v-if="packet.active" class="absolute inset-x-[10%] top-[49%] h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-50 animate-flow z-0"></div>
+
+                    <!-- Processing State Indicator -->
+                    <div v-if="serverProcessing" class="absolute right-[15%] top-[30%] bg-yellow-500/10 border border-yellow-500/50 text-yellow-400 px-3 py-1 rounded text-xs flex items-center gap-2 animate-pulse">
+                        <i class="fa-solid fa-microchip fa-spin"></i> Processing...
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN: Server (Python) -->
+            <!-- RESTORED WIDTH: w-[30%] -->
+            <div class="w-[30%] bg-slate-900 border-l border-slate-800 flex flex-col z-10 shadow-2xl">
+                <!-- Node Header -->
+                <div class="p-4 bg-slate-800 border-b border-slate-700 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-green-400 font-bold text-lg flex items-center gap-2">
+                            <i class="fa-solid fa-server"></i> Server Node
+                        </h2>
+                        <p class="text-xs text-slate-400 font-mono mt-0.5">S12_Part03_Script_g_RPC_Server.py (Port 50051)</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="text-[10px] font-bold uppercase" :class="serverRunning ? 'text-green-500' : 'text-slate-500'">{{ serverRunning ? 'Active' : 'Offline' }}</div>
+                        <button 
+                            @click="toggleServer"
+                            class="w-8 h-4 rounded-full relative transition-colors duration-300 focus:outline-none"
+                            :class="serverRunning ? 'bg-green-600' : 'bg-slate-600'"
+                        >
+                            <div class="absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform duration-300" :class="serverRunning ? 'translate-x-4' : 'translate-x-0'"></div>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex-1 overflow-y-auto p-5 space-y-6">
+                    <!-- Thread Pool Visualizer -->
+                    <div class="bg-slate-950 rounded-lg border border-slate-700 p-4">
+                        <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 flex justify-between">
+                            <span>ThreadPoolExecutor</span>
+                            <span class="text-slate-600">max_workers=10</span>
+                        </div>
+                        <div class="grid grid-cols-5 gap-2">
+                            <div v-for="i in 10" :key="i" class="aspect-square rounded bg-slate-800 border border-slate-700 flex items-center justify-center transition-all duration-300" :class="{ 'bg-green-900/50 border-green-500 shadow-[0_0_10px_rgba(34,197,94,0.3)]': serverProcessing && i === activeThread }">
+                                <i class="fa-solid fa-gears text-xs" :class="serverProcessing && i === activeThread ? 'text-green-400 fa-spin' : 'text-slate-600'"></i>
+                            </div>
+                        </div>
+                        <div class="mt-3 text-center">
+                             <div class="text-[10px] text-slate-500">Service Implementation</div>
+                             <div class="font-mono text-xs text-green-400 mt-1">class CalculatorService(calculator_pb2_grpc.CalculatorServicer)</div>
+                        </div>
+                    </div>
+
+                    <!-- Method Handlers -->
+                    <div class="space-y-2 opacity-80">
+                        <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Registered RPC Handlers</div>
+                        <div class="p-2 border-l-2 border-slate-600 bg-slate-800/30 text-xs font-mono text-slate-300">def Add(self, request, context): ...</div>
+                        <div class="p-2 border-l-2 border-slate-600 bg-slate-800/30 text-xs font-mono text-slate-300">def Multiply(self, request, context): ...</div>
+                        <div class="p-2 border-l-2 border-slate-600 bg-slate-800/30 text-xs font-mono text-slate-300">def Power(self, request, context): ...</div>
+                    </div>
+                </div>
+
+                 <!-- Server Terminal -->
+                 <div class="h-40 bg-[#0d1117] border-t border-slate-700 flex flex-col font-mono text-xs">
+                    <div class="px-3 py-1.5 bg-slate-800 text-slate-400 flex justify-between items-center border-b border-slate-700">
+                        <span class="flex items-center gap-2"><i class="fa-solid fa-terminal"></i> stage4_grpc_server_log.txt</span>
+                        <button @click="serverLogs=[]" class="hover:text-white"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                    <div class="flex-1 overflow-y-auto p-2 terminal-scroll" ref="serverTerminal">
+                         <div v-if="serverLogs.length === 0" class="text-slate-600 italic">Server not started.</div>
+                        <div v-for="(log, i) in serverLogs" :key="i" class="mb-1">
+                            <span class="text-slate-500">[{{ log.time }}]</span>
+                            <span :class="log.color">{{ log.text }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    // State
+                    serverRunning: false,
+                    clientConnected: false,
+                    isAnimating: false,
+                    showProto: false,
+                    serverProcessing: false,
+                    activeThread: 1,
+                    
+                    // Inputs
+                    inputs: {
+                        add: { a: 10, b: 20 },
+                        mult: { a: 5, b: 5 },
+                        pow: { base: 2, exp: 8 }
+                    },
+
+                    // Logs
+                    clientLogs: [],
+                    serverLogs: [],
+
+                    // Animation Objects
+                    packet: {
+                        active: false,
+                        type: 'req', // 'req' or 'res'
+                        method: '',
+                        progress: 10, // % from left
+                        binaryPreview: '' // Mock hex
+                    },
+
+                    // Learning Content
+                    currentStepText: 'Waiting to Start',
+                    infoPanel: {
+                        category: 'Concept',
+                        title: 'gRPC Architecture',
+                        content: 'Welcome to the lab. gRPC uses <b>HTTP/2</b> for transport and <b>Protocol Buffers</b> for serialization. Start by launching the server on the right.'
+                    }
+                };
+            },
+            methods: {
+                getCurrentTime() {
+                    const now = new Date();
+                    return now.toTimeString().split(' ')[0];
+                },
+                resetSim() {
+                    this.serverRunning = false;
+                    this.clientConnected = false;
+                    this.clientLogs = [];
+                    this.serverLogs = [];
+                    this.packet.active = false;
+                    this.isAnimating = false;
+                    this.serverProcessing = false;
+                    this.infoPanel = {
+                        category: 'Concept',
+                        title: 'gRPC Architecture',
+                        content: 'Reset complete. gRPC uses <b>HTTP/2</b> for transport and <b>Protocol Buffers</b> for serialization. Start by launching the server.'
+                    };
+                    this.currentStepText = 'Waiting to Start';
+                },
+                toggleServer() {
+                    this.serverRunning = !this.serverRunning;
+                    if (this.serverRunning) {
+                        this.logServer("[SERVER] gRPC Calculator server started on port 50051", "text-green-400 font-bold");
+                        this.infoPanel = {
+                            category: 'Server Side',
+                            title: 'Server Listening',
+                            content: 'The server is now listening on <b>0.0.0.0:50051</b>. It has initialised a <code>ThreadPoolExecutor</code> to handle multiple incoming RPCs concurrently.'
+                        };
+                        this.currentStepText = 'Server Ready';
+                    } else {
+                        this.logServer("[SERVER] Stopping server...", "text-orange-400");
+                        this.infoPanel = {
+                            category: 'System',
+                            title: 'Server Stopped',
+                            content: 'The server has been shut down. Client calls will now fail with <code>UNAVAILABLE</code> status.'
+                        };
+                        this.currentStepText = 'Server Offline';
+                    }
+                },
+                toggleClientConnection() {
+                    if (this.clientConnected) {
+                        this.clientConnected = false;
+                        this.logClient("Channel closed.", "text-slate-400");
+                        this.infoPanel = {
+                            category: 'Client Side',
+                            title: 'Channel Closed',
+                            content: 'The gRPC channel has been torn down. You can no longer make calls.'
+                        };
+                    } else {
+                        this.clientConnected = true;
+                        this.logClient("[CLIENT] Connecting to gRPC server at localhost:50051...", "text-blue-300");
+                        this.logClient("[CLIENT] Channel ready. Stub initialised.", "text-green-400");
+                        this.infoPanel = {
+                            category: 'Client Side',
+                            title: 'Channel & Stub',
+                            content: 'A <b>Channel</b> maintains the connection to the server. A <b>Stub</b> is a client-side object that provides the same methods as the server, hiding the complexity of network serialization.'
+                        };
+                        this.currentStepText = 'Client Connected';
+                    }
+                },
+                triggerRPC(method) {
+                    if (this.isAnimating || !this.clientConnected) return;
+                    this.isAnimating = true;
+
+                    // 1. Prepare Data
+                    let requestData = {};
+                    let result = 0;
+                    
+                    if (method === 'Add') {
+                        requestData = { a: this.inputs.add.a, b: this.inputs.add.b };
+                        result = requestData.a + requestData.b;
+                    } else if (method === 'Multiply') {
+                        requestData = { a: this.inputs.mult.a, b: this.inputs.mult.b };
+                        result = requestData.a * requestData.b;
+                    } else if (method === 'Power') {
+                        requestData = { base: this.inputs.pow.base, exponent: this.inputs.pow.exp };
+                        result = Math.pow(requestData.base, requestData.exponent);
+                    }
+
+                    // 2. Client Log
+                    this.logClient(`Calling stub.${method}(${JSON.stringify(requestData)})`, "text-slate-300");
+                    
+                    // 3. Info Panel Update: Serialization
+                    this.infoPanel = {
+                        category: 'Serialization',
+                        title: 'Protocol Buffers Encoding',
+                        content: `The <b>${method}Request</b> object is serialized into a binary format. Unlike JSON, this is compact and strongly typed based on <code>S12_Part02_Config_Calculator.proto</code>.`
+                    };
+                    this.currentStepText = 'Serializing Request';
+
+                    // 4. Start Animation (Request)
+                    this.packet.active = true;
+                    this.packet.type = 'req';
+                    this.packet.method = method;
+                    this.packet.progress = 15;
+                    this.packet.binaryPreview = this.mockHex(method, requestData); // Fake binary look
+
+                    // Animate Movement
+                    let interval = setInterval(() => {
+                        this.packet.progress += 1;
+                        
+                        // Update info mid-flight
+                        if (this.packet.progress === 40) {
+                            this.infoPanel = {
+                                category: 'Transport',
+                                title: 'HTTP/2 POST',
+                                content: `The binary payload is wrapped in an HTTP/2 frame and sent to <b>/Calculator/${method}</b>. Notice the header compression efficiency.`
+                            };
+                            this.currentStepText = 'Transmitting (HTTP/2)';
+                        }
+
+                        // Arrival at Server
+                        if (this.packet.progress >= 85) {
+                            clearInterval(interval);
+                            this.packet.active = false;
+                            this.handleServerSide(method, requestData, result);
+                        }
+                    }, 20);
+                },
+                handleServerSide(method, requestData, result) {
+                    // Check if server is running
+                    if (!this.serverRunning) {
+                        setTimeout(() => {
+                            this.logClient(`grpc._channel._InactiveRpcError: StatusCode.UNAVAILABLE`, "text-red-400 font-bold");
+                            this.infoPanel = {
+                                category: 'Error',
+                                title: 'Connection Refused',
+                                content: 'The server is offline. The client failed to establish a connection (TCP handshake failed).'
+                            };
+                            this.isAnimating = false;
+                            this.currentStepText = 'Error: Unavailable';
+                        }, 500);
+                        return;
+                    }
+
+                    // Server Logic
+                    this.currentStepText = 'Server Processing';
+                    this.serverProcessing = true;
+                    this.activeThread = Math.floor(Math.random() * 10) + 1; // Pick a random thread
+
+                    this.infoPanel = {
+                        category: 'Server Side',
+                        title: 'Deserialization & Execution',
+                        content: `The server receives the bytes, deserializes them into a <b>${method}Request</b> object, and passes it to the <code>${method}</code> method in <code>CalculatorService</code>.`
+                    };
+
+                    setTimeout(() => {
+                        // Log Server Side
+                        let logMsg = "";
+                        if (method === 'Add') logMsg = `Add called with a=${requestData.a}, b=${requestData.b}, result=${result}`;
+                        if (method === 'Multiply') logMsg = `Multiply called with a=${requestData.a}, b=${requestData.b}, result=${result}`;
+                        if (method === 'Power') logMsg = `Power called with base=${requestData.base}, exponent=${requestData.exponent}, result=${result}`;
+                        
+                        this.logServer(`[SERVER] ${logMsg}`, "text-green-300");
+
+                        // Prepare Response
+                        this.serverProcessing = false;
+                        this.sendResponse(method, result);
+
+                    }, 1500); // Simulate processing time
+                },
+                sendResponse(method, result) {
+                    this.currentStepText = 'Sending Response';
+                    this.infoPanel = {
+                        category: 'Serialization',
+                        title: 'Encoding Response',
+                        content: `The result <b>${result}</b> is wrapped in a <b>${method}Response</b> object and serialized back to bytes for the return trip.`
+                    };
+
+                    this.packet.active = true;
+                    this.packet.type = 'res';
+                    this.packet.progress = 85;
+                    this.packet.binaryPreview = "08 " + result.toString(16).padStart(2, '0').toUpperCase(); // Mock hex result
+
+                    // Animate Back
+                    let interval = setInterval(() => {
+                        this.packet.progress -= 1;
+                        
+                        if (this.packet.progress <= 15) {
+                            clearInterval(interval);
+                            this.packet.active = false;
+                            
+                            // Client Receives
+                            this.logClient(`Result received: ${result}`, "text-green-400 font-bold");
+                            this.infoPanel = {
+                                category: 'Client Side',
+                                title: 'Cycle Complete',
+                                content: 'The client Stub receives the response, deserializes it, and returns a standard Python object to the calling code.'
+                            };
+                            this.currentStepText = 'Idle';
+                            this.isAnimating = false;
+                        }
+                    }, 20);
+                },
+                mockHex(method, data) {
+                    // Just creates a techy-looking hex string for visuals
+                    const v1 = Object.values(data)[0] % 255;
+                    const v2 = Object.values(data)[1] % 255;
+                    return `0A ${v1.toString(16).toUpperCase()} 12 ${v2.toString(16).toUpperCase()}`;
+                },
+                logClient(text, color) {
+                    this.clientLogs.push({ text, color, time: this.getCurrentTime() });
+                    this.$nextTick(() => {
+                        if(this.$refs.clientTerminal) this.$refs.clientTerminal.scrollTop = this.$refs.clientTerminal.scrollHeight;
+                    });
+                },
+                logServer(text, color) {
+                    this.serverLogs.push({ text, color, time: this.getCurrentTime() });
+                    this.$nextTick(() => {
+                        if(this.$refs.serverTerminal) this.$refs.serverTerminal.scrollTop = this.$refs.serverTerminal.scrollHeight;
+                    });
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

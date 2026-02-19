@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Services Lab: DNS & SSH</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; /* Slate 950 */
+            color: #e2e8f0;
+        }
+        .font-mono { font-family: 'Fira Code', monospace; }
+
+        /* Terminal Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+        .packet {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            z-index: 50; /* Higher z-index to ensure visibility */
+            box-shadow: 0 0 10px currentColor;
+            pointer-events: none;
+        }
+
+        .node-glow {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+            transition: all 0.3s ease;
+        }
+        .node-glow.active {
+            box-shadow: 0 0 40px rgba(59, 130, 246, 0.8);
+            transform: scale(1.05);
+            border-color: #60a5fa;
+        }
+
+        /* CRT Effect for Terminal */
+        .scanlines {
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0,0,0,0.1) 50%,
+                rgba(0,0,0,0.1)
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+        }
+
+        .blinking-cursor {
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        /* Success Checkmark Animation */
+        @keyframes check-pop {
+            0% { transform: scale(0); }
+            80% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        .check-anim { animation: check-pop 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden text-slate-200">
+
+    <!-- Header -->
+    <header class="h-16 bg-slate-900 border-b border-slate-700 flex justify-between items-center px-6 shrink-0 z-30">
+        <div class="flex items-center gap-4">
+            <div class="bg-blue-600 text-white font-bold rounded p-1.5 text-sm">LAB 10</div>
+            <div>
+                <h1 class="text-lg font-bold text-white tracking-tight">Network Services: DNS & SSH</h1>
+                <p class="text-xs text-slate-400">Interactive Simulation Environment</p>
+            </div>
+        </div>
+        <div class="flex gap-3">
+            <div class="px-3 py-1 rounded bg-slate-800 border border-slate-600 text-xs text-slate-400 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                System Online
+            </div>
+        </div>
+    </header>
+
+    <div class="flex-1 flex overflow-hidden">
+        
+        <!-- Left Panel: Educational Guide -->
+        <aside class="w-[350px] bg-slate-900 border-r border-slate-700 flex flex-col z-20 shadow-xl">
+            <div class="p-4 border-b border-slate-700 bg-slate-800/50">
+                <h2 class="font-bold text-blue-400 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                    Lab Guide
+                </h2>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-4 space-y-6" id="guide-container">
+                
+                <!-- Step 1: DNS -->
+                <div class="step-card group bg-slate-800/40 border border-slate-700 rounded-lg p-4 transition-all hover:border-blue-500/50">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-semibold text-sm text-white">1. DNS Investigation</h3>
+                        <span id="badge-dns" class="text-[10px] px-2 py-0.5 rounded bg-slate-700 text-slate-400 uppercase font-bold">Pending</span>
+                    </div>
+                    <p class="text-xs text-slate-400 mb-3 leading-relaxed">
+                        Computers communicate via IP addresses. DNS translates human names (like <code>example.com</code>) into IPs.
+                    </p>
+                    <div class="bg-slate-950 p-2 rounded border border-slate-800 mb-2">
+                        <code class="text-xs font-mono text-green-400 block mb-1">$ dig example.com</code>
+                        <code class="text-xs font-mono text-green-400 block">$ dig A example.com</code>
+                    </div>
+                    <div class="text-[10px] text-slate-500 italic">
+                        <strong>Goal:</strong> Observe the <code>ANSWER SECTION</code> and <code>TTL</code>.
+                    </div>
+                </div>
+
+                <!-- Step 2: SSH Connect -->
+                <div class="step-card group bg-slate-800/40 border border-slate-700 rounded-lg p-4 transition-all hover:border-green-500/50">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-semibold text-sm text-white">2. Secure Connection</h3>
+                        <span id="badge-ssh" class="text-[10px] px-2 py-0.5 rounded bg-slate-700 text-slate-400 uppercase font-bold">Pending</span>
+                    </div>
+                    <p class="text-xs text-slate-400 mb-3 leading-relaxed">
+                        Establish a secure encrypted tunnel to manage a remote server.
+                    </p>
+                    <div class="bg-slate-950 p-2 rounded border border-slate-800 mb-2">
+                        <code class="text-xs font-mono text-green-400 block">$ ssh student@192.168.1.10</code>
+                    </div>
+                    <div class="text-[10px] text-slate-500 italic">
+                        <strong>Goal:</strong> Complete the cryptographic handshake.
+                    </div>
+                </div>
+
+                <!-- Step 3: Remote Ops -->
+                <div class="step-card group bg-slate-800/40 border border-slate-700 rounded-lg p-4 transition-all hover:border-purple-500/50">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-semibold text-sm text-white">3. Remote Operations</h3>
+                        <span id="badge-ops" class="text-[10px] px-2 py-0.5 rounded bg-slate-700 text-slate-400 uppercase font-bold">Locked</span>
+                    </div>
+                    <p class="text-xs text-slate-400 mb-3 leading-relaxed">
+                        Execute commands on the remote machine.
+                    </p>
+                    <div class="bg-slate-950 p-2 rounded border border-slate-800 mb-2">
+                        <code class="text-xs font-mono text-purple-400 block">$ uname -a</code>
+                        <code class="text-xs font-mono text-purple-400 block">$ ls -la</code>
+                    </div>
+                </div>
+
+                <!-- Learning Concepts -->
+                <div class="bg-blue-900/20 border border-blue-800/50 rounded-lg p-3 mt-4">
+                    <h4 class="text-xs font-bold text-blue-300 mb-2 uppercase tracking-wide">Key Concepts</h4>
+                    <ul class="text-[11px] space-y-2 text-blue-200/80 list-disc pl-4">
+                        <li><strong>TTL (Time To Live):</strong> How long a DNS record is cached.</li>
+                        <li><strong>A Record:</strong> Maps Hostname → IPv4.</li>
+                        <li><strong>Port 53 (UDP):</strong> Standard for DNS queries.</li>
+                        <li><strong>Port 22 (TCP):</strong> Standard for SSH.</li>
+                    </ul>
+                </div>
+
+            </div>
+        </aside>
+
+        <!-- Right Area: Visualizer & Terminal -->
+        <main class="flex-1 flex flex-col bg-slate-950 relative">
+            
+            <!-- 1. Visualization Canvas (Top Half) -->
+            <!-- ADDED ID="viz-canvas" for robust selection -->
+            <div id="viz-canvas" class="h-[55%] relative bg-[#0B101A] overflow-hidden border-b border-slate-800">
+                
+                <!-- Grid Background -->
+                <div class="absolute inset-0" style="background-image: linear-gradient(#1e293b 1px, transparent 1px), linear-gradient(90deg, #1e293b 1px, transparent 1px); background-size: 40px 40px; opacity: 0.1;"></div>
+
+                <!-- NODES -->
+                
+                <!-- Client (User) -->
+                <div id="node-client" class="absolute top-1/2 left-[10%] -translate-y-1/2 w-24 flex flex-col items-center z-10 node-glow">
+                    <div class="w-16 h-16 bg-slate-800 rounded-xl border-2 border-slate-600 flex items-center justify-center relative bg-slate-900">
+                        <!-- Laptop Icon -->
+                        <svg class="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                        
+                        <!-- Lock Icon (SSH Status) -->
+                        <div id="ssh-lock" class="absolute -top-3 -right-3 w-7 h-7 bg-green-500 rounded-full flex items-center justify-center text-slate-900 shadow-lg scale-0 transition-transform duration-500">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                        </div>
+                    </div>
+                    <div class="mt-2 text-center">
+                        <span class="block text-xs font-bold text-slate-200">Local Client</span>
+                        <span class="block text-[10px] font-mono text-slate-500">192.168.1.5</span>
+                    </div>
+                </div>
+
+                <!-- DNS Server -->
+                <div id="node-dns" class="absolute top-[15%] left-1/2 -translate-x-1/2 w-24 flex flex-col items-center z-10 node-glow transition-opacity duration-300">
+                    <div class="w-14 h-14 bg-blue-900/40 rounded-full border-2 border-blue-500/50 flex items-center justify-center mb-1 backdrop-blur-sm bg-slate-900">
+                        <span class="text-xs font-bold text-blue-300">DNS</span>
+                    </div>
+                    <span class="text-[10px] font-mono text-blue-400/70">8.8.8.8</span>
+                </div>
+
+                <!-- SSH Server -->
+                <div id="node-server" class="absolute top-1/2 right-[10%] -translate-y-1/2 w-24 flex flex-col items-center z-10 node-glow grayscale opacity-60 transition-all duration-500">
+                    <div class="w-16 h-16 bg-slate-800 rounded-lg border-2 border-purple-500 flex items-center justify-center shadow-lg bg-slate-900">
+                        <!-- Server Icon -->
+                        <svg class="w-8 h-8 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"></path></svg>
+                    </div>
+                    <div class="mt-2 text-center">
+                        <span class="block text-xs font-bold text-slate-200">Remote Host</span>
+                        <span class="block text-[10px] font-mono text-slate-500">192.168.1.10</span>
+                    </div>
+                </div>
+
+                <!-- Wiring (SVG Overlay) -->
+                <svg class="absolute inset-0 w-full h-full pointer-events-none z-0">
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+                          <polygon points="0 0, 10 3.5, 0 7" fill="#475569" />
+                        </marker>
+                    </defs>
+                    <!-- Path to DNS -->
+                    <path id="path-dns" d="M 120 50% Q 50% 15% 50% 25%" fill="none" stroke="#334155" stroke-width="2" stroke-dasharray="6 4" class="opacity-50"/>
+                    <!-- Path to Server -->
+                    <path id="path-ssh" d="M 120 50% L 85% 50%" fill="none" stroke="#334155" stroke-width="2" />
+                </svg>
+
+                <!-- Network Sniffer Overlay (Wireshark Style) -->
+                <div class="absolute bottom-4 left-4 right-4 h-32 bg-slate-900/90 border border-slate-700 rounded overflow-hidden font-mono text-[10px] shadow-2xl z-20 flex flex-col backdrop-blur">
+                    <div class="bg-slate-800 px-3 py-1 text-slate-400 border-b border-slate-700 flex justify-between">
+                        <span>NETWORK ANALYSER (Sniffer)</span>
+                        <span>Interface: eth0</span>
+                    </div>
+                    <div class="flex-1 overflow-auto p-0">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="bg-slate-800/50 text-slate-500 sticky top-0">
+                                <tr>
+                                    <th class="px-2 py-1 font-normal w-16">Time</th>
+                                    <th class="px-2 py-1 font-normal w-20">Source</th>
+                                    <th class="px-2 py-1 font-normal w-20">Dest</th>
+                                    <th class="px-2 py-1 font-normal w-16">Proto</th>
+                                    <th class="px-2 py-1 font-normal">Info</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sniffer-body" class="text-slate-300">
+                                <!-- Rows injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- 2. Terminal Emulator (Bottom Half) -->
+            <div class="flex-1 bg-[#1e1e1e] p-4 font-mono text-sm overflow-hidden relative flex flex-col" onclick="document.getElementById('cli-input').focus()">
+                <div class="scanlines absolute inset-0 z-10"></div>
+                
+                <!-- Terminal Output -->
+                <div id="terminal-history" class="flex-1 overflow-y-auto pb-2 space-y-1 text-slate-300 z-0">
+                    <div class="text-slate-500 mb-4">
+                        Lab Environment v1.0 initialised...<br>
+                        Network interfaces: UP<br>
+                        Type 'help' for available commands.
+                    </div>
+                </div>
+
+                <!-- Input Line -->
+                <div class="flex items-center pt-2 border-t border-slate-800 z-0 bg-[#1e1e1e]">
+                    <span id="prompt-user" class="text-green-500 font-bold mr-2 select-none">student@local:~$</span>
+                    <input type="text" id="cli-input" class="bg-transparent border-none outline-none text-slate-100 flex-1 font-mono caret-white" autocomplete="off" spellcheck="false" placeholder="Type command here...">
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Logic -->
+    <script>
+        // State Management
+        const state = {
+            step: 1, // 1: DNS, 2: SSH, 3: Remote
+            sshConnected: false,
+            dnsCached: false,
+            isBusy: false // Prevent command flooding
+        };
+
+        const DOM = {
+            history: document.getElementById('terminal-history'),
+            input: document.getElementById('cli-input'),
+            prompt: document.getElementById('prompt-user'),
+            sniffer: document.getElementById('sniffer-body'),
+            badges: {
+                dns: document.getElementById('badge-dns'),
+                ssh: document.getElementById('badge-ssh'),
+                ops: document.getElementById('badge-ops')
+            },
+            nodes: {
+                dns: document.getElementById('node-dns'),
+                server: document.getElementById('node-server'),
+                lock: document.getElementById('ssh-lock')
+            }
+        };
+
+        // --- Terminal System ---
+
+        DOM.input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const cmd = DOM.input.value.trim();
+                
+                if (state.isBusy) {
+                    return; // Ignore input during animation
+                }
+
+                if (cmd) {
+                    printLine(`${DOM.prompt.innerText} ${cmd}`, 'text-slate-100');
+                    processCommand(cmd);
+                    DOM.input.value = '';
+                }
+            }
+        });
+
+        function printLine(text, className = 'text-slate-300') {
+            const div = document.createElement('div');
+            div.className = className;
+            div.innerHTML = text; // Allow HTML for colors
+            DOM.history.appendChild(div);
+            DOM.history.scrollTop = DOM.history.scrollHeight;
+        }
+
+        function processCommand(rawCmd) {
+            const parts = rawCmd.split(/\s+/);
+            const cmd = parts[0].toLowerCase();
+            const args = parts.slice(1);
+
+            if (cmd === 'clear') {
+                DOM.history.innerHTML = '';
+                return;
+            }
+            
+            if (cmd === 'help') {
+                printLine(`
+Available Commands:
+  <span class="text-yellow-400">dig [domain]</span>      Query DNS records
+  <span class="text-yellow-400">ssh [user@host]</span>   Connect to remote server
+  <span class="text-yellow-400">clear</span>             Clear screen
+                `);
+                return;
+            }
+
+            // --- DNS COMMANDS ---
+            if (cmd === 'dig') {
+                if (args.length === 0) {
+                    printLine("dig: usage: dig [type] domain", "text-red-400");
+                    return;
+                }
+                const domain = args.find(a => a.includes('.'));
+                const type = args.includes('A') ? 'A' : (args.includes('MX') ? 'MX' : 'A');
+                
+                if (!domain) {
+                    printLine("Error: No domain specified.", "text-red-400");
+                    return;
+                }
+
+                executeDig(domain, type);
+                return;
+            }
+
+            // --- SSH COMMANDS ---
+            if (cmd === 'ssh') {
+                if (state.sshConnected) {
+                    printLine("Already connected. Type 'exit' to disconnect.", "text-yellow-400");
+                    return;
+                }
+                if (args.length === 0) {
+                    printLine("ssh: usage: ssh user@host", "text-red-400");
+                    return;
+                }
+                executeSSH(args[0]);
+                return;
+            }
+
+            if (cmd === 'exit' && state.sshConnected) {
+                state.sshConnected = false;
+                DOM.prompt.innerText = "student@local:~$";
+                DOM.prompt.classList.remove('text-purple-400');
+                DOM.prompt.classList.add('text-green-500');
+                DOM.nodes.lock.style.transform = "scale(0)";
+                DOM.nodes.server.classList.add('grayscale', 'opacity-60');
+                DOM.nodes.server.classList.remove('active');
+                DOM.nodes.dns.style.opacity = '1';
+                logSniffer('SSH', 'Client', 'Server', 'TCP FIN, Connection Terminated');
+                printLine("Connection to 192.168.1.10 closed.");
+                return;
+            }
+
+            // --- REMOTE COMMANDS ---
+            if (state.sshConnected) {
+                executeRemote(cmd, args);
+                return;
+            }
+
+            printLine(`bash: ${cmd}: command not found`, "text-red-400");
+        }
+
+        // --- Execution Logic & Animations ---
+
+        function executeDig(domain, type) {
+            state.isBusy = true;
+            // 1. Sniffer Log Request
+            logSniffer('DNS', '192.168.1.5', '8.8.8.8', `Standard Query ${type} ${domain}`);
+            
+            // 2. Animation
+            animatePacket('dns', () => {
+                // 3. Sniffer Log Response
+                logSniffer('DNS', '8.8.8.8', '192.168.1.5', `Standard Response ${type} 93.184.216.34`);
+
+                // 4. Terminal Output
+                const ttl = 3600;
+                const resultIP = "93.184.216.34";
+                
+                printLine(`<span class="text-slate-500">; <<>> DiG 9.16.1 <<>> ${type} ${domain}</span>`);
+                printLine(`<span class="text-slate-500">;; global options: +cmd</span>`);
+                printLine(`<span class="text-slate-500">;; Got answer:</span>`);
+                printLine(`<span class="text-slate-500">;; ->>HEADER<<- opcode: QUERY, status: <span class="text-green-400">NOERROR</span>, id: 12345</span>`);
+                printLine(`<br><span class="text-slate-400">;; QUESTION SECTION:</span>`);
+                printLine(`;${domain}.\t\tIN\t${type}`);
+                printLine(`<br><span class="text-slate-400">;; ANSWER SECTION:</span>`);
+                printLine(`<span class="text-yellow-300">${domain}.\t${ttl}\tIN\t${type}\t${resultIP}</span>`);
+                printLine(`<br><span class="text-slate-500">;; Query time: 24 msec</span>`);
+                printLine(`<span class="text-slate-500">;; SERVER: 8.8.8.8#53(8.8.8.8)</span>`);
+
+                // 5. Update Guide
+                if (state.step === 1 && domain === 'example.com') {
+                    completeStep('dns', 'Complete');
+                    state.step = 2;
+                }
+                state.isBusy = false;
+            });
+        }
+
+        function executeSSH(target) {
+            const [user, host] = target.split('@');
+            if (host !== '192.168.1.10' && host !== 'server') {
+                printLine(`ssh: connect to host ${host} port 22: Connection refused`, "text-red-400");
+                return;
+            }
+
+            state.isBusy = true;
+            printLine(`OpenSSH_8.9p1 Ubuntu-3ubuntu0.1, OpenSSL 3.0.2`);
+            printLine(`debug1: Connecting to ${host} [192.168.1.10] port 22.`);
+
+            // Simulation: 3-Way Handshake
+            setTimeout(() => {
+                logSniffer('TCP', 'Client', 'Server', 'SYN [Seq=0]');
+                animatePacket('ssh', () => {
+                    logSniffer('TCP', 'Server', 'Client', 'SYN, ACK [Seq=0, Ack=1]');
+                    
+                    setTimeout(() => {
+                         printLine(`debug1: Connection established.`);
+                         printLine(`debug1: identiy file /home/student/.ssh/id_rsa type 0`);
+                         
+                         // Simulation: Key Exchange
+                         logSniffer('SSHv2', 'Client', 'Server', 'Client: Key Exchange Init');
+                         logSniffer('SSHv2', 'Server', 'Client', 'Server: Key Exchange Reply');
+                         logSniffer('SSHv2', 'Client', 'Server', 'Diffie-Hellman Key Exchange Init');
+                         
+                         printLine(`Authenticated to ${host}.`);
+                         
+                         // Success State
+                         state.sshConnected = true;
+                         DOM.prompt.innerHTML = `<span class="text-purple-400 font-bold">student@server:~$</span>`;
+                         DOM.nodes.lock.style.transform = "scale(1)";
+                         DOM.nodes.server.classList.remove('grayscale', 'opacity-60');
+                         DOM.nodes.server.classList.add('node-glow', 'active');
+                         DOM.nodes.dns.style.opacity = '0.3'; // Dim DNS to focus on SSH
+
+                         if (state.step === 2) {
+                             completeStep('ssh', 'Connected');
+                             document.getElementById('badge-ops').innerText = "Pending";
+                             document.getElementById('badge-ops').className = "text-[10px] px-2 py-0.5 rounded bg-slate-700 text-slate-400 uppercase font-bold";
+                             state.step = 3;
+                         }
+                         state.isBusy = false;
+
+                    }, 800);
+                });
+            }, 500);
+        }
+
+        function executeRemote(cmd, args) {
+            state.isBusy = true;
+            logSniffer('SSHv2', 'Client', 'Server', `Encrypted Packet (len=${24 + cmd.length})`);
+            
+            animatePacket('ssh', () => {
+                logSniffer('SSHv2', 'Server', 'Client', `Encrypted Packet (len=128)`);
+                
+                if (cmd === 'uname') {
+                    printLine("Linux server-lab-01 5.15.0-46-generic #49-Ubuntu SMP x86_64 GNU/Linux");
+                } else if (cmd === 'ls') {
+                    printLine(`
+total 12
+drwxr-xr-x 2 student student 4096 Feb 09 10:00 .
+drwxr-xr-x 3 root    root    4096 Feb 01 12:00 ..
+-rw-r--r-- 1 student student   24 Feb 09 10:01 secret_config.txt
+                    `);
+                    if(state.step === 3) {
+                         completeStep('ops', 'Success');
+                         printLine("<span class='text-green-400'>Congratulations! Lab 1 Stage Completed.</span>");
+                    }
+                } else {
+                    printLine(`bash: ${cmd}: command not found`, "text-slate-400");
+                }
+                state.isBusy = false;
+            });
+        }
+
+        // --- Helpers ---
+
+        function completeStep(id, text) {
+            const badge = DOM.badges[id];
+            badge.innerText = text;
+            badge.className = "text-[10px] px-2 py-0.5 rounded bg-green-500 text-black uppercase font-bold check-anim";
+            badge.parentElement.parentElement.classList.add('border-green-500/30', 'bg-green-900/10');
+        }
+
+        let packetId = 0;
+        function logSniffer(proto, src, dst, info) {
+            const row = document.createElement('tr');
+            row.className = "border-b border-slate-800/50 hover:bg-slate-800/50 transition-colors";
+            
+            // Color coding protocols
+            let protoColor = "text-slate-300";
+            if (proto.includes("DNS")) protoColor = "text-blue-400";
+            if (proto.includes("TCP")) protoColor = "text-yellow-400";
+            if (proto.includes("SSH")) protoColor = "text-green-400";
+
+            row.innerHTML = `
+                <td class="px-2 py-1 text-slate-500">${(Date.now() / 1000).toFixed(4)}</td>
+                <td class="px-2 py-1">${src}</td>
+                <td class="px-2 py-1">${dst}</td>
+                <td class="px-2 py-1 ${protoColor} font-bold">${proto}</td>
+                <td class="px-2 py-1 text-slate-400 truncate">${info}</td>
+            `;
+            DOM.sniffer.prepend(row);
+            
+            // Limit rows
+            if (DOM.sniffer.children.length > 8) {
+                DOM.sniffer.lastElementChild.remove();
+            }
+        }
+
+        function animatePacket(type, callback) {
+            const clientRect = document.getElementById('node-client').getBoundingClientRect();
+            
+            let targetEl = type === 'dns' ? DOM.nodes.dns : DOM.nodes.server;
+            const targetRect = targetEl.getBoundingClientRect();
+
+            // Create Packet
+            const packet = document.createElement('div');
+            packet.className = `packet ${type === 'dns' ? 'bg-blue-400 text-blue-400' : 'bg-yellow-400 text-yellow-400'}`;
+            
+            // Calculate center points relative to the visualizer container using ID
+            const container = document.getElementById('viz-canvas');
+            const contRect = container.getBoundingClientRect();
+            
+            // Packet size adjustment (14px / 2 = 7px) to center the dot
+            const packetOffset = 7;
+
+            const startX = (clientRect.left + clientRect.width/2) - contRect.left - packetOffset;
+            const startY = (clientRect.top + clientRect.height/2) - contRect.top - packetOffset;
+            
+            const endX = (targetRect.left + targetRect.width/2) - contRect.left - packetOffset;
+            const endY = (targetRect.top + targetRect.height/2) - contRect.top - packetOffset;
+
+            packet.style.left = startX + 'px';
+            packet.style.top = startY + 'px';
+            container.appendChild(packet);
+
+            // Simple Linear Animation for now (offset-path is complex to calc dynamically cleanly without SVG libs)
+            // Using Web Animations API
+            const anim = packet.animate([
+                { left: startX + 'px', top: startY + 'px' },
+                { left: endX + 'px', top: endY + 'px' }
+            ], {
+                duration: 600,
+                easing: 'ease-in-out'
+            });
+
+            anim.onfinish = () => {
+                // Flash Target
+                targetEl.classList.add('active');
+                setTimeout(() => targetEl.classList.remove('active'), 200);
+
+                // Return trip
+                const returnAnim = packet.animate([
+                    { left: endX + 'px', top: endY + 'px' },
+                    { left: startX + 'px', top: startY + 'px' }
+                ], {
+                    duration: 600,
+                    easing: 'ease-in-out',
+                    delay: 100
+                });
+
+                returnAnim.onfinish = () => {
+                    packet.remove();
+                    if (callback) callback();
+                };
+            };
+        }
+
+        // Init
+        printLine("System Ready.", "text-green-500");
+    </script>
+</body>
+</html>

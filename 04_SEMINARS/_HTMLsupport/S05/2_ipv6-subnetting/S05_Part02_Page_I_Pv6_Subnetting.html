@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPv6 Subnetting & Structure Visualiser</title>
+    
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #e2e8f0;
+        }
+        
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .hextet {
+            transition: all 0.3s ease;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569; 
+        }
+
+        /* Input styling */
+        input[type="text"] {
+            background: #1e293b;
+            border: 1px solid #334155;
+            color: #e2e8f0;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input[type="text"]:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+        .correct-input {
+            border-color: #10b981 !important;
+            background: rgba(16, 185, 129, 0.1) !important;
+        }
+        .incorrect-input {
+            border-color: #ef4444 !important;
+            background: rgba(239, 68, 68, 0.1) !important;
+        }
+        
+        /* Fade in animation */
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- ICONS (Internal SVGs) ---
+        const IconBase = ({ children, className }) => (
+            <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                width="24" 
+                height="24" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                className={className}
+            >
+                {children}
+            </svg>
+        );
+
+        const Network = ({ className }) => (
+            <IconBase className={className}>
+                <rect x="16" y="16" width="6" height="6" rx="1"></rect>
+                <rect x="2" y="16" width="6" height="6" rx="1"></rect>
+                <rect x="9" y="2" width="6" height="6" rx="1"></rect>
+                <path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"></path>
+                <path d="M12 12V8"></path>
+            </IconBase>
+        );
+
+        const Minimize2 = ({ className }) => (
+            <IconBase className={className}>
+                <polyline points="4 14 10 14 10 20"></polyline>
+                <polyline points="20 10 14 10 14 4"></polyline>
+                <line x1="14" y1="10" x2="21" y2="3"></line>
+                <line x1="3" y1="21" x2="10" y2="14"></line>
+            </IconBase>
+        );
+
+        const Layers = ({ className }) => (
+            <IconBase className={className}>
+                <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                <polyline points="2 17 12 22 22 17"></polyline>
+                <polyline points="2 12 12 17 22 12"></polyline>
+            </IconBase>
+        );
+
+        const Share2 = ({ className }) => (
+            <IconBase className={className}>
+                <circle cx="18" cy="5" r="3"></circle>
+                <circle cx="6" cy="12" r="3"></circle>
+                <circle cx="18" cy="19" r="3"></circle>
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+            </IconBase>
+        );
+
+        const Hash = ({ className }) => (
+            <IconBase className={className}>
+                <line x1="4" y1="9" x2="20" y2="9"></line>
+                <line x1="4" y1="15" x2="20" y2="15"></line>
+                <line x1="10" y1="3" x2="8" y2="21"></line>
+                <line x1="16" y1="3" x2="14" y2="21"></line>
+            </IconBase>
+        );
+        
+        const BookOpen = ({ className }) => (
+            <IconBase className={className}>
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+            </IconBase>
+        );
+
+        const CheckCircle = ({ className }) => (
+             <IconBase className={className}>
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </IconBase>
+        );
+
+        const Edit3 = ({ className }) => (
+            <IconBase className={className}>
+                <path d="M12 20h9"></path>
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+            </IconBase>
+        );
+
+
+        // --- EDUCATIONAL COMPONENTS (THEORY MODE) ---
+
+        const AddressCompression = () => {
+            const rawSegments = ["2001", "0db8", "abcd", "0012", "0000", "0000", "0000", "0001"];
+            const [step, setStep] = useState(0); 
+
+            const getDisplaySegments = () => {
+                if (step === 0) return rawSegments;
+                const noLeading = rawSegments.map(s => parseInt(s, 16).toString(16));
+                if (step === 1) return noLeading;
+                return ["2001", "db8", "abcd", "12", "::", "1"];
+            };
+
+            const segments = getDisplaySegments();
+
+            return (
+                <div className="card rounded-2xl p-6 mb-8 border-l-4 border-l-emerald-500">
+                    <div className="flex items-center gap-3 mb-6">
+                        <Minimize2 className="text-emerald-400" />
+                        <h2 className="text-2xl font-bold text-white">Address Compression Logic</h2>
+                    </div>
+
+                    <div className="bg-slate-900/50 p-6 rounded-xl mb-6 text-center overflow-x-auto">
+                        <div className="flex items-center justify-center gap-1 md:gap-2 font-mono text-xl md:text-3xl font-bold flex-wrap">
+                            {segments.map((seg, idx) => (
+                                <React.Fragment key={idx}>
+                                    <span className={`hextet px-2 py-1 rounded ${seg === '::' ? 'bg-emerald-500/20 text-emerald-300' : 'text-slate-200'}`}>
+                                        {seg}
+                                    </span>
+                                    {idx < segments.length - 1 && seg !== '::' && segments[idx+1] !== '::' && (
+                                        <span className="text-slate-600">:</span>
+                                    )}
+                                </React.Fragment>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <button onClick={() => setStep(0)} className={`p-4 rounded-xl text-sm font-semibold transition-all ${step === 0 ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-750'}`}>
+                            1. Full 128-bit Expansion
+                            <div className="text-xs font-normal mt-1 opacity-80">Raw hexadecimal notation</div>
+                        </button>
+                        <button onClick={() => setStep(1)} className={`p-4 rounded-xl text-sm font-semibold transition-all ${step === 1 ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-750'}`}>
+                            2. Remove Leading Zeros
+                            <div className="text-xs font-normal mt-1 opacity-80">0012 becomes 12</div>
+                        </button>
+                        <button onClick={() => setStep(2)} className={`p-4 rounded-xl text-sm font-semibold transition-all ${step === 2 ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-750'}`}>
+                            3. Zero Compression (::)
+                            <div className="text-xs font-normal mt-1 opacity-80">Consecutive groups of 0 become ::</div>
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        const StructureBreakdown = () => {
+            const [hoveredSection, setHoveredSection] = useState(null);
+            const sections = [
+                { id: 'prefix', name: 'Global Prefix', bits: 48, color: 'bg-blue-500', desc: 'Assigned by ISP/RIR. Identifies the organisation.' },
+                { id: 'subnet', name: 'Subnet ID', bits: 16, color: 'bg-purple-500', desc: 'Used by admins to define local subnets (up to 65,536).' },
+                { id: 'interface', name: 'Interface ID', bits: 64, color: 'bg-orange-500', desc: 'Unique identifier for the host (MAC derived or random).' }
+            ];
+
+            return (
+                <div className="card rounded-2xl p-6 mb-8 border-l-4 border-l-blue-500">
+                     <div className="flex items-center gap-3 mb-6">
+                        <Layers className="text-blue-400" />
+                        <h2 className="text-2xl font-bold text-white">The /64 Standard Layout</h2>
+                    </div>
+                    <div className="flex flex-col md:flex-row w-full h-16 rounded-lg overflow-hidden mb-4 cursor-pointer font-mono text-sm font-bold shadow-2xl">
+                        {sections.map((section) => (
+                            <div key={section.id} className={`${section.color} flex items-center justify-center transition-all duration-300 hover:brightness-110 relative`} style={{ width: `${(section.bits / 128) * 100}%` }} onMouseEnter={() => setHoveredSection(section.id)} onMouseLeave={() => setHoveredSection(null)}>
+                                <span className="drop-shadow-md text-white px-2 text-center">{section.bits} bits</span>
+                            </div>
+                        ))}
+                    </div>
+                    <div className="flex justify-between text-xs text-slate-500 font-mono mb-6 uppercase tracking-wider">
+                        <span>Bit 0</span><span>Bit 48</span><span>Bit 64</span><span>Bit 128</span>
+                    </div>
+                    <div className="min-h-[80px]">
+                        {sections.map((section) => (
+                            <div key={section.id} className={`transition-opacity duration-300 ${hoveredSection && hoveredSection !== section.id ? 'opacity-20 blur-sm' : 'opacity-100'}`}>
+                                <div className="flex items-center gap-2 mb-1"><div className={`w-3 h-3 rounded-full ${section.color}`}></div><h3 className="text-white font-semibold">{section.name}</h3></div>
+                                <p className="text-slate-400 text-sm pl-5">{section.desc}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        const SubnetGenerator = () => {
+            const [subnetDec, setSubnetDec] = useState(1);
+            const [mode, setMode] = useState('64');
+            const prefix = "2001:db8:10";
+            const subnetHex = subnetDec.toString(16).padStart(4, '0'); 
+            const split50Values = [0, 4, 8, 12]; 
+            
+            return (
+                <div className="card rounded-2xl p-6 mb-8 border-l-4 border-l-purple-500">
+                    <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center gap-3">
+                            <Share2 className="text-purple-400" />
+                            <h2 className="text-2xl font-bold text-white">Subnet Calculator</h2>
+                        </div>
+                        <div className="flex bg-slate-900 rounded-lg p-1">
+                            <button onClick={() => setMode('64')} className={`px-3 py-1 text-xs font-bold rounded-md transition-colors ${mode === '64' ? 'bg-purple-600 text-white' : 'text-slate-400 hover:text-white'}`}>/64</button>
+                            <button onClick={() => setMode('50')} className={`px-3 py-1 text-xs font-bold rounded-md transition-colors ${mode === '50' ? 'bg-purple-600 text-white' : 'text-slate-400 hover:text-white'}`}>/50</button>
+                        </div>
+                    </div>
+                    {mode === '64' ? (
+                        <div className="space-y-6">
+                            <div className="bg-slate-900 p-6 rounded-xl border border-slate-700">
+                                <p className="text-xs text-slate-400 uppercase tracking-widest mb-2">Base Prefix: /48</p>
+                                <div className="font-mono text-xl text-slate-500">{prefix}:<span className="text-purple-400 font-bold">{subnetHex}</span>::/64</div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-slate-300 mb-2">Increment Subnet ID</label>
+                                <input type="range" min="0" max="255" value={subnetDec} onChange={(e) => setSubnetDec(parseInt(e.target.value))} className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-purple-500" />
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            <div className="grid grid-cols-1 gap-3">
+                                {split50Values.map((val, idx) => (
+                                    <div key={idx} className="flex items-center justify-between p-3 bg-slate-800 rounded border border-slate-700">
+                                        <div><span className="text-xs text-slate-500 font-bold uppercase mr-2">Block {idx + 1}</span><span className="font-mono text-emerald-400">2001:db8:abcd:<span className="text-purple-400">{val.toString(16)}</span>::/50</span></div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const ComparisonTable = () => {
+            const data = [
+                { feature: "Address Size", v4: "32 bits", v6: "128 bits" },
+                { feature: "Subnetting", v4: "Complex (variable)", v6: "Simple (Standard /64)" },
+                { feature: "Broadcast", v4: "Yes (noisy)", v6: "No (Multicast used)" },
+                { feature: "Configuration", v4: "DHCP or Static", v6: "SLAAC (Stateless Auto) + DHCPv6" },
+                { feature: "Scalability", v4: "Exhausted", v6: "Virtually Infinite" },
+            ];
+
+            return (
+                <div className="card rounded-2xl overflow-hidden mb-8">
+                    <div className="p-6 border-b border-slate-700/50 flex items-center gap-3">
+                        <Hash className="text-slate-400" />
+                        <h2 className="text-xl font-bold text-white">Quick Compare: IPv4 vs IPv6</h2>
+                    </div>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left">
+                            <thead className="bg-slate-900/50 text-slate-400 text-xs uppercase tracking-wider">
+                                <tr><th className="p-4 font-semibold">Feature</th><th className="p-4 font-semibold text-blue-400">IPv4</th><th className="p-4 font-semibold text-emerald-400">IPv6</th></tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-700/50 text-sm text-slate-300">
+                                {data.map((row, idx) => (
+                                    <tr key={idx} className="hover:bg-slate-800/30 transition-colors"><td className="p-4 font-medium text-white">{row.feature}</td><td className="p-4 font-mono">{row.v4}</td><td className="p-4 font-mono">{row.v6}</td></tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- EXERCISE COMPONENTS (PRACTICE MODE) ---
+
+        const CheckResult = ({ correct }) => (
+            correct === null ? null : (
+                correct ? 
+                <div className="flex items-center gap-2 text-emerald-400 text-sm mt-2"><CheckCircle className="w-4 h-4"/> Correct!</div> : 
+                <div className="text-red-400 text-sm mt-2">Try again.</div>
+            )
+        );
+
+        const Ex1Notation = () => {
+            const [a1, setA1] = useState("");
+            const [a2, setA2] = useState("");
+            
+            const checkA1 = a1.toLowerCase().trim() === "2001:db8::abcd:0:0:1" || a1.toLowerCase().trim() === "2001:db8:0:0:abcd::1"; 
+            const checkA2 = a2.toLowerCase().trim() === "fe80::ff:0:0:1234";
+
+            return (
+                <div className="mb-8">
+                    <h3 className="text-lg font-bold text-white mb-4">Exercise 1: Understanding Notation</h3>
+                    <p className="text-slate-400 mb-4 text-sm">Compress the following addresses to their shortest valid form.</p>
+                    
+                    <div className="grid gap-6">
+                        <div className="bg-slate-800/50 p-4 rounded-xl border border-slate-700">
+                            <div className="font-mono text-slate-300 text-sm mb-2 break-all">2001:0db8:0000:0000:abcd:0000:0000:0001</div>
+                            <input type="text" placeholder="e.g. 2001:db8..." className={`w-full p-2 rounded font-mono text-sm ${a1 && (checkA1 ? "correct-input" : "incorrect-input")}`} value={a1} onChange={e => setA1(e.target.value)} />
+                            <CheckResult correct={a1 ? checkA1 : null} />
+                        </div>
+
+                        <div className="bg-slate-800/50 p-4 rounded-xl border border-slate-700">
+                            <div className="font-mono text-slate-300 text-sm mb-2 break-all">fe80:0000:0000:0000:00ff:0000:0000:1234</div>
+                            <input type="text" placeholder="e.g. fe80::..." className={`w-full p-2 rounded font-mono text-sm ${a2 && (checkA2 ? "correct-input" : "incorrect-input")}`} value={a2} onChange={e => setA2(e.target.value)} />
+                            <CheckResult correct={a2 ? checkA2 : null} />
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const Ex2Subnets = () => {
+            // Inputs
+            const [server, setServer] = useState("");
+            const [lan, setLan] = useState("");
+            const [iot, setIot] = useState("");
+            const [router, setRouter] = useState("");
+
+            // Validation Logic
+            const validate = (input) => {
+                const clean = input.toLowerCase().trim();
+                const regex = /^2001:db8:1234:[0-9a-f]{1,4}::(\/64)?$/;
+                return regex.test(clean);
+            };
+
+            return (
+                <div className="mb-8">
+                    <h3 className="text-lg font-bold text-white mb-4">Exercise 2: Create /64 Subnets</h3>
+                    <p className="text-slate-400 mb-4 text-sm">
+                        Given prefix: <code className="text-purple-400">2001:db8:1234::/48</code>. Create 4 distinct /64 subnets.
+                    </p>
+                    <div className="grid gap-3">
+                        {[
+                            { label: "Servers", val: server, set: setServer },
+                            { label: "LAN Clients", val: lan, set: setLan },
+                            { label: "IoT", val: iot, set: setIot },
+                            { label: "Router-Router", val: router, set: setRouter }
+                        ].map((field, i) => (
+                            <div key={i} className="flex flex-col md:flex-row md:items-center gap-2">
+                                <span className="w-32 text-sm text-slate-400">{field.label}:</span>
+                                <input 
+                                    type="text" 
+                                    placeholder="2001:db8:1234:X::/64" 
+                                    className={`flex-1 p-2 rounded font-mono text-sm ${field.val && (validate(field.val) ? "correct-input" : "incorrect-input")}`} 
+                                    value={field.val} 
+                                    onChange={e => field.set(e.target.value)} 
+                                />
+                            </div>
+                        ))}
+                    </div>
+                    <p className="text-xs text-slate-500 mt-2 italic">Tip: Use the 4th hextet for the Subnet ID. Format: 2001:db8:1234:X::/64</p>
+                </div>
+            );
+        };
+
+        const Ex3Sequential = () => {
+            const [s1, setS1] = useState("");
+            const [s2, setS2] = useState("");
+            const [s3, setS3] = useState("");
+            const [s4, setS4] = useState("");
+
+            const getSubnetId = (input) => {
+                const match = input.toLowerCase().match(/^2001:db8:abcd:([0-9a-f]{1,4})::/);
+                return match ? parseInt(match[1], 16) : null;
+            };
+
+            const isSequential = () => {
+                const v1 = getSubnetId(s1);
+                const v2 = getSubnetId(s2);
+                const v3 = getSubnetId(s3);
+                const v4 = getSubnetId(s4);
+                if (v1 === null || v2 === null || v3 === null || v4 === null) return false;
+                return (v2 === v1 + 1) && (v3 === v2 + 1) && (v4 === v3 + 1);
+            };
+
+            const allValidFormat = [s1,s2,s3,s4].every(s => /^2001:db8:abcd:[0-9a-f]{1,4}::(\/64)?$/i.test(s));
+            const correct = allValidFormat && isSequential();
+
+            return (
+                <div className="mb-8">
+                    <h3 className="text-lg font-bold text-white mb-4">Exercise 3: Sequential /64 Subnets</h3>
+                    <p className="text-slate-400 mb-4 text-sm">
+                        Prefix: <code className="text-purple-400">2001:db8:abcd::/48</code>. Allocate 4 <strong>consecutive</strong> /64 subnets.
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {[s1, s2, s3, s4].map((val, i) => (
+                            <input 
+                                key={i}
+                                type="text" 
+                                placeholder={`Subnet ${i+1} (e.g. ...:0::)`}
+                                className="p-2 rounded font-mono text-sm"
+                                value={val}
+                                onChange={e => [setS1, setS2, setS3, setS4][i](e.target.value)}
+                            />
+                        ))}
+                    </div>
+                    {(s1 && s2 && s3 && s4) && (
+                        <div className={`mt-2 text-sm ${correct ? "text-emerald-400" : "text-yellow-400"}`}>
+                            {correct ? "Perfect! Correct sequential logic." : "Check format or sequence."}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const Ex4Hosts = () => {
+            const [h1, setH1] = useState("");
+            const [h2, setH2] = useState("");
+            const [h3, setH3] = useState("");
+            const [h4, setH4] = useState("");
+
+            const validateHost = (input) => {
+                const clean = input.trim().toLowerCase();
+                // Must start with the Exercise 2 prefix
+                if (!clean.startsWith("2001:db8:1234:")) return false;
+                // Must NOT end with :: (which implies a subnet or anycast router)
+                if (clean.endsWith("::")) return false;
+                // Must NOT contain CIDR
+                if (clean.includes("/")) return false;
+                // Must have content after the 4th colon group
+                // Regex: Starts with prefix, then a subnet hextet, then colon, then non-empty
+                const regex = /^2001:db8:1234:[0-9a-f]{1,4}:.+/;
+                return regex.test(clean);
+            };
+
+            return (
+                <div className="mb-8">
+                    <h3 className="text-lg font-bold text-white mb-4">Exercise 4: Host Addresses</h3>
+                    <p className="text-slate-400 mb-4 text-sm">
+                        Choose a valid <strong>host address</strong> for each subnet defined in Exercise 2.
+                    </p>
+                    <div className="grid gap-3">
+                        {[
+                            { label: "Server Host", val: h1, set: setH1 },
+                            { label: "LAN Client Host", val: h2, set: setH2 },
+                            { label: "IoT Host", val: h3, set: setH3 },
+                            { label: "Router Host", val: h4, set: setH4 }
+                        ].map((field, i) => (
+                            <div key={i} className="flex flex-col md:flex-row md:items-center gap-2">
+                                <span className="w-32 text-sm text-slate-400">{field.label}:</span>
+                                <input 
+                                    type="text" 
+                                    placeholder="2001:db8:1234:X::Y" 
+                                    className={`flex-1 p-2 rounded font-mono text-sm ${field.val && (validateHost(field.val) ? "correct-input" : "incorrect-input")}`} 
+                                    value={field.val} 
+                                    onChange={e => field.set(e.target.value)} 
+                                />
+                            </div>
+                        ))}
+                    </div>
+                    <p className="text-xs text-slate-500 mt-2 italic">Ensure the Subnet ID (4th group) matches Ex 2, and the Interface ID (suffix) is unique.</p>
+                </div>
+            );
+        };
+
+        const Ex5Identification = () => {
+            const [q1, setQ1] = useState("");
+            const [q2, setQ2] = useState("");
+            const [q3, setQ3] = useState("");
+
+            const check = (input, answer) => input.trim().toLowerCase().includes(answer);
+
+            return (
+                <div className="mb-8">
+                    <h3 className="text-lg font-bold text-white mb-4">Exercise 5: Prefix Identification</h3>
+                    <p className="text-slate-400 mb-4 text-sm">Identify the /64 prefix (e.g., 2001:db8:10:5::) for these host addresses.</p>
+                    
+                    <div className="space-y-4">
+                        {[
+                            { addr: "2001:db8:10:5::abcd", ans: "2001:db8:10:5::", state: q1, set: setQ1 },
+                            { addr: "2001:db8:10:ff::20", ans: "2001:db8:10:ff::", state: q2, set: setQ2 },
+                            { addr: "2001:db8:abcd:12::1", ans: "2001:db8:abcd:12::", state: q3, set: setQ3 }
+                        ].map((item, i) => (
+                            <div key={i} className="bg-slate-800/50 p-3 rounded-lg flex flex-col md:flex-row md:items-center justify-between gap-3 border border-slate-700">
+                                <code className="text-sm text-blue-300">{item.addr}</code>
+                                <input 
+                                    type="text" 
+                                    placeholder="Prefix..." 
+                                    className={`md:w-48 p-1 px-2 rounded font-mono text-sm ${item.state && (check(item.state, item.ans) ? "correct-input" : "incorrect-input")}`}
+                                    value={item.state}
+                                    onChange={e => item.set(e.target.value)}
+                                />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        const Ex6Theory = () => {
+            const [show, setShow] = useState(false);
+            return (
+                <div>
+                    <h3 className="text-lg font-bold text-white mb-4">Exercise 6: Theory</h3>
+                    <p className="text-slate-400 mb-2 text-sm">Why do most IPv6 networks use /64 and not smaller sizes?</p>
+                    <textarea className="w-full h-24 bg-slate-800 border border-slate-700 rounded p-3 text-slate-300 text-sm mb-3" placeholder="Write your explanation..."></textarea>
+                    <button onClick={() => setShow(!show)} className="text-xs text-blue-400 hover:text-blue-300 underline">
+                        {show ? "Hide Answer" : "Show Model Answer"}
+                    </button>
+                    {show && (
+                        <div className="mt-3 p-3 bg-blue-900/20 text-blue-200 text-sm rounded border border-blue-500/30">
+                            <strong>Answer:</strong> SLAAC (Stateless Address Auto-Configuration) requires a /64 prefix to function correctly. Additionally, it is the industry standard for maximum compatibility and simplicity.
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const PracticeSection = () => (
+            <div className="max-w-3xl mx-auto animate-fade-in">
+                <Ex1Notation />
+                <div className="h-px bg-slate-700/50 my-8"></div>
+                <Ex2Subnets />
+                <div className="h-px bg-slate-700/50 my-8"></div>
+                <Ex3Sequential />
+                <div className="h-px bg-slate-700/50 my-8"></div>
+                <Ex4Hosts />
+                <div className="h-px bg-slate-700/50 my-8"></div>
+                <Ex5Identification />
+                <div className="h-px bg-slate-700/50 my-8"></div>
+                <Ex6Theory />
+            </div>
+        );
+
+
+        // --- MAIN APP COMPONENT ---
+
+        const Header = ({ mode, setMode }) => (
+            <header className="mb-10 text-center">
+                <div className="inline-flex items-center justify-center p-3 bg-blue-500/10 rounded-full mb-4 ring-1 ring-blue-500/30">
+                    <Network className="w-8 h-8 text-blue-400" />
+                </div>
+                <h1 className="text-4xl md:text-5xl font-bold text-white mb-3 tracking-tight">
+                    IPv6 Structure & Subnetting
+                </h1>
+                
+                <div className="flex justify-center gap-4 mt-8">
+                    <button 
+                        onClick={() => setMode('learn')}
+                        className={`flex items-center gap-2 px-6 py-2 rounded-full font-medium transition-all ${mode === 'learn' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/25' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}
+                    >
+                        <BookOpen className="w-4 h-4" /> Learn
+                    </button>
+                    <button 
+                        onClick={() => setMode('practice')}
+                        className={`flex items-center gap-2 px-6 py-2 rounded-full font-medium transition-all ${mode === 'practice' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/25' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}
+                    >
+                        <Edit3 className="w-4 h-4" /> Practice
+                    </button>
+                </div>
+            </header>
+        );
+
+        const App = () => {
+            const [mode, setMode] = useState('learn'); // 'learn' or 'practice'
+
+            return (
+                <div className="max-w-4xl mx-auto">
+                    <Header mode={mode} setMode={setMode} />
+                    
+                    {mode === 'learn' ? (
+                        <div className="animate-fade-in">
+                            <AddressCompression />
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                                <StructureBreakdown />
+                                <SubnetGenerator />
+                            </div>
+                            <ComparisonTable />
+                        </div>
+                    ) : (
+                        <PracticeSection />
+                    )}
+                    
+                    <footer className="mt-12 text-center text-slate-600 text-sm pb-8">
+                        <p>Educational Simulation based on IPv6 Fundamentals.</p>
+                        <p className="mt-2 text-xs">Computer Science Seminar 2b.</p>
+                    </footer>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

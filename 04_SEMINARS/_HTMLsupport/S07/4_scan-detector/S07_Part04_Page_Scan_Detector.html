@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IDS Logic Visualizer: Port Scan Detection</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; /* Slate 900 */
+            color: #e2e8f0;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+        .packet {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            z-index: 50;
+            pointer-events: none;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            font-weight: bold;
+            color: white;
+            font-family: 'Fira Code', monospace;
+        }
+
+        /* Packet Types */
+        .pkt-normal { background: #3b82f6; border: 1px solid #60a5fa; box-shadow: 0 0 8px #3b82f6; }
+        .pkt-scan   { background: #ef4444; border: 1px solid #f87171; box-shadow: 0 0 8px #ef4444; }
+        .pkt-brute  { background: #eab308; border: 1px solid #facc15; box-shadow: 0 0 8px #eab308; }
+
+        .node-icon {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Pulse Animation for Alerts */
+        @keyframes alert-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); border-color: #ef4444; }
+            70% { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); border-color: #ef4444; }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); border-color: #3b82f6; }
+        }
+        .animate-alert { animation: alert-pulse 1.5s infinite; }
+
+        /* Code Highlighting */
+        .code-line {
+            padding: 2px 8px;
+            border-radius: 2px;
+            transition: background-color 0.2s;
+            opacity: 0.6;
+        }
+        .code-line.active {
+            background-color: #1e40af; /* Blue 800 */
+            color: #fff;
+            opacity: 1;
+            font-weight: 600;
+            border-left: 3px solid #60a5fa;
+        }
+
+        /* Timeline / Sliding Window Visuals */
+        .timeline-container {
+            position: relative;
+            overflow: hidden;
+            background: #1e293b;
+        }
+        .timeline-mark {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            transition: left linear; /* Controlled by JS for smoothness */
+        }
+        .timeline-limit {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: repeating-linear-gradient(0deg, #94a3b8, #94a3b8 4px, transparent 4px, transparent 8px);
+            z-index: 10;
+        }
+
+        .terminal-text { font-family: 'Fira Code', monospace; }
+        .btn-scenario { transition: all 0.2s; }
+        .btn-scenario:active { transform: scale(0.98); }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden text-sm">
+
+    <!-- Navbar -->
+    <header class="bg-slate-900 border-b border-slate-700 h-14 flex items-center px-4 justify-between shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="bg-blue-600 p-1.5 rounded text-white"><i class="fas fa-shield-alt"></i></div>
+            <h1 class="font-bold text-lg tracking-tight">IDS Logic Visualizer <span class="text-slate-500 font-normal">| Stage 5</span></h1>
+        </div>
+        <div class="flex items-center gap-4 text-xs text-slate-400">
+            <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-blue-500"></span> Normal
+                <span class="w-2 h-2 rounded-full bg-yellow-500"></span> Brute Force
+                <span class="w-2 h-2 rounded-full bg-red-500"></span> Port Scan
+            </div>
+            <a href="#" onclick="alert('This simulator demonstrates how a basic Python script detects port scans by counting distinct destination ports within a time window.')" class="hover:text-white"><i class="far fa-question-circle text-lg"></i></a>
+        </div>
+    </header>
+
+    <!-- Main Grid -->
+    <main class="flex-1 grid grid-cols-12 overflow-hidden">
+        
+        <!-- Left Panel: Controls (Width: 3/12) -->
+        <aside class="col-span-3 bg-slate-800 border-r border-slate-700 flex flex-col overflow-y-auto">
+            
+            <!-- Config Section -->
+            <div class="p-5 border-b border-slate-700">
+                <h2 class="text-slate-100 font-semibold mb-4 flex items-center gap-2">
+                    <i class="fas fa-sliders-h text-blue-400"></i> Configuration
+                </h2>
+                
+                <div class="space-y-6">
+                    <!-- Window Slider -->
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <label class="text-slate-400 text-xs uppercase font-bold tracking-wider">Time Window</label>
+                            <span id="windowValue" class="text-blue-400 font-mono font-bold">5s</span>
+                        </div>
+                        <input type="range" id="windowInput" min="2" max="10" value="5" class="w-full h-1.5 bg-slate-600 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                        <p class="text-xs text-slate-500 mt-1">Packets older than this drop from memory.</p>
+                    </div>
+
+                    <!-- Threshold Slider -->
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <label class="text-slate-400 text-xs uppercase font-bold tracking-wider">Alert Threshold</label>
+                            <span id="thresholdValue" class="text-blue-400 font-mono font-bold">10 ports</span>
+                        </div>
+                        <input type="range" id="thresholdInput" min="3" max="20" value="10" class="w-full h-1.5 bg-slate-600 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                        <p class="text-xs text-slate-500 mt-1">Triggers alert if unique ports > threshold.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scenarios Section -->
+            <div class="p-5 flex-1">
+                <h2 class="text-slate-100 font-semibold mb-4 flex items-center gap-2">
+                    <i class="fas fa-play-circle text-green-400"></i> Real-World Scenarios
+                </h2>
+                
+                <div class="space-y-3">
+                    <!-- Scenario 1: Normal -->
+                    <button id="btnScenarioNormal" class="btn-scenario w-full text-left p-3 rounded-lg bg-slate-700 hover:bg-slate-600 border border-slate-600 hover:border-slate-500 group">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-bold text-slate-200 group-hover:text-white">Web Browsing</span>
+                            <i class="fas fa-globe text-blue-400"></i>
+                        </div>
+                        <p class="text-xs text-slate-400 leading-relaxed">
+                            Opens multiple connections to port <span class="font-mono text-slate-300">443</span> (HTTPS). 
+                            <br><span class="text-green-400">Should NOT alert.</span>
+                        </p>
+                    </button>
+
+                    <!-- Scenario 2: Brute Force -->
+                    <button id="btnScenarioBrute" class="btn-scenario w-full text-left p-3 rounded-lg bg-slate-700 hover:bg-slate-600 border border-slate-600 hover:border-slate-500 group">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-bold text-slate-200 group-hover:text-white">SSH Brute Force</span>
+                            <i class="fas fa-key text-yellow-400"></i>
+                        </div>
+                        <p class="text-xs text-slate-400 leading-relaxed">
+                            Repeatedly tries login on port <span class="font-mono text-slate-300">22</span>.
+                            <br><span class="text-yellow-400">False Negative (Low unique port count).</span>
+                        </p>
+                    </button>
+
+                    <!-- Scenario 3: Scan -->
+                    <button id="btnScenarioScan" class="btn-scenario w-full text-left p-3 rounded-lg bg-slate-700 hover:bg-slate-600 border border-slate-600 hover:border-slate-500 group">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-bold text-slate-200 group-hover:text-white">Nmap SYN Scan</span>
+                            <i class="fas fa-radar text-red-400"></i>
+                        </div>
+                        <p class="text-xs text-slate-400 leading-relaxed">
+                            Rapidly probes sequential ports (<span class="font-mono text-slate-300">1001, 1002...</span>).
+                            <br><span class="text-red-400">Should ALERT immediately.</span>
+                        </p>
+                    </button>
+                    
+                     <button id="btnStop" class="hidden mt-4 w-full bg-red-900/50 hover:bg-red-900 text-red-200 border border-red-800 p-2 rounded font-bold uppercase text-xs tracking-wider">
+                        Stop Simulation
+                    </button>
+                </div>
+            </div>
+            
+            <div class="p-4 border-t border-slate-700 text-center">
+                 <button id="btnReset" class="text-slate-500 hover:text-slate-300 text-xs flex items-center justify-center w-full gap-2">
+                    <i class="fas fa-undo"></i> Reset Memory
+                </button>
+            </div>
+        </aside>
+
+        <!-- Center Panel: Visualization (Width: 5/12) -->
+        <section class="col-span-5 bg-slate-900 relative flex flex-col">
+            
+            <!-- Network Map -->
+            <div id="network-canvas" class="flex-1 relative flex flex-col items-center justify-center p-8">
+                
+                <!-- Connection Line -->
+                <div class="absolute top-1/2 left-20 right-20 h-0.5 bg-slate-700 z-0"></div>
+
+                <div class="w-full flex justify-between items-center z-10 px-10">
+                    <!-- Attacker -->
+                    <div class="flex flex-col items-center gap-2">
+                        <div class="w-20 h-20 bg-slate-800 border-2 border-red-900 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(239,68,68,0.2)]">
+                            <i class="fas fa-user-secret text-4xl text-red-500"></i>
+                        </div>
+                        <div class="text-center">
+                            <div class="font-bold text-red-400 font-mono">10.0.10.1</div>
+                            <div class="text-xs text-slate-500">Attacker (Kali)</div>
+                        </div>
+                    </div>
+
+                    <!-- Victim -->
+                    <div class="flex flex-col items-center gap-2">
+                        <div id="victim-node" class="node-icon w-24 h-24 bg-slate-800 border-2 border-blue-500 rounded-lg flex items-center justify-center shadow-[0_0_30px_rgba(59,130,246,0.2)] relative">
+                            <i class="fas fa-server text-5xl text-blue-500"></i>
+                            
+                            <!-- Firewall/IDS Badge -->
+                            <div class="absolute -top-3 -right-3 bg-slate-900 border border-blue-500 text-blue-400 text-[10px] px-2 py-0.5 rounded-full font-bold shadow-lg">
+                                IDS Active
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <div class="font-bold text-blue-400 font-mono">10.0.10.2</div>
+                            <div class="text-xs text-slate-500">Victim (Server)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sliding Window Visualization -->
+            <div class="h-40 bg-slate-800 border-t border-slate-700 flex flex-col">
+                <div class="px-4 py-2 flex justify-between items-center border-b border-slate-700/50">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                        <i class="fas fa-stopwatch mr-1"></i> Sliding Window Visualizer
+                    </h3>
+                    <div class="text-[10px] text-slate-500">
+                        Packets expire when they cross the line
+                    </div>
+                </div>
+                
+                <div class="flex-1 relative p-4" id="timeline-box">
+                    <!-- The Window Limit Line -->
+                    <div class="timeline-limit" style="left: 20%;"></div>
+                    
+                    <!-- Labels -->
+                    <div class="absolute bottom-2 left-[20%] text-[10px] text-slate-500 -translate-x-1/2 mt-1">Window Limit</div>
+                    <div class="absolute bottom-2 right-4 text-[10px] text-slate-500">NOW (t=0)</div>
+
+                    <!-- Dynamic Dots Container -->
+                    <div id="timeline-dots-layer" class="absolute inset-0 top-6 bottom-6 overflow-hidden">
+                        <!-- Dots injected here -->
+                    </div>
+                    
+                    <!-- Background Grid -->
+                    <div class="absolute inset-0 pointer-events-none opacity-10" 
+                         style="background-image: linear-gradient(#94a3b8 1px, transparent 1px); background-size: 100% 20px;">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Panel: Logic & Logs (Width: 4/12) -->
+        <aside class="col-span-4 bg-slate-900 border-l border-slate-700 flex flex-col">
+            
+            <!-- Code View -->
+            <div class="h-1/3 bg-[#0d1117] border-b border-slate-700 overflow-hidden flex flex-col">
+                <div class="px-3 py-1 bg-slate-800 border-b border-slate-700 text-xs font-bold text-slate-300 flex justify-between">
+                    <span>Python Logic (Simplified)</span>
+                    <span class="text-slate-500">detect_scan.py</span>
+                </div>
+                <div class="flex-1 p-3 overflow-y-auto font-mono text-xs text-slate-400 leading-5" id="code-block">
+                    <div id="code-1" class="code-line">def process_packet(src_ip, dst_port):</div>
+                    <div id="code-2" class="code-line pl-4"># 1. Prune old ports (> window)</div>
+                    <div id="code-3" class="code-line pl-4">clean_old_entries(src_ip, NOW)</div>
+                    <div id="code-4" class="code-line pl-4"></div>
+                    <div id="code-5" class="code-line pl-4"># 2. Add current port</div>
+                    <div id="code-6" class="code-line pl-4">scan_state[src_ip].add(dst_port)</div>
+                    <div id="code-7" class="code-line pl-4"></div>
+                    <div id="code-8" class="code-line pl-4"># 3. Check threshold</div>
+                    <div id="code-9" class="code-line pl-4">count = len(scan_state[src_ip])</div>
+                    <div id="code-10" class="code-line pl-4">if count >= PORT_THRESHOLD:</div>
+                    <div id="code-11" class="code-line pl-8 text-red-400">print("[ALERT] Port Scan Detected!")</div>
+                </div>
+            </div>
+
+            <!-- Memory State -->
+            <div class="h-1/3 border-b border-slate-700 bg-slate-800 flex flex-col">
+                <div class="px-3 py-1 bg-slate-700/50 border-b border-slate-600 text-xs font-bold text-slate-300">
+                    <i class="fas fa-memory mr-1"></i> RAM State (scan_state)
+                </div>
+                <div class="flex-1 p-3 overflow-y-auto" id="memory-display">
+                    <div class="text-slate-500 italic text-center mt-8 text-xs">No active connections.</div>
+                </div>
+            </div>
+
+            <!-- Terminal -->
+            <div class="flex-1 bg-black flex flex-col font-mono text-xs">
+                <div class="px-3 py-1 bg-slate-800 border-b border-slate-700 text-slate-400 flex justify-between">
+                    <span><i class="fas fa-terminal mr-1"></i> Terminal Output</span>
+                    <button id="clearLogs" class="hover:text-white">Clear</button>
+                </div>
+                <div id="console-output" class="flex-1 p-3 overflow-y-auto text-green-500 space-y-1">
+                    <div><span class="text-blue-500">[root@h2 ~]#</span> ./detect_scan.py eth0</div>
+                    <div class="text-slate-400">[INFO] Sniffer started on eth0</div>
+                    <div class="text-slate-400">[INFO] Window=5s, Threshold=10 ports</div>
+                </div>
+            </div>
+
+        </aside>
+
+    </main>
+
+    <script>
+        // --- Configuration & State ---
+        const config = {
+            windowSeconds: 5,
+            threshold: 10,
+            attackerIp: '10.0.10.1',
+            victimIp: '10.0.10.2',
+            timelineDuration: 10 // Total seconds visible on timeline
+        };
+
+        // Core Data Structure: { "10.0.10.1": { ports: { 80: timestamp, ... } } }
+        let scanState = {};
+        
+        // Simulation Globals
+        let simInterval = null;
+        let timelineLoop = null;
+        let isRunning = false;
+        let activeScenario = null; // 'normal', 'brute', 'scan'
+
+        // DOM Elements
+        const els = {
+            windowInput: document.getElementById('windowInput'),
+            windowValue: document.getElementById('windowValue'),
+            thresholdInput: document.getElementById('thresholdInput'),
+            thresholdValue: document.getElementById('thresholdValue'),
+            victimNode: document.getElementById('victim-node'),
+            timelineLimit: document.querySelector('.timeline-limit'),
+            timelineDots: document.getElementById('timeline-dots-layer'),
+            memoryDisplay: document.getElementById('memory-display'),
+            consoleOutput: document.getElementById('console-output'),
+            codeLines: document.querySelectorAll('.code-line'),
+            btnStop: document.getElementById('btnStop')
+        };
+
+        // --- Initialization ---
+        function init() {
+            updateTimelineLimit();
+            startTimelineAnimation();
+            
+            // Listeners
+            els.windowInput.addEventListener('input', (e) => {
+                config.windowSeconds = parseInt(e.target.value);
+                els.windowValue.innerText = config.windowSeconds + 's';
+                updateTimelineLimit();
+                log(`[CONFIG] Window updated to ${config.windowSeconds}s`, 'text-yellow-500');
+                refreshMemoryView(); // Force UI update to show expired/valid
+            });
+
+            els.thresholdInput.addEventListener('input', (e) => {
+                config.threshold = parseInt(e.target.value);
+                els.thresholdValue.innerText = config.threshold + ' ports';
+                log(`[CONFIG] Threshold updated to ${config.threshold} ports`, 'text-yellow-500');
+            });
+
+            document.getElementById('btnScenarioNormal').onclick = () => startScenario('normal');
+            document.getElementById('btnScenarioBrute').onclick = () => startScenario('brute');
+            document.getElementById('btnScenarioScan').onclick = () => startScenario('scan');
+            els.btnStop.onclick = stopSimulation;
+            document.getElementById('btnReset').onclick = resetSim;
+            document.getElementById('clearLogs').onclick = () => { els.consoleOutput.innerHTML = ''; };
+        }
+
+        // --- Visual: Timeline ---
+        function updateTimelineLimit() {
+            // Calculate where the limit line should be based on Window vs Total Duration
+            // If Timeline is 10s total, and Window is 5s, line is at 50% from right (or 50% from left)
+            // Visual logic: Right side is T=0. Left side is T=10.
+            // Window of 5s means items stay valid until they reach 5s mark.
+            
+            const pct = (config.windowSeconds / config.timelineDuration) * 100;
+            // Left position: If window is 2s (small), line is close to right (100 - 20 = 80% left)
+            // Actually, let's say Right is 0. Left is 10.
+            // Line position from Right = (window / total) * 100 %.
+            els.timelineLimit.style.left = `${100 - pct}%`;
+            els.timelineLimit.style.right = 'auto'; // Reset
+        }
+
+        function addTimelineDot(port, type) {
+            const dot = document.createElement('div');
+            dot.className = `timeline-mark ${type === 'scan' ? 'bg-red-500' : type === 'brute' ? 'bg-yellow-500' : 'bg-blue-500'}`;
+            dot.dataset.created = Date.now();
+            dot.dataset.port = port;
+            
+            // Random vertical scatter for visual effect
+            const top = 10 + Math.random() * 80;
+            dot.style.top = `${top}%`;
+            dot.style.left = '100%'; // Start at right (Now)
+            
+            // Tooltip
+            dot.title = `Port: ${port}`;
+
+            els.timelineDots.appendChild(dot);
+        }
+
+        function startTimelineAnimation() {
+            if (timelineLoop) cancelAnimationFrame(timelineLoop);
+            
+            function animate() {
+                const now = Date.now();
+                const totalMs = config.timelineDuration * 1000;
+                const windowMs = config.windowSeconds * 1000;
+                
+                // Update all dots
+                const dots = document.querySelectorAll('.timeline-mark');
+                dots.forEach(dot => {
+                    const age = now - parseInt(dot.dataset.created);
+                    
+                    if (age > totalMs) {
+                        dot.remove(); // Remove if fell off the far left edge
+                    } else {
+                        // Calculate position: 0ms = 100% left, totalMs = 0% left
+                        const pct = 100 - (age / totalMs * 100);
+                        dot.style.left = `${pct}%`;
+                        
+                        // Visual check: is it inside window?
+                        if (age > windowMs) {
+                            dot.style.opacity = '0.3'; // Expired visually
+                            dot.style.filter = 'grayscale(100%)';
+                        } else {
+                            dot.style.opacity = '1';
+                        }
+                    }
+                });
+                
+                // Prune memory state based on exact time (Python logic simulation)
+                // In Python, this happens per packet, but here we do it continuously for the UI to look responsive
+                // Or we can stick to strict Python logic: Only prune when a packet arrives. 
+                // Let's stick to strict logic inside processPacket(), but for the 'RAM Display' UI, we might want to refresh.
+                // Let's just rely on processPacket to be accurate, but refreshMemoryView periodically to update the "age" bars.
+                
+                timelineLoop = requestAnimationFrame(animate);
+            }
+            timelineLoop = requestAnimationFrame(animate);
+            
+            // Separate UI refresher for the RAM bars
+            setInterval(refreshMemoryView, 500);
+        }
+
+
+        // --- Simulation Logic ---
+
+        function startScenario(type) {
+            stopSimulation();
+            isRunning = true;
+            activeScenario = type;
+            els.btnStop.classList.remove('hidden');
+
+            let portCounter = 1000;
+            let intervalMs = 800; // Default slow
+
+            if (type === 'normal') {
+                log('[SCENARIO] Starting Web Traffic (Port 443)...', 'text-blue-400');
+                intervalMs = 600;
+            } else if (type === 'brute') {
+                log('[SCENARIO] Starting SSH Brute Force (Port 22)...', 'text-yellow-400');
+                intervalMs = 300; // Fast hits
+            } else if (type === 'scan') {
+                log('[SCENARIO] Starting Nmap SYN Scan...', 'text-red-400');
+                intervalMs = 150; // Very fast
+            }
+
+            simInterval = setInterval(() => {
+                let dstPort;
+                let pktClass = 'pkt-normal';
+                
+                if (type === 'normal') {
+                    // Mostly 443, sometimes 80
+                    dstPort = Math.random() > 0.8 ? 80 : 443;
+                } else if (type === 'brute') {
+                    dstPort = 22;
+                    pktClass = 'pkt-brute';
+                } else if (type === 'scan') {
+                    dstPort = portCounter++;
+                    pktClass = 'pkt-scan';
+                    if (portCounter > 65535) portCounter = 1000;
+                }
+
+                spawnPacket(pktClass, dstPort, type);
+
+            }, intervalMs);
+        }
+
+        function stopSimulation() {
+            isRunning = false;
+            clearInterval(simInterval);
+            els.btnStop.classList.add('hidden');
+            activeScenario = null;
+        }
+
+        function resetSim() {
+            stopSimulation();
+            scanState = {};
+            els.timelineDots.innerHTML = '';
+            refreshMemoryView();
+            log('[INFO] Memory cleared.', 'text-slate-500');
+            clearAlert();
+        }
+
+        function spawnPacket(cssClass, port, type) {
+            const pkt = document.createElement('div');
+            pkt.className = `packet ${cssClass}`;
+            pkt.innerText = port;
+            
+            // Positioning logic is simplified for relative flex layouts
+            // We use fixed overlay coordinates for the animation to be smooth across containers
+            const startRect = document.querySelector('.fa-user-secret').getBoundingClientRect();
+            const endRect = document.querySelector('.fa-server').getBoundingClientRect();
+            
+            document.body.appendChild(pkt);
+            
+            // Set initial position
+            pkt.style.left = (startRect.left + 20) + 'px';
+            pkt.style.top = (startRect.top + 20) + 'px';
+            
+            // Animate
+            const anim = pkt.animate([
+                { left: (startRect.left + 20) + 'px', top: (startRect.top + 20) + 'px' },
+                { left: (endRect.left + 40) + 'px', top: (endRect.top + 40) + 'px' }
+            ], {
+                duration: 600,
+                easing: 'linear'
+            });
+
+            anim.onfinish = () => {
+                pkt.remove();
+                processPacket(config.attackerIp, port, type);
+            };
+        }
+
+        // --- Core Python Logic Translation ---
+
+        async function processPacket(srcIp, dstPort, type) {
+            const now = Date.now();
+            
+            // Visuals
+            addTimelineDot(dstPort, type);
+            highlightLine([1]); // Highlight function def
+
+            // 1. Init
+            if (!scanState[srcIp]) {
+                scanState[srcIp] = {};
+            }
+
+            // 2. Prune (Python Logic)
+            highlightLine([3]);
+            const portsObj = scanState[srcIp];
+            const windowMs = config.windowSeconds * 1000;
+            
+            for (const p in portsObj) {
+                if (now - portsObj[p] > windowMs) {
+                    delete portsObj[p];
+                }
+            }
+            await wait(50); // Small visual delay for code tracing
+
+            // 3. Add Current
+            highlightLine([6]);
+            portsObj[dstPort] = now;
+            await wait(50);
+
+            // 4. Check Threshold
+            highlightLine([9, 10]);
+            const uniqueCount = Object.keys(portsObj).length;
+            
+            refreshMemoryView(); // Update UI
+
+            if (uniqueCount >= config.threshold) {
+                highlightLine([11]);
+                triggerAlert(uniqueCount);
+            } else {
+                clearAlert();
+            }
+            
+            setTimeout(() => highlightLine([]), 300); // Clear highlight
+        }
+
+        // --- UI Updates ---
+
+        function refreshMemoryView() {
+            const container = els.memoryDisplay;
+            container.innerHTML = '';
+            
+            if (!scanState[config.attackerIp] || Object.keys(scanState[config.attackerIp]).length === 0) {
+                container.innerHTML = '<div class="text-slate-500 italic text-center mt-8 text-xs">No active connections in window.</div>';
+                return;
+            }
+
+            const portsObj = scanState[config.attackerIp];
+            const now = Date.now();
+            const windowMs = config.windowSeconds * 1000;
+            
+            // Sort by time descending
+            const entries = Object.entries(portsObj).sort((a,b) => b[1] - a[1]);
+            
+            // Header
+            const header = document.createElement('div');
+            header.className = "flex justify-between items-center mb-2 pb-2 border-b border-slate-600";
+            const count = entries.length;
+            const countClass = count >= config.threshold ? "text-red-400 font-bold" : "text-slate-300";
+            header.innerHTML = `
+                <span class="font-mono font-bold text-slate-200">${config.attackerIp}</span>
+                <span class="${countClass} text-xs">Count: ${count} / ${config.threshold}</span>
+            `;
+            container.appendChild(header);
+
+            // List
+            entries.forEach(([port, ts]) => {
+                const age = now - ts;
+                // If age > window (e.g. slight delay in processing), make it dim
+                const isExpired = age > windowMs;
+                const pct = Math.max(0, 100 - (age/windowMs * 100));
+                
+                const row = document.createElement('div');
+                row.className = `flex items-center text-[10px] mb-1.5 ${isExpired ? 'opacity-30' : ''}`;
+                row.innerHTML = `
+                    <span class="w-10 font-mono text-slate-400">${port}</span>
+                    <div class="flex-1 h-1.5 bg-slate-700 rounded-full overflow-hidden mx-2">
+                        <div class="h-full ${activeScenario === 'scan' ? 'bg-red-500' : 'bg-blue-500'}" style="width: ${pct}%"></div>
+                    </div>
+                    <span class="w-8 text-right text-slate-500">-${(age/1000).toFixed(1)}s</span>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function triggerAlert(count) {
+            els.victimNode.classList.add('animate-alert', 'border-red-500');
+            els.victimNode.classList.remove('border-blue-500');
+            
+            // Add to terminal only if not spamming (simple throttle)
+            const lastLog = els.consoleOutput.lastElementChild?.innerText;
+            if (!lastLog || !lastLog.includes('ALERT')) {
+                log(`[ALERT] Possible Port Scan! ${count} distinct ports in ${config.windowSeconds}s`, 'text-red-500 font-bold bg-red-900/20');
+            }
+        }
+
+        function clearAlert() {
+            els.victimNode.classList.remove('animate-alert', 'border-red-500');
+            els.victimNode.classList.add('border-blue-500');
+        }
+
+        function highlightLine(indices) {
+            els.codeLines.forEach(l => l.classList.remove('active'));
+            indices.forEach(i => {
+                const line = document.getElementById(`code-${i}`);
+                if (line) line.classList.add('active');
+            });
+        }
+
+        function log(msg, classes = '') {
+            const time = new Date().toLocaleTimeString('en-GB', {hour12: false});
+            const div = document.createElement('div');
+            div.className = classes;
+            div.innerHTML = `<span class="text-slate-600 mr-2">[${time}]</span>${msg}`;
+            els.consoleOutput.appendChild(div);
+            els.consoleOutput.scrollTop = els.consoleOutput.scrollHeight;
+        }
+
+        function wait(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // Start
+        init();
+
+    </script>
+</body>
+</html>

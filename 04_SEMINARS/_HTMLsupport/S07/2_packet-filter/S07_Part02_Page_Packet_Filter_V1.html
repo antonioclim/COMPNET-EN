@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Packet Filter Simulation (TCP/UDP/IP)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; /* Slate 900 */
+            color: #e2e8f0; /* Slate 200 */
+        }
+
+        .font-mono {
+            font-family: 'Fira Code', monospace;
+        }
+
+        /* Animation Keyframes */
+        @keyframes packetMove {
+            0% { transform: translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            45% { transform: translateX(45%); } /* Stop at filter */
+            55% { transform: translateX(45%); } /* Pause for inspection */
+            100% { transform: translateX(100%); opacity: 0; }
+        }
+
+        @keyframes packetDrop {
+            0% { transform: translateX(45%) translateY(0); opacity: 1; }
+            100% { transform: translateX(45%) translateY(50px); opacity: 0; }
+        }
+
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b; 
+        }
+
+        .packet {
+            transition: all 0.5s ease;
+        }
+
+        .code-highlight {
+            background-color: rgba(56, 189, 248, 0.1); /* Light blue bg */
+            border-left: 3px solid #38bdf8;
+            padding-left: 0.5rem;
+        }
+
+        .code-inactive {
+            opacity: 0.4;
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden">
+
+    <!-- Header -->
+    <header class="bg-slate-800 border-b border-slate-700 p-4 shadow-md z-10">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div>
+                <h1 class="text-xl font-bold text-sky-400 flex items-center gap-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    Network Seminar: Packet Filtering
+                </h1>
+                <p class="text-xs text-slate-400 mt-1">Interactive visualization of Python <code>struct</code> parsing and firewall logic</p>
+            </div>
+            <div class="flex gap-3">
+                 <button onclick="app.resetLog()" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 rounded text-sm transition text-slate-200">Clear Log</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex overflow-hidden">
+        
+        <!-- Left Panel: Controls & Code -->
+        <aside class="w-1/3 bg-slate-900 border-r border-slate-700 flex flex-col p-6 overflow-y-auto">
+            
+            <!-- Traffic Generator -->
+            <div class="mb-8">
+                <h2 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Traffic Generator</h2>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="app.spawnPacket('DNS')" class="p-3 bg-indigo-900/50 border border-indigo-700 hover:bg-indigo-800/50 rounded text-indigo-200 text-sm font-medium transition text-left group">
+                        <span class="block text-xs text-indigo-400 mb-1">UDP : 53</span>
+                        Generate DNS
+                    </button>
+                    <button onclick="app.spawnPacket('HTTP')" class="p-3 bg-emerald-900/50 border border-emerald-700 hover:bg-emerald-800/50 rounded text-emerald-200 text-sm font-medium transition text-left">
+                        <span class="block text-xs text-emerald-400 mb-1">TCP : 80</span>
+                        Generate HTTP
+                    </button>
+                    <button onclick="app.spawnPacket('SSH')" class="p-3 bg-sky-900/50 border border-sky-700 hover:bg-sky-800/50 rounded text-sky-200 text-sm font-medium transition text-left">
+                        <span class="block text-xs text-sky-400 mb-1">TCP : 22</span>
+                        Generate SSH
+                    </button>
+                    <button onclick="app.spawnPacket('RANDOM')" class="p-3 bg-slate-800 border border-slate-600 hover:bg-slate-700 rounded text-slate-300 text-sm font-medium transition text-left">
+                        <span class="block text-xs text-slate-500 mb-1">Random IP/Proto</span>
+                        Random Noise
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filter Configuration -->
+            <div class="flex-1 flex flex-col">
+                <h2 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Filter Logic (passes_filter)</h2>
+                
+                <div class="space-y-4 mb-6">
+                    <!-- Rule 1 -->
+                    <label class="flex items-start gap-3 p-3 rounded-lg border border-slate-700 bg-slate-800/50 cursor-pointer hover:border-sky-500/50 transition">
+                        <input type="checkbox" id="rule_tcp" class="mt-1 w-4 h-4 text-sky-500 rounded bg-slate-700 border-slate-600 focus:ring-sky-500 focus:ring-offset-slate-900" onchange="app.updateFilter()">
+                        <div>
+                            <span class="block font-medium text-slate-200">Rule 1: Allow TCP Only</span>
+                            <span class="text-xs text-slate-400">Drops all UDP and ICMP packets.</span>
+                        </div>
+                    </label>
+
+                    <!-- Rule 2 -->
+                    <label class="flex items-start gap-3 p-3 rounded-lg border border-slate-700 bg-slate-800/50 cursor-pointer hover:border-sky-500/50 transition">
+                        <input type="checkbox" id="rule_dns" class="mt-1 w-4 h-4 text-sky-500 rounded bg-slate-700 border-slate-600 focus:ring-sky-500 focus:ring-offset-slate-900" onchange="app.updateFilter()">
+                        <div>
+                            <span class="block font-medium text-slate-200">Rule 2: Allow DNS + High TCP</span>
+                            <span class="text-xs text-slate-400">Allow UDP:53 OR TCP Port > 1024.</span>
+                        </div>
+                    </label>
+
+                    <!-- Rule 3 -->
+                    <label class="flex items-start gap-3 p-3 rounded-lg border border-slate-700 bg-slate-800/50 cursor-pointer hover:border-sky-500/50 transition">
+                        <input type="checkbox" id="rule_ip" class="mt-1 w-4 h-4 text-sky-500 rounded bg-slate-700 border-slate-600 focus:ring-sky-500 focus:ring-offset-slate-900" onchange="app.updateFilter()">
+                        <div>
+                            <span class="block font-medium text-slate-200">Rule 3: Restrict Source IP</span>
+                            <span class="text-xs text-slate-400">Only allow IPs starting with <code>10.</code></span>
+                        </div>
+                    </label>
+                </div>
+
+                <!-- Live Code View -->
+                <div class="bg-slate-950 rounded-lg p-4 font-mono text-xs overflow-x-auto border border-slate-800 shadow-inner flex-1">
+                    <div class="text-gray-500 mb-2"># Live Python Implementation</div>
+                    <pre><code class="language-python" id="codeDisplay">
+def passes_filter(src_ip, dst_ip, proto, src_port, dst_port):
+    <span id="code_ip" class="code-inactive block"># Rule 3: Source Network Check
+    if not src_ip.startswith("10."):
+        return False</span>
+    <span id="code_dns" class="code-inactive block"># Rule 2: DNS & Safe TCP Check
+    if proto == 17 and dst_port == 53:
+        return True
+    if proto == 6 and dst_port > 1024:
+        return True</span>
+    <span id="code_tcp" class="code-inactive block"># Rule 1: Simple TCP Check
+    if proto == 6:
+        return True</span>
+    
+    return False <span class="text-gray-500"># Default Deny</span>
+                    </code></pre>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Center: Visualisation Stage -->
+        <section class="flex-1 bg-slate-800 relative flex flex-col">
+            
+            <!-- Inspector Panel (Top) -->
+            <div class="h-1/3 border-b border-slate-700 bg-slate-900/50 p-6 flex flex-col items-center justify-center relative">
+                <div class="absolute top-4 left-4 text-xs font-bold text-slate-500 uppercase">Packet Inspector (struct.unpack)</div>
+                
+                <div id="inspector-placeholder" class="text-slate-600 text-sm">Waiting for packet...</div>
+                
+                <div id="inspector-content" class="hidden w-full max-w-2xl">
+                    <div class="grid grid-cols-3 gap-4">
+                        <!-- Ethernet Header -->
+                        <div class="bg-slate-800 p-3 rounded border border-slate-700">
+                            <div class="text-xs text-slate-500 mb-1">Ethernet Header</div>
+                            <div class="text-xs font-mono text-slate-400">Raw: <span class="text-slate-600">00 0c 29 ...</span></div>
+                            <div class="mt-2 text-sm text-purple-400">Proto: 0x0800 (IPv4)</div>
+                        </div>
+
+                        <!-- IP Header -->
+                        <div class="bg-slate-800 p-3 rounded border border-slate-700">
+                            <div class="text-xs text-slate-500 mb-1">IPv4 Header</div>
+                            <div class="text-xs font-mono text-slate-400">Unpack: <span class="text-yellow-500">! 8x B B ...</span></div>
+                            <div class="mt-2 text-sm">
+                                <div class="flex justify-between"><span class="text-slate-400">Src:</span> <span class="text-yellow-400 font-mono" id="insp_src"></span></div>
+                                <div class="flex justify-between"><span class="text-slate-400">Proto:</span> <span class="text-yellow-400 font-mono" id="insp_proto"></span></div>
+                            </div>
+                        </div>
+
+                        <!-- Transport Header -->
+                        <div class="bg-slate-800 p-3 rounded border border-slate-700">
+                            <div class="text-xs text-slate-500 mb-1">TCP/UDP Header</div>
+                            <div class="text-xs font-mono text-slate-400">Unpack: <span class="text-blue-500">! H H</span></div>
+                            <div class="mt-2 text-sm">
+                                <div class="flex justify-between"><span class="text-slate-400">Dst Port:</span> <span class="text-blue-400 font-mono" id="insp_port"></span></div>
+                                <div class="flex justify-between"><span class="text-slate-400">Payload:</span> <span class="text-slate-500 text-xs truncate w-20">...</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Animation Pipe (Middle) -->
+            <div class="flex-1 relative overflow-hidden flex items-center justify-center bg-slate-800" id="animationStage">
+                
+                <!-- Background grid lines -->
+                <div class="absolute inset-0" style="background-image: linear-gradient(#1e293b 1px, transparent 1px), linear-gradient(90deg, #1e293b 1px, transparent 1px); background-size: 20px 20px; opacity: 0.2;"></div>
+
+                <!-- Path Elements -->
+                <div class="absolute left-0 w-1/2 h-2 bg-slate-700 top-1/2 transform -translate-y-1/2 z-0"></div> <!-- Incoming wire -->
+                <div class="absolute right-0 w-1/2 h-2 bg-slate-700 top-1/2 transform -translate-y-1/2 z-0"></div> <!-- Outgoing wire -->
+
+                <!-- The Filter Node -->
+                <div id="filterNode" class="w-32 h-32 bg-slate-900 border-4 border-slate-600 rounded-full z-10 flex flex-col items-center justify-center shadow-2xl transition-colors duration-200">
+                    <svg class="w-10 h-10 text-slate-500 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+                    <span class="text-xs font-bold text-slate-400 uppercase">Filter</span>
+                </div>
+
+                <!-- Labels -->
+                <div class="absolute left-4 top-1/2 mt-8 text-xs text-slate-500 font-mono">INTERFACE: ETH0</div>
+                <div class="absolute right-4 top-1/2 mt-8 text-xs text-slate-500 font-mono">APPLICATION LAYER</div>
+
+            </div>
+
+            <!-- Terminal Output (Bottom) -->
+            <div class="h-48 bg-black border-t border-slate-700 p-4 font-mono text-xs overflow-y-auto" id="consoleLog">
+                <div class="text-slate-500 mb-2">root@host:~# sudo python3 packet_filter.py eth0</div>
+                <div class="text-sky-500 mb-2">[INFO] Starting packet_filter on interface eth0</div>
+                <div class="text-sky-500 mb-2">[INFO] Processing max 100 packets...</div>
+                <!-- Dynamic Logs go here -->
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        /**
+         * Simulation Logic
+         */
+        const app = {
+            activePackets: [],
+            packetCount: 0,
+            config: {
+                rule_tcp: false,
+                rule_dns: false,
+                rule_ip: false
+            },
+
+            // Updates the internal config based on UI checkboxes
+            updateFilter: function() {
+                this.config.rule_tcp = document.getElementById('rule_tcp').checked;
+                this.config.rule_dns = document.getElementById('rule_dns').checked;
+                this.config.rule_ip = document.getElementById('rule_ip').checked;
+                
+                this.updateCodeHighlighting();
+            },
+
+            // Updates the visual code block to show which logic is active
+            updateCodeHighlighting: function() {
+                const setStyle = (id, active) => {
+                    const el = document.getElementById(id);
+                    if (active) {
+                        el.classList.remove('code-inactive');
+                        el.classList.add('code-highlight');
+                    } else {
+                        el.classList.add('code-inactive');
+                        el.classList.remove('code-highlight');
+                    }
+                };
+
+                setStyle('code_tcp', this.config.rule_tcp);
+                setStyle('code_dns', this.config.rule_dns);
+                setStyle('code_ip', this.config.rule_ip);
+            },
+
+            // The core filtering logic (Python logic in JS)
+            passesFilter: function(packet) {
+                // Check Rule 3: Source IP
+                if (this.config.rule_ip) {
+                    if (!packet.src_ip.startsWith("10.")) return false;
+                }
+
+                // Check Rule 2: DNS + High Ports
+                if (this.config.rule_dns) {
+                    // UDP Port 53
+                    if (packet.proto === 17 && packet.dst_port === 53) return true;
+                    // TCP Port > 1024
+                    if (packet.proto === 6 && packet.dst_port > 1024) return true;
+                    // If this rule is active, and we didn't match above, we might still match Rule 1 if active? 
+                    // Based on the task description, these build on each other. 
+                    // If Rule 2 is active, we implicitly usually want to block other stuff, 
+                    // BUT for the sake of this UI, let's treat them as layered allow-lists or restrictive blocks.
+                    // The task implies a specific progression. Let's strictly follow the "Student TODO" combination logic.
+                }
+
+                // Check Rule 1: TCP Only
+                if (this.config.rule_tcp) {
+                    // If ONLY rule 1 is checked, we only pass TCP.
+                    // If Rule 2 is also checked, we might have already returned True above.
+                    if (packet.proto === 6) return true;
+                }
+                
+                // If no rules are checked, everything is blocked (default python return False)
+                return false;
+            },
+
+            // Creates a packet object
+            createPacket: function(type) {
+                const getRandomByte = () => Math.floor(Math.random() * 255);
+                const getRandomIP = (prefix) => prefix ? `${prefix}.${getRandomByte()}.${getRandomByte()}.${getRandomByte()}` : `${getRandomByte()}.${getRandomByte()}.${getRandomByte()}.${getRandomByte()}`;
+                
+                let packet = {
+                    id: this.packetCount++,
+                    src_ip: getRandomIP(),
+                    dst_ip: getRandomIP(),
+                    proto: 6, // Default TCP
+                    src_port: Math.floor(Math.random() * 60000) + 1025,
+                    dst_port: 80,
+                    color: 'bg-blue-500',
+                    label: 'TCP'
+                };
+
+                if (type === 'DNS') {
+                    packet.proto = 17;
+                    packet.dst_port = 53;
+                    packet.color = 'bg-indigo-500';
+                    packet.label = 'DNS';
+                    // Random chance to have correct source IP for Rule 3
+                    if (Math.random() > 0.5) packet.src_ip = getRandomIP('10');
+                } else if (type === 'HTTP') {
+                    packet.proto = 6;
+                    packet.dst_port = 80;
+                    packet.color = 'bg-emerald-500';
+                    packet.label = 'HTTP';
+                    if (Math.random() > 0.5) packet.src_ip = getRandomIP('10');
+                } else if (type === 'SSH') {
+                    packet.proto = 6;
+                    packet.dst_port = 22; // Privileged port
+                    packet.color = 'bg-sky-500';
+                    packet.label = 'SSH';
+                    packet.src_ip = '192.168.1.5';
+                } else if (type === 'RANDOM') {
+                    // Randomise protocol and ports
+                    packet.proto = Math.random() > 0.5 ? 6 : 17;
+                    if (Math.random() > 0.8) packet.proto = 1; // ICMP rare
+                    packet.dst_port = Math.floor(Math.random() * 5000);
+                    packet.src_ip = Math.random() > 0.5 ? getRandomIP('10') : getRandomIP('192');
+                    
+                    if (packet.proto === 6) { packet.label = 'TCP'; packet.color = 'bg-blue-500'; }
+                    else if (packet.proto === 17) { packet.label = 'UDP'; packet.color = 'bg-orange-500'; }
+                    else { packet.label = 'ICMP'; packet.color = 'bg-pink-500'; }
+                }
+
+                return packet;
+            },
+
+            // Starts the visual animation
+            spawnPacket: function(type) {
+                const packet = this.createPacket(type);
+                const stage = document.getElementById('animationStage');
+                
+                // Visual Element
+                const el = document.createElement('div');
+                el.className = `absolute left-0 top-1/2 w-12 h-8 ${packet.color} rounded shadow-lg flex items-center justify-center text-[10px] font-bold text-white z-20 packet transform -translate-y-1/2 -translate-x-12`;
+                el.innerText = packet.label;
+                stage.appendChild(el);
+
+                // Animate Phase 1: Move to Filter
+                // Using Web Animations API for better control than CSS classes
+                const animation = el.animate([
+                    { left: '-50px', offset: 0 },
+                    { left: 'calc(50% - 24px)', offset: 1 }
+                ], {
+                    duration: 1000,
+                    easing: 'ease-out',
+                    fill: 'forwards'
+                });
+
+                animation.onfinish = () => {
+                    this.inspectPacket(packet);
+                    this.processPacketAtFilter(packet, el);
+                };
+            },
+
+            // Updates the Inspector Panel
+            inspectPacket: function(packet) {
+                document.getElementById('inspector-placeholder').classList.add('hidden');
+                document.getElementById('inspector-content').classList.remove('hidden');
+                
+                document.getElementById('insp_src').innerText = packet.src_ip;
+                
+                let protoStr = "UNKNOWN";
+                if(packet.proto === 6) protoStr = "6 (TCP)";
+                else if(packet.proto === 17) protoStr = "17 (UDP)";
+                else if(packet.proto === 1) protoStr = "1 (ICMP)";
+                document.getElementById('insp_proto').innerText = protoStr;
+
+                document.getElementById('insp_port').innerText = packet.proto === 1 ? 'N/A' : packet.dst_port;
+            },
+
+            // Filter Decision & Animation Phase 2
+            processPacketAtFilter: function(packet, el) {
+                const filterNode = document.getElementById('filterNode');
+                const passed = this.passesFilter(packet);
+
+                // Processing Delay Simulation
+                filterNode.style.borderColor = "#fbbf24"; // Amber (Thinking)
+                
+                setTimeout(() => {
+                    if (passed) {
+                        // Success Animation
+                        filterNode.style.borderColor = "#22c55e"; // Green
+                        filterNode.style.animation = "pulse-green 0.5s";
+                        
+                        // Move packet to finish
+                        el.animate([
+                            { left: 'calc(50% + 24px)', opacity: 1 },
+                            { left: '110%', opacity: 0 }
+                        ], {
+                            duration: 800,
+                            easing: 'ease-in',
+                            fill: 'forwards'
+                        }).onfinish = () => {
+                            el.remove();
+                            this.logPacket(packet);
+                        };
+
+                    } else {
+                        // Drop Animation
+                        filterNode.style.borderColor = "#ef4444"; // Red
+                        filterNode.style.animation = "pulse-red 0.5s";
+                        
+                        // Drop packet down
+                        el.animate([
+                            { transform: 'translateY(-50%)', opacity: 1 },
+                            { transform: 'translateY(50px)', opacity: 0 }
+                        ], {
+                            duration: 500,
+                            easing: 'ease-in',
+                            fill: 'forwards'
+                        }).onfinish = () => el.remove();
+                    }
+
+                    // Reset Filter Color
+                    setTimeout(() => {
+                        filterNode.style.borderColor = ""; 
+                        filterNode.style.animation = "";
+                    }, 600);
+
+                }, 400); // 400ms processing time
+            },
+
+            // Write to Terminal Log
+            logPacket: function(packet) {
+                const consoleLog = document.getElementById('consoleLog');
+                const line = document.createElement('div');
+                line.className = "font-mono mb-1 animate-pulse";
+                
+                let protoName = "ALT";
+                if (packet.proto === 6) protoName = "TCP";
+                else if (packet.proto === 17) protoName = "UDP";
+
+                const timestamp = new Date().toLocaleTimeString('en-GB', { hour12: false });
+                
+                // Colorize output
+                const src = `<span class="text-yellow-200">${packet.src_ip}:${packet.src_port}</span>`;
+                const dst = `<span class="text-blue-200">${packet.dst_ip}:${packet.dst_port}</span>`;
+                
+                line.innerHTML = `<span class="text-slate-500">[${timestamp}]</span> ${src} -> ${dst}  <span class="text-green-400">proto=${protoName}</span>`;
+                
+                consoleLog.appendChild(line);
+                consoleLog.scrollTop = consoleLog.scrollHeight;
+                
+                // Remove animation class after a bit
+                setTimeout(() => line.classList.remove('animate-pulse'), 1000);
+            },
+
+            resetLog: function() {
+                document.getElementById('consoleLog').innerHTML = `
+                    <div class="text-slate-500 mb-2">root@host:~# sudo python3 packet_filter.py eth0</div>
+                    <div class="text-sky-500 mb-2">[INFO] Starting packet_filter on interface eth0</div>
+                    <div class="text-sky-500 mb-2">[INFO] Processing max 100 packets...</div>
+                `;
+            }
+        };
+
+        // Initialize code highlighting on load
+        app.updateFilter();
+
+    </script>
+</body>
+</html>

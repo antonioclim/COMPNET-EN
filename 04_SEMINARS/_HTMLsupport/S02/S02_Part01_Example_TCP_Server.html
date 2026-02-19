@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TCP Server Visual Guide</title>
+    <style>
+        :root {
+            --bg-primary: #1e1e1e;
+            --bg-secondary: #252526;
+            --accent-blue: #4daafc;
+            --accent-green: #6a9955;
+            --accent-orange: #ce9178;
+            --text-main: #d4d4d4;
+            --text-dim: #858585;
+            --border: #3e3e42;
+            --font-mono: 'Consolas', 'Monaco', 'Courier New', monospace;
+            --font-sans: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --code-bg: #101010;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- Header --- */
+        header {
+            background-color: var(--bg-secondary);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+        }
+
+        h1 { font-size: 1.1rem; font-weight: 600; color: #fff; }
+
+        /* --- Main Canvas --- */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: radial-gradient(circle at center, #2a2a2a 0%, #1e1e1e 70%);
+        }
+
+        /* --- Dynamic Code Card (The "Subtitle") --- */
+        .code-card {
+            position: absolute;
+            top: 2rem;
+            background-color: var(--code-bg);
+            border: 1px solid var(--accent-blue);
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            max-width: 800px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+            z-index: 10;
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        
+        .code-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .code-card h3 {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            margin-bottom: 0.5rem;
+            letter-spacing: 1px;
+        }
+
+        .code-snippet {
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            white-space: pre-wrap;
+            line-height: 1.5;
+        }
+
+        /* Syntax Highlighting */
+        .kw { color: #569cd6; } /* keyword */
+        .cls { color: #4ec9b0; } /* class */
+        .str { color: #ce9178; } /* string */
+        .fn { color: #dcdcaa; } /* function */
+        .num { color: #b5cea8; } /* number */
+        .cmt { color: #6a9955; } /* comment */
+
+        /* --- Network Diagram --- */
+        .diagram-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 80%;
+            max-width: 800px;
+            height: 300px;
+            position: relative;
+        }
+
+        .node {
+            width: 120px;
+            height: 120px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .node.active { box-shadow: 0 0 20px rgba(77, 170, 252, 0.3); }
+
+        .node-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .node-label { font-size: 1rem; font-weight: 600; color: #fff; }
+        .node-status { font-size: 0.75rem; color: var(--text-dim); margin-top: 4px; }
+        
+        /* Connection Line */
+        .connection-track {
+            position: absolute;
+            left: 120px; 
+            right: 120px;
+            top: 50%;
+            height: 2px;
+            background: #333;
+            z-index: 1;
+        }
+
+        .packet {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: var(--accent-orange);
+            color: #1e1e1e;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            z-index: 5;
+            transition: left 1s ease-in-out, transform 0.2s;
+            white-space: nowrap;
+        }
+
+        /* --- Controls Bar --- */
+        footer {
+            background-color: var(--bg-secondary);
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            z-index: 20;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 0.5rem;
+            background: #111;
+            padding: 0.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        button {
+            background-color: var(--bg-secondary);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            padding: 0.6rem 1.2rem;
+            cursor: pointer;
+            border-radius: 6px;
+            font-family: var(--font-sans);
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        button:hover:not(:disabled) { background-color: var(--accent-blue); color: #121212; border-color: var(--accent-blue); }
+        button:disabled { opacity: 0.4; cursor: not-allowed; }
+        
+        button.stop-btn:hover:not(:disabled) { background-color: #f48771; border-color: #f48771; }
+
+        input[type="text"] {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 0.6rem;
+            border-radius: 6px;
+            width: 200px;
+        }
+        input[type="text"]:focus { outline: 1px solid var(--accent-blue); }
+
+        /* --- Log Toast --- */
+        .log-toast {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        @media (max-width: 700px) {
+            .diagram-container { flex-direction: column; height: 400px; width: 100%; }
+            .connection-track { width: 2px; height: auto; top: 120px; bottom: 120px; left: 50%; right: auto; }
+            .code-card { width: 95%; top: 1rem; font-size: 0.8rem; }
+            footer { flex-direction: column; align-items: stretch; }
+            .control-group { flex-direction: column; }
+            input[type="text"] { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>TCP Echo Server <span style="font-weight:400; color:#888; margin-left:10px;">Python Logic Visualiser</span></h1>
+</header>
+
+<main>
+    <!-- Code Highlight Overlay -->
+    <div class="code-card" id="codeCard">
+        <h3 id="codeTitle">Current Python Operation</h3>
+        <div class="code-snippet" id="codeContent"></div>
+    </div>
+
+    <!-- Visual Diagram -->
+    <div class="diagram-container">
+        <!-- Client -->
+        <div class="node" id="clientNode" style="border-color: var(--border)">
+            <div class="node-icon">💻</div>
+            <div class="node-label">Client</div>
+            <div class="node-status" id="clientStatus">Offline</div>
+        </div>
+
+        <!-- Connection Line -->
+        <div class="connection-track"></div>
+        
+        <!-- Packet -->
+        <div class="packet" id="packet">DATA</div>
+
+        <!-- Server -->
+        <div class="node" id="serverNode" style="border-color: var(--border)">
+            <div class="node-icon">🖥️</div>
+            <div class="node-label">Server</div>
+            <div class="node-status" id="serverStatus">Stopped</div>
+        </div>
+    </div>
+
+    <div class="log-toast" id="logToast">Ready to start server...</div>
+</main>
+
+<footer>
+    <div class="control-group">
+        <button id="btnStart" onclick="startServer()">Start Server</button>
+        <button class="stop-btn" id="btnStop" onclick="stopServer()" disabled>Stop</button>
+    </div>
+
+    <div class="control-group">
+        <button id="btnConnect" onclick="connectClient()" disabled>Connect Client</button>
+    </div>
+
+    <div class="control-group">
+        <input type="text" id="msgInput" placeholder="Message..." disabled value="hello python">
+        <button id="btnSend" onclick="sendMessage()" disabled>Send</button>
+    </div>
+</footer>
+
+<script>
+    // State
+    let isServerRunning = false;
+    let isClientConnected = false;
+
+    // Elements
+    const codeCard = document.getElementById('codeCard');
+    const codeTitle = document.getElementById('codeTitle');
+    const codeContent = document.getElementById('codeContent');
+    const logToast = document.getElementById('logToast');
+    const packet = document.getElementById('packet');
+
+    // Snippets Dictionary
+    const snippets = {
+        START: `
+<span class="kw">if</span> __name__ == <span class="str">"__main__"</span>:
+    HOST, PORT = <span class="str">"localhost"</span>, <span class="num">12345</span>
+    <span class="kw">with</span> MyTCPServer((HOST, PORT), MyTCPHandler) <span class="kw">as</span> server:
+        server.serve_forever() <span class="cmt"># Starts infinite loop</span>`,
+        
+        CONNECT: `
+<span class="cmt"># New connection accepted!</span>
+<span class="kw">class</span> <span class="cls">MyTCPHandler</span>(socketserver.BaseRequestHandler):
+    <span class="kw">def</span> <span class="fn">handle</span>(<span class="kw">self</span>):
+        <span class="cmt"># Logic starts here for this client</span>
+        <span class="kw">pass</span>`,
+
+        WAITING: `
+<span class="cmt"># Inside handle(): Waiting for data...</span>
+<span class="kw">self</span>.data = <span class="kw">self</span>.request.<span class="fn">recv</span>(<span class="num">1024</span>).strip()
+<span class="cmt"># Execution BLOCKS here until client sends bytes</span>`,
+
+        PROCESS: `
+<span class="kw">print</span>(<span class="str">f"{self.client_address[0]} wrote:"</span>)
+<span class="kw">print</span>(<span class="kw">self</span>.data) <span class="cmt"># e.g. b'hello python'</span>`,
+
+        SEND: `
+<span class="cmt"># Echo back in UPPERCASE</span>
+<span class="kw">self</span>.request.sendall(<span class="kw">self</span>.data.upper())`,
+
+        STOP: `
+<span class="kw">except</span> <span class="cls">KeyboardInterrupt</span>:
+    server.shutdown()
+<span class="cmt"># Context manager closes socket automatically</span>`
+    };
+
+    // Helper: Show Code
+    function showCode(key, title) {
+        codeContent.innerHTML = snippets[key];
+        codeTitle.innerText = title;
+        codeCard.classList.add('visible');
+    }
+
+    // Helper: Log
+    function log(msg) {
+        logToast.innerText = msg;
+        logToast.style.opacity = 1;
+    }
+
+    // Helper: Update Node Visuals
+    function setNodeStatus(nodeId, statusId, isActive, text, color) {
+        const node = document.getElementById(nodeId);
+        const status = document.getElementById(statusId);
+        
+        if (isActive) {
+            node.style.borderColor = color;
+            node.classList.add('active');
+            status.style.color = color;
+        } else {
+            node.style.borderColor = 'var(--border)';
+            node.classList.remove('active');
+            status.style.color = 'var(--text-dim)';
+        }
+        status.innerText = text;
+    }
+
+    // --- Actions ---
+
+    function startServer() {
+        isServerRunning = true;
+        
+        // Buttons
+        document.getElementById('btnStart').disabled = true;
+        document.getElementById('btnStop').disabled = false;
+        document.getElementById('btnConnect').disabled = false;
+
+        // Visuals
+        setNodeStatus('serverNode', 'serverStatus', true, 'Listening :12345', 'var(--accent-green)');
+        
+        // Code
+        showCode('START', 'Server Initialization');
+        log("Server bound to localhost:12345");
+    }
+
+    function connectClient() {
+        if (!isServerRunning) return;
+
+        isClientConnected = true;
+
+        // Buttons
+        document.getElementById('btnConnect').disabled = true;
+        document.getElementById('btnSend').disabled = false;
+        document.getElementById('msgInput').disabled = false;
+
+        // Visuals
+        setNodeStatus('clientNode', 'clientStatus', true, 'Connected', 'var(--accent-blue)');
+
+        // Code
+        showCode('CONNECT', 'Handler Instantiation');
+        log("Client connected. Handler created.");
+
+        // After a moment, show that it waits for data
+        setTimeout(() => {
+            if (isClientConnected) {
+                showCode('WAITING', 'Blocking I/O');
+                log("Server waiting for recv()...");
+            }
+        }, 2500);
+    }
+
+    async function sendMessage() {
+        const input = document.getElementById('msgInput');
+        const text = input.value;
+        if (!text) return;
+
+        // Lock UI
+        input.disabled = true;
+        document.getElementById('btnSend').disabled = true;
+
+        // 1. Packet: Client -> Server
+        log(`Sending "${text}"...`);
+        // We don't change code here, keep showing "WAITING" as it explains why it accepts data
+        await animatePacket(text, 'client', 'server');
+
+        // 2. Server Processes
+        showCode('PROCESS', 'Processing Data');
+        log("Server received data. Printing to console.");
+        await wait(1500);
+
+        // 3. Server Sends Back
+        showCode('SEND', 'Response Logic');
+        const response = text.toUpperCase();
+        log(`Sending back "${response}"...`);
+        await animatePacket(response, 'server', 'client');
+
+        // 4. Back to Waiting State
+        showCode('WAITING', 'Loop / Blocking');
+        log("Transaction complete. Waiting for next message.");
+        
+        // Unlock UI
+        input.disabled = false;
+        document.getElementById('btnSend').disabled = false;
+        input.focus();
+    }
+
+    function stopServer() {
+        isServerRunning = false;
+        isClientConnected = false;
+
+        // Buttons
+        document.getElementById('btnStart').disabled = false;
+        document.getElementById('btnStop').disabled = true;
+        document.getElementById('btnConnect').disabled = true;
+        document.getElementById('btnSend').disabled = true;
+        document.getElementById('msgInput').disabled = true;
+
+        // Visuals
+        setNodeStatus('serverNode', 'serverStatus', false, 'Stopped', '');
+        setNodeStatus('clientNode', 'clientStatus', false, 'Offline', '');
+
+        // Code
+        showCode('STOP', 'Shutdown Sequence');
+        log("Server stopped.");
+    }
+
+    // --- Animation Utils ---
+
+    function wait(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function animatePacket(text, from, to) {
+        return new Promise(resolve => {
+            packet.innerText = text;
+            packet.style.transform = 'translate(-50%, -50%) scale(1)'; // Show
+            
+            // Check orientation (desktop vs mobile)
+            const isMobile = window.innerWidth <= 700;
+            
+            // Define positions (0% = left/top, 100% = right/bottom)
+            const startPos = from === 'client' ? '15%' : '85%';
+            const endPos = from === 'client' ? '85%' : '15%';
+
+            // Reset position
+            if (isMobile) {
+                packet.style.left = '50%';
+                packet.style.top = startPos;
+            } else {
+                packet.style.top = '50%';
+                packet.style.left = startPos;
+            }
+
+            // Force reflow
+            void packet.offsetWidth;
+
+            // Animate
+            if (isMobile) {
+                packet.style.transition = 'top 1s ease-in-out';
+                packet.style.top = endPos;
+            } else {
+                packet.style.transition = 'left 1s ease-in-out';
+                packet.style.left = endPos;
+            }
+
+            // Cleanup after animation
+            setTimeout(() => {
+                packet.style.transform = 'translate(-50%, -50%) scale(0)'; // Hide
+                resolve();
+            }, 1000);
+        });
+    }
+
+</script>
+
+</body>
+</html>

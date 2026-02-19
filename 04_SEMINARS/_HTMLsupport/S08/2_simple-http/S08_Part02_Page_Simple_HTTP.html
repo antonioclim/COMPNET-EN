@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python http.server Lab</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Vue.js -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- PrismJS for Syntax Highlighting (Lightweight) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; /* Slate 900 */
+            color: #e2e8f0;
+        }
+        
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+        /* Code Editor Overrides */
+        .code-editor-container {
+            position: relative;
+            height: 100%;
+        }
+        textarea.code-input {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 10;
+            background: transparent;
+            color: transparent;
+            caret-color: white;
+            padding: 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            border: none;
+            resize: none;
+            outline: none;
+            overflow: auto;
+            white-space: pre;
+        }
+        pre.code-output {
+            margin: 0;
+            padding: 1.5rem;
+            height: 100%;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            pointer-events: none;
+            overflow: hidden; /* Scroll synced via JS */
+        }
+        
+        /* Terminal Blink */
+        .cursor-blink { animation: blink 1s step-end infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* Success Pulse */
+        @keyframes success-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(74, 222, 128, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+        }
+        .task-complete { animation: success-pulse 1s ease-out; }
+    </style>
+</head>
+<body>
+
+<div id="app" class="h-screen flex flex-col overflow-hidden">
+    
+    <!-- Top Bar -->
+    <header class="bg-slate-900 border-b border-slate-700 h-14 flex items-center justify-between px-6 shrink-0 z-20">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded bg-gradient-to-br from-blue-500 to-yellow-500 flex items-center justify-center font-bold text-white text-xs">Py</div>
+            <h1 class="font-bold text-lg text-slate-100">Python <span class="text-blue-400 font-mono">http.server</span> Lab</h1>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="px-3 py-1 rounded bg-slate-800 border border-slate-700 text-xs text-slate-400 font-mono">
+                Port: <span class="text-green-400">8000</span>
+            </div>
+            <button @click="resetLab" class="text-xs text-slate-500 hover:text-white transition-colors">Reset Lab</button>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="flex-grow flex flex-col lg:flex-row overflow-hidden">
+        
+        <!-- LEFT: Code Editor (The Server Implementation) -->
+        <section class="lg:w-1/2 flex flex-col border-r border-slate-700 bg-[#1e1e1e] relative">
+            <!-- Toolbar -->
+            <div class="h-10 bg-[#252526] flex items-center px-4 justify-between border-b border-[#333]">
+                <span class="text-xs text-slate-400 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                    simple_http_builtin.py
+                </span>
+                <div class="flex gap-2">
+                    <button 
+                        @click="toggleServer"
+                        :class="[
+                            'px-3 py-1 rounded text-xs font-semibold flex items-center gap-2 transition-all',
+                            isServerRunning 
+                                ? 'bg-red-500/20 text-red-400 border border-red-500/50 hover:bg-red-500/30' 
+                                : 'bg-green-600 text-white hover:bg-green-500 shadow-lg shadow-green-900/50'
+                        ]"
+                    >
+                        <svg v-if="!isServerRunning" class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                        <svg v-else class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg>
+                        {{ isServerRunning ? 'Stop Server' : 'Run Server' }}
+                    </button>
+                </div>
+            </div>
+
+            <!-- Editor Area -->
+            <div class="flex-grow relative code-editor-container overflow-hidden">
+                <textarea 
+                    ref="codeTextarea"
+                    v-model="codeContent" 
+                    class="code-input" 
+                    spellcheck="false"
+                    @input="handleCodeInput"
+                    @scroll="syncScroll"
+                    :disabled="isServerRunning"
+                ></textarea>
+                <pre ref="codePre" class="code-output"><code ref="codeBlock" class="language-python"></code></pre>
+                
+                <!-- Server Overlay when running -->
+                <div v-if="isServerRunning" class="absolute inset-0 bg-black/60 backdrop-blur-[1px] z-20 flex items-center justify-center">
+                    <div class="bg-slate-900 border border-slate-700 p-6 rounded-xl shadow-2xl text-center max-w-sm">
+                        <div class="w-12 h-12 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                        </div>
+                        <h3 class="text-white font-bold mb-1">Server Running</h3>
+                        <p class="text-slate-400 text-sm mb-4">Port 8000 is listening via <code class="bg-slate-800 px-1 rounded">socketserver.TCPServer</code></p>
+                        <p class="text-xs text-slate-500 italic">Edit code blocked while running.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hint/Helper for Task 2 -->
+            <div class="h-12 bg-[#252526] border-t border-[#333] flex items-center px-4 justify-between">
+                <span class="text-xs text-slate-500">
+                    {{ codeContainsStudentEndpoint ? '✅ /student endpoint detected' : '⚪ /student endpoint missing' }}
+                </span>
+                <button 
+                    v-if="!codeContainsStudentEndpoint" 
+                    @click="insertStudentCode"
+                    :disabled="isServerRunning"
+                    class="text-xs text-blue-400 hover:text-blue-300 disabled:opacity-50"
+                >
+                    + Insert Task 2 Code
+                </button>
+            </div>
+        </section>
+
+        <!-- RIGHT: Terminal & Visualizer -->
+        <section class="lg:w-1/2 flex flex-col bg-slate-900">
+            
+            <!-- Tasks Panel -->
+            <div class="bg-slate-800 border-b border-slate-700 p-4">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Seminar Tasks (Stage 2)</h3>
+                <ul class="space-y-2">
+                    <li v-for="task in tasks" :key="task.id" 
+                        class="flex items-center gap-3 text-sm transition-all p-2 rounded"
+                        :class="task.done ? 'bg-green-900/20 text-green-200 task-complete' : 'text-slate-400 bg-slate-900/50'"
+                    >
+                        <div class="w-5 h-5 rounded-full border flex items-center justify-center shrink-0"
+                             :class="task.done ? 'border-green-500 bg-green-500 text-white' : 'border-slate-600'">
+                             <svg v-if="task.done" class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        </div>
+                        <div class="flex-grow">
+                            <p :class="{'line-through opacity-50': task.done}">{{ task.desc }}</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Terminal -->
+            <div class="flex-grow flex flex-col bg-[#0d1117] font-mono text-sm relative">
+                <!-- Terminal Header -->
+                <div class="bg-[#161b22] px-4 py-2 flex justify-between items-center border-b border-slate-800">
+                    <span class="text-slate-400 text-xs">student@localhost:~</span>
+                    <button @click="clearTerminal" class="text-xs text-slate-600 hover:text-slate-400">Clear</button>
+                </div>
+                
+                <!-- Terminal Output -->
+                <div id="terminal-output" class="flex-grow overflow-y-auto p-4 space-y-1 text-slate-300">
+                    <div class="text-slate-500 italic mb-2"># Use commands listed in tasks (e.g., curl -v ...)</div>
+                    
+                    <div v-for="(line, idx) in history" :key="idx" :class="line.class">
+                        <span v-html="line.html"></span>
+                    </div>
+                </div>
+
+                <!-- Input Line -->
+                <div class="p-4 pt-0 flex items-center bg-[#0d1117]">
+                    <span class="text-green-400 mr-2">$</span>
+                    <input 
+                        type="text" 
+                        v-model="inputCmd"
+                        @keydown.enter="executeCommand"
+                        placeholder="Type curl command..."
+                        class="flex-grow bg-transparent border-none outline-none text-white placeholder-slate-700"
+                        autofocus
+                    >
+                </div>
+                
+                <!-- Server Status Indicator Overlay -->
+                 <div v-if="!isServerRunning" class="absolute inset-0 bg-black/80 flex items-center justify-center z-10 pointer-events-none">
+                    <div class="text-center">
+                        <p class="text-slate-400 mb-2">Server is offline.</p>
+                        <p class="text-xs text-slate-600">Click "Run Server" in the code editor to start.</p>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- Visualizer Footer (Mini-trace) -->
+    <footer class="h-12 bg-slate-950 border-t border-slate-800 flex items-center px-6 gap-6 text-xs font-mono">
+        <span class="text-slate-500 uppercase">Last Request Trace:</span>
+        <div class="flex items-center gap-2" :class="trace.method ? 'opacity-100' : 'opacity-30'">
+            <span class="px-2 py-1 rounded bg-blue-900 text-blue-300">{{ trace.method || 'METHOD' }}</span>
+            <span class="text-slate-600">--&gt;</span>
+            <span class="text-yellow-400">{{ trace.path || '/path' }}</span>
+            <span class="text-slate-600">--&gt;</span>
+            <span class="text-purple-400">SimpleHTTPRequestHandler.do_GET()</span>
+            <span class="text-slate-600">--&gt;</span>
+            <span class="px-2 py-1 rounded" :class="trace.status === 200 ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'">
+                {{ trace.status || 'STATUS' }}
+            </span>
+        </div>
+        <div class="ml-auto text-slate-600">
+            {{ trace.note }}
+        </div>
+    </footer>
+
+</div>
+
+<script>
+const { createApp, ref, computed, nextTick, onMounted, watch } = Vue;
+
+// The starter code provided in S08_Part02B_Example_Simple_HTTP_Builtin.py
+const INITIAL_CODE = `#!/usr/bin/env python3
+import http.server
+import socketserver
+import json
+import time
+import sys
+
+class MyHandler(http.server.SimpleHTTPRequestHandler):
+    """Custom handler extending SimpleHTTPRequestHandler."""
+
+    def do_GET(self):
+        """
+        Override the do_GET method to handle custom endpoints.
+        """
+        if self.path == "/hello":
+            # Plain text response
+            self.send_response(200)
+            self.send_header("Content-Type", "text/plain; charset=utf-8")
+            self.end_headers()
+            self.wfile.write(b"Hello! You have reached /hello.\\n")
+            return
+
+        elif self.path == "/api/time":
+            # JSON response with timestamp
+            content = {
+                "timestamp": time.time(),
+                "readable": time.ctime()
+            }
+            body = json.dumps(content).encode("utf-8")
+
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
+
+        # If not a custom endpoint, fall back to the default behaviour
+        return super().do_GET()
+
+def main():
+    PORT = 8000
+    handler = MyHandler
+    print(f"Starting server on port {PORT}...")
+    with socketserver.TCPServer(("0.0.0.0", PORT), handler) as httpd:
+        httpd.serve_forever()
+
+if __name__ == "__main__":
+    main()`;
+
+// The snippet to inject for Task 2
+const STUDENT_SNIPPET = `
+        elif self.path == "/student":
+            # New endpoint for Task 2
+            content = {
+                "name": "Student Lab",
+                "lab": 8
+            }
+            body = json.dumps(content).encode("utf-8")
+
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
+`;
+
+createApp({
+    setup() {
+        const codeContent = ref(INITIAL_CODE);
+        const codeTextarea = ref(null);
+        const codePre = ref(null);
+        const codeBlock = ref(null);
+        
+        const isServerRunning = ref(false);
+        const inputCmd = ref('');
+        const history = ref([]);
+        
+        const trace = ref({ method: '', path: '', status: '', note: 'Waiting for request...' });
+
+        const tasks = ref([
+            { id: 1, desc: 'Start the server (Port 8000)', done: false },
+            { id: 2, desc: 'Test /hello using curl -v', done: false },
+            { id: 3, desc: 'Test /api/time using curl -v', done: false },
+            { id: 4, desc: 'Modify code to add /student endpoint', done: false },
+            { id: 5, desc: 'Test /student using curl', done: false }
+        ]);
+
+        // Smart Detection of Code Changes
+        const codeContainsStudentEndpoint = computed(() => {
+            // Check for key elements of the solution in the code string
+            const hasPath = codeContent.value.includes('if self.path == "/student"') || codeContent.value.includes('elif self.path == "/student"');
+            const hasJson = codeContent.value.includes('json.dumps');
+            const hasResponse = codeContent.value.includes('self.send_response(200)');
+            return hasPath && hasJson && hasResponse;
+        });
+
+        watch(codeContainsStudentEndpoint, (newVal) => {
+            if (newVal) {
+                markTask(4);
+            } else {
+                tasks.value[3].done = false; // Uncheck if code removed
+            }
+        });
+
+        // Syntax Highlighting Sync
+        const highlightCode = () => {
+            if(codeBlock.value) {
+                codeBlock.value.textContent = codeContent.value;
+                Prism.highlightElement(codeBlock.value);
+            }
+        };
+
+        const handleCodeInput = () => {
+            highlightCode();
+        };
+
+        const syncScroll = () => {
+            if(codePre.value && codeTextarea.value) {
+                codePre.value.scrollTop = codeTextarea.value.scrollTop;
+                codePre.value.scrollLeft = codeTextarea.value.scrollLeft;
+            }
+        };
+
+        const insertStudentCode = () => {
+            // Find insertion point (before the last return super().do_GET())
+            const insertionMarker = '# If not a custom endpoint';
+            const parts = codeContent.value.split(insertionMarker);
+            if (parts.length === 2) {
+                codeContent.value = parts[0] + STUDENT_SNIPPET + "        " + insertionMarker + parts[1];
+                highlightCode();
+                nextTick(() => {
+                   // Scroll to insertion
+                   codeTextarea.value.scrollTop = codeTextarea.value.scrollHeight * 0.5;
+                });
+            }
+        };
+
+        // Server Logic
+        const toggleServer = () => {
+            isServerRunning.value = !isServerRunning.value;
+            if (isServerRunning.value) {
+                markTask(1);
+                addLog('Server started on port 8000.', 'text-green-400');
+            } else {
+                addLog('Server stopped.', 'text-red-400');
+                trace.value = { method: '', path: '', status: '', note: 'Server stopped' };
+            }
+        };
+
+        // Terminal Logic
+        const addLog = (text, className = 'text-slate-300') => {
+            history.value.push({ html: text, class: className });
+            nextTick(() => {
+                const term = document.getElementById('terminal-output');
+                if(term) term.scrollTop = term.scrollHeight;
+            });
+        };
+
+        const clearTerminal = () => history.value = [];
+
+        const markTask = (id) => {
+            const task = tasks.value.find(t => t.id === id);
+            if (task && !task.done) task.done = true;
+        };
+
+        const executeCommand = async () => {
+            const raw = inputCmd.value.trim();
+            if (!raw) return;
+            
+            addLog(`$ ${raw}`, 'text-white font-bold');
+            inputCmd.value = '';
+
+            // Basic Parsing
+            const parts = raw.split(/\s+/);
+            const cmd = parts[0];
+            
+            if (cmd !== 'curl') {
+                addLog(`Command not found: ${cmd}. Please use curl.`, 'text-red-400');
+                return;
+            }
+
+            if (!isServerRunning.value) {
+                addLog(`curl: (7) Failed to connect to localhost port 8000: Connection refused`, 'text-red-400');
+                return;
+            }
+
+            // Parse Args
+            let isVerbose = false;
+            let url = '';
+            
+            parts.forEach(p => {
+                if (p === '-v' || p === '--verbose') isVerbose = true;
+                else if (p.startsWith('http')) url = p;
+            });
+
+            if (!url) {
+                addLog('curl: no URL specified', 'text-yellow-400');
+                return;
+            }
+
+            // Extract Path
+            let path = '/';
+            try {
+                const u = new URL(url);
+                path = u.pathname;
+                if(u.port !== '8000') {
+                     addLog(`curl: (7) Failed to connect to ${u.hostname} port ${u.port}: Connection refused`, 'text-red-400');
+                     return;
+                }
+            } catch (e) {
+                addLog(`curl: invalid URL`, 'text-red-400');
+                return;
+            }
+
+            // Simulate Request Delay
+            if (isVerbose) {
+                addLog(`* Trying 127.0.0.1:8000...`, 'text-slate-500');
+                addLog(`* Connected to localhost (127.0.0.1) port 8000 (#0)`, 'text-slate-500');
+                addLog(`> GET ${path} HTTP/1.1`, 'text-purple-400');
+                addLog(`> Host: localhost:8000`, 'text-purple-400');
+                addLog(`> User-Agent: curl/7.81.0`, 'text-purple-400');
+                addLog(`> Accept: */*`, 'text-purple-400');
+                addLog(`>`, 'text-purple-400');
+                await new Promise(r => setTimeout(r, 300));
+            }
+
+            // ROUTER LOGIC (Running "Python" code in JS)
+            let response = { status: 404, headers: {}, body: '404 Not Found' };
+            let note = 'Handled by super().do_GET() (Fallback)';
+
+            // 1. /hello
+            if (path === '/hello') {
+                response = {
+                    status: 200,
+                    headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Date': new Date().toUTCString() },
+                    body: 'Hello! You have reached /hello.\n'
+                };
+                note = 'Matched if self.path == "/hello"';
+                markTask(2);
+            }
+            // 2. /api/time
+            else if (path === '/api/time') {
+                const now = new Date();
+                const content = { timestamp: now.getTime() / 1000, readable: now.toString() };
+                const bodyStr = JSON.stringify(content);
+                response = {
+                    status: 200,
+                    headers: { 'Content-Type': 'application/json', 'Content-Length': bodyStr.length, 'Date': new Date().toUTCString() },
+                    body: bodyStr
+                };
+                note = 'Matched if self.path == "/api/time"';
+                markTask(3);
+            }
+            // 3. /student (Task 2)
+            else if (path === '/student') {
+                if (codeContainsStudentEndpoint.value) {
+                    const content = { name: "Student Lab", lab: 8 };
+                    const bodyStr = JSON.stringify(content);
+                    response = {
+                        status: 200,
+                        headers: { 'Content-Type': 'application/json', 'Content-Length': bodyStr.length, 'Date': new Date().toUTCString() },
+                        body: bodyStr
+                    };
+                    note = 'Matched if self.path == "/student" (Custom Code)';
+                    markTask(5);
+                } else {
+                    // 404 if code not present, even if path requested
+                    response.status = 404;
+                    response.body = `Error code: 404\nMessage: File not found code.\nError code explanation: 404 - Nothing matches the given URI`;
+                     response.headers = {'Content-Type': 'text/html;charset=utf-8', 'Content-Length': response.body.length};
+                     note = 'Path /student requested but not implemented in code';
+                }
+            }
+            // 4. Root / (File Server)
+            else if (path === '/' || path === '/index.html') {
+                response = {
+                    status: 200,
+                    headers: { 'Content-Type': 'text/html', 'Date': new Date().toUTCString(), 'Server': 'SimpleHTTP/0.6 Python/3.10.6' },
+                    body: '<html><head><title>Directory listing</title></head><body><h1>Directory listing for /</h1><hr><ul><li><a href="simple_http_builtin.py">simple_http_builtin.py</a></li></ul><hr></body></html>'
+                };
+                note = 'Handled by super().do_GET() (File Listing)';
+            }
+
+            // Update Trace
+            trace.value = { method: 'GET', path, status: response.status, note };
+
+            // Output Response
+            if (isVerbose) {
+                addLog(`< HTTP/1.0 ${response.status} ${response.status === 200 ? 'OK' : 'Error'}`, 'text-blue-400');
+                for (const [k, v] of Object.entries(response.headers)) {
+                    addLog(`< ${k}: ${v}`, 'text-blue-400');
+                }
+                addLog(`< `, 'text-blue-400');
+            }
+
+            addLog(response.body, 'text-slate-100');
+        };
+
+        const resetLab = () => {
+            codeContent.value = INITIAL_CODE;
+            isServerRunning.value = false;
+            tasks.value.forEach(t => t.done = false);
+            clearTerminal();
+            highlightCode();
+        };
+
+        onMounted(() => {
+            highlightCode();
+        });
+
+        return {
+            codeContent,
+            codeTextarea,
+            codePre,
+            codeBlock,
+            isServerRunning,
+            toggleServer,
+            inputCmd,
+            executeCommand,
+            history,
+            clearTerminal,
+            tasks,
+            handleCodeInput,
+            syncScroll,
+            insertStudentCode,
+            codeContainsStudentEndpoint,
+            trace,
+            resetLab
+        };
+    }
+}).mount('#app');
+</script>
+</body>
+</html>

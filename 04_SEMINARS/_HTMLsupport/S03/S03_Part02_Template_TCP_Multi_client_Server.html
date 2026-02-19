@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TCP Chat Server (Broadcast) Visualizer</title>
+    <style>
+        :root {
+            --bg-primary: #1e1e1e;
+            --bg-secondary: #252526;
+            --accent-main: #c586c0; /* Purple for Main Thread */
+            --accent-thread: #4ec9b0; /* Teal for Worker Threads */
+            --accent-client: #ce9178; /* Orange for Clients */
+            --accent-broadcast: #dcdcaa; /* Yellow for Broadcast Action */
+            --text-main: #d4d4d4;
+            --text-dim: #858585;
+            --border: #3e3e42;
+            --font-mono: 'Consolas', 'Monaco', 'Courier New', monospace;
+            --font-sans: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --code-bg: #101010;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- Header --- */
+        header {
+            background-color: var(--bg-secondary);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+        }
+
+        h1 { font-size: 1.1rem; font-weight: 600; color: #fff; }
+        .badge { background: var(--accent-broadcast); color: #1e1e1e; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; margin-left: 10px; font-weight: bold; }
+
+        /* --- Main Layout --- */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: row;
+            overflow: hidden;
+        }
+
+        /* Left: Code & Control */
+        .control-panel {
+            width: 380px;
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            background: #141414;
+            padding: 1rem;
+        }
+
+        .code-view {
+            flex: 1;
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 10px;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            position: relative;
+        }
+
+        .code-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            padding: 5px;
+            background: rgba(220, 220, 170, 0.2);
+            color: #fff;
+            font-size: 0.7rem;
+            text-align: right;
+            border-bottom: 1px solid var(--accent-broadcast);
+        }
+
+        .btn-group {
+            margin-top: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* Right: Visualization */
+        .visual-panel {
+            flex: 1;
+            position: relative;
+            background: radial-gradient(circle at center, #2a2a2a 0%, #1e1e1e 70%);
+            display: flex;
+            flex-direction: column;
+            padding: 2rem;
+            overflow: hidden;
+        }
+
+        /* Server Box */
+        .server-container {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 40px;
+            position: relative;
+            background: rgba(0,0,0,0.2);
+        }
+        
+        .server-label {
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            background: var(--bg-primary);
+            padding: 0 10px;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+
+        /* Main Thread */
+        .main-thread {
+            width: 100%;
+            height: 50px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--accent-main);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+        
+        .main-thread.active { box-shadow: 0 0 15px rgba(197, 134, 192, 0.4); }
+
+        /* Thread Pool Area */
+        .thread-pool {
+            display: flex;
+            gap: 20px;
+            min-height: 100px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .worker-thread {
+            width: 150px;
+            background: #1a2a2a;
+            border: 1px solid var(--accent-thread);
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.8rem;
+            position: relative;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: spawn 0.5s forwards;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        .worker-thread.broadcasting {
+            border-color: var(--accent-broadcast);
+            box-shadow: 0 0 15px rgba(220, 220, 170, 0.4);
+        }
+
+        @keyframes spawn { to { opacity: 1; transform: translateY(0); } }
+
+        /* Shared Memory (Clients List) */
+        .shared-memory {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #111;
+            border: 1px solid #444;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: #aaa;
+        }
+
+        /* Client Area */
+        .client-area {
+            display: flex;
+            gap: 60px;
+            justify-content: center;
+            padding-top: 40px;
+            border-top: 1px solid var(--border);
+        }
+
+        .client-node {
+            width: 130px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--accent-client);
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            opacity: 0.5;
+            transition: all 0.3s;
+        }
+
+        .client-node.connected { opacity: 1; box-shadow: 0 0 15px rgba(206, 145, 120, 0.2); }
+        .client-node.disconnected { opacity: 0.3; filter: grayscale(1); }
+
+        .chat-bubble {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fff;
+            color: #000;
+            padding: 5px 10px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s, bottom 0.3s;
+            pointer-events: none;
+            margin-bottom: 10px;
+        }
+        
+        .client-node.speaking .chat-bubble { opacity: 1; bottom: 110%; }
+
+        /* Controls */
+        button {
+            padding: 0.6rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--bg-secondary);
+            color: #fff;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        button.btn-main { background: var(--accent-main); border-color: var(--accent-main); }
+        button:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); }
+        button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .client-controls { display: flex; gap: 5px; margin-top: 10px; }
+        .client-controls button { padding: 4px 8px; font-size: 0.75rem; flex: 1; }
+        
+        input[type="text"] {
+            background: #000;
+            border: 1px solid #444;
+            color: #fff;
+            padding: 4px;
+            width: 100%;
+            margin-bottom: 5px;
+            font-size: 0.8rem;
+            border-radius: 4px;
+        }
+
+        /* Packet Animation */
+        .packet {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            z-index: 100;
+            display: none;
+            box-shadow: 0 0 8px #fff;
+        }
+
+        /* Syntax Highlighting */
+        .kw { color: #569cd6; } .fn { color: #dcdcaa; } .str { color: #ce9178; } .cmt { color: #6a9955; } .var { color: #9cdcfe; }
+        
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>TCP Chat Server <span class="badge">Broadcast Logic</span></h1>
+</header>
+
+<main>
+    <!-- Left: Controls & Code -->
+    <div class="control-panel">
+        <div class="code-view" id="codeDisplay">
+            <div class="code-overlay" id="codeStatus">Idle</div>
+            <div id="codeContent"></div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-main" id="btnStart" onclick="startServer()">1. Start Server</button>
+            <div style="font-size: 0.8rem; color: #888; margin-top: 5px;">Chat Clients:</div>
+            
+            <div style="display:flex; gap:10px;">
+                <!-- Client 1 -->
+                <div style="flex:1; border:1px solid #333; padding:5px; border-radius:4px;">
+                    <div style="font-size:0.7rem; color:var(--accent-client)">CLIENT 1</div>
+                    <input type="text" id="msg1" value="Hello!">
+                    <div class="client-controls">
+                        <button id="btnC1Connect" onclick="connectClient(1)" disabled>Join</button>
+                        <button id="btnC1Send" onclick="sendData(1)" disabled>Send</button>
+                        <button id="btnC1Disc" onclick="disconnectClient(1)" disabled>Leave</button>
+                    </div>
+                </div>
+
+                <!-- Client 2 -->
+                <div style="flex:1; border:1px solid #333; padding:5px; border-radius:4px;">
+                    <div style="font-size:0.7rem; color:var(--accent-client)">CLIENT 2</div>
+                    <input type="text" id="msg2" value="Hi C1!">
+                    <div class="client-controls">
+                        <button id="btnC2Connect" onclick="connectClient(2)" disabled>Join</button>
+                        <button id="btnC2Send" onclick="sendData(2)" disabled>Send</button>
+                        <button id="btnC2Disc" onclick="disconnectClient(2)" disabled>Leave</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Hidden Client 3 for robust logic visualization -->
+            <div style="border:1px solid #333; padding:5px; border-radius:4px; opacity: 0.6;">
+                 <div style="font-size:0.7rem; color:var(--accent-client)">CLIENT 3 (Passive)</div>
+                 <div class="client-controls">
+                     <button id="btnC3Connect" onclick="connectClient(3)" disabled>Auto Join</button>
+                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right: Visuals -->
+    <div class="visual-panel">
+        
+        <div class="shared-memory" id="memoryBlock">
+            <div>Global Clients List:</div>
+            <div id="clientListText">[]</div>
+            <div style="margin-top:5px; font-size:0.6rem; color:#666;">🔒 Lock protected</div>
+        </div>
+
+        <div class="server-container">
+            <div class="server-label">Server Process</div>
+            
+            <div class="main-thread" id="mainThread">
+                <div>
+                    <span style="font-weight:bold; color:var(--accent-main)">Main Thread</span>
+                    <span style="font-size:0.75rem; color:#888;">(Accept Loop)</span>
+                </div>
+            </div>
+
+            <div class="thread-pool" id="threadPool"></div>
+        </div>
+
+        <div class="client-area">
+            <div class="client-node" id="client1">
+                <div class="chat-bubble" id="bubble1">...</div>
+                <div style="font-size:2rem;">💻</div>
+                <div>Client 1</div>
+            </div>
+            
+            <div class="client-node" id="client2">
+                <div class="chat-bubble" id="bubble2">...</div>
+                <div style="font-size:2rem;">📱</div>
+                <div>Client 2</div>
+            </div>
+            
+            <div class="client-node" id="client3">
+                <div class="chat-bubble" id="bubble3">...</div>
+                <div style="font-size:2rem;">📠</div>
+                <div>Client 3</div>
+            </div>
+        </div>
+
+        <div class="packet" id="packet"></div>
+        <!-- Extra packets for broadcast -->
+        <div class="packet" id="packet2"></div>
+        <div class="packet" id="packet3"></div>
+    </div>
+</main>
+
+<script>
+    // --- Code Snippets ---
+    const snippets = {
+        START: `
+<span class="kw">def</span> <span class="fn">main</span>():
+    server_socket.bind((HOST, PORT))
+    <span class="fn">accept_loop</span>(server_socket)`,
+
+        CONNECT: `
+<span class="kw">def</span> <span class="fn">accept_loop</span>(sock):
+    <span class="kw">while</span> <span class="kw">True</span>:
+        client, addr = sock.accept()
+        <span class="kw">with</span> clients_lock:
+            clients.append(client)
+        threading.Thread(target=handle_client).start()`,
+
+        RECV: `
+<span class="kw">def</span> <span class="fn">handle_client</span>(sock, addr):
+    <span class="kw">print</span>(<span class="str">f"[THREAD] {addr} connected"</span>)
+    <span class="kw">while</span> <span class="kw">True</span>:
+        data = sock.recv(<span class="str">1024</span>)`,
+
+        BROADCAST: `
+        <span class="cmt"># TODO 2: Mini-Chat Logic</span>
+        msg = <span class="str">f"[{addr}] {data.decode()}"</span>
+        b_msg = msg.encode()
+
+        <span class="cmt"># Broadcast to OTHERS</span>
+        <span class="kw">with</span> clients_lock:
+            <span class="kw">for</span> c <span class="kw">in</span> clients:
+                <span class="kw">if</span> c != sock:
+                    c.sendall(b_msg)`,
+
+        DISCONNECT: `
+    <span class="kw">with</span> clients_lock:
+        clients.remove(sock)
+    <span class="kw">print</span>(<span class="str">f"[DISCONNECT] {addr}"</span>)`
+    };
+
+    // --- State ---
+    let serverRunning = false;
+    let activeClients = []; // IDs [1, 2, 3]
+
+    // --- Elements ---
+    const codeContent = document.getElementById('codeContent');
+    const codeStatus = document.getElementById('codeStatus');
+    const threadPool = document.getElementById('threadPool');
+    const clientListText = document.getElementById('clientListText');
+
+    // --- Logic ---
+
+    function showCode(key, status) {
+        codeContent.innerHTML = snippets[key];
+        codeStatus.innerText = status;
+    }
+
+    function updateSharedList() {
+        const listStr = activeClients.map(id => `Socket${id}`).join(', ');
+        clientListText.innerText = `[${listStr}]`;
+    }
+
+    function startServer() {
+        serverRunning = true;
+        document.getElementById('btnStart').disabled = true;
+        document.getElementById('btnC1Connect').disabled = false;
+        document.getElementById('btnC2Connect').disabled = false;
+        document.getElementById('btnC3Connect').disabled = false;
+        document.getElementById('mainThread').classList.add('active');
+        
+        showCode('START', 'Server Listening');
+        setTimeout(() => showCode('CONNECT', 'Waiting for Connections'), 1000);
+    }
+
+    async function connectClient(id) {
+        if (!serverRunning) return;
+        
+        const clientNode = document.getElementById(`client${id}`);
+        clientNode.classList.add('connected');
+        
+        // UI updates
+        document.getElementById(`btnC${id}Connect`).disabled = true;
+        if(id < 3) {
+            document.getElementById(`btnC${id}Send`).disabled = false;
+            document.getElementById(`btnC${id}Disc`).disabled = false;
+        }
+
+        // Logic
+        showCode('CONNECT', 'Accepting Connection');
+        
+        // Packet: Client -> Main Thread
+        await animatePacket(clientNode, document.getElementById('mainThread'), '#fff', 'packet');
+        
+        // Add to list
+        activeClients.push(id);
+        updateSharedList();
+        
+        // Spawn Thread
+        spawnThread(id);
+        showCode('RECV', `Thread ${id} Waiting`);
+    }
+
+    function spawnThread(id) {
+        const tDiv = document.createElement('div');
+        tDiv.className = 'worker-thread';
+        tDiv.id = `thread-${id}`;
+        tDiv.innerHTML = `
+            <div class="worker-icon">⚙️</div>
+            <div>Thread-${id}</div>
+            <div style="font-size:0.6rem; color:#888;">Socket${id} Handler</div>
+        `;
+        threadPool.appendChild(tDiv);
+    }
+
+    async function sendData(senderId) {
+        const input = document.getElementById(`msg${senderId}`);
+        const msgText = input ? input.value : "Hello";
+        
+        // UI Logic
+        const clientNode = document.getElementById(`client${senderId}`);
+        const threadNode = document.getElementById(`thread-${senderId}`);
+        
+        if (!threadNode) return; // Should not happen
+
+        // Show bubble
+        const bubble = document.getElementById(`bubble${senderId}`);
+        bubble.innerText = msgText;
+        clientNode.classList.add('speaking');
+        
+        // 1. Send to Thread
+        showCode('RECV', `Thread ${senderId} Reading`);
+        await animatePacket(clientNode, threadNode, 'var(--accent-client)', 'packet');
+        
+        clientNode.classList.remove('speaking');
+        
+        // 2. Broadcast Logic
+        showCode('BROADCAST', 'Broadcasting to Others');
+        threadNode.classList.add('broadcasting');
+        
+        // Identify recipients (everyone in activeClients EXCEPT senderId)
+        const recipients = activeClients.filter(id => id !== senderId);
+        
+        if (recipients.length === 0) {
+            // No one else online
+            // Just flash thread and return
+            await wait(500);
+        } else {
+            // Animate to all recipients simultaneously
+            const promises = recipients.map((rId, idx) => {
+                const rNode = document.getElementById(`client${rId}`);
+                // Use packet2 and packet3 for visuals
+                const pId = idx === 0 ? 'packet' : (idx === 1 ? 'packet2' : 'packet3');
+                return animatePacket(threadNode, rNode, 'var(--accent-broadcast)', pId);
+            });
+            await Promise.all(promises);
+            
+            // Show received bubbles
+            recipients.forEach(rId => {
+                const rBubble = document.getElementById(`bubble${rId}`);
+                rBubble.innerText = `[C${senderId}]: ${msgText}`;
+                const rNode = document.getElementById(`client${rId}`);
+                rNode.classList.add('speaking');
+                setTimeout(() => rNode.classList.remove('speaking'), 2000);
+            });
+        }
+        
+        threadNode.classList.remove('broadcasting');
+        showCode('RECV', 'Waiting for next msg');
+    }
+
+    async function disconnectClient(id) {
+        const clientNode = document.getElementById(`client${id}`);
+        const threadNode = document.getElementById(`thread-${id}`);
+        
+        document.getElementById(`btnC${id}Send`).disabled = true;
+        document.getElementById(`btnC${id}Disc`).disabled = true;
+
+        // 1. FIN Packet
+        await animatePacket(clientNode, threadNode, '#555', 'packet');
+        
+        // 2. Cleanup
+        showCode('DISCONNECT', `Removing Client ${id}`);
+        
+        if (threadNode) threadNode.remove();
+        
+        activeClients = activeClients.filter(c => c !== id);
+        updateSharedList();
+        
+        clientNode.classList.remove('connected');
+        clientNode.classList.add('disconnected');
+        
+        document.getElementById(`btnC${id}Connect`).disabled = false;
+        
+        setTimeout(() => {
+            clientNode.classList.remove('disconnected');
+            if(activeClients.length > 0) showCode('RECV', 'Other Threads Active');
+            else showCode('CONNECT', 'Server Idle');
+        }, 1000);
+    }
+
+    // --- Utils ---
+    function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+    function animatePacket(fromEl, toEl, color, packetId) {
+        return new Promise(resolve => {
+            const pkt = document.getElementById(packetId);
+            const panelRect = document.querySelector('.visual-panel').getBoundingClientRect();
+            const fRect = fromEl.getBoundingClientRect();
+            const tRect = toEl.getBoundingClientRect();
+
+            const startX = fRect.left + fRect.width/2 - panelRect.left;
+            const startY = fRect.top + fRect.height/2 - panelRect.top;
+            const endX = tRect.left + tRect.width/2 - panelRect.left;
+            const endY = tRect.top + tRect.height/2 - panelRect.top;
+
+            pkt.style.display = 'block';
+            pkt.style.background = color;
+            pkt.style.left = `${startX}px`;
+            pkt.style.top = `${startY}px`;
+            pkt.style.transition = 'none';
+
+            void pkt.offsetWidth; // Force Reflow
+
+            pkt.style.transition = 'all 0.6s ease-in-out';
+            pkt.style.left = `${endX}px`;
+            pkt.style.top = `${endY}px`;
+
+            setTimeout(() => {
+                pkt.style.display = 'none';
+                resolve();
+            }, 600);
+        });
+    }
+
+</script>
+
+</body>
+</html>

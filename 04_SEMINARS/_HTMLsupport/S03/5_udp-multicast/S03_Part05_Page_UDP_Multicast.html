@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UDP Multicast Lab Simulator</title>
+    <style>
+        :root {
+            --bg-app: #1e1e1e;
+            --bg-panel: #252526;
+            --term-bg: #0c0c0c;
+            --wireshark-bg: #ffffff;
+            --text-main: #cccccc;
+            --text-bright: #ffffff;
+            --accent-mcast: #bd93f9; /* Violet for Multicast */
+            --accent-sender: #50fa7b; /* Green */
+            --accent-recv: #8be9fd; /* Cyan */
+            --border: #44475a;
+            --font-mono: 'Consolas', 'Monaco', monospace;
+            --font-sans: 'Segoe UI', sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-app);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* --- Header --- */
+        header {
+            background: var(--bg-panel);
+            padding: 0 1.5rem;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            justify-content: space-between;
+        }
+        
+        h1 { font-size: 1.1rem; font-weight: 600; color: var(--text-bright); }
+        .badge { background: var(--accent-mcast); color: #282a36; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; margin-left: 10px; font-weight: bold; }
+
+        /* --- Main Layout --- */
+        main {
+            flex: 1;
+            display: grid;
+            grid-template-rows: 60% 40%;
+            overflow: hidden;
+        }
+
+        /* Diagram Area */
+        .diagram-container {
+            position: relative;
+            background: radial-gradient(circle at center, #2a2a2a 0%, #1e1e1e 80%);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Multicast Router / Group Core */
+        .mcast-core {
+            width: 180px;
+            height: 180px;
+            border: 2px dashed var(--accent-mcast);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(189, 147, 249, 0.05);
+            z-index: 1;
+        }
+        
+        .mcast-label {
+            font-size: 0.8rem;
+            color: var(--accent-mcast);
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .node {
+            width: 110px;
+            height: 100px;
+            background: var(--bg-panel);
+            border: 2px solid #6272a4;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            z-index: 10;
+            transition: all 0.3s;
+        }
+
+        .node-icon { font-size: 2rem; margin-bottom: 5px; }
+        .node-label { font-size: 0.8rem; font-weight: bold; color: #fff; }
+        
+        /* State: Joined vs Left */
+        .node.joined { border-color: var(--accent-recv); box-shadow: 0 0 15px rgba(139, 233, 253, 0.3); }
+        .node.left { border-color: #444; opacity: 0.6; filter: grayscale(1); }
+
+        /* Positions */
+        #senderNode { top: 30px; border-color: var(--accent-sender); opacity: 1; filter: none; }
+        
+        .receivers-row {
+            position: absolute;
+            bottom: 30px;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            padding: 0 50px;
+        }
+
+        /* Controls inside Receivers */
+        .node-controls {
+            margin-top: 5px;
+        }
+        
+        .btn-toggle {
+            font-size: 0.6rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid #6272a4;
+            background: transparent;
+            color: #ccc;
+            cursor: pointer;
+        }
+        
+        .node.joined .btn-toggle { background: var(--accent-recv); color: #000; border-color: var(--accent-recv); }
+
+        /* Packet Animation */
+        .packet {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            background: var(--accent-mcast);
+            border-radius: 50%;
+            z-index: 20;
+            box-shadow: 0 0 10px var(--accent-mcast);
+            display: none;
+        }
+
+        /* Bottom Panel */
+        .bottom-panel {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            border-top: 4px solid var(--border);
+        }
+
+        .panel-col {
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .panel-header {
+            background: #252526;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-main);
+        }
+
+        /* Code View */
+        .code-view {
+            background: var(--term-bg);
+            flex: 1;
+            padding: 10px;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: #ccc;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        /* Wireshark Table */
+        table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
+        th { background: #e6e6e6; text-align: left; padding: 4px; position: sticky; top: 0; color: #333; }
+        td { padding: 2px 4px; border-bottom: 1px solid #eee; background: #fff; color: #333; }
+        tr.highlight-row { background: #e1bee7; } /* Light purple */
+
+        /* Logs Overlay on Diagram */
+        .log-overlay {
+            position: absolute;
+            top: 20px; right: 20px;
+            width: 250px;
+            max-height: 150px;
+            background: rgba(0,0,0,0.6);
+            border: 1px solid #444;
+            padding: 10px;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: #fff;
+            overflow-y: auto;
+            border-radius: 4px;
+            z-index: 5;
+        }
+
+        /* Footer Controls */
+        footer {
+            background: var(--bg-panel);
+            padding: 1rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        input[type="text"] {
+            background: #111;
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 0.5rem;
+            border-radius: 4px;
+            width: 200px;
+        }
+
+        button.main-action {
+            padding: 0.6rem 1.5rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--accent-sender);
+            color: #282a36;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.1s;
+        }
+        
+        button.main-action:hover { transform: scale(1.05); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Syntax Highlighting */
+        .kw { color: #ff79c6; } .fn { color: #8be9fd; } .str { color: #f1fa8c; } .cmt { color: #6272a4; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>UDP Multicast <span class="badge">224.0.0.1</span></h1>
+</header>
+
+<main>
+    <!-- Visual Diagram -->
+    <div class="diagram-container">
+        <!-- Log Overlay -->
+        <div class="log-overlay" id="receiverLog">
+            <div style="color:#aaa; border-bottom:1px solid #555; margin-bottom:5px;">Receiver Outputs (Template)</div>
+        </div>
+
+        <!-- Multicast Core -->
+        <div class="mcast-core">
+            <div style="font-size:3rem; opacity:0.5;">🕸️</div>
+            <div class="mcast-label">Multicast Group</div>
+            <div class="mcast-label">224.0.0.1</div>
+        </div>
+
+        <!-- Sender -->
+        <div class="node" id="senderNode">
+            <div class="node-icon">📡</div>
+            <div class="node-label">Sender</div>
+        </div>
+
+        <!-- Receivers -->
+        <div class="receivers-row">
+            <div class="node left" id="recv1">
+                <div class="node-icon">🖥️</div>
+                <div class="node-label">Recv 1</div>
+                <div class="node-controls">
+                    <button class="btn-toggle" onclick="toggleJoin(1)">Join</button>
+                </div>
+            </div>
+            
+            <div class="node left" id="recv2">
+                <div class="node-icon">💻</div>
+                <div class="node-label">Recv 2</div>
+                <div class="node-controls">
+                    <button class="btn-toggle" onclick="toggleJoin(2)">Join</button>
+                </div>
+            </div>
+            
+            <div class="node left" id="recv3">
+                <div class="node-icon">📱</div>
+                <div class="node-label">Recv 3</div>
+                <div class="node-controls">
+                    <button class="btn-toggle" onclick="toggleJoin(3)">Join</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Packets -->
+        <div class="packet" id="pktMain"></div>
+        <div class="packet" id="pkt1"></div>
+        <div class="packet" id="pkt2"></div>
+        <div class="packet" id="pkt3"></div>
+    </div>
+
+    <!-- Bottom Panel -->
+    <div class="bottom-panel">
+        <div class="panel-col">
+            <div class="panel-header">Receiver Template Logic (Python)</div>
+            <div class="code-view" id="codeView">
+<span class="cmt"># Implementing Subscription logic</span>
+<span class="kw">import</span> socket, struct
+
+MCAST_GRP = <span class="str">"224.0.0.1"</span>
+MCAST_PORT = <span class="str">5001</span>
+
+sock = socket.socket(AF_INET, SOCK_DGRAM)
+sock.bind((<span class="str">""</span>, MCAST_PORT))
+
+<span class="cmt"># Crucial Step: Join Group</span>
+group = socket.inet_aton(MCAST_GRP)
+mreq = struct.pack(<span class="str">"4sL"</span>, group, socket.INADDR_ANY)
+sock.setsockopt(IPPROTO_IP, IP_ADD_MEMBERSHIP, mreq)
+
+<span class="kw">while</span> <span class="kw">True</span>:
+    data, addr = sock.recvfrom(<span class="str">1024</span>)
+    <span class="cmt"># Format: [#Count at Time] From IP -> Msg</span>
+            </div>
+        </div>
+        <div class="panel-col">
+            <div class="panel-header">Wireshark Capture (udp.port == 5001)</div>
+            <div style="flex:1; overflow-y:auto; background:#fff;">
+                <table id="wsTable">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Source</th>
+                            <th>Destination</th>
+                            <th>Protocol</th>
+                            <th>Info</th>
+                        </tr>
+                    </thead>
+                    <tbody id="wsBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer>
+    <input type="text" id="msgInput" value="Hello Multicast!">
+    <button class="main-action" id="btnSend" onclick="sendMulticast()">Send Multicast</button>
+</footer>
+
+<script>
+    // --- State ---
+    const receivers = {
+        1: { joined: false, msgCount: 0 },
+        2: { joined: false, msgCount: 0 },
+        3: { joined: false, msgCount: 0 }
+    };
+
+    // --- Actions ---
+
+    function toggleJoin(id) {
+        const r = receivers[id];
+        r.joined = !r.joined;
+        
+        const node = document.getElementById(`recv${id}`);
+        const btn = node.querySelector('.btn-toggle');
+        
+        if (r.joined) {
+            node.classList.remove('left');
+            node.classList.add('joined');
+            btn.innerText = "Leave";
+            logApp(`[SYSTEM] Recv ${id} joined 224.0.0.1`);
+        } else {
+            node.classList.remove('joined');
+            node.classList.add('left');
+            btn.innerText = "Join";
+            logApp(`[SYSTEM] Recv ${id} left group`);
+        }
+    }
+
+    async function sendMulticast() {
+        const input = document.getElementById('msgInput');
+        const text = input.value;
+        if(!text) return;
+
+        document.getElementById('btnSend').disabled = true;
+
+        // 1. Log Wireshark
+        logWireshark("192.168.1.100", "224.0.0.1", text);
+
+        // 2. Animate: Sender -> Core
+        await animatePacket('senderNode', null, 'pktMain', true); // true = to center
+
+        // 3. Animate: Core -> Subscribed Receivers
+        const promises = [];
+        
+        for (let i = 1; i <= 3; i++) {
+            if (receivers[i].joined) {
+                // Animate packet to this node
+                promises.push(animatePacket(null, `recv${i}`, `pkt${i}`, false));
+                
+                // Update Logic
+                receivers[i].msgCount++;
+                const timestamp = new Date().toLocaleTimeString();
+                
+                // Delay log slightly to match animation arrival
+                setTimeout(() => {
+                    logApp(`[R${i}] [#${receivers[i].msgCount} at ${timestamp}] From 192.168.1.100 -> "${text}"`);
+                }, 600);
+            }
+        }
+
+        if (promises.length === 0) {
+            logApp("[WARN] No subscribers. Packet dropped at router.");
+        }
+
+        await Promise.all(promises);
+        document.getElementById('btnSend').disabled = false;
+    }
+
+    // --- Logging ---
+
+    function logApp(msg) {
+        const div = document.createElement('div');
+        div.innerText = msg;
+        div.style.marginBottom = "4px";
+        div.style.fontSize = "0.7rem";
+        
+        if (msg.startsWith('[SYSTEM]')) div.style.color = "#8be9fd";
+        else if (msg.startsWith('[WARN]')) div.style.color = "#ff5555";
+        else div.style.color = "#50fa7b";
+
+        const container = document.getElementById('receiverLog');
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function logWireshark(src, dst, info) {
+        const tbody = document.getElementById('wsBody');
+        const tr = document.createElement('tr');
+        
+        const time = new Date().toISOString().split('T')[1].slice(0,8);
+        
+        tr.innerHTML = `
+            <td>${time}</td>
+            <td>${src}</td>
+            <td>${dst}</td>
+            <td>UDP</td>
+            <td>Dst Port: 5001 Len=${info.length + 10}</td>
+        `;
+        
+        tr.className = "highlight-row";
+        tbody.appendChild(tr);
+        tr.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        
+        setTimeout(() => tr.classList.remove('highlight-row'), 1000);
+    }
+
+    // --- Animation Utils ---
+
+    function animatePacket(fromId, toId, pktId, toCenter) {
+        return new Promise(resolve => {
+            const pkt = document.getElementById(pktId);
+            const container = document.querySelector('.diagram-container').getBoundingClientRect();
+            
+            let startX, startY, endX, endY;
+
+            // Center Coordinates
+            const centerX = container.width / 2;
+            const centerY = container.height / 2;
+
+            if (toCenter) {
+                // Sender -> Center
+                const fromRect = document.getElementById(fromId).getBoundingClientRect();
+                startX = fromRect.left + fromRect.width/2 - container.left;
+                startY = fromRect.top + fromRect.height/2 - container.top;
+                endX = centerX;
+                endY = centerY;
+            } else {
+                // Center -> Receiver
+                startX = centerX;
+                startY = centerY;
+                const toRect = document.getElementById(toId).getBoundingClientRect();
+                endX = toRect.left + toRect.width/2 - container.left;
+                endY = toRect.top + toRect.height/2 - container.top;
+            }
+
+            pkt.style.display = 'block';
+            pkt.style.left = `${startX}px`;
+            pkt.style.top = `${startY}px`;
+            pkt.style.transition = 'none';
+
+            // Force reflow
+            void pkt.offsetWidth;
+
+            pkt.style.transition = 'all 0.6s ease-in-out';
+            pkt.style.left = `${endX}px`;
+            pkt.style.top = `${endY}px`;
+
+            setTimeout(() => {
+                pkt.style.display = 'none';
+                resolve();
+            }, 600);
+        });
+    }
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workbook: IPv4 Subnetting & VLSM</title>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #e2e8f0;
+        }
+        
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b; 
+        }
+
+        .input-base {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            color: #f8fafc;
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            width: 100%;
+            transition: all 0.2s;
+        }
+        .input-base:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+        .input-correct {
+            border-color: #22c55e;
+            background-color: rgba(34, 197, 94, 0.1);
+        }
+        .input-error {
+            border-color: #ef4444;
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+
+        // --- IP UTILS ---
+
+        // Convert IP string to Integer
+        const ipToInt = (ip) => {
+            return ip.split('.').reduce((acc, octet) => (acc << 8) + parseInt(octet, 10), 0) >>> 0;
+        };
+
+        // Convert Integer to IP String
+        const intToIp = (int) => {
+            return [
+                (int >>> 24) & 255,
+                (int >>> 16) & 255,
+                (int >>> 8) & 255,
+                int & 255
+            ].join('.');
+        };
+
+        // Get Subnet Details
+        const calculateSubnet = (ip, cidr) => {
+            const ipInt = ipToInt(ip);
+            const maskInt = -1 << (32 - cidr);
+            const networkInt = ipInt & maskInt;
+            const broadcastInt = networkInt | (~maskInt >>> 0);
+            
+            return {
+                network: intToIp(networkInt),
+                broadcast: intToIp(broadcastInt),
+                firstHost: intToIp(networkInt + 1),
+                lastHost: intToIp(broadcastInt - 1),
+                numHosts: Math.max(0, Math.pow(2, 32 - cidr) - 2),
+                maskInt,
+                networkInt,
+                broadcastInt
+            };
+        };
+
+        // --- COMPONENTS ---
+
+        const Navbar = ({ activeTab, setActiveTab }) => {
+            const tabs = [
+                { id: 1, label: 'Ex 1: Subnet Elements' },
+                { id: 2, label: 'Ex 2: Equal Subnetting' },
+                { id: 3, label: 'Ex 3: VLSM 1' },
+                { id: 4, label: 'Ex 4: VLSM 2' },
+                { id: 5, label: 'Ex 5: Address Types' },
+                { id: 6, label: 'Ex 6: Calculator' },
+            ];
+
+            return (
+                <div className="w-64 bg-slate-900 border-r border-slate-700 h-screen flex flex-col fixed left-0 top-0 overflow-y-auto z-10">
+                    <div className="p-6 border-b border-slate-700">
+                        <h1 className="text-xl font-bold text-blue-400 flex items-center gap-2">
+                            <i data-lucide="network"></i> NetLab
+                        </h1>
+                        <p className="text-xs text-slate-400 mt-1">IPv4 Subnetting Workbook</p>
+                    </div>
+                    <nav className="flex-1 p-4 space-y-2">
+                        {tabs.map(tab => (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                className={`w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                                    activeTab === tab.id 
+                                    ? 'bg-blue-600 text-white shadow-lg' 
+                                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                                }`}
+                            >
+                                {tab.label}
+                            </button>
+                        ))}
+                    </nav>
+                </div>
+            );
+        };
+
+        const StatusMessage = ({ status, message }) => {
+            if (status === 'idle') return null;
+            return (
+                <div className={`p-4 rounded-lg mt-4 flex items-start gap-3 ${
+                    status === 'success' ? 'bg-green-900/30 border border-green-500/50 text-green-200' : 'bg-red-900/30 border border-red-500/50 text-red-200'
+                }`}>
+                    <div className="mt-1">
+                        {status === 'success' ? (
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+                        ) : (
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        )}
+                    </div>
+                    <div>
+                        <p className="font-semibold">{status === 'success' ? 'Correct!' : 'Try Again'}</p>
+                        <p className="text-sm opacity-90">{message}</p>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- EXERCISE 1 ---
+        const Exercise1 = () => {
+            const [inputs, setInputs] = useState({ network: '', broadcast: '', range: '', count: '' });
+            const [status, setStatus] = useState('idle');
+            
+            const checkAnswer = () => {
+                const solution = calculateSubnet('172.16.12.64', 28);
+                const isNet = inputs.network.trim() === solution.network;
+                const isBroad = inputs.broadcast.trim() === solution.broadcast;
+                // Range check: allow flexible formats like "x.x.x.65 - x.x.x.78" or just "65-78"
+                const cleanRange = inputs.range.replace(/\s/g, '');
+                const correctRange1 = `${solution.firstHost}-${solution.lastHost}`;
+                const correctRange2 = `${solution.firstHost}-${solution.lastHost.split('.').pop()}`;
+                const isRange = cleanRange.includes(correctRange1) || cleanRange.includes(correctRange2) || (cleanRange.includes(solution.firstHost) && cleanRange.includes(solution.lastHost));
+                const isCount = parseInt(inputs.count) === solution.numHosts;
+
+                if (isNet && isBroad && isRange && isCount) {
+                    setStatus('success');
+                } else {
+                    setStatus('error');
+                }
+            };
+
+            return (
+                <div className="max-w-2xl">
+                    <h2 className="text-2xl font-bold mb-4 text-white">Ex 1: Subnet Elements</h2>
+                    <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 mb-6">
+                        <p className="text-slate-300 mb-2">For the subnet:</p>
+                        <code className="text-xl bg-slate-900 px-3 py-1 rounded text-blue-400 mono block w-fit mb-4">172.16.12.64/28</code>
+                        
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm text-slate-400 mb-1">Network Address</label>
+                                <input type="text" className="input-base mono" placeholder="e.g.: 172.16.12.0" 
+                                    value={inputs.network} onChange={e => setInputs({...inputs, network: e.target.value})} />
+                            </div>
+                            <div>
+                                <label className="block text-sm text-slate-400 mb-1">Broadcast Address</label>
+                                <input type="text" className="input-base mono" placeholder="e.g.: 172.16.12.15" 
+                                    value={inputs.broadcast} onChange={e => setInputs({...inputs, broadcast: e.target.value})} />
+                            </div>
+                            <div>
+                                <label className="block text-sm text-slate-400 mb-1">Usable Host Range</label>
+                                <input type="text" className="input-base mono" placeholder="e.g.: 172.16.12.65 - 172.16.12.78" 
+                                    value={inputs.range} onChange={e => setInputs({...inputs, range: e.target.value})} />
+                            </div>
+                            <div>
+                                <label className="block text-sm text-slate-400 mb-1">Number of Usable Hosts</label>
+                                <input type="number" className="input-base mono" placeholder="e.g.: 14" 
+                                    value={inputs.count} onChange={e => setInputs({...inputs, count: e.target.value})} />
+                            </div>
+                        </div>
+                        
+                        <div className="mt-6">
+                            <button onClick={checkAnswer} className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+                                Check Answer
+                            </button>
+                        </div>
+
+                        <StatusMessage status={status} message={status === 'success' 
+                            ? "Excellent! You correctly identified the boundaries of the /28 block (increment of 16)." 
+                            : "Check your calculations. A /28 has 32-28=4 host bits. 2^4 = 16 total addresses."} />
+                    </div>
+                </div>
+            );
+        };
+
+        // --- EXERCISE 2 ---
+        const Exercise2 = () => {
+            const [rows, setRows] = useState(Array(8).fill({ prefix: '/27', network: '', broadcast: '' }));
+            const [status, setStatus] = useState('idle');
+
+            const handleChange = (idx, field, val) => {
+                const newRows = [...rows];
+                newRows[idx] = { ...newRows[idx], [field]: val };
+                setRows(newRows);
+            };
+
+            const checkAnswer = () => {
+                const baseIp = '192.168.100.';
+                let allCorrect = true;
+                const blockSize = 32; // /27 is 32 IPs
+
+                rows.forEach((row, i) => {
+                    const expectedNet = `${baseIp}${i * blockSize}`;
+                    const expectedBroad = `${baseIp}${(i * blockSize) + 31}`;
+                    
+                    if (row.network.trim() !== expectedNet || row.broadcast.trim() !== expectedBroad || !row.prefix.includes('27')) {
+                        allCorrect = false;
+                    }
+                });
+
+                setStatus(allCorrect ? 'success' : 'error');
+            };
+
+            return (
+                <div className="max-w-4xl">
+                    <h2 className="text-2xl font-bold mb-4 text-white">Ex 2: Equal Subnetting</h2>
+                    <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 mb-6">
+                        <p className="text-slate-300 mb-4">Split the network <code className="text-blue-400">192.168.100.0/24</code> into <strong>8 equal subnets</strong>.</p>
+                        
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="border-b border-slate-700 text-slate-400 text-sm">
+                                        <th className="p-2">#</th>
+                                        <th className="p-2">Prefix (CIDR)</th>
+                                        <th className="p-2">Network Address</th>
+                                        <th className="p-2">Broadcast Address</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="text-sm">
+                                    {rows.map((row, i) => (
+                                        <tr key={i} className="border-b border-slate-700/50">
+                                            <td className="p-2 text-slate-500">{i + 1}</td>
+                                            <td className="p-2">
+                                                <input type="text" className="input-base mono py-1" value={row.prefix} 
+                                                    onChange={e => handleChange(i, 'prefix', e.target.value)} />
+                                            </td>
+                                            <td className="p-2">
+                                                <input type="text" className="input-base mono py-1" value={row.network} placeholder={`192.168.100...`}
+                                                    onChange={e => handleChange(i, 'network', e.target.value)} />
+                                            </td>
+                                            <td className="p-2">
+                                                <input type="text" className="input-base mono py-1" value={row.broadcast} placeholder={`192.168.100...`}
+                                                    onChange={e => handleChange(i, 'broadcast', e.target.value)} />
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div className="mt-6">
+                            <button onClick={checkAnswer} className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+                                Check
+                            </button>
+                        </div>
+
+                        <StatusMessage status={status} message={status === 'success' 
+                            ? "Correct! For 8 subnets you need 3 borrowed bits (2^3=8). /24 + 3 = /27. The step is 32." 
+                            : "Attention: You need 3 additional bits for the network part. The prefix will be /27. Check the increment."} />
+                    </div>
+                </div>
+            );
+        };
+
+        // --- EXERCISE 3 (VLSM 1) ---
+        const Exercise3 = () => {
+            const [subnets, setSubnets] = useState([
+                { name: 'A (60 hosts)', prefix: '', net: '', broad: '' },
+                { name: 'B (30 hosts)', prefix: '', net: '', broad: '' },
+                { name: 'C (10 hosts)', prefix: '', net: '', broad: '' },
+                { name: 'D (P2P Link)', prefix: '', net: '', broad: '' },
+            ]);
+            const [status, setStatus] = useState('idle');
+
+            // Correct Logic (Standard VLSM: Largest to Smallest)
+            // Base: 10.10.0.0/24
+            // A (60) -> /26. Net: 10.10.0.0, Broad: 10.10.0.63
+            // B (30) -> /27. Net: 10.10.0.64, Broad: 10.10.0.95
+            // C (10) -> /28. Net: 10.10.0.96, Broad: 10.10.0.111
+            // D (2)  -> /30. Net: 10.10.0.112, Broad: 10.10.0.115
+
+            const updateSubnet = (idx, field, val) => {
+                const news = [...subnets];
+                news[idx][field] = val;
+                setSubnets(news);
+            };
+
+            const checkAnswer = () => {
+                const solution = [
+                    { p: 26, n: '10.10.0.0', b: '10.10.0.63' },
+                    { p: 27, n: '10.10.0.64', b: '10.10.0.95' },
+                    { p: 28, n: '10.10.0.96', b: '10.10.0.111' },
+                    { p: 30, n: '10.10.0.112', b: '10.10.0.115' }
+                ];
+
+                let allCorrect = true;
+                subnets.forEach((s, i) => {
+                    const sol = solution[i];
+                    const pVal = parseInt(s.prefix.replace('/', ''));
+                    if (pVal !== sol.p || s.net.trim() !== sol.n || s.broad.trim() !== sol.b) {
+                        allCorrect = false;
+                    }
+                });
+                setStatus(allCorrect ? 'success' : 'error');
+            };
+
+            return (
+                <div className="max-w-3xl">
+                    <h2 className="text-2xl font-bold mb-4 text-white">Ex 3: VLSM</h2>
+                    <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 mb-6">
+                        <p className="text-slate-300 mb-4">Network: <code className="text-blue-400">10.10.0.0/24</code>. Allocate (descending order):</p>
+                        
+                        <div className="grid gap-4">
+                            {subnets.map((sub, i) => (
+                                <div key={i} className="bg-slate-900/50 p-4 rounded-lg border border-slate-700">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <span className="font-bold text-blue-300">{sub.name}</span>
+                                        <span className="text-xs text-slate-500 uppercase tracking-wider font-bold">Subnet {String.fromCharCode(65+i)}</span>
+                                    </div>
+                                    <div className="grid grid-cols-3 gap-3">
+                                        <div>
+                                            <label className="text-xs text-slate-400">Prefix (/xx)</label>
+                                            <input type="text" className="input-base mono text-sm" placeholder="/24"
+                                                value={sub.prefix} onChange={e => updateSubnet(i, 'prefix', e.target.value)} />
+                                        </div>
+                                        <div>
+                                            <label className="text-xs text-slate-400">Network Addr</label>
+                                            <input type="text" className="input-base mono text-sm" placeholder="10.10.0.x"
+                                                value={sub.net} onChange={e => updateSubnet(i, 'net', e.target.value)} />
+                                        </div>
+                                        <div>
+                                            <label className="text-xs text-slate-400">Broadcast Addr</label>
+                                            <input type="text" className="input-base mono text-sm" placeholder="10.10.0.y"
+                                                value={sub.broad} onChange={e => updateSubnet(i, 'broad', e.target.value)} />
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="mt-6">
+                            <button onClick={checkAnswer} className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+                                Check
+                            </button>
+                        </div>
+                        <StatusMessage status={status} message={status === 'success' 
+                            ? "Correct! You correctly applied the 'Largest-to-Smallest' strategy to avoid fragmentation." 
+                            : "Check: Order the subnets by size (largest first). 60 hosts need /26, 30 hosts need /27, etc."} />
+                    </div>
+                </div>
+            );
+        };
+
+        // --- EXERCISE 4 (VLSM 2) ---
+        const Exercise4 = () => {
+             const [subnets, setSubnets] = useState([
+                { name: 'IoT (>= 50)', prefix: '', start: '', end: '' },
+                { name: 'Web (>= 20)', prefix: '', start: '', end: '' },
+                { name: 'Mgmt (>= 5)', prefix: '', start: '', end: '' },
+            ]);
+            const [status, setStatus] = useState('idle');
+
+            // Logic: 192.168.200.0/24
+            // 1. IoT (50) -> /26. Range .0 - .63
+            // 2. Web (20) -> /27. Range .64 - .95
+            // 3. Mgmt (5) -> /29. Range .96 - .103 (needs 8 ips, 6 usable)
+
+            const updateSubnet = (idx, field, val) => {
+                const news = [...subnets];
+                news[idx][field] = val;
+                setSubnets(news);
+            };
+
+            const checkAnswer = () => {
+                 const solution = [
+                    { p: 26, start: '192.168.200.0', end: '192.168.200.63' },
+                    { p: 27, start: '192.168.200.64', end: '192.168.200.95' },
+                    { p: 29, start: '192.168.200.96', end: '192.168.200.103' } // /29 is 8 IPs
+                ];
+
+                let allCorrect = true;
+                subnets.forEach((s, i) => {
+                    const sol = solution[i];
+                    const pVal = parseInt(s.prefix.replace('/', ''));
+                    // We check if input contains start and end IP
+                    if (pVal !== sol.p || s.start.trim() !== sol.start || s.end.trim() !== sol.end) {
+                        allCorrect = false;
+                    }
+                });
+                setStatus(allCorrect ? 'success' : 'error');
+            };
+
+            return (
+                 <div className="max-w-3xl">
+                    <h2 className="text-2xl font-bold mb-4 text-white">Ex 4: VLSM Scenario</h2>
+                    <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 mb-6">
+                        <p className="text-slate-300 mb-4">Network: <code className="text-blue-400">192.168.200.0/24</code>. <br/><span className="text-sm text-slate-400">Note: Sort requirements descending by number of hosts!</span></p>
+                        
+                        <div className="grid gap-4">
+                            {subnets.map((sub, i) => (
+                                <div key={i} className="bg-slate-900/50 p-4 rounded-lg border border-slate-700 flex flex-col md:flex-row gap-4 items-center">
+                                    <div className="w-full md:w-32 font-bold text-emerald-400">{sub.name}</div>
+                                    <div className="flex-1 grid grid-cols-3 gap-2 w-full">
+                                        <input type="text" className="input-base mono text-sm" placeholder="Prefix (/xx)"
+                                                value={sub.prefix} onChange={e => updateSubnet(i, 'prefix', e.target.value)} />
+                                        <input type="text" className="input-base mono text-sm" placeholder="IP Start (Network)"
+                                                value={sub.start} onChange={e => updateSubnet(i, 'start', e.target.value)} />
+                                        <input type="text" className="input-base mono text-sm" placeholder="IP End (Broadcast)"
+                                                value={sub.end} onChange={e => updateSubnet(i, 'end', e.target.value)} />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="mt-6">
+                            <button onClick={checkAnswer} className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+                                Check
+                            </button>
+                        </div>
+                        <StatusMessage status={status} message={status === 'success' 
+                            ? "Correct! Order of hosts: 50 -> 20 -> 5. Prefixes are /26, /27, /29." 
+                            : "Check: Management needs 5 hosts. A /30 only offers 2. You need a /29 (6 usable hosts)."} />
+                    </div>
+                </div>
+            );
+        };
+
+        // --- EXERCISE 5 (Types) ---
+        const Exercise5 = () => {
+            const [answers, setAnswers] = useState({});
+            const [status, setStatus] = useState('idle');
+
+            const questions = [
+                { id: 1, ip: '192.168.1.0/24', type: 'network' },
+                { id: 2, ip: '192.168.1.127/25', type: 'broadcast' },
+                { id: 3, ip: '10.0.5.255/23', type: 'broadcast' },
+                { id: 4, ip: '172.16.8.32/27', type: 'network' }
+            ];
+
+            const handleChange = (id, val) => {
+                setAnswers(prev => ({...prev, [id]: val}));
+            };
+
+            const checkAnswer = () => {
+                let correct = true;
+                questions.forEach(q => {
+                    if (answers[q.id] !== q.type) correct = false;
+                });
+                setStatus(correct ? 'success' : 'error');
+            };
+
+            return (
+                <div className="max-w-2xl">
+                    <h2 className="text-2xl font-bold mb-4 text-white">Ex 5: Address Types</h2>
+                    <div className="bg-slate-800 p-6 rounded-xl border border-slate-700">
+                        <p className="text-slate-300 mb-6">Identify the address type (Network, Broadcast, or Usable Host).</p>
+                        
+                        <div className="space-y-4">
+                            {questions.map(q => (
+                                <div key={q.id} className="flex justify-between items-center bg-slate-900/50 p-3 rounded border border-slate-700">
+                                    <code className="text-blue-300 mono">{q.ip}</code>
+                                    <select 
+                                        className="bg-slate-800 border border-slate-600 rounded text-slate-200 p-1 text-sm focus:border-blue-500 outline-none"
+                                        value={answers[q.id] || ''}
+                                        onChange={(e) => handleChange(q.id, e.target.value)}
+                                    >
+                                        <option value="">Choose...</option>
+                                        <option value="network">Network Address</option>
+                                        <option value="broadcast">Broadcast Address</option>
+                                        <option value="host">Usable Host</option>
+                                    </select>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="mt-6">
+                            <button onClick={checkAnswer} className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+                                Check
+                            </button>
+                        </div>
+                        
+                        <StatusMessage status={status} message={status === 'success' 
+                            ? "Perfect! You understand address block boundaries." 
+                            : "Attention to /25 (block of 128) and /23 (block of 512)."} />
+                    </div>
+                </div>
+            );
+        };
+
+        // --- EXERCISE 6 (Calculator) ---
+        const Exercise6 = () => {
+            const [input, setInput] = useState('192.168.0.1/24');
+            const [result, setResult] = useState(null);
+
+            const calculate = () => {
+                try {
+                    const [ip, cidrStr] = input.split('/');
+                    const cidr = parseInt(cidrStr);
+                    if(!ip || isNaN(cidr) || cidr < 0 || cidr > 32) throw new Error("Format invalid");
+                    
+                    const res = calculateSubnet(ip, cidr);
+                    
+                    // Binary Helper
+                    const ipBin = res.networkInt.toString(2).padStart(32, '0').match(/.{1,8}/g).join('.');
+                    const maskBin = res.maskInt.toString(2).padStart(32, '0').match(/.{1,8}/g).join('.');
+
+                    setResult({...res, ipBin, maskBin});
+                } catch (e) {
+                    setResult(null);
+                }
+            };
+
+            return (
+                <div className="max-w-2xl">
+                    <h2 className="text-2xl font-bold mb-4 text-white">Ex 6: Verification (Calculator)</h2>
+                    <div className="bg-slate-800 p-6 rounded-xl border border-slate-700">
+                        <div className="flex gap-2 mb-6">
+                            <input 
+                                type="text" 
+                                className="input-base mono text-lg flex-1" 
+                                value={input} 
+                                onChange={(e) => setInput(e.target.value)}
+                                placeholder="e.g.: 10.0.0.1/24"
+                            />
+                            <button onClick={calculate} className="bg-emerald-600 hover:bg-emerald-500 text-white px-6 rounded-lg font-bold">
+                                Calculate
+                            </button>
+                        </div>
+
+                        {result && (
+                            <div className="space-y-3 animation-fade-in">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="bg-slate-900 p-3 rounded border border-slate-700">
+                                        <p className="text-xs text-slate-500 uppercase">Network</p>
+                                        <p className="font-mono text-emerald-400">{result.network}</p>
+                                    </div>
+                                    <div className="bg-slate-900 p-3 rounded border border-slate-700">
+                                        <p className="text-xs text-slate-500 uppercase">Broadcast</p>
+                                        <p className="font-mono text-purple-400">{result.broadcast}</p>
+                                    </div>
+                                    <div className="bg-slate-900 p-3 rounded border border-slate-700">
+                                        <p className="text-xs text-slate-500 uppercase">First Host</p>
+                                        <p className="font-mono text-slate-200">{result.firstHost}</p>
+                                    </div>
+                                    <div className="bg-slate-900 p-3 rounded border border-slate-700">
+                                        <p className="text-xs text-slate-500 uppercase">Last Host</p>
+                                        <p className="font-mono text-slate-200">{result.lastHost}</p>
+                                    </div>
+                                </div>
+                                
+                                <div className="bg-slate-900 p-3 rounded border border-slate-700 mt-4">
+                                    <p className="text-xs text-slate-500 uppercase">Usable Hosts</p>
+                                    <p className="font-mono text-xl text-white">{result.numHosts.toLocaleString()}</p>
+                                </div>
+
+                                <div className="mt-4 p-3 bg-black/30 rounded font-mono text-xs text-slate-400">
+                                    <p>Net Bin: <span className="text-emerald-500">{result.ipBin}</span></p>
+                                    <p>Msk Bin: <span className="text-blue-500">{result.maskBin}</span></p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // --- MAIN APP ---
+        const App = () => {
+            const [activeTab, setActiveTab] = useState(1);
+            
+            // Allow Lucide icons to render after React mount
+            useEffect(() => {
+                if (window.lucide) window.lucide.createIcons();
+            });
+
+            return (
+                <div className="flex min-h-screen">
+                    <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
+                    <main className="flex-1 ml-64 p-8 overflow-y-auto">
+                        {activeTab === 1 && <Exercise1 />}
+                        {activeTab === 2 && <Exercise2 />}
+                        {activeTab === 3 && <Exercise3 />}
+                        {activeTab === 4 && <Exercise4 />}
+                        {activeTab === 5 && <Exercise5 />}
+                        {activeTab === 6 && <Exercise6 />}
+                    </main>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

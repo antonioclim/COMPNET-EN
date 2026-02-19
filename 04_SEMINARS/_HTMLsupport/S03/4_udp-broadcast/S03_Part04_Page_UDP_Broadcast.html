@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UDP Broadcast Simulator</title>
+    <style>
+        :root {
+            --bg-app: #1e1e1e;
+            --bg-panel: #252526;
+            --term-bg: #0c0c0c;
+            --wireshark-bg: #ffffff;
+            --text-main: #cccccc;
+            --text-bright: #ffffff;
+            --accent-bcast: #f1fa8c; /* Yellow for Broadcast */
+            --accent-sender: #ff79c6; /* Pink */
+            --accent-recv: #8be9fd; /* Cyan */
+            --border: #333;
+            --font-mono: 'Consolas', 'Monaco', monospace;
+            --font-sans: 'Segoe UI', sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-app);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* --- Header --- */
+        header {
+            background: var(--bg-panel);
+            padding: 0 1.5rem;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            justify-content: space-between;
+        }
+        
+        h1 { font-size: 1.1rem; font-weight: 600; color: var(--text-bright); }
+        .badge { background: var(--accent-bcast); color: #282a36; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; margin-left: 10px; font-weight: bold; }
+
+        /* --- Main Layout --- */
+        main {
+            flex: 1;
+            display: grid;
+            grid-template-rows: 65% 35%; /* Diagram top, Logs/Wireshark bottom */
+            overflow: hidden;
+        }
+
+        /* Diagram Area */
+        .diagram-container {
+            position: relative;
+            background: radial-gradient(circle at center, #2a2a2a 0%, #1e1e1e 80%);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .network-switch {
+            width: 200px;
+            height: 60px;
+            background: #44475a;
+            border: 2px solid #6272a4;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: bold;
+            z-index: 5;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        .node {
+            width: 100px;
+            height: 100px;
+            background: var(--bg-panel);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            z-index: 10;
+            transition: all 0.3s;
+        }
+
+        .node-icon { font-size: 2rem; margin-bottom: 5px; }
+        .node-label { font-size: 0.8rem; font-weight: bold; color: #fff; }
+        .node-ip { font-size: 0.7rem; color: #888; }
+
+        /* Sender Position */
+        #senderNode { top: 40px; border-color: var(--accent-sender); }
+
+        /* Receivers Row */
+        .receivers-row {
+            position: absolute;
+            bottom: 40px;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            padding: 0 50px;
+        }
+
+        .receiver-node { border-color: var(--accent-recv); position: relative; }
+
+        /* Packet Animation */
+        .packet {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: var(--accent-bcast);
+            border-radius: 50%;
+            z-index: 20;
+            box-shadow: 0 0 10px var(--accent-bcast);
+            display: none;
+        }
+
+        /* Broadcast Wave Effect */
+        .wave {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            border: 2px solid var(--accent-bcast);
+            opacity: 0;
+            z-index: 1;
+        }
+        
+        @keyframes ripple {
+            0% { width: 10px; height: 10px; opacity: 0.8; }
+            100% { width: 600px; height: 600px; opacity: 0; border-width: 0px; }
+        }
+
+        /* Log Popups on Receivers */
+        .log-popup {
+            position: absolute;
+            bottom: 110%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s, bottom 0.3s;
+            font-weight: bold;
+            pointer-events: none;
+        }
+        
+        .log-ok { color: green; border: 1px solid green; }
+        .log-skip { color: #d16969; border: 1px solid #d16969; }
+
+        /* Bottom Panel: Split Logs & Wireshark */
+        .bottom-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border-top: 4px solid var(--border);
+        }
+
+        .panel-col {
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .panel-header {
+            background: #252526;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .terminal-log {
+            background: var(--term-bg);
+            flex: 1;
+            padding: 10px;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: #ccc;
+            overflow-y: auto;
+        }
+
+        .log-line { margin-bottom: 2px; }
+        .kw-ok { color: var(--accent-green); }
+        .kw-skip { color: #ff5555; }
+
+        /* Wireshark Table */
+        table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
+        th { background: #e6e6e6; text-align: left; padding: 4px; position: sticky; top: 0; }
+        td { padding: 2px 4px; border-bottom: 1px solid #eee; background: #fff; color: #333; }
+        tr.highlight-row { background: #fff3e0; }
+
+        /* Footer Controls */
+        footer {
+            background: var(--bg-panel);
+            padding: 1rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        input[type="text"] {
+            background: #111;
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 0.5rem;
+            border-radius: 4px;
+            width: 200px;
+        }
+
+        button {
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--bg-panel);
+            color: #fff;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        
+        button:hover { background: #44475a; }
+        button.btn-send { background: var(--accent-sender); border-color: var(--accent-sender); color: #282a36; }
+        button.btn-send:hover { filter: brightness(1.1); }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>UDP Broadcast <span class="badge">255.255.255.255</span></h1>
+</header>
+
+<main>
+    <!-- Visual Diagram -->
+    <div class="diagram-container">
+        <!-- Switch/Network Core -->
+        <div class="network-switch" id="switch">Network Switch</div>
+        <div class="wave" id="waveAnim"></div>
+
+        <!-- Sender -->
+        <div class="node" id="senderNode">
+            <div class="node-icon">📡</div>
+            <div class="node-label">Sender</div>
+            <div class="node-ip">192.168.1.100</div>
+        </div>
+
+        <!-- Receivers -->
+        <div class="receivers-row">
+            <div class="node receiver-node" id="recv1">
+                <div class="log-popup" id="pop1">...</div>
+                <div class="node-icon">🖥️</div>
+                <div class="node-label">Recv 1</div>
+                <div class="node-ip">.101 :5007</div>
+            </div>
+            
+            <div class="node receiver-node" id="recv2">
+                <div class="log-popup" id="pop2">...</div>
+                <div class="node-icon">💻</div>
+                <div class="node-label">Recv 2</div>
+                <div class="node-ip">.102 :5007</div>
+            </div>
+            
+            <div class="node receiver-node" id="recv3">
+                <div class="log-popup" id="pop3">...</div>
+                <div class="node-icon">📱</div>
+                <div class="node-label">Recv 3</div>
+                <div class="node-ip">.103 :5007</div>
+            </div>
+        </div>
+
+        <!-- Packet Element -->
+        <div class="packet" id="packet"></div>
+        <div class="packet" id="p1"></div>
+        <div class="packet" id="p2"></div>
+        <div class="packet" id="p3"></div>
+    </div>
+
+    <!-- Logs & Wireshark -->
+    <div class="bottom-panel">
+        <div class="panel-col">
+            <div class="panel-header">Receiver Logs (Template Logic)</div>
+            <div class="terminal-log" id="recvLog">
+                <div class="log-line" style="color:#888"># Waiting for broadcast...</div>
+            </div>
+        </div>
+        <div class="panel-col">
+            <div class="panel-header">Wireshark Capture (udp.port == 5007)</div>
+            <div style="flex:1; overflow-y:auto; background:#fff;">
+                <table id="wsTable">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Source</th>
+                            <th>Destination</th>
+                            <th>Protocol</th>
+                            <th>Length</th>
+                            <th>Info</th>
+                        </tr>
+                    </thead>
+                    <tbody id="wsBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer>
+    <input type="text" id="msgInput" value="Hello Broadcast">
+    <button class="btn-send" id="btnSend" onclick="sendBroadcast()">Send Broadcast</button>
+    <div style="width: 20px"></div>
+    <button onclick="sendBadMsg()">Send "Other"</button>
+    <button onclick="clearLogs()">Clear</button>
+</footer>
+
+<script>
+    // --- State ---
+    let packetCount = 0;
+    let msgCounter = 0; // For the lab counter requirement
+
+    // --- Actions ---
+
+    async function sendBroadcast() {
+        const input = document.getElementById('msgInput');
+        const text = input.value;
+        await simulateTransmission(text, true);
+    }
+
+    async function sendBadMsg() {
+        await simulateTransmission("Just noise", false);
+    }
+
+    async function simulateTransmission(text, isHello) {
+        document.getElementById('btnSend').disabled = true;
+        
+        // Update Counter logic from Template
+        msgCounter++; 
+        
+        // 1. Sender -> Switch
+        const sender = document.getElementById('senderNode');
+        const sw = document.getElementById('switch');
+        
+        // Log Sender
+        logWireshark("192.168.1.100", "255.255.255.255", 5007, text);
+        
+        await animatePacket(sender, sw, 'packet');
+        
+        // 2. Switch Broadcast (Wave)
+        triggerWave();
+        
+        // 3. Switch -> All Receivers (Parallel)
+        const p1 = animatePacket(sw, document.getElementById('recv1'), 'p1');
+        const p2 = animatePacket(sw, document.getElementById('recv2'), 'p2');
+        const p3 = animatePacket(sw, document.getElementById('recv3'), 'p3');
+        
+        await Promise.all([p1, p2, p3]);
+        
+        // 4. Processing Logic (Filter)
+        processAtReceiver(1, text, isHello);
+        processAtReceiver(2, text, isHello);
+        processAtReceiver(3, text, isHello);
+        
+        // Global Log update
+        if (text.startsWith("Hello")) {
+            logReceiver(`[OK] (#${msgCounter}) From 192.168.1.100 -> "${text}"`, "kw-ok");
+        } else {
+            logReceiver(`[SKIP] From 192.168.1.100 -> "${text}"`, "kw-skip");
+        }
+
+        document.getElementById('btnSend').disabled = false;
+    }
+
+    function processAtReceiver(id, text, isHello) {
+        const popup = document.getElementById(`pop${id}`);
+        const node = document.getElementById(`recv${id}`);
+        
+        // Template Logic: startswith("Hello")
+        const isValid = text.startsWith("Hello");
+        
+        popup.innerText = isValid ? "[OK] Processed" : "[SKIP] Ignored";
+        popup.className = `log-popup ${isValid ? 'log-ok' : 'log-skip'}`;
+        
+        // Animate Popup
+        popup.style.opacity = 1;
+        popup.style.bottom = "120%";
+        
+        // Visual Feedback on Node
+        node.style.borderColor = isValid ? "var(--accent-green)" : "#ff5555";
+        
+        setTimeout(() => {
+            popup.style.opacity = 0;
+            popup.style.bottom = "110%";
+            node.style.borderColor = "var(--accent-recv)";
+        }, 1500);
+    }
+
+    function triggerWave() {
+        const wave = document.getElementById('waveAnim');
+        // Reset animation
+        wave.style.animation = 'none';
+        wave.offsetHeight; /* trigger reflow */
+        wave.style.animation = 'ripple 0.8s ease-out';
+    }
+
+    // --- Logging ---
+
+    function logReceiver(msg, cssClass) {
+        const div = document.createElement('div');
+        div.className = `log-line ${cssClass || ''}`;
+        div.innerText = msg;
+        const container = document.getElementById('recvLog');
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function logWireshark(src, dst, port, info) {
+        const tbody = document.getElementById('wsBody');
+        const tr = document.createElement('tr');
+        
+        const time = new Date().toISOString().split('T')[1].slice(0,8);
+        const len = 42 + info.length; // Fake length
+        
+        tr.innerHTML = `
+            <td>${time}</td>
+            <td>${src}</td>
+            <td>${dst}</td>
+            <td>UDP</td>
+            <td>${len}</td>
+            <td>Source port: random  Destination port: ${port}  Data: ${info}</td>
+        `;
+        
+        tr.className = "highlight-row";
+        tbody.appendChild(tr);
+        tr.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        
+        // Remove highlight after a bit
+        setTimeout(() => tr.classList.remove('highlight-row'), 1000);
+    }
+
+    function clearLogs() {
+        document.getElementById('recvLog').innerHTML = '';
+        document.getElementById('wsBody').innerHTML = '';
+        msgCounter = 0;
+    }
+
+    // --- Animation Utils ---
+
+    function animatePacket(fromEl, toEl, packetId) {
+        return new Promise(resolve => {
+            const pkt = document.getElementById(packetId);
+            const parent = document.querySelector('.diagram-container').getBoundingClientRect();
+            const fRect = fromEl.getBoundingClientRect();
+            const tRect = toEl.getBoundingClientRect();
+
+            const startX = fRect.left + fRect.width/2 - parent.left;
+            const startY = fRect.top + fRect.height/2 - parent.top;
+            const endX = tRect.left + tRect.width/2 - parent.left;
+            const endY = tRect.top + tRect.height/2 - parent.top;
+
+            pkt.style.display = 'block';
+            pkt.style.left = `${startX}px`;
+            pkt.style.top = `${startY}px`;
+            pkt.style.transition = 'none';
+
+            void pkt.offsetWidth;
+
+            pkt.style.transition = 'all 0.5s linear';
+            pkt.style.left = `${endX}px`;
+            pkt.style.top = `${endY}px`;
+
+            setTimeout(() => {
+                pkt.style.display = 'none';
+                resolve();
+            }, 500);
+        });
+    }
+
+</script>
+
+</body>
+</html>

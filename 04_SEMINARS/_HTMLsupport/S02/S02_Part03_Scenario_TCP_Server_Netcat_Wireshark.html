@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TCP Lab: Server, Netcat & Wireshark</title>
+    <style>
+        :root {
+            --bg-app: #1e1e1e;
+            --bg-panel: #252526;
+            --term-bg: #0c0c0c;
+            --wireshark-bg: #ffffff;
+            --text-main: #cccccc;
+            --text-bright: #ffffff;
+            --accent: #007acc;
+            --accent-green: #4ec9b0;
+            --border: #333;
+            --font-mono: 'Consolas', 'Monaco', monospace;
+            --font-sans: 'Segoe UI', sans-serif;
+            
+            /* Wireshark Colours */
+            --ws-selected: #cfe2f3;
+            --ws-tcp: #e4ffc7;
+            --ws-header: #e6e6e6;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-app);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* --- Header --- */
+        header {
+            background: var(--bg-panel);
+            padding: 0 1.5rem;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            justify-content: space-between;
+        }
+        
+        h1 { font-size: 1.1rem; font-weight: 600; color: var(--text-bright); }
+        .subtitle { font-size: 0.8rem; color: #888; margin-left: 10px; }
+
+        /* --- Main Workspace --- */
+        main {
+            flex: 1;
+            display: grid;
+            grid-template-rows: 60% 40%; /* Terminals top, Wireshark bottom */
+            overflow: hidden;
+        }
+
+        .terminals-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border-bottom: 4px solid var(--border);
+        }
+
+        /* --- Terminal Components --- */
+        .terminal-window {
+            background-color: var(--term-bg);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            overflow: hidden;
+        }
+
+        .term-header {
+            background: #333;
+            padding: 5px 10px;
+            font-size: 0.75rem;
+            color: #ddd;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .term-body {
+            padding: 10px;
+            flex: 1;
+            overflow-y: auto;
+            color: #d4d4d4;
+            white-space: pre-wrap;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 15px;
+            background: #ccc;
+            animation: blink 1s step-end infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* Terminal Prompt Colours */
+        .prompt-server { color: #4ec9b0; }
+        .prompt-client { color: #ce9178; }
+        .cmd-text { color: #ffffff; }
+
+        /* --- Wireshark Simulation --- */
+        .wireshark-panel {
+            background: var(--wireshark-bg);
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            font-family: var(--font-sans);
+            font-size: 0.8rem;
+        }
+
+        .ws-toolbar {
+            background: #f0f0f0;
+            padding: 5px;
+            border-bottom: 1px solid #ccc;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .ws-filter-box {
+            background: #fff;
+            border: 1px solid #ccc;
+            padding: 2px 5px;
+            width: 300px;
+            font-family: var(--font-mono);
+            color: #008000; /* Valid filter green */
+        }
+
+        .ws-table-container {
+            flex: 1;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        th {
+            background: var(--ws-header);
+            text-align: left;
+            padding: 4px;
+            border-right: 1px solid #ccc;
+            border-bottom: 1px solid #ccc;
+            font-weight: normal;
+            font-size: 0.75rem;
+            position: sticky;
+            top: 0;
+        }
+
+        td {
+            padding: 2px 4px;
+            border-bottom: 1px solid #f0f0f0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        tr.packet-row {
+            background-color: var(--ws-tcp);
+            cursor: pointer;
+        }
+
+        tr.packet-row:hover { background-color: #dbf0c0; }
+        tr.packet-row.selected { background-color: var(--ws-selected); }
+
+        /* --- Control Footer --- */
+        footer {
+            background: var(--bg-panel);
+            padding: 1rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .instruction-box {
+            flex: 1;
+            margin-right: 2rem;
+        }
+        
+        .step-badge {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .instruction-text {
+            font-size: 0.95rem;
+            color: var(--text-bright);
+        }
+
+        button {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover { background: #0062a3; }
+        button:disabled { background: #444; cursor: not-allowed; opacity: 0.7; }
+
+        /* --- Responsive Design --- */
+        @media (max-width: 800px) {
+            main { grid-template-rows: 50% 50%; }
+            .terminals-container { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+            .terminal-window { border-right: none; border-bottom: 1px solid var(--border); }
+            th:nth-child(4), th:nth-child(5), td:nth-child(4), td:nth-child(5) { display: none; } /* Hide less important cols on mobile */
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Lab Simulator <span class="subtitle">TCP Server, Netcat & Wireshark Analysis</span></h1>
+    <div style="font-size: 0.8rem; color: #888;">Scenario: S02_Part03_Scenario_TCP_Server_Netcat_Wireshark.md</div>
+</header>
+
+<main>
+    <!-- Top Half: Terminals -->
+    <div class="terminals-container">
+        
+        <!-- Terminal 1: Server -->
+        <div class="terminal-window" id="termServer">
+            <div class="term-header">
+                <span>student@lab-machine: ~/tcp_project</span>
+                <span>Server Terminal</span>
+            </div>
+            <div class="term-body" id="termBodyServer">
+                <div class="line"><span class="prompt-server">student@lab:$</span> <span class="cursor"></span></div>
+            </div>
+        </div>
+
+        <!-- Terminal 2: Client -->
+        <div class="terminal-window" id="termClient">
+            <div class="term-header">
+                <span>student@lab-machine: ~</span>
+                <span>Client (Netcat) Terminal</span>
+            </div>
+            <div class="term-body" id="termBodyClient">
+                <div class="line"><span class="prompt-client">student@lab:$</span> </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Half: Wireshark -->
+    <div class="wireshark-panel">
+        <div class="ws-toolbar">
+            <span style="font-weight: bold; color:#0066cc;">Wireshark</span>
+            <span style="color:#666;">|</span>
+            <span>Filter:</span>
+            <input type="text" class="ws-filter-box" value="tcp.port == 12345" readonly>
+            <span style="flex:1;"></span>
+            <span style="font-size:0.75rem; color:#666;">Interface: Loopback: lo0</span>
+        </div>
+        <div class="ws-table-container">
+            <table id="wsTable">
+                <thead>
+                    <tr>
+                        <th style="width: 60px;">No.</th>
+                        <th style="width: 80px;">Time</th>
+                        <th style="width: 120px;">Source</th>
+                        <th style="width: 120px;">Destination</th>
+                        <th style="width: 80px;">Protocol</th>
+                        <th style="width: 60px;">Len</th>
+                        <th>Info</th>
+                    </tr>
+                </thead>
+                <tbody id="wsTableBody">
+                    <!-- Packets will appear here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<footer>
+    <div class="instruction-box">
+        <div class="step-badge" id="stepBadge">Step 1: Initiation</div>
+        <div class="instruction-text" id="instructionText">Prepare the environment. Launch the Python TCP server to begin listening for incoming connections.</div>
+    </div>
+    <button id="actionBtn" onclick="labManager.next()">Run Server Command</button>
+</footer>
+
+<script>
+    // --- Utilities ---
+    const wait = (ms) => new Promise(res => setTimeout(res, ms));
+
+    // --- Terminal Logic ---
+    class Terminal {
+        constructor(elementId, promptClass, promptText) {
+            this.body = document.getElementById(elementId);
+            this.promptClass = promptClass;
+            this.promptText = promptText;
+            this.lines = [];
+        }
+
+        async typeCommand(cmd) {
+            // Remove cursor from current line
+            const currentLine = this.body.lastElementChild;
+            const cursor = currentLine.querySelector('.cursor');
+            if(cursor) cursor.remove();
+
+            // Create text node for command
+            const cmdSpan = document.createElement('span');
+            cmdSpan.className = 'cmd-text';
+            currentLine.appendChild(cmdSpan);
+
+            // Re-add cursor
+            const newCursor = document.createElement('span');
+            newCursor.className = 'cursor';
+            currentLine.appendChild(newCursor);
+
+            // Type effect
+            for (let char of cmd) {
+                cmdSpan.innerText += char;
+                await wait(Math.random() * 50 + 30);
+            }
+            
+            await wait(200);
+            newCursor.remove();
+        }
+
+        output(text) {
+            const div = document.createElement('div');
+            div.innerText = text;
+            div.style.color = '#ccc';
+            this.body.appendChild(div);
+            this.scrollToBottom();
+        }
+
+        newPrompt() {
+            const div = document.createElement('div');
+            div.className = 'line';
+            div.innerHTML = `<span class="${this.promptClass}">${this.promptText}</span> <span class="cursor"></span>`;
+            this.body.appendChild(div);
+            this.scrollToBottom();
+        }
+
+        scrollToBottom() {
+            this.body.scrollTop = this.body.scrollHeight;
+        }
+    }
+
+    // --- Wireshark Logic ---
+    class Wireshark {
+        constructor() {
+            this.tbody = document.getElementById('wsTableBody');
+            this.packetCount = 0;
+            this.startTime = Date.now();
+        }
+
+        addPacket(src, dst, info, len=0, flags="") {
+            this.packetCount++;
+            const timeOffset = ((Date.now() - this.startTime) / 1000).toFixed(6);
+            
+            const tr = document.createElement('tr');
+            tr.className = 'packet-row';
+            tr.innerHTML = `
+                <td>${this.packetCount}</td>
+                <td>${timeOffset}</td>
+                <td>${src}</td>
+                <td>${dst}</td>
+                <td>TCP</td>
+                <td>${len}</td>
+                <td>${info}</td>
+            `;
+            
+            // Animation for new row
+            tr.style.animation = "highlight 1s";
+            this.tbody.appendChild(tr);
+            
+            // Auto scroll
+            tr.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }
+    }
+
+    // --- Lab Scenario Manager ---
+    class LabManager {
+        constructor() {
+            this.step = 0;
+            this.termServer = new Terminal('termBodyServer', 'prompt-server', 'student@lab:$');
+            this.termClient = new Terminal('termBodyClient', 'prompt-client', 'student@lab:$');
+            this.wireshark = new Wireshark();
+            
+            this.badge = document.getElementById('stepBadge');
+            this.text = document.getElementById('instructionText');
+            this.btn = document.getElementById('actionBtn');
+        }
+
+        async next() {
+            this.btn.disabled = true;
+
+            switch(this.step) {
+                case 0: // Step 1: Run Server
+                    await this.runServer();
+                    break;
+                case 1: // Step 2: Connect Netcat
+                    await this.connectNetcat();
+                    break;
+                case 2: // Step 3: Send Message
+                    await this.sendMessage();
+                    break;
+                case 3: // Step 4: Template Switch
+                    await this.switchToTemplate();
+                    break;
+                case 4: // Step 5: Test Template
+                    await this.testTemplate();
+                    break;
+            }
+
+            this.btn.disabled = false;
+            this.step++;
+        }
+
+        // --- Step Implementations ---
+
+        async runServer() {
+            this.badge.innerText = "Step 2: Start Server";
+            this.text.innerText = "Executing 'python3 S02_Part01_Example_TCP_Server.py'. The server will bind to localhost:12345.";
+            
+            await this.termServer.typeCommand("python3 S02_Part01_Example_TCP_Server.py");
+            this.termServer.output("[INFO] TCP server listening on localhost:12345");
+            // No new prompt, server is blocking
+            
+            this.updateUI("Step 3: Connect Client", "Now, switch to the second terminal. Use 'netcat' to initiate a TCP connection to 127.0.0.1 on port 12345.", "Run Netcat");
+        }
+
+        async connectNetcat() {
+            // Wireshark: 3-Way Handshake
+            await this.termClient.typeCommand("nc 127.0.0.1 12345");
+            
+            // SYN
+            this.wireshark.addPacket("54321", "12345", "54321 → 12345 [SYN] Seq=0 Win=65535 Len=0 MSS=65495", 0);
+            await wait(200);
+            // SYN-ACK
+            this.wireshark.addPacket("12345", "54321", "12345 → 54321 [SYN, ACK] Seq=0 Ack=1 Win=65535 Len=0", 0);
+            await wait(100);
+            // ACK
+            this.wireshark.addPacket("54321", "12345", "54321 → 12345 [ACK] Seq=1 Ack=1 Win=65535 Len=0", 0);
+            
+            this.termServer.output("('127.0.0.1', 54321) wrote:"); // Server log logic
+            
+            this.updateUI("Step 3: Data Transmission", "Connection established. Type 'hello tcp' in the client terminal to test the echo functionality.", "Send Message");
+        }
+
+        async sendMessage() {
+            const msg = "hello tcp";
+            await this.termClient.typeCommand(msg);
+            this.termClient.output("HELLO TCP"); // Echo response
+            
+            this.termServer.output("b'hello tcp'"); // Server raw output
+            
+            // Wireshark: PSH, ACK
+            this.wireshark.addPacket("54321", "12345", "54321 → 12345 [PSH, ACK] Seq=1 Ack=1 Win=65535 Len=10", 10, "PSH");
+            await wait(300);
+            this.wireshark.addPacket("12345", "54321", "12345 → 54321 [PSH, ACK] Seq=1 Ack=11 Win=65535 Len=10", 10, "PSH");
+            
+            // Packet ACK
+            this.wireshark.addPacket("54321", "12345", "54321 → 12345 [ACK] Seq=11 Ack=11 Win=65535 Len=0", 0);
+
+            this.updateUI("Step 5: Student Task", "Excellent. You've verified the reference implementation. Now, let's simulate modifying the code to 'S02_Part02_Solution_TCP_Server_Template.py' and testing the new requirements.", "Load Modified Server");
+        }
+
+        async switchToTemplate() {
+            // Simulate stopping old server and starting new one
+            this.termServer.output("^C"); // Ctrl+C
+            this.termServer.output("[INFO] Shutting down server...");
+            this.termServer.newPrompt();
+            
+            // Stop client too
+            this.termClient.output("^C");
+            this.termClient.newPrompt();
+
+            // Wireshark: FIN
+            this.wireshark.addPacket("54321", "12345", "54321 → 12345 [FIN, ACK] Seq=11 Ack=11", 0);
+            this.wireshark.addPacket("12345", "54321", "12345 → 54321 [FIN, ACK] Seq=11 Ack=12", 0);
+
+            await wait(1000);
+
+            // Run New Server
+            await this.termServer.typeCommand("python3 S02_Part02_Solution_TCP_Server_Template.py");
+            this.termServer.output("[INFO] TCP server listening on localhost:12345");
+
+            this.updateUI("Final Step: Verify Template", "The modified server is running. It should now log the length and prefix the response with 'OK: '. Let's test it.", "Test New Logic");
+        }
+
+        async testTemplate() {
+            // Connect Client again
+            await this.termClient.typeCommand("nc 127.0.0.1 12345");
+            await wait(500); // skip handshake visual for brevity, assume established
+
+            // Send "test"
+            await this.termClient.typeCommand("testing template");
+            
+            // Expected Output in Client: OK: TESTING TEMPLATE
+            this.termClient.output("OK: TESTING TEMPLATE");
+
+            // Expected Output in Server:
+            // [CLIENT] 127.0.0.1:54322 connected
+            // [CLIENT] Sent 16 bytes: b'testing template'
+            this.termServer.output("[CLIENT] 127.0.0.1:54322 connected");
+            this.termServer.output("[CLIENT] Sent 16 bytes: b'testing template'");
+
+            // Wireshark update
+            this.wireshark.addPacket("54322", "12345", "54322 → 12345 [PSH, ACK] Seq=1 Ack=1 Len=16", 16);
+            this.wireshark.addPacket("12345", "54322", "12345 → 54322 [PSH, ACK] Seq=1 Ack=17 Len=20", 20); // Len 20 because "OK: " (4) + 16
+
+            this.badge.innerText = "Lab Complete";
+            this.badge.style.background = "#4ec9b0";
+            this.text.innerText = "Success! The server correctly logs metadata and formats the response. You are ready to export your capture.";
+            this.btn.innerText = "Reset Simulation";
+            this.btn.onclick = () => location.reload();
+        }
+
+        updateUI(badge, text, btnText) {
+            this.badge.innerText = badge;
+            this.text.innerText = text;
+            this.btn.innerText = btnText;
+        }
+    }
+
+    const labManager = new LabManager();
+
+</script>
+
+</body>
+</html>

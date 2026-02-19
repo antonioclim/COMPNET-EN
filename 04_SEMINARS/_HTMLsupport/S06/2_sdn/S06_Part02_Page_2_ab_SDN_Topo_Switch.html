@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDN Concept Visualization: Mininet & OpenFlow</title>
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --text-color: #334155;
+            --card-bg: #ffffff;
+            --primary: #2563eb;
+            --secondary: #475569;
+            --accent-success: #10b981;
+            --accent-danger: #ef4444;
+            --accent-warn: #f59e0b;
+            --controller-color: #7c3aed;
+            --switch-color: #0f172a;
+            --host-color: #3b82f6;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+
+        h1 { margin: 0; font-size: 1.5rem; color: var(--switch-color); }
+        h2 { margin: 5px 0 0; font-size: 0.9rem; font-weight: normal; color: var(--secondary); }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+            flex: 1;
+            min-height: 0;
+        }
+
+        /* Canvas Area */
+        .visualization-area {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+
+        .controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .btn-ping-allow { background: var(--primary); color: white; }
+        .btn-ping-allow:hover { background: #1d4ed8; }
+        
+        .btn-ping-block { background: var(--accent-danger); color: white; }
+        .btn-ping-block:hover { background: #b91c1c; }
+
+        .btn-reset { background: var(--secondary); color: white; }
+        .btn-reset:hover { background: #334155; }
+
+        /* Topology Nodes */
+        .node {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            z-index: 2;
+            transition: transform 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .node-icon { font-size: 1.5rem; margin-bottom: 4px; }
+        .node-ip { font-size: 0.65rem; font-weight: normal; opacity: 0.9; }
+
+        .host { background: var(--host-color); color: white; }
+        .switch { background: var(--switch-color); color: white; border-radius: 8px; width: 100px; height: 60px; }
+        .controller { background: var(--controller-color); color: white; border: 2px dashed #a78bfa; }
+
+        /* SVG Lines */
+        svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        line {
+            stroke: #cbd5e1;
+            stroke-width: 3;
+        }
+
+        .packet {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--accent-warn);
+            border: 2px solid white;
+            z-index: 5;
+            display: none;
+            box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+        }
+
+        .panel {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .panel-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--secondary);
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Flow Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.75rem;
+        }
+        
+        th { text-align: left; color: var(--secondary); padding: 4px; border-bottom: 1px solid #e2e8f0; }
+        td { padding: 6px 4px; border-bottom: 1px solid #f1f5f9; font-family: monospace; }
+        tr:last-child td { border-bottom: none; }
+        
+        .action-output { color: var(--accent-success); font-weight: bold; }
+        .action-drop { color: var(--accent-danger); font-weight: bold; }
+        .action-controller { color: var(--controller-color); font-weight: bold; }
+
+        /* Logs */
+        .log-container {
+            height: 200px;
+            overflow-y: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.75rem;
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        .log-entry { margin-bottom: 4px; border-left: 3px solid transparent; padding-left: 8px; }
+        .log-info { border-color: var(--primary); }
+        .log-success { border-color: var(--accent-success); color: #86efac; }
+        .log-error { border-color: var(--accent-danger); color: #fca5a5; }
+        .log-sdn { border-color: var(--controller-color); color: #d8b4fe; }
+
+        /* Legend */
+        .legend { display: flex; gap: 10px; font-size: 0.75rem; margin-top: 5px; }
+        .legend-item { display: flex; align-items: center; gap: 4px; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            background: #e2e8f0;
+            color: #475569;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>SDN Topology: Open vSwitch & Controller</h1>
+    <h2>Simulation of S06_Part02B_Script_SDN_Topo_Switch.py logic</h2>
+</header>
+
+<div class="main-layout">
+    <div class="visualization-area" id="canvas">
+        <div class="controls">
+            <button class="btn-ping-allow" onclick="runSimulation('h2')">Simulate: h1 ping 10.0.10.2 (Allow)</button>
+            <button class="btn-ping-block" onclick="runSimulation('h3')">Simulate: h1 ping 10.0.10.3 (Block)</button>
+            <button class="btn-reset" onclick="resetSim()">Reset Switch State</button>
+            <div class="legend">
+                <div class="legend-item"><div class="dot" style="background:var(--host-color)"></div>Host</div>
+                <div class="legend-item"><div class="dot" style="background:var(--switch-color)"></div>Switch (OVS)</div>
+                <div class="legend-item"><div class="dot" style="background:var(--controller-color)"></div>Controller</div>
+            </div>
+        </div>
+
+        <svg id="connections"></svg>
+
+        <!-- Nodes will be placed by JS -->
+        <div id="packet" class="packet"></div>
+    </div>
+
+    <div class="sidebar">
+        <!-- Flow Table Panel -->
+        <div class="panel">
+            <div class="panel-title">
+                <span>s1 Flow Table (Data Plane)</span>
+                <span id="flow-count" class="status-badge">0 Rules</span>
+            </div>
+            <div style="min-height: 100px;">
+                <table id="flow-table">
+                    <thead>
+                        <tr>
+                            <th>Priority</th>
+                            <th>Match</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="flow-body">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+                <div id="empty-state" style="text-align: center; padding: 20px; color: #94a3b8; font-size: 0.8rem; font-style: italic;">
+                    Table Empty. Default behaviour: Send to Controller.
+                </div>
+            </div>
+        </div>
+
+        <!-- Explanation Panel -->
+        <div class="panel">
+            <div class="panel-title">Logic Analysis</div>
+            <div id="explanation-text" style="font-size: 0.85rem; line-height: 1.4; color: var(--secondary);">
+                Ready to simulate.<br><br>
+                <strong>SDN Principle:</strong> The switch (s1) has no intelligence initially. It relies on the Controller (Control Plane) to install rules for the Data Plane.
+            </div>
+        </div>
+
+        <!-- Logs -->
+        <div class="log-container" id="logs">
+            <div class="log-entry log-info">> Mininet topology loaded.</div>
+            <div class="log-entry log-info">> Controller connected on 127.0.0.1:6633.</div>
+            <div class="log-entry log-info">> Ready.</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Configuration
+    const topology = {
+        controller: { id: 'c0', x: 50, y: 15, label: 'Controller', type: 'controller', ip: '127.0.0.1' },
+        s1: { id: 's1', x: 50, y: 50, label: 's1 (OVS)', type: 'switch', ip: '' },
+        h1: { id: 'h1', x: 20, y: 85, label: 'h1', type: 'host', ip: '10.0.10.1' },
+        h2: { id: 'h2', x: 50, y: 85, label: 'h2', type: 'host', ip: '10.0.10.2' },
+        h3: { id: 'h3', x: 80, y: 85, label: 'h3', type: 'host', ip: '10.0.10.3' }
+    };
+
+    // State
+    let flows = [];
+    let isAnimating = false;
+
+    // DOM Elements
+    const canvas = document.getElementById('canvas');
+    const svg = document.getElementById('connections');
+    const flowBody = document.getElementById('flow-body');
+    const emptyState = document.getElementById('empty-state');
+    const logContainer = document.getElementById('logs');
+    const packetEl = document.getElementById('packet');
+    const explanationEl = document.getElementById('explanation-text');
+    const flowCountBadge = document.getElementById('flow-count');
+
+    // Initialize Layout
+    function init() {
+        // Create Nodes
+        Object.values(topology).forEach(node => {
+            const el = document.createElement('div');
+            el.className = `node ${node.type}`;
+            el.id = node.id;
+            el.style.left = `calc(${node.x}% - ${node.type === 'switch' ? 50 : 40}px)`;
+            el.style.top = `calc(${node.y}% - ${node.type === 'switch' ? 30 : 40}px)`;
+            
+            let icon = '💻';
+            if (node.type === 'switch') icon = '🔄';
+            if (node.type === 'controller') icon = '🧠';
+
+            el.innerHTML = `
+                <div class="node-icon">${icon}</div>
+                <div>${node.label}</div>
+                ${node.ip ? `<div class="node-ip">${node.ip}</div>` : ''}
+            `;
+            canvas.appendChild(el);
+        });
+
+        // Create Links
+        drawLink('controller', 's1', true); // dashed for control plane
+        drawLink('h1', 's1');
+        drawLink('h2', 's1');
+        drawLink('h3', 's1');
+    }
+
+    function drawLink(id1, id2, dashed = false) {
+        const n1 = topology[id1];
+        const n2 = topology[id2];
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        
+        // Coordinates are percentage based, need to map to bounding box on resize, 
+        // but for simplicity in this specific container we assume relative consistency
+        // Using getBoundingClientRect would be more robust for complex apps
+        
+        line.setAttribute('x1', `${n1.x}%`);
+        line.setAttribute('y1', `${n1.y}%`);
+        line.setAttribute('x2', `${n2.x}%`);
+        line.setAttribute('y2', `${n2.y}%`);
+        
+        if (dashed) {
+            line.setAttribute('stroke-dasharray', '5,5');
+            line.setAttribute('stroke', '#a78bfa');
+        }
+
+        svg.appendChild(line);
+    }
+
+    // Animation Helpers
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function log(msg, type = 'info') {
+        const div = document.createElement('div');
+        div.className = `log-entry log-${type}`;
+        div.innerText = `> ${msg}`;
+        logContainer.appendChild(div);
+        logContainer.scrollTop = logContainer.scrollHeight;
+    }
+
+    function explain(text) {
+        explanationEl.innerHTML = text;
+    }
+
+    async function movePacket(fromId, toId, color = '#f59e0b') {
+        const fromNode = topology[fromId];
+        const toNode = topology[toId];
+        
+        packetEl.style.display = 'block';
+        packetEl.style.background = color;
+        packetEl.style.boxShadow = `0 0 8px ${color}`;
+
+        const duration = 1000;
+        const start = performance.now();
+
+        return new Promise(resolve => {
+            function step(timestamp) {
+                const progress = Math.min((timestamp - start) / duration, 1);
+                
+                const currentX = fromNode.x + (toNode.x - fromNode.x) * progress;
+                const currentY = fromNode.y + (toNode.y - fromNode.y) * progress;
+
+                packetEl.style.left = `calc(${currentX}% - 8px)`;
+                packetEl.style.top = `calc(${currentY}% - 8px)`;
+
+                if (progress < 1) {
+                    requestAnimationFrame(step);
+                } else {
+                    packetEl.style.display = 'none';
+                    resolve();
+                }
+            }
+            requestAnimationFrame(step);
+        });
+    }
+
+    function addFlow(priority, match, action, type) {
+        // Check if exists
+        const exists = flows.some(f => f.match === match);
+        if (exists) return;
+
+        flows.push({ priority, match, action, type });
+        renderFlows();
+        
+        // Flash visualization on switch
+        const sw = document.getElementById('s1');
+        sw.style.boxShadow = "0 0 20px #2563eb";
+        setTimeout(() => sw.style.boxShadow = "none", 500);
+    }
+
+    function renderFlows() {
+        flowBody.innerHTML = '';
+        if (flows.length === 0) {
+            emptyState.style.display = 'block';
+            flowCountBadge.innerText = '0 Rules';
+            return;
+        }
+        
+        emptyState.style.display = 'none';
+        flowCountBadge.innerText = `${flows.length} Rules`;
+
+        flows.forEach(flow => {
+            const row = document.createElement('tr');
+            let actionClass = 'action-output';
+            if (flow.type === 'drop') actionClass = 'action-drop';
+            
+            row.innerHTML = `
+                <td>${flow.priority}</td>
+                <td>${flow.match}</td>
+                <td class="${actionClass}">${flow.action}</td>
+            `;
+            flowBody.appendChild(row);
+        });
+    }
+
+    function resetSim() {
+        if (isAnimating) return;
+        flows = [];
+        renderFlows();
+        log('Switch s1 flow table cleared.', 'info');
+        explain('<strong>Reset:</strong> The switch has forgotten all learned paths. Next packet will trigger a Packet-In event.');
+    }
+
+    // Main Simulation Logic
+    async function runSimulation(target) {
+        if (isAnimating) return;
+        isAnimating = true;
+
+        const targetIp = target === 'h2' ? '10.0.10.2' : '10.0.10.3';
+        
+        log(`Starting Ping: h1 -> ${targetIp}`, 'info');
+        explain(`<strong>Step 1:</strong> Host h1 generates an ICMP Echo Request destined for ${targetIp}. It sends it to the gateway/switch s1.`);
+
+        // 1. h1 -> s1
+        await movePacket('h1', 's1');
+
+        // Check Flow Table
+        const hasFlow = flows.some(f => f.match.includes(target));
+
+        if (hasFlow) {
+            // FAST PATH
+            log('s1: Match found in Flow Table!', 'success');
+            
+            if (target === 'h2') {
+                explain(`<strong>Fast Path:</strong> The switch already knows the route to h2. It forwards immediately without asking the controller.`);
+                await movePacket('s1', 'h2', '#10b981');
+                log('h2 received packet.', 'success');
+            } else {
+                explain(`<strong>Fast Path:</strong> The switch remembers that traffic to h3 is BLOCKED. Dropping packet silently.`);
+                log('s1: Action is DROP.', 'error');
+                // Visual drop
+                const sw = document.getElementById('s1');
+                sw.style.backgroundColor = '#ef4444';
+                setTimeout(() => sw.style.backgroundColor = 'var(--switch-color)', 500);
+            }
+        } else {
+            // SLOW PATH (Control Plane)
+            log('s1: Table Miss. Sending Packet-In to c0.', 'warn');
+            explain(`<strong>Table Miss:</strong> s1 doesn't know what to do with IP ${targetIp}. It encapsulates the header in a <em>Packet-In</em> message and sends it to the Controller.`);
+
+            // 2. s1 -> c0
+            await movePacket('s1', 'controller', '#7c3aed');
+
+            // Controller Logic
+            await sleep(500);
+            
+            if (target === 'h2') {
+                log('Controller: Logic permits h1 <-> h2.', 'sdn');
+                explain(`<strong>Controller Decision:</strong> The Python script logic says "h1 to h2 is allowed". The controller sends a <em>Flow-Mod</em> to install the path.`);
+                
+                // 3. c0 -> s1 (Flow Mod)
+                log('Controller sending Flow-Mod (Install Rules) + Packet-Out.', 'sdn');
+                await movePacket('controller', 's1', '#7c3aed');
+
+                addFlow(10, 'in_port=1, dst=10.0.10.2', 'output:2', 'allow');
+                addFlow(10, 'in_port=2, dst=10.0.10.1', 'output:1', 'allow');
+
+                // 4. s1 -> h2
+                log('s1: Rules installed. Forwarding packet.', 'success');
+                explain(`<strong>Forwarding:</strong> Now that the rule is installed, s1 executes the action: Output to Port 2.`);
+                await movePacket('s1', 'h2', '#10b981');
+                log('h2 received packet.', 'success');
+
+            } else {
+                log('Controller: Logic BLOCKS h1 -> h3.', 'sdn');
+                explain(`<strong>Controller Decision:</strong> The logic says "h1 to h3 is blocked". Controller sends a <em>Flow-Mod</em> to drop these packets.`);
+
+                // 3. c0 -> s1 (Flow Mod - DROP)
+                log('Controller sending Flow-Mod (DROP Rule).', 'sdn');
+                await movePacket('controller', 's1', '#7c3aed');
+
+                addFlow(20, 'dst=10.0.10.3', 'DROP', 'drop');
+
+                log('s1: Drop Rule installed. Packet discarded.', 'error');
+                const sw = document.getElementById('s1');
+                sw.style.border = '2px solid #ef4444';
+                setTimeout(() => sw.style.border = 'none', 1000);
+            }
+        }
+
+        isAnimating = false;
+        explain('Simulation complete. Check the Logs and Flow Table.');
+    }
+
+    // Start
+    init();
+    renderFlows();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSH Port Forwarding Simulator</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Vue.js 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;800&display=swap');
+
+        body { font-family: 'Inter', sans-serif; }
+        code, pre, .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* --- Animations --- */
+        @keyframes flow-right {
+            0% { left: 5%; opacity: 0; transform: scale(0.8); }
+            10% { opacity: 1; transform: scale(1); }
+            90% { opacity: 1; transform: scale(1); }
+            100% { left: 95%; opacity: 0; transform: scale(0.8); }
+        }
+        @keyframes flow-left {
+            0% { left: 95%; opacity: 0; transform: scale(0.8); }
+            10% { opacity: 1; transform: scale(1); }
+            90% { opacity: 1; transform: scale(1); }
+            100% { left: 5%; opacity: 0; transform: scale(0.8); }
+        }
+        
+        .packet-move-right { animation: flow-right 2s linear forwards; }
+        .packet-move-left { animation: flow-left 2s linear forwards; }
+        
+        .tunnel-active {
+            background-image: repeating-linear-gradient(90deg, #064e3b 0, #064e3b 10px, #065f46 10px, #065f46 20px);
+            background-size: 200% 100%;
+            animation: bg-slide 2s linear infinite;
+        }
+
+        @keyframes bg-slide {
+            0% { background-position: 0 0; }
+            100% { background-position: -40px 0; }
+        }
+
+        .terminal-scroll::-webkit-scrollbar { width: 6px; }
+        .terminal-scroll::-webkit-scrollbar-track { background: #1f2937; }
+        .terminal-scroll::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 3px; }
+
+        /* Node styling */
+        .node-card {
+            transition: all 0.5s ease;
+        }
+        .node-card.active {
+            border-color: #3b82f6;
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.3);
+        }
+
+        /* File Icon Animation */
+        .file-appear-enter-active, .file-appear-leave-active {
+            transition: all 0.5s ease;
+        }
+        .file-appear-enter-from, .file-appear-leave-to {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+    </style>
+</head>
+<body class="bg-gray-950 text-gray-200 h-screen flex flex-col overflow-hidden selection:bg-blue-500 selection:text-white">
+
+    <div id="app" class="flex flex-col h-full">
+
+        <!-- Header -->
+        <header class="bg-gray-900 border-b border-gray-800 p-4 shadow-xl z-20">
+            <div class="max-w-7xl mx-auto flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="bg-indigo-600 p-2 rounded-lg shadow-lg shadow-indigo-500/20">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-100 tracking-tight">SSH Port Forwarding Simulator</h1>
+                        <p class="text-xs text-gray-400 font-medium">Stage 4: Accessing Internal Docker Services via <code class="bg-gray-800 px-1 rounded text-indigo-300">ssh -L</code></p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <!-- Step Indicators -->
+                    <div class="flex items-center gap-1 mr-4">
+                        <div v-for="s in 3" :key="s" class="h-2 w-8 rounded-full transition-all duration-300" 
+                             :class="step >= s ? 'bg-indigo-500' : 'bg-gray-700'"></div>
+                    </div>
+
+                    <!-- Controls -->
+                    <button @click="reset" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-md text-sm font-medium transition-colors border border-gray-700">
+                        Reset
+                    </button>
+                    
+                    <button v-if="step === 0" @click="startInfrastructure" class="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-md text-sm font-bold shadow-lg shadow-blue-900/50 transition-all hover:scale-105">
+                        Step 1: Start Infrastructure
+                    </button>
+                    
+                    <button v-if="step === 1" @click="establishTunnel" class="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-md text-sm font-bold shadow-lg shadow-emerald-900/50 transition-all hover:scale-105 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                        Step 2: Open SSH Tunnel
+                    </button>
+
+                    <button v-if="step === 2" @click="sendRequest" :disabled="isTransmitting" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-md text-sm font-bold shadow-lg shadow-indigo-900/50 transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        Step 3: Test with curl
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex overflow-hidden">
+            
+            <!-- Left: Visualization Stage -->
+            <div class="flex-1 bg-gray-950 relative overflow-hidden flex flex-col">
+                
+                <!-- Legend -->
+                <div class="absolute top-4 left-4 z-10 flex gap-4 text-[10px] font-mono uppercase tracking-widest text-gray-500">
+                    <div class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-blue-500"></div> Plain HTTP</div>
+                    <div class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-emerald-500"></div> Encrypted SSH</div>
+                </div>
+
+                <!-- Simulation Area -->
+                <div class="flex-1 flex items-center justify-center p-8 relative">
+
+                    <!-- Docker Network Boundary -->
+                    <div class="absolute right-10 top-20 bottom-20 w-[60%] border-2 border-dashed border-gray-700 rounded-3xl bg-gray-900/30 -z-0 transition-opacity duration-1000"
+                         :class="step > 0 ? 'opacity-100' : 'opacity-0'">
+                        <div class="absolute top-0 right-0 bg-gray-700 text-gray-300 text-xs px-3 py-1 rounded-bl-xl rounded-tr-lg font-mono">
+                            Docker Network (bridge)
+                        </div>
+                    </div>
+
+                    <!-- CONNECTION LINE: Host -> Bastion -->
+                    <div class="absolute left-[25%] right-[55%] h-1 bg-gray-800 z-0">
+                        <div class="absolute inset-0 transition-opacity duration-500" 
+                             :class="tunnelActive ? 'opacity-100 tunnel-active' : 'opacity-0'"></div>
+                        
+                        <div v-if="packetA" class="absolute w-8 h-8 -mt-3.5 z-20 transition-all"
+                             :class="packetA.direction === 'right' ? 'packet-move-right' : 'packet-move-left'">
+                            <div class="w-full h-full rounded-md flex items-center justify-center text-[10px] font-bold shadow-xl border"
+                                 :class="packetA.type === 'ssh' ? 'bg-emerald-600 border-emerald-400 text-white' : 'bg-blue-600 border-blue-400 text-white'">
+                                {{ packetA.label }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CONNECTION LINE: Bastion -> Web -->
+                    <div class="absolute left-[45%] right-[25%] h-1 bg-gray-800 z-0 transition-opacity duration-1000" :class="step > 0 ? 'opacity-100' : 'opacity-0'">
+                         <div v-if="packetB" class="absolute w-8 h-8 -mt-3.5 z-20 transition-all"
+                             :class="packetB.direction === 'right' ? 'packet-move-right' : 'packet-move-left'">
+                            <div class="w-full h-full rounded-md flex items-center justify-center text-[10px] font-bold shadow-xl border bg-blue-600 border-blue-400 text-white">
+                                {{ packetB.label }}
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- NODES -->
+                    <div class="w-full max-w-6xl grid grid-cols-3 gap-12 relative z-10">
+                        
+                        <!-- NODE 1: HOST -->
+                        <div class="node-card bg-gray-900 rounded-xl border border-gray-700 p-4 shadow-2xl flex flex-col h-96"
+                             :class="{'active': step >= 0}">
+                            <div class="flex items-center gap-2 border-b border-gray-800 pb-2 mb-2">
+                                <div class="w-3 h-3 rounded-full bg-gray-500"></div>
+                                <span class="text-sm font-bold text-gray-300">Host Machine</span>
+                                <span class="ml-auto text-xs text-gray-500 font-mono">localhost</span>
+                            </div>
+                            
+                            <!-- Host Terminal -->
+                            <div class="h-32 bg-black rounded p-2 font-mono text-[10px] text-gray-400 overflow-y-auto terminal-scroll border border-gray-800 mb-2">
+                                <div v-for="(log, i) in hostLogs" :key="i" class="mb-1">
+                                    <span class="text-green-500 font-bold" v-if="log.cmd">➜ ~</span>
+                                    <span :class="log.color || 'text-gray-300'">{{ log.text }}</span>
+                                </div>
+                                <div v-if="isTyping" class="animate-pulse">_</div>
+                            </div>
+
+                            <!-- Port Visual -->
+                            <div class="h-10 border border-dashed border-gray-700 rounded bg-gray-800 flex items-center justify-center relative transition-all duration-500 mb-2"
+                                 :class="tunnelActive ? 'border-emerald-500 bg-emerald-900/10' : ''">
+                                <div v-if="tunnelActive" class="absolute -top-3 bg-emerald-600 text-white text-[9px] px-2 rounded-full">Listening: 9000</div>
+                                <span class="text-xs text-gray-500 font-mono flex items-center gap-2">
+                                    <svg v-if="tunnelActive" class="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                    Local Port 9000
+                                </span>
+                            </div>
+
+                            <!-- Host File System -->
+                            <div class="flex-1 bg-gray-800 rounded p-2 border border-gray-700 overflow-hidden">
+                                <div class="text-[9px] text-gray-400 font-bold uppercase mb-2 border-b border-gray-600 pb-1">Local Files (Downloads)</div>
+                                <div class="space-y-1">
+                                    <transition-group name="file-appear">
+                                        <div v-for="file in hostFiles" :key="file.name" class="flex items-center gap-2 p-1 bg-gray-700 rounded text-[10px]">
+                                            <span class="text-lg">📄</span>
+                                            <div>
+                                                <div class="text-gray-200 font-bold">{{ file.name }}</div>
+                                                <div class="text-gray-500 text-[8px]">{{ file.size }}</div>
+                                            </div>
+                                        </div>
+                                    </transition-group>
+                                    <div v-if="hostFiles.length === 0" class="text-gray-600 text-[10px] italic text-center mt-4">
+                                        No files downloaded yet
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- NODE 2: BASTION -->
+                        <div class="node-card bg-gray-900 rounded-xl border border-gray-700 p-4 shadow-2xl flex flex-col h-96 transition-all duration-700 transform"
+                             :class="step > 0 ? 'opacity-100 translate-y-0 active' : 'opacity-30 translate-y-10'">
+                            <div class="flex items-center gap-2 border-b border-gray-800 pb-2 mb-2">
+                                <div class="w-3 h-3 rounded-full bg-emerald-500"></div>
+                                <span class="text-sm font-bold text-gray-300">ssh-bastion</span>
+                                <span class="ml-auto text-xs text-gray-500 font-mono">2222:22</span>
+                            </div>
+                            
+                            <div class="flex-1 flex flex-col gap-2">
+                                <!-- Process Visual -->
+                                <div class="bg-gray-800 p-2 rounded border border-gray-700 flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-gray-900 rounded flex items-center justify-center border border-emerald-500/30">
+                                        <svg class="w-6 h-6 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                                    </div>
+                                    <div>
+                                        <div class="text-[10px] font-bold text-gray-300">SSHD Service</div>
+                                        <div class="text-[9px] text-gray-500">Forwarding Active</div>
+                                    </div>
+                                </div>
+
+                                <!-- Bastion Files -->
+                                <div class="flex-1 bg-gray-800 rounded p-2 border border-gray-700">
+                                    <div class="text-[9px] text-gray-400 font-bold uppercase mb-2 border-b border-gray-600 pb-1">File System (/etc/ssh)</div>
+                                    <div class="space-y-1">
+                                        <div class="flex items-center gap-2 p-1 hover:bg-gray-700 rounded text-[10px]">
+                                            <span class="text-gray-500">⚙️</span>
+                                            <span class="text-gray-400">sshd_config</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 p-1 hover:bg-gray-700 rounded text-[10px]">
+                                            <span class="text-gray-500">🔑</span>
+                                            <span class="text-gray-400">ssh_host_rsa_key</span>
+                                        </div>
+                                    </div>
+                                    <div class="mt-4 p-1 bg-yellow-900/20 border border-yellow-700/30 rounded text-[9px] text-yellow-500 text-center">
+                                        Note: Bastion only forwards traffic, it does not store HTML files.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- NODE 3: WEB SERVER -->
+                        <div class="node-card bg-gray-900 rounded-xl border border-gray-700 p-4 shadow-2xl flex flex-col h-96 transition-all duration-700 transform delay-100"
+                             :class="step > 0 ? 'opacity-100 translate-y-0 active' : 'opacity-30 translate-y-10'">
+                            <div class="flex items-center gap-2 border-b border-gray-800 pb-2 mb-2">
+                                <div class="w-3 h-3 rounded-full bg-blue-500"></div>
+                                <span class="text-sm font-bold text-gray-300">web</span>
+                                <span class="ml-auto text-xs text-gray-500 font-mono">port 8000</span>
+                            </div>
+                            
+                            <!-- Web Process -->
+                            <div class="bg-gray-950 border border-gray-800 rounded p-2 font-mono text-[10px] relative overflow-hidden h-24 mb-2">
+                                <div class="absolute top-0 right-0 p-1 bg-blue-900/50 text-blue-300 text-[8px] rounded-bl">HTTP Server</div>
+                                <div class="text-gray-500 mt-4">Running: python -m http.server</div>
+                                
+                                <transition name="fade">
+                                    <div v-if="showWebHit" class="absolute inset-0 bg-blue-500/20 flex items-center justify-center">
+                                        <div class="bg-blue-600 text-white px-3 py-1 rounded shadow-lg animate-bounce text-xs font-bold">Request Received!</div>
+                                    </div>
+                                </transition>
+                            </div>
+
+                            <!-- Web Files -->
+                            <div class="flex-1 bg-gray-800 rounded p-2 border border-gray-700">
+                                <div class="text-[9px] text-gray-400 font-bold uppercase mb-2 border-b border-gray-600 pb-1">Web Root (/app)</div>
+                                <div class="space-y-1">
+                                    <div class="flex items-center gap-2 p-1 bg-blue-900/20 border border-blue-500/30 rounded text-[10px]">
+                                        <span class="text-lg">📄</span>
+                                        <div>
+                                            <div class="text-blue-200 font-bold">index.html</div>
+                                            <div class="text-gray-500 text-[8px]">142 bytes • Public</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Step Description Banner -->
+                <div class="bg-gray-900 border-t border-gray-800 p-4 text-center">
+                     <transition name="fade" mode="out-in">
+                        <p :key="description" class="text-sm text-gray-300 font-medium">
+                            {{ description }}
+                        </p>
+                     </transition>
+                </div>
+            </div>
+
+            <!-- Right: Code & Explainer -->
+            <div class="w-96 bg-gray-900 border-l border-gray-800 flex flex-col shadow-2xl z-20">
+                <div class="p-4 border-b border-gray-800 bg-gray-850">
+                    <h3 class="text-sm font-bold text-gray-100 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        Technical Details
+                    </h3>
+                </div>
+
+                <!-- Explanation Cards -->
+                <div class="flex-1 overflow-y-auto p-4 space-y-4">
+                    
+                    <!-- Command Breakdown -->
+                    <div class="bg-gray-800 rounded-lg p-3 border border-gray-700">
+                        <div class="text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">The Magic Command</div>
+                        <code class="block bg-black p-2 rounded text-xs text-green-400 mb-2 break-all">ssh -L 9000:web:8000 labuser@localhost -p 2222</code>
+                        <div class="grid grid-cols-1 gap-2 text-[10px]">
+                            <div class="flex items-start gap-2">
+                                <span class="bg-indigo-900 text-indigo-300 px-1 rounded font-mono">-L 9000</span>
+                                <span class="text-gray-400">Opens local port 9000 on your machine.</span>
+                            </div>
+                            <div class="flex items-start gap-2">
+                                <span class="bg-blue-900 text-blue-300 px-1 rounded font-mono">web:8000</span>
+                                <span class="text-gray-400">Target destination (inside the remote network).</span>
+                            </div>
+                            <div class="flex items-start gap-2">
+                                <span class="bg-emerald-900 text-emerald-300 px-1 rounded font-mono">@localhost</span>
+                                <span class="text-gray-400">Connect to bastion (mapped to localhost).</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Flow Diagram Text -->
+                    <div class="bg-gray-800 rounded-lg p-3 border border-gray-700" v-if="step >= 2">
+                         <div class="text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">Traffic Flow</div>
+                         <ol class="list-decimal list-inside text-[10px] text-gray-300 space-y-1.5 leading-relaxed">
+                            <li :class="{'text-yellow-400 font-bold': packetStage === 1}">App sends request to <span class="font-mono">localhost:9000</span>.</li>
+                            <li :class="{'text-yellow-400 font-bold': packetStage === 2}">SSH Client encrypts the packet.</li>
+                            <li :class="{'text-yellow-400 font-bold': packetStage === 3}">Encrypted packet travels to Bastion.</li>
+                            <li :class="{'text-yellow-400 font-bold': packetStage === 4}">Bastion decrypts packet.</li>
+                            <li :class="{'text-yellow-400 font-bold': packetStage === 5}">Bastion sends plain HTTP to <span class="font-mono">web:8000</span>.</li>
+                            <li :class="{'text-yellow-400 font-bold': packetStage === 6}">Web Server responds with file.</li>
+                         </ol>
+                    </div>
+
+                    <!-- File Content Preview -->
+                     <div class="bg-gray-800 rounded-lg p-3 border border-gray-700">
+                        <div class="text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">Target File Content</div>
+                        <pre class="bg-black p-2 rounded text-[9px] text-blue-200 overflow-x-auto">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;&lt;title&gt;SSH Port Forward Demo&lt;/title&gt;&lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;Hello from the web container!&lt;/h1&gt;
+    &lt;p&gt;You arrived here via an SSH tunnel.&lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</pre>
+                    </div>
+
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    step: 0,
+                    hostLogs: [],
+                    hostFiles: [],
+                    isTyping: false,
+                    tunnelActive: false,
+                    description: "Welcome. Click 'Step 1: Start Infrastructure' to initialise the Docker environment.",
+                    
+                    // Animation State
+                    packetA: null, // Host <-> Bastion
+                    packetB: null, // Bastion <-> Web
+                    isTransmitting: false,
+                    showWebHit: false,
+                    packetStage: 0
+                }
+            },
+            methods: {
+                sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); },
+                
+                addLog(text, cmd=false, color=null) {
+                    this.hostLogs.push({ text, cmd, color });
+                    this.$nextTick(() => {
+                        const el = document.querySelector('.terminal-scroll');
+                        if(el) el.scrollTop = el.scrollHeight;
+                    });
+                },
+
+                async typeCommand(cmd) {
+                    this.isTyping = true;
+                    this.addLog(cmd, true);
+                    await this.sleep(800); // Simulate typing delay
+                    this.isTyping = false;
+                },
+
+                reset() {
+                    this.step = 0;
+                    this.hostLogs = [];
+                    this.hostFiles = [];
+                    this.tunnelActive = false;
+                    this.packetA = null;
+                    this.packetB = null;
+                    this.isTransmitting = false;
+                    this.description = "Welcome. Click 'Step 1: Start Infrastructure' to initialise the Docker environment.";
+                    this.packetStage = 0;
+                },
+
+                async startInfrastructure() {
+                    this.step = 1;
+                    this.description = "Docker Compose starts 'ssh-bastion' and 'web' containers...";
+                    
+                    await this.sleep(500);
+                    this.addLog("docker compose up -d", true);
+                    await this.sleep(800);
+                    this.addLog("Creating network 'lab_default'", false, "text-gray-500");
+                    this.addLog("Creating container web ... done", false, "text-green-400");
+                    this.addLog("Creating container ssh-bastion ... done", false, "text-green-400");
+                    
+                    this.description = "Infrastructure is ready. The 'web' container is hidden. We need SSH to access it.";
+                },
+
+                async establishTunnel() {
+                    this.step = 2;
+                    this.description = "Running SSH command to create a local tunnel on port 9000.";
+                    
+                    await this.typeCommand("ssh -L 9000:web:8000 labuser@localhost -p 2222");
+                    this.addLog("labuser@localhost's password: ", false);
+                    await this.sleep(600);
+                    this.addLog("*******", false);
+                    await this.sleep(400);
+                    this.addLog("Welcome to Ubuntu 22.04 LTS", false, "text-gray-400");
+                    this.addLog("labuser@ssh-bastion:~$", false, "text-green-500");
+                    
+                    this.tunnelActive = true;
+                    this.description = "Tunnel established! Traffic to localhost:9000 is now forwarded to web:8000.";
+                },
+
+                async sendRequest() {
+                    if (this.isTransmitting) return;
+                    this.isTransmitting = true;
+                    this.description = "Sending HTTP Request via Tunnel...";
+                    this.packetStage = 1;
+
+                    // 1. Host -> Bastion (Encrypted)
+                    await this.typeCommand("curl -v http://localhost:9000/");
+                    this.addLog("* Trying 127.0.0.1:9000...", false, "text-gray-500");
+                    this.addLog("* Connected to localhost (127.0.0.1) port 9000", false, "text-gray-500");
+                    
+                    this.packetStage = 2;
+                    this.packetA = { direction: 'right', type: 'ssh', label: 'SSH' }; // Encrypted
+                    await this.sleep(2000); // Wait for animation
+                    this.packetA = null;
+                    this.packetStage = 3;
+
+                    // 2. Bastion -> Web (Plain)
+                    this.packetStage = 4;
+                    this.packetB = { direction: 'right', type: 'http', label: 'HTTP' }; // Plain
+                    await this.sleep(2000);
+                    this.packetB = null;
+                    
+                    // 3. Web Processing
+                    this.packetStage = 6;
+                    this.showWebHit = true;
+                    await this.sleep(500);
+                    this.showWebHit = false;
+
+                    // 4. Web -> Bastion (Plain Response)
+                    this.packetB = { direction: 'left', type: 'http', label: 'HTML' };
+                    await this.sleep(2000);
+                    this.packetB = null;
+
+                    // 5. Bastion -> Host (Encrypted Response)
+                    this.packetStage = 7;
+                    this.packetA = { direction: 'left', type: 'ssh', label: 'SSH' };
+                    await this.sleep(2000);
+                    this.packetA = null;
+
+                    // 6. Output to Terminal & File Creation
+                    this.addLog("< HTTP/1.0 200 OK", false, "text-blue-400");
+                    this.addLog("< Content-Type: text/html", false, "text-blue-400");
+                    this.addLog("... (content received) ...", false, "text-gray-300");
+                    
+                    // Create visual file
+                    this.hostFiles.push({ name: 'output_curl.html', size: '142B' });
+                    
+                    this.description = "Success! The host received the HTML file from the hidden web container.";
+                    this.isTransmitting = false;
+                    this.packetStage = 0;
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

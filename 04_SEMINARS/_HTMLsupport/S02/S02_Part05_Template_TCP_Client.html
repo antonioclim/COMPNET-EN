@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TCP Client Loop (RTT) Visualizer</title>
+    <style>
+        :root {
+            --bg-primary: #1e1e1e;
+            --bg-secondary: #252526;
+            --accent-blue: #4daafc;
+            --accent-green: #6a9955;
+            --accent-orange: #ce9178;
+            --accent-yellow: #dcdcaa;
+            --text-main: #d4d4d4;
+            --text-dim: #858585;
+            --border: #3e3e42;
+            --font-mono: 'Consolas', 'Monaco', 'Courier New', monospace;
+            --font-sans: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --code-bg: #101010;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- Header --- */
+        header {
+            background-color: var(--bg-secondary);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+        }
+
+        h1 { font-size: 1.1rem; font-weight: 600; color: #fff; }
+
+        /* --- Main Canvas --- */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: radial-gradient(circle at center, #2a2a2a 0%, #1e1e1e 70%);
+        }
+
+        /* --- Dynamic Code Card --- */
+        .code-card {
+            position: absolute;
+            top: 2rem;
+            background-color: var(--code-bg);
+            border: 1px solid var(--accent-yellow);
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            max-width: 800px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+            z-index: 10;
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        
+        .code-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .code-card h3 {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            margin-bottom: 0.5rem;
+            letter-spacing: 1px;
+        }
+
+        .code-snippet {
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            white-space: pre-wrap;
+            line-height: 1.5;
+        }
+
+        /* Syntax Highlighting */
+        .kw { color: #569cd6; } /* keyword */
+        .cls { color: #4ec9b0; } /* class */
+        .str { color: #ce9178; } /* string */
+        .fn { color: #dcdcaa; } /* function */
+        .num { color: #b5cea8; } /* number */
+        .cmt { color: #6a9955; } /* comment */
+        .var { color: #9cdcfe; } /* variable */
+
+        /* --- Network Diagram --- */
+        .diagram-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 80%;
+            max-width: 800px;
+            height: 300px;
+            position: relative;
+        }
+
+        .node {
+            width: 120px;
+            height: 120px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            opacity: 0.5;
+        }
+
+        .node.active { 
+            opacity: 1; 
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+
+        .node-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .node-label { font-size: 1rem; font-weight: 600; color: #fff; }
+        .node-status { font-size: 0.75rem; color: var(--text-dim); margin-top: 4px; }
+        
+        /* Connection Line */
+        .connection-track {
+            position: absolute;
+            left: 120px; 
+            right: 120px;
+            top: 50%;
+            height: 2px;
+            background: #333;
+            z-index: 1;
+        }
+
+        .packet {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: var(--accent-blue);
+            color: #1e1e1e;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            z-index: 5;
+            white-space: nowrap;
+            transition: transform 0.2s;
+        }
+
+        /* --- Terminal Output Log --- */
+        .terminal-log {
+            position: absolute;
+            bottom: 20px;
+            width: 90%;
+            max-width: 800px;
+            background: #0c0c0c;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            height: 150px;
+            overflow-y: auto;
+            color: #ccc;
+        }
+        .log-line { margin-bottom: 4px; line-height: 1.4; }
+        .log-info { color: var(--text-dim); }
+        .log-input { color: #fff; font-weight: bold; }
+        .log-rtt { color: var(--accent-yellow); }
+
+        /* --- Controls Bar --- */
+        footer {
+            background-color: var(--bg-secondary);
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            z-index: 20;
+        }
+
+        .action-btn {
+            background-color: var(--bg-secondary);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            padding: 0.8rem 1.5rem;
+            cursor: pointer;
+            border-radius: 6px;
+            font-family: var(--font-sans);
+            font-weight: 600;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-btn:hover:not(:disabled) { background-color: #333; border-color: #555; }
+        
+        .btn-start { background-color: var(--accent-green); color: #fff; border: none; }
+        .btn-start:hover { background-color: #558045; }
+        
+        .btn-input { border-color: var(--accent-blue); }
+        .btn-exit { border-color: var(--accent-orange); color: var(--accent-orange); }
+
+        button:disabled { opacity: 0.4; cursor: not-allowed; filter: grayscale(1); }
+        
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>TCP Client Template <span style="font-weight:400; color:#888; margin-left:10px;">Reference Solution (Loop & RTT)</span></h1>
+</header>
+
+<main>
+    <!-- Code Highlight Overlay -->
+    <div class="code-card" id="codeCard">
+        <h3 id="codeTitle">Python Logic</h3>
+        <div class="code-snippet" id="codeContent"></div>
+    </div>
+
+    <!-- Visual Diagram -->
+    <div class="diagram-container">
+        <!-- Client -->
+        <div class="node" id="clientNode">
+            <div class="node-icon">💻</div>
+            <div class="node-label">Client</div>
+            <div class="node-status" id="clientStatus">Idle</div>
+        </div>
+
+        <!-- Connection Line -->
+        <div class="connection-track"></div>
+        
+        <!-- Packet -->
+        <div class="packet" id="packet">DATA</div>
+
+        <!-- Server (Target) -->
+        <div class="node" id="serverNode">
+            <div class="node-icon">🌐</div>
+            <div class="node-label">Server</div>
+            <div class="node-status">Listening</div>
+        </div>
+    </div>
+
+    <!-- Terminal Output -->
+    <div class="terminal-log" id="termLog">
+        <div class="log-line log-info"># Ready to run solution for 'S02_Part05_Template_TCP_Client.py'</div>
+    </div>
+</main>
+
+<footer>
+    <button class="action-btn btn-start" id="btnStart" onclick="startApp()">Start App</button>
+    <button class="action-btn btn-input" id="btnPing" onclick="simulateInput('ping')" disabled>Type "ping"</button>
+    <button class="action-btn btn-input" id="btnHello" onclick="simulateInput('hello network')" disabled>Type "hello network"</button>
+    <button class="action-btn btn-exit" id="btnExit" onclick="simulateInput('exit')" disabled>Type "exit"</button>
+</footer>
+
+<script>
+    // State
+    let isConnected = false;
+
+    // Elements
+    const codeCard = document.getElementById('codeCard');
+    const codeTitle = document.getElementById('codeTitle');
+    const codeContent = document.getElementById('codeContent');
+    const packet = document.getElementById('packet');
+    const termLog = document.getElementById('termLog');
+    const clientNode = document.getElementById('clientNode');
+    const serverNode = document.getElementById('serverNode');
+    
+    // Buttons
+    const btnStart = document.getElementById('btnStart');
+    const btnPing = document.getElementById('btnPing');
+    const btnHello = document.getElementById('btnHello');
+    const btnExit = document.getElementById('btnExit');
+
+    // Snippets Dictionary
+    const snippets = {
+        CONNECT: `
+<span class="kw">with</span> socket.socket(...) <span class="kw">as</span> s:
+    s.connect((<span class="str">"127.0.0.1"</span>, <span class="num">12345</span>))
+    <span class="kw">print</span>(<span class="str">"[INFO] Connected."</span>)`,
+        
+        INPUT_LOOP: `
+<span class="kw">while</span> <span class="kw">True</span>:
+    <span class="cmt"># TODO 1: Ask user for input</span>
+    msg = <span class="fn">input</span>(<span class="str">"Message (or 'exit'): "</span>)`,
+
+        EXIT_CHECK: `
+    <span class="cmt"># TODO 2a: Check exit condition</span>
+    <span class="kw">if</span> msg == <span class="str">'exit'</span>:
+        <span class="kw">break</span>`,
+
+        TIMER_START: `
+    <span class="cmt"># TODO 2b: Measure Time & Send</span>
+    t0 = time.time()
+    s.sendall(msg.encode(<span class="str">'utf-8'</span>))`,
+
+        RECV: `
+    <span class="cmt"># Wait for response...</span>
+    resp = s.recv(<span class="num">1024</span>)`,
+
+        CALC_RTT: `
+    <span class="cmt"># TODO 2c: Stop Timer & Calculate RTT</span>
+    t1 = time.time()
+    rtt_ms = (t1 - t0) * <span class="num">1000</span>
+    <span class="kw">print</span>(<span class="str">f"RTT: {rtt_ms:.2f}ms"</span>)`,
+
+        CLOSE: `
+<span class="kw">print</span>(<span class="str">"[INFO] Connection closed."</span>)
+s.close()`
+    };
+
+    // --- Actions ---
+
+    async function startApp() {
+        btnStart.disabled = true;
+        termLog.innerHTML = "";
+        
+        // 1. Connect
+        showCode('CONNECT', 'Initialization');
+        clientNode.classList.add('active');
+        clientNode.style.borderColor = 'var(--accent-blue)';
+        serverNode.classList.add('active');
+        serverNode.style.borderColor = 'var(--accent-green)';
+        
+        log("[INFO] Connecting to 127.0.0.1:12345 ...");
+        await wait(1000);
+        log("[INFO] Connected.");
+        
+        isConnected = true;
+        enableInputs(true);
+        promptUser();
+    }
+
+    function promptUser() {
+        if (!isConnected) return;
+        showCode('INPUT_LOOP', 'Infinite Loop');
+        log("Message (or 'exit'): _", false); // Prompt style
+    }
+
+    async function simulateInput(text) {
+        if (!isConnected) return;
+        
+        // Disable inputs during processing
+        enableInputs(false);
+
+        // Replace prompt with user text
+        const lastLine = termLog.lastElementChild;
+        lastLine.innerText = `Message (or 'exit'): ${text}`;
+        
+        if (text === 'exit') {
+            await handleExit();
+        } else {
+            await handleMessage(text);
+        }
+    }
+
+    async function handleMessage(text) {
+        // 1. Timer Start
+        showCode('TIMER_START', 'Start Timer & Send');
+        log(`[DEBUG] Timer started (t0). Sending ${text.length} bytes...`);
+        
+        // Animation Client -> Server
+        await animatePacket(`b'${text}'`, 'client', 'server', 'var(--accent-blue)');
+        
+        // 2. Recv Wait
+        showCode('RECV', 'Blocking Wait');
+        clientNode.querySelector('.node-status').innerText = "Blocking (recv)";
+        
+        // Simulate Network/Server Latency (random between 20ms and 100ms visual)
+        await wait(800);
+        
+        // Server response (Echo + Upper)
+        const responseText = `OK: ${text.toUpperCase()}`;
+        await animatePacket(`b'${responseText}'`, 'server', 'client', 'var(--accent-green)');
+        
+        // 3. RTT Calc
+        showCode('CALC_RTT', 'Calculate Round Trip Time');
+        const simulatedRTT = (Math.random() * 10 + 5).toFixed(2); // Random 5-15ms
+        
+        log(`[RESPONSE] ${responseText}`);
+        const rttLine = document.createElement('div');
+        rttLine.className = 'log-line log-rtt';
+        rttLine.innerText = `[STATS] RTT: ${simulatedRTT}ms | Sent: "${text}"`;
+        termLog.appendChild(rttLine);
+        termLog.scrollTop = termLog.scrollHeight;
+
+        clientNode.querySelector('.node-status').innerText = "Idle";
+        await wait(1500);
+        
+        // Loop back
+        enableInputs(true);
+        promptUser();
+    }
+
+    async function handleExit() {
+        showCode('EXIT_CHECK', 'Break Loop');
+        await wait(1000);
+        
+        showCode('CLOSE', 'Cleanup');
+        log("[INFO] Connection closed.");
+        
+        isConnected = false;
+        clientNode.classList.remove('active');
+        clientNode.style.borderColor = 'var(--border)';
+        serverNode.classList.remove('active');
+        serverNode.style.borderColor = 'var(--border)';
+        
+        btnStart.disabled = false;
+        btnStart.innerText = "Restart App";
+    }
+
+    // --- Helpers ---
+
+    function enableInputs(enabled) {
+        btnPing.disabled = !enabled;
+        btnHello.disabled = !enabled;
+        btnExit.disabled = !enabled;
+    }
+
+    function showCode(key, title) {
+        codeContent.innerHTML = snippets[key];
+        codeTitle.innerText = title;
+        codeCard.classList.add('visible');
+    }
+
+    function log(msg, isNewLine = true) {
+        const div = document.createElement('div');
+        div.className = 'log-line';
+        div.innerText = msg;
+        termLog.appendChild(div);
+        termLog.scrollTop = termLog.scrollHeight;
+    }
+
+    function wait(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function animatePacket(text, from, to, color) {
+        return new Promise(resolve => {
+            packet.innerText = text;
+            packet.style.background = color || 'var(--accent-blue)';
+            packet.style.transform = 'translate(-50%, -50%) scale(1)'; // Show
+            
+            const isMobile = window.innerWidth <= 700;
+            const startPos = from === 'client' ? '15%' : '85%';
+            const endPos = from === 'client' ? '85%' : '15%';
+
+            if (isMobile) {
+                packet.style.left = '50%';
+                packet.style.top = startPos;
+                packet.style.transition = 'top 0.6s ease-in-out';
+            } else {
+                packet.style.top = '50%';
+                packet.style.left = startPos;
+                packet.style.transition = 'left 0.6s ease-in-out';
+            }
+
+            // Force reflow
+            void packet.offsetWidth;
+
+            if (isMobile) {
+                packet.style.top = endPos;
+            } else {
+                packet.style.left = endPos;
+            }
+
+            setTimeout(() => {
+                packet.style.transform = 'translate(-50%, -50%) scale(0)'; // Hide
+                resolve();
+            }, 600);
+        });
+    }
+
+</script>
+
+</body>
+</html>

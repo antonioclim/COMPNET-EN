@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TCP Binary Protocol (Pickle) Simulator</title>
+    <style>
+        :root {
+            --bg-app: #1e1e1e;
+            --bg-panel: #252526;
+            --term-bg: #0c0c0c;
+            --text-main: #cccccc;
+            --text-bright: #ffffff;
+            --accent-obj: #ffca28; /* Amber for Python Objects */
+            --accent-bin: #4db6ac; /* Teal for Binary Data */
+            --accent-len: #ef5350; /* Red for Length Byte */
+            --accent-state: #6a9955;
+            --border: #333;
+            --font-mono: 'Consolas', 'Monaco', monospace;
+            --font-sans: 'Segoe UI', sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-app);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* --- Header --- */
+        header {
+            background: var(--bg-panel);
+            padding: 0 1.5rem;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            justify-content: space-between;
+        }
+        
+        h1 { font-size: 1.1rem; font-weight: 600; color: var(--text-bright); }
+        .badge { background: var(--accent-bin); color: #1e1e1e; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; margin-left: 10px; font-weight: bold; }
+
+        /* --- Main Layout --- */
+        main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            overflow: hidden;
+        }
+
+        /* Left: Serialization & Network */
+        .network-panel {
+            position: relative;
+            background: radial-gradient(circle at center, #2a2a2a 0%, #1e1e1e 80%);
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border);
+            padding: 20px;
+        }
+
+        /* Nodes */
+        .nodes-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            position: relative;
+            height: 150px;
+        }
+
+        .node {
+            width: 140px;
+            background: var(--bg-panel);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 10;
+            transition: all 0.3s;
+        }
+
+        .node-icon { font-size: 2.5rem; margin-bottom: 10px; }
+        .node-title { font-weight: bold; color: #fff; margin-bottom: 5px; font-size: 0.9rem; }
+
+        #clientNode { border-color: var(--accent-obj); }
+        #serverNode { border-color: var(--accent-state); }
+
+        /* Connection Line */
+        .conn-line {
+            position: absolute;
+            top: 50%; left: 140px; right: 140px;
+            height: 2px;
+            background: #444;
+            z-index: 1;
+        }
+
+        /* Binary Packet */
+        .binary-packet {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: var(--bg-panel);
+            border: 2px solid var(--accent-bin);
+            color: var(--accent-bin);
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            z-index: 20;
+            white-space: nowrap;
+            transition: transform 0.2s;
+            box-shadow: 0 0 10px rgba(77, 182, 172, 0.3);
+        }
+
+        /* Serialization Process View */
+        .process-view {
+            flex: 1;
+            background: #111;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow: hidden;
+        }
+
+        .process-step {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.8rem;
+            color: #888;
+            opacity: 0.3;
+            transition: opacity 0.5s;
+        }
+        
+        .process-step.active { opacity: 1; color: #fff; }
+
+        .step-icon { font-size: 1.2rem; }
+        .step-desc { font-family: var(--font-mono); }
+
+        .obj-box {
+            border: 1px solid var(--accent-obj);
+            color: var(--accent-obj);
+            padding: 2px 6px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .bin-box {
+            border: 1px solid var(--accent-bin);
+            color: var(--accent-bin);
+            padding: 2px 6px;
+            border-radius: 4px;
+            display: inline-block;
+            word-break: break-all;
+        }
+
+        /* Right: State & Console */
+        .info-panel {
+            display: flex;
+            flex-direction: column;
+            background: #141414;
+        }
+
+        .state-section {
+            flex: 1;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            overflow-y: auto;
+        }
+
+        .state-header {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: var(--accent-state);
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .state-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+        }
+        
+        .state-table th { text-align: left; border-bottom: 1px solid #444; padding: 4px; color: #888; }
+        .state-table td { border-bottom: 1px solid #333; padding: 4px; color: #fff; }
+        
+        .row-new { animation: flashGreen 1s; }
+        .row-del { animation: flashRed 1s forwards; }
+
+        @keyframes flashGreen { 0% { background: rgba(106, 153, 85, 0.5); } 100% { background: transparent; } }
+        @keyframes flashRed { 0% { background: rgba(206, 145, 120, 0.5); } 100% { opacity: 0; } }
+
+        .console-section {
+            height: 250px;
+            background: var(--term-bg);
+            padding: 10px;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: #ccc;
+            overflow-y: auto;
+            border-top: 1px solid var(--border);
+        }
+        
+        .log-line { margin-bottom: 4px; border-left: 2px solid transparent; padding-left: 5px; }
+        .log-client { border-color: var(--accent-obj); }
+        .log-net { border-color: var(--accent-bin); color: var(--accent-bin); }
+        .log-server { border-color: var(--accent-state); }
+
+        /* Footer */
+        footer {
+            background: var(--bg-panel);
+            padding: 1rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        input[type="text"] {
+            background: #111;
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 0.5rem;
+            border-radius: 4px;
+            width: 280px;
+            font-family: var(--font-mono);
+        }
+
+        button {
+            padding: 0.6rem 1.5rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--accent-bin);
+            color: #1e1e1e;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.1s;
+        }
+        
+        button:hover { transform: scale(1.05); filter: brightness(1.1); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Binary Protocol Visualizer <span class="badge">Pickle Serializer</span></h1>
+</header>
+
+<main>
+    <!-- Left Panel -->
+    <div class="network-panel">
+        <div class="nodes-row">
+            <div class="node" id="clientNode">
+                <div class="node-icon">💻</div>
+                <div class="node-title">Client</div>
+            </div>
+
+            <div class="conn-line"></div>
+            <div class="binary-packet" id="packet">
+                \x08\x80\x03c...
+            </div>
+
+            <div class="node" id="serverNode">
+                <div class="node-icon">🖥️</div>
+                <div class="node-title">Server</div>
+            </div>
+        </div>
+
+        <div class="process-view" id="processView">
+            <div class="process-step" id="step1">
+                <span class="step-icon">📦</span>
+                <span class="step-desc">Object Creation: <span class="obj-box">Request(...)</span></span>
+            </div>
+            <div class="process-step" id="step2">
+                <span class="step-icon">🔄</span>
+                <span class="step-desc">Pickle Dump: Object &rarr; Bytes</span>
+            </div>
+            <div class="process-step" id="step3">
+                <span class="step-icon">📏</span>
+                <span class="step-desc">Framing: Add <span style="color:var(--accent-len)">LEN_BYTE</span> prefix</span>
+            </div>
+            <div class="process-step" id="step4">
+                <span class="step-icon">📡</span>
+                <span class="step-desc">Transmission: <span class="bin-box">b'\x15\x80\x03...'</span></span>
+            </div>
+            <div class="process-step" id="step5">
+                <span class="step-icon">🔓</span>
+                <span class="step-desc">Unpack: Read Len &rarr; Pickle Load &rarr; <span class="obj-box">Object</span></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Panel -->
+    <div class="info-panel">
+        <div class="state-section">
+            <div class="state-header">
+                <span>Server State (Resources)</span>
+                <span style="font-size:0.7rem; color:#666">Thread-Safe Dict</span>
+            </div>
+            <table class="state-table">
+                <thead>
+                    <tr><th style="width:30%">Key</th><th>Value</th></tr>
+                </thead>
+                <tbody id="stateTableBody">
+                    <!-- Dynamic Content -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="console-section" id="console">
+            <div class="log-line" style="color:#666"># Connected to 127.0.0.1:3333</div>
+            <div class="log-line" style="color:#666"># Try: 'add k1 v1', 'get k1', 'keys'</div>
+        </div>
+    </div>
+</main>
+
+<footer>
+    <input type="text" id="cmdInput" value="add user1 SecretData" placeholder="add key val | get key | keys">
+    <button id="btnSend" onclick="runCycle()">Send Binary</button>
+</footer>
+
+<script>
+    // --- State ---
+    const serverData = {};
+
+    // --- Actions ---
+
+    async function runCycle() {
+        const input = document.getElementById('cmdInput');
+        const rawCmd = input.value.trim();
+        if(!rawCmd) return;
+
+        // UI Lock
+        input.disabled = true;
+        document.getElementById('btnSend').disabled = true;
+        resetSteps();
+
+        // Parse Input
+        const parts = rawCmd.split(' ');
+        const cmd = parts[0];
+        const key = parts[1] || "";
+        const val = parts.slice(2).join(' ');
+
+        log(`[CLIENT] User Input: "${rawCmd}"`, "log-client");
+
+        // 1. Object Creation
+        activateStep(1);
+        const reqObjStr = `Request(cmd='${cmd}', key='${key}'...)`;
+        document.querySelector('#step1 .step-desc').innerHTML = `Object Creation: <span class="obj-box">${reqObjStr}</span>`;
+        await wait(800);
+
+        // 2. Pickle Dump
+        activateStep(2);
+        // Simulate pickle bytes visual
+        const mockBytes = generateMockBytes(rawCmd);
+        document.querySelector('#step2 .step-desc').innerHTML = `Pickle Dump: <span class="bin-box">${mockBytes}</span>`;
+        await wait(800);
+
+        // 3. Framing
+        activateStep(3);
+        const lenByte = `\\x${(mockBytes.length + 1).toString(16).padStart(2,'0')}`;
+        const framedBytes = `<span style="color:var(--accent-len)">${lenByte}</span>` + mockBytes;
+        document.querySelector('#step3 .step-desc').innerHTML = `Framing: Len=${mockBytes.length+1}`;
+        await wait(800);
+
+        // 4. Transmission
+        activateStep(4);
+        document.querySelector('#step4 .step-desc').innerHTML = `Transmission: <span class="bin-box">${lenByte}${mockBytes.substring(0,10)}...</span>`;
+        log(`[NETWORK] Sending ${mockBytes.length+1} bytes raw data`, "log-net");
+        
+        // Animate Packet C -> S
+        updatePacketText(lenByte + mockBytes.substring(0, 5) + "...");
+        await animatePacket('clientNode', 'serverNode');
+
+        // 5. Server Processing
+        activateStep(5);
+        document.querySelector('#step5 .step-desc').innerHTML = `Server: Unpack & Load`;
+        await wait(500);
+
+        const responseText = processServerLogic(cmd, key, val);
+        log(`[SERVER] Processed. Result: "${responseText}"`, "log-server");
+
+        // Response Path (Simplified animation)
+        log(`[NETWORK] Sending response bytes...`, "log-net");
+        const respBytes = generateMockBytes(responseText);
+        const respLen = `\\x${(respBytes.length+1).toString(16)}`;
+        
+        updatePacketText(respLen + respBytes.substring(0,5) + "...");
+        await animatePacket('serverNode', 'clientNode');
+
+        // Client Display
+        log(`[CLIENT] Response Object Payload: "${responseText}"`, "log-client");
+        log("------------------------------------------");
+
+        // Unlock
+        input.disabled = false;
+        document.getElementById('btnSend').disabled = false;
+        input.focus();
+    }
+
+    // --- Server Logic Simulation ---
+    function processServerLogic(cmd, key, val) {
+        if (cmd === 'add') {
+            if(!key) return "ERR missing key";
+            serverData[key] = val;
+            updateTable(key, 'add');
+            return `${key} added`;
+        } 
+        else if (cmd === 'remove') {
+            if(!key) return "ERR missing key";
+            if(serverData[key]) {
+                delete serverData[key];
+                updateTable(key, 'remove');
+                return `${key} removed`;
+            }
+            return `${key} not found`;
+        }
+        else if (cmd === 'get') {
+            if(!key) return "ERR missing key";
+            return serverData[key] || "key was not found";
+        }
+        else if (cmd === 'keys') {
+            // Lab Template Feature
+            const keys = Object.keys(serverData);
+            return keys.length > 0 ? keys.join(", ") : "no keys";
+        }
+        return "command not recognised";
+    }
+
+    // --- Helpers ---
+
+    function generateMockBytes(str) {
+        // Just a visual representation of pickle-like bytes
+        let res = "\\x80\\x03X" + str.length.toString(16) + "\\x00...";
+        // Add some random hex
+        for(let i=0; i<Math.min(str.length, 5); i++) {
+            res += "\\x" + str.charCodeAt(i).toString(16);
+        }
+        return res;
+    }
+
+    function updateTable(key, action) {
+        const tbody = document.getElementById('stateTableBody');
+        
+        if (action === 'remove') {
+            const rows = Array.from(tbody.children);
+            const target = rows.find(r => r.cells[0].innerText === key);
+            if(target) {
+                target.classList.add('row-del');
+                setTimeout(() => target.remove(), 1000);
+            }
+            return;
+        }
+
+        // Add/Update
+        let exists = false;
+        Array.from(tbody.children).forEach(r => {
+            if (r.cells[0].innerText === key) {
+                r.cells[1].innerText = serverData[key];
+                r.classList.remove('row-new');
+                void r.offsetWidth;
+                r.classList.add('row-new');
+                exists = true;
+            }
+        });
+
+        if (!exists) {
+            const tr = document.createElement('tr');
+            tr.className = 'row-new';
+            tr.innerHTML = `<td>${key}</td><td>${serverData[key]}</td>`;
+            tbody.appendChild(tr);
+        }
+    }
+
+    function updatePacketText(txt) {
+        document.getElementById('packet').innerText = txt;
+    }
+
+    function activateStep(num) {
+        document.querySelectorAll('.process-step').forEach(el => el.classList.remove('active'));
+        document.getElementById(`step${num}`).classList.add('active');
+    }
+
+    function resetSteps() {
+        document.querySelectorAll('.process-step').forEach(el => el.classList.remove('active'));
+    }
+
+    function log(msg, cls) {
+        const div = document.createElement('div');
+        div.className = `log-line ${cls}`;
+        div.innerText = msg;
+        const c = document.getElementById('console');
+        c.appendChild(div);
+        c.scrollTop = c.scrollHeight;
+    }
+
+    function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+    function animatePacket(fromId, toId) {
+        return new Promise(resolve => {
+            const pkt = document.getElementById('packet');
+            const container = document.querySelector('.nodes-row').getBoundingClientRect();
+            const fRect = document.getElementById(fromId).getBoundingClientRect();
+            const tRect = document.getElementById(toId).getBoundingClientRect();
+
+            const startX = fRect.left + fRect.width/2 - container.left;
+            const endX = tRect.left + tRect.width/2 - container.left;
+
+            pkt.style.left = `${startX}px`;
+            pkt.style.transform = `translate(-50%, -50%) scale(1)`;
+            pkt.style.transition = 'none';
+
+            void pkt.offsetWidth;
+
+            pkt.style.transition = 'left 0.8s ease-in-out';
+            pkt.style.left = `${endX}px`;
+
+            setTimeout(() => {
+                pkt.style.transform = `translate(-50%, -50%) scale(0)`;
+                resolve();
+            }, 800);
+        });
+    }
+</script>
+
+</body>
+</html>

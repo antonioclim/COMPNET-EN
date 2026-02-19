@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Packet Sniffer: Interactive Debugger</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;600;700&display=swap');
+
+        :root {
+            --bg-dark: #0f172a;
+            --panel-bg: #1e293b;
+            --accent-blue: #38bdf8;
+            --accent-purple: #c084fc;
+            --accent-green: #4ade80;
+            --accent-red: #f87171;
+            --code-bg: #0d1117;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: #e2e8f0;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mono { font-family: 'Fira Code', monospace; }
+
+        /* Animation Keyframes */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(56, 189, 248, 0); }
+            100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
+        }
+
+        @keyframes packet-fly {
+            0% { transform: translateX(-50px) scale(0.5); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateX(300px) scale(1); opacity: 0; }
+        }
+
+        @keyframes highlight-flash {
+            0% { background-color: rgba(255, 255, 255, 0.1); }
+            50% { background-color: rgba(56, 189, 248, 0.3); }
+            100% { background-color: transparent; }
+        }
+
+        /* Components */
+        .packet-icon {
+            width: 12px;
+            height: 12px;
+            background: var(--accent-blue);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 20px;
+            opacity: 0;
+        }
+        .animating-packet {
+            animation: packet-fly 1s ease-in-out forwards;
+        }
+
+        /* Hex Grid */
+        .hex-grid {
+            display: grid;
+            grid-template-columns: repeat(16, 1fr);
+            gap: 4px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.7rem;
+        }
+        .hex-byte {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #334155;
+            color: #94a3b8;
+            border-radius: 2px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        
+        /* Token Overlay for struct.unpack visualization */
+        .hex-token {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.6rem;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            z-index: 10;
+            backdrop-filter: blur(1px);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .show-token .hex-token { opacity: 1; }
+
+        /* Code Lines */
+        .code-line {
+            padding: 4px 8px;
+            border-left: 3px solid transparent;
+            opacity: 0.6;
+            transition: all 0.2s;
+        }
+        .code-line.active {
+            background-color: rgba(56, 189, 248, 0.1);
+            border-left-color: var(--accent-blue);
+            opacity: 1;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.1);
+        }
+        .code-line:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Variable Watcher */
+        .var-box {
+            background: #1e293b;
+            border: 1px solid #334155;
+            padding: 8px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            transition: border-color 0.3s;
+        }
+        .var-box.updated {
+            border-color: var(--accent-green);
+            animation: highlight-flash 1s;
+        }
+
+        /* Byte Highlights */
+        .hl-byte-active { background-color: var(--accent-blue) !important; color: black !important; transform: scale(1.1); box-shadow: 0 0 10px var(--accent-blue); z-index: 5; }
+        .hl-byte-skip { background-color: #475569 !important; opacity: 0.3; }
+        .hl-byte-read { background-color: var(--accent-purple) !important; color: white !important; }
+
+        /* Custom Scrollbar */
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: var(--bg-dark); }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="h-16 border-b border-slate-700 bg-slate-900/80 backdrop-blur flex items-center justify-between px-6 z-20">
+        <div class="flex items-center gap-4">
+            <div class="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                </svg>
+            </div>
+            <div>
+                <h1 class="text-lg font-bold text-white tracking-tight">Packet Sniffer <span class="text-sky-400">Debugger</span></h1>
+                <p class="text-xs text-slate-400 font-mono">STEP-BY-STEP PYTHON EXECUTION</p>
+            </div>
+        </div>
+
+        <!-- Flow Viz Container -->
+        <div class="flex-1 max-w-xl mx-8 h-12 relative flex items-center bg-slate-800/50 rounded-full border border-slate-700 px-4 overflow-hidden">
+            <div class="text-[10px] font-mono text-slate-500 absolute left-4">NETWORK</div>
+            <div class="text-[10px] font-mono text-slate-500 absolute right-4">BUFFER</div>
+            <div id="packet-track" class="w-full h-0.5 bg-slate-700 relative">
+                <!-- Packets animate here -->
+            </div>
+        </div>
+
+        <div class="flex gap-3">
+            <button onclick="generateTraffic('icmp')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded text-xs font-bold text-white transition flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-pink-500"></span> Generate Ping
+            </button>
+            <button onclick="resetApp()" class="px-3 py-2 text-slate-400 hover:text-white transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="flex-1 flex overflow-hidden">
+        
+        <!-- LEFT: Code Execution -->
+        <section class="w-1/3 border-r border-slate-700 flex flex-col bg-[#0d1117]">
+            <div class="p-3 border-b border-slate-700 flex justify-between items-center bg-slate-800/30">
+                <span class="text-xs font-bold text-slate-300 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                    packet_sniffer.py
+                </span>
+                <div id="debug-controls" class="flex gap-2 opacity-50 pointer-events-none transition-opacity">
+                    <button onclick="stepCode()" class="px-3 py-1 bg-green-600 hover:bg-green-500 text-white rounded text-[10px] font-bold flex items-center gap-1 shadow-lg shadow-green-900/20">
+                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg>
+                        NEXT STEP
+                    </button>
+                </div>
+            </div>
+            
+            <div class="flex-1 overflow-auto p-4 custom-scroll relative">
+                <!-- Line Numbers -->
+                <div class="absolute left-0 top-4 bottom-0 w-8 text-right pr-2 text-slate-700 font-mono text-xs select-none">
+                    1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10<br>11<br>12<br>13<br>14<br>15<br>16<br>17<br>18
+                </div>
+
+                <!-- Code Content -->
+                <div class="pl-8 font-mono text-xs leading-6">
+                    <div class="code-line text-slate-500 italic"># Function to parse IPv4 Header</div>
+                    <div class="code-line"><span class="text-purple-400">def</span> <span class="text-blue-400">parse_ipv4_header</span>(data):</div>
+                    
+                    <div id="line-0" class="code-line pl-6">
+                        <span class="text-slate-500 italic"># 1. Extract Version & IHL from first byte</span>
+                    </div>
+                    <div id="line-1" class="code-line pl-6">
+                        version_ihl = data[0]
+                    </div>
+                    <div id="line-2" class="code-line pl-6">
+                        version = version_ihl >> 4
+                    </div>
+                    <div id="line-3" class="code-line pl-6">
+                        ihl = (version_ihl & 0x0F) * 4
+                    </div>
+
+                    <div id="line-4" class="code-line pl-6 mt-2">
+                        <span class="text-slate-500 italic"># 2. Unpack Header Fields</span>
+                    </div>
+                    <div id="line-5" class="code-line pl-6">
+                        <span class="text-slate-500"># Format: ! 8x B B 2x 4s 4s</span>
+                    </div>
+                    <div id="line-6" class="code-line pl-6">
+                        ttl, proto, src, dst = struct.unpack(
+                    </div>
+                    <div id="line-7" class="code-line pl-10">
+                        <span class="text-green-400">'! 8x B B 2x 4s 4s'</span>, data[:20]
+                    </div>
+                    <div id="line-8" class="code-line pl-6">
+                        )
+                    </div>
+
+                    <div id="line-9" class="code-line pl-6 mt-2">
+                        <span class="text-slate-500 italic"># 3. Format IP Addresses</span>
+                    </div>
+                    <div id="line-10" class="code-line pl-6">
+                        src_ip = ipv4_addr(src)
+                    </div>
+                    <div id="line-11" class="code-line pl-6">
+                        dst_ip = ipv4_addr(dst)
+                    </div>
+
+                    <div id="line-12" class="code-line pl-6 mt-2">
+                        <span class="text-purple-400">return</span> src_ip, dst_ip, proto
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CENTER: Memory & Visuals -->
+        <section class="flex-1 flex flex-col bg-slate-900 border-r border-slate-700">
+            
+            <!-- Context / Teaching Banner -->
+            <div id="teaching-panel" class="h-32 bg-slate-800 p-6 flex flex-col justify-center border-b border-slate-700 transition-colors">
+                <h2 class="text-sm font-bold text-slate-300 uppercase mb-2 flex items-center gap-2">
+                    <span class="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></span>
+                    System Status
+                </h2>
+                <p id="instruction-text" class="text-slate-400 text-sm">Waiting for traffic... Click "Generate Ping" to start.</p>
+            </div>
+
+            <!-- Hex View -->
+            <div class="flex-1 p-6 overflow-hidden flex flex-col">
+                <div class="flex justify-between items-end mb-4">
+                    <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Raw Memory (Packet Buffer)</h3>
+                    <div class="flex gap-4 text-[10px] font-mono text-slate-500">
+                        <span class="flex items-center gap-1"><span class="w-2 h-2 bg-indigo-500 rounded-sm opacity-50"></span> Ethernet Header (14 bytes)</span>
+                        <span class="flex items-center gap-1"><span class="w-2 h-2 bg-sky-500 rounded-sm opacity-50"></span> IP Header (20 bytes)</span>
+                    </div>
+                </div>
+
+                <div class="relative bg-black rounded-lg border border-slate-700 p-4 shadow-inner flex-1 overflow-auto">
+                    <!-- Overlay for "No Packet Selected" -->
+                    <div id="empty-state" class="absolute inset-0 flex items-center justify-center bg-black/80 z-20">
+                        <p class="text-slate-600 font-mono text-sm">Buffer Empty</p>
+                    </div>
+
+                    <div id="hex-container" class="hex-grid select-none">
+                        <!-- Hex bytes generated by JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- RIGHT: Variables Watcher -->
+        <section class="w-72 bg-[#0f172a] flex flex-col">
+            <div class="p-3 border-b border-slate-700 bg-slate-800/30">
+                <span class="text-xs font-bold text-slate-300">Variables Watch</span>
+            </div>
+            
+            <div id="vars-container" class="flex-1 p-4 overflow-y-auto space-y-4">
+                <!-- Variables appear here -->
+                <div class="text-center text-slate-600 text-xs italic mt-10 opacity-50">
+                    Local variables will appear here as you step through the code.
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // --- State ---
+        let packets = [];
+        let currentPacket = null;
+        let stepIndex = -1; // -1: Idle, 0: Start, ...
+        
+        // --- Configuration ---
+        const STEPS = [
+            { lines: [1], action: 'EXTRACT_BYTE_0', desc: "Reading the first byte of the IP Header. It contains both Version and IHL." },
+            { lines: [2], action: 'CALC_VER', desc: "Bitwise Shift: 0x45 >> 4 = 4. This isolates the Version (IPv4)." },
+            { lines: [3], action: 'CALC_IHL', desc: "Bitwise AND: 0x45 & 0x0F = 5. Multiply by 4 = 20 bytes header length." },
+            { lines: [6, 7, 8], action: 'UNPACK', desc: "struct.unpack: '! 8x B B 2x 4s 4s'. Skips 8 bytes, reads TTL(1), Proto(1), Skips 2, Reads Src(4), Dst(4)." },
+            { lines: [10], action: 'FMT_SRC', desc: "Converting 4 raw bytes into a human-readable IP string (192.168...)." },
+            { lines: [11], action: 'FMT_DST', desc: "Converting destination bytes to string." },
+            { lines: [12], action: 'RETURN', desc: "Parsing complete. Returning structured data." }
+        ];
+
+        // --- Init ---
+        function init() {
+            renderHexGrid();
+        }
+
+        // --- Traffic Logic ---
+        function generateTraffic(type) {
+            // 1. Visual Animation
+            const track = document.getElementById('packet-track');
+            const packet = document.createElement('div');
+            packet.className = 'packet-icon animating-packet';
+            track.appendChild(packet);
+
+            setTimeout(() => {
+                packet.remove();
+                receivePacket(type);
+            }, 950);
+
+            // Update status
+            setInstruction("Incoming traffic detected on interface...", "text-sky-400");
+        }
+
+        function receivePacket(type) {
+            // Mock Data
+            const id = packets.length + 1;
+            // Ethernet (14) + IP (20) + Payload
+            // IP Header starts at index 14
+            // 0x45 (Ver/IHL), 0x00 (TOS), 0x00 0x3C (Len), 0x12 0x34 (ID), 0x40 0x00 (Flags), 0x40 (TTL=64), 0x01 (Proto=ICMP), 0x00 0x00 (Chk)
+            // Src: 192.168.0.105 (C0 A8 00 69)
+            // Dst: 8.8.8.8 (08 08 08 08)
+            const raw = [
+                0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x08, 0x00, // Eth
+                0x45, 0x00, 0x00, 0x3C, 0x12, 0x34, 0x40, 0x00, 0x40, 0x01, 0x00, 0x00, // IP Part 1
+                0xC0, 0xA8, 0x00, 0x69, // Src
+                0x08, 0x08, 0x08, 0x08, // Dst
+                0xDE, 0xAD, 0xBE, 0xEF  // Payload
+            ];
+
+            const pkt = { id, raw, type };
+            currentPacket = pkt;
+            
+            // UI Update
+            document.getElementById('empty-state').classList.add('hidden');
+            renderPacketBytes(pkt);
+            
+            // Enable Debugger
+            const controls = document.getElementById('debug-controls');
+            controls.classList.remove('opacity-50', 'pointer-events-none');
+            controls.classList.add('opacity-100');
+            
+            setInstruction("Packet Captured in Buffer. Click 'NEXT STEP' to execute the parsing script.", "text-green-400");
+            
+            // Reset steps
+            stepIndex = -1;
+            document.getElementById('vars-container').innerHTML = '';
+            clearHighlights();
+        }
+
+        // --- Core Debugger Logic ---
+        function stepCode() {
+            stepIndex++;
+
+            if (stepIndex >= STEPS.length) {
+                setInstruction("Execution finished. Packet parsed successfully.", "text-white");
+                document.getElementById('debug-controls').classList.add('opacity-50', 'pointer-events-none');
+                return;
+            }
+
+            const step = STEPS[stepIndex];
+            
+            // 1. Highlight Code Lines
+            document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+            step.lines.forEach(lineNum => {
+                document.getElementById(`line-${lineNum}`).classList.add('active');
+            });
+
+            // 2. Update Instruction Panel
+            setInstruction(step.desc, "text-sky-300");
+
+            // 3. Execute Visual Logic
+            executeVisualStep(step.action);
+        }
+
+        function executeVisualStep(action) {
+            clearHighlights(); // Reset previous visual markers
+
+            if (action === 'EXTRACT_BYTE_0') {
+                // Highlight Byte 14 (0x45)
+                highlightByte(14, 'hl-byte-active');
+                addVariable('data[0]', '0x45', 'byte');
+            }
+            else if (action === 'CALC_VER') {
+                highlightByte(14, 'hl-byte-read');
+                // Show calculation
+                addVariable('version_ihl', '0x45 (0100 0101)', 'int');
+                addVariable('version', '4 (IPv4)', 'int', true);
+            }
+            else if (action === 'CALC_IHL') {
+                highlightByte(14, 'hl-byte-read');
+                addVariable('ihl', '20 bytes', 'int', true);
+            }
+            else if (action === 'UNPACK') {
+                // Complex Visualization: Show struct tokens
+                // IP header starts at 14.
+                // ! 8x (14-21)
+                // B (22) TTL
+                // B (23) Proto
+                // 2x (24-25)
+                // 4s (26-29) Src
+                // 4s (30-33) Dst
+                
+                showStructToken(14, 21, "8x (Skip)");
+                showStructToken(22, 22, "B (TTL)");
+                showStructToken(23, 23, "B (Proto)");
+                showStructToken(24, 25, "2x (Skip)");
+                showStructToken(26, 29, "4s (Src)");
+                showStructToken(30, 33, "4s (Dst)");
+
+                // Highlight meaningful bytes
+                highlightByte(22, 'hl-byte-active');
+                highlightByte(23, 'hl-byte-active');
+                highlightRange(26, 29, 'hl-byte-read');
+                highlightRange(30, 33, 'hl-byte-read');
+
+                // Update Vars
+                addVariable('ttl', '64', 'int', true);
+                addVariable('proto', '1 (ICMP)', 'int', true);
+                addVariable('src', "b'\\xc0\\xa8...'", 'bytes', true);
+                addVariable('dst', "b'\\x08\\x08...'", 'bytes', true);
+            }
+            else if (action === 'FMT_SRC') {
+                highlightRange(26, 29, 'hl-byte-active');
+                addVariable('src_ip', '"192.168.0.105"', 'str', true);
+            }
+            else if (action === 'FMT_DST') {
+                highlightRange(30, 33, 'hl-byte-active');
+                addVariable('dst_ip', '"8.8.8.8"', 'str', true);
+            }
+        }
+
+        // --- Helpers ---
+
+        function renderHexGrid() {
+            const container = document.getElementById('hex-container');
+            container.innerHTML = '';
+            for (let i = 0; i < 64; i++) {
+                const div = document.createElement('div');
+                div.className = 'hex-byte opacity-30';
+                div.innerText = '00';
+                container.appendChild(div);
+            }
+        }
+
+        function renderPacketBytes(pkt) {
+            const container = document.getElementById('hex-container');
+            container.innerHTML = '';
+            
+            pkt.raw.forEach((byte, idx) => {
+                const div = document.createElement('div');
+                div.id = `byte-${idx}`;
+                div.className = 'hex-byte font-mono text-[10px]';
+                div.innerText = byte.toString(16).padStart(2, '0').toUpperCase();
+                
+                // Color coding basics
+                if (idx < 14) div.style.color = '#64748b'; // Eth
+                else if (idx < 34) div.style.color = '#38bdf8'; // IP
+                else div.style.color = '#94a3b8'; // Payload
+
+                // Token container
+                const token = document.createElement('div');
+                token.className = 'hex-token';
+                div.appendChild(token);
+
+                container.appendChild(div);
+            });
+        }
+
+        function highlightByte(idx, cls) {
+            const el = document.getElementById(`byte-${idx}`);
+            if (el) el.classList.add(cls);
+        }
+
+        function highlightRange(start, end, cls) {
+            for (let i = start; i <= end; i++) highlightByte(i, cls);
+        }
+
+        function clearHighlights() {
+            document.querySelectorAll('.hex-byte').forEach(el => {
+                el.classList.remove('hl-byte-active', 'hl-byte-read', 'hl-byte-skip');
+            });
+            document.querySelectorAll('.hex-token').forEach(el => {
+                el.innerText = '';
+                el.parentElement.classList.remove('show-token');
+            });
+        }
+
+        function showStructToken(start, end, text) {
+            for (let i = start; i <= end; i++) {
+                const el = document.getElementById(`byte-${i}`);
+                if (el) {
+                    const token = el.querySelector('.hex-token');
+                    token.innerText = i === start || i === end || (end-start < 2) ? text : ''; // Simplify text for ranges
+                    if (end - start > 3 && i === start + 1) token.innerText = text; // Center text for large ranges
+                    el.classList.add('show-token');
+                    if (text.includes('Skip')) el.classList.add('hl-byte-skip');
+                }
+            }
+        }
+
+        function addVariable(name, val, type, flash = false) {
+            const container = document.getElementById('vars-container');
+            
+            // Check if exists
+            let box = document.getElementById(`var-${name}`);
+            if (!box) {
+                box = document.createElement('div');
+                box.id = `var-${name}`;
+                box.className = 'var-box';
+                container.appendChild(box);
+            }
+
+            let typeColor = 'text-slate-500';
+            if (type === 'int') typeColor = 'text-orange-400';
+            if (type === 'str') typeColor = 'text-green-400';
+            if (type === 'bytes') typeColor = 'text-purple-400';
+
+            box.innerHTML = `
+                <div class="flex justify-between items-center mb-1">
+                    <span class="font-bold text-slate-200 text-xs font-mono">${name}</span>
+                    <span class="text-[10px] ${typeColor} font-mono">${type}</span>
+                </div>
+                <div class="text-sm font-mono text-white break-all">${val}</div>
+            `;
+
+            if (flash) {
+                box.classList.remove('updated');
+                void box.offsetWidth; // trigger reflow
+                box.classList.add('updated');
+            }
+        }
+
+        function setInstruction(text, colorClass) {
+            const el = document.getElementById('instruction-text');
+            el.innerText = text;
+            el.className = `text-sm transition-colors duration-300 ${colorClass}`;
+        }
+
+        function resetApp() {
+            stepIndex = -1;
+            document.getElementById('debug-controls').classList.add('opacity-50', 'pointer-events-none');
+            document.getElementById('empty-state').classList.remove('hidden');
+            document.getElementById('vars-container').innerHTML = '';
+            document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+            setInstruction("Waiting for traffic... Click 'Generate Ping' to start.", "text-slate-400");
+            renderHexGrid();
+        }
+
+        // Start
+        init();
+
+    </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Packet Sniffer: Interactive Debugger</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;600;700&display=swap');
+
+        :root {
+            --bg-dark: #0f172a;
+            --panel-bg: #1e293b;
+            --accent-blue: #38bdf8;
+            --accent-purple: #c084fc;
+            --accent-green: #4ade80;
+            --accent-red: #f87171;
+            --code-bg: #0d1117;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: #e2e8f0;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mono { font-family: 'Fira Code', monospace; }
+
+        /* Animation Keyframes */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(56, 189, 248, 0); }
+            100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
+        }
+
+        @keyframes packet-fly {
+            0% { transform: translateX(-50px) scale(0.5); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateX(300px) scale(1); opacity: 0; }
+        }
+
+        @keyframes highlight-flash {
+            0% { background-color: rgba(255, 255, 255, 0.1); }
+            50% { background-color: rgba(56, 189, 248, 0.3); }
+            100% { background-color: transparent; }
+        }
+
+        /* Components */
+        .packet-icon {
+            width: 12px;
+            height: 12px;
+            background: var(--accent-blue);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 20px;
+            opacity: 0;
+        }
+        .animating-packet {
+            animation: packet-fly 1s ease-in-out forwards;
+        }
+
+        /* Hex Grid */
+        .hex-grid {
+            display: grid;
+            grid-template-columns: repeat(16, 1fr);
+            gap: 4px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.7rem;
+        }
+        .hex-byte {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #334155;
+            color: #94a3b8;
+            border-radius: 2px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        
+        /* Token Overlay for struct.unpack visualization */
+        .hex-token {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.6rem;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            z-index: 10;
+            backdrop-filter: blur(1px);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .show-token .hex-token { opacity: 1; }
+
+        /* Code Lines */
+        .code-line {
+            padding: 4px 8px;
+            border-left: 3px solid transparent;
+            opacity: 0.6;
+            transition: all 0.2s;
+        }
+        .code-line.active {
+            background-color: rgba(56, 189, 248, 0.1);
+            border-left-color: var(--accent-blue);
+            opacity: 1;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.1);
+        }
+        .code-line:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Variable Watcher */
+        .var-box {
+            background: #1e293b;
+            border: 1px solid #334155;
+            padding: 8px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            transition: border-color 0.3s;
+        }
+        .var-box.updated {
+            border-color: var(--accent-green);
+            animation: highlight-flash 1s;
+        }
+
+        /* Byte Highlights */
+        .hl-byte-active { background-color: var(--accent-blue) !important; color: black !important; transform: scale(1.1); box-shadow: 0 0 10px var(--accent-blue); z-index: 5; }
+        .hl-byte-skip { background-color: #475569 !important; opacity: 0.3; }
+        .hl-byte-read { background-color: var(--accent-purple) !important; color: white !important; }
+
+        /* Custom Scrollbar */
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: var(--bg-dark); }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="h-16 border-b border-slate-700 bg-slate-900/80 backdrop-blur flex items-center justify-between px-6 z-20">
+        <div class="flex items-center gap-4">
+            <div class="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                </svg>
+            </div>
+            <div>
+                <h1 class="text-lg font-bold text-white tracking-tight">Packet Sniffer <span class="text-sky-400">Debugger</span></h1>
+                <p class="text-xs text-slate-400 font-mono">STEP-BY-STEP PYTHON EXECUTION</p>
+            </div>
+        </div>
+
+        <!-- Flow Viz Container -->
+        <div class="flex-1 max-w-xl mx-8 h-12 relative flex items-center bg-slate-800/50 rounded-full border border-slate-700 px-4 overflow-hidden">
+            <div class="text-[10px] font-mono text-slate-500 absolute left-4">NETWORK</div>
+            <div class="text-[10px] font-mono text-slate-500 absolute right-4">BUFFER</div>
+            <div id="packet-track" class="w-full h-0.5 bg-slate-700 relative">
+                <!-- Packets animate here -->
+            </div>
+        </div>
+
+        <div class="flex gap-3">
+            <button onclick="generateTraffic('icmp')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded text-xs font-bold text-white transition flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-pink-500"></span> Generate Ping
+            </button>
+            <button onclick="resetApp()" class="px-3 py-2 text-slate-400 hover:text-white transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="flex-1 flex overflow-hidden">
+        
+        <!-- LEFT: Code Execution -->
+        <section class="w-1/3 border-r border-slate-700 flex flex-col bg-[#0d1117]">
+            <div class="p-3 border-b border-slate-700 flex justify-between items-center bg-slate-800/30">
+                <span class="text-xs font-bold text-slate-300 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                    packet_sniffer.py
+                </span>
+                <div id="debug-controls" class="flex gap-2 opacity-50 pointer-events-none transition-opacity">
+                    <button onclick="stepCode()" class="px-3 py-1 bg-green-600 hover:bg-green-500 text-white rounded text-[10px] font-bold flex items-center gap-1 shadow-lg shadow-green-900/20">
+                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg>
+                        NEXT STEP
+                    </button>
+                </div>
+            </div>
+            
+            <div class="flex-1 overflow-auto p-4 custom-scroll relative">
+                <!-- Line Numbers -->
+                <div class="absolute left-0 top-4 bottom-0 w-8 text-right pr-2 text-slate-700 font-mono text-xs select-none">
+                    1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10<br>11<br>12<br>13<br>14<br>15<br>16<br>17<br>18
+                </div>
+
+                <!-- Code Content -->
+                <div class="pl-8 font-mono text-xs leading-6">
+                    <div class="code-line text-slate-500 italic"># Function to parse IPv4 Header</div>
+                    <div class="code-line"><span class="text-purple-400">def</span> <span class="text-blue-400">parse_ipv4_header</span>(data):</div>
+                    
+                    <div id="line-0" class="code-line pl-6">
+                        <span class="text-slate-500 italic"># 1. Extract Version & IHL from first byte</span>
+                    </div>
+                    <div id="line-1" class="code-line pl-6">
+                        version_ihl = data[0]
+                    </div>
+                    <div id="line-2" class="code-line pl-6">
+                        version = version_ihl >> 4
+                    </div>
+                    <div id="line-3" class="code-line pl-6">
+                        ihl = (version_ihl & 0x0F) * 4
+                    </div>
+
+                    <div id="line-4" class="code-line pl-6 mt-2">
+                        <span class="text-slate-500 italic"># 2. Unpack Header Fields</span>
+                    </div>
+                    <div id="line-5" class="code-line pl-6">
+                        <span class="text-slate-500"># Format: ! 8x B B 2x 4s 4s</span>
+                    </div>
+                    <div id="line-6" class="code-line pl-6">
+                        ttl, proto, src, dst = struct.unpack(
+                    </div>
+                    <div id="line-7" class="code-line pl-10">
+                        <span class="text-green-400">'! 8x B B 2x 4s 4s'</span>, data[:20]
+                    </div>
+                    <div id="line-8" class="code-line pl-6">
+                        )
+                    </div>
+
+                    <div id="line-9" class="code-line pl-6 mt-2">
+                        <span class="text-slate-500 italic"># 3. Format IP Addresses</span>
+                    </div>
+                    <div id="line-10" class="code-line pl-6">
+                        src_ip = ipv4_addr(src)
+                    </div>
+                    <div id="line-11" class="code-line pl-6">
+                        dst_ip = ipv4_addr(dst)
+                    </div>
+
+                    <div id="line-12" class="code-line pl-6 mt-2">
+                        <span class="text-purple-400">return</span> src_ip, dst_ip, proto
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CENTER: Memory & Visuals -->
+        <section class="flex-1 flex flex-col bg-slate-900 border-r border-slate-700">
+            
+            <!-- Context / Teaching Banner -->
+            <div id="teaching-panel" class="h-32 bg-slate-800 p-6 flex flex-col justify-center border-b border-slate-700 transition-colors">
+                <h2 class="text-sm font-bold text-slate-300 uppercase mb-2 flex items-center gap-2">
+                    <span class="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></span>
+                    System Status
+                </h2>
+                <p id="instruction-text" class="text-slate-400 text-sm">Waiting for traffic... Click "Generate Ping" to start.</p>
+            </div>
+
+            <!-- Hex View -->
+            <div class="flex-1 p-6 overflow-hidden flex flex-col">
+                <div class="flex justify-between items-end mb-4">
+                    <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Raw Memory (Packet Buffer)</h3>
+                    <div class="flex gap-4 text-[10px] font-mono text-slate-500">
+                        <span class="flex items-center gap-1"><span class="w-2 h-2 bg-indigo-500 rounded-sm opacity-50"></span> Ethernet Header (14 bytes)</span>
+                        <span class="flex items-center gap-1"><span class="w-2 h-2 bg-sky-500 rounded-sm opacity-50"></span> IP Header (20 bytes)</span>
+                    </div>
+                </div>
+
+                <div class="relative bg-black rounded-lg border border-slate-700 p-4 shadow-inner flex-1 overflow-auto">
+                    <!-- Overlay for "No Packet Selected" -->
+                    <div id="empty-state" class="absolute inset-0 flex items-center justify-center bg-black/80 z-20">
+                        <p class="text-slate-600 font-mono text-sm">Buffer Empty</p>
+                    </div>
+
+                    <div id="hex-container" class="hex-grid select-none">
+                        <!-- Hex bytes generated by JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- RIGHT: Variables Watcher -->
+        <section class="w-72 bg-[#0f172a] flex flex-col">
+            <div class="p-3 border-b border-slate-700 bg-slate-800/30">
+                <span class="text-xs font-bold text-slate-300">Variables Watch</span>
+            </div>
+            
+            <div id="vars-container" class="flex-1 p-4 overflow-y-auto space-y-4">
+                <!-- Variables appear here -->
+                <div class="text-center text-slate-600 text-xs italic mt-10 opacity-50">
+                    Local variables will appear here as you step through the code.
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // --- State ---
+        let packets = [];
+        let currentPacket = null;
+        let stepIndex = -1; // -1: Idle, 0: Start, ...
+        
+        // --- Configuration ---
+        const STEPS = [
+            { lines: [1], action: 'EXTRACT_BYTE_0', desc: "Reading the first byte of the IP Header. It contains both Version and IHL." },
+            { lines: [2], action: 'CALC_VER', desc: "Bitwise Shift: 0x45 >> 4 = 4. This isolates the Version (IPv4)." },
+            { lines: [3], action: 'CALC_IHL', desc: "Bitwise AND: 0x45 & 0x0F = 5. Multiply by 4 = 20 bytes header length." },
+            { lines: [6, 7, 8], action: 'UNPACK', desc: "struct.unpack: '! 8x B B 2x 4s 4s'. Skips 8 bytes, reads TTL(1), Proto(1), Skips 2, Reads Src(4), Dst(4)." },
+            { lines: [10], action: 'FMT_SRC', desc: "Converting 4 raw bytes into a human-readable IP string (192.168...)." },
+            { lines: [11], action: 'FMT_DST', desc: "Converting destination bytes to string." },
+            { lines: [12], action: 'RETURN', desc: "Parsing complete. Returning structured data." }
+        ];
+
+        // --- Init ---
+        function init() {
+            renderHexGrid();
+        }
+
+        // --- Traffic Logic ---
+        function generateTraffic(type) {
+            // 1. Visual Animation
+            const track = document.getElementById('packet-track');
+            const packet = document.createElement('div');
+            packet.className = 'packet-icon animating-packet';
+            track.appendChild(packet);
+
+            setTimeout(() => {
+                packet.remove();
+                receivePacket(type);
+            }, 950);
+
+            // Update status
+            setInstruction("Incoming traffic detected on interface...", "text-sky-400");
+        }
+
+        function receivePacket(type) {
+            // Mock Data
+            const id = packets.length + 1;
+            // Ethernet (14) + IP (20) + Payload
+            // IP Header starts at index 14
+            // 0x45 (Ver/IHL), 0x00 (TOS), 0x00 0x3C (Len), 0x12 0x34 (ID), 0x40 0x00 (Flags), 0x40 (TTL=64), 0x01 (Proto=ICMP), 0x00 0x00 (Chk)
+            // Src: 192.168.0.105 (C0 A8 00 69)
+            // Dst: 8.8.8.8 (08 08 08 08)
+            const raw = [
+                0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x08, 0x00, // Eth
+                0x45, 0x00, 0x00, 0x3C, 0x12, 0x34, 0x40, 0x00, 0x40, 0x01, 0x00, 0x00, // IP Part 1
+                0xC0, 0xA8, 0x00, 0x69, // Src
+                0x08, 0x08, 0x08, 0x08, // Dst
+                0xDE, 0xAD, 0xBE, 0xEF  // Payload
+            ];
+
+            const pkt = { id, raw, type };
+            currentPacket = pkt;
+            
+            // UI Update
+            document.getElementById('empty-state').classList.add('hidden');
+            renderPacketBytes(pkt);
+            
+            // Enable Debugger
+            const controls = document.getElementById('debug-controls');
+            controls.classList.remove('opacity-50', 'pointer-events-none');
+            controls.classList.add('opacity-100');
+            
+            setInstruction("Packet Captured in Buffer. Click 'NEXT STEP' to execute the parsing script.", "text-green-400");
+            
+            // Reset steps
+            stepIndex = -1;
+            document.getElementById('vars-container').innerHTML = '';
+            clearHighlights();
+        }
+
+        // --- Core Debugger Logic ---
+        function stepCode() {
+            stepIndex++;
+
+            if (stepIndex >= STEPS.length) {
+                setInstruction("Execution finished. Packet parsed successfully.", "text-white");
+                document.getElementById('debug-controls').classList.add('opacity-50', 'pointer-events-none');
+                return;
+            }
+
+            const step = STEPS[stepIndex];
+            
+            // 1. Highlight Code Lines
+            document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+            step.lines.forEach(lineNum => {
+                document.getElementById(`line-${lineNum}`).classList.add('active');
+            });
+
+            // 2. Update Instruction Panel
+            setInstruction(step.desc, "text-sky-300");
+
+            // 3. Execute Visual Logic
+            executeVisualStep(step.action);
+        }
+
+        function executeVisualStep(action) {
+            clearHighlights(); // Reset previous visual markers
+
+            if (action === 'EXTRACT_BYTE_0') {
+                // Highlight Byte 14 (0x45)
+                highlightByte(14, 'hl-byte-active');
+                addVariable('data[0]', '0x45', 'byte');
+            }
+            else if (action === 'CALC_VER') {
+                highlightByte(14, 'hl-byte-read');
+                // Show calculation
+                addVariable('version_ihl', '0x45 (0100 0101)', 'int');
+                addVariable('version', '4 (IPv4)', 'int', true);
+            }
+            else if (action === 'CALC_IHL') {
+                highlightByte(14, 'hl-byte-read');
+                addVariable('ihl', '20 bytes', 'int', true);
+            }
+            else if (action === 'UNPACK') {
+                // Complex Visualization: Show struct tokens
+                // IP header starts at 14.
+                // ! 8x (14-21)
+                // B (22) TTL
+                // B (23) Proto
+                // 2x (24-25)
+                // 4s (26-29) Src
+                // 4s (30-33) Dst
+                
+                showStructToken(14, 21, "8x (Skip)");
+                showStructToken(22, 22, "B (TTL)");
+                showStructToken(23, 23, "B (Proto)");
+                showStructToken(24, 25, "2x (Skip)");
+                showStructToken(26, 29, "4s (Src)");
+                showStructToken(30, 33, "4s (Dst)");
+
+                // Highlight meaningful bytes
+                highlightByte(22, 'hl-byte-active');
+                highlightByte(23, 'hl-byte-active');
+                highlightRange(26, 29, 'hl-byte-read');
+                highlightRange(30, 33, 'hl-byte-read');
+
+                // Update Vars
+                addVariable('ttl', '64', 'int', true);
+                addVariable('proto', '1 (ICMP)', 'int', true);
+                addVariable('src', "b'\\xc0\\xa8...'", 'bytes', true);
+                addVariable('dst', "b'\\x08\\x08...'", 'bytes', true);
+            }
+            else if (action === 'FMT_SRC') {
+                highlightRange(26, 29, 'hl-byte-active');
+                addVariable('src_ip', '"192.168.0.105"', 'str', true);
+            }
+            else if (action === 'FMT_DST') {
+                highlightRange(30, 33, 'hl-byte-active');
+                addVariable('dst_ip', '"8.8.8.8"', 'str', true);
+            }
+        }
+
+        // --- Helpers ---
+
+        function renderHexGrid() {
+            const container = document.getElementById('hex-container');
+            container.innerHTML = '';
+            for (let i = 0; i < 64; i++) {
+                const div = document.createElement('div');
+                div.className = 'hex-byte opacity-30';
+                div.innerText = '00';
+                container.appendChild(div);
+            }
+        }
+
+        function renderPacketBytes(pkt) {
+            const container = document.getElementById('hex-container');
+            container.innerHTML = '';
+            
+            pkt.raw.forEach((byte, idx) => {
+                const div = document.createElement('div');
+                div.id = `byte-${idx}`;
+                div.className = 'hex-byte font-mono text-[10px]';
+                div.innerText = byte.toString(16).padStart(2, '0').toUpperCase();
+                
+                // Color coding basics
+                if (idx < 14) div.style.color = '#64748b'; // Eth
+                else if (idx < 34) div.style.color = '#38bdf8'; // IP
+                else div.style.color = '#94a3b8'; // Payload
+
+                // Token container
+                const token = document.createElement('div');
+                token.className = 'hex-token';
+                div.appendChild(token);
+
+                container.appendChild(div);
+            });
+        }
+
+        function highlightByte(idx, cls) {
+            const el = document.getElementById(`byte-${idx}`);
+            if (el) el.classList.add(cls);
+        }
+
+        function highlightRange(start, end, cls) {
+            for (let i = start; i <= end; i++) highlightByte(i, cls);
+        }
+
+        function clearHighlights() {
+            document.querySelectorAll('.hex-byte').forEach(el => {
+                el.classList.remove('hl-byte-active', 'hl-byte-read', 'hl-byte-skip');
+            });
+            document.querySelectorAll('.hex-token').forEach(el => {
+                el.innerText = '';
+                el.parentElement.classList.remove('show-token');
+            });
+        }
+
+        function showStructToken(start, end, text) {
+            for (let i = start; i <= end; i++) {
+                const el = document.getElementById(`byte-${i}`);
+                if (el) {
+                    const token = el.querySelector('.hex-token');
+                    token.innerText = i === start || i === end || (end-start < 2) ? text : ''; // Simplify text for ranges
+                    if (end - start > 3 && i === start + 1) token.innerText = text; // Center text for large ranges
+                    el.classList.add('show-token');
+                    if (text.includes('Skip')) el.classList.add('hl-byte-skip');
+                }
+            }
+        }
+
+        function addVariable(name, val, type, flash = false) {
+            const container = document.getElementById('vars-container');
+            
+            // Check if exists
+            let box = document.getElementById(`var-${name}`);
+            if (!box) {
+                box = document.createElement('div');
+                box.id = `var-${name}`;
+                box.className = 'var-box';
+                container.appendChild(box);
+            }
+
+            let typeColor = 'text-slate-500';
+            if (type === 'int') typeColor = 'text-orange-400';
+            if (type === 'str') typeColor = 'text-green-400';
+            if (type === 'bytes') typeColor = 'text-purple-400';
+
+            box.innerHTML = `
+                <div class="flex justify-between items-center mb-1">
+                    <span class="font-bold text-slate-200 text-xs font-mono">${name}</span>
+                    <span class="text-[10px] ${typeColor} font-mono">${type}</span>
+                </div>
+                <div class="text-sm font-mono text-white break-all">${val}</div>
+            `;
+
+            if (flash) {
+                box.classList.remove('updated');
+                void box.offsetWidth; // trigger reflow
+                box.classList.add('updated');
+            }
+        }
+
+        function setInstruction(text, colorClass) {
+            const el = document.getElementById('instruction-text');
+            el.innerText = text;
+            el.className = `text-sm transition-colors duration-300 ${colorClass}`;
+        }
+
+        function resetApp() {
+            stepIndex = -1;
+            document.getElementById('debug-controls').classList.add('opacity-50', 'pointer-events-none');
+            document.getElementById('empty-state').classList.remove('hidden');
+            document.getElementById('vars-container').innerHTML = '';
+            document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+            setInstruction("Waiting for traffic... Click 'Generate Ping' to start.", "text-slate-400");
+            renderHexGrid();
+        }
+
+        // Start
+        init();
+
+    </script>
+</body>
+</html>

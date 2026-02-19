@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Architecture Simulator: Nginx vs Custom LB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; /* Slate 900 */
+            color: #e2e8f0; /* Slate 200 */
+        }
+
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Subtle Grid Pattern */
+        .bg-grid {
+            background-image: linear-gradient(to right, #1e293b 1px, transparent 1px),
+                              linear-gradient(to bottom, #1e293b 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        /* --- Network Zones --- */
+        .zone-label {
+            position: absolute;
+            top: -12px;
+            left: 16px;
+            background-color: #0f172a;
+            padding: 0 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .network-zone {
+            position: relative;
+            border: 2px dashed #334155;
+            border-radius: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .network-zone:hover {
+            border-color: #475569;
+        }
+
+        /* --- Nodes & Elements --- */
+        .server-node {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .server-node.active-processing {
+            box-shadow: 0 0 25px rgba(59, 130, 246, 0.4);
+            border-color: #60a5fa;
+            transform: scale(1.02);
+        }
+
+        .server-node.offline {
+            opacity: 0.6;
+            filter: grayscale(1);
+            border-color: #ef4444;
+            border-style: dashed;
+            background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(239, 68, 68, 0.05) 10px, rgba(239, 68, 68, 0.05) 20px);
+        }
+
+        /* --- Packet Animation --- */
+        .packet {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            z-index: 50;
+            box-shadow: 0 0 10px currentColor;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            pointer-events: none;
+            will-change: transform, opacity;
+        }
+
+        .packet-http { background-color: #3b82f6; color: #3b82f6; } /* Request (Blue) */
+        .packet-success { background-color: #10b981; color: #10b981; } /* Response (Green) */
+        .packet-error { background-color: #ef4444; color: #ef4444; } /* Error (Red) */
+
+        /* --- Connections --- */
+        .connection-line {
+            position: absolute;
+            height: 2px;
+            background-color: #334155;
+            z-index: 0;
+            transform-origin: 0 50%;
+            transition: all 0.3s;
+        }
+        
+        .connection-line.active {
+            background-color: #60a5fa;
+            height: 2px;
+            box-shadow: 0 0 8px rgba(96, 165, 250, 0.5);
+        }
+
+        /* --- Next Up Indicator --- */
+        .next-indicator {
+            position: absolute;
+            left: -24px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #facc15; 
+            font-size: 1rem;
+            animation: pulse-right 1.5s infinite;
+            filter: drop-shadow(0 0 5px rgba(250, 204, 21, 0.5));
+        }
+
+        @keyframes pulse-right {
+            0%, 100% { transform: translate(0, -50%); opacity: 0.5; }
+            50% { transform: translate(5px, -50%); opacity: 1; }
+        }
+
+        /* --- Syntax Highlighting --- */
+        .code-block {
+            background-color: #111827;
+            color: #e5e7eb;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            overflow-x: auto;
+            border: 1px solid #374151;
+        }
+        .token-kw { color: #c084fc; } /* Purple */
+        .token-str { color: #86efac; } /* Green */
+        .token-def { color: #93c5fd; } /* Blue */
+        .token-comment { color: #6b7280; font-style: italic; }
+
+        /* --- Tooltip --- */
+        .tooltip {
+            visibility: hidden;
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.9);
+            color: #fff;
+            text-align: center;
+            padding: 5px 10px;
+            border-radius: 6px;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.75rem;
+            bottom: 110%;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            pointer-events: none;
+            border: 1px solid #334155;
+        }
+        .has-tooltip:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* --- Terminal Scrollbar --- */
+        .terminal-scroll::-webkit-scrollbar { width: 6px; }
+        .terminal-scroll::-webkit-scrollbar-track { background: #000; }
+        .terminal-scroll::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden bg-slate-900 selection:bg-blue-500 selection:text-white">
+
+    <!-- Header -->
+    <header class="bg-slate-900 border-b border-slate-800 h-16 shrink-0 flex items-center justify-between px-6 z-50 shadow-lg">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-blue-900/50">
+                <i class="fa-solid fa-server text-sm"></i>
+            </div>
+            <div>
+                <h1 class="text-sm font-bold text-white tracking-wide uppercase">Infrastructure Simulator</h1>
+                <p class="text-[10px] text-slate-400 font-mono">Stage 4: Comparative Analysis</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <button onclick="app.showSidebar('theory')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded border border-slate-700 transition flex items-center gap-2">
+                <i class="fa-solid fa-book-open"></i> Theory
+            </button>
+            <button onclick="app.showSidebar('code')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded border border-slate-700 transition flex items-center gap-2">
+                <i class="fa-solid fa-code"></i> Source
+            </button>
+            <button onclick="app.showSidebar('compare')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded border border-slate-700 transition flex items-center gap-2">
+                <i class="fa-solid fa-scale-balanced"></i> Compare
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="flex-1 flex overflow-hidden">
+        
+        <!-- Simulation Canvas -->
+        <div class="flex-1 bg-grid relative flex flex-col overflow-y-auto" id="simulation-area">
+            
+            <!-- Animation Layers -->
+            <div id="lines-layer" class="absolute inset-0 pointer-events-none z-0"></div>
+            <div id="packet-layer" class="absolute inset-0 pointer-events-none z-50 overflow-hidden"></div>
+
+            <!-- Top Control Bar -->
+            <div class="sticky top-6 z-40 px-6 flex justify-center w-full">
+                <div class="bg-slate-800/90 backdrop-blur border border-slate-600 p-2 rounded-xl flex gap-6 shadow-2xl items-center">
+                    
+                    <!-- Engine Switch -->
+                    <div class="flex flex-col gap-1">
+                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-1">Load Balancer Engine</span>
+                        <div class="flex bg-slate-900 rounded p-1 border border-slate-700">
+                            <button onclick="app.setMode('nginx')" id="mode-nginx" class="px-4 py-1.5 rounded text-xs font-bold transition flex items-center gap-2 bg-green-600 text-white shadow-lg">
+                                <i class="fa-brands fa-docker"></i> Nginx
+                            </button>
+                            <button onclick="app.setMode('custom')" id="mode-custom" class="px-4 py-1.5 rounded text-xs font-bold text-slate-400 hover:text-white transition flex items-center gap-2">
+                                <i class="fa-brands fa-python"></i> Custom Python
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="w-px h-8 bg-slate-600 mx-2"></div>
+
+                    <!-- Actions -->
+                    <div class="flex items-center gap-3">
+                        <button id="btn-send" onclick="app.sendRequest()" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-lg font-bold shadow-lg shadow-blue-500/20 transition active:scale-95 flex items-center gap-2">
+                            <i class="fa-solid fa-paper-plane"></i> Send Request
+                        </button>
+                        <button onclick="app.reset()" class="w-10 h-10 flex items-center justify-center rounded-lg bg-slate-700 hover:bg-slate-600 text-white transition border border-slate-600" title="Reset Simulation">
+                            <i class="fa-solid fa-rotate-right"></i>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Architecture Layout -->
+            <div class="flex-1 flex items-center justify-center p-8 gap-12 min-h-[500px]">
+
+                <!-- Zone: Public Internet -->
+                <div class="network-zone p-6 border-dashed border-2 border-slate-700 rounded-2xl bg-slate-800/20">
+                    <span class="zone-label">Public Internet</span>
+                    
+                    <div class="flex flex-col items-center gap-4">
+                        <div id="node-client" class="server-node w-32 h-32 bg-slate-800 border border-slate-600 rounded-xl flex flex-col items-center justify-center shadow-xl has-tooltip">
+                            <div class="w-12 h-12 rounded-full bg-slate-700 flex items-center justify-center mb-2">
+                                <i class="fa-solid fa-laptop text-xl text-slate-300"></i>
+                            </div>
+                            <span class="text-sm font-bold text-white">Client</span>
+                            <span class="text-[10px] text-slate-500 font-mono">198.51.100.1</span>
+                            <div class="tooltip">External User (Browser/Curl)</div>
+                        </div>
+
+                        <!-- Terminal Output Mockup -->
+                        <div class="w-48 bg-black border border-slate-700 rounded-lg p-2 font-mono text-[10px] shadow-lg">
+                            <div class="flex gap-1.5 mb-2 opacity-50">
+                                <div class="w-2 h-2 rounded-full bg-red-500"></div>
+                                <div class="w-2 h-2 rounded-full bg-yellow-500"></div>
+                                <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                            </div>
+                            <div id="client-terminal" class="text-slate-300 h-8 flex items-center overflow-hidden whitespace-nowrap">
+                                <span class="text-blue-500 mr-2">$</span> <span id="client-output">curl localhost:8080</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Zone: Edge / DMZ -->
+                <div class="flex flex-col justify-center">
+                    <div id="node-proxy" class="server-node w-36 h-36 bg-slate-800 border-2 rounded-2xl flex flex-col items-center justify-center shadow-2xl z-20 transition-all duration-500 has-tooltip">
+                        <div class="absolute -top-3 px-2 py-0.5 bg-slate-900 border border-slate-600 rounded text-[10px] font-mono text-slate-400">
+                            :8080
+                        </div>
+                        
+                        <!-- Dynamic Icon -->
+                        <div id="proxy-icon-container" class="w-14 h-14 rounded-full flex items-center justify-center mb-2 transition-colors duration-300">
+                            <i id="proxy-icon" class="text-3xl transition-all duration-300"></i>
+                        </div>
+                        
+                        <span id="proxy-name" class="text-sm font-bold text-white">Proxy</span>
+                        <span id="proxy-status" class="text-[10px] font-mono mt-1">Ready</span>
+
+                        <div class="tooltip">Entry Point (Reverse Proxy)</div>
+                    </div>
+                </div>
+
+                <!-- Zone: Private Network -->
+                <div class="network-zone p-8 pt-10 min-w-[300px] border-dashed border-2 border-slate-700 rounded-2xl bg-slate-800/20">
+                    <span class="zone-label">Private Docker Network (172.18.0.0/16)</span>
+                    <div class="absolute top-4 right-4 text-[10px] text-slate-500 font-mono">
+                        <i class="fa-solid fa-lock mr-1"></i> No Public Access
+                    </div>
+
+                    <div class="flex flex-col gap-6">
+                        <!-- Backend Nodes -->
+                        <div class="relative group">
+                            <div id="arrow-web1" class="next-indicator hidden"><i class="fa-solid fa-caret-right"></i></div>
+                            <div id="node-web1" class="server-node bg-slate-800 border border-slate-600 p-3 rounded-lg flex items-center justify-between shadow-md hover:border-slate-500 transition has-tooltip">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded bg-blue-900/30 flex items-center justify-center text-blue-400 border border-blue-500/20">
+                                        <i class="fa-brands fa-python"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-xs font-bold text-slate-200">web1</div>
+                                        <div class="text-[10px] text-slate-500 font-mono">172.18.0.2:8000</div>
+                                    </div>
+                                </div>
+                                <button onclick="app.toggleServer(0)" id="btn-web1" class="text-xs text-green-500 hover:text-green-400 w-6 h-6 flex items-center justify-center border border-transparent hover:border-slate-600 rounded transition" title="Start/Stop Container">
+                                    <i class="fa-solid fa-power-off"></i>
+                                </button>
+                                <div class="tooltip">Container: web1-lb</div>
+                            </div>
+                        </div>
+
+                        <div class="relative group">
+                            <div id="arrow-web2" class="next-indicator hidden"><i class="fa-solid fa-caret-right"></i></div>
+                            <div id="node-web2" class="server-node bg-slate-800 border border-slate-600 p-3 rounded-lg flex items-center justify-between shadow-md hover:border-slate-500 transition has-tooltip">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded bg-blue-900/30 flex items-center justify-center text-blue-400 border border-blue-500/20">
+                                        <i class="fa-brands fa-python"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-xs font-bold text-slate-200">web2</div>
+                                        <div class="text-[10px] text-slate-500 font-mono">172.18.0.3:8000</div>
+                                    </div>
+                                </div>
+                                <button onclick="app.toggleServer(1)" id="btn-web2" class="text-xs text-green-500 hover:text-green-400 w-6 h-6 flex items-center justify-center border border-transparent hover:border-slate-600 rounded transition" title="Start/Stop Container">
+                                    <i class="fa-solid fa-power-off"></i>
+                                </button>
+                                <div class="tooltip">Container: web2-lb</div>
+                            </div>
+                        </div>
+
+                        <div class="relative group">
+                            <div id="arrow-web3" class="next-indicator hidden"><i class="fa-solid fa-caret-right"></i></div>
+                            <div id="node-web3" class="server-node bg-slate-800 border border-slate-600 p-3 rounded-lg flex items-center justify-between shadow-md hover:border-slate-500 transition has-tooltip">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded bg-blue-900/30 flex items-center justify-center text-blue-400 border border-blue-500/20">
+                                        <i class="fa-brands fa-python"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-xs font-bold text-slate-200">web3</div>
+                                        <div class="text-[10px] text-slate-500 font-mono">172.18.0.4:8000</div>
+                                    </div>
+                                </div>
+                                <button onclick="app.toggleServer(2)" id="btn-web3" class="text-xs text-green-500 hover:text-green-400 w-6 h-6 flex items-center justify-center border border-transparent hover:border-slate-600 rounded transition" title="Start/Stop Container">
+                                    <i class="fa-solid fa-power-off"></i>
+                                </button>
+                                <div class="tooltip">Container: web3-lb</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Terminal Logs Panel -->
+            <div class="h-48 bg-black border-t border-slate-800 flex flex-col shrink-0">
+                <div class="flex items-center justify-between px-4 py-2 bg-slate-900 border-b border-slate-800">
+                    <span class="text-xs font-mono text-slate-400 flex items-center gap-2">
+                        <i class="fa-solid fa-terminal"></i> docker compose logs -f
+                    </span>
+                    <button onclick="app.clearLogs()" class="text-[10px] text-slate-500 hover:text-white transition">Clear Console</button>
+                </div>
+                <div id="logs-container" class="flex-1 p-4 overflow-y-auto font-mono text-xs terminal-scroll space-y-1">
+                    <div class="text-slate-500 italic opacity-50"># System initialised. Waiting for connections...</div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Sidebar (Right) -->
+        <div id="sidebar" class="w-[400px] bg-slate-900 border-l border-slate-800 transform translate-x-full transition-transform duration-300 absolute inset-y-0 right-0 z-50 flex flex-col shadow-2xl">
+            <div class="h-16 flex items-center justify-between px-6 border-b border-slate-800 bg-slate-900 shrink-0">
+                <h2 id="sidebar-title" class="text-sm font-bold text-white uppercase tracking-wider">Theory</h2>
+                <button onclick="app.closeSidebar()" class="text-slate-400 hover:text-white transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <div id="sidebar-content" class="flex-1 overflow-y-auto p-6 text-slate-300 text-sm leading-relaxed">
+                <!-- Dynamic Content -->
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // --- Data & Content ---
+        const contentData = {
+            theory: `
+                <h3 class="text-blue-400 font-bold mb-3">Reverse Proxy Fundamentals</h3>
+                <p class="mb-4">
+                    A <strong>Reverse Proxy</strong> is an intermediary server that sits between clients (public internet) and backend servers (private network). It accepts requests and forwards them to the appropriate backend.
+                </p>
+                <div class="bg-slate-800 p-3 rounded border border-slate-700 mb-4 text-xs font-mono">
+                    Client (Public IP) -> Proxy (Public IP:8080) -> Internal Network (172.18.x.x)
+                </div>
+                <h3 class="text-blue-400 font-bold mb-3 mt-6">Stage 3: The "Dumb" Load Balancer</h3>
+                <p class="mb-4">
+                    The Custom Python LB implements a basic <strong>Round Robin</strong> algorithm using raw TCP sockets.
+                </p>
+                <ul class="list-disc pl-5 space-y-2 mb-4 text-slate-400">
+                    <li>It accepts a connection.</li>
+                    <li>It blindly picks the next server in the list.</li>
+                    <li>It tries to connect. If the server is down, the Python script throws a <code>ConnectionRefusedError</code>, and the client sees a failure.</li>
+                </ul>
+                <p class="text-yellow-500 italic text-xs border-l-2 border-yellow-500 pl-3">
+                    "It does not know if a backend is healthy until it tries to connect and fails."
+                </p>
+            `,
+            code: {
+                nginx: `
+                    <div class="text-xs font-mono text-slate-400 mb-2">/etc/nginx/nginx.conf</div>
+                    <div class="code-block">
+<span class="token-kw">upstream</span> <span class="token-def">backend_pool</span> {
+    <span class="token-comment"># Nginx automatically tracks health</span>
+    <span class="token-kw">server</span> web1:8000;
+    <span class="token-kw">server</span> web2:8000;
+    <span class="token-kw">server</span> web3:8000;
+}
+
+<span class="token-kw">server</span> {
+    <span class="token-kw">listen</span> 80;
+    <span class="token-kw">location</span> / {
+        <span class="token-def">proxy_pass</span> http://backend_pool;
+        <span class="token-comment"># If a node fails, Nginx tries the next one</span>
+        <span class="token-def">proxy_next_upstream</span> error timeout;
+    }
+}
+                    </div>
+                `,
+                custom: `
+                    <div class="text-xs font-mono text-slate-400 mb-2">S11_Part02_Script_Simple_Lb.py</div>
+                    <div class="code-block">
+<span class="token-kw">def</span> <span class="token-def">get_next_backend</span>():
+    <span class="token-kw">global</span> idx
+    <span class="token-comment"># Blind Round Robin</span>
+    backend = BACKENDS[idx]
+    idx = (idx + 1) % len(BACKENDS)
+    <span class="token-kw">return</span> backend
+
+<span class="token-kw">def</span> <span class="token-def">handle_request</span>(client):
+    host, port = get_next_backend()
+    <span class="token-kw">try</span>:
+        <span class="token-comment"># Fails here if backend is stopped</span>
+        sock.connect((host, port))
+        sock.send(data)
+    <span class="token-kw">except</span> Exception <span class="token-kw">as</span> e:
+        print(f<span class="token-str">"[ERROR] Connection Failed: {e}"</span>)
+        client.close()
+                    </div>
+                `
+            },
+            compare: `
+                <h3 class="text-white font-bold mb-4">Architecture Comparison</h3>
+                <div class="overflow-hidden rounded border border-slate-700">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-800 text-slate-400">
+                            <tr>
+                                <th class="p-3">Feature</th>
+                                <th class="p-3 text-green-400">Nginx</th>
+                                <th class="p-3 text-blue-400">Custom Python</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800">
+                            <tr>
+                                <td class="p-3">Load Balancing</td>
+                                <td class="p-3">Round Robin (Smart)</td>
+                                <td class="p-3">Round Robin (Blind)</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3">Health Checks</td>
+                                <td class="p-3">Passive (Retries on error)</td>
+                                <td class="p-3">None</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3">Failure Handling</td>
+                                <td class="p-3">Seamless Failover</td>
+                                <td class="p-3">Request Fails</td>
+                            </tr>
+                             <tr>
+                                <td class="p-3">Concurrency</td>
+                                <td class="p-3">Event Loop (High Perf)</td>
+                                <td class="p-3">Thread per Request</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-4 p-4 bg-slate-800/50 rounded border border-slate-700">
+                    <p class="text-xs text-slate-400">
+                        <strong>Try this experiment:</strong><br>
+                        1. Stop "web2".<br>
+                        2. Send 3 requests.<br>
+                        <br>
+                        <strong>Nginx:</strong> Will serve web1, web3, web1 (skipping web2).<br>
+                        <strong>Custom LB:</strong> Will serve web1, <span class="text-red-400">Error</span>, web3.
+                    </p>
+                </div>
+            `
+        };
+
+        // --- Core Application ---
+        class Simulator {
+            constructor() {
+                this.mode = 'nginx'; // 'nginx' | 'custom'
+                this.servers = [
+                    { id: 'web1', active: true, ip: '172.18.0.2' },
+                    { id: 'web2', active: true, ip: '172.18.0.3' },
+                    { id: 'web3', active: true, ip: '172.18.0.4' }
+                ];
+                this.rrIndex = 0;
+                this.isProcessing = false;
+
+                // UI Elements
+                this.ui = {
+                    proxyNode: document.getElementById('node-proxy'),
+                    proxyIcon: document.getElementById('proxy-icon'),
+                    proxyContainer: document.getElementById('proxy-icon-container'),
+                    proxyName: document.getElementById('proxy-name'),
+                    proxyStatus: document.getElementById('proxy-status'),
+                    clientTerminal: document.getElementById('client-output'),
+                    logs: document.getElementById('logs-container')
+                };
+
+                // Init
+                this.setMode('nginx');
+                this.drawConnections();
+                this.updateNextIndicator();
+                
+                window.addEventListener('resize', () => this.drawConnections());
+            }
+
+            setMode(mode) {
+                this.mode = mode;
+                this.reset();
+
+                // Toggle Buttons
+                const btnNginx = document.getElementById('mode-nginx');
+                const btnCustom = document.getElementById('mode-custom');
+
+                if (mode === 'nginx') {
+                    // Styles for Nginx
+                    this.ui.proxyNode.className = "server-node w-36 h-36 bg-slate-800 border-2 border-green-500 rounded-2xl flex flex-col items-center justify-center shadow-2xl z-20 transition-all duration-500 has-tooltip";
+                    this.ui.proxyContainer.className = "w-14 h-14 rounded-full flex items-center justify-center mb-2 transition-colors duration-300 bg-green-900/30 text-green-400 border border-green-500/30";
+                    this.ui.proxyIcon.className = "fa-solid fa-server text-3xl";
+                    this.ui.proxyName.textContent = "Nginx Proxy";
+                    this.ui.proxyStatus.textContent = "Ready (Passive HC)";
+                    this.ui.proxyStatus.className = "text-[10px] font-mono mt-1 text-green-400";
+                    
+                    btnNginx.className = "px-4 py-1.5 rounded text-xs font-bold transition flex items-center gap-2 bg-green-600 text-white shadow-lg transform scale-105";
+                    btnCustom.className = "px-4 py-1.5 rounded text-xs font-bold text-slate-400 hover:text-white transition flex items-center gap-2 bg-transparent";
+                    
+                    this.log("System", "Switched to Nginx (Industrial Grade).");
+                } else {
+                    // Styles for Custom
+                    this.ui.proxyNode.className = "server-node w-36 h-36 bg-slate-800 border-2 border-blue-500 rounded-2xl flex flex-col items-center justify-center shadow-2xl z-20 transition-all duration-500 has-tooltip";
+                    this.ui.proxyContainer.className = "w-14 h-14 rounded-full flex items-center justify-center mb-2 transition-colors duration-300 bg-blue-900/30 text-blue-400 border border-blue-500/30";
+                    this.ui.proxyIcon.className = "fa-brands fa-python text-3xl";
+                    this.ui.proxyName.textContent = "S11_Part02_Script_Simple_Lb.py";
+                    this.ui.proxyStatus.textContent = "Running (PID 45)";
+                    this.ui.proxyStatus.className = "text-[10px] font-mono mt-1 text-blue-400";
+
+                    btnNginx.className = "px-4 py-1.5 rounded text-xs font-bold text-slate-400 hover:text-white transition flex items-center gap-2 bg-transparent";
+                    btnCustom.className = "px-4 py-1.5 rounded text-xs font-bold transition flex items-center gap-2 bg-blue-600 text-white shadow-lg transform scale-105";
+                    
+                    this.log("System", "Switched to Custom Python Script (Educational).");
+                }
+            }
+
+            toggleServer(idx) {
+                const s = this.servers[idx];
+                s.active = !s.active;
+                const el = document.getElementById(`node-web${idx+1}`);
+                const btn = document.getElementById(`btn-web${idx+1}`);
+
+                if (s.active) {
+                    el.classList.remove('offline');
+                    btn.classList.replace('text-slate-500', 'text-green-500');
+                    this.log(s.id, `Container started at ${s.ip}:8000`);
+                } else {
+                    el.classList.add('offline');
+                    btn.classList.replace('text-green-500', 'text-slate-500');
+                    this.log(s.id, `Received SIGTERM. Container stopped.`);
+                }
+            }
+
+            async sendRequest() {
+                if (this.isProcessing) return;
+                this.isProcessing = true;
+                document.getElementById('btn-send').classList.add('opacity-50', 'cursor-not-allowed');
+                
+                // 1. Client -> Proxy
+                this.ui.clientTerminal.innerHTML = '<span class="text-blue-500 mr-2">$</span> curl -v http://localhost:8080';
+                await this.animatePacket('node-client', 'node-proxy', 'http');
+                
+                // 2. Proxy Logic
+                this.ui.proxyNode.classList.add('active-processing');
+                await this.wait(400);
+
+                let target = null;
+                let success = false;
+
+                if (this.mode === 'nginx') {
+                    // Nginx Logic: Smart Retry
+                    let attempts = 0;
+                    while (attempts < 3) {
+                        target = this.servers[this.rrIndex];
+                        this.rrIndex = (this.rrIndex + 1) % 3; // Advance RR
+                        this.updateNextIndicator();
+
+                        if (target.active) {
+                            success = true;
+                            break;
+                        } else {
+                            // Nginx internal log
+                            this.log("nginx", `[error] connect() to ${target.ip}:8000 failed, trying next upstream`);
+                        }
+                        attempts++;
+                    }
+                } else {
+                    // Custom Logic: Dumb
+                    target = this.servers[this.rrIndex];
+                    this.rrIndex = (this.rrIndex + 1) % 3; // Advance RR
+                    this.updateNextIndicator();
+
+                    if (target.active) {
+                        success = true;
+                        this.log("lb-custom", `[INFO] ('198.51.100.1') -> ${target.id}:${target.ip}`);
+                    } else {
+                        success = false;
+                        this.log("lb-custom", `[INFO] ('198.51.100.1') -> ${target.id}:${target.ip}`);
+                        this.log("lb-custom", `[ERROR] ConnectionRefusedError: [Errno 111] Connection refused`);
+                    }
+                }
+
+                this.ui.proxyNode.classList.remove('active-processing');
+
+                // 3. Result
+                if (success && target) {
+                    // Proxy -> Backend
+                    await this.animatePacket('node-proxy', `node-${target.id}`, 'http');
+                    
+                    // Backend Processing
+                    const backendEl = document.getElementById(`node-${target.id}`);
+                    backendEl.classList.add('active-processing');
+                    this.log(target.id, `"GET / HTTP/1.1" 200 -`);
+                    await this.wait(500);
+                    backendEl.classList.remove('active-processing');
+
+                    // Return Trip
+                    await this.animatePacket(`node-${target.id}`, 'node-proxy', 'success');
+                    await this.animatePacket('node-proxy', 'node-client', 'success');
+                    
+                    this.ui.clientTerminal.innerHTML = `<span class="text-green-400">&lt; HTTP/1.1 200 OK (Server: ${target.id})</span>`;
+                    if (this.mode === 'nginx') this.log("nginx", `198.51.100.1 - - "GET / HTTP/1.1" 200`);
+                
+                } else {
+                    // Failure
+                    await this.animatePacket('node-proxy', 'node-client', 'error');
+                    
+                    if (this.mode === 'nginx') {
+                        this.ui.clientTerminal.innerHTML = `<span class="text-red-400">&lt; HTTP/1.1 502 Bad Gateway</span>`;
+                        this.log("nginx", `198.51.100.1 - - "GET / HTTP/1.1" 502`);
+                    } else {
+                        this.ui.clientTerminal.innerHTML = `<span class="text-red-400">curl: (56) Recv failure: Connection reset by peer</span>`;
+                    }
+                }
+
+                this.isProcessing = false;
+                document.getElementById('btn-send').classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+
+            // --- Visualization Helpers ---
+            updateNextIndicator() {
+                // Hide all
+                this.servers.forEach(s => {
+                    document.getElementById(`arrow-${s.id}`).classList.add('hidden');
+                });
+                // Show current RR index
+                const current = this.servers[this.rrIndex];
+                document.getElementById(`arrow-${current.id}`).classList.remove('hidden');
+            }
+
+            async animatePacket(fromId, toId, type) {
+                return new Promise(resolve => {
+                    const fromEl = document.getElementById(fromId);
+                    const toEl = document.getElementById(toId);
+                    const layer = document.getElementById('packet-layer');
+                    
+                    const fRect = fromEl.getBoundingClientRect();
+                    const tRect = toEl.getBoundingClientRect();
+                    const cRect = layer.getBoundingClientRect();
+
+                    const startX = fRect.left + fRect.width/2 - cRect.left;
+                    const startY = fRect.top + fRect.height/2 - cRect.top;
+                    const endX = tRect.left + tRect.width/2 - cRect.left;
+                    const endY = tRect.top + tRect.height/2 - cRect.top;
+
+                    const p = document.createElement('div');
+                    p.className = `packet packet-${type}`;
+                    p.style.transform = `translate(${startX}px, ${startY}px)`;
+                    layer.appendChild(p);
+
+                    // Force Reflow
+                    p.getBoundingClientRect();
+
+                    // Animate
+                    p.style.transition = 'transform 0.6s cubic-bezier(0.45, 0, 0.55, 1)';
+                    p.style.transform = `translate(${endX}px, ${endY}px)`;
+
+                    setTimeout(() => {
+                        p.remove();
+                        resolve();
+                    }, 600);
+                });
+            }
+
+            drawConnections() {
+                const layer = document.getElementById('lines-layer');
+                layer.innerHTML = ''; 
+                const containerRect = document.getElementById('simulation-area').getBoundingClientRect();
+
+                const draw = (id1, id2) => {
+                    const el1 = document.getElementById(id1);
+                    const el2 = document.getElementById(id2);
+                    if(!el1 || !el2) return;
+
+                    const r1 = el1.getBoundingClientRect();
+                    const r2 = el2.getBoundingClientRect();
+
+                    const x1 = r1.left + r1.width / 2 - containerRect.left;
+                    const y1 = r1.top + r1.height / 2 - containerRect.top;
+                    const x2 = r2.left + r2.width / 2 - containerRect.left;
+                    const y2 = r2.top + r2.height / 2 - containerRect.top;
+
+                    const length = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+                    const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+
+                    const line = document.createElement('div');
+                    line.className = 'connection-line';
+                    line.style.width = `${length}px`;
+                    line.style.left = `${x1}px`;
+                    line.style.top = `${y1}px`;
+                    line.style.transform = `rotate(${angle}deg)`;
+                    layer.appendChild(line);
+                };
+
+                draw('node-client', 'node-proxy');
+                draw('node-proxy', 'node-web1');
+                draw('node-proxy', 'node-web2');
+                draw('node-proxy', 'node-web3');
+            }
+
+            log(source, msg) {
+                const row = document.createElement('div');
+                row.className = "flex gap-3 animate-fade-in";
+                
+                const time = new Date().toISOString().split('T')[1].slice(0,12);
+                let colorClass = "text-slate-400";
+                
+                if (source === 'nginx') colorClass = "text-green-400";
+                if (source === 'lb-custom') colorClass = "text-blue-400";
+                if (source.startsWith('web')) colorClass = "text-purple-400";
+
+                row.innerHTML = `
+                    <span class="text-slate-600 shrink-0 w-24">${time}</span>
+                    <span class="${colorClass} font-bold shrink-0 w-20 text-right pr-2 border-r border-slate-800">${source}</span>
+                    <span class="text-slate-300">${msg}</span>
+                `;
+                
+                this.ui.logs.appendChild(row);
+                this.ui.logs.scrollTop = this.ui.logs.scrollHeight;
+            }
+
+            wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+            
+            clearLogs() { this.ui.logs.innerHTML = ''; }
+            
+            reset() {
+                this.rrIndex = 0;
+                this.updateNextIndicator();
+                this.clearLogs();
+                this.servers.forEach((s, i) => {
+                    if (!s.active) this.toggleServer(i);
+                });
+                this.ui.clientTerminal.innerHTML = '<span class="text-blue-500 mr-2">$</span>';
+            }
+
+            // --- Sidebar Logic ---
+            showSidebar(key) {
+                const sidebar = document.getElementById('sidebar');
+                const content = document.getElementById('sidebar-content');
+                const title = document.getElementById('sidebar-title');
+
+                title.textContent = key.toUpperCase();
+                
+                if (key === 'config') key = 'code'; // map button to data key
+                
+                // If code, pick based on mode
+                if (key === 'code') {
+                    content.innerHTML = contentData.code[this.mode];
+                } else {
+                    content.innerHTML = contentData[key];
+                }
+                
+                sidebar.classList.remove('translate-x-full');
+            }
+            
+            closeSidebar() {
+                document.getElementById('sidebar').classList.add('translate-x-full');
+            }
+        }
+
+        // Init
+        let app;
+        window.onload = () => {
+            app = new Simulator();
+            // Intro animation
+            setTimeout(() => {
+                app.log("System", "Docker Compose environment initialised.");
+                app.log("System", "Network: lbnet created (Driver: bridge)");
+            }, 500);
+        };
+    </script>
+</body>
+</html>

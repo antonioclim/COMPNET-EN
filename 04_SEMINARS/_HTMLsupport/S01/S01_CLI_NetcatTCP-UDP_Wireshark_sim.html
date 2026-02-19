@@ -1,0 +1,893 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  Terminal, 
+  Network, 
+  Shield, 
+  Play, 
+  Square, 
+  Info, 
+  ChevronRight, 
+  Book, 
+  Save, 
+  Wifi, 
+  Activity, 
+  X,
+  Server,
+  Monitor,
+  ArrowRightLeft,
+  Search
+} from 'lucide-react';
+
+// --- DATA CONTENT (ENGLISH) ---
+const LAB_CONTENT = {
+    basics: {
+        title: "1. Basic Network Utilities",
+        desc: "Mastering ping, netstat, and nslookup commands.",
+        guide: (
+            <div className="space-y-4 text-sm text-gray-700">
+                <h3 className="text-lg font-bold text-slate-800">Introduction</h3>
+                <p>In this module, we explore three fundamental tools available in almost every operating system. These are your "eyes and ears" on the network.</p>
+                
+                <div className="space-y-3 mt-4">
+                    <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                        <div className="font-bold text-slate-700 flex items-center gap-2">
+                            <Activity size={16} className="text-blue-500" /> ping (Packet Internet Groper)
+                        </div>
+                        <p className="text-xs mt-1 text-slate-600">
+                            Uses <b>ICMP</b> Echo Request packets to test if a host is reachable and measures the round-trip time (latency).
+                        </p>
+                    </div>
+
+                    <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                        <div className="font-bold text-slate-700 flex items-center gap-2">
+                            <Network size={16} className="text-green-500" /> netstat (Network Statistics)
+                        </div>
+                        <p className="text-xs mt-1 text-slate-600">
+                            Displays active connections, listening ports, and the processes attempting to use the network. Crucial for spotting unauthorized services.
+                        </p>
+                    </div>
+
+                    <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                        <div className="font-bold text-slate-700 flex items-center gap-2">
+                            <Search size={16} className="text-purple-500" /> nslookup (Name Server Lookup)
+                        </div>
+                        <p className="text-xs mt-1 text-slate-600">
+                            Queries DNS servers to translate domain names (like google.com) into IP addresses (like 142.250.x.x).
+                        </p>
+                    </div>
+                </div>
+
+                <h3 className="text-lg font-bold text-slate-800 mt-6">Lab Tasks</h3>
+                <div className="bg-yellow-50 p-4 border-l-4 border-yellow-400 rounded-r-lg shadow-sm">
+                    <ol className="list-decimal pl-4 space-y-2">
+                        <li>Test connectivity: <code className="bg-white border border-gray-200 px-1.5 py-0.5 rounded text-red-600 font-mono text-xs">ping google.com</code></li>
+                        <li>Test local gateway: <code className="bg-white border border-gray-200 px-1.5 py-0.5 rounded text-red-600 font-mono text-xs">ping 192.168.1.1</code></li>
+                        <li>Check listening ports: <code className="bg-white border border-gray-200 px-1.5 py-0.5 rounded text-red-600 font-mono text-xs">netstat -tulnp</code></li>
+                        <li>Resolve a domain: <code className="bg-white border border-gray-200 px-1.5 py-0.5 rounded text-red-600 font-mono text-xs">nslookup google.com</code></li>
+                    </ol>
+                </div>
+            </div>
+        )
+    },
+    netcat: {
+        title: "2. Netcat (TCP vs UDP)",
+        desc: "The 'Swiss Army Knife' of networking: Client/Server simulation.",
+        guide: (
+            <div className="space-y-4 text-sm text-gray-700">
+                <h3 className="text-lg font-bold text-slate-800">Netcat Concepts</h3>
+                <p>Netcat (<code className="bg-gray-100 px-1 rounded font-mono">nc</code>) can read and write data across network connections using TCP or UDP. It is perfect for debugging.</p>
+                
+                <div className="grid grid-cols-1 gap-4 mt-2">
+                    <div className="border border-blue-200 bg-blue-50 p-3 rounded-lg">
+                        <h4 className="font-bold text-blue-800 flex items-center gap-2"><ArrowRightLeft size={16}/> TCP Mode</h4>
+                        <p className="text-xs mb-2">Connection-oriented. A "handshake" establishes a reliable session.</p>
+                        <div className="bg-slate-800 text-green-400 p-2 rounded text-xs font-mono">
+                            <div># Server (Listener)</div>
+                            <div>nc -l -p 9100</div>
+                            <div className="mt-1"># Client (Connect)</div>
+                            <div>nc 127.0.0.1 9100</div>
+                        </div>
+                    </div>
+
+                    <div className="border border-orange-200 bg-orange-50 p-3 rounded-lg">
+                        <h4 className="font-bold text-orange-800 flex items-center gap-2"><Activity size={16}/> UDP Mode</h4>
+                        <p className="text-xs mb-2">Connectionless ("Fire and Forget"). Packets are sent individually without verifying receipt.</p>
+                        <div className="bg-slate-800 text-green-400 p-2 rounded text-xs font-mono">
+                            <div># Server (Listener)</div>
+                            <div>nc -u -l -p 9101</div>
+                            <div className="mt-1"># Client (Send One Packet)</div>
+                            <div>echo "hi" | nc -u 127.0.0.1 9101</div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 className="text-lg font-bold text-slate-800 mt-4">Lab Tasks</h3>
+                <div className="bg-yellow-50 p-4 border-l-4 border-yellow-400 rounded-r-lg shadow-sm">
+                    <ol className="list-decimal pl-4 space-y-2">
+                        <li>Start a <b>TCP Server</b> on port 9100. Connect the Client. Chat back and forth.</li>
+                        <li>Stop the server (Use the "Stop Process" button).</li>
+                        <li>Start a <b>UDP Server</b> on port 9101. Send two distinct messages.</li>
+                        <li><b>Observe:</b> TCP keeps the chat open. UDP sends independent messages.</li>
+                    </ol>
+                </div>
+            </div>
+        )
+    },
+    wireshark: {
+        title: "3. Wireshark Simulator",
+        desc: "Packet capture analysis, filtering, and protocol inspection.",
+        guide: (
+            <div className="space-y-4 text-sm text-gray-700">
+                <h3 className="text-lg font-bold text-slate-800">Wireshark Workflow</h3>
+                <p>Wireshark captures traffic on the "wire". Real-world analysis involves two stages of filtering:</p>
+                
+                <div className="space-y-3 mt-2">
+                    <div className="border-l-4 border-red-500 pl-3">
+                        <h4 className="font-bold text-slate-800">1. Capture Filters (BPF)</h4>
+                        <p className="text-xs text-slate-600">Applied <b>before</b> capturing. Limits what enters the buffer (saves disk/RAM).</p>
+                        <code className="block bg-slate-100 p-1 mt-1 text-xs font-mono rounded">tcp port 9300</code>
+                    </div>
+                    
+                    <div className="border-l-4 border-blue-500 pl-3">
+                        <h4 className="font-bold text-slate-800">2. Display Filters</h4>
+                        <p className="text-xs text-slate-600">Applied <b>after</b> capturing. Hides noise to focus on specific packets.</p>
+                        <code className="block bg-slate-100 p-1 mt-1 text-xs font-mono rounded">tcp.stream eq 0</code>
+                    </div>
+                </div>
+
+                <h3 className="text-lg font-bold text-slate-800 mt-6">Exam Scenario</h3>
+                <div className="bg-yellow-50 p-4 border-l-4 border-yellow-400 rounded-r-lg shadow-sm">
+                    <ol className="list-decimal pl-4 space-y-2">
+                        <li>Set Capture Filter: <code className="bg-white border px-1 rounded text-red-600 font-mono text-xs">tcp port 9300</code></li>
+                        <li><b>Start Capture</b>.</li>
+                        <li>Click <b>"Simulate TCP Handshake"</b> and <b>"Simulate TCP Data"</b>.</li>
+                        <li><b>Stop Capture</b>.</li>
+                        <li>Locate the 3-way handshake: <b>SYN</b>, <b>SYN-ACK</b>, <b>ACK</b>.</li>
+                        <li>Clear filters and repeat for UDP on port 9301.</li>
+                    </ol>
+                </div>
+            </div>
+        )
+    }
+};
+
+// --- COMPONENTS ---
+
+// 1. TERMINAL COMPONENT
+const TerminalShell = ({ id, title, lines, onCommand, promptStr = "$", isReadOnly = false, height = "h-64", status = "", onStop }) => {
+    const [input, setInput] = useState("");
+    const bottomRef = useRef(null);
+
+    // Auto-scroll to bottom when lines change
+    useEffect(() => {
+        if(bottomRef.current) {
+            bottomRef.current.scrollIntoView({ behavior: "smooth" });
+        }
+    }, [lines]);
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            onCommand(input);
+            setInput("");
+        }
+    };
+
+    return (
+        <div className={`flex flex-col bg-[#1e1e1e] text-[#cccccc] rounded-lg overflow-hidden shadow-2xl border border-gray-700 ${height} font-mono text-sm`}>
+            {/* Terminal Header */}
+            <div className="bg-[#2d2d2d] px-3 py-2 text-xs flex justify-between items-center select-none border-b border-[#3e3e3e]">
+                <div className="flex items-center gap-2 text-gray-300">
+                    <Terminal size={14} className="text-gray-400" />
+                    <span className="font-semibold tracking-wide">{title}</span>
+                    {status && (
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${status.includes('CONNECTED') ? 'bg-green-900 text-green-300' : 'bg-blue-900 text-blue-300'}`}>
+                            {status}
+                        </span>
+                    )}
+                </div>
+                <div className="flex gap-3 items-center">
+                    {onStop && (
+                        <button onClick={onStop} className="flex items-center text-red-400 hover:text-red-300 hover:bg-red-900/30 px-2 py-0.5 rounded transition-all text-[10px] uppercase font-bold">
+                            <Square size={10} className="mr-1 fill-current" /> Stop
+                        </button>
+                    )}
+                    <div className="flex gap-1.5">
+                        <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f56]"></div>
+                        <div className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]"></div>
+                        <div className="w-2.5 h-2.5 rounded-full bg-[#27c93f]"></div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Terminal Body */}
+            <div className="flex-1 p-3 overflow-y-auto" onClick={() => !isReadOnly && document.getElementById(`input-${id}`)?.focus()}>
+                <div className="space-y-0.5">
+                    {lines.map((line, idx) => (
+                        <div key={idx} className="whitespace-pre-wrap break-words leading-tight">{line}</div>
+                    ))}
+                </div>
+                
+                {!isReadOnly && (
+                    <div className="flex mt-1 items-center">
+                        <span className="mr-2 text-[#27c93f] font-bold shrink-0 select-none">{promptStr}</span>
+                        <input 
+                            id={`input-${id}`}
+                            type="text" 
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                            onKeyDown={handleKeyDown}
+                            className="bg-transparent border-none outline-none flex-1 text-white placeholder-gray-600 font-mono caret-gray-400"
+                            autoComplete="off"
+                            spellCheck="false"
+                            autoFocus
+                        />
+                    </div>
+                )}
+                <div ref={bottomRef} className="h-2"></div>
+            </div>
+        </div>
+    );
+};
+
+// 2. BASIC TOOLS MODULE
+const BasicsModule = () => {
+    const [history, setHistory] = useState([
+        "Welcome to Ubuntu 22.04.2 LTS (GNU/Linux 5.15.0-72-generic x86_64)",
+        "",
+        " * Documentation:  https://help.ubuntu.com",
+        " * Management:     https://landscape.canonical.com",
+        " * Support:        https://ubuntu.com/advantage",
+        "",
+        "student@lab-vm:~$ "
+    ]);
+
+    const addToHistory = (line) => {
+        setHistory(prev => [...prev, line]);
+    };
+
+    const executeCommand = (cmdRaw) => {
+        const cmd = cmdRaw.trim();
+        if (!cmd) return;
+        
+        // Add user command to history immediately
+        setHistory(prev => {
+            // Remove the last empty prompt if it exists (visual cleanup)
+            const cleanPrev = prev[prev.length-1].includes("student@lab-vm:~$") && prev[prev.length-1].length < 20 
+                ? prev.slice(0, -1) 
+                : prev;
+            return [...cleanPrev, `student@lab-vm:~$ ${cmd}`];
+        });
+
+        const parts = cmd.split(" ");
+        const base = parts[0];
+
+        // --- COMMAND LOGIC ---
+
+        if (base === "clear") {
+            setTimeout(() => setHistory([]), 50);
+            return;
+        }
+
+        if (base === "help") {
+            addToHistory("GNU bash, version 5.1.16(1)-release (x86_64-pc-linux-gnu)");
+            addToHistory("Available commands for this lab:");
+            addToHistory("  ping <host>      Check network connectivity");
+            addToHistory("  netstat -tulnp   Print network connections");
+            addToHistory("  nslookup <dom>   Query Internet Name Servers");
+            addToHistory("  clear            Clear the terminal screen");
+            return;
+        }
+
+        if (base === "ping") {
+            const target = parts[1];
+            if (!target) {
+                addToHistory("ping: usage error: Destination address required");
+                return;
+            }
+            
+            const ip = target === 'google.com' ? '142.250.180.14' : target;
+            addToHistory(`PING ${target} (${ip}) 56(84) bytes of data.`);
+            
+            let count = 0;
+            const maxPings = 4;
+            
+            const interval = setInterval(() => {
+                count++;
+                const time = (Math.random() * 10 + 14).toFixed(1);
+                const ttl = 114;
+                addToHistory(`64 bytes from ${ip}: icmp_seq=${count} ttl=${ttl} time=${time} ms`);
+                
+                if (count >= maxPings) {
+                    clearInterval(interval);
+                    addToHistory("");
+                    addToHistory(`--- ${target} ping statistics ---`);
+                    addToHistory(`${maxPings} packets transmitted, ${maxPings} received, 0% packet loss, time ${((maxPings-1)*1000) + 10}ms`);
+                    addToHistory(`rtt min/avg/max/mdev = 14.2/18.5/24.1/3.2 ms`);
+                }
+            }, 800); // Realistic delay
+            return;
+        }
+
+        if (base === "netstat") {
+            if (parts[1] === "-tulnp" || parts[1] === "-an") {
+                addToHistory("Active Internet connections (only servers)");
+                addToHistory("Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name    ");
+                addToHistory("tcp        0      0 127.0.0.53:53           0.0.0.0:* LISTEN      551/systemd-resolve ");
+                addToHistory("tcp        0      0 0.0.0.0:22              0.0.0.0:* LISTEN      852/sshd: /usr/sbin ");
+                addToHistory("tcp6       0      0 :::22                   :::* LISTEN      852/sshd: /usr/sbin ");
+                addToHistory("udp        0      0 127.0.0.53:53           0.0.0.0:* 551/systemd-resolve ");
+                addToHistory("udp        0      0 0.0.0.0:68              0.0.0.0:* 654/dhclient        ");
+            } else {
+                addToHistory("usage: netstat [-vWeenNcCF] [<Af>] -r         netstat {-V|--version|-h|--help}");
+                addToHistory("       netstat [-vWnNcaeol] [<Socket> ...]");
+                addToHistory("       netstat { [-vWeenNac] -I[<Iface>] | [-veWnN] -i | [-c] -M | -s } [delay]");
+                addToHistory("Try 'netstat -tulnp' for this exercise.");
+            }
+            return;
+        }
+
+        if (base === "nslookup") {
+            const domain = parts[1];
+            if (!domain) {
+                addToHistory("usage: nslookup <domain>");
+            } else {
+                // Simulate a slight network delay
+                setTimeout(() => {
+                    addToHistory(`Server:		127.0.0.53`);
+                    addToHistory(`Address:	127.0.0.53#53`);
+                    addToHistory(``);
+                    addToHistory(`Non-authoritative answer:`);
+                    addToHistory(`Name:	${domain}`);
+                    addToHistory(`Address: ${domain === 'google.com' ? '142.250.180.14' : '192.168.1.50'}`);
+                    if(domain === 'google.com') addToHistory(`Address: 2a00:1450:400e:80e::200e`);
+                }, 400);
+            }
+            return;
+        }
+
+        addToHistory(`${base}: command not found`);
+    };
+
+    return (
+        <div className="p-6 h-full bg-slate-100 flex flex-col items-center justify-center">
+            <div className="w-full max-w-4xl h-full shadow-2xl">
+                <TerminalShell id="basics-term" title="student@lab-vm: ~" lines={history} onCommand={executeCommand} height="h-full" />
+            </div>
+        </div>
+    );
+};
+
+// 3. NETCAT MODULE
+const NetcatModule = () => {
+    const [serverLog, setServerLog] = useState(["student@server:~$ "]);
+    const [clientLog, setClientLog] = useState(["student@client:~$ "]);
+    
+    const [serverState, setServerState] = useState({ active: false, port: null, proto: 'tcp' });
+    const [clientState, setClientState] = useState({ connected: false, proto: 'tcp', targetPort: null });
+
+    const addLog = (setter, msg) => setter(prev => [...prev, msg]);
+
+    const startServer = (port, proto) => {
+        setServerState({ active: true, port, proto });
+        addLog(setServerLog, `student@server:~$ nc ${proto === 'udp' ? '-u ' : ''}-l -p ${port}`);
+        if(proto === 'tcp') {
+            addLog(setServerLog, `Listening on 0.0.0.0 ${port}`);
+        } else {
+            addLog(setServerLog, `Listening on 0.0.0.0 ${port} (UDP)`);
+        }
+    };
+
+    const resetServer = () => {
+        setServerState({ active: false, port: null, proto: 'tcp' });
+        addLog(setServerLog, "^C");
+        
+        if (clientState.connected && clientState.proto === 'tcp') {
+            setClientState({ connected: false, proto: 'tcp', targetPort: null });
+            addLog(setClientLog, "Ncat: Connection reset by peer.");
+            addLog(setClientLog, "student@client:~$ ");
+        }
+        addLog(setServerLog, "student@server:~$ ");
+    };
+
+    const resetClient = () => {
+        setClientState({ connected: false, proto: 'tcp', targetPort: null });
+        addLog(setClientLog, "^C");
+        addLog(setClientLog, "student@client:~$ ");
+        
+        if (serverState.proto === 'tcp' && serverState.active) {
+            addLog(setServerLog, "Connection closed by 127.0.0.1.");
+        }
+    };
+
+    const handleServerCommand = (cmd) => {
+        // If TCP connection is active, this acts as a chat
+        if (serverState.active && serverState.proto === 'tcp' && clientState.connected) {
+            addLog(setServerLog, `${cmd}`);
+            addLog(setClientLog, `${cmd}`); // Send to client
+            return;
+        }
+
+        // Parse command: nc -l -p <port>
+        const parts = cmd.trim().split(/\s+/);
+        if (parts[0] === 'nc' && parts.includes('-l')) {
+            const pIndex = parts.indexOf('-p');
+            const port = pIndex !== -1 ? parts[pIndex+1] : '9000';
+            const isUdp = parts.includes('-u');
+            startServer(port, isUdp ? 'udp' : 'tcp');
+        } else {
+            addLog(setServerLog, `student@server:~$ ${cmd}`);
+            addLog(setServerLog, `${parts[0]}: command not found (or server already running)`);
+        }
+    };
+
+    const handleClientCommand = (cmd) => {
+        // TCP Active Chat
+        if (clientState.connected) {
+            addLog(setClientLog, `${cmd}`);
+            addLog(setServerLog, `${cmd}`); // Send to server
+            return;
+        }
+
+        // Pipe Syntax: echo "msg" | nc ...
+        if (cmd.includes('|') && cmd.includes('nc')) {
+             addLog(setClientLog, `student@client:~$ ${cmd}`);
+             
+             const [msgPart, ncPart] = cmd.split('|');
+             const msg = msgPart.replace('echo', '').replace(/["']/g, '').trim();
+             const ncArgs = ncPart.trim().split(/\s+/);
+             
+             const isUdp = ncArgs.includes('-u');
+             const targetPort = ncArgs[ncArgs.length - 1]; 
+
+             // UDP "Fire and Forget" Logic
+             if (serverState.active && serverState.port === targetPort && serverState.proto === (isUdp ? 'udp' : 'tcp')) {
+                addLog(setServerLog, `${msg}`);
+             } 
+             
+             // Client always thinks it sent successfully in UDP, or if pipe works
+             addLog(setClientLog, "student@client:~$ ");
+             return;
+        }
+
+        // Standard connect: nc [-u] <host> <port>
+        const parts = cmd.trim().split(/\s+/);
+        addLog(setClientLog, `student@client:~$ ${cmd}`);
+
+        if (parts[0] === 'nc') {
+            const isUdp = parts.includes('-u');
+            const potentialPort = parts[parts.length - 1];
+            
+            if (isUdp) {
+                // UDP Connection Mode
+                setClientState({ connected: true, proto: 'udp', targetPort: potentialPort });
+                // In netcat UDP, it doesn't really "connect" but we simulate the interactive mode
+                addLog(setClientLog, `(UDP mode: Type messages to send to ${potentialPort})`);
+            } else {
+                // TCP Connection Mode
+                if (serverState.active && serverState.port === potentialPort && serverState.proto === 'tcp') {
+                    setClientState({ connected: true, proto: 'tcp', targetPort: potentialPort });
+                    addLog(setServerLog, `Accepted connection from 127.0.0.1:56232`);
+                } else {
+                    addLog(setClientLog, `(UNKNOWN) [127.0.0.1] ${potentialPort} (?) : Connection refused`);
+                    addLog(setClientLog, "student@client:~$ ");
+                }
+            }
+            return;
+        }
+        
+        addLog(setClientLog, "command not found");
+    };
+
+    return (
+        <div className="flex flex-col h-full gap-6 p-6 bg-slate-100">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-full">
+                {/* SERVER SIDE */}
+                <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2 text-slate-700 font-bold px-1">
+                        <Server size={18} className="text-purple-600"/> 
+                        <span>Server (Listener)</span>
+                    </div>
+                    <TerminalShell 
+                        id="server-term" 
+                        title="student@server" 
+                        lines={serverLog} 
+                        onCommand={handleServerCommand} 
+                        promptStr=""
+                        height="h-full" 
+                        status={serverState.active ? `LISTENING ${serverState.proto.toUpperCase()}:${serverState.port}` : ""}
+                        onStop={serverState.active ? resetServer : null}
+                    />
+                </div>
+
+                {/* CLIENT SIDE */}
+                <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2 text-slate-700 font-bold px-1">
+                        <Monitor size={18} className="text-blue-600"/> 
+                        <span>Client (Sender)</span>
+                    </div>
+                    <TerminalShell 
+                        id="client-term" 
+                        title="student@client" 
+                        lines={clientLog} 
+                        onCommand={handleClientCommand} 
+                        promptStr=""
+                        height="h-full"
+                        status={clientState.connected ? `ESTABLISHED ${clientState.proto.toUpperCase()}` : ""} 
+                        onStop={clientState.connected ? resetClient : null}
+                    />
+                </div>
+            </div>
+            
+            <div className="bg-white border-l-4 border-blue-500 p-4 rounded shadow-sm text-sm text-slate-600 flex flex-col md:flex-row gap-4 justify-between items-center">
+                <div className="flex items-center gap-2">
+                    <Info size={20} className="text-blue-500" />
+                    <span>
+                        <strong>Cheat Sheet:</strong> TCP Server: <code className="bg-gray-100 px-1 rounded font-mono">nc -l -p 9100</code> &nbsp;|&nbsp; 
+                        UDP Server: <code className="bg-gray-100 px-1 rounded font-mono">nc -u -l -p 9101</code>
+                    </span>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// 4. WIRESHARK MODULE
+const WiresharkModule = () => {
+    const [isCapturing, setIsCapturing] = useState(false);
+    const [captureFilter, setCaptureFilter] = useState("");
+    const [displayFilter, setDisplayFilter] = useState("");
+    const [packets, setPackets] = useState([]);
+    const [allCapturedPackets, setAllCapturedPackets] = useState([]);
+    const [selectedPacket, setSelectedPacket] = useState(null);
+    const scrollRef = useRef(null);
+
+    const packetIdRef = useRef(1);
+    const timeRef = useRef(0.0);
+
+    // Auto-scroll packet list
+    useEffect(() => {
+        if (scrollRef.current) {
+            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+    }, [packets]);
+
+    // Background Noise
+    useEffect(() => {
+        let interval;
+        if (isCapturing) {
+            interval = setInterval(() => {
+                // Occasional noise if filter allows it (simulating filter check implicitly for noise)
+                if (Math.random() > 0.8 && captureFilter === "") {
+                    addPacket({
+                        protocol: 'SSDP',
+                        source: '192.168.1.105',
+                        dest: '239.255.255.250',
+                        length: 214,
+                        info: 'NOTIFY * HTTP/1.1',
+                        port: 1900
+                    });
+                }
+            }, 2000);
+        }
+        return () => clearInterval(interval);
+    }, [isCapturing, captureFilter]);
+
+    // Apply Display Filter
+    useEffect(() => {
+        if (!displayFilter) {
+            setPackets(allCapturedPackets);
+            return;
+        }
+        
+        const f = displayFilter.toLowerCase();
+        const filtered = allCapturedPackets.filter(p => {
+            if (f.includes('tcp') && p.protocol === 'TCP') return true;
+            if (f.includes('udp') && p.protocol === 'UDP') return true;
+            if (f.includes('eq 0') && p.streamId === 0) return true; // Simulating stream ID
+            if (f.includes('port')) {
+                const port = f.match(/(\d+)/)?.[0];
+                return p.info.includes(port) || p.port == port;
+            }
+            return false;
+        });
+        setPackets(filtered);
+    }, [displayFilter, allCapturedPackets]);
+
+    const addPacket = (pktData) => {
+        // Capture Filter Logic
+        if (captureFilter) {
+            const cf = captureFilter.toLowerCase();
+            let passed = false;
+            if (cf.includes('tcp') && pktData.protocol === 'TCP') {
+                const port = cf.match(/(\d+)/)?.[0];
+                if (!port || pktData.port == port) passed = true;
+            } 
+            else if (cf.includes('udp') && pktData.protocol === 'UDP') {
+                const port = cf.match(/(\d+)/)?.[0];
+                if (!port || pktData.port == port) passed = true;
+            }
+            if (!passed) return;
+        }
+
+        timeRef.current += (Math.random() * 0.05) + 0.001; // Increment time slightly
+        const newPacket = {
+            id: packetIdRef.current++,
+            time: timeRef.current.toFixed(6),
+            source: pktData.source || '127.0.0.1',
+            dest: pktData.dest || '127.0.0.1',
+            protocol: pktData.protocol,
+            length: pktData.length || 64,
+            info: pktData.info,
+            port: pktData.port, 
+            streamId: pktData.streamId || 0,
+            details: pktData.details || {}
+        };
+        
+        setAllCapturedPackets(prev => [...prev, newPacket]);
+    };
+
+    // Scenarios
+    const triggerTcpHandshake = () => {
+        if (!isCapturing) { alert("Please click 'Start Capture' first!"); return; }
+        const port = 9300;
+        // SYN
+        addPacket({ protocol: 'TCP', port, length: 74, info: `56230 → ${port} [SYN] Seq=0 Win=65535 Len=0 MSS=1460`, details: { flags: '0x002 (SYN)', seq: 0, ack: 0 } });
+        // SYN-ACK
+        setTimeout(() => addPacket({ protocol: 'TCP', port, length: 74, source: '127.0.0.1', dest: '127.0.0.1', info: `${port} → 56230 [SYN, ACK] Seq=0 Ack=1 Win=65535 Len=0`, details: { flags: '0x012 (SYN, ACK)', seq: 0, ack: 1 } }), 100);
+        // ACK
+        setTimeout(() => addPacket({ protocol: 'TCP', port, length: 66, info: `56230 → ${port} [ACK] Seq=1 Ack=1 Win=65535 Len=0`, details: { flags: '0x010 (ACK)', seq: 1, ack: 1 } }), 200);
+    };
+
+    const triggerTcpData = () => {
+        if (!isCapturing) return;
+        const port = 9300;
+        addPacket({ protocol: 'TCP', port, length: 79, info: `56230 → ${port} [PSH, ACK] Seq=1 Ack=1 Win=65535 Len=13 [Data: "Hello World"]`, details: { flags: '0x018 (PSH, ACK)', payload: 'Hello World', seq: 1, ack: 1 } });
+        setTimeout(() => addPacket({ protocol: 'TCP', port, length: 66, source: '127.0.0.1', dest: '127.0.0.1', info: `${port} → 56230 [ACK] Seq=1 Ack=14 Win=65535 Len=0`, details: { flags: '0x010 (ACK)', seq: 1, ack: 14 } }), 150);
+    };
+
+    const triggerUdpPacket = () => {
+        if (!isCapturing) return;
+        const port = 9301;
+        addPacket({ protocol: 'UDP', port, length: 60, info: `Source port: 45882  Destination port: ${port}  Len=12`, details: { payload: 'UDP Payload Data', flags: 'None (UDP)' } });
+    };
+
+    return (
+        <div className="flex flex-col h-full bg-white text-sm">
+            {/* Toolbar */}
+            <div className="bg-[#e6e6e6] p-2 border-b border-[#a0a0a0] flex items-center space-x-3 shadow-sm">
+                <div className="flex space-x-1">
+                    <button 
+                        onClick={() => { setIsCapturing(!isCapturing); if(!isCapturing) { setAllCapturedPackets([]); setPackets([]); packetIdRef.current=1; timeRef.current=0; } }} 
+                        className={`p-1.5 rounded-md border shadow-sm transition-all active:scale-95 ${isCapturing ? 'bg-red-100 border-red-400 text-red-700 hover:bg-red-200' : 'bg-blue-100 border-blue-400 text-blue-700 hover:bg-blue-200'}`}
+                        title={isCapturing ? "Stop Capture" : "Start Capture"}
+                    >
+                        {isCapturing ? <Square size={18} fill="currentColor" /> : <Activity size={18} />}
+                    </button>
+                    <button onClick={() => { setAllCapturedPackets([]); setPackets([]); }} className="p-1.5 rounded-md border border-gray-400 bg-gray-100 text-gray-600 hover:bg-gray-200" title="Clear Packets">
+                        <X size={18} />
+                    </button>
+                </div>
+                
+                <div className="h-6 w-px bg-gray-400"></div>
+
+                <div className="flex items-center space-x-2 flex-1">
+                    <span className="font-semibold text-gray-700 text-xs uppercase tracking-wide">Capture Filter:</span>
+                    <div className={`flex-1 relative rounded-md border ${isCapturing ? 'bg-gray-200 border-gray-300' : 'bg-white border-green-500 shadow-inner'}`}>
+                        <div className="absolute left-2 top-1.5 text-gray-400 pointer-events-none">
+                            <Wifi size={14}/>
+                        </div>
+                        <input 
+                            disabled={isCapturing}
+                            type="text" 
+                            className="w-full pl-8 py-1 bg-transparent outline-none text-sm font-mono text-gray-800"
+                            placeholder="e.g., tcp port 9300"
+                            value={captureFilter}
+                            onChange={(e) => setCaptureFilter(e.target.value)}
+                        />
+                    </div>
+                </div>
+
+                <div className="flex space-x-2">
+                    <button onClick={triggerTcpHandshake} disabled={!isCapturing} className="px-3 py-1 bg-gradient-to-b from-white to-gray-100 border border-gray-400 rounded hover:bg-gray-50 text-xs font-medium text-gray-700 shadow-sm active:shadow-inner disabled:opacity-50">Gener. TCP Handshake</button>
+                    <button onClick={triggerTcpData} disabled={!isCapturing} className="px-3 py-1 bg-gradient-to-b from-white to-gray-100 border border-gray-400 rounded hover:bg-gray-50 text-xs font-medium text-gray-700 shadow-sm active:shadow-inner disabled:opacity-50">Gener. TCP Data</button>
+                    <button onClick={triggerUdpPacket} disabled={!isCapturing} className="px-3 py-1 bg-gradient-to-b from-white to-gray-100 border border-gray-400 rounded hover:bg-gray-50 text-xs font-medium text-gray-700 shadow-sm active:shadow-inner disabled:opacity-50">Gener. UDP Packet</button>
+                </div>
+            </div>
+
+            {/* Display Filter Bar */}
+            <div className="bg-[#e6e6e6] p-1.5 border-b border-[#a0a0a0] flex items-center space-x-2">
+                <span className="text-gray-600 text-xs font-bold pl-1">Display Filter:</span>
+                <input 
+                    type="text" 
+                    className="flex-1 py-0.5 px-2 text-sm border border-gray-400 rounded shadow-inner focus:bg-[#e8f5e9] focus:border-green-500 outline-none transition-colors"
+                    placeholder="Apply a display filter ... (e.g., tcp.stream eq 0)"
+                    value={displayFilter}
+                    onChange={(e) => setDisplayFilter(e.target.value)}
+                />
+                <button 
+                    onClick={() => setDisplayFilter('')} 
+                    className="px-3 py-0.5 bg-gray-200 border border-gray-400 rounded text-xs hover:bg-gray-300"
+                >
+                    Clear
+                </button>
+            </div>
+
+            {/* Packet List Pane */}
+            <div className="flex-1 overflow-auto bg-white font-mono text-xs" ref={scrollRef}>
+                <table className="w-full text-left border-collapse table-fixed">
+                    <thead className="bg-gray-100 text-gray-600 border-b border-gray-300 sticky top-0 z-10 text-[11px] uppercase shadow-sm">
+                        <tr>
+                            <th className="p-1 w-12 border-r">No.</th>
+                            <th className="p-1 w-20 border-r">Time</th>
+                            <th className="p-1 w-32 border-r">Source</th>
+                            <th className="p-1 w-32 border-r">Destination</th>
+                            <th className="p-1 w-16 border-r">Protocol</th>
+                            <th className="p-1 w-16 border-r">Length</th>
+                            <th className="p-1">Info</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {packets.map(pkt => {
+                            // Protocol Colors (Wireshark Style)
+                            let rowClass = "hover:bg-blue-50 cursor-pointer border-b border-gray-100 ";
+                            if (selectedPacket?.id === pkt.id) {
+                                rowClass = "bg-[#0055ff] text-white selection-white ";
+                            } else {
+                                if (pkt.protocol === 'TCP') rowClass += "bg-[#e4ffc7] text-black "; // Light Green
+                                else if (pkt.protocol === 'UDP') rowClass += "bg-[#daeeff] text-black "; // Light Blue
+                                else rowClass += "bg-[#fff3d6] text-black "; // Light Yellow (SSDP etc)
+                            }
+
+                            return (
+                                <tr key={pkt.id} onClick={() => setSelectedPacket(pkt)} className={rowClass}>
+                                    <td className="p-1 border-r border-black/5 text-right pr-2">{pkt.id}</td>
+                                    <td className="p-1 border-r border-black/5">{pkt.time}</td>
+                                    <td className="p-1 border-r border-black/5">{pkt.source}</td>
+                                    <td className="p-1 border-r border-black/5">{pkt.dest}</td>
+                                    <td className="p-1 border-r border-black/5 font-semibold">{pkt.protocol}</td>
+                                    <td className="p-1 border-r border-black/5 text-right pr-2">{pkt.length}</td>
+                                    <td className="p-1 truncate">{pkt.info}</td>
+                                </tr>
+                            )
+                        })}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Packet Details Pane */}
+            <div className="h-1/3 border-t-4 border-gray-300 bg-white flex flex-col">
+                <div className="bg-gray-100 px-2 py-1 border-b border-gray-300 text-xs font-bold text-gray-700">
+                    Packet Details
+                </div>
+                <div className="flex-1 overflow-auto p-2 font-mono text-xs text-gray-800">
+                    {selectedPacket ? (
+                        <div className="space-y-1">
+                            <div className="cursor-default hover:bg-blue-100 px-1 rounded">
+                                <span className="text-gray-500">Frame {selectedPacket.id}:</span> {selectedPacket.length} bytes on wire ({(selectedPacket.length * 8)} bits), {selectedPacket.length} bytes captured
+                            </div>
+                            <div className="cursor-default hover:bg-blue-100 px-1 rounded">
+                                <span className="text-gray-500">Ethernet II, Src:</span> 00:00:00_00:00:00, <span className="text-gray-500">Dst:</span> 00:00:00_00:00:00
+                            </div>
+                            <div className="cursor-default hover:bg-blue-100 px-1 rounded">
+                                <span className="text-gray-500">Internet Protocol Version 4, Src:</span> {selectedPacket.source}, <span className="text-gray-500">Dst:</span> {selectedPacket.dest}
+                            </div>
+                            <div className="cursor-default hover:bg-blue-100 px-1 rounded">
+                                <span className="text-gray-500">{selectedPacket.protocol === 'TCP' ? 'Transmission Control Protocol' : 'User Datagram Protocol'}, Src Port:</span> {selectedPacket.port ? 'High' : 'Unknown'}, <span className="text-gray-500">Dst Port:</span> {selectedPacket.port}
+                            </div>
+
+                            {/* Protocol Specifics */}
+                            <div className="ml-4 border-l border-gray-400 pl-2 mt-2 space-y-1">
+                                {selectedPacket.details?.flags && (
+                                    <div className="text-blue-800">Flags: {selectedPacket.details.flags}</div>
+                                )}
+                                {selectedPacket.details?.seq !== undefined && (
+                                    <div className="text-gray-600">Sequence Number: {selectedPacket.details.seq}</div>
+                                )}
+                                {selectedPacket.details?.ack !== undefined && (
+                                    <div className="text-gray-600">Acknowledgment Number: {selectedPacket.details.ack}</div>
+                                )}
+                                {selectedPacket.details?.payload && (
+                                    <div className="mt-2 bg-gray-50 border p-2 rounded">
+                                        <div className="text-xs text-gray-500 uppercase font-bold mb-1">Payload (ASCII):</div>
+                                        <div className="whitespace-pre font-mono text-black">{selectedPacket.details.payload}</div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="h-full flex flex-col items-center justify-center text-gray-400">
+                            <Search size={32} className="mb-2 opacity-20" />
+                            <p>Select a packet to inspect its headers.</p>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// --- MAIN APP SHELL ---
+export default function App() {
+    const [activeTab, setActiveTab] = useState('basics');
+    const [showGuide, setShowGuide] = useState(true);
+
+    return (
+        <div className="flex h-screen w-full overflow-hidden bg-slate-50 text-slate-900 font-sans">
+            {/* Sidebar Navigation */}
+            <div className="w-64 bg-[#1a1b26] text-slate-300 flex flex-col shadow-2xl z-20 shrink-0 border-r border-slate-800">
+                <div className="p-5 bg-[#16161e] font-bold text-xl border-b border-slate-800 flex items-center gap-3 text-white">
+                    <div className="bg-blue-600 p-1.5 rounded-lg shadow-lg shadow-blue-900/50">
+                        <Network size={20} className="text-white" /> 
+                    </div>
+                    NetLab <span className="text-[10px] text-blue-400 self-end mb-1">v2.0</span>
+                </div>
+                
+                <nav className="flex-1 p-4 space-y-2">
+                    <button onClick={() => setActiveTab('basics')} className={`w-full text-left p-3 rounded-lg transition-all duration-200 flex items-center gap-3 group ${activeTab === 'basics' ? 'bg-blue-600 text-white shadow-md shadow-blue-900/30' : 'hover:bg-slate-800 hover:text-white'}`}>
+                        <Terminal size={18} className={activeTab === 'basics' ? 'text-blue-200' : 'text-slate-500 group-hover:text-blue-400'} /> 
+                        <span className="font-medium">1. Basic Utilities</span>
+                    </button>
+                    <button onClick={() => setActiveTab('netcat')} className={`w-full text-left p-3 rounded-lg transition-all duration-200 flex items-center gap-3 group ${activeTab === 'netcat' ? 'bg-blue-600 text-white shadow-md shadow-blue-900/30' : 'hover:bg-slate-800 hover:text-white'}`}>
+                        <ArrowRightLeft size={18} className={activeTab === 'netcat' ? 'text-blue-200' : 'text-slate-500 group-hover:text-blue-400'} /> 
+                        <span className="font-medium">2. Netcat (TCP/UDP)</span>
+                    </button>
+                    <button onClick={() => setActiveTab('wireshark')} className={`w-full text-left p-3 rounded-lg transition-all duration-200 flex items-center gap-3 group ${activeTab === 'wireshark' ? 'bg-blue-600 text-white shadow-md shadow-blue-900/30' : 'hover:bg-slate-800 hover:text-white'}`}>
+                        <Activity size={18} className={activeTab === 'wireshark' ? 'text-blue-200' : 'text-slate-500 group-hover:text-blue-400'} /> 
+                        <span className="font-medium">3. Wireshark Sim</span>
+                    </button>
+                </nav>
+                
+                <div className="p-4 text-[10px] text-slate-500 text-center border-t border-slate-800">
+                    Network Analysis Module<br/>Operating Systems & Networks
+                </div>
+            </div>
+
+            {/* Main Content Area */}
+            <div className="flex-1 flex flex-col relative overflow-hidden">
+                {/* Top Header */}
+                <div className="bg-white border-b border-slate-200 px-6 py-3 flex justify-between items-center z-10 h-16 shrink-0 shadow-sm">
+                    <div>
+                        <h1 className="text-xl font-bold text-slate-800 leading-tight">{LAB_CONTENT[activeTab].title}</h1>
+                        <p className="text-xs text-slate-500 mt-0.5">{LAB_CONTENT[activeTab].desc}</p>
+                    </div>
+                    <button 
+                        onClick={() => setShowGuide(!showGuide)} 
+                        className={`text-sm font-medium px-4 py-2 rounded-full border transition-all flex items-center gap-2 ${showGuide ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50'}`}
+                    >
+                        {showGuide ? 'Hide Guide' : 'Show Guide'} 
+                        {showGuide ? <ChevronRight size={16} /> : <Book size={16} />}
+                    </button>
+                </div>
+
+                {/* Workspace Container */}
+                <div className="flex flex-1 overflow-hidden relative">
+                    {/* Interactive Module */}
+                    <div className="flex-1 bg-slate-100 overflow-hidden relative flex flex-col">
+                        {activeTab === 'basics' && <BasicsModule />}
+                        {activeTab === 'netcat' && <NetcatModule />}
+                        {activeTab === 'wireshark' && <WiresharkModule />}
+                    </div>
+
+                    {/* Right Side Guide Panel */}
+                    <div className={`bg-white border-l border-slate-200 shadow-xl overflow-y-auto transition-all duration-300 ease-in-out shrink-0 flex flex-col ${showGuide ? 'w-96 translate-x-0' : 'w-0 translate-x-full opacity-0'}`}>
+                        <div className="p-6 flex-1">
+                            <div className="uppercase tracking-widest text-xs font-bold text-slate-400 mb-4 border-b pb-2">Lab Guide</div>
+                            <div className="prose prose-sm text-slate-600 max-w-none">
+                                {LAB_CONTENT[activeTab].guide}
+                            </div>
+                        </div>
+                        
+                        <div className="p-6 bg-slate-50 border-t border-slate-200">
+                            <h4 className="font-bold text-slate-800 mb-2 flex items-center gap-2 text-sm">
+                                <Save size={16} className="text-blue-600" /> Proof of Completion
+                            </h4>
+                            <p className="text-xs text-slate-500 leading-relaxed">
+                                Please take screenshots of your terminal outputs or packet captures once you have successfully completed the tasks above.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}

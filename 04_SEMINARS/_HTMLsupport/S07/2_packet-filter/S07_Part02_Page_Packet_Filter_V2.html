@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Packet Filter Workshop: Structs & Logic</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; /* Slate 900 */
+            color: #e2e8f0;
+        }
+
+        .font-mono { font-family: 'Fira Code', monospace; }
+
+        /* Byte Grid Animation */
+        .byte-box {
+            transition: all 0.3s ease;
+        }
+        .byte-box.active {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
+            z-index: 10;
+        }
+
+        /* Code Highlighting */
+        .code-line {
+            padding: 2px 8px;
+            border-left: 2px solid transparent;
+            opacity: 0.5;
+            transition: all 0.2s;
+        }
+        .code-line.active {
+            background: rgba(56, 189, 248, 0.1);
+            border-left-color: #38bdf8;
+            opacity: 1;
+            color: #fff;
+        }
+        .code-line.success {
+            background: rgba(34, 197, 94, 0.1);
+            border-left-color: #22c55e;
+            opacity: 1;
+            color: #4ade80;
+        }
+        .code-line.fail {
+            background: rgba(239, 68, 68, 0.1);
+            border-left-color: #ef4444;
+            opacity: 1;
+            color: #f87171;
+        }
+
+        /* Logic Gates */
+        .gate {
+            transition: all 0.3s ease;
+        }
+        .gate.pending { border-color: #475569; opacity: 0.5; }
+        .gate.processing { border-color: #fbbf24; opacity: 1; box-shadow: 0 0 10px rgba(251, 191, 36, 0.3); }
+        .gate.pass { border-color: #22c55e; background-color: rgba(34, 197, 94, 0.1); opacity: 1; }
+        .gate.block { border-color: #ef4444; background-color: rgba(239, 68, 68, 0.1); opacity: 1; }
+
+        /* Animation utilities */
+        .fade-enter { opacity: 0; transform: translateY(10px); }
+        .fade-enter-active { opacity: 1; transform: translateY(0); transition: opacity 0.3s, transform 0.3s; }
+        
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden">
+
+    <!-- Header -->
+    <header class="bg-slate-800 border-b border-slate-700 h-14 flex items-center justify-between px-6 shrink-0">
+        <div class="flex items-center gap-2">
+            <svg class="w-6 h-6 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+            <h1 class="font-bold text-slate-200 tracking-wide">Packet Filter <span class="text-sky-400">Workshop</span></h1>
+        </div>
+        <div class="flex gap-4 text-xs font-mono text-slate-400">
+            <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-slate-600"></span> Raw Bytes</div>
+            <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-purple-500"></span> Struct Unpack</div>
+            <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Logic Pass</div>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="flex-1 flex overflow-hidden">
+        
+        <!-- LEFT: Simulation & Visualization -->
+        <section class="flex-1 flex flex-col bg-slate-900 relative">
+            
+            <!-- Top: Generator Controls -->
+            <div class="p-6 border-b border-slate-800 bg-slate-900/50 flex gap-4 justify-center z-10">
+                <button onclick="sim.spawn('DNS')" class="px-4 py-2 bg-indigo-900/40 border border-indigo-500/30 hover:border-indigo-500 text-indigo-300 rounded text-sm font-medium transition hover:shadow-[0_0_10px_rgba(99,102,241,0.2)]">
+                    Generate DNS (UDP:53)
+                </button>
+                <button onclick="sim.spawn('HTTP')" class="px-4 py-2 bg-emerald-900/40 border border-emerald-500/30 hover:border-emerald-500 text-emerald-300 rounded text-sm font-medium transition hover:shadow-[0_0_10px_rgba(16,185,129,0.2)]">
+                    Generate HTTP (TCP:80)
+                </button>
+                <button onclick="sim.spawn('SSH')" class="px-4 py-2 bg-sky-900/40 border border-sky-500/30 hover:border-sky-500 text-sky-300 rounded text-sm font-medium transition hover:shadow-[0_0_10px_rgba(14,165,233,0.2)]">
+                    Generate SSH (TCP:22)
+                </button>
+            </div>
+
+            <!-- Middle: The Byte Stream (Visualizing the Wire) -->
+            <div class="h-32 flex items-center justify-center border-b border-slate-800 bg-slate-900 relative overflow-hidden" id="wire-stage">
+                <div class="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none">
+                    <div class="w-full h-px bg-slate-700"></div>
+                </div>
+                <!-- Dynamic Byte Stream will appear here -->
+                <div id="byte-stream-container" class="flex gap-1 overflow-x-auto max-w-full px-4 items-center h-16">
+                    <div class="text-slate-500 text-sm italic">Waiting for packet... Select a generator above.</div>
+                </div>
+            </div>
+
+            <!-- Bottom: The Inspection & Logic Stage -->
+            <div class="flex-1 flex relative">
+                
+                <!-- Parsing Visualization (Structs) -->
+                <div class="w-1/2 border-r border-slate-800 p-6 flex flex-col gap-6 overflow-y-auto">
+                    <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">1. Header Parsing (struct.unpack)</h3>
+                    
+                    <!-- Ethernet Block -->
+                    <div id="vis-eth" class="p-4 rounded-lg bg-slate-800/50 border border-slate-700 transition opacity-50 grayscale">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-bold text-purple-400">Ethernet II Header</span>
+                            <span class="text-xs font-mono text-slate-500">Bytes 0-14</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-xs font-mono text-slate-300">
+                            <div>Dst MAC: <span id="val-dmac" class="text-yellow-400">--</span></div>
+                            <div>Src MAC: <span id="val-smac" class="text-yellow-400">--</span></div>
+                            <div class="col-span-2">Proto: <span id="val-ethproto" class="text-blue-400">--</span> (Expected 0x0800)</div>
+                        </div>
+                    </div>
+
+                    <!-- IP Block -->
+                    <div id="vis-ip" class="p-4 rounded-lg bg-slate-800/50 border border-slate-700 transition opacity-50 grayscale">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-bold text-sky-400">IPv4 Header</span>
+                            <span class="text-xs font-mono text-slate-500">Bytes 14-34</span>
+                        </div>
+                        
+                        <!-- Bitwise Animation Area -->
+                        <div class="bg-slate-950 p-2 rounded mb-2 font-mono text-[10px] text-slate-400 border border-slate-800">
+                            <div class="flex justify-between">
+                                <span>Byte 0: <span id="val-ipverbyte" class="text-white">--</span></span>
+                                <span>-> Binary: <span id="val-ipverbinary" class="text-sky-500">00000000</span></span>
+                            </div>
+                            <div class="mt-1 pl-2 border-l-2 border-slate-700">
+                                <div>ver = byte >> 4 &nbsp;&nbsp;= <span id="val-ver" class="text-green-400">--</span></div>
+                                <div>ihl = byte & 0x0F = <span id="val-ihl" class="text-green-400">--</span></div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 text-xs font-mono text-slate-300">
+                            <div>Src IP: <span id="val-saddr" class="text-yellow-400">--</span></div>
+                            <div>Dst IP: <span id="val-daddr" class="text-yellow-400">--</span></div>
+                            <div>Proto: <span id="val-ipproto" class="text-blue-400">--</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Transport Block -->
+                    <div id="vis-trans" class="p-4 rounded-lg bg-slate-800/50 border border-slate-700 transition opacity-50 grayscale">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-bold text-emerald-400">Transport (TCP/UDP)</span>
+                            <span class="text-xs font-mono text-slate-500">Payload</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-xs font-mono text-slate-300">
+                            <div>Src Port: <span id="val-sport" class="text-white">--</span></div>
+                            <div>Dst Port: <span id="val-dport" class="text-white">--</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Logic Filter Tree -->
+                <div class="w-1/2 p-6 bg-slate-900/80 overflow-y-auto">
+                    <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">2. Filter Logic (passes_filter)</h3>
+                    
+                    <div class="flex flex-col gap-4 relative">
+                        <!-- Connecting Line -->
+                        <div class="absolute left-6 top-4 bottom-4 w-0.5 bg-slate-800 z-0"></div>
+
+                        <!-- Step 1: Network Check -->
+                        <div id="logic-1" class="gate relative z-10 p-3 bg-slate-800 border-2 border-slate-700 rounded-lg ml-2 pending">
+                            <div class="text-xs font-bold text-slate-400 mb-1">Check 1: Source Network</div>
+                            <div class="font-mono text-xs text-slate-300">src_ip.startswith("10.")</div>
+                            <div class="text-[10px] text-right mt-1 status-text text-slate-500">Pending</div>
+                        </div>
+
+                        <!-- Step 2: Protocol Specific -->
+                        <div id="logic-2" class="gate relative z-10 p-3 bg-slate-800 border-2 border-slate-700 rounded-lg ml-2 pending">
+                            <div class="text-xs font-bold text-slate-400 mb-1">Check 2: Service Rules</div>
+                            <div class="font-mono text-xs text-slate-300 space-y-1">
+                                <div>(UDP and port==53) OR</div>
+                                <div>(TCP and port > 1024)</div>
+                            </div>
+                            <div class="text-[10px] text-right mt-1 status-text text-slate-500">Pending</div>
+                        </div>
+
+                        <!-- Step 3: Default TCP -->
+                        <div id="logic-3" class="gate relative z-10 p-3 bg-slate-800 border-2 border-slate-700 rounded-lg ml-2 pending">
+                            <div class="text-xs font-bold text-slate-400 mb-1">Check 3: Basic TCP</div>
+                            <div class="font-mono text-xs text-slate-300">proto == 6 (TCP)</div>
+                            <div class="text-[10px] text-right mt-1 status-text text-slate-500">Pending</div>
+                        </div>
+
+                        <!-- Final Result -->
+                        <div id="logic-result" class="relative z-10 mt-4 ml-2 p-4 rounded-lg border-2 border-dashed border-slate-700 text-center text-sm font-bold text-slate-500">
+                            VERDICT PENDING
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- RIGHT: The Code (Live Trace) -->
+        <aside class="w-1/3 bg-slate-950 border-l border-slate-800 flex flex-col">
+            <div class="p-3 border-b border-slate-800 bg-slate-900">
+                <h3 class="text-xs font-bold text-slate-400 uppercase">S07_Part02A_Script_Packet_Filter.py</h3>
+            </div>
+            <div class="flex-1 overflow-auto p-4 font-mono text-xs text-slate-400 leading-relaxed" id="code-panel">
+                <!-- Python Code Mockup -->
+<div id="line-1" class="code-line">def parse_ethernet_header(data):</div>
+<div id="line-2" class="code-line">    dest_mac, src_mac, proto = struct.unpack("! 6s 6s H", data[:14])</div>
+<div id="line-3" class="code-line">    return dest_mac, src_mac, proto</div>
+<div class="code-line">&nbsp;</div>
+<div id="line-4" class="code-line">def parse_ipv4_header(data):</div>
+<div id="line-5" class="code-line">    version_ihl = data[0]</div>
+<div id="line-6" class="code-line">    version = version_ihl >> 4</div>
+<div id="line-7" class="code-line">    ihl = (version_ihl & 0x0F) * 4</div>
+<div id="line-8" class="code-line">    ttl, proto, src, dst = struct.unpack("! 8x B B 2x 4s 4s", data[:20])</div>
+<div id="line-9" class="code-line">    return src, dst, proto</div>
+<div class="code-line">&nbsp;</div>
+<div id="line-10" class="code-line">def passes_filter(src_ip, dst_ip, proto, src_port, dst_port):</div>
+<div id="line-11" class="code-line">    # Rule 1: Source Network</div>
+<div id="line-12" class="code-line">    if not src_ip.startswith("10."):</div>
+<div id="line-13" class="code-line fail">        return False</div>
+<div class="code-line">&nbsp;</div>
+<div id="line-14" class="code-line">    # Rule 2: DNS & Safe TCP</div>
+<div id="line-15" class="code-line">    if proto == 17 and dst_port == 53:</div>
+<div id="line-16" class="code-line success">        return True</div>
+<div id="line-17" class="code-line">    if proto == 6 and dst_port > 1024:</div>
+<div id="line-18" class="code-line success">        return True</div>
+<div class="code-line">&nbsp;</div>
+<div id="line-19" class="code-line">    # Rule 3: Allow all TCP</div>
+<div id="line-20" class="code-line">    if proto == 6:</div>
+<div id="line-21" class="code-line success">        return True</div>
+<div class="code-line">&nbsp;</div>
+<div id="line-22" class="code-line">    return False</div>
+            </div>
+        </aside>
+
+    </main>
+
+    <script>
+        const sim = {
+            isProcessing: false,
+            delay: 800, // Speed of animation
+
+            spawn: async function(type) {
+                if (this.isProcessing) return;
+                this.isProcessing = true;
+                this.resetUI();
+
+                // Generate Data
+                const packet = this.createPacketData(type);
+                
+                // 1. Render Bytes
+                this.renderBytes(packet);
+                await this.wait(500);
+
+                // 2. Parse Ethernet
+                await this.animateEthernet(packet);
+                
+                // 3. Parse IP
+                await this.animateIP(packet);
+
+                // 4. Parse Transport
+                await this.animateTransport(packet);
+
+                // 5. Run Filter Logic
+                await this.animateFilter(packet);
+
+                this.isProcessing = false;
+            },
+
+            createPacketData: function(type) {
+                // Mock Byte array generation
+                let bytes = [];
+                // Ethernet (0-13)
+                for(let i=0; i<12; i++) bytes.push(Math.floor(Math.random()*255).toString(16).padStart(2,'0'));
+                bytes.push('08', '00'); // Proto IPv4
+                
+                // IP (14-33)
+                bytes.push('45'); // Ver 4, IHL 5
+                for(let i=0; i<8; i++) bytes.push(Math.floor(Math.random()*255).toString(16).padStart(2,'0'));
+                
+                let proto = (type === 'DNS') ? 17 : 6;
+                bytes.push(proto.toString(16).padStart(2,'0')); // Proto
+                bytes.push('00', '00'); // Checksum placeholder
+                
+                // Src IP / Dst IP mock logic
+                let srcIP = "192.168.1.5";
+                let validNetwork = Math.random() > 0.3; // 70% chance to be 10.x
+                if (validNetwork) srcIP = "10.0.5." + Math.floor(Math.random()*255);
+                
+                let dstIP = "8.8.8.8";
+
+                // Push IP bytes (simplified visuals)
+                bytes.push('c0','a8','01','05'); // Fake src
+                bytes.push('08','08','08','08'); // Fake dst
+
+                // Transport
+                let srcPort = Math.floor(Math.random() * 50000) + 1024;
+                let dstPort = (type === 'DNS') ? 53 : (type === 'HTTP' ? 80 : 22);
+
+                return {
+                    raw: bytes,
+                    type: type,
+                    srcIP: srcIP,
+                    dstIP: dstIP,
+                    proto: proto,
+                    srcPort: srcPort,
+                    dstPort: dstPort
+                };
+            },
+
+            renderBytes: function(packet) {
+                const container = document.getElementById('byte-stream-container');
+                container.innerHTML = '';
+                packet.raw.forEach((byte, idx) => {
+                    const el = document.createElement('div');
+                    el.className = 'byte-box w-8 h-8 flex items-center justify-center bg-slate-800 rounded border border-slate-700 text-xs font-mono text-slate-400 fade-enter';
+                    el.innerText = byte;
+                    el.dataset.index = idx;
+                    container.appendChild(el);
+                    
+                    // Stagger animation
+                    setTimeout(() => el.classList.add('fade-enter-active'), idx * 20);
+                });
+            },
+
+            animateEthernet: async function(packet) {
+                this.highlightCode('line-1');
+                this.highlightCode('line-2');
+                
+                // Highlight bytes 0-13
+                this.highlightBytes(0, 13, 'border-purple-500 text-purple-300 bg-purple-900/20');
+                
+                // Show Card
+                const card = document.getElementById('vis-eth');
+                card.classList.remove('opacity-50', 'grayscale');
+                card.classList.add('bg-slate-800', 'border-purple-500', 'shadow-[0_0_15px_rgba(168,85,247,0.2)]');
+
+                // Populate Data
+                await this.wait(300);
+                document.getElementById('val-dmac').innerText = "00:0c:29:..";
+                document.getElementById('val-smac').innerText = "00:50:56:..";
+                document.getElementById('val-ethproto').innerText = "0x0800";
+                
+                await this.wait(this.delay);
+            },
+
+            animateIP: async function(packet) {
+                this.highlightCode('line-4');
+                this.highlightCode('line-5');
+
+                // Highlight bytes 14-33
+                this.highlightBytes(14, 33, 'border-sky-500 text-sky-300 bg-sky-900/20');
+
+                // Show Card
+                const card = document.getElementById('vis-ip');
+                card.classList.remove('opacity-50', 'grayscale');
+                card.classList.add('bg-slate-800', 'border-sky-500', 'shadow-[0_0_15px_rgba(14,165,233,0.2)]');
+
+                // Bitwise Explain
+                const firstByte = packet.raw[14]; // Should be 45 usually
+                document.getElementById('val-ipverbyte').innerText = "0x" + firstByte;
+                // Mock binary for 0x45 -> 01000101
+                document.getElementById('val-ipverbinary').innerText = "01000101";
+                
+                await this.wait(500);
+                this.highlightCode('line-6');
+                document.getElementById('val-ver').innerText = "4 (IPv4)";
+                
+                await this.wait(500);
+                this.highlightCode('line-7');
+                document.getElementById('val-ihl').innerText = "5 (20 bytes)";
+
+                await this.wait(500);
+                this.highlightCode('line-8');
+                document.getElementById('val-saddr').innerText = packet.srcIP;
+                document.getElementById('val-daddr').innerText = packet.dstIP;
+                document.getElementById('val-ipproto').innerText = packet.proto === 6 ? "6 (TCP)" : "17 (UDP)";
+
+                await this.wait(this.delay);
+            },
+
+            animateTransport: async function(packet) {
+                // Highlight remaining bytes
+                this.highlightBytes(34, packet.raw.length - 1, 'border-emerald-500 text-emerald-300 bg-emerald-900/20');
+                
+                const card = document.getElementById('vis-trans');
+                card.classList.remove('opacity-50', 'grayscale');
+                card.classList.add('bg-slate-800', 'border-emerald-500');
+
+                document.getElementById('val-sport').innerText = packet.srcPort;
+                document.getElementById('val-dport').innerText = packet.dstPort;
+
+                await this.wait(this.delay);
+            },
+
+            animateFilter: async function(packet) {
+                this.highlightCode('line-10');
+                await this.wait(300);
+
+                // Check 1: Source IP
+                this.highlightCode('line-12');
+                const gate1 = document.getElementById('logic-1');
+                gate1.classList.remove('pending');
+                gate1.classList.add('processing');
+                
+                await this.wait(600);
+                
+                if (!packet.srcIP.startsWith("10.")) {
+                    // FAIL
+                    gate1.classList.remove('processing');
+                    gate1.classList.add('block');
+                    gate1.querySelector('.status-text').innerText = "FALSE (Blocked)";
+                    this.highlightCode('line-13', 'fail');
+                    this.setResult(false, "Dropped by Rule 1 (IP)");
+                    return;
+                } else {
+                    // PASS
+                    gate1.classList.remove('processing');
+                    gate1.classList.add('pass');
+                    gate1.querySelector('.status-text').innerText = "TRUE (Continue)";
+                }
+
+                // Check 2: DNS or High Port
+                await this.wait(500);
+                this.highlightCode('line-15');
+                const gate2 = document.getElementById('logic-2');
+                gate2.classList.remove('pending');
+                gate2.classList.add('processing');
+
+                await this.wait(600);
+
+                // Logic match Python
+                // if proto == 17 and dst_port == 53:
+                if (packet.proto === 17 && packet.dstPort === 53) {
+                    gate2.classList.remove('processing');
+                    gate2.classList.add('pass');
+                    gate2.querySelector('.status-text').innerText = "MATCH (DNS)";
+                    this.highlightCode('line-16', 'success');
+                    this.setResult(true, "Allowed by Rule 2 (DNS)");
+                    return;
+                }
+
+                // if proto == 6 and dst_port > 1024:
+                this.highlightCode('line-17');
+                await this.wait(300);
+                if (packet.proto === 6 && packet.dstPort > 1024) {
+                    gate2.classList.remove('processing');
+                    gate2.classList.add('pass');
+                    gate2.querySelector('.status-text').innerText = "MATCH (High TCP)";
+                    this.highlightCode('line-18', 'success');
+                    this.setResult(true, "Allowed by Rule 2 (High TCP)");
+                    return;
+                }
+
+                gate2.classList.remove('processing');
+                gate2.classList.add('block'); // Didn't match this rule, but logic continues
+                gate2.querySelector('.status-text').innerText = "NO MATCH";
+
+                // Check 3: Basic TCP
+                await this.wait(500);
+                this.highlightCode('line-20');
+                const gate3 = document.getElementById('logic-3');
+                gate3.classList.remove('pending');
+                gate3.classList.add('processing');
+
+                await this.wait(600);
+
+                if (packet.proto === 6) {
+                    gate3.classList.remove('processing');
+                    gate3.classList.add('pass');
+                    gate3.querySelector('.status-text').innerText = "MATCH (TCP)";
+                    this.highlightCode('line-21', 'success');
+                    this.setResult(true, "Allowed by Rule 3 (TCP)");
+                    return;
+                }
+
+                // Fail Default
+                gate3.classList.remove('processing');
+                gate3.classList.add('block');
+                this.highlightCode('line-22', 'fail');
+                this.setResult(false, "Dropped (Default Deny)");
+            },
+
+            setResult: function(allowed, msg) {
+                const box = document.getElementById('logic-result');
+                box.innerText = msg.toUpperCase();
+                box.className = `relative z-10 mt-4 ml-2 p-4 rounded-lg border-2 font-bold text-center transition scale-110 ${allowed ? 'bg-emerald-900/50 border-emerald-500 text-emerald-400' : 'bg-red-900/50 border-red-500 text-red-400'}`;
+            },
+
+            highlightBytes: function(start, end, classes) {
+                const boxes = document.querySelectorAll('.byte-box');
+                boxes.forEach(b => {
+                    const idx = parseInt(b.dataset.index);
+                    // Reset
+                    b.className = 'byte-box w-8 h-8 flex items-center justify-center bg-slate-800 rounded border border-slate-700 text-xs font-mono text-slate-400';
+                    
+                    if (idx >= start && idx <= end) {
+                        b.className = `byte-box w-8 h-8 flex items-center justify-center rounded border text-xs font-mono active ${classes}`;
+                    }
+                });
+            },
+
+            highlightCode: function(id, type='active') {
+                // Clear all
+                document.querySelectorAll('.code-line').forEach(l => {
+                    l.classList.remove('active', 'success', 'fail');
+                });
+                
+                const el = document.getElementById(id);
+                if(el) el.classList.add(type);
+                
+                // Scroll to
+                if(el) {
+                    const container = document.getElementById('code-panel');
+                    // simple scroll
+                    // el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            },
+
+            wait: function(ms) { return new Promise(r => setTimeout(r, ms)); },
+
+            resetUI: function() {
+                // Reset Byte Stream
+                document.getElementById('byte-stream-container').innerHTML = '';
+                
+                // Reset Cards
+                ['vis-eth', 'vis-ip', 'vis-trans'].forEach(id => {
+                    const el = document.getElementById(id);
+                    el.className = "p-4 rounded-lg bg-slate-800/50 border border-slate-700 transition opacity-50 grayscale";
+                });
+                
+                // Reset Gates
+                document.querySelectorAll('.gate').forEach(g => {
+                    g.className = "gate relative z-10 p-3 bg-slate-800 border-2 border-slate-700 rounded-lg ml-2 pending";
+                    g.querySelector('.status-text').innerText = "Pending";
+                });
+
+                // Reset Result
+                const res = document.getElementById('logic-result');
+                res.className = "relative z-10 mt-4 ml-2 p-4 rounded-lg border-2 border-dashed border-slate-700 text-center text-sm font-bold text-slate-500";
+                res.innerText = "VERDICT PENDING";
+
+                // Reset Values
+                document.getElementById('val-ver').innerText = "--";
+                document.getElementById('val-ihl').innerText = "--";
+                document.getElementById('val-ipverbyte').innerText = "--";
+                document.getElementById('val-ipverbinary').innerText = "00000000";
+            }
+        };
+    </script>
+</body>
+</html>

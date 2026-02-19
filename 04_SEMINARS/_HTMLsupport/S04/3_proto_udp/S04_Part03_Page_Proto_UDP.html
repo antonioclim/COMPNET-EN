@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UDP State Machine Protocol Visualizer</title>
+    <style>
+        :root {
+            --bg-app: #1e1e1e;
+            --bg-panel: #252526;
+            --term-bg: #0c0c0c;
+            --text-main: #cccccc;
+            --text-bright: #ffffff;
+            --accent-req: #4daafc; /* Blue for Requests */
+            --accent-resp: #6a9955; /* Green for OK Responses */
+            --accent-err: #ce9178; /* Red for Errors */
+            --accent-state: #dcdcaa; /* Yellow for State */
+            --border: #333;
+            --font-mono: 'Consolas', 'Monaco', monospace;
+            --font-sans: 'Segoe UI', sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-app);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* --- Header --- */
+        header {
+            background: var(--bg-panel);
+            padding: 0 1.5rem;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            justify-content: space-between;
+        }
+        
+        h1 { font-size: 1.1rem; font-weight: 600; color: var(--text-bright); }
+        .badge { background: var(--accent-state); color: #1e1e1e; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; margin-left: 10px; font-weight: bold; }
+
+        /* --- Main Layout --- */
+        main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            overflow: hidden;
+        }
+
+        /* Left: Client & Controls */
+        .client-panel {
+            padding: 1rem;
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            background: #141414;
+            position: relative;
+        }
+
+        .client-status-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .status-light {
+            width: 15px; height: 15px;
+            border-radius: 50%;
+            background: #444;
+            box-shadow: 0 0 5px #000;
+            transition: background 0.3s, box-shadow 0.3s;
+        }
+        .status-light.connected { background: var(--accent-resp); box-shadow: 0 0 10px var(--accent-resp); }
+        .status-light.error { background: var(--accent-err); box-shadow: 0 0 10px var(--accent-err); }
+
+        .client-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .control-group {
+            grid-column: span 2;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 0.8rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--bg-panel);
+            color: #fff;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+        }
+        
+        button:hover:not(:disabled) { filter: brightness(1.2); transform: translateY(-1px); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .btn-connect { border-color: var(--accent-resp); color: var(--accent-resp); }
+        .btn-disconnect { border-color: var(--accent-err); color: var(--accent-err); }
+        .btn-action { background: #2d2d2d; }
+
+        input[type="text"] {
+            background: #000;
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 0.8rem;
+            border-radius: 6px;
+            flex: 1;
+        }
+
+        /* Log Area */
+        .log-container {
+            flex: 1;
+            margin-top: 20px;
+            background: var(--term-bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 10px;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            overflow-y: auto;
+            color: #ccc;
+        }
+        
+        .log-line { margin-bottom: 5px; border-left: 3px solid transparent; padding-left: 5px; }
+        .log-req { border-color: var(--accent-req); }
+        .log-resp-ok { border-color: var(--accent-resp); color: var(--accent-resp); }
+        .log-resp-err { border-color: var(--accent-err); color: var(--accent-err); }
+
+        /* Right: Server State & Visualization */
+        .server-panel {
+            position: relative;
+            background: radial-gradient(circle at center, #2a2a2a 0%, #1e1e1e 70%);
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+        }
+
+        .server-state-view {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .state-title {
+            font-size: 0.9rem;
+            color: var(--accent-state);
+            margin-bottom: 10px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 5px;
+        }
+
+        .connection-list {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+        }
+
+        .conn-item {
+            background: #333;
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 5px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .conn-header { font-weight: bold; color: #fff; display: flex; justify-content: space-between; }
+        .notes-list { 
+            background: #111; 
+            padding: 5px; 
+            border-radius: 4px; 
+            min-height: 20px;
+            color: #aaa;
+            white-space: pre-wrap;
+        }
+
+        /* Animation Area */
+        .anim-area {
+            flex: 1;
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 50px;
+        }
+
+        .node {
+            width: 100px;
+            height: 100px;
+            background: var(--bg-panel);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .node-icon { font-size: 2.5rem; margin-bottom: 5px; }
+        .node-label { font-size: 0.8rem; font-weight: bold; }
+
+        .packet {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: var(--bg-panel);
+            border: 2px solid var(--accent-req);
+            border-radius: 8px;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            display: none; /* Hidden by default */
+        }
+
+        /* Code Hint Overlay */
+        .code-hint {
+            position: absolute;
+            bottom: 20px; right: 20px;
+            background: #111;
+            border: 1px solid var(--accent-state);
+            padding: 10px;
+            border-radius: 6px;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: #dcdcaa;
+            max-width: 300px;
+            opacity: 0.8;
+        }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>UDP Protocol <span class="badge">State Machine</span></h1>
+</header>
+
+<main>
+    <!-- Left Panel -->
+    <div class="client-panel">
+        <div class="client-status-card">
+            <div class="status-light" id="statusLight"></div>
+            <div>
+                <div style="font-weight:bold; font-size:0.9rem;">Client Status</div>
+                <div style="font-size:0.75rem; color:#888;" id="statusText">Disconnected</div>
+            </div>
+        </div>
+
+        <div class="client-controls">
+            <button class="btn-connect" onclick="sendAction('CONNECT')">CONNECT</button>
+            <button class="btn-disconnect" onclick="sendAction('DISCONNECT')">DISCONNECT</button>
+            
+            <div class="control-group">
+                <input type="text" id="noteInput" placeholder="Enter note...">
+                <button class="btn-action" onclick="sendAction('SEND')">SEND</button>
+            </div>
+            
+            <button class="btn-action" onclick="sendAction('LIST')">LIST</button>
+            <button class="btn-action" onclick="sendAction('CLEAR')">CLEAR</button>
+        </div>
+
+        <div class="log-container" id="clientLog">
+            <div class="log-line" style="color:#666"># Interactive Client Ready.</div>
+            <div class="log-line" style="color:#666"># Try sending commands. Protocol runs over UDP.</div>
+        </div>
+    </div>
+
+    <!-- Right Panel -->
+    <div class="server-panel">
+        <div class="server-state-view">
+            <div class="state-title">Server Memory (State.connections)</div>
+            <div id="connList" class="connection-list">
+                <div style="color:#666; font-style:italic;">No active sessions</div>
+            </div>
+        </div>
+
+        <div class="anim-area">
+            <div class="node" id="clientNode">
+                <div class="node-icon">📡</div>
+                <div class="node-label">Client</div>
+            </div>
+
+            <div class="packet" id="packet">📦</div>
+
+            <div class="node" id="serverNode" style="border-color: var(--accent-state);">
+                <div class="node-icon">💾</div>
+                <div class="node-label">Server</div>
+            </div>
+        </div>
+
+        <div class="code-hint" id="codeHint">
+            Server Logic: Waiting for packet...
+        </div>
+    </div>
+</main>
+
+<script>
+    // --- Simulator Logic ---
+    
+    // Server State
+    const serverDb = {
+        // Key: "127.0.0.1:12345" -> Value: ["note 1", "note 2"]
+        connections: {}
+    };
+    const clientAddr = "127.0.0.1:5555"; // Simulated client address
+
+    // UI Updates
+    function updateServerView() {
+        const container = document.getElementById('connList');
+        container.innerHTML = '';
+
+        const keys = Object.keys(serverDb.connections);
+        if (keys.length === 0) {
+            container.innerHTML = '<div style="color:#666; font-style:italic;">No active sessions</div>';
+            return;
+        }
+
+        keys.forEach(addr => {
+            const notes = serverDb.connections[addr];
+            const div = document.createElement('div');
+            div.className = 'conn-item';
+            div.innerHTML = `
+                <div class="conn-header">
+                    <span>${addr}</span>
+                    <span style="font-size:0.7rem; background:#444; padding:2px 4px; border-radius:3px;">CONNECTED</span>
+                </div>
+                <div class="notes-list">${notes.length > 0 ? notes.join('\n') : '(empty)'}</div>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    // Client Action
+    async function sendAction(type) {
+        // Lock UI
+        toggleButtons(false);
+
+        // Get payload if needed
+        let payload = "";
+        if (type === 'SEND') {
+            const input = document.getElementById('noteInput');
+            payload = input.value.trim();
+            if (!payload) {
+                log("[CLIENT] Warn: Empty note, skipping.", "");
+                toggleButtons(true);
+                return;
+            }
+            input.value = ""; // Clear
+        }
+
+        // 1. Log Request
+        const reqStr = payload ? `${type} "${payload}"` : type;
+        log(`[REQ] Sent: ${reqStr}`, "log-req");
+
+        // 2. Animate Packet C -> S
+        showCodeHint(`Deserializing Request: ${type}`);
+        await animatePacket('clientNode', 'serverNode', '➡️');
+
+        // 3. Server Processing (State Machine Logic)
+        const response = processRequest(type, payload);
+        
+        // Update Server UI (Flash effect)
+        updateServerView();
+        
+        // 4. Animate Packet S -> C
+        await wait(500); // Processing delay
+        await animatePacket('serverNode', 'clientNode', '⬅️');
+
+        // 5. Handle Response
+        if (response.status === 'OK') {
+            log(`[RESP] OK ${response.payload || ''}`, "log-resp-ok");
+            updateClientStatus(true);
+            if(type === 'DISCONNECT') updateClientStatus(false);
+        } else {
+            log(`[RESP] ${response.status}`, "log-resp-err");
+            // If error is NOT_CONNECTED, ensure client knows
+            if(response.status === 'ERR_CONNECTED') updateClientStatus(false);
+        }
+
+        toggleButtons(true);
+    }
+
+    // Server Logic (Mirrors Python Template)
+    function processRequest(type, payload) {
+        const isConnected = serverDb.connections.hasOwnProperty(clientAddr);
+        let resp = { status: 'ERR_UNKNOWN', payload: '' };
+
+        if (type === 'CONNECT') {
+            showCodeHint("if CONNECT: state.add_connection()");
+            if (!isConnected) serverDb.connections[clientAddr] = [];
+            resp.status = 'OK';
+        }
+        else if (type === 'SEND') {
+            showCodeHint("if SEND: check connection -> add_note()");
+            if (isConnected) {
+                serverDb.connections[clientAddr].push(payload);
+                resp.status = 'OK';
+            } else {
+                resp.status = 'ERR_CONNECTED';
+            }
+        }
+        else if (type === 'LIST') {
+            showCodeHint("if LIST: check connection -> get_notes()");
+            if (isConnected) {
+                const notes = serverDb.connections[clientAddr].join(', ');
+                resp.status = 'OK';
+                resp.payload = `[${notes}]`;
+            } else {
+                resp.status = 'ERR_CONNECTED';
+            }
+        }
+        else if (type === 'CLEAR') {
+            showCodeHint("if CLEAR: check connection -> clear_notes()");
+            if (isConnected) {
+                serverDb.connections[clientAddr] = [];
+                resp.status = 'OK';
+            } else {
+                resp.status = 'ERR_CONNECTED';
+            }
+        }
+        else if (type === 'DISCONNECT') {
+            showCodeHint("if DISCONNECT: remove_connection()");
+            if (isConnected) {
+                delete serverDb.connections[clientAddr];
+                resp.status = 'OK';
+            } else {
+                resp.status = 'ERR_CONNECTED';
+            }
+        }
+
+        return resp;
+    }
+
+    // --- Helpers ---
+
+    function updateClientStatus(connected) {
+        const light = document.getElementById('statusLight');
+        const text = document.getElementById('statusText');
+        
+        if (connected) {
+            light.className = 'status-light connected';
+            text.innerText = "Session Active";
+            text.style.color = "var(--accent-resp)";
+        } else {
+            light.className = 'status-light';
+            text.innerText = "Disconnected";
+            text.style.color = "#888";
+        }
+    }
+
+    function showCodeHint(text) {
+        const box = document.getElementById('codeHint');
+        box.innerText = text;
+        box.style.borderColor = "#fff";
+        setTimeout(() => box.style.borderColor = "var(--accent-state)", 300);
+    }
+
+    function toggleButtons(enabled) {
+        document.querySelectorAll('button').forEach(b => b.disabled = !enabled);
+    }
+
+    function log(msg, cls) {
+        const div = document.createElement('div');
+        div.className = `log-line ${cls}`;
+        div.innerText = msg;
+        const c = document.getElementById('clientLog');
+        c.appendChild(div);
+        c.scrollTop = c.scrollHeight;
+    }
+
+    function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+    function animatePacket(fromId, toId, icon) {
+        return new Promise(resolve => {
+            const pkt = document.getElementById('packet');
+            const fRect = document.getElementById(fromId).getBoundingClientRect();
+            const tRect = document.getElementById(toId).getBoundingClientRect();
+            const pRect = document.querySelector('.anim-area').getBoundingClientRect();
+
+            // Calculate relative positions
+            const startX = fRect.left + fRect.width/2 - pRect.left;
+            const endX = tRect.left + tRect.width/2 - pRect.left;
+
+            pkt.innerText = icon;
+            pkt.style.display = 'flex';
+            pkt.style.left = `${startX}px`;
+            pkt.style.transition = 'none';
+
+            // Force reflow
+            void pkt.offsetWidth;
+
+            pkt.style.transition = 'left 0.6s ease-in-out';
+            pkt.style.left = `${endX}px`;
+
+            setTimeout(() => {
+                pkt.style.display = 'none';
+                resolve();
+            }, 600);
+        });
+    }
+
+</script>
+
+</body>
+</html>

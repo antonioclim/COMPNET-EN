@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UDP Anycast Simulator (IPv6)</title>
+    <style>
+        :root {
+            --bg-app: #1e1e1e;
+            --bg-panel: #252526;
+            --term-bg: #0c0c0c;
+            --wireshark-bg: #ffffff;
+            --text-main: #cccccc;
+            --text-bright: #ffffff;
+            --accent-anycast: #ffb86c; /* Orange/Gold for Anycast */
+            --accent-router: #6272a4; /* Blueish for Router */
+            --accent-server: #50fa7b; /* Green */
+            --accent-client: #8be9fd; /* Cyan */
+            --border: #44475a;
+            --font-mono: 'Consolas', 'Monaco', monospace;
+            --font-sans: 'Segoe UI', sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-app);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* --- Header --- */
+        header {
+            background: var(--bg-panel);
+            padding: 0 1.5rem;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            justify-content: space-between;
+        }
+        
+        h1 { font-size: 1.1rem; font-weight: 600; color: var(--text-bright); }
+        .badge { background: var(--accent-anycast); color: #282a36; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; margin-left: 10px; font-weight: bold; }
+
+        /* --- Main Layout --- */
+        main {
+            flex: 1;
+            display: grid;
+            grid-template-rows: 65% 35%;
+            overflow: hidden;
+        }
+
+        /* Diagram Area */
+        .diagram-container {
+            position: relative;
+            background: radial-gradient(circle at center, #2a2a2a 0%, #1e1e1e 80%);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Router Node */
+        .router-core {
+            width: 140px;
+            height: 140px;
+            border: 2px solid var(--accent-router);
+            border-radius: 50%; /* Circle */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: #282a36;
+            z-index: 5;
+            box-shadow: 0 0 20px rgba(98, 114, 164, 0.4);
+        }
+        
+        .router-label { font-size: 0.8rem; color: var(--accent-router); font-weight: bold; margin-top: 5px; }
+        .router-icon { font-size: 2.5rem; }
+
+        /* Nodes */
+        .node {
+            width: 140px;
+            height: 110px;
+            background: var(--bg-panel);
+            border: 2px solid #444;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            z-index: 10;
+            transition: all 0.3s;
+        }
+
+        .node-icon { font-size: 2rem; margin-bottom: 2px; }
+        .node-label { font-size: 0.8rem; font-weight: bold; color: #fff; }
+        .node-ip { font-size: 0.7rem; color: var(--accent-anycast); font-family: var(--font-mono); }
+        
+        /* Client */
+        #clientNode { 
+            top: 30px; left: 50%; transform: translateX(-50%); 
+            border-color: var(--accent-client); 
+        }
+
+        /* Servers Row */
+        .servers-row {
+            position: absolute;
+            bottom: 30px;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            padding: 0 50px;
+        }
+
+        .server-node { border-color: var(--accent-server); position: relative; }
+        
+        /* Metric Controls */
+        .metric-control {
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: #111;
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid #333;
+        }
+        
+        .metric-label { font-size: 0.6rem; color: #888; }
+        .metric-input { 
+            width: 30px; 
+            background: transparent; 
+            border: none; 
+            color: #fff; 
+            text-align: center; 
+            font-family: var(--font-mono); 
+            font-size: 0.7rem; 
+            border-bottom: 1px solid #555;
+        }
+
+        /* Packet Animation */
+        .packet {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            background: var(--accent-anycast);
+            border-radius: 2px; /* Square for Datagram */
+            z-index: 20;
+            box-shadow: 0 0 10px var(--accent-anycast);
+            display: none;
+            transform: rotate(45deg);
+        }
+
+        /* Connecting Lines (Simulated via SVG or CSS borders, simple version here) */
+        .link-line {
+            position: absolute;
+            background: #333;
+            z-index: 1;
+            transform-origin: 0 0;
+        }
+
+        /* Bottom Panel */
+        .bottom-panel {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            border-top: 4px solid var(--border);
+        }
+
+        .panel-col {
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .panel-header {
+            background: #252526;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-main);
+        }
+
+        /* Code View */
+        .code-view {
+            background: var(--term-bg);
+            flex: 1;
+            padding: 10px;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: #ccc;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        /* Log Panel */
+        .log-panel {
+            flex: 1;
+            background: #fff;
+            color: #333;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            padding: 10px;
+            overflow-y: auto;
+        }
+        
+        .log-line { margin-bottom: 4px; border-bottom: 1px solid #eee; padding-bottom: 2px; }
+        .log-route { color: #d35400; font-weight: bold; }
+        .log-recv { color: var(--accent-green); }
+
+        /* Footer */
+        footer {
+            background: var(--bg-panel);
+            padding: 1rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        input[type="text"] {
+            background: #111;
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 0.5rem;
+            border-radius: 4px;
+            width: 200px;
+        }
+
+        button.main-action {
+            padding: 0.6rem 1.5rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--accent-client);
+            color: #282a36;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.1s;
+        }
+        
+        button.main-action:hover { transform: scale(1.05); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Syntax Highlighting */
+        .kw { color: #ff79c6; } .fn { color: #8be9fd; } .str { color: #f1fa8c; } .cmt { color: #6272a4; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>UDP Anycast <span class="badge">IPv6: 2001:db8::1</span></h1>
+</header>
+
+<main>
+    <!-- Visual Diagram -->
+    <div class="diagram-container">
+        
+        <!-- Client -->
+        <div class="node" id="clientNode">
+            <div class="node-icon">💻</div>
+            <div class="node-label">Client</div>
+            <div class="node-ip">::AA</div>
+        </div>
+
+        <!-- Router -->
+        <div class="router-core" id="routerNode">
+            <div class="router-icon">🔀</div>
+            <div class="router-label">Router</div>
+            <div style="font-size:0.6rem; color:#888;">Selects Shortest Path</div>
+        </div>
+
+        <!-- Servers -->
+        <div class="servers-row">
+            <!-- Server 1 -->
+            <div class="node server-node" id="serv1">
+                <div class="node-icon">🖥️</div>
+                <div class="node-label">Server S1</div>
+                <div class="node-ip">2001:db8::1</div>
+                <div class="metric-control">
+                    <span class="metric-label">Latency:</span>
+                    <input type="number" class="metric-input" id="lat1" value="20" min="1" max="999" onchange="updateLinks()">
+                    <span class="metric-label">ms</span>
+                </div>
+            </div>
+            
+            <!-- Server 2 -->
+            <div class="node server-node" id="serv2">
+                <div class="node-icon">🖥️</div>
+                <div class="node-label">Server S2</div>
+                <div class="node-ip">2001:db8::1</div>
+                <div class="metric-control">
+                    <span class="metric-label">Latency:</span>
+                    <input type="number" class="metric-input" id="lat2" value="50" min="1" max="999" onchange="updateLinks()">
+                    <span class="metric-label">ms</span>
+                </div>
+            </div>
+            
+            <!-- Server 3 -->
+            <div class="node server-node" id="serv3">
+                <div class="node-icon">🖥️</div>
+                <div class="node-label">Server S3</div>
+                <div class="node-ip">2001:db8::1</div>
+                <div class="metric-control">
+                    <span class="metric-label">Latency:</span>
+                    <input type="number" class="metric-input" id="lat3" value="35" min="1" max="999" onchange="updateLinks()">
+                    <span class="metric-label">ms</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Packets -->
+        <div class="packet" id="pktMain"></div>
+    </div>
+
+    <!-- Bottom Panel -->
+    <div class="bottom-panel">
+        <div class="panel-col">
+            <div class="panel-header">Server Template Logic (Python)</div>
+            <div class="code-view" id="codeView">
+<span class="cmt"># Server implementation identifying itself</span>
+<span class="kw">import</span> socket
+
+ANYCAST_ADDR = <span class="str">"::"</span> 
+PORT = 5007
+
+sock = socket.socket(AF_INET6, SOCK_DGRAM)
+sock.bind((ANYCAST_ADDR, PORT))
+
+<span class="cmt"># Student logic: Identify instance</span>
+SERVER_ID = <span class="fn">input</span>(<span class="str">"Enter Server ID: "</span>) 
+
+<span class="kw">while</span> <span class="kw">True</span>:
+    data, addr = sock.recvfrom(1024)
+    <span class="kw">print</span>(<span class="str">f"[RECV-{SERVER_ID}] From {addr}"</span>)
+    
+    <span class="cmt"># Reply includes the ID</span>
+    reply = <span class="str">f"[{SERVER_ID}] Reply from anycast"</span>
+    sock.sendto(reply.encode(), addr)
+            </div>
+        </div>
+        <div class="panel-col">
+            <div class="panel-header">Network Logs & Routing Decisions</div>
+            <div class="log-panel" id="logPanel">
+                <div style="color:#888; font-style:italic;"># Adjust latencies and send a message...</div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer>
+    <input type="text" id="msgInput" value="Hello Anycast!">
+    <button class="main-action" id="btnSend" onclick="sendAnycast()">Send to 2001:db8::1</button>
+</footer>
+
+<script>
+    // --- Actions ---
+
+    async function sendAnycast() {
+        const input = document.getElementById('msgInput');
+        const text = input.value;
+        if(!text) return;
+
+        document.getElementById('btnSend').disabled = true;
+
+        // 1. Log Start
+        logApp(`[CLIENT] Sending "${text}" to Anycast Address [2001:db8::1]`);
+
+        // 2. Animate: Client -> Router
+        await animatePacket('clientNode', 'routerNode', 'pktMain');
+
+        // 3. Routing Decision
+        const lat1 = parseInt(document.getElementById('lat1').value) || 999;
+        const lat2 = parseInt(document.getElementById('lat2').value) || 999;
+        const lat3 = parseInt(document.getElementById('lat3').value) || 999;
+
+        const best = Math.min(lat1, lat2, lat3);
+        let targetId = 'serv1';
+        let serverName = 'S1';
+        let latency = lat1;
+
+        if (best === lat2) { targetId = 'serv2'; serverName = 'S2'; latency = lat2; }
+        if (best === lat3) { targetId = 'serv3'; serverName = 'S3'; latency = lat3; }
+
+        logApp(`[ROUTER] Routing Table Lookup: S1=${lat1}ms, S2=${lat2}ms, S3=${lat3}ms`, true);
+        logApp(`[ROUTER] Best Path Selected: <strong>${serverName}</strong> (Metric: ${latency}ms)`, true);
+
+        // 4. Animate: Router -> Best Server
+        await animatePacket('routerNode', targetId, 'pktMain');
+
+        // 5. Server Processing Delay (Simulated by latency)
+        // Visual indicator
+        const sNode = document.getElementById(targetId);
+        sNode.style.borderColor = "#fff";
+        sNode.style.boxShadow = "0 0 20px #fff";
+        
+        await wait(latency * 10); // scale up for visual effect
+        
+        sNode.style.borderColor = "var(--accent-server)";
+        sNode.style.boxShadow = "none";
+
+        logApp(`[${serverName}] Received packet. Sending Reply...`);
+
+        // 6. Reply: Server -> Router -> Client
+        // Note: In real life, reply uses Unicast IP of client, so it routes back directly.
+        await animatePacket(targetId, 'routerNode', 'pktMain');
+        await animatePacket('routerNode', 'clientNode', 'pktMain');
+
+        logApp(`[CLIENT] Received: "[${serverName}] Reply from anycast"`);
+        logApp("------------------------------------------------");
+
+        document.getElementById('btnSend').disabled = false;
+    }
+
+    // --- Logging ---
+
+    function logApp(msg, isRouting=false) {
+        const div = document.createElement('div');
+        div.className = "log-line";
+        div.innerHTML = msg;
+        
+        if (msg.startsWith('[CLIENT]')) div.style.color = "var(--accent-client)"; // Blueish
+        // Routing logs handled by class/bolding in string, but let's color code
+        if (isRouting) div.style.color = "#d35400"; // Orange
+        
+        const container = document.getElementById('logPanel');
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    // --- Animation Utils ---
+
+    function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+    function animatePacket(fromId, toId, pktId) {
+        return new Promise(resolve => {
+            const pkt = document.getElementById(pktId);
+            const container = document.querySelector('.diagram-container').getBoundingClientRect();
+            
+            const fromRect = document.getElementById(fromId).getBoundingClientRect();
+            const toRect = document.getElementById(toId).getBoundingClientRect();
+
+            const startX = fromRect.left + fromRect.width/2 - container.left;
+            const startY = fromRect.top + fromRect.height/2 - container.top;
+            const endX = toRect.left + toRect.width/2 - container.left;
+            const endY = toRect.top + toRect.height/2 - container.top;
+
+            pkt.style.display = 'block';
+            pkt.style.left = `${startX}px`;
+            pkt.style.top = `${startY}px`;
+            pkt.style.transition = 'none';
+
+            // Force reflow
+            void pkt.offsetWidth;
+
+            pkt.style.transition = 'all 0.6s ease-in-out';
+            pkt.style.left = `${endX}px`;
+            pkt.style.top = `${endY}px`;
+
+            setTimeout(() => {
+                pkt.style.display = 'none';
+                resolve();
+            }, 600);
+        });
+    }
+
+</script>
+
+</body>
+</html>

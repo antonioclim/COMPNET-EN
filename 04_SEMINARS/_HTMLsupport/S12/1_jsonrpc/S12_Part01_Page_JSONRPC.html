@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RPC & JSON-RPC Interactive Lab</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Fira+Code:wght@400;500&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; /* Slate 900 */
+            color: #e2e8f0;
+        }
+
+        .code-font {
+            font-family: 'Fira Code', monospace;
+        }
+
+        /* Packet Animation Classes */
+        .packet {
+            position: absolute;
+            width: 32px;
+            height: 32px;
+            background-color: #3b82f6; /* blue-500 */
+            border-radius: 6px;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.6);
+            transition: all 0.1s linear;
+            opacity: 0;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 10px;
+            border: 1px solid #60a5fa;
+        }
+
+        .packet.sending {
+            background-color: #2563eb;
+        }
+
+        .packet.receiving {
+            background-color: #059669; /* emerald-600 */
+            border-color: #34d399;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b; 
+        }
+
+        .tab-active {
+            border-bottom: 2px solid #3b82f6;
+            color: #60a5fa;
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Syntax Highlighting */
+        .key { color: #9cdcfe; }
+        .string { color: #ce9178; }
+        .number { color: #b5cea8; }
+        .boolean { color: #569cd6; }
+        .comment { color: #6a9955; font-style: italic; }
+
+        /* Lifecycle Steps */
+        .step-card {
+            transition: all 0.3s ease;
+            opacity: 0.4;
+            transform: scale(0.98);
+            border-left: 3px solid transparent;
+        }
+        .step-card.active {
+            opacity: 1;
+            transform: scale(1);
+            background-color: #1e293b;
+            border-left: 3px solid #3b82f6;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        /* Network Pipe Animation */
+        .network-pipe {
+            background: repeating-linear-gradient(
+                90deg,
+                #1e293b,
+                #1e293b 20px,
+                #334155 20px,
+                #334155 40px
+            );
+            background-size: 200% 100%;
+        }
+        .network-active {
+            animation: moveStripes 1s linear infinite;
+        }
+        @keyframes moveStripes {
+            from { background-position: 0 0; }
+            to { background-position: -40px 0; }
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden text-sm">
+
+    <!-- Header -->
+    <header class="bg-slate-900 border-b border-slate-700 p-4 shadow-lg z-20">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-600 p-2 rounded-lg shadow-lg shadow-blue-500/30">
+                    <i class="fas fa-network-wired text-white text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-slate-100 tracking-tight">RPC & JSON-RPC <span class="text-blue-400">Interactive Lab</span></h1>
+                    <p class="text-xs text-slate-400">Seminar 12 – Distributed Systems Concepts</p>
+                </div>
+            </div>
+            <nav class="flex gap-1 bg-slate-800 p-1 rounded-lg">
+                <button onclick="switchTab('theory')" id="btn-theory" class="px-4 py-2 rounded-md transition text-slate-400 hover:text-white tab-active">
+                    <i class="fas fa-book mr-2"></i>Concepts
+                </button>
+                <button onclick="switchTab('simulation')" id="btn-simulation" class="px-4 py-2 rounded-md transition text-slate-400 hover:text-white">
+                    <i class="fas fa-play-circle mr-2"></i>Live Simulation
+                </button>
+                <button onclick="switchTab('tasks')" id="btn-tasks" class="px-4 py-2 rounded-md transition text-slate-400 hover:text-white">
+                    <i class="fas fa-tasks mr-2"></i>Tasks
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-hidden relative bg-slate-900">
+
+        <!-- TAB 1: THEORY -->
+        <div id="tab-theory" class="h-full overflow-y-auto p-8 fade-in scroll-smooth">
+            <div class="max-w-5xl mx-auto space-y-8 pb-12">
+                
+                <!-- Hero Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                    <div class="bg-slate-800 rounded-xl border border-slate-700 p-6 shadow-xl">
+                        <h2 class="text-2xl font-bold text-white mb-4 flex items-center">
+                            <i class="fas fa-lightbulb text-yellow-400 mr-3"></i> What is RPC?
+                        </h2>
+                        <p class="text-slate-300 mb-6 leading-relaxed">
+                            <strong>Remote Procedure Call (RPC)</strong> is a protocol that one program can use to request a service from a program located in another computer on a network without having to understand the network's details. It makes a remote call look like a local call.
+                        </p>
+                        
+                        <div class="space-y-4">
+                            <div class="bg-slate-900/50 rounded-lg p-4 border border-slate-700">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 class="font-semibold text-green-400 text-xs uppercase tracking-wider">Local Call</h3>
+                                    <span class="text-xs text-slate-500">Same Memory Space</span>
+                                </div>
+                                <code class="block font-mono text-slate-200 bg-black/30 p-2 rounded border-l-2 border-green-500">
+                                    result = add(1, 2)
+                                </code>
+                            </div>
+                            
+                            <div class="bg-slate-900/50 rounded-lg p-4 border border-slate-700 relative overflow-hidden">
+                                <div class="absolute right-0 top-0 p-4 opacity-10">
+                                    <i class="fas fa-globe text-6xl"></i>
+                                </div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 class="font-semibold text-blue-400 text-xs uppercase tracking-wider">Remote Call (RPC)</h3>
+                                    <span class="text-xs text-slate-500">Over Network</span>
+                                </div>
+                                <code class="block font-mono text-slate-200 bg-black/30 p-2 rounded border-l-2 border-blue-500">
+                                    result = server.Add(AddRequest(1, 2))
+                                </code>
+                                <p class="text-xs text-slate-400 mt-2 italic">
+                                    *The code looks similar, but the "AddRequest" is serialized and sent over the wire.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-800 rounded-xl border border-slate-700 p-6 shadow-xl">
+                        <h2 class="text-2xl font-bold text-white mb-4">RPC vs REST</h2>
+                        <div class="overflow-hidden rounded-lg border border-slate-600">
+                            <table class="w-full text-left text-sm text-slate-300">
+                                <thead class="bg-slate-700 text-slate-100 uppercase text-xs">
+                                    <tr>
+                                        <th class="px-4 py-3">Feature</th>
+                                        <th class="px-4 py-3 text-blue-400">RPC (gRPC/JSON-RPC)</th>
+                                        <th class="px-4 py-3 text-green-400">REST</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-600 bg-slate-800/50">
+                                    <tr>
+                                        <td class="px-4 py-3 font-medium text-slate-400">Philosophy</td>
+                                        <td class="px-4 py-3">Action-oriented (Verbs)</td>
+                                        <td class="px-4 py-3">Resource-oriented (Nouns)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-3 font-medium text-slate-400">Example</td>
+                                        <td class="px-4 py-3 code-font text-xs">getUser(id)</td>
+                                        <td class="px-4 py-3 code-font text-xs">GET /users/:id</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-3 font-medium text-slate-400">Contract</td>
+                                        <td class="px-4 py-3">Strict (e.g., .proto)</td>
+                                        <td class="px-4 py-3">Flexible (OpenAPI)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-3 font-medium text-slate-400">Format</td>
+                                        <td class="px-4 py-3">Binary (Protobuf) or JSON</td>
+                                        <td class="px-4 py-3">Typically JSON/XML</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-4 p-4 bg-blue-900/20 border border-blue-800 rounded text-xs text-blue-200">
+                            <strong class="block mb-1">When to use RPC?</strong>
+                            Microservices, internal APIs, high performance needs, or when you need streaming.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Protobuf Section -->
+                <div class="bg-slate-800 rounded-xl border border-slate-700 p-6 shadow-xl">
+                    <h2 class="text-xl font-bold text-white mb-4 border-b border-slate-700 pb-2">The Role of Protocol Buffers (gRPC)</h2>
+                    <div class="flex flex-col md:flex-row gap-6">
+                        <div class="flex-1 text-slate-300 space-y-2">
+                            <p><strong>Definition:</strong> Protobuf is Google's language-neutral, platform-neutral mechanism for serializing structured data.</p>
+                            <ul class="list-disc pl-5 space-y-1 text-slate-400 text-sm">
+                                <li><strong>Interface Definition Language (IDL):</strong> Defines the service and messages in a <code>.proto</code> file.</li>
+                                <li><strong>Code Generator:</strong> Generates client and server code (stubs) in Python, Java, Go, etc.</li>
+                                <li><strong>Binary Format:</strong> Much smaller and faster than JSON.</li>
+                            </ul>
+                        </div>
+                        <div class="flex-1 bg-[#1e1e1e] p-4 rounded-lg border border-slate-600 shadow-inner font-mono text-sm overflow-x-auto">
+                            <div class="flex justify-between text-xs text-slate-500 mb-2">
+                                <span>service.proto</span>
+                                <span>IDL Example</span>
+                            </div>
+<pre><span class="text-purple-400">syntax</span> = <span class="string">"proto3"</span>;
+
+<span class="text-blue-400">message</span> <span class="text-yellow-400">AddRequest</span> {
+  <span class="text-blue-400">int32</span> a = <span class="number">1</span>;
+  <span class="text-blue-400">int32</span> b = <span class="number">2</span>;
+}
+
+<span class="text-blue-400">message</span> <span class="text-yellow-400">AddResponse</span> {
+  <span class="text-blue-400">int32</span> result = <span class="number">1</span>;
+}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: SIMULATION -->
+        <div id="tab-simulation" class="h-full hidden flex flex-col lg:flex-row relative bg-slate-900">
+            
+            <!-- Packet Animation Element -->
+            <div id="network-packet" class="packet">
+                <i class="fas fa-file-code mr-1"></i> <span class="font-mono text-[9px]">JSON</span>
+            </div>
+
+            <!-- Left Panel: The Environment -->
+            <div class="flex-1 p-4 flex flex-col gap-4 relative overflow-y-auto">
+                
+                <!-- Client Area -->
+                <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 relative group transition-colors duration-300" id="client-area">
+                    <div class="absolute -top-3 left-4 bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-lg">
+                        <i class="fas fa-laptop-code mr-1"></i> Client Application (Python)
+                    </div>
+                    
+                    <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Input Control -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-2 uppercase">1. User Input (Method Call)</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="rpc-input" value="10 * 5 - 3" 
+                                    class="flex-1 bg-slate-900 border border-slate-600 text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none font-mono placeholder-slate-600"
+                                    placeholder="e.g. 2 + 2">
+                                <button onclick="startSimulation()" id="btn-send" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg font-medium transition shadow-lg shadow-blue-900/50">
+                                    <i class="fas fa-play mr-1"></i> Run RPC
+                                </button>
+                            </div>
+                            <div class="mt-2 text-xs text-slate-500 font-mono">
+                                client.rpc_call("evaluate", ["<span id="input-mirror">10 * 5 - 3</span>"])
+                            </div>
+                        </div>
+
+                        <!-- Step 1: Marshaling -->
+                        <div id="step-marshal" class="step-card p-3 rounded bg-slate-900/50 border border-slate-700">
+                            <div class="flex justify-between items-center mb-1">
+                                <h4 class="text-xs font-bold text-yellow-500 uppercase"><i class="fas fa-box-open mr-1"></i> Client Stub (Marshaling)</h4>
+                                <span class="text-[10px] bg-slate-700 px-1 rounded text-slate-300">Serialization</span>
+                            </div>
+                            <p class="text-[10px] text-slate-400 mb-2">Packages method & params into a standard format.</p>
+                            <pre class="text-[10px] text-green-400 font-mono overflow-x-auto whitespace-pre bg-black/40 p-2 rounded" id="marshal-preview">// Waiting for input...</pre>
+                        </div>
+                    </div>
+
+                    <!-- Port -->
+                    <div class="absolute top-1/2 -right-1 w-2 h-2 bg-slate-500 rounded-full" id="client-port"></div>
+                </div>
+
+                <!-- Network Area -->
+                <div class="flex-none h-24 flex items-center justify-center relative">
+                    <!-- The Pipe -->
+                    <div class="h-2 w-full network-pipe rounded relative overflow-hidden opacity-30" id="network-pipe"></div>
+                    
+                    <!-- Network Label -->
+                    <div class="absolute bg-slate-900 px-4 py-1 rounded-full text-xs font-mono text-slate-500 border border-slate-700 shadow-sm z-10">
+                        <i class="fas fa-globe mr-2"></i>Internet (HTTP POST)
+                    </div>
+
+                    <!-- Step 2 & 4 Visualization (Hidden by default) -->
+                    <div id="network-status" class="absolute top-14 text-xs font-mono text-blue-400 opacity-0 transition-opacity">
+                        Transmitting...
+                    </div>
+                </div>
+
+                <!-- Server Area -->
+                <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 relative transition-colors duration-300" id="server-area">
+                    <div class="absolute -top-3 right-4 bg-purple-600 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-lg">
+                        Server (api.mathjs.org) <i class="fas fa-server ml-1"></i>
+                    </div>
+
+                    <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+                         <!-- Step 3: Unmarshaling -->
+                         <div id="step-unmarshal" class="step-card p-3 rounded bg-slate-900/50 border border-slate-700">
+                            <div class="flex justify-between items-center mb-1">
+                                <h4 class="text-xs font-bold text-purple-400 uppercase"><i class="fas fa-box mr-1"></i> Server Skeleton</h4>
+                                <span class="text-[10px] bg-slate-700 px-1 rounded text-slate-300">Unmarshaling</span>
+                            </div>
+                            <p class="text-[10px] text-slate-400 mb-2">Decodes request, finds procedure.</p>
+                            <div class="font-mono text-[10px] space-y-1 bg-black/40 p-2 rounded">
+                                <div class="text-slate-300">Method: <span class="text-yellow-400" id="srv-method">?</span></div>
+                                <div class="text-slate-300">Params: <span class="text-blue-400" id="srv-params">?</span></div>
+                            </div>
+                        </div>
+
+                        <!-- Step 4: Execution -->
+                        <div id="step-execute" class="step-card p-3 rounded bg-slate-900/50 border border-slate-700">
+                            <div class="flex justify-between items-center mb-1">
+                                <h4 class="text-xs font-bold text-green-500 uppercase"><i class="fas fa-microchip mr-1"></i> Execution</h4>
+                                <span class="text-[10px] bg-slate-700 px-1 rounded text-slate-300">Logic</span>
+                            </div>
+                            <p class="text-[10px] text-slate-400 mb-2">Runs the actual function logic.</p>
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-cog text-slate-600" id="gear-icon"></i>
+                                <span class="font-mono text-lg font-bold text-white" id="srv-result">Waiting...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Port -->
+                    <div class="absolute top-1/2 -left-1 w-2 h-2 bg-slate-500 rounded-full" id="server-port"></div>
+                </div>
+
+            </div>
+
+            <!-- Right Panel: Terminal / Logs -->
+            <div class="w-full lg:w-[400px] bg-[#0d1117] text-slate-300 font-mono text-xs border-l border-slate-700 flex flex-col shadow-2xl z-30">
+                <div class="bg-slate-800 px-4 py-3 border-b border-slate-700 flex justify-between items-center">
+                    <span class="font-bold text-slate-200"><i class="fas fa-terminal mr-2 text-slate-400"></i>Client Terminal</span>
+                    <div class="flex gap-2">
+                        <span class="w-3 h-3 rounded-full bg-red-500/20 border border-red-500"></span>
+                        <span class="w-3 h-3 rounded-full bg-yellow-500/20 border border-yellow-500"></span>
+                        <span class="w-3 h-3 rounded-full bg-green-500/20 border border-green-500"></span>
+                    </div>
+                </div>
+                
+                <div id="console-logs" class="flex-1 overflow-y-auto p-4 space-y-3 font-fira">
+                    <div class="text-slate-500 italic"># Python JSON-RPC Client initiated...</div>
+                    <div class="text-slate-500 italic"># Ready for user input.</div>
+                </div>
+                
+                <div class="bg-slate-800 p-3 border-t border-slate-700 flex justify-between items-center">
+                    <span class="text-[10px] text-slate-500">Output formatted for Seminar Task 2</span>
+                    <button onclick="clearLogs()" class="text-[10px] hover:text-white text-slate-400 transition uppercase font-bold">Clear</button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- TAB 3: TASKS -->
+        <div id="tab-tasks" class="h-full hidden overflow-y-auto p-8 fade-in">
+            <div class="max-w-4xl mx-auto bg-slate-800 rounded-xl border border-slate-700 p-8 shadow-xl">
+                <h2 class="text-2xl font-bold text-white mb-2">Seminar Tasks Checklist</h2>
+                <p class="text-slate-400 mb-8 border-b border-slate-700 pb-4">Follow these instructions to complete the lab requirements.</p>
+                
+                <div class="space-y-8">
+                    <!-- Stage 1 Tasks -->
+                    <div class="bg-slate-900/50 p-6 rounded-lg border border-slate-700 hover:border-blue-500 transition">
+                        <h3 class="text-lg font-bold text-blue-400 mb-3">Stage 1: RPC Concepts</h3>
+                        <p class="text-sm text-slate-400 mb-4">Create a file named <code class="bg-black px-1 rounded text-yellow-300">stage1_rpc_intro_answers.txt</code>.</p>
+                        <ul class="space-y-3">
+                            <li class="flex items-start gap-3">
+                                <input type="checkbox" class="mt-1 w-4 h-4 rounded border-slate-600 bg-slate-800 text-blue-600 focus:ring-blue-500">
+                                <span class="text-slate-300">List <strong>3 differences</strong> between RPC and REST (use the table in Concepts tab).</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <input type="checkbox" class="mt-1 w-4 h-4 rounded border-slate-600 bg-slate-800 text-blue-600 focus:ring-blue-500">
+                                <span class="text-slate-300">Write <strong>2 advantages</strong> and <strong>2 disadvantages</strong> of RPC.</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <input type="checkbox" class="mt-1 w-4 h-4 rounded border-slate-600 bg-slate-800 text-blue-600 focus:ring-blue-500">
+                                <span class="text-slate-300">Explain the role of <strong>Protocol Buffers</strong> in gRPC (2-3 lines).</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Stage 2 Tasks -->
+                    <div class="bg-slate-900/50 p-6 rounded-lg border border-slate-700 hover:border-purple-500 transition">
+                        <h3 class="text-lg font-bold text-purple-400 mb-3">Stage 2: JSON-RPC Client</h3>
+                        <p class="text-sm text-slate-400 mb-4">
+                            Create a file named <code class="bg-black px-1 rounded text-yellow-300">stage2_jsonrpc_output.txt</code> and use the simulation log output.
+                        </p>
+                        
+                        <div class="flex gap-4 mb-4">
+                            <button onclick="switchTab('simulation')" class="text-xs bg-purple-600 hover:bg-purple-500 text-white px-3 py-1 rounded transition">
+                                Go to Simulation
+                            </button>
+                        </div>
+
+                        <ul class="space-y-3">
+                            <li class="flex items-start gap-3">
+                                <input type="checkbox" class="mt-1 w-4 h-4 rounded border-slate-600 bg-slate-800 text-purple-600 focus:ring-purple-500">
+                                <span class="text-slate-300"><strong>Action 1:</strong> Enter a complex math expression (e.g., <code>10*5 - 3</code>) in the input field.</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <input type="checkbox" class="mt-1 w-4 h-4 rounded border-slate-600 bg-slate-800 text-purple-600 focus:ring-purple-500">
+                                <span class="text-slate-300"><strong>Action 2:</strong> Click "Run RPC". Wait for the logs to populate.</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <input type="checkbox" class="mt-1 w-4 h-4 rounded border-slate-600 bg-slate-800 text-purple-600 focus:ring-purple-500">
+                                <span class="text-slate-300"><strong>Action 3:</strong> Copy the Terminal Log content (User Input, JSON Request, Server Response) into your text file.</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // --- Navigation Logic ---
+        function switchTab(tabId) {
+            ['theory', 'simulation', 'tasks'].forEach(t => {
+                document.getElementById(`tab-${t}`).classList.add('hidden');
+                const btn = document.getElementById(`btn-${t}`);
+                btn.classList.remove('tab-active', 'text-white', 'bg-slate-800');
+                btn.classList.add('text-slate-400');
+            });
+
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`btn-${tabId}`);
+            activeBtn.classList.add('tab-active', 'text-white', 'bg-slate-800');
+            activeBtn.classList.remove('text-slate-400');
+        }
+
+        function clearLogs() {
+            document.getElementById('console-logs').innerHTML = '<div class="text-slate-500 italic"># Terminal cleared. Ready...</div>';
+        }
+
+        // --- Simulator Logic ---
+        const clientPort = document.getElementById('client-port');
+        const serverPort = document.getElementById('server-port');
+        const packet = document.getElementById('network-packet');
+        const logContainer = document.getElementById('console-logs');
+        const pipe = document.getElementById('network-pipe');
+
+        let isProcessing = false;
+
+        async function startSimulation() {
+            if (isProcessing) return;
+            isProcessing = true;
+
+            const inputVal = document.getElementById('rpc-input').value;
+            const btn = document.getElementById('btn-send');
+            
+            // UI Reset
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+            resetSteps();
+            
+            // --- Step 0: User Input ---
+            document.getElementById('input-mirror').textContent = inputVal;
+            addLogEntry("USER_INPUT", `Reading from stdin: "${inputVal}"`);
+            await wait(500);
+
+            // --- Step 1: Client Stub (Marshaling) ---
+            highlightStep('step-marshal');
+            
+            const requestPayload = {
+                "jsonrpc": "2.0",
+                "id": Math.floor(Math.random() * 1000),
+                "method": "evaluate",
+                "params": [inputVal]
+            };
+            const jsonReq = JSON.stringify(requestPayload, null, 2);
+            document.getElementById('marshal-preview').innerHTML = syntaxHighlight(jsonReq);
+            
+            addLogEntry("CLIENT_STUB", "Marshaling method call to JSON...");
+            await wait(1000);
+            
+            // --- Step 2: Network Transmission (Request) ---
+            highlightStep('step-marshal', false); // Dim previous
+            addLogEntry("NETWORK", "Sending HTTP POST request...");
+            pipe.classList.add('opacity-100', 'network-active');
+            
+            await animatePacket(clientPort, serverPort, 'sending');
+            
+            pipe.classList.remove('opacity-100', 'network-active');
+            pipe.classList.add('opacity-30');
+
+            // --- Step 3: Server Stub (Unmarshaling) ---
+            highlightStep('step-unmarshal');
+            document.getElementById('srv-method').textContent = requestPayload.method;
+            document.getElementById('srv-params').textContent = JSON.stringify(requestPayload.params);
+            
+            addLogEntry("SERVER_LOG", `Received request ID: ${requestPayload.id}`);
+            await wait(800);
+
+            // --- Step 4: Execution ---
+            highlightStep('step-unmarshal', false);
+            highlightStep('step-execute');
+            document.getElementById('gear-icon').classList.add('fa-spin');
+            
+            addLogEntry("SERVER_LOG", "Executing method 'evaluate'...");
+            await wait(1200); // Simulate calculation time
+
+            // Calculate
+            let result;
+            let error = null;
+            try {
+                if (/^[0-9+\-*/().\s]+$/.test(inputVal)) {
+                    result = new Function('return ' + inputVal)();
+                    // Limit decimals
+                    if(typeof result === 'number' && !Number.isInteger(result)) result = parseFloat(result.toFixed(4));
+                } else {
+                    throw new Error("Invalid characters");
+                }
+            } catch (e) {
+                error = e.message;
+                result = null;
+            }
+
+            document.getElementById('gear-icon').classList.remove('fa-spin');
+            const resultText = error ? "Error" : result;
+            document.getElementById('srv-result').textContent = resultText;
+            document.getElementById('srv-result').className = error ? "font-mono text-lg font-bold text-red-500" : "font-mono text-lg font-bold text-green-400";
+
+            // Prepare Response
+            const responsePayload = {
+                "jsonrpc": "2.0",
+                "id": requestPayload.id
+            };
+            if (error) {
+                responsePayload.error = { "code": -32602, "message": error };
+            } else {
+                responsePayload.result = result;
+            }
+            const jsonRes = JSON.stringify(responsePayload, null, 2);
+
+            await wait(500);
+
+            // --- Step 5: Network Transmission (Response) ---
+            highlightStep('step-execute', false);
+            addLogEntry("NETWORK", "Sending HTTP 200 OK response...");
+            
+            pipe.classList.add('opacity-100', 'network-active');
+            await animatePacket(serverPort, clientPort, 'receiving');
+            pipe.classList.remove('opacity-100', 'network-active');
+            pipe.classList.add('opacity-30');
+
+            // --- Step 6: Client Receive ---
+            addLogEntry("CLIENT_STUB", "Unmarshaling response...");
+            addLogEntry("OUTPUT", `Result: ${error ? 'Error: ' + error : result}`);
+            
+            // Detailed log for the task
+            const fullLog = `--- RPC TRANSACTION LOG ---\nRequest:\n${jsonReq}\n\nResponse:\n${jsonRes}`;
+            addLogEntry("DEBUG_DUMP", fullLog);
+
+            // Cleanup
+            btn.disabled = false;
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            isProcessing = false;
+        }
+
+        // --- Helper Functions ---
+
+        function highlightStep(id, isActive = true) {
+            const el = document.getElementById(id);
+            if (isActive) {
+                el.classList.add('active');
+            } else {
+                el.classList.remove('active');
+            }
+        }
+
+        function resetSteps() {
+            document.querySelectorAll('.step-card').forEach(el => el.classList.remove('active'));
+            document.getElementById('marshal-preview').textContent = '// Waiting...';
+            document.getElementById('srv-method').textContent = '?';
+            document.getElementById('srv-params').textContent = '?';
+            document.getElementById('srv-result').textContent = 'Waiting...';
+            document.getElementById('srv-result').className = "font-mono text-lg font-bold text-white";
+        }
+
+        function wait(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function animatePacket(startElem, endElem, type) {
+            return new Promise(resolve => {
+                const startRect = startElem.getBoundingClientRect();
+                const endRect = endElem.getBoundingClientRect();
+                const containerRect = document.querySelector('#tab-simulation').getBoundingClientRect(); // Relative to tab
+
+                // Offset calculation to handle scrolling or relative positioning
+                const scrollLeft = document.querySelector('main').scrollLeft;
+                const scrollTop = document.querySelector('main').scrollTop;
+
+                packet.style.left = (startRect.left - containerRect.left) + 'px';
+                packet.style.top = (startRect.top - containerRect.top) + 'px';
+                packet.className = `packet ${type}`; 
+                packet.style.opacity = '1';
+
+                // Force reflow
+                void packet.offsetWidth;
+
+                // Move
+                packet.style.left = (endRect.left - containerRect.left) + 'px';
+                packet.style.top = (endRect.top - containerRect.top) + 'px';
+
+                setTimeout(() => {
+                    packet.style.opacity = '0';
+                    resolve();
+                }, 1000); 
+            });
+        }
+
+        function addLogEntry(type, content) {
+            const entry = document.createElement('div');
+            entry.className = "mb-3 font-mono text-xs animate-pulse-once";
+            
+            let colorClass = "text-slate-300";
+            if (type === "USER_INPUT") colorClass = "text-yellow-400";
+            if (type === "CLIENT_STUB") colorClass = "text-blue-400";
+            if (type === "SERVER_LOG") colorClass = "text-purple-400";
+            if (type === "ERROR") colorClass = "text-red-400";
+            if (type === "DEBUG_DUMP") colorClass = "text-slate-500 text-[10px]";
+
+            const timestamp = new Date().toLocaleTimeString('en-US', {hour12: false, hour: '2-digit', minute:'2-digit', second:'2-digit'});
+
+            entry.innerHTML = `
+                <div class="flex gap-2">
+                    <span class="text-slate-600">[${timestamp}]</span>
+                    <span class="font-bold ${colorClass}">${type}</span>
+                </div>
+                <div class="pl-16 text-slate-300 whitespace-pre-wrap">${content}</div>
+            `;
+            logContainer.appendChild(entry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function syntaxHighlight(json) {
+            json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                var cls = 'number';
+                if (/^"/.test(match)) {
+                    if (/:$/.test(match)) {
+                        cls = 'key';
+                    } else {
+                        cls = 'string';
+                    }
+                } else if (/true|false/.test(match)) {
+                    cls = 'boolean';
+                } else if (/null/.test(match)) {
+                    cls = 'comment';
+                }
+                return '<span class="' + cls + '">' + match + '</span>';
+            });
+        }
+
+        window.onload = function() {
+           // Init
+        };
+
+    </script>
+</body>
+</html>

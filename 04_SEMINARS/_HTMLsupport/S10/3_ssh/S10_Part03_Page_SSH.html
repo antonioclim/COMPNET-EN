@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSH with Paramiko Simulator</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Vue.js 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- Highlight.js -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/python.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;800&display=swap');
+
+        body { font-family: 'Inter', sans-serif; }
+        code, pre { font-family: 'JetBrains Mono', monospace; }
+
+        /* Animations */
+        @keyframes flow-right {
+            0% { left: 10%; opacity: 0; transform: scale(0.8); }
+            10% { opacity: 1; transform: scale(1); }
+            90% { opacity: 1; transform: scale(1); }
+            100% { left: 90%; opacity: 0; transform: scale(0.8); }
+        }
+        @keyframes flow-left {
+            0% { left: 90%; opacity: 0; transform: scale(0.8); }
+            10% { opacity: 1; transform: scale(1); }
+            90% { opacity: 1; transform: scale(1); }
+            100% { left: 10%; opacity: 0; transform: scale(0.8); }
+        }
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.8); }
+        }
+        @keyframes tunnel-flow {
+            0% { background-position: 0 0; }
+            100% { background-position: 20px 0; }
+        }
+
+        .packet-right { animation: flow-right 1.5s linear infinite; }
+        .packet-left { animation: flow-left 1.5s linear infinite; }
+        
+        .tunnel-active {
+            background-image: linear-gradient(90deg, #1f2937 50%, #111827 50%);
+            background-size: 20px 100%;
+            animation: tunnel-flow 1s linear infinite;
+        }
+
+        .encrypted-glow {
+            box-shadow: 0 0 15px #10b981;
+            border-color: #10b981;
+        }
+
+        .terminal-scroll::-webkit-scrollbar { width: 6px; }
+        .terminal-scroll::-webkit-scrollbar-track { background: #1f2937; }
+        .terminal-scroll::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 3px; }
+
+        .file-enter-active, .file-leave-active { transition: all 0.5s ease; }
+        .file-enter-from { opacity: 0; transform: translateY(10px); }
+        .file-leave-to { opacity: 0; transform: scale(0.9); }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 h-screen flex flex-col overflow-hidden selection:bg-blue-500 selection:text-white">
+
+    <div id="app" class="flex flex-col h-full">
+
+        <!-- Navigation / Control Bar -->
+        <header class="bg-gray-800 border-b border-gray-700 p-3 shadow-xl z-20">
+            <div class="max-w-screen-2xl mx-auto flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="bg-blue-600 p-2 rounded-lg shadow-lg shadow-blue-500/20">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-100 tracking-tight">Paramiko SSH Simulator</h1>
+                        <p class="text-xs text-gray-400 font-medium">Educational visualization of Docker, SSH Protocol, and Python Automation</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4 bg-gray-900/50 p-1.5 rounded-lg border border-gray-700">
+                    <div class="flex flex-col items-end px-2">
+                        <span class="text-[10px] uppercase font-bold text-gray-500 tracking-wider">Current Status</span>
+                        <span class="text-sm font-bold" :class="statusColor">{{ statusText }}</span>
+                    </div>
+                    <div class="h-8 w-px bg-gray-700"></div>
+                    <div class="flex gap-2">
+                        <button @click="resetSimulation" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-md text-sm font-medium transition-colors border border-gray-600 hover:border-gray-500">
+                            Reset
+                        </button>
+                        <button v-if="step === 0" @click="startInfrastructure" class="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-md text-sm font-bold shadow-lg shadow-blue-900/50 transition-all hover:scale-105">
+                            Start Infrastructure
+                        </button>
+                        <button v-else-if="step === 1" @click="runSimulation" class="px-6 py-2 bg-green-600 hover:bg-green-500 text-white rounded-md text-sm font-bold shadow-lg shadow-green-900/50 transition-all hover:scale-105 flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            Run Python Script
+                        </button>
+                        <div v-else class="px-6 py-2 bg-gray-700 text-gray-400 rounded-md text-sm font-bold cursor-wait flex items-center gap-2">
+                             <svg v-if="!simulationComplete" class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                             {{ simulationComplete ? 'Execution Complete' : 'Processing...' }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="flex-1 flex overflow-hidden">
+            
+            <!-- Left Panel: Visual Simulation -->
+            <div class="flex-1 bg-[#0d1117] p-8 flex flex-col relative">
+                
+                <!-- Background Grid -->
+                <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none"></div>
+                <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: radial-gradient(#3b82f6 1px, transparent 1px); background-size: 32px 32px;"></div>
+
+                <!-- Docker Network Label -->
+                <div class="absolute top-6 left-6 border border-dashed border-gray-700 rounded px-3 py-1 text-xs font-mono text-gray-500 bg-gray-900/80">
+                    NETWORK: docker-compose-net (172.20.0.0/16)
+                </div>
+
+                <!-- Simulation Stage -->
+                <div class="flex-1 flex items-center justify-center gap-20 relative z-10">
+                    
+                    <!-- CLIENT NODE -->
+                    <div class="relative group">
+                        <!-- Container IP -->
+                        <div class="absolute -top-8 left-0 right-0 text-center transition-opacity duration-500" :class="step >= 1 ? 'opacity-100' : 'opacity-0'">
+                            <span class="bg-gray-800 text-blue-400 px-2 py-0.5 rounded text-[10px] font-mono border border-blue-900 shadow-lg">172.20.0.2</span>
+                        </div>
+                        
+                        <div class="w-80 bg-gray-800 rounded-xl border border-gray-700 shadow-2xl overflow-hidden transition-all duration-700 transform"
+                             :class="step >= 1 ? 'translate-y-0 opacity-100 border-blue-500/50 shadow-blue-900/20' : 'translate-y-10 opacity-30 blur-sm'">
+                            
+                            <!-- Header -->
+                            <div class="bg-gray-900/50 p-3 border-b border-gray-700 flex justify-between items-center">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-3 h-3 rounded-full bg-red-500" :class="{'bg-green-500': step >= 1}"></div>
+                                    <span class="text-sm font-bold text-gray-200">ssh-client</span>
+                                </div>
+                                <span class="text-[10px] text-gray-500 font-mono">Python 3.10</span>
+                            </div>
+
+                            <!-- Terminal Area -->
+                            <div class="p-4 bg-black/50 h-48 overflow-y-auto terminal-scroll font-mono text-[11px] leading-relaxed">
+                                <div v-for="(log, i) in clientLogs" :key="i" class="mb-1 break-words">
+                                    <span v-if="log.type === 'cmd'" class="text-blue-400 font-bold">root@client:~# {{ log.msg }}</span>
+                                    <span v-else-if="log.type === 'success'" class="text-green-400">✔ {{ log.msg }}</span>
+                                    <span v-else-if="log.type === 'error'" class="text-red-400">✖ {{ log.msg }}</span>
+                                    <span v-else-if="log.type === 'debug'" class="text-gray-500 italic">{{ log.msg }}</span>
+                                    <span v-else class="text-gray-300">{{ log.msg }}</span>
+                                </div>
+                                <div v-if="step > 1 && !simulationComplete" class="animate-pulse text-blue-400">_</div>
+                            </div>
+
+                            <!-- File System -->
+                            <div class="bg-gray-900 border-t border-gray-700 p-3">
+                                <div class="text-[10px] text-gray-500 uppercase font-bold mb-2 flex justify-between">
+                                    <span>Local Files (/app)</span>
+                                </div>
+                                <div class="flex gap-2 overflow-x-auto pb-1">
+                                    <transition-group name="file">
+                                        <div v-for="file in clientFiles" :key="file.name" class="flex-shrink-0 flex flex-col items-center bg-gray-800 p-2 rounded border border-gray-600 w-16 group/file hover:bg-gray-700 transition-colors">
+                                            <span class="text-2xl mb-1">{{ file.icon }}</span>
+                                            <span class="text-[9px] text-gray-300 truncate w-full text-center">{{ file.shortName }}</span>
+                                        </div>
+                                    </transition-group>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CONNECTION PIPE -->
+                    <div class="flex-1 max-w-xs relative h-16 flex items-center">
+                        <!-- The Wire -->
+                        <div class="w-full h-1 bg-gray-700 rounded relative overflow-hidden">
+                            <div class="absolute inset-0 transition-opacity duration-500" :class="isEncrypted ? 'opacity-100 tunnel-active' : 'opacity-0'"></div>
+                        </div>
+
+                        <!-- Labels -->
+                        <div class="absolute -top-6 w-full text-center">
+                            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/40 border border-gray-700 backdrop-blur-md text-[10px] font-mono transition-colors duration-300" 
+                                 :class="isEncrypted ? 'text-green-400 border-green-500/30' : 'text-gray-400'">
+                                <svg v-if="isEncrypted" class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                                <svg v-else class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"></path></svg>
+                                {{ connectionLabel }}
+                            </div>
+                        </div>
+
+                        <!-- Packets -->
+                        <div v-if="packet" class="absolute left-0 right-0 top-1/2 -mt-4 pointer-events-none z-20">
+                            <div class="absolute w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-bold shadow-xl border border-white/20 backdrop-blur-sm transition-all"
+                                 :class="[
+                                    packet.dir === 'right' ? 'packet-right' : 'packet-left',
+                                    isEncrypted ? 'bg-green-600 text-white encrypted-glow' : 'bg-blue-600 text-white'
+                                 ]">
+                                {{ packet.text }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SERVER NODE -->
+                    <div class="relative group">
+                         <!-- Container IP -->
+                         <div class="absolute -top-8 left-0 right-0 text-center transition-opacity duration-500" :class="step >= 1 ? 'opacity-100' : 'opacity-0'">
+                            <span class="bg-gray-800 text-purple-400 px-2 py-0.5 rounded text-[10px] font-mono border border-purple-900 shadow-lg">172.20.0.3</span>
+                        </div>
+
+                        <div class="w-80 bg-gray-800 rounded-xl border border-gray-700 shadow-2xl overflow-hidden transition-all duration-700 transform"
+                             :class="step >= 1 ? 'translate-y-0 opacity-100 border-purple-500/50 shadow-purple-900/20' : 'translate-y-10 opacity-30 blur-sm'">
+                            
+                            <!-- Header -->
+                            <div class="bg-gray-900/50 p-3 border-b border-gray-700 flex justify-between items-center">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-3 h-3 rounded-full bg-red-500" :class="{'bg-green-500': step >= 1}"></div>
+                                    <span class="text-sm font-bold text-gray-200">ssh-server</span>
+                                </div>
+                                <span class="text-[10px] text-gray-500 font-mono">OpenSSH 8.9</span>
+                            </div>
+
+                            <!-- Server Logs -->
+                            <div class="p-4 bg-black/50 h-48 overflow-y-auto terminal-scroll font-mono text-[11px] leading-relaxed">
+                                <div class="text-gray-500 italic mb-2 border-b border-gray-800 pb-1">/var/log/auth.log</div>
+                                <div v-for="(log, i) in serverLogs" :key="i" class="mb-1 text-gray-400">
+                                    <span class="text-purple-400">sshd[105]:</span> {{ log }}
+                                </div>
+                            </div>
+
+                            <!-- File System -->
+                            <div class="bg-gray-900 border-t border-gray-700 p-3">
+                                <div class="text-[10px] text-gray-500 uppercase font-bold mb-2">Remote Storage (/home/labuser)</div>
+                                <div class="flex gap-2 overflow-x-auto pb-1">
+                                    <transition-group name="file">
+                                        <div v-for="file in serverFiles" :key="file.name" class="flex-shrink-0 flex flex-col items-center bg-gray-800 p-2 rounded border border-gray-600 w-16">
+                                            <span class="text-2xl mb-1">{{ file.icon }}</span>
+                                            <span class="text-[9px] text-gray-300 truncate w-full text-center">{{ file.shortName }}</span>
+                                        </div>
+                                    </transition-group>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Info Toast -->
+                <transition name="file">
+                    <div v-if="toastMessage" class="absolute bottom-10 left-1/2 -translate-x-1/2 bg-gray-800/90 backdrop-blur border border-blue-500/50 text-blue-100 px-6 py-3 rounded-full shadow-2xl z-30 flex items-center gap-3">
+                        <span class="animate-pulse w-2 h-2 bg-blue-400 rounded-full"></span>
+                        {{ toastMessage }}
+                    </div>
+                </transition>
+
+            </div>
+
+            <!-- Right Panel: Code & Education -->
+            <div class="w-[450px] bg-[#1e1e1e] border-l border-gray-700 flex flex-col shadow-2xl z-20">
+                
+                <!-- Tab Headers -->
+                <div class="flex border-b border-gray-700 bg-[#252526]">
+                    <div class="px-4 py-2 text-xs font-bold text-gray-200 border-t-2 border-blue-500 bg-[#1e1e1e] flex items-center gap-2">
+                        <svg class="w-3 h-3 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                        S10_Part03_Script_Paramiko_Client.py
+                    </div>
+                </div>
+
+                <!-- Code View -->
+                <div class="flex-1 overflow-auto relative terminal-scroll bg-[#1e1e1e]">
+                    <!-- Line Highlighter -->
+                    <div class="absolute left-0 right-0 bg-blue-500/10 border-l-2 border-blue-500 transition-all duration-300 pointer-events-none z-0"
+                         :style="{ top: (activeLine * 24) + 'px', height: '24px', display: activeLine >= 0 ? 'block' : 'none' }">
+                    </div>
+
+                    <pre class="p-4 text-xs leading-6 relative z-10"><code class="python language-python" v-html="highlightedCode"></code></pre>
+                </div>
+
+                <!-- Educational Context Panel -->
+                <div class="h-1/3 bg-[#252526] border-t border-gray-700 p-5 flex flex-col">
+                    <div class="flex items-center gap-2 mb-3">
+                        <div class="bg-blue-900/50 p-1 rounded">
+                            <svg class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <h3 class="text-sm font-bold text-gray-100">Learning Context</h3>
+                    </div>
+                    
+                    <div class="flex-1 overflow-y-auto pr-2 terminal-scroll">
+                        <transition name="fade" mode="out-in">
+                            <div :key="eduTitle">
+                                <h4 class="text-blue-400 text-xs font-bold uppercase tracking-wide mb-2">{{ eduTitle }}</h4>
+                                <p class="text-sm text-gray-400 leading-relaxed">{{ eduText }}</p>
+                                
+                                <div v-if="eduNote" class="mt-3 bg-yellow-900/20 border border-yellow-700/50 p-2 rounded">
+                                    <p class="text-[10px] text-yellow-500 font-medium">⚠️ NOTE: {{ eduNote }}</p>
+                                </div>
+                            </div>
+                        </transition>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        const PYTHON_CODE = `import paramiko
+import os
+
+# Configuration matching our Docker setup
+HOST = "ssh-server"    # Docker DNS resolves this name to 172.20.0.3
+PORT = 22
+USERNAME = "labuser"
+PASSWORD = "labpass"
+
+def main():
+    print("[+] Initializing SSH Client...")
+
+    # Create a new SSHClient instance
+    client = paramiko.SSHClient()
+    
+    # Automatically add the server's host key (Simulated "Trust on First Use")
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+    print(f"[+] Connecting to {HOST}...")
+    
+    # Establish the connection
+    client.connect(
+        hostname=HOST,
+        port=PORT,
+        username=USERNAME,
+        password=PASSWORD
+    )
+    print("[+] Secure Connection Established!")
+
+    # 1. REMOTE COMMAND EXECUTION
+    # We send "uname -a" to get kernel details
+    print("[+] Executing remote command: uname -a")
+    
+    # exec_command returns standard IO streams
+    stdin, stdout, stderr = client.exec_command("uname -a")
+    
+    # Read the output from the stdout stream
+    result = stdout.read().decode().strip()
+    print(f"[+] Output received: {result}")
+
+    # Save output to a local file
+    with open("ssh_output.txt", "w") as f:
+        f.write(result + "\\n")
+    print("[+] Saved output to local file 'ssh_output.txt'")
+
+    # 2. SFTP FILE TRANSFER
+    print("[+] Opening SFTP Subsystem...")
+    sftp = client.open_sftp()
+
+    # Create a dummy file to upload
+    with open("upload.txt", "w") as f:
+        f.write("Data from Paramiko Client")
+    
+    # Upload: Local -> Remote
+    local_path = "upload.txt"
+    remote_path = "/home/labuser/storage/uploaded.txt"
+    sftp.put(local_path, remote_path)
+    print(f"[+] Uploaded {local_path} to {remote_path}")
+
+    # Download: Remote -> Local
+    # We download /etc/hostname to see the container ID
+    remote_file = "/etc/hostname"
+    local_dest = "downloaded_hostname.txt"
+    sftp.get(remote_file, local_dest)
+    print(f"[+] Downloaded {remote_file} to {local_dest}")
+
+    # Cleanup
+    sftp.close()
+    client.close()
+    print("[+] Connection closed gracefully.")
+
+if __name__ == "__main__":
+    main()`;
+
+        createApp({
+            data() {
+                return {
+                    code: PYTHON_CODE,
+                    step: 0, // 0:Off, 1:Infra, 2:Running...
+                    clientLogs: [],
+                    serverLogs: [],
+                    clientFiles: [],
+                    serverFiles: [],
+                    packet: null, // { dir: 'right', text: 'SYN' }
+                    activeLine: -1,
+                    isEncrypted: false,
+                    simulationComplete: false,
+                    
+                    // Education State
+                    eduTitle: "Welcome",
+                    eduText: "This simulator visualizes how a Python script uses the Paramiko library to interact with a remote server via SSH. Use the controls above to start the infrastructure.",
+                    eduNote: "",
+                    toastMessage: ""
+                }
+            },
+            computed: {
+                highlightedCode() {
+                    return hljs.highlight(this.code, { language: 'python' }).value;
+                },
+                statusText() {
+                    if (this.step === 0) return "Offline";
+                    if (this.step === 1) return "Infrastructure Ready";
+                    if (this.simulationComplete) return "Task Completed";
+                    return "Running Script...";
+                },
+                statusColor() {
+                    if (this.step === 0) return "text-gray-500";
+                    if (this.step === 1) return "text-green-500";
+                    return "text-blue-500";
+                },
+                connectionLabel() {
+                    if (this.isEncrypted) return "SSHv2 Tunnel (AES-256)";
+                    if (this.step > 1 && !this.isEncrypted) return "Handshaking...";
+                    return "No Connection";
+                }
+            },
+            methods: {
+                logClient(msg, type='info') { this.clientLogs.push({msg, type}); this.scrollToBottom(); },
+                logServer(msg) { this.serverLogs.push(msg); },
+                
+                scrollToBottom() {
+                    setTimeout(() => {
+                        const term = document.querySelector('.terminal-scroll');
+                        if(term) term.scrollTop = term.scrollHeight;
+                    }, 50);
+                },
+
+                sleep(ms) { return new Promise(r => setTimeout(r, ms)); },
+
+                async startInfrastructure() {
+                    this.step = 1;
+                    this.clientLogs = [];
+                    this.serverLogs = [];
+                    this.clientFiles = [];
+                    this.serverFiles = [{name: 'hostname', shortName: 'hostname', icon: '📄'}];
+                    
+                    this.eduTitle = "Docker Infrastructure Initialization";
+                    this.eduText = "We are spinning up two isolated containers in a virtual network. 'ssh-client' contains our Python script, and 'ssh-server' runs the OpenSSH daemon. They can find each other using Docker's internal DNS.";
+                    this.eduNote = "";
+                    
+                    this.toastMessage = "Initializing Containers...";
+                    await this.sleep(800);
+                    this.logClient("Container Started. IP: 172.20.0.2", "success");
+                    await this.sleep(400);
+                    this.logServer("Server listening on 0.0.0.0 port 22.");
+                    this.logServer("Server Started. IP: 172.20.0.3");
+                    this.toastMessage = "";
+                    
+                    this.eduText = "Infrastructure is ready. The server is listening on port 22. Click 'Run Python Script' to execute the Paramiko code.";
+                },
+
+                async sendPacket(text, dir, duration=1000) {
+                    this.packet = { text, dir };
+                    await this.sleep(duration);
+                    this.packet = null;
+                },
+
+                resetSimulation() {
+                    this.step = 0;
+                    this.clientLogs = [];
+                    this.serverLogs = [];
+                    this.isEncrypted = false;
+                    this.simulationComplete = false;
+                    this.activeLine = -1;
+                    this.eduTitle = "Welcome";
+                    this.eduText = "This simulator visualizes how a Python script uses the Paramiko library to interact with a remote server via SSH. Use the controls above to start the infrastructure.";
+                    this.eduNote = "";
+                    this.toastMessage = "";
+                },
+
+                async runSimulation() {
+                    this.step = 2;
+                    this.clientLogs = []; // Clear boot logs
+                    
+                    // --- SETUP ---
+                    this.activeLine = 10; // Print init
+                    this.eduTitle = "Step 1: Initialization";
+                    this.eduText = "The script imports 'paramiko' and creates an SSHClient instance. This object will manage the connection state, authentication, and channels.";
+                    this.logClient("[+] Initializing SSH Client...", "debug");
+                    await this.sleep(1500);
+
+                    this.activeLine = 16; // AutoAddPolicy
+                    this.eduTitle = "Host Key Verification";
+                    this.eduText = "By default, SSH rejects unknown servers to prevent Man-in-the-Middle attacks. 'AutoAddPolicy' tells Paramiko to automatically accept and save the server's key if it's new.";
+                    this.eduNote = "In production, you should use load_system_host_keys() instead of AutoAddPolicy() for better security.";
+                    await this.sleep(2000);
+
+                    // --- CONNECTION HANDSHAKE ---
+                    this.activeLine = 21; // connect()
+                    this.eduTitle = "Step 2: The SSH Handshake";
+                    this.eduText = "Connecting involves multiple steps: 1. TCP Handshake (SYN/ACK). 2. Version Exchange (SSH-2.0). 3. Key Exchange (Diffie-Hellman). 4. Authentication.";
+                    this.eduNote = "Watch the packets closely. The connection starts as plain text and becomes encrypted.";
+                    
+                    this.logClient(`[+] Connecting to ${this.code.match(/HOST = "(.*)"/)[1]}...`);
+                    this.toastMessage = "Resolving 'ssh-server' -> 172.20.0.3";
+                    await this.sleep(1000);
+                    this.toastMessage = "";
+
+                    // TCP
+                    await this.sendPacket("SYN", "right", 800);
+                    await this.sendPacket("SYN-ACK", "left", 800);
+                    await this.sendPacket("ACK", "right", 600);
+                    this.logServer("Connection from 172.20.0.2 port 58292");
+
+                    // SSH Proto
+                    await this.sendPacket("SSH-PROTO", "right", 800);
+                    await this.sendPacket("SSH-PROTO", "left", 800);
+
+                    // Key Ex
+                    await this.sendPacket("KEY-EX", "right", 800);
+                    await this.sendPacket("KEY-EX", "left", 800);
+                    
+                    // Auth
+                    this.eduText = "Key exchange is done. Now authenticating user 'labuser' sending the password over the now-encrypted channel.";
+                    await this.sendPacket("AUTH(PW)", "right", 1000);
+                    this.logServer("Accepted password for labuser from 172.20.0.2");
+                    
+                    this.isEncrypted = true;
+                    this.activeLine = 27; // Print Success
+                    this.logClient("[+] Secure Connection Established!", "success");
+                    await this.sleep(1500);
+
+                    // --- COMMAND EXECUTION ---
+                    this.activeLine = 34; // exec_command
+                    this.eduTitle = "Step 3: Remote Command Execution";
+                    this.eduText = "exec_command() creates a new 'Channel' inside the tunnel. It sends the command string and opens three streams: stdin (input), stdout (output), and stderr (errors).";
+                    this.eduNote = "Paramiko is non-blocking here. We must .read() from stdout to actually wait for data.";
+                    
+                    this.logClient("[+] Executing remote command: uname -a");
+                    await this.sendPacket("CMD: uname", "right", 1000);
+                    this.logServer("Starting session: shell command 'uname -a'");
+                    await this.sleep(500);
+                    await this.sendPacket("DATA: Linux", "left", 1000);
+                    
+                    this.activeLine = 37; // read()
+                    this.logClient("[+] Output received: Linux ssh-server 5.15.0-generic ...", "debug");
+                    
+                    this.activeLine = 40; // File write
+                    this.clientFiles.push({name: 'ssh_output.txt', shortName: 'ssh_out', icon: '📝'});
+                    this.logClient("[+] Saved output to local file 'ssh_output.txt'");
+                    await this.sleep(2000);
+
+                    // --- SFTP UPLOAD ---
+                    this.activeLine = 46; // open_sftp
+                    this.eduTitle = "Step 4: SFTP Subsystem";
+                    this.eduText = "SFTP is not FTP! It is a file transfer protocol designed to run *over* SSH. Paramiko opens a dedicated SFTP channel for this.";
+                    this.eduNote = "";
+                    this.logClient("[+] Opening SFTP Subsystem...", "debug");
+                    this.logServer("subsystem request for sftp");
+                    await this.sleep(1000);
+
+                    this.activeLine = 49; // Create local file
+                    this.clientFiles.push({name: 'upload.txt', shortName: 'up.txt', icon: '📄'});
+                    this.logClient("Created local file: upload.txt");
+                    await this.sleep(800);
+
+                    this.activeLine = 55; // Put
+                    this.eduTitle = "SFTP Upload (put)";
+                    this.eduText = "The .put() method reads the local file and streams it via binary packets to the remote server path.";
+                    await this.sendPacket("WRITE", "right", 1000);
+                    this.serverFiles.push({name: 'uploaded.txt', shortName: 'up.txt', icon: '📄'});
+                    this.logServer("SFTP: Wrote /home/labuser/storage/uploaded.txt");
+                    this.logClient("[+] Uploaded upload.txt to /home/labuser/storage/uploaded.txt", "success");
+                    await this.sleep(2000);
+
+                    // --- SFTP DOWNLOAD ---
+                    this.activeLine = 61; // Get
+                    this.eduTitle = "SFTP Download (get)";
+                    this.eduText = "The .get() method requests a file handle from the remote server and streams the data back to a local path.";
+                    await this.sendPacket("READ", "right", 600);
+                    await this.sendPacket("DATA", "left", 1000);
+                    this.clientFiles.push({name: 'downloaded_hostname.txt', shortName: 'host.txt', icon: '⚙️'});
+                    this.logClient("[+] Downloaded /etc/hostname to downloaded_hostname.txt", "success");
+                    await this.sleep(1500);
+
+                    // --- CLEANUP ---
+                    this.activeLine = 65; // Close
+                    this.eduTitle = "Cleanup";
+                    this.eduText = "Always close your client! This tears down the TCP connection and frees up the socket on the server.";
+                    this.isEncrypted = false;
+                    this.logServer("Connection closed by 172.20.0.2");
+                    this.logClient("[+] Connection closed gracefully.", "success");
+                    
+                    this.simulationComplete = true;
+                    this.activeLine = -1;
+                    this.eduTitle = "Simulation Complete";
+                    this.eduText = "You have successfully simulated a full SSH automation workflow. You can Reset to try again.";
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

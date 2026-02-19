@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TCP Multi-Client Threading Visualizer</title>
+    <style>
+        :root {
+            --bg-primary: #1e1e1e;
+            --bg-secondary: #252526;
+            --accent-main: #c586c0; /* Purple for Main Thread */
+            --accent-thread: #4ec9b0; /* Teal for Worker Threads */
+            --accent-client: #ce9178; /* Orange for Clients */
+            --text-main: #d4d4d4;
+            --text-dim: #858585;
+            --border: #3e3e42;
+            --font-mono: 'Consolas', 'Monaco', 'Courier New', monospace;
+            --font-sans: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --code-bg: #101010;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- Header --- */
+        header {
+            background-color: var(--bg-secondary);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+        }
+
+        h1 { font-size: 1.1rem; font-weight: 600; color: #fff; }
+        .badge { background: var(--accent-main); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; margin-left: 10px; }
+
+        /* --- Main Layout --- */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: row;
+            overflow: hidden;
+        }
+
+        /* Left: Code & Control */
+        .control-panel {
+            width: 350px;
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            background: #141414;
+            padding: 1rem;
+        }
+
+        .code-view {
+            flex: 1;
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 10px;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            position: relative;
+        }
+
+        .code-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            padding: 5px;
+            background: rgba(197, 134, 192, 0.2);
+            color: #fff;
+            font-size: 0.7rem;
+            text-align: right;
+            border-bottom: 1px solid var(--accent-main);
+        }
+
+        .btn-group {
+            margin-top: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* Right: Visualization */
+        .visual-panel {
+            flex: 1;
+            position: relative;
+            background: radial-gradient(circle at center, #2a2a2a 0%, #1e1e1e 70%);
+            display: flex;
+            flex-direction: column;
+            padding: 2rem;
+            overflow: hidden;
+        }
+
+        /* Server Box */
+        .server-container {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 40px;
+            position: relative;
+            background: rgba(0,0,0,0.2);
+        }
+        
+        .server-label {
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            background: var(--bg-primary);
+            padding: 0 10px;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+
+        /* Main Thread */
+        .main-thread {
+            width: 100%;
+            height: 60px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--accent-main);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+        
+        .main-thread.active { box-shadow: 0 0 15px rgba(197, 134, 192, 0.4); }
+
+        /* Thread Pool Area */
+        .thread-pool {
+            display: flex;
+            gap: 20px;
+            min-height: 100px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .worker-thread {
+            width: 140px;
+            background: #1a2a2a;
+            border: 1px solid var(--accent-thread);
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.8rem;
+            position: relative;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: spawn 0.5s forwards;
+        }
+
+        @keyframes spawn { to { opacity: 1; transform: translateY(0); } }
+
+        .worker-icon { font-size: 1.5rem; margin-bottom: 5px; }
+        .worker-status { color: var(--accent-thread); font-size: 0.7rem; }
+
+        /* Client Area */
+        .client-area {
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .client-node {
+            width: 120px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--accent-client);
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            opacity: 0.5;
+            transition: all 0.3s;
+        }
+
+        .client-node.connected { opacity: 1; box-shadow: 0 0 15px rgba(206, 145, 120, 0.2); }
+        .client-node.disconnected { opacity: 0.3; filter: grayscale(1); }
+
+        /* Controls */
+        button {
+            padding: 0.8rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--bg-secondary);
+            color: #fff;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        button.btn-main { background: var(--accent-main); border-color: var(--accent-main); }
+        button:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); }
+        button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .client-controls {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .client-controls button { padding: 4px 8px; font-size: 0.75rem; flex: 1; }
+
+        /* Packet Animation */
+        .packet {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            z-index: 100;
+            display: none;
+            box-shadow: 0 0 8px #fff;
+        }
+
+        /* Syntax Highlighting */
+        .kw { color: #569cd6; } .fn { color: #dcdcaa; } .str { color: #ce9178; } .cmt { color: #6a9955; }
+        
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Multi-Client <span class="badge">Threading</span> Visualizer</h1>
+</header>
+
+<main>
+    <!-- Left: Controls & Code -->
+    <div class="control-panel">
+        <div class="code-view" id="codeDisplay">
+            <div class="code-overlay" id="codeStatus">Idle</div>
+            <div id="codeContent"></div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-main" id="btnStart" onclick="startServer()">1. Start Server Main Loop</button>
+            <div style="font-size: 0.8rem; color: #888; margin-top: 5px;">Client Simulator:</div>
+            
+            <div class="client-controls-row" style="display:flex; gap:10px;">
+                <!-- Client 1 Controls -->
+                <div style="flex:1; border:1px solid #333; padding:5px; border-radius:4px;">
+                    <div style="font-size:0.7rem; color:var(--accent-client)">CLIENT 1</div>
+                    <div class="client-controls">
+                        <button id="btnC1Connect" onclick="connectClient(1)" disabled>Connect</button>
+                        <button id="btnC1Send" onclick="sendData(1)" disabled>Send</button>
+                        <button id="btnC1Disc" onclick="disconnectClient(1)" disabled>Exit</button>
+                    </div>
+                </div>
+
+                <!-- Client 2 Controls -->
+                <div style="flex:1; border:1px solid #333; padding:5px; border-radius:4px;">
+                    <div style="font-size:0.7rem; color:var(--accent-client)">CLIENT 2</div>
+                    <div class="client-controls">
+                        <button id="btnC2Connect" onclick="connectClient(2)" disabled>Connect</button>
+                        <button id="btnC2Send" onclick="sendData(2)" disabled>Send</button>
+                        <button id="btnC2Disc" onclick="disconnectClient(2)" disabled>Exit</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="globalList" style="margin-top:10px; font-size:0.8rem; color:#888;">
+                Global Clients List: []
+            </div>
+        </div>
+    </div>
+
+    <!-- Right: Visuals -->
+    <div class="visual-panel">
+        
+        <div class="server-container">
+            <div class="server-label">Server Process (PID 1001)</div>
+            
+            <!-- Main Thread -->
+            <div class="main-thread" id="mainThread">
+                <div>
+                    <span style="font-weight:bold; color:var(--accent-main)">Main Thread</span>
+                    <div style="font-size:0.75rem; color:#888;">accept_loop()</div>
+                </div>
+                <div style="font-size:0.8rem;" id="mainStatus">Stopped</div>
+            </div>
+
+            <!-- Thread Pool -->
+            <div class="thread-pool" id="threadPool">
+                <!-- Threads will spawn here -->
+            </div>
+        </div>
+
+        <div class="client-area">
+            <div class="client-node" id="client1">
+                <div style="font-size:2rem;">💻</div>
+                <div>Client 1</div>
+                <div style="font-size:0.7rem; color:#888;">:4001</div>
+            </div>
+            
+            <div class="client-node" id="client2">
+                <div style="font-size:2rem;">📱</div>
+                <div>Client 2</div>
+                <div style="font-size:0.7rem; color:#888;">:4002</div>
+            </div>
+        </div>
+
+        <div class="packet" id="packet"></div>
+    </div>
+</main>
+
+<script>
+    // --- Code Content ---
+    const snippets = {
+        START: `
+<span class="kw">def</span> <span class="fn">main</span>():
+    server_socket.bind((HOST, PORT))
+    server_socket.listen(<span class="str">5</span>)
+    <span class="fn">accept_loop</span>(server_socket)`,
+
+        ACCEPT: `
+<span class="kw">def</span> <span class="fn">accept_loop</span>(sock):
+    <span class="kw">while</span> is_running:
+        <span class="cmt"># Main thread blocks here</span>
+        client, addr = sock.accept()
+        
+        <span class="cmt"># Spawns new thread</span>
+        t = threading.Thread(target=handle_client, ...)
+        t.start()`,
+
+        THREAD_RECV: `
+<span class="kw">def</span> <span class="fn">handle_client</span>(sock, addr):
+    <span class="kw">print</span>(<span class="str">f"[THREAD] {addr} connected"</span>)
+    <span class="kw">with</span> sock:
+        <span class="kw">while</span> <span class="kw">True</span>:
+            data = sock.recv(<span class="str">1024</span>)`,
+
+        THREAD_PROCESS: `
+            <span class="cmt"># Process Data (Independent)</span>
+            resp = data.capitalize()
+            sock.sendall(resp)`,
+
+        THREAD_EXIT: `
+            <span class="kw">if</span> <span class="kw">not</span> data:
+                <span class="kw">break</span> <span class="cmt"># Disconnect</span>
+    
+    clients.remove(sock)
+    <span class="kw">print</span>(<span class="str">"[THREAD END]"</span>)`
+    };
+
+    // --- Elements ---
+    const codeContent = document.getElementById('codeContent');
+    const codeStatus = document.getElementById('codeStatus');
+    const mainThread = document.getElementById('mainThread');
+    const threadPool = document.getElementById('threadPool');
+    const globalList = document.getElementById('globalList');
+    const packet = document.getElementById('packet');
+
+    // --- State ---
+    let serverRunning = false;
+    let connectedClients = []; // Store IDs like [1, 2]
+
+    // --- Logic ---
+
+    function showCode(key, status) {
+        codeContent.innerHTML = snippets[key];
+        codeStatus.innerText = status;
+    }
+
+    function updateGlobalList() {
+        globalList.innerText = `Global Clients List: [${connectedClients.map(id => `<socket:${id}>`).join(', ')}]`;
+    }
+
+    function startServer() {
+        serverRunning = true;
+        document.getElementById('btnStart').disabled = true;
+        
+        // Enable connect buttons
+        document.getElementById('btnC1Connect').disabled = false;
+        document.getElementById('btnC2Connect').disabled = false;
+
+        mainThread.classList.add('active');
+        document.getElementById('mainStatus').innerText = "Listening :3333";
+        document.getElementById('mainStatus').style.color = "var(--accent-green)";
+
+        showCode('START', 'Server Binding');
+        setTimeout(() => showCode('ACCEPT', 'Accept Loop (Blocking)'), 1500);
+    }
+
+    async function connectClient(id) {
+        if (!serverRunning) return;
+        
+        const clientNode = document.getElementById(`client${id}`);
+        clientNode.classList.add('connected');
+        
+        // Disable Connect, Enable Send/Disc
+        document.getElementById(`btnC${id}Connect`).disabled = true;
+        document.getElementById(`btnC${id}Send`).disabled = false;
+        document.getElementById(`btnC${id}Disc`).disabled = false;
+
+        // Visual: Packet Handshake (Simplified)
+        await animatePacket(clientNode, mainThread, '#fff');
+        
+        // Logic: Spawn Thread
+        spawnThread(id);
+        
+        connectedClients.push(id);
+        updateGlobalList();
+        
+        // Show Code logic for Thread Start
+        showCode('THREAD_RECV', `Thread-${id} Started`);
+    }
+
+    function spawnThread(id) {
+        const tDiv = document.createElement('div');
+        tDiv.className = 'worker-thread';
+        tDiv.id = `thread-${id}`;
+        tDiv.innerHTML = `
+            <div class="worker-icon">⚙️</div>
+            <div>Thread-${id}</div>
+            <div class="worker-status" id="status-${id}">Running</div>
+            <div style="font-size:0.6rem; margin-top:5px; color:#666">Handling Client ${id}</div>
+        `;
+        threadPool.appendChild(tDiv);
+    }
+
+    async function sendData(id) {
+        const clientNode = document.getElementById(`client${id}`);
+        const threadNode = document.getElementById(`thread-${id}`);
+        const statusNode = document.getElementById(`status-${id}`);
+        
+        // Disable button temp
+        document.getElementById(`btnC${id}Send`).disabled = true;
+
+        showCode('THREAD_RECV', `Thread-${id} Receiving`);
+        
+        // 1. Client -> Thread
+        await animatePacket(clientNode, threadNode, 'var(--accent-client)');
+        
+        // 2. Process
+        statusNode.innerText = "Processing...";
+        statusNode.style.color = "#fff";
+        showCode('THREAD_PROCESS', `Thread-${id} Capitalizing`);
+        
+        // Simulate work
+        await wait(500); 
+        statusNode.innerText = "Running";
+        statusNode.style.color = "var(--accent-thread)";
+        
+        // 3. Thread -> Client
+        await animatePacket(threadNode, clientNode, 'var(--accent-thread)');
+        
+        document.getElementById(`btnC${id}Send`).disabled = false;
+        
+        // Return code view to accept loop if other client idle, else keep current
+        setTimeout(() => {
+            // Just a visual reset hint
+            if(connectedClients.length > 0) showCode('THREAD_RECV', 'Threads Waiting');
+        }, 1000);
+    }
+
+    async function disconnectClient(id) {
+        const clientNode = document.getElementById(`client${id}`);
+        const threadNode = document.getElementById(`thread-${id}`);
+        
+        // Disable buttons
+        document.getElementById(`btnC${id}Send`).disabled = true;
+        document.getElementById(`btnC${id}Disc`).disabled = true;
+        
+        // 1. Send FIN (visual)
+        await animatePacket(clientNode, threadNode, '#555');
+        
+        // 2. Thread Cleanup
+        showCode('THREAD_EXIT', `Thread-${id} Finishing`);
+        if(threadNode) {
+            threadNode.style.opacity = '0.5';
+            threadNode.innerHTML = `<div style="color:#f48771">Terminated</div>`;
+            setTimeout(() => threadNode.remove(), 1000);
+        }
+
+        // 3. Global List Update
+        connectedClients = connectedClients.filter(c => c !== id);
+        updateGlobalList();
+
+        // 4. Client Visual Reset
+        clientNode.classList.remove('connected');
+        clientNode.classList.add('disconnected');
+        setTimeout(() => clientNode.classList.remove('disconnected'), 1000);
+        
+        document.getElementById(`btnC${id}Connect`).disabled = false;
+        
+        // If no clients left, show main loop
+        if (connectedClients.length === 0) {
+            setTimeout(() => showCode('ACCEPT', 'Accept Loop (Blocking)'), 1500);
+        }
+    }
+
+    // --- Animation Utils ---
+    function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+    function animatePacket(fromEl, toEl, color) {
+        return new Promise(resolve => {
+            const fRect = fromEl.getBoundingClientRect();
+            const tRect = toEl.getBoundingClientRect();
+            const parentRect = document.querySelector('.visual-panel').getBoundingClientRect();
+
+            const startX = fRect.left + fRect.width/2 - parentRect.left;
+            const startY = fRect.top + fRect.height/2 - parentRect.top;
+            const endX = tRect.left + tRect.width/2 - parentRect.left;
+            const endY = tRect.top + tRect.height/2 - parentRect.top;
+
+            packet.style.display = 'block';
+            packet.style.background = color;
+            packet.style.left = `${startX}px`;
+            packet.style.top = `${startY}px`;
+            packet.style.transition = 'none';
+
+            // Force reflow
+            void packet.offsetWidth;
+
+            packet.style.transition = 'all 0.6s ease-in-out';
+            packet.style.left = `${endX}px`;
+            packet.style.top = `${endY}px`;
+
+            setTimeout(() => {
+                packet.style.display = 'none';
+                resolve();
+            }, 600);
+        });
+    }
+
+</script>
+
+</body>
+</html>

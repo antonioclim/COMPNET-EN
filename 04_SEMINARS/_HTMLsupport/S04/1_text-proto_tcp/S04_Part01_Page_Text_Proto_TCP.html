@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TCP Text Protocol & Framing Simulator</title>
+    <style>
+        :root {
+            --bg-app: #1e1e1e;
+            --bg-panel: #252526;
+            --term-bg: #0c0c0c;
+            --text-main: #cccccc;
+            --text-bright: #ffffff;
+            --accent-cmd: #4daafc; /* Blue for commands */
+            --accent-header: #dcdcaa; /* Yellow for Length Header */
+            --accent-state: #6a9955; /* Green for State Storage */
+            --accent-lock: #ce9178; /* Orange for Lock */
+            --border: #333;
+            --font-mono: 'Consolas', 'Monaco', monospace;
+            --font-sans: 'Segoe UI', sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-app);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* --- Header --- */
+        header {
+            background: var(--bg-panel);
+            padding: 0 1.5rem;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            justify-content: space-between;
+        }
+        
+        h1 { font-size: 1.1rem; font-weight: 600; color: var(--text-bright); }
+        .badge { background: var(--accent-header); color: #1e1e1e; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; margin-left: 10px; font-weight: bold; }
+
+        /* --- Main Layout --- */
+        main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1.5fr; /* Diagram Left, State/Logs Right */
+            overflow: hidden;
+        }
+
+        /* Diagram Area */
+        .diagram-panel {
+            position: relative;
+            background: radial-gradient(circle at center, #2a2a2a 0%, #1e1e1e 80%);
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border);
+        }
+
+        /* Nodes */
+        .node-container {
+            flex: 1;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            position: relative;
+        }
+
+        .node {
+            width: 140px;
+            background: var(--bg-panel);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 10;
+            transition: all 0.3s;
+        }
+
+        .node-title { font-weight: bold; color: #fff; margin-bottom: 5px; }
+        .node-icon { font-size: 2.5rem; margin-bottom: 10px; }
+
+        #serverNode { border-color: var(--accent-state); }
+        #clientNode { border-color: var(--accent-cmd); }
+
+        /* Packet Animation */
+        .packet-track {
+            position: absolute;
+            top: 50%; left: 140px; right: 140px;
+            height: 2px;
+            background: #444;
+            z-index: 1;
+        }
+
+        .packet {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: var(--bg-panel);
+            border: 2px solid var(--accent-header);
+            border-radius: 6px;
+            padding: 4px 8px;
+            color: #fff;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            z-index: 20;
+            white-space: nowrap;
+            transition: transform 0.2s;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+        
+        .pkt-len { color: var(--accent-header); font-weight: bold; }
+        .pkt-payload { color: var(--accent-cmd); }
+
+        /* Parsing Visualizer (Middle of diagram) */
+        .parser-box {
+            height: 120px;
+            border-top: 1px solid var(--border);
+            background: #111;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .parser-title { font-size: 0.8rem; color: #888; margin-bottom: 10px; text-transform: uppercase; }
+        
+        .byte-stream {
+            display: flex;
+            gap: 2px;
+            font-family: var(--font-mono);
+        }
+        
+        .byte {
+            width: 20px; height: 30px;
+            background: #333;
+            color: #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            border-radius: 2px;
+        }
+        
+        .byte.header { background: var(--accent-header); color: #000; }
+        .byte.cmd { background: var(--accent-cmd); color: #000; }
+        .byte.arg { background: var(--text-main); color: #000; }
+
+        /* Right Panel: State & Logs */
+        .info-panel {
+            display: flex;
+            flex-direction: column;
+            background: #141414;
+        }
+
+        .state-section {
+            flex: 1;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            overflow-y: auto;
+        }
+
+        .section-header {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: var(--accent-state);
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .lock-indicator {
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: #333;
+            color: #888;
+        }
+        .lock-indicator.locked { background: var(--accent-lock); color: #fff; }
+
+        .state-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+        }
+        
+        .state-table th { text-align: left; border-bottom: 1px solid #444; padding: 4px; color: #888; }
+        .state-table td { border-bottom: 1px solid #333; padding: 4px; color: #fff; }
+        
+        .row-new { animation: flashGreen 1s; }
+        .row-del { animation: flashRed 1s forwards; }
+
+        @keyframes flashGreen { 0% { background: rgba(106, 153, 85, 0.5); } 100% { background: transparent; } }
+        @keyframes flashRed { 0% { background: rgba(206, 145, 120, 0.5); } 100% { opacity: 0; } }
+
+        .log-section {
+            height: 200px;
+            background: var(--term-bg);
+            padding: 10px;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: #ccc;
+            overflow-y: auto;
+        }
+        .log-line { margin-bottom: 4px; }
+        .log-client { color: var(--accent-cmd); }
+        .log-server { color: var(--accent-state); }
+
+        /* Footer Controls */
+        footer {
+            background: var(--bg-panel);
+            padding: 1rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        input[type="text"] {
+            background: #111;
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 0.5rem;
+            border-radius: 4px;
+            width: 250px;
+            font-family: var(--font-mono);
+        }
+
+        button {
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--accent-cmd);
+            color: #fff;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.1s;
+        }
+        
+        button:hover { transform: scale(1.05); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; background: #444; }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Text Protocol Visualizer <span class="badge">Framing: &lt;LEN&gt; &lt;CMD&gt;</span></h1>
+</header>
+
+<main>
+    <!-- Left: Diagram -->
+    <div class="diagram-panel">
+        <div class="node-container">
+            <div class="node" id="clientNode">
+                <div class="node-icon">💻</div>
+                <div class="node-title">Client</div>
+                <div style="font-size:0.7rem; color:#888">buffer size: 8</div>
+            </div>
+
+            <div class="packet-track"></div>
+            <div class="packet" id="packet">
+                <span class="pkt-len">15</span> <span class="pkt-payload">add k1 v1</span>
+            </div>
+
+            <div class="node" id="serverNode">
+                <div class="node-icon">🖥️</div>
+                <div class="node-title">Server</div>
+                <div style="font-size:0.7rem; color:#888">buffer size: 8</div>
+            </div>
+        </div>
+
+        <div class="parser-box">
+            <div class="parser-title">Stream Parser View</div>
+            <div class="byte-stream" id="byteStream">
+                <!-- Bytes will appear here -->
+                <span style="color:#555; font-style:italic;">No active transmission</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right: State & Logs -->
+    <div class="info-panel">
+        <div class="state-section">
+            <div class="section-header">
+                Server Memory (State)
+                <div class="lock-indicator" id="lockInd">🔓 UNLOCKED</div>
+            </div>
+            <table class="state-table">
+                <thead>
+                    <tr><th>Key</th><th>Resource</th></tr>
+                </thead>
+                <tbody id="stateTableBody">
+                    <!-- Rows -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="log-section" id="termLog">
+            <div class="log-line" style="color:#888"># System ready. Type a command below.</div>
+            <div class="log-line" style="color:#888"># Examples: 'add user1 alice', 'get user1', 'remove user1'</div>
+        </div>
+    </div>
+</main>
+
+<footer>
+    <input type="text" id="cmdInput" value="add user1 Alice" placeholder="Command...">
+    <button id="btnSend" onclick="processClientCommand()">Send Command</button>
+</footer>
+
+<script>
+    // --- State ---
+    const serverState = {};
+    let isLocked = false;
+
+    // --- Actions ---
+
+    async function processClientCommand() {
+        const input = document.getElementById('cmdInput');
+        const rawCmd = input.value.trim();
+        if(!rawCmd) return;
+
+        // Lock UI
+        document.getElementById('btnSend').disabled = true;
+        input.disabled = true;
+
+        // 1. Client Framing Logic
+        // Formula: Total = len(cmd) + len(str(len(cmd))) + 1
+        const contentLen = rawCmd.length;
+        const totalLen = contentLen + String(contentLen).length + 1;
+        const framedMsg = `${totalLen} ${rawCmd}`;
+
+        log(`[CLIENT] Input: "${rawCmd}"`, "log-client");
+        log(`[CLIENT] Framing: len(${rawCmd})=${contentLen} -> Prefix "${totalLen} "`, "log-client");
+        log(`[CLIENT] Sending bytes: "${framedMsg}"`, "log-client");
+
+        // 2. Animate Packet: Client -> Server
+        updatePacketView(totalLen, rawCmd);
+        await animatePacket('clientNode', 'serverNode');
+
+        // 3. Server Parsing & Logic
+        await serverParse(framedMsg);
+
+        // 4. Server Response Logic
+        const responseText = executeCommand(rawCmd);
+        const respContentLen = responseText.length;
+        const respTotalLen = respContentLen + String(respContentLen).length + 1;
+        const framedResp = `${respTotalLen} ${responseText}`;
+
+        log(`[SERVER] Sending Response: "${framedResp}"`, "log-server");
+
+        // 5. Animate Packet: Server -> Client
+        updatePacketView(respTotalLen, responseText);
+        await animatePacket('serverNode', 'clientNode');
+
+        log(`[CLIENT] Received: "${responseText}"`, "log-client");
+        log("-------------------------------------------------");
+
+        // Unlock UI
+        input.disabled = false;
+        document.getElementById('btnSend').disabled = false;
+        input.focus();
+        document.getElementById('byteStream').innerHTML = '<span style="color:#555; font-style:italic;">Idle</span>';
+    }
+
+    async function serverParse(fullMsg) {
+        // Visualise byte stream arrival
+        const streamContainer = document.getElementById('byteStream');
+        streamContainer.innerHTML = '';
+        
+        // Split header and body for visual distinction
+        const firstSpace = fullMsg.indexOf(' ');
+        const header = fullMsg.substring(0, firstSpace);
+        const body = fullMsg.substring(firstSpace + 1);
+
+        // Animate Header Bytes
+        for(let char of (header + " ")) {
+            addByte(char, 'header');
+            await wait(50);
+        }
+        
+        log(`[SERVER] Read Header: Length=${header}`, "log-server");
+
+        // Animate Body Bytes
+        const parts = body.split(' ');
+        const cmd = parts[0];
+        
+        // Cmd
+        for(let char of (cmd + " ")) {
+            addByte(char, 'cmd');
+            await wait(30);
+        }
+
+        // Rest
+        for(let char of body.substring(cmd.length + 1)) {
+            addByte(char, 'arg');
+            await wait(20);
+        }
+
+        log(`[SERVER] Parsed Payload: "${body}"`, "log-server");
+    }
+
+    function executeCommand(cmdString) {
+        const parts = cmdString.split(' ');
+        const cmd = parts[0];
+        const key = parts[1];
+        const res = parts.slice(2).join(' ');
+
+        let response = "ERR unknown command";
+
+        // Visualize Lock
+        toggleLock(true);
+
+        if (cmd === 'add') {
+            if (key) {
+                serverState[key] = res || "";
+                updateTable(key, 'add');
+                response = `${key} added`;
+            } else response = "ERR missing key";
+        } else if (cmd === 'remove') {
+            if (key) {
+                if (serverState[key] !== undefined) {
+                    delete serverState[key];
+                    updateTable(key, 'remove');
+                    response = `${key} removed`;
+                } else {
+                    response = `${key} not found`; // Simplified logic
+                }
+            } else response = "ERR missing key";
+        } else if (cmd === 'get') {
+            if (key) {
+                const val = serverState[key];
+                response = val !== undefined ? val : "key was not found";
+            } else response = "ERR missing key";
+        } else if (cmd === 'count') {
+            // Lab Requirement simulation
+            const count = Object.keys(serverState).length;
+            response = `${count} keys`;
+        }
+
+        // Release Lock
+        setTimeout(() => toggleLock(false), 500);
+        
+        return response;
+    }
+
+    // --- UI Helpers ---
+
+    function toggleLock(locked) {
+        const ind = document.getElementById('lockInd');
+        if (locked) {
+            ind.classList.add('locked');
+            ind.innerText = "🔒 LOCKED";
+        } else {
+            ind.classList.remove('locked');
+            ind.innerText = "🔓 UNLOCKED";
+        }
+    }
+
+    function updateTable(key, action) {
+        const tbody = document.getElementById('stateTableBody');
+        
+        // Re-render specifically to handle updates cleanly
+        if (action === 'remove') {
+            const rows = Array.from(tbody.children);
+            const target = rows.find(r => r.cells[0].innerText === key);
+            if (target) {
+                target.classList.add('row-del');
+                setTimeout(() => target.remove(), 1000);
+            }
+            return;
+        }
+
+        // Add/Update
+        // Check if exists
+        let exists = false;
+        Array.from(tbody.children).forEach(r => {
+            if (r.cells[0].innerText === key) {
+                r.cells[1].innerText = serverState[key];
+                r.classList.remove('row-new');
+                void r.offsetWidth; // trigger reflow
+                r.classList.add('row-new');
+                exists = true;
+            }
+        });
+
+        if (!exists) {
+            const tr = document.createElement('tr');
+            tr.className = 'row-new';
+            tr.innerHTML = `<td>${key}</td><td>${serverState[key]}</td>`;
+            tbody.appendChild(tr);
+        }
+    }
+
+    function addByte(char, type) {
+        const span = document.createElement('div');
+        span.className = `byte ${type}`;
+        span.innerText = char === ' ' ? '_' : char;
+        document.getElementById('byteStream').appendChild(span);
+    }
+
+    function updatePacketView(len, payload) {
+        const pkt = document.getElementById('packet');
+        pkt.querySelector('.pkt-len').innerText = len;
+        pkt.querySelector('.pkt-payload').innerText = payload.length > 15 ? payload.substring(0,12)+"..." : payload;
+    }
+
+    function log(msg, cls) {
+        const div = document.createElement('div');
+        div.className = `log-line ${cls}`;
+        div.innerText = msg;
+        const c = document.getElementById('termLog');
+        c.appendChild(div);
+        c.scrollTop = c.scrollHeight;
+    }
+
+    function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+    function animatePacket(fromId, toId) {
+        return new Promise(resolve => {
+            const pkt = document.getElementById('packet');
+            const container = document.querySelector('.node-container').getBoundingClientRect();
+            const fRect = document.getElementById(fromId).getBoundingClientRect();
+            const tRect = document.getElementById(toId).getBoundingClientRect();
+
+            const startX = fRect.left + fRect.width/2 - container.left;
+            const endX = tRect.left + tRect.width/2 - container.left;
+
+            pkt.style.left = `${startX}px`;
+            pkt.style.transform = `translate(-50%, -50%) scale(1)`;
+            pkt.style.transition = 'none';
+
+            void pkt.offsetWidth;
+
+            pkt.style.transition = 'left 1s ease-in-out';
+            pkt.style.left = `${endX}px`;
+
+            setTimeout(() => {
+                pkt.style.transform = `translate(-50%, -50%) scale(0)`;
+                resolve();
+            }, 1000);
+        });
+    }
+</script>
+
+</body>
+</html>

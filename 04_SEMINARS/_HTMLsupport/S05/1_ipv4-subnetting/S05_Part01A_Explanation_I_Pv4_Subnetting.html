@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPv4 Subnetting & VLSM Visualizer</title>
+    <style>
+        :root {
+            --bg-primary: #1e1e1e;
+            --bg-secondary: #252526;
+            --accent-net: #4daafc; /* Network Bits */
+            --accent-host: #ce9178; /* Host Bits */
+            --accent-sub: #6a9955; /* Subnet */
+            --text-main: #d4d4d4;
+            --text-dim: #858585;
+            --border: #3e3e42;
+            --font-mono: 'Consolas', 'Monaco', monospace;
+            --font-sans: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- Header --- */
+        header {
+            background-color: var(--bg-secondary);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+        }
+
+        h1 { font-size: 1.1rem; font-weight: 600; color: #fff; }
+        .badge { background: var(--accent-net); color: #1e1e1e; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; margin-left: 10px; font-weight: bold; }
+
+        /* --- Main Layout --- */
+        main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            overflow: hidden;
+        }
+
+        /* Left Panel: Bit Visualization */
+        .left-panel {
+            padding: 2rem;
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+
+        input[type="text"], input[type="number"] {
+            background: #111;
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+        }
+
+        button {
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--bg-secondary);
+            color: #fff;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        button:hover { background: #333; }
+        button.primary { background: var(--accent-net); color: #1e1e1e; border-color: var(--accent-net); }
+
+        .bit-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-bottom: 20px;
+            font-family: var(--font-mono);
+        }
+
+        .octet {
+            display: flex;
+            gap: 1px;
+            margin-right: 8px;
+        }
+
+        .bit {
+            width: 20px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 2px;
+            font-size: 0.8rem;
+            position: relative;
+        }
+
+        .bit.net { background: var(--accent-net); color: #000; }
+        .bit.host { background: #333; color: var(--accent-host); border: 1px solid var(--border); }
+        .bit.borrowed { background: var(--accent-sub); color: #fff; }
+
+        .info-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+        }
+        .label { color: var(--text-dim); }
+        .value { color: #fff; font-weight: bold; }
+
+        /* Right Panel: VLSM & Subnetting */
+        .right-panel {
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            background: #141414;
+            overflow-y: auto;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        .tab {
+            cursor: pointer;
+            padding: 5px 10px;
+            color: var(--text-dim);
+        }
+        .tab.active {
+            color: #fff;
+            border-bottom: 2px solid var(--accent-net);
+        }
+
+        .vlsm-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .req-list {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .req-item {
+            background: #333;
+            padding: 5px 10px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.8rem;
+        }
+
+        .req-remove { cursor: pointer; color: #f48771; font-weight: bold; }
+
+        .visual-bar {
+            width: 100%;
+            height: 40px;
+            background: #222;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            display: flex;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .bar-segment {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: #fff;
+            border-right: 1px solid #000;
+            transition: width 0.5s;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            font-family: var(--font-mono);
+        }
+        
+        .result-table th { text-align: left; padding: 5px; color: var(--text-dim); border-bottom: 1px solid var(--border); }
+        .result-table td { padding: 5px; border-bottom: 1px solid #333; }
+
+        @media (max-width: 900px) {
+            main { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>IPv4 Subnetting & VLSM <span class="badge">Visualizer</span></h1>
+</header>
+
+<main>
+    <!-- Left: Bit Analysis -->
+    <div class="left-panel">
+        <h3>1. Address Analysis</h3>
+        <div class="input-group">
+            <input type="text" id="ipInput" value="192.168.10.0" placeholder="IP Address">
+            <span style="font-size: 1.2rem;">/</span>
+            <input type="number" id="cidrInput" value="24" min="1" max="32" style="width: 60px;">
+            <button class="primary" onclick="analyzeIP()">Analyse</button>
+        </div>
+
+        <div class="bit-container" id="bitVisual">
+            <!-- Bits generated by JS -->
+        </div>
+
+        <div class="info-card">
+            <div class="info-row"><span class="label">Network Address:</span> <span class="value" id="resNet">...</span></div>
+            <div class="info-row"><span class="label">Broadcast Address:</span> <span class="value" id="resBcast">...</span></div>
+            <div class="info-row"><span class="label">Subnet Mask:</span> <span class="value" id="resMask">...</span></div>
+            <div class="info-row"><span class="label">Total IPs:</span> <span class="value" id="resTotal">...</span></div>
+            <div class="info-row"><span class="label">Usable Hosts:</span> <span class="value" id="resUsable">...</span></div>
+        </div>
+    </div>
+
+    <!-- Right: VLSM -->
+    <div class="right-panel">
+        <div class="tabs">
+            <div class="tab active">VLSM Allocation</div>
+        </div>
+
+        <div class="vlsm-container">
+            <p style="font-size: 0.9rem; color: #888; margin-bottom: 10px;">
+                Define host requirements. The algorithm sorts them descending (largest first) to avoid overlap.
+                Based on starting block from left panel.
+            </p>
+
+            <div class="input-group">
+                <input type="number" id="reqHosts" placeholder="Hosts needed (e.g. 100)" style="width: 150px;">
+                <input type="text" id="reqName" placeholder="Name (e.g. Sales)" style="width: 150px;">
+                <button onclick="addRequirement()">Add Subnet</button>
+                <button onclick="resetVLSM()" style="border-color: #f48771; color: #f48771;">Reset</button>
+            </div>
+
+            <div class="req-list" id="reqList">
+                <!-- Requirements bubbles -->
+            </div>
+
+            <button class="primary" onclick="calculateVLSM()" style="margin-bottom: 20px;">Calculate VLSM</button>
+
+            <!-- Visualization Bar -->
+            <div class="visual-bar" id="vlsmBar">
+                <div style="width:100%; display:flex; align-items:center; justify-content:center; color:#555;">No allocation yet</div>
+            </div>
+
+            <table class="result-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Hosts Needed</th>
+                        <th>Allocated Size</th>
+                        <th>Subnet</th>
+                        <th>Range</th>
+                    </tr>
+                </thead>
+                <tbody id="vlsmTable">
+                    <!-- Results -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<script>
+    // --- IP Math Utilities ---
+
+    function ipToInt(ip) {
+        return ip.split('.').reduce((acc, octet) => (acc << 8) + parseInt(octet), 0) >>> 0;
+    }
+
+    function intToIp(int) {
+        return [
+            (int >>> 24) & 255,
+            (int >>> 16) & 255,
+            (int >>> 8) & 255,
+            int & 255
+        ].join('.');
+    }
+
+    function getMask(cidr) {
+        return -1 << (32 - cidr);
+    }
+
+    // --- Analysis Logic ---
+
+    function analyzeIP() {
+        const ipStr = document.getElementById('ipInput').value;
+        const cidr = parseInt(document.getElementById('cidrInput').value);
+
+        if(!validateIP(ipStr)) {
+            alert("Invalid IP Address");
+            return;
+        }
+
+        const ipInt = ipToInt(ipStr);
+        const maskInt = getMask(cidr);
+        const netInt = (ipInt & maskInt) >>> 0;
+        const bcastInt = (netInt | (~maskInt)) >>> 0;
+        
+        const total = Math.pow(2, 32 - cidr);
+        const usable = total > 2 ? total - 2 : 0;
+
+        // Update UI Text
+        document.getElementById('resNet').innerText = `${intToIp(netInt)}/${cidr}`;
+        document.getElementById('resBcast').innerText = intToIp(bcastInt);
+        document.getElementById('resMask').innerText = intToIp(maskInt);
+        document.getElementById('resTotal').innerText = total.toLocaleString();
+        document.getElementById('resUsable').innerText = usable.toLocaleString();
+
+        // Visual Bits
+        renderBits(netInt, cidr);
+    }
+
+    function renderBits(ipInt, cidr) {
+        const container = document.getElementById('bitVisual');
+        container.innerHTML = '';
+
+        for (let i = 0; i < 4; i++) {
+            const octetDiv = document.createElement('div');
+            octetDiv.className = 'octet';
+            
+            // Extract bits for this octet
+            const octetVal = (ipInt >>> (24 - i * 8)) & 255;
+            
+            for (let b = 7; b >= 0; b--) {
+                const globalIndex = (i * 8) + (7 - b);
+                const bitVal = (octetVal >> b) & 1;
+                
+                const bitDiv = document.createElement('div');
+                bitDiv.className = 'bit';
+                bitDiv.innerText = bitVal;
+                
+                // Color Logic
+                if (globalIndex < cidr) {
+                    bitDiv.classList.add('net');
+                } else {
+                    bitDiv.classList.add('host');
+                }
+                
+                octetDiv.appendChild(bitDiv);
+            }
+            container.appendChild(octetDiv);
+        }
+    }
+
+    function validateIP(ip) {
+        const parts = ip.split('.');
+        return parts.length === 4 && parts.every(p => !isNaN(parseInt(p)) && parseInt(p) >= 0 && parseInt(p) <= 255);
+    }
+
+    // --- VLSM Logic ---
+
+    let requirements = [
+        { name: "LAN 1", needed: 100 },
+        { name: "LAN 2", needed: 50 },
+        { name: "Link A", needed: 2 },
+        { name: "Admin", needed: 10 }
+    ]; // Default example from MD
+
+    function renderRequirements() {
+        const list = document.getElementById('reqList');
+        list.innerHTML = '';
+        requirements.forEach((req, idx) => {
+            const div = document.createElement('div');
+            div.className = 'req-item';
+            div.innerHTML = `
+                <span>${req.name}: ${req.needed} hosts</span>
+                <span class="req-remove" onclick="removeReq(${idx})">×</span>
+            `;
+            list.appendChild(div);
+        });
+    }
+
+    function addRequirement() {
+        const hosts = parseInt(document.getElementById('reqHosts').value);
+        const name = document.getElementById('reqName').value || `Subnet ${requirements.length + 1}`;
+        
+        if (!hosts || hosts <= 0) return;
+        
+        requirements.push({ name, needed: hosts });
+        renderRequirements();
+        document.getElementById('reqHosts').value = '';
+        document.getElementById('reqName').value = '';
+    }
+
+    function removeReq(idx) {
+        requirements.splice(idx, 1);
+        renderRequirements();
+    }
+
+    function resetVLSM() {
+        requirements = [];
+        renderRequirements();
+        document.getElementById('vlsmTable').innerHTML = '';
+        document.getElementById('vlsmBar').innerHTML = '<div style="width:100%; display:flex; align-items:center; justify-content:center; color:#555;">No allocation yet</div>';
+    }
+
+    function calculateVLSM() {
+        // Get Base Network
+        const ipStr = document.getElementById('ipInput').value;
+        const cidrStr = document.getElementById('cidrInput').value;
+        const baseIpInt = ipToInt(ipStr);
+        const baseCidr = parseInt(cidrStr);
+        
+        // Validations
+        const baseTotalHosts = Math.pow(2, 32 - baseCidr);
+        
+        // 1. Sort requirements descending (Crucial for VLSM)
+        const sortedReqs = [...requirements].sort((a, b) => b.needed - a.needed);
+        
+        const tableBody = document.getElementById('vlsmTable');
+        const visualBar = document.getElementById('vlsmBar');
+        tableBody.innerHTML = '';
+        visualBar.innerHTML = '';
+
+        let currentIp = baseIpInt;
+        let totalAllocated = 0;
+
+        const colors = ['#4daafc', '#6a9955', '#ce9178', '#dcdcaa', '#c586c0'];
+
+        sortedReqs.forEach((req, idx) => {
+            // Find power of 2
+            // needed + 2 (net + bcast)
+            let power = 0;
+            while ((1 << power) < (req.needed + 2)) {
+                power++;
+            }
+            const allocSize = 1 << power;
+            const newCidr = 32 - power;
+            
+            // Check overflow
+            if (totalAllocated + allocSize > baseTotalHosts) {
+                alert(`Error: Not enough space for ${req.name} (${req.needed} hosts)`);
+                return;
+            }
+
+            // Calculate Ranges
+            const netAddr = intToIp(currentIp);
+            const bcastAddr = intToIp(currentIp + allocSize - 1);
+            const range = `${intToIp(currentIp + 1)} - ${intToIp(currentIp + allocSize - 2)}`;
+
+            // Row
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${req.name}</td>
+                <td>${req.needed}</td>
+                <td>${allocSize} (/ ${newCidr})</td>
+                <td><strong>${netAddr}/${newCidr}</strong></td>
+                <td>${range}</td>
+            `;
+            tableBody.appendChild(tr);
+
+            // Bar
+            const percent = (allocSize / baseTotalHosts) * 100;
+            const barSeg = document.createElement('div');
+            barSeg.className = 'bar-segment';
+            barSeg.style.width = `${percent}%`;
+            barSeg.style.backgroundColor = colors[idx % colors.length];
+            barSeg.title = `${req.name}: ${netAddr}/${newCidr}`;
+            barSeg.innerText = `/${newCidr}`;
+            visualBar.appendChild(barSeg);
+
+            // Advance pointer
+            currentIp += allocSize;
+            totalAllocated += allocSize;
+        });
+
+        // Add Unallocated chunk
+        if (totalAllocated < baseTotalHosts) {
+            const remPercent = 100 - (totalAllocated / baseTotalHosts * 100);
+            const remBar = document.createElement('div');
+            remBar.className = 'bar-segment';
+            remBar.style.width = `${remPercent}%`;
+            remBar.style.backgroundColor = '#333';
+            remBar.style.color = '#888';
+            remBar.innerText = 'Free';
+            visualBar.appendChild(remBar);
+        }
+    }
+
+    // Init
+    analyzeIP();
+    renderRequirements();
+
+</script>
+
+</body>
+</html>

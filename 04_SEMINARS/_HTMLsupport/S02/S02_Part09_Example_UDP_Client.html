@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UDP Client Visualizer</title>
+    <style>
+        :root {
+            --bg-primary: #1e1e1e;
+            --bg-secondary: #252526;
+            --accent-udp: #d16969; /* Reddish for UDP */
+            --accent-green: #6a9955;
+            --accent-orange: #ce9178;
+            --text-main: #d4d4d4;
+            --text-dim: #858585;
+            --border: #3e3e42;
+            --font-mono: 'Consolas', 'Monaco', 'Courier New', monospace;
+            --font-sans: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --code-bg: #101010;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- Header --- */
+        header {
+            background-color: var(--bg-secondary);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+        }
+
+        h1 { font-size: 1.1rem; font-weight: 600; color: #fff; }
+
+        /* --- Main Canvas --- */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: radial-gradient(circle at center, #2a2a2a 0%, #1e1e1e 70%);
+        }
+
+        /* --- Dynamic Code Card --- */
+        .code-card {
+            position: absolute;
+            top: 2rem;
+            background-color: var(--code-bg);
+            border: 1px solid var(--accent-udp);
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            max-width: 800px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+            z-index: 10;
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        
+        .code-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .code-card h3 {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            margin-bottom: 0.5rem;
+            letter-spacing: 1px;
+        }
+
+        .code-snippet {
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            white-space: pre-wrap;
+            line-height: 1.5;
+        }
+
+        /* Syntax Highlighting */
+        .kw { color: #569cd6; } /* keyword */
+        .cls { color: #4ec9b0; } /* class */
+        .str { color: #ce9178; } /* string */
+        .fn { color: #dcdcaa; } /* function */
+        .num { color: #b5cea8; } /* number */
+        .cmt { color: #6a9955; } /* comment */
+        .var { color: #9cdcfe; } /* variable */
+
+        /* --- Network Diagram --- */
+        .diagram-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 80%;
+            max-width: 800px;
+            height: 250px;
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .node {
+            width: 120px;
+            height: 120px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            opacity: 0.6;
+        }
+
+        .node.active { 
+            opacity: 1; 
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+
+        .node-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .node-label { font-size: 1rem; font-weight: 600; color: #fff; }
+        .node-status { font-size: 0.75rem; color: var(--text-dim); margin-top: 4px; }
+        
+        /* Connection Line (Dashed) */
+        .connection-track {
+            position: absolute;
+            left: 120px; 
+            right: 120px;
+            top: 50%;
+            height: 0;
+            border-top: 2px dashed #444;
+            z-index: 1;
+        }
+
+        .packet {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: var(--accent-udp);
+            color: #fff;
+            padding: 6px 16px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            z-index: 5;
+            white-space: nowrap;
+            transition: transform 0.2s;
+        }
+
+        /* --- CLI Simulation --- */
+        .cli-bar {
+            background: #000;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 10px;
+            width: 90%;
+            max-width: 800px;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            color: #ccc;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .cli-input-group {
+            display: flex;
+            align-items: center;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 2px 8px;
+        }
+        
+        .cli-label { color: var(--accent-green); margin-right: 5px; font-size: 0.8rem; }
+        .cli-input { 
+            background: transparent; 
+            border: none; 
+            color: #fff; 
+            font-family: inherit; 
+            width: 80px; 
+        }
+        .cli-input.wide { width: 150px; }
+        .cli-input:focus { outline: none; }
+
+        /* --- Terminal Output Log --- */
+        .terminal-log {
+            width: 90%;
+            max-width: 800px;
+            background: #0c0c0c;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            height: 120px;
+            overflow-y: auto;
+            color: #ccc;
+        }
+        .log-line { margin-bottom: 4px; }
+        .log-info { color: var(--text-dim); }
+        .log-cmd { color: #fff; }
+
+        /* --- Controls Bar --- */
+        footer {
+            background-color: var(--bg-secondary);
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            z-index: 20;
+        }
+
+        button {
+            background-color: var(--accent-udp);
+            color: #fff;
+            border: none;
+            padding: 0.8rem 2rem;
+            cursor: pointer;
+            border-radius: 6px;
+            font-family: var(--font-sans);
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        button:hover:not(:disabled) { filter: brightness(1.1); }
+        button:disabled { opacity: 0.4; cursor: not-allowed; filter: grayscale(1); }
+        
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>UDP Client <span style="font-weight:400; color:#888; margin-left:10px;">One-Shot Execution</span></h1>
+</header>
+
+<main>
+    <!-- Code Highlight Overlay -->
+    <div class="code-card" id="codeCard">
+        <h3 id="codeTitle">Python Operation</h3>
+        <div class="code-snippet" id="codeContent"></div>
+    </div>
+
+    <!-- CLI Input Simulation -->
+    <div class="cli-bar">
+        <span style="color: var(--accent-green);">$</span> python3 S06_Part03_Script_UDP_Client.py
+        <div class="cli-input-group">
+            <span class="cli-label">HOST</span>
+            <input type="text" class="cli-input" id="inHost" value="127.0.0.1">
+        </div>
+        <div class="cli-input-group">
+            <span class="cli-label">PORT</span>
+            <input type="text" class="cli-input" id="inPort" value="12345">
+        </div>
+        <div class="cli-input-group">
+            <span class="cli-label">MSG</span>
+            <input type="text" class="cli-input wide" id="inMsg" value="Hello UDP">
+        </div>
+    </div>
+
+    <!-- Visual Diagram -->
+    <div class="diagram-container">
+        <!-- Client -->
+        <div class="node" id="clientNode">
+            <div class="node-icon">📡</div>
+            <div class="node-label">Client</div>
+            <div class="node-status" id="clientStatus">Idle</div>
+        </div>
+
+        <!-- Connection Line -->
+        <div class="connection-track"></div>
+        
+        <!-- Packet -->
+        <div class="packet" id="packet">DATA</div>
+
+        <!-- Server (Target) -->
+        <div class="node active" id="serverNode" style="border-color: var(--border); opacity: 0.4;">
+            <div class="node-icon">🖥️</div>
+            <div class="node-label">Server</div>
+            <div class="node-status">Unknown Status</div>
+        </div>
+    </div>
+
+    <!-- Terminal Output -->
+    <div class="terminal-log" id="termLog">
+        <div class="log-line log-info"># Configure arguments above and click Run</div>
+    </div>
+</main>
+
+<footer>
+    <button id="btnRun" onclick="runClientScript()">Run Script</button>
+</footer>
+
+<script>
+    // State
+    let isRunning = false;
+
+    // Elements
+    const codeCard = document.getElementById('codeCard');
+    const codeTitle = document.getElementById('codeTitle');
+    const codeContent = document.getElementById('codeContent');
+    const packet = document.getElementById('packet');
+    const termLog = document.getElementById('termLog');
+    const clientNode = document.getElementById('clientNode');
+    const serverNode = document.getElementById('serverNode');
+    const clientStatus = document.getElementById('clientStatus');
+
+    // Snippets Dictionary
+    const snippets = {
+        ARGS: `
+<span class="cmt"># Parse Command Line Arguments</span>
+HOST = sys.argv[<span class="num">1</span>]
+PORT = <span class="fn">int</span>(sys.argv[<span class="num">2</span>])
+MESSAGE = sys.argv[<span class="num">3</span>]`,
+        
+        SOCKET: `
+<span class="cmt"># Create UDP Socket (SOCK_DGRAM)</span>
+<span class="kw">with</span> socket.socket(socket.AF_INET, socket.SOCK_DGRAM) <span class="kw">as</span> s:
+    <span class="cmt"># No connection handshake needed!</span>`,
+
+        SEND: `
+<span class="cmt"># Encode and Send Datagram</span>
+data = MESSAGE.encode(<span class="str">'utf-8'</span>)
+s.sendto(data, (HOST, PORT))
+<span class="kw">print</span>(<span class="str">f"[INFO] Sending..."</span>)`,
+
+        RECV: `
+<span class="cmt"># Wait for response (Blocking)</span>
+response, addr = s.recvfrom(<span class="num">1024</span>)`,
+
+        PRINT: `
+<span class="cmt"># Display Result</span>
+<span class="kw">print</span>(<span class="str">f"[INFO] Received {len(response)} bytes..."</span>)
+<span class="kw">print</span>(<span class="str">f"{response!r}"</span>)`
+    };
+
+    // --- Actions ---
+
+    async function runClientScript() {
+        if (isRunning) return;
+        isRunning = true;
+        document.getElementById('btnRun').disabled = true;
+        
+        // Get Inputs
+        const host = document.getElementById('inHost').value;
+        const port = document.getElementById('inPort').value;
+        const msg = document.getElementById('inMsg').value;
+
+        // Reset Logs
+        termLog.innerHTML = `<div class="log-line log-cmd">$ python3 S06_Part03_Script_UDP_Client.py ${host} ${port} "${msg}"</div>`;
+
+        // 1. Args Parsing
+        showCode('ARGS', 'Step 1: Parse Arguments');
+        await wait(1000);
+
+        // 2. Socket Creation
+        showCode('SOCKET', 'Step 2: Create Socket');
+        clientNode.classList.add('active');
+        clientNode.style.borderColor = 'var(--accent-udp)';
+        clientStatus.innerText = "Socket Created";
+        clientStatus.style.color = 'var(--accent-udp)';
+        
+        // Server becomes "visible" as target
+        serverNode.style.opacity = '1';
+        serverNode.style.borderColor = 'var(--accent-green)';
+        serverNode.querySelector('.node-status').innerText = "Target";
+        await wait(1000);
+
+        // 3. Send Data
+        showCode('SEND', 'Step 3: Sendto (No Handshake)');
+        log(`[INFO] Sending ${msg.length} bytes to ${host}:${port} ...`);
+        
+        await animatePacket(`b'${msg}'`, "client", "server", "var(--accent-udp)");
+        await wait(200);
+
+        // 4. Recv Data
+        showCode('RECV', 'Step 4: Recvfrom (Blocking)');
+        clientStatus.innerText = "Waiting (recvfrom)...";
+        clientStatus.style.color = 'var(--accent-orange)';
+        
+        // Simulate Server Processing Delay
+        await wait(800); 
+        
+        // Server sends back
+        const responseText = msg.toUpperCase();
+        await animatePacket(`b'${responseText}'`, "server", "client", "var(--accent-green)");
+        
+        // 5. Print Result
+        showCode('PRINT', 'Step 5: Output');
+        const sAddr = `('${host}', ${port})`;
+        log(`[INFO] Received ${responseText.length} bytes from ${sAddr}: b'${responseText}'`);
+        
+        clientStatus.innerText = "Done";
+        clientStatus.style.color = 'var(--accent-green)';
+        await wait(2000);
+
+        // Cleanup
+        codeCard.classList.remove('visible');
+        clientNode.classList.remove('active');
+        clientNode.style.borderColor = 'var(--border)';
+        serverNode.style.opacity = '0.4';
+        document.getElementById('btnRun').disabled = false;
+        isRunning = false;
+    }
+
+    // --- Helpers ---
+
+    function showCode(key, title) {
+        codeContent.innerHTML = snippets[key];
+        codeTitle.innerText = title;
+        codeCard.classList.add('visible');
+    }
+
+    function log(msg) {
+        const div = document.createElement('div');
+        div.className = 'log-line';
+        div.innerText = msg;
+        termLog.appendChild(div);
+        termLog.scrollTop = termLog.scrollHeight;
+    }
+
+    function wait(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function animatePacket(text, from, to, color) {
+        return new Promise(resolve => {
+            packet.innerText = text;
+            packet.style.background = color || 'var(--accent-udp)';
+            packet.style.transform = 'translate(-50%, -50%) scale(1)'; // Show
+            
+            const isMobile = window.innerWidth <= 700;
+            const startPos = from === 'client' ? '15%' : '85%';
+            const endPos = from === 'client' ? '85%' : '15%';
+
+            // Initial Position
+            if (isMobile) {
+                packet.style.left = '50%';
+                packet.style.top = startPos;
+                packet.style.transition = 'top 0.8s ease-in-out';
+            } else {
+                packet.style.top = '50%';
+                packet.style.left = startPos;
+                packet.style.transition = 'left 0.8s ease-in-out';
+            }
+
+            // Force reflow
+            void packet.offsetWidth;
+
+            // Move
+            if (isMobile) {
+                packet.style.top = endPos;
+            } else {
+                packet.style.left = endPos;
+            }
+
+            setTimeout(() => {
+                packet.style.transform = 'translate(-50%, -50%) scale(0)'; // Hide
+                resolve();
+            }, 800);
+        });
+    }
+
+</script>
+
+</body>
+</html>

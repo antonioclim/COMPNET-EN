@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protobuf & gRPC: Stage 3 Simulation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #1e1e1e;
+            --editor-bg: #252526;
+            --sidebar-bg: #2d2d2d;
+            --accent: #0e639c;
+            --text-primary: #cccccc;
+            --keyword: #569cd6;
+            --type: #4ec9b0;
+            --string: #ce9178;
+            --number: #b5cea8;
+            --comment: #6a9955;
+            --terminal-bg: #121212;
+            --tooltip-bg: #202020;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-dark); 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #424242; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4f4f4f; 
+        }
+
+        /* Editor Styling */
+        .editor-container {
+            position: relative;
+            background-color: var(--editor-bg);
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            overflow: hidden;
+            border: 1px solid #3e3e42;
+        }
+
+        .editor-textarea {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            color: transparent;
+            caret-color: white;
+            z-index: 2;
+            padding: 20px;
+            border: none;
+            outline: none;
+            resize: none;
+            white-space: pre;
+            overflow: auto;
+        }
+
+        .editor-highlight {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            padding: 20px;
+            white-space: pre;
+            overflow: hidden;
+            pointer-events: none; 
+        }
+
+        /* Syntax Highlighting & Tooltip triggers */
+        .token-keyword { color: var(--keyword); font-weight: bold; cursor: help; text-decoration: underline dotted #569cd6; }
+        .token-type { color: var(--type); cursor: help; text-decoration: underline dotted #4ec9b0; }
+        .token-string { color: var(--string); }
+        .token-number { color: var(--number); }
+        .token-comment { color: var(--comment); font-style: italic; }
+        .token-todo { color: #FFCC00; font-weight: bold; background: rgba(255, 204, 0, 0.1); }
+
+        /* Terminal Styling */
+        .terminal {
+            background-color: var(--terminal-bg);
+            font-family: 'Consolas', monospace;
+            color: #d4d4d4;
+            padding: 15px;
+            overflow-y: auto;
+            border-top: 1px solid #3e3e42;
+        }
+
+        .cmd-prompt::before {
+            content: "student@lab:~/grpc-project$ ";
+            color: #4caf50;
+            font-weight: bold;
+        }
+
+        /* Generated Files Animation */
+        .generated-file {
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .generated-file.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* Checkbox Animation */
+        .task-checkbox {
+            transition: all 0.3s ease;
+        }
+        .task-complete {
+            color: #4caf50;
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+
+        /* Tabs */
+        .tab-btn {
+            border-bottom: 2px solid transparent;
+        }
+        .tab-btn.active {
+            border-bottom-color: var(--accent);
+            color: white;
+            background-color: #2d2d2d;
+        }
+
+        /* Tooltip */
+        #tooltip {
+            position: absolute;
+            display: none;
+            background: var(--tooltip-bg);
+            border: 1px solid #454545;
+            padding: 8px 12px;
+            border-radius: 4px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            z-index: 50;
+            max-width: 300px;
+            pointer-events: none;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 13px;
+        }
+        #tooltip strong { color: var(--type); display: block; margin-bottom: 4px; }
+        #tooltip span { color: #d4d4d4; }
+
+        /* Blueprint Nodes */
+        .node-card {
+            background: #252526;
+            border: 1px solid #3e3e42;
+            border-radius: 6px;
+            padding: 8px;
+            margin-bottom: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+        .node-header {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #3e3e42;
+            font-weight: bold;
+        }
+        .node-content {
+            font-family: 'Consolas', monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body class="flex flex-col h-screen">
+
+    <!-- Tooltip Element -->
+    <div id="tooltip"></div>
+
+    <!-- Header -->
+    <header class="h-14 bg-[#333333] flex items-center justify-between px-4 shadow-md z-10 border-b border-[#1e1e1e]">
+        <div class="flex items-center space-x-3">
+            <div class="bg-blue-600 w-8 h-8 rounded flex items-center justify-center text-white font-bold shadow-inner">
+                <i class="fas fa-network-wired text-xs"></i>
+            </div>
+            <div>
+                <h1 class="text-base font-bold text-gray-100 leading-tight">Distributed Systems Lab</h1>
+                <p class="text-[10px] text-gray-400">Scenario: High-Performance Calculator Service</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-4">
+            <span class="text-xs px-2 py-1 bg-[#3e3e42] rounded text-blue-300 border border-blue-900/30">
+                <i class="fas fa-code-branch mr-1"></i>Stage 3: Protocol Definition
+            </span>
+            <button onclick="resetLab()" class="text-xs bg-red-900/80 hover:bg-red-700 text-red-100 border border-red-700 px-3 py-1 rounded transition flex items-center">
+                <i class="fas fa-undo mr-1"></i> Reset
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex overflow-hidden">
+        
+        <!-- Left Sidebar: Instructions & Theory -->
+        <div class="w-1/3 min-w-[320px] max-w-[400px] bg-[#252526] border-r border-[#3e3e42] flex flex-col shadow-lg z-10">
+            <!-- Tabs -->
+            <div class="flex border-b border-[#3e3e42] text-sm font-medium bg-[#1e1e1e]">
+                <button onclick="switchTab('tasks')" id="tab-tasks" class="tab-btn active flex-1 py-3 text-center transition text-gray-400 hover:text-white">
+                    <i class="fas fa-tasks mr-2"></i>Tasks
+                </button>
+                <button onclick="switchTab('theory')" id="tab-theory" class="tab-btn flex-1 py-3 text-center transition text-gray-400 hover:text-white">
+                    <i class="fas fa-lightbulb mr-2"></i>Concepts
+                </button>
+            </div>
+
+            <!-- Content Area -->
+            <div class="flex-1 overflow-y-auto p-6 custom-scrollbar relative">
+                
+                <!-- Tasks Panel -->
+                <div id="panel-tasks" class="block animate-fade-in">
+                    <div class="mb-6">
+                        <div class="flex items-center justify-between mb-2">
+                            <h2 class="text-lg font-bold text-white">Current Objective</h2>
+                            <span class="text-xs bg-yellow-900/50 text-yellow-500 px-2 py-0.5 rounded border border-yellow-800">TODO</span>
+                        </div>
+                        <p class="text-gray-400 text-sm mb-4 leading-relaxed">
+                            The client needs to perform exponentiation (power) operations. Extend the <code class="text-orange-400 bg-[#1e1e1e] px-1 rounded">S12_Part02_Config_Calculator.proto</code> contract to support this.
+                        </p>
+                        
+                        <div class="bg-[#1e1e1e] p-4 rounded-lg border border-[#3e3e42] shadow-inner">
+                            <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Implementation Requirements</h3>
+                            <ul class="space-y-3 text-sm">
+                                <li id="task-1" class="task-checkbox flex items-start space-x-3 group">
+                                    <div class="mt-0.5 w-5 h-5 rounded border-2 border-gray-600 flex items-center justify-center text-xs transition-colors bg-[#252526]"></div>
+                                    <div class="flex-1">
+                                        <span class="block group-hover:text-white transition-colors">Define <strong>PowerRequest</strong> message</span>
+                                        <span class="text-xs text-gray-500">Fields: <code>int32 base</code>, <code>int32 exponent</code></span>
+                                    </div>
+                                </li>
+                                <li id="task-2" class="task-checkbox flex items-start space-x-3 group">
+                                    <div class="mt-0.5 w-5 h-5 rounded border-2 border-gray-600 flex items-center justify-center text-xs transition-colors bg-[#252526]"></div>
+                                    <div class="flex-1">
+                                        <span class="block group-hover:text-white transition-colors">Define <strong>PowerResponse</strong> message</span>
+                                        <span class="text-xs text-gray-500">Field: <code>int32 result</code></span>
+                                    </div>
+                                </li>
+                                <li id="task-3" class="task-checkbox flex items-start space-x-3 group">
+                                    <div class="mt-0.5 w-5 h-5 rounded border-2 border-gray-600 flex items-center justify-center text-xs transition-colors bg-[#252526]"></div>
+                                    <div class="flex-1">
+                                        <span class="block group-hover:text-white transition-colors">Add <strong>Power</strong> RPC method</span>
+                                        <span class="text-xs text-gray-500">To: <code>service Calculator</code></span>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <button onclick="runCompiler()" id="compile-btn" class="w-full py-3 bg-gradient-to-r from-green-700 to-green-600 hover:from-green-600 hover:to-green-500 text-white font-bold rounded shadow-lg transition transform active:scale-95 flex items-center justify-center relative overflow-hidden group">
+                        <span class="relative z-10 flex items-center">
+                            <i class="fas fa-cogs mr-2 group-hover:animate-spin"></i> Compile & Generate Code
+                        </span>
+                    </button>
+
+                    <div class="mt-6 p-4 bg-blue-900/20 border border-blue-800/50 rounded text-xs text-blue-200 leading-relaxed">
+                        <div class="flex items-center mb-2 text-blue-400 font-bold">
+                            <i class="fas fa-info-circle mr-2"></i> Tip:
+                        </div>
+                        Hover over keywords like <code class="text-blue-300">message</code> or <code class="text-blue-300">rpc</code> in the editor to see definitions.
+                    </div>
+                </div>
+
+                <!-- Theory Panel -->
+                <div id="panel-theory" class="hidden animate-fade-in">
+                    <h2 class="text-xl font-bold mb-4 text-white">Protobuf & gRPC Workflow</h2>
+                    
+                    <div class="space-y-6 text-sm text-gray-300 leading-relaxed">
+                        <section>
+                            <h3 class="text-blue-400 font-bold mb-2 flex items-center"><i class="fas fa-file-contract mr-2"></i>1. The Contract (.proto)</h3>
+                            <p class="mb-2">Before writing any code (Python, Java, etc.), we define the "Interface" using Protocol Buffers. This is language-neutral.</p>
+                            <div class="bg-[#1e1e1e] p-2 rounded border-l-2 border-blue-500 text-xs">
+                                It acts like a blueprint: "Here is what data looks like, and here are the functions available."
+                            </div>
+                        </section>
+
+                        <section>
+                            <h3 class="text-blue-400 font-bold mb-2 flex items-center"><i class="fas fa-cubes mr-2"></i>2. Data Types</h3>
+                            <p>Proto3 replaces language-specific types with generic ones:</p>
+                            <div class="grid grid-cols-2 gap-2 mt-2">
+                                <div class="bg-[#3e3e42] p-2 rounded text-xs">
+                                    <span class="text-green-400 font-mono">int32</span><br>
+                                    <span class="text-gray-500">Integer (Whole number)</span>
+                                </div>
+                                <div class="bg-[#3e3e42] p-2 rounded text-xs">
+                                    <span class="text-green-400 font-mono">string</span><br>
+                                    <span class="text-gray-500">Text</span>
+                                </div>
+                                <div class="bg-[#3e3e42] p-2 rounded text-xs">
+                                    <span class="text-green-400 font-mono">bool</span><br>
+                                    <span class="text-gray-500">True/False</span>
+                                </div>
+                                <div class="bg-[#3e3e42] p-2 rounded text-xs">
+                                    <span class="text-green-400 font-mono">repeated</span><br>
+                                    <span class="text-gray-500">List/Array</span>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section>
+                            <h3 class="text-blue-400 font-bold mb-2 flex items-center"><i class="fas fa-magic mr-2"></i>3. Code Generation</h3>
+                            <p class="mb-2">We don't write the networking code manually. The <code>protoc</code> compiler generates it for us.</p>
+                            <div class="space-y-2 mt-2">
+                                <div class="flex items-center text-xs">
+                                    <i class="fab fa-python w-5 text-yellow-500"></i>
+                                    <code class="text-gray-200">_pb2.py</code>
+                                    <span class="ml-2 text-gray-500">- Contains classes for your Messages</span>
+                                </div>
+                                <div class="flex items-center text-xs">
+                                    <i class="fab fa-python w-5 text-yellow-500"></i>
+                                    <code class="text-gray-200">_pb2_grpc.py</code>
+                                    <span class="ml-2 text-gray-500">- Contains Server/Stub classes</span>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Center: Editor -->
+        <div class="flex-1 flex flex-col min-w-[400px] z-0">
+            <!-- Tab File Name -->
+            <div class="flex bg-[#1e1e1e] h-9 items-end px-2 border-b border-[#1e1e1e]">
+                <div class="flex items-center px-4 py-2 bg-[#252526] text-gray-200 text-xs border-t border-l border-r border-[#3e3e42] rounded-t-md relative top-[1px]">
+                    <i class="fas fa-file-code text-orange-400 mr-2"></i> S12_Part02_Config_Calculator.proto
+                    <span id="unsaved-dot" class="ml-2 w-1.5 h-1.5 bg-white rounded-full opacity-0 transition"></span>
+                </div>
+            </div>
+
+            <!-- Code Editor -->
+            <div class="flex-1 editor-container relative group" onmousemove="handleTooltip(event)" onmouseleave="hideTooltip()">
+                <!-- Highlight Layer -->
+                <pre class="editor-highlight" id="highlight-layer"></pre>
+                <!-- Input Layer -->
+                <textarea id="code-input" class="editor-textarea" spellcheck="false" oninput="handleInput()" onscroll="syncScroll()">syntax = "proto3";
+
+// Package definition prevents name clashes
+package seminar12;
+
+// ---------------------
+// Request Messages
+// ---------------------
+
+// Request for Add(a, b)
+message AddRequest {
+  int32 a = 1;
+  int32 b = 2;
+}
+
+// Request for Multiply(a, b)
+message MultiplyRequest {
+  int32 a = 1;
+  int32 b = 2;
+}
+
+// TODO (student):
+// ------------
+// Define PowerRequest message here
+// with fields: int32 base, int32 exponent
+// ------------
+
+
+// -------------------------
+// Response Messages
+// -------------------------
+
+message AddResponse {
+  int32 result = 1;
+}
+
+message MultiplyResponse {
+  int32 result = 1;
+}
+
+// TODO (student):
+// ------------
+// Define PowerResponse message here
+// with field: int32 result
+// ------------
+
+
+// -------------------------
+// Service Definition
+// -------------------------
+
+service Calculator {
+  // Remote Procedure Calls
+  rpc Add (AddRequest) returns (AddResponse);
+  rpc Multiply (MultiplyRequest) returns (MultiplyResponse);
+
+  // TODO (student):
+  // --------------
+  // Add the Power RPC method here
+  // It takes PowerRequest and returns PowerResponse
+  // --------------
+}
+</textarea>
+            </div>
+            
+            <!-- Bottom Terminal -->
+            <div class="h-1/3 bg-[#1e1e1e] border-t border-[#3e3e42] flex flex-col shadow-inner-up">
+                <div class="flex items-center justify-between px-4 py-1 bg-[#252526] text-[10px] text-gray-400 uppercase tracking-wider border-b border-[#3e3e42]">
+                    <span class="flex items-center"><i class="fas fa-terminal mr-2"></i>Terminal Output</span>
+                    <button onclick="clearTerminal()" class="hover:text-white transition"><i class="fas fa-trash-alt"></i></button>
+                </div>
+                <div id="terminal-output" class="terminal flex-1 text-sm font-mono leading-snug">
+                    <div class="text-gray-500 mb-1"># Environment initialised. Protobuf compiler (protoc) ready.</div>
+                    <div class="text-gray-500 mb-2"># Edit 'S12_Part02_Config_Calculator.proto' and click 'Generate Code' to compile.</div>
+                    <div class="mt-2 cmd-prompt"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: File System & Blueprint Visualizer -->
+        <div class="w-72 bg-[#252526] border-l border-[#3e3e42] flex flex-col shadow-lg z-10">
+            <!-- Section 1: Files -->
+            <div class="flex flex-col h-1/3 border-b border-[#3e3e42]">
+                <div class="px-4 py-2 bg-[#2d2d2d] text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-[#3e3e42]">
+                    Project Explorer
+                </div>
+                <div class="p-4 space-y-2 overflow-y-auto">
+                    <!-- Static File -->
+                    <div class="flex items-center text-sm text-gray-300 group cursor-default">
+                        <i class="fas fa-file-code text-orange-400 w-6 text-center"></i>
+                        <span>S12_Part02_Config_Calculator.proto</span>
+                    </div>
+
+                    <!-- Generated Files Container -->
+                    <div id="generated-files-area" class="border-l-2 border-[#3e3e42] pl-3 ml-2.5 pt-1 space-y-2 hidden">
+                        <div class="generated-file flex items-center text-sm text-gray-300 hover:text-white transition group cursor-pointer p-1 rounded hover:bg-[#3e3e42]">
+                            <i class="fab fa-python text-yellow-400 w-5 text-center"></i>
+                            <div class="flex flex-col">
+                                <span class="leading-none">S12_Part02_Config_Calculator_pb2.py</span>
+                                <span class="text-[9px] text-gray-500">Message Classes</span>
+                            </div>
+                        </div>
+                        
+                        <div class="generated-file flex items-center text-sm text-gray-300 hover:text-white transition group cursor-pointer p-1 rounded hover:bg-[#3e3e42]" style="transition-delay: 100ms;">
+                            <i class="fab fa-python text-yellow-400 w-5 text-center"></i>
+                            <div class="flex flex-col">
+                                <span class="leading-none">S12_Part02_Config_Calculator_pb2_grpc.py</span>
+                                <span class="text-[9px] text-gray-500">Service Stubs</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 2: Blueprint Visualization -->
+            <div class="flex-1 flex flex-col bg-[#1e1e1e]">
+                <div class="px-4 py-2 bg-[#2d2d2d] text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-[#3e3e42] flex justify-between items-center">
+                    <span>Live Blueprint</span>
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                </div>
+                <div id="structure-viz" class="p-4 overflow-y-auto space-y-4">
+                    <!-- Dynamic diagram content -->
+                    <div class="text-xs text-gray-600 italic text-center mt-10">
+                        Writing valid proto syntax<br>will generate the blueprint...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Constants & State ---
+        const initialCode = document.getElementById('code-input').value;
+        const terminal = document.getElementById('terminal-output');
+        const tasks = { t1: false, t2: false, t3: false };
+        
+        // Tooltip Definitions (Learning Curve)
+        const dictionary = {
+            'syntax': "Specifies the Protobuf version. We use 'proto3' for modern features.",
+            'package': "Namespaces your code to prevent naming conflicts with other libraries.",
+            'message': "Defines a data structure (like a Class or Struct) to be sent over the network.",
+            'service': "Defines the API interface. Contains the methods the server exposes.",
+            'rpc': "Remote Procedure Call. A function that runs on the server but is called by the client.",
+            'returns': "Specifies what message the server sends back after processing.",
+            'int32': "A 32-bit signed integer. Efficient for standard numbers.",
+            'string': "A sequence of characters (UTF-8).",
+            'repeated': "A dynamic array/list of elements.",
+            '1': "Field Tag = 1. Used in binary serialization. Must be unique per message.",
+            '2': "Field Tag = 2. Must be unique per message."
+        };
+
+        // --- Editor Logic ---
+        function handleInput() {
+            const textarea = document.getElementById('code-input');
+            const highlight = document.getElementById('highlight-layer');
+            const text = textarea.value;
+            
+            document.getElementById('unsaved-dot').style.opacity = text !== initialCode ? '1' : '0';
+
+            // Enhanced Syntax Highlighting & Tooltip Tagging
+            let highlighted = text
+                .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+                .replace(/(\/\/.*)/g, '<span class="token-comment">$1</span>')
+                .replace(/(".*?")/g, '<span class="token-string">$1</span>')
+                .replace(/\b(syntax|package|message|service|rpc|returns)\b/g, '<span class="token-keyword" data-term="$1">$1</span>')
+                .replace(/\b(int32|int64|string|bool|float|double|bytes|repeated)\b/g, '<span class="token-type" data-term="$1">$1</span>')
+                .replace(/\b(\d+)\b/g, '<span class="token-number" data-term="$1">$1</span>')
+                .replace(/(TODO.*)/g, '<span class="token-todo">$1</span>');
+
+            highlight.innerHTML = highlighted;
+            
+            const checks = checkTasksRealtime(text);
+            updateStructureViz(text, checks);
+        }
+
+        function syncScroll() {
+            const textarea = document.getElementById('code-input');
+            const highlight = document.getElementById('highlight-layer');
+            highlight.scrollTop = textarea.scrollTop;
+            highlight.scrollLeft = textarea.scrollLeft;
+        }
+
+        // --- Tooltip Logic ---
+        function handleTooltip(e) {
+            const tooltip = document.getElementById('tooltip');
+            if (e.target.classList.contains('token-keyword') || 
+                e.target.classList.contains('token-type') ||
+                e.target.classList.contains('token-number')) {
+                
+                const term = e.target.getAttribute('data-term');
+                if (dictionary[term]) {
+                    tooltip.innerHTML = `<strong>${term}</strong><span>${dictionary[term]}</span>`;
+                    tooltip.style.display = 'block';
+                    tooltip.style.left = (e.clientX + 10) + 'px';
+                    tooltip.style.top = (e.clientY + 10) + 'px';
+                }
+            } else {
+                tooltip.style.display = 'none';
+            }
+        }
+
+        function hideTooltip() {
+            document.getElementById('tooltip').style.display = 'none';
+        }
+
+        // --- Logic & Visualization ---
+        function checkTasksRealtime(code) {
+            const cleanCode = code.replace(/\/\/.*$/gm, '');
+
+            const hasPowerReq = /message\s+PowerRequest\s*\{[^}]*int32\s+base\s*=\s*\d+\s*;[^}]*int32\s+exponent\s*=\s*\d+\s*;[^}]*\}/s.test(cleanCode) ||
+                                /message\s+PowerRequest\s*\{[^}]*int32\s+exponent\s*=\s*\d+\s*;[^}]*int32\s+base\s*=\s*\d+\s*;[^}]*\}/s.test(cleanCode);
+            updateTaskUI('task-1', hasPowerReq);
+
+            const hasPowerRes = /message\s+PowerResponse\s*\{[^}]*int32\s+result\s*=\s*\d+\s*;[^}]*\}/s.test(cleanCode);
+            updateTaskUI('task-2', hasPowerRes);
+
+            const hasRpc = /rpc\s+Power\s*\(\s*PowerRequest\s*\)\s*returns\s*\(\s*PowerResponse\s*\)\s*;/s.test(cleanCode);
+            updateTaskUI('task-3', hasRpc);
+
+            return { hasPowerReq, hasPowerRes, hasRpc };
+        }
+
+        function updateTaskUI(id, isComplete) {
+            const el = document.getElementById(id);
+            const checkbox = el.querySelector('div');
+            
+            if (isComplete) {
+                el.classList.add('task-complete');
+                checkbox.innerHTML = '<i class="fas fa-check text-green-500"></i>';
+                checkbox.classList.remove('border-gray-600');
+                checkbox.classList.add('border-green-500');
+            } else {
+                el.classList.remove('task-complete');
+                checkbox.innerHTML = '';
+                checkbox.classList.add('border-gray-600');
+                checkbox.classList.remove('border-green-500');
+            }
+        }
+
+        function updateStructureViz(code, checks) {
+            const viz = document.getElementById('structure-viz');
+            
+            // Simple Parser to extract structure
+            const messages = [];
+            const msgRegex = /message\s+(\w+)/g;
+            let match;
+            while ((match = msgRegex.exec(code)) !== null) {
+                messages.push(match[1]);
+            }
+
+            const services = [];
+            const svcRegex = /service\s+(\w+)/g;
+            while ((match = svcRegex.exec(code)) !== null) {
+                services.push(match[1]);
+            }
+
+            if (messages.length === 0 && services.length === 0) {
+                 viz.innerHTML = `<div class="text-xs text-gray-600 italic text-center mt-10">Writing valid proto syntax<br>will generate the blueprint...</div>`;
+                 return;
+            }
+
+            let html = '';
+
+            // Render Service Cards
+            if (services.length > 0) {
+                html += `<div class="text-[10px] text-gray-500 font-bold mb-2 uppercase">Services (API Endpoints)</div>`;
+                services.forEach(svc => {
+                    let methodsHtml = '';
+                    if (svc === 'Calculator') {
+                        methodsHtml += `<div class="flex items-center text-green-400 mb-1"><i class="fas fa-bolt mr-2 text-[10px]"></i> Add</div>`;
+                        methodsHtml += `<div class="flex items-center text-green-400 mb-1"><i class="fas fa-bolt mr-2 text-[10px]"></i> Multiply</div>`;
+                        if (checks.hasRpc) {
+                             methodsHtml += `<div class="flex items-center text-yellow-400 animate-pulse"><i class="fas fa-bolt mr-2 text-[10px]"></i> Power</div>`;
+                        }
+                    }
+                    
+                    html += `
+                        <div class="node-card border-l-4 border-l-green-600">
+                            <div class="node-header text-green-500 flex justify-between">
+                                <span>${svc}</span>
+                                <i class="fas fa-server"></i>
+                            </div>
+                            <div class="node-content">
+                                ${methodsHtml || '<span class="text-gray-600 italic">No methods defined</span>'}
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            // Render Message Cards
+            if (messages.length > 0) {
+                html += `<div class="text-[10px] text-gray-500 font-bold mb-2 mt-4 uppercase">Messages (Data Objects)</div>`;
+                messages.forEach(msg => {
+                    let fields = '';
+                    let color = 'border-l-blue-500 text-blue-400';
+                    
+                    if (msg === 'AddRequest' || msg === 'MultiplyRequest') fields = 'a (int32), b (int32)';
+                    if (msg === 'AddResponse' || msg === 'MultiplyResponse') fields = 'result (int32)';
+                    
+                    if (msg === 'PowerRequest') {
+                        fields = checks.hasPowerReq ? 'base, exponent' : 'Incomplete...';
+                        color = 'border-l-orange-500 text-orange-400';
+                    }
+                    if (msg === 'PowerResponse') {
+                        fields = checks.hasPowerRes ? 'result' : 'Incomplete...';
+                        color = 'border-l-orange-500 text-orange-400';
+                    }
+
+                    html += `
+                        <div class="node-card border-l-4 ${color.split(' ')[0]}">
+                            <div class="node-header ${color.split(' ')[1]} flex justify-between">
+                                <span>${msg}</span>
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div class="node-content text-gray-400 text-[10px]">
+                                ${fields ? `<i class="fas fa-code mr-1"></i> ${fields}` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            viz.innerHTML = html;
+        }
+
+        // --- Compilation Simulation ---
+        async function runCompiler() {
+            const code = document.getElementById('code-input').value;
+            const checks = checkTasksRealtime(code);
+            const cmd = `python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. S12_Part02_Config_Calculator.proto`;
+
+            // Reset UI
+            terminal.innerHTML = '';
+            document.getElementById('generated-files-area').classList.add('hidden');
+            document.querySelectorAll('.generated-file').forEach(el => el.classList.remove('show'));
+            
+            // Type Command
+            await typeToTerminal(cmd);
+            await new Promise(r => setTimeout(r, 400));
+
+            // Validate
+            if (checks.hasPowerReq && checks.hasPowerRes && checks.hasRpc) {
+                // Success Sequence
+                appendLog("Scanning dependencies...", "text-blue-400");
+                await new Promise(r => setTimeout(r, 600));
+                
+                appendLog("[OK] Syntax check passed.", "text-green-500");
+                appendLog("Generating Python data structures...", "text-gray-400");
+                await new Promise(r => setTimeout(r, 400));
+                appendLog("Generating gRPC client/server stubs...", "text-gray-400");
+                
+                // Show Files Animation
+                const fileArea = document.getElementById('generated-files-area');
+                fileArea.classList.remove('hidden');
+                
+                // Sequential fade in
+                const files = document.querySelectorAll('.generated-file');
+                setTimeout(() => files[0].classList.add('show'), 100);
+                setTimeout(() => files[1].classList.add('show'), 400);
+
+                appendLog("Done.", "text-green-400 font-bold");
+                appendLog("----------------------------------------", "text-gray-600");
+                appendLog("SUCCESS: Artifacts generated in /dist", "text-white bg-green-900/50 p-1 inline-block rounded");
+                appendLog("Next Step: Implement the logic in Python.", "text-yellow-400 mt-2");
+
+            } else {
+                // Failure Sequence
+                appendLog("Scanning dependencies...", "text-blue-400");
+                await new Promise(r => setTimeout(r, 500));
+                appendLog("Syntax Error: Compilation failed.", "text-red-500 font-bold");
+
+                if (!checks.hasPowerReq) appendLog(" > Missing 'PowerRequest' message definition.", "text-red-400 ml-2");
+                else if (!checks.hasPowerRes) appendLog(" > Missing 'PowerResponse' message definition.", "text-red-400 ml-2");
+                else if (!checks.hasRpc) appendLog(" > Service 'Calculator' missing 'Power' method.", "text-red-400 ml-2");
+                
+                appendLog("Please fix the errors marked in the checklist.", "text-gray-400 mt-2");
+            }
+            
+            // Restore prompt
+            const p = document.createElement('div');
+            p.className = "mt-2 cmd-prompt";
+            terminal.appendChild(p);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        // --- Helpers ---
+        function typeToTerminal(text) {
+            return new Promise(resolve => {
+                const line = document.createElement('div');
+                line.className = "cmd-prompt mb-1 break-all";
+                terminal.appendChild(line);
+                
+                let i = 0;
+                const interval = setInterval(() => {
+                    line.textContent = "student@lab:~/grpc-project$ " + text.substring(0, i+1);
+                    i++;
+                    terminal.scrollTop = terminal.scrollHeight;
+                    if (i >= text.length) {
+                        clearInterval(interval);
+                        resolve();
+                    }
+                }, 15);
+            });
+        }
+
+        function appendLog(msg, colorClass = "text-gray-300") {
+            const div = document.createElement('div');
+            div.className = `${colorClass} mb-1`;
+            div.innerHTML = msg; // allow html
+            terminal.appendChild(div);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function clearTerminal() {
+            terminal.innerHTML = '<div class="mt-2 cmd-prompt"></div>';
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            
+            document.getElementById('panel-tasks').classList.add('hidden');
+            document.getElementById('panel-theory').classList.add('hidden');
+            document.getElementById(`panel-${tabId}`).classList.remove('hidden');
+        }
+
+        function resetLab() {
+            document.getElementById('code-input').value = initialCode;
+            handleInput();
+            document.getElementById('generated-files-area').classList.add('hidden');
+            document.querySelectorAll('.generated-file').forEach(el => el.classList.remove('show'));
+            clearTerminal();
+        }
+
+        // Initialize
+        handleInput();
+        
+        // Initial Tip
+        setTimeout(() => {
+            appendLog("System ready. Hover over code keywords to see explanations.", "text-blue-400");
+            const p = document.createElement('div');
+            p.className = "mt-2 cmd-prompt";
+            terminal.appendChild(p);
+        }, 500);
+    </script>
+</body>
+</html>

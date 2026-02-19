@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini IDS Simulation | Network Security Education</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap');
+
+        :root {
+            --packet-tcp: #3b82f6;
+            --packet-udp: #f97316;
+            --alert-bg: #fee2e2;
+            --alert-text: #991b1b;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #e2e8f0;
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b; 
+        }
+
+        /* Packet Animation */
+        @keyframes travel {
+            0% { left: 5%; opacity: 0; transform: scale(0.5); }
+            10% { opacity: 1; transform: scale(1); }
+            90% { opacity: 1; transform: scale(1); }
+            100% { left: 90%; opacity: 0; transform: scale(0.5); }
+        }
+
+        .packet {
+            position: absolute;
+            top: 50%;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            transform: translateY(-50%);
+            box-shadow: 0 0 10px currentColor;
+            z-index: 10;
+        }
+
+        .packet.tcp { background-color: var(--packet-tcp); color: var(--packet-tcp); }
+        .packet.udp { background-color: var(--packet-udp); color: var(--packet-udp); }
+
+        .animate-packet {
+            animation: travel 1.5s linear forwards;
+        }
+
+        .flash-red {
+            animation: flash 0.5s ease-in-out;
+        }
+
+        @keyframes flash {
+            0%, 100% { background-color: transparent; }
+            50% { background-color: rgba(239, 68, 68, 0.3); }
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden">
+
+    <!-- Header -->
+    <header class="bg-slate-900 border-b border-slate-700 p-4 flex justify-between items-center shadow-md shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="bg-blue-600 p-2 rounded-lg">
+                <i data-lucide="shield-alert" class="text-white w-6 h-6"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold text-white tracking-tight">Mini IDS Simulator</h1>
+                <p class="text-xs text-slate-400">Based on Seminar 7: Packet Sniffing & Intrusion Detection</p>
+            </div>
+        </div>
+        <div class="flex gap-4 text-sm text-slate-400 items-center">
+            <div class="flex items-center gap-2 bg-slate-800 px-3 py-1 rounded border border-slate-700">
+                <i data-lucide="clock" class="w-4 h-4 text-blue-400"></i>
+                <span>Window: <span id="lbl-window" class="text-white mono">5s</span></span>
+            </div>
+            <button onclick="resetSimulation()" class="text-slate-300 hover:text-white hover:bg-slate-800 px-3 py-1 rounded transition-colors flex items-center gap-2">
+                <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reset
+            </button>
+            <button onclick="toggleInfo()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition-colors flex items-center gap-2">
+                <i data-lucide="book-open" class="w-4 h-4"></i> Theory
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="flex-1 grid grid-cols-12 gap-0 overflow-hidden">
+        
+        <!-- LEFT: Controls & Network Visualisation -->
+        <section class="col-span-12 lg:col-span-4 bg-slate-900 border-r border-slate-700 flex flex-col p-6 gap-6 overflow-y-auto">
+            
+            <!-- Network Topology -->
+            <div class="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-lg relative h-48 flex items-center justify-between" id="network-canvas">
+                <!-- Attacker -->
+                <div class="flex flex-col items-center z-20">
+                    <i data-lucide="laptop-2" class="w-10 h-10 text-red-500 mb-2"></i>
+                    <span class="text-xs font-bold text-red-400">Attacker (H1)</span>
+                    <span class="text-[10px] text-slate-500 mono">10.0.0.1</span>
+                </div>
+
+                <!-- Wire -->
+                <div class="absolute left-10 right-10 top-1/2 h-1 bg-slate-700 -z-0"></div>
+
+                <!-- IDS Sensor -->
+                <div class="relative z-20 bg-slate-900 p-2 rounded-full border-2 border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.5)]">
+                    <i data-lucide="eye" class="w-6 h-6 text-blue-400"></i>
+                    <div class="absolute -bottom-8 left-1/2 -translate-x-1/2 text-[10px] text-blue-400 font-bold whitespace-nowrap">IDS Sensor</div>
+                </div>
+
+                <!-- Victim -->
+                <div class="flex flex-col items-center z-20">
+                    <i data-lucide="server" class="w-10 h-10 text-emerald-500 mb-2"></i>
+                    <span class="text-xs font-bold text-emerald-400">Victim (H2)</span>
+                    <span class="text-[10px] text-slate-500 mono">10.0.0.2</span>
+                </div>
+            </div>
+
+            <!-- Attack Controls -->
+            <div class="space-y-4">
+                <h3 class="text-sm font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                    <i data-lucide="zap" class="w-4 h-4"></i> Generate Traffic
+                </h3>
+                
+                <div class="grid grid-cols-1 gap-3">
+                    <!-- Normal Traffic -->
+                    <button onclick="sendPacket('TCP', false, 1)" class="group bg-slate-800 hover:bg-slate-700 border border-slate-600 p-3 rounded-lg text-left transition-all hover:border-blue-500">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-medium text-blue-400">Single TCP Packet</span>
+                            <i data-lucide="arrow-right" class="w-4 h-4 text-slate-500 group-hover:text-blue-400"></i>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">Normal traffic. Port 80. Flag: PSH/ACK.</p>
+                    </button>
+
+                    <!-- Port Scan -->
+                    <button onclick="triggerPortScan()" class="group bg-slate-800 hover:bg-slate-700 border border-slate-600 p-3 rounded-lg text-left transition-all hover:border-red-500">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-medium text-red-400">TCP Port Scan</span>
+                            <i data-lucide="scan" class="w-4 h-4 text-slate-500 group-hover:text-red-400"></i>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">Sends >10 SYN packets to different ports.</p>
+                    </button>
+
+                    <!-- UDP Spray -->
+                    <button onclick="triggerUdpSpray()" class="group bg-slate-800 hover:bg-slate-700 border border-slate-600 p-3 rounded-lg text-left transition-all hover:border-orange-500">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-medium text-orange-400">UDP Spray</span>
+                            <i data-lucide="spray-can" class="w-4 h-4 text-slate-500 group-hover:text-orange-400"></i>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">Sends >10 UDP packets to different ports.</p>
+                    </button>
+
+                    <!-- Flood -->
+                    <button onclick="triggerFlood()" class="group bg-slate-800 hover:bg-slate-700 border border-slate-600 p-3 rounded-lg text-left transition-all hover:border-purple-500">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-medium text-purple-400">TCP Flood (DoS)</span>
+                            <i data-lucide="waves" class="w-4 h-4 text-slate-500 group-hover:text-purple-400"></i>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">Bursts 25 packets to Port 80 instantly.</p>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Configuration -->
+            <div class="mt-auto bg-slate-800 p-4 rounded-lg border border-slate-700">
+                <h4 class="text-xs font-bold text-slate-400 uppercase mb-3">IDS Configuration (Python)</h4>
+                <div class="space-y-2 text-xs font-mono">
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">WINDOW_SECONDS</span>
+                        <span class="text-green-400">5.0</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">TCP_SYN_THRESHOLD</span>
+                        <span class="text-blue-400">10</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">UDP_PORT_THRESHOLD</span>
+                        <span class="text-orange-400">10</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">FLOOD_THRESHOLD</span>
+                        <span class="text-purple-400">20</span> <span class="text-[9px] text-slate-600">(Simulated)</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MIDDLE: Sniffer Output & Alerts -->
+        <section class="col-span-12 lg:col-span-4 bg-slate-950 flex flex-col border-r border-slate-800">
+            <!-- Alert Log (Top Priority) -->
+            <div class="h-1/3 border-b border-slate-800 flex flex-col">
+                <div class="p-3 bg-slate-900 border-b border-slate-800 flex justify-between items-center">
+                    <h3 class="text-xs font-bold text-red-400 uppercase flex items-center gap-2">
+                        <i data-lucide="triangle-alert" class="w-4 h-4"></i> IDS Alerts (ids_alerts.log)
+                    </h3>
+                    <button onclick="clearLogs('alerts')" class="text-[10px] text-slate-500 hover:text-white">Clear</button>
+                </div>
+                <div id="alert-log" class="flex-1 p-4 overflow-y-auto space-y-2 font-mono text-xs">
+                    <!-- Alerts go here -->
+                </div>
+            </div>
+
+            <!-- Packet Sniffer (Bottom) -->
+            <div class="flex-1 flex flex-col bg-black">
+                <div class="p-3 bg-slate-900 border-b border-slate-800 flex justify-between items-center">
+                    <h3 class="text-xs font-bold text-blue-400 uppercase flex items-center gap-2">
+                        <i data-lucide="activity" class="w-4 h-4"></i> Sniffer Output (AF_PACKET)
+                    </h3>
+                    <div class="flex gap-2">
+                        <span class="flex items-center gap-1 text-[10px] text-slate-400"><div class="w-2 h-2 rounded-full bg-blue-500"></div> TCP</span>
+                        <span class="flex items-center gap-1 text-[10px] text-slate-400"><div class="w-2 h-2 rounded-full bg-orange-500"></div> UDP</span>
+                    </div>
+                </div>
+                <div id="packet-log" class="flex-1 p-4 overflow-y-auto font-mono text-[11px] leading-relaxed space-y-1 text-slate-400">
+                    <!-- Packets go here -->
+                    <div class="text-slate-600 italic">// Listening on interface eth0...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- RIGHT: Internal State Visualiser -->
+        <section class="col-span-12 lg:col-span-4 bg-slate-900 flex flex-col p-6 overflow-y-auto">
+            <h3 class="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4 flex items-center gap-2">
+                <i data-lucide="cpu" class="w-4 h-4"></i> Internal State Memory
+            </h3>
+            <p class="text-xs text-slate-500 mb-4">
+                This shows the <code>ids_state</code> dictionary tracking timestamps. Entries expire after 5 seconds.
+            </p>
+
+            <div class="space-y-6">
+                <!-- TCP Scan State -->
+                <div class="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden">
+                    <div class="bg-slate-950 px-3 py-2 border-b border-slate-700 flex justify-between">
+                        <span class="text-xs font-bold text-blue-400">ids_state['tcp_scan']</span>
+                        <span class="text-[10px] text-slate-500">Threshold: 10 ports</span>
+                    </div>
+                    <div class="p-3 font-mono text-[10px] text-slate-300 whitespace-pre overflow-x-auto" id="state-tcp">{}</div>
+                </div>
+
+                <!-- UDP Spray State -->
+                <div class="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden">
+                    <div class="bg-slate-950 px-3 py-2 border-b border-slate-700 flex justify-between">
+                        <span class="text-xs font-bold text-orange-400">ids_state['udp_spray']</span>
+                        <span class="text-[10px] text-slate-500">Threshold: 10 ports</span>
+                    </div>
+                    <div class="p-3 font-mono text-[10px] text-slate-300 whitespace-pre overflow-x-auto" id="state-udp">{}</div>
+                </div>
+
+                <!-- Flood State -->
+                <div class="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden">
+                    <div class="bg-slate-950 px-3 py-2 border-b border-slate-700 flex justify-between">
+                        <span class="text-xs font-bold text-purple-400">ids_state['flood']</span>
+                        <span class="text-[10px] text-slate-500">Threshold: 20 pkts</span>
+                    </div>
+                    <div class="p-3 font-mono text-[10px] text-slate-300 whitespace-pre overflow-x-auto" id="state-flood">{}</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal for Theory -->
+    <div id="theory-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-slate-900 border border-slate-600 rounded-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto shadow-2xl">
+            <div class="p-6 border-b border-slate-700 flex justify-between items-center sticky top-0 bg-slate-900">
+                <h2 class="text-xl font-bold text-white">How this Mini IDS Works</h2>
+                <button onclick="toggleInfo()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
+            </div>
+            <div class="p-6 space-y-4 text-sm text-slate-300">
+                <p>This simulation visualises the Python logic from <code>mini_ids.py</code>.</p>
+                
+                <h3 class="text-blue-400 font-bold text-lg">1. TCP Port Scan Detection</h3>
+                <p><strong>Logic:</strong> The IDS tracks SYN packets (connection requests) that do not have the ACK flag set.</p>
+                <ul class="list-disc ml-5 space-y-1 text-slate-400">
+                    <li>Key: Source IP.</li>
+                    <li>Value: Set of distinct Destination Ports accessed within <code>WINDOW_SECONDS</code>.</li>
+                    <li><strong>Alert:</strong> Triggered if the count of distinct ports ≥ <code>TCP_SYN_THRESHOLD</code> (10).</li>
+                </ul>
+
+                <h3 class="text-orange-400 font-bold text-lg">2. UDP Spray Detection</h3>
+                <p><strong>Logic:</strong> Since UDP is connectionless, we simply count unique destination ports contacted by a source.</p>
+                <ul class="list-disc ml-5 space-y-1 text-slate-400">
+                    <li>Key: Source IP.</li>
+                    <li>Value: Set of distinct Destination Ports accessed within <code>WINDOW_SECONDS</code>.</li>
+                    <li><strong>Alert:</strong> Triggered if the count of distinct ports ≥ <code>UDP_PORT_THRESHOLD</code> (10).</li>
+                </ul>
+
+                <h3 class="text-purple-400 font-bold text-lg">3. Flood Detection (DoS)</h3>
+                <p><strong>Logic:</strong> Detects high traffic volume to a single target service.</p>
+                <ul class="list-disc ml-5 space-y-1 text-slate-400">
+                    <li>Key: Tuple <code>(Destination IP, Destination Port)</code>.</li>
+                    <li>Value: List of packet timestamps.</li>
+                    <li><strong>Alert:</strong> Triggered if packet count > <code>FLOOD_THRESHOLD</code> within the time window.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- ICONS ---
+        lucide.createIcons();
+
+        // --- CONFIGURATION ---
+        const CONFIG = {
+            WINDOW_SECONDS: 5,
+            TCP_SYN_THRESHOLD: 10,
+            UDP_PORT_THRESHOLD: 10,
+            FLOOD_THRESHOLD: 20 // Lowered slightly from Python's 50 for better visual demo
+        };
+
+        // --- STATE ---
+        let ids_state = {
+            tcp_scan: {}, // { src_ip: { dst_port: timestamp } }
+            udp_spray: {}, // { src_ip: { dst_port: timestamp } }
+            flood: {}      // { "dst_ip:dst_port": [timestamps] }
+        };
+
+        // --- DOM ELEMENTS ---
+        const els = {
+            packetLog: document.getElementById('packet-log'),
+            alertLog: document.getElementById('alert-log'),
+            stateTcp: document.getElementById('state-tcp'),
+            stateUdp: document.getElementById('state-udp'),
+            stateFlood: document.getElementById('state-flood'),
+            networkCanvas: document.getElementById('network-canvas'),
+            modal: document.getElementById('theory-modal')
+        };
+
+        // --- HELPER FUNCTIONS ---
+        function getTime() {
+            const now = new Date();
+            return now.toLocaleTimeString('en-GB', { hour12: false }) + "." + String(now.getMilliseconds()).padStart(3, '0');
+        }
+
+        // --- VISUALIZATION LOGIC ---
+
+        function createPacketVisual(type) {
+            const pkt = document.createElement('div');
+            pkt.className = `packet ${type.toLowerCase()} animate-packet`;
+            els.networkCanvas.appendChild(pkt);
+            
+            // Remove from DOM after animation
+            setTimeout(() => {
+                pkt.remove();
+            }, 1500);
+        }
+
+        function logPacket(src, dst, proto, info) {
+            const entry = document.createElement('div');
+            entry.className = "hover:bg-slate-900 px-1 rounded cursor-default";
+            // Color code based on proto
+            const colorClass = proto === 'TCP' ? 'text-blue-300' : 'text-orange-300';
+            
+            entry.innerHTML = `
+                <span class="text-slate-500">[${getTime()}]</span> 
+                <span class="${colorClass} font-bold">${proto}</span> 
+                ${src} &rarr; ${dst} 
+                <span class="text-slate-500 text-[10px] ml-2">${info}</span>
+            `;
+            els.packetLog.appendChild(entry);
+            els.packetLog.scrollTop = els.packetLog.scrollHeight;
+        }
+
+        function logAlert(message) {
+            const entry = document.createElement('div');
+            entry.className = "bg-red-950/30 border-l-2 border-red-500 p-2 text-red-200 animate-pulse";
+            entry.innerHTML = `
+                <div class="font-bold flex items-center gap-2">
+                    <i data-lucide="siren" class="w-3 h-3"></i> ALERT
+                    <span class="text-[10px] text-red-400 font-normal">[${getTime()}]</span>
+                </div>
+                <div class="mt-1">${message}</div>
+            `;
+            els.alertLog.appendChild(entry);
+            els.alertLog.scrollTop = els.alertLog.scrollHeight;
+            lucide.createIcons();
+            
+            // Flash the screen slightly
+            document.body.classList.add('flash-red');
+            setTimeout(() => document.body.classList.remove('flash-red'), 500);
+        }
+
+        // --- CORE IDS LOGIC (Re-implementing Python) ---
+
+        function cleanupOldEntries(dict, now_sec, window_sec) {
+            // For TCP/UDP Scan dicts: { port: timestamp }
+            for (const key in dict) {
+                const timestamp = dict[key];
+                if (now_sec - timestamp > window_sec) {
+                    delete dict[key];
+                }
+            }
+        }
+
+        function cleanupFloodEntries(list, now_sec, window_sec) {
+            // For Flood list: [timestamp, timestamp...]
+            // Filter returns a new array, logic matches Python "to_delete"
+            return list.filter(ts => now_sec - ts <= window_sec);
+        }
+
+        function updateStateDisplay() {
+            // Helper to clean up empty keys for cleaner display
+            const cleanState = (obj) => {
+                const clean = {};
+                for(let k in obj) {
+                    if(Object.keys(obj[k]).length > 0) clean[k] = obj[k];
+                }
+                return clean;
+            };
+
+            els.stateTcp.innerText = JSON.stringify(cleanState(ids_state.tcp_scan), null, 2);
+            els.stateUdp.innerText = JSON.stringify(cleanState(ids_state.udp_spray), null, 2);
+            els.stateFlood.innerText = JSON.stringify(ids_state.flood, null, 2);
+        }
+
+        function handleTcpPacket(src_ip, dst_ip, dst_port, flags, now_sec) {
+            const is_syn = flags.includes('SYN');
+            const is_ack = flags.includes('ACK');
+
+            // 1. Detect Port Scan (SYN, no ACK)
+            if (is_syn && !is_ack) {
+                if (!ids_state.tcp_scan[src_ip]) ids_state.tcp_scan[src_ip] = {};
+                
+                // Cleanup
+                cleanupOldEntries(ids_state.tcp_scan[src_ip], now_sec, CONFIG.WINDOW_SECONDS);
+                
+                // Add current
+                ids_state.tcp_scan[src_ip][dst_port] = now_sec;
+
+                // Check Threshold
+                const port_count = Object.keys(ids_state.tcp_scan[src_ip]).length;
+                if (port_count >= CONFIG.TCP_SYN_THRESHOLD) {
+                    logAlert(`Poss. TCP PORT SCAN from ${src_ip}: ${port_count} distinct ports in ${CONFIG.WINDOW_SECONDS}s`);
+                    // Reset to avoid spamming alerts every packet (Optional, but good for UI)
+                    ids_state.tcp_scan[src_ip] = {}; 
+                }
+            }
+
+            // 2. Detect Flood
+            const floodKey = `${dst_ip}:${dst_port}`;
+            if (!ids_state.flood[floodKey]) ids_state.flood[floodKey] = [];
+            
+            // Add current
+            ids_state.flood[floodKey].push(now_sec);
+            
+            // Cleanup
+            ids_state.flood[floodKey] = cleanupFloodEntries(ids_state.flood[floodKey], now_sec, CONFIG.WINDOW_SECONDS);
+
+            // Check Threshold
+            if (ids_state.flood[floodKey].length >= CONFIG.FLOOD_THRESHOLD) {
+                logAlert(`Poss. TCP FLOOD to ${dst_ip}:${dst_port} (${ids_state.flood[floodKey].length} pkts in ${CONFIG.WINDOW_SECONDS}s)`);
+                ids_state.flood[floodKey] = []; // Reset visual alert
+            }
+
+            updateStateDisplay();
+        }
+
+        function handleUdpPacket(src_ip, dst_ip, dst_port, now_sec) {
+            if (!ids_state.udp_spray[src_ip]) ids_state.udp_spray[src_ip] = {};
+
+            // Cleanup
+            cleanupOldEntries(ids_state.udp_spray[src_ip], now_sec, CONFIG.WINDOW_SECONDS);
+
+            // Add
+            ids_state.udp_spray[src_ip][dst_port] = now_sec;
+
+            // Check
+            const port_count = Object.keys(ids_state.udp_spray[src_ip]).length;
+            if (port_count >= CONFIG.UDP_PORT_THRESHOLD) {
+                logAlert(`Poss. UDP SPRAY from ${src_ip}: ${port_count} distinct ports in ${CONFIG.WINDOW_SECONDS}s`);
+                ids_state.udp_spray[src_ip] = {}; // Reset
+            }
+
+            updateStateDisplay();
+        }
+
+        // --- SIMULATION CONTROLS ---
+
+        function processPacket(proto, src, dst, port, flags) {
+            const now_sec = Date.now() / 1000;
+            
+            createPacketVisual(proto);
+            
+            // Delay logical processing slightly to match visual arrival at "sensor" (middle)
+            setTimeout(() => {
+                let flagStr = flags ? `[${flags.join(',')}]` : "";
+                logPacket(src, `${dst}:${port}`, proto, flagStr);
+
+                if (proto === 'TCP') {
+                    handleTcpPacket(src, dst, port, flags, now_sec);
+                } else if (proto === 'UDP') {
+                    handleUdpPacket(src, dst, port, now_sec);
+                }
+            }, 750); // 1.5s animation / 2 = 0.75s to hit middle
+        }
+
+        function sendPacket(proto, isAttack, count, fixedPort = null) {
+            let sent = 0;
+            const interval = setInterval(() => {
+                if (sent >= count) {
+                    clearInterval(interval);
+                    return;
+                }
+
+                // Randomise port if not fixed
+                const port = fixedPort ? fixedPort : Math.floor(Math.random() * 1000) + 20;
+                const flags = proto === 'TCP' ? (isAttack ? ['SYN'] : ['PSH', 'ACK']) : null;
+                
+                processPacket(proto, '10.0.0.1', '10.0.0.2', port, flags);
+                sent++;
+            }, 100); // 100ms gap between packets in a burst
+        }
+
+        // --- USER ACTIONS ---
+
+        function triggerPortScan() {
+            // Send TCP_SYN_THRESHOLD + 1 packets
+            sendPacket('TCP', true, CONFIG.TCP_SYN_THRESHOLD + 1);
+        }
+
+        function triggerUdpSpray() {
+            // Send UDP_PORT_THRESHOLD + 1 packets
+            sendPacket('UDP', true, CONFIG.UDP_PORT_THRESHOLD + 1);
+        }
+
+        function triggerFlood() {
+            // Send FLOOD_THRESHOLD + 5 packets to port 80
+            sendPacket('TCP', false, CONFIG.FLOOD_THRESHOLD + 5, 80);
+        }
+
+        function resetSimulation() {
+            ids_state = { tcp_scan: {}, udp_spray: {}, flood: {} };
+            updateStateDisplay();
+            clearLogs('all');
+        }
+
+        function clearLogs(type) {
+            if (type === 'alerts' || type === 'all') els.alertLog.innerHTML = '';
+            if (type === 'all') els.packetLog.innerHTML = '<div class="text-slate-600 italic">// Logs cleared. Listening...</div>';
+        }
+
+        function toggleInfo() {
+            els.modal.classList.toggle('hidden');
+        }
+
+        // --- BACKGROUND MAINTENANCE ---
+        // Mimic real-time expiry (optional, but makes the state display look alive)
+        setInterval(() => {
+            const now_sec = Date.now() / 1000;
+            // Clean TCP Scan
+            for(let ip in ids_state.tcp_scan) cleanupOldEntries(ids_state.tcp_scan[ip], now_sec, CONFIG.WINDOW_SECONDS);
+            // Clean UDP Spray
+            for(let ip in ids_state.udp_spray) cleanupOldEntries(ids_state.udp_spray[ip], now_sec, CONFIG.WINDOW_SECONDS);
+            // Clean Flood
+            for(let key in ids_state.flood) ids_state.flood[key] = cleanupFloodEntries(ids_state.flood[key], now_sec, CONFIG.WINDOW_SECONDS);
+            
+            updateStateDisplay();
+        }, 1000);
+
+    </script>
+</body>
+</html>

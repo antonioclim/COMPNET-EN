@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UDP Interactive Client (RTT & Timeout)</title>
+    <style>
+        :root {
+            --bg-primary: #1e1e1e;
+            --bg-secondary: #252526;
+            --accent-udp: #d16969;
+            --accent-green: #6a9955;
+            --accent-warn: #ce9178;
+            --text-main: #d4d4d4;
+            --text-dim: #858585;
+            --border: #3e3e42;
+            --font-mono: 'Consolas', 'Monaco', 'Courier New', monospace;
+            --font-sans: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --code-bg: #101010;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- Header --- */
+        header {
+            background-color: var(--bg-secondary);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+        }
+
+        h1 { font-size: 1.1rem; font-weight: 600; color: #fff; }
+
+        /* --- Main Layout --- */
+        main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            overflow: hidden;
+        }
+
+        /* Left: Code Panel */
+        .left-panel {
+            padding: 1rem;
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            background: #141414;
+        }
+
+        .code-display {
+            flex: 1;
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            position: relative;
+        }
+
+        .code-title {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: var(--accent-udp);
+            color: #fff;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-bottom-left-radius: 6px;
+        }
+
+        /* Right: Visual & Stats */
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+            background: radial-gradient(circle at center, #2a2a2a 0%, #1e1e1e 70%);
+            position: relative;
+        }
+
+        /* Network Diagram */
+        .diagram-area {
+            flex: 2;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            padding: 0 40px;
+        }
+
+        .node {
+            width: 100px;
+            height: 100px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            transition: all 0.3s;
+        }
+        
+        .node.active { border-color: var(--accent-udp); box-shadow: 0 0 15px rgba(209, 105, 105, 0.3); }
+
+        .node-icon { font-size: 2rem; margin-bottom: 5px; }
+        .node-label { font-size: 0.8rem; font-weight: bold; color: #fff; }
+
+        .packet {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: var(--accent-udp);
+            border-radius: 50%;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            z-index: 20;
+            transition: all 0.5s linear;
+        }
+
+        /* Timeout Bar */
+        .timeout-bar-container {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 6px;
+            background: #333;
+            border-radius: 3px;
+            overflow: hidden;
+            display: none;
+        }
+        
+        .timeout-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--accent-warn);
+            transition: width 2s linear; /* Matches simulated timeout */
+        }
+
+        /* Stats Panel */
+        .stats-panel {
+            flex: 1;
+            background: rgba(0,0,0,0.5);
+            border-top: 1px solid var(--border);
+            padding: 1rem;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .stat-box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 10px;
+            text-align: center;
+        }
+        
+        .stat-val { font-size: 1.5rem; font-weight: bold; color: #fff; }
+        .stat-label { font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; }
+
+        /* Log */
+        .log-panel {
+            height: 120px;
+            background: #0c0c0c;
+            border-top: 1px solid var(--border);
+            padding: 10px;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            overflow-y: auto;
+            color: #ccc;
+        }
+
+        /* Footer Controls */
+        footer {
+            background-color: var(--bg-secondary);
+            padding: 1rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        input[type="text"] {
+            background: #111;
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 0.5rem;
+            border-radius: 4px;
+            width: 200px;
+        }
+
+        button {
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            background: var(--bg-primary);
+            color: #fff;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        button.btn-send { background: var(--accent-green); border-color: var(--accent-green); }
+        button.btn-stop { background: var(--accent-warn); border-color: var(--accent-warn); }
+        
+        /* Toggle Switch for Packet Loss */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: 20px;
+            padding-left: 20px;
+            border-left: 1px solid var(--border);
+        }
+        
+        .toggle-switch {
+            position: relative;
+            width: 40px;
+            height: 20px;
+            background: #333;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        
+        .toggle-switch.active { background: var(--accent-warn); }
+        
+        .toggle-knob {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 16px;
+            height: 16px;
+            background: #fff;
+            border-radius: 50%;
+            transition: left 0.2s;
+        }
+        
+        .toggle-switch.active .toggle-knob { left: 22px; }
+
+        /* Syntax Highlighting */
+        .kw { color: #569cd6; } .fn { color: #dcdcaa; } .str { color: #ce9178; } .cmt { color: #6a9955; }
+
+        @media (max-width: 800px) {
+            main { grid-template-columns: 1fr; grid-template-rows: 40% 60%; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>UDP Interactive Client <span style="font-weight:400; color:#888; margin-left:10px;">RTT & Timeout Logic</span></h1>
+</header>
+
+<main>
+    <div class="left-panel">
+        <div class="code-display" id="codeView">
+            <span class="cmt"># Python Logic Preview</span>
+        </div>
+    </div>
+
+    <div class="right-panel">
+        <div class="diagram-area">
+            <div class="node" id="clientNode">
+                <div class="node-icon">📡</div>
+                <div class="node-label">Client</div>
+            </div>
+            
+            <div class="packet" id="packet"></div>
+            
+            <div class="node" id="serverNode">
+                <div class="node-icon">🌐</div>
+                <div class="node-label">Server</div>
+            </div>
+
+            <div class="timeout-bar-container" id="timeoutBar">
+                <div class="timeout-bar-fill" id="timeoutFill"></div>
+            </div>
+        </div>
+
+        <div class="stats-panel">
+            <div class="stat-box">
+                <div class="stat-val" id="statSent">0</div>
+                <div class="stat-label">Sent</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-val" id="statRecv">0</div>
+                <div class="stat-label">Received</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-val" id="statLoss" style="color:var(--accent-warn)">0%</div>
+                <div class="stat-label">Loss Rate</div>
+            </div>
+        </div>
+        
+        <div class="log-panel" id="termLog">
+            <div># Ready to run...</div>
+        </div>
+    </div>
+</main>
+
+<footer>
+    <button id="btnStart" onclick="startApp()">Start Client</button>
+    <input type="text" id="msgInput" placeholder="Message..." disabled>
+    <button class="btn-send" id="btnSend" onclick="sendMessage()" disabled>Send</button>
+    <button class="btn-stop" id="btnExit" onclick="exitApp()" disabled>Exit Loop</button>
+    
+    <div class="toggle-container">
+        <div style="font-size: 0.8rem; color: #ccc;">Simulate Loss</div>
+        <div class="toggle-switch" id="lossToggle" onclick="toggleLoss()">
+            <div class="toggle-knob"></div>
+        </div>
+    </div>
+</footer>
+
+<script>
+    // --- Code Snippets ---
+    const snippets = {
+        SETUP: `
+<span class="kw">with</span> socket.socket(AF_INET, SOCK_DGRAM) <span class="kw">as</span> s:
+    <span class="kw">print</span>(<span class="str">"[INFO] UDP client ready"</span>)
+    s.settimeout(<span class="str">2.0</span>)  <span class="cmt"># Set timeout to 2 sec</span>
+    sent = <span class="str">0</span>; recv = <span class="str">0</span>`,
+        
+        INPUT: `
+<span class="kw">while</span> <span class="kw">True</span>:
+    msg = <span class="fn">input</span>(<span class="str">"Message: "</span>)
+    <span class="kw">if</span> msg == <span class="str">'exit'</span>: <span class="kw">break</span>`,
+
+        SEND: `
+    <span class="cmt"># Send & Start Timer</span>
+    sent += <span class="str">1</span>
+    t0 = time.time()
+    s.sendto(msg.encode(), addr)`,
+
+        WAIT: `
+    <span class="kw">try</span>:
+        <span class="cmt"># Waiting for response...</span>
+        resp, _ = s.recvfrom(<span class="str">1024</span>)`,
+
+        SUCCESS: `
+        <span class="cmt"># Success! Response received</span>
+        t1 = time.time()
+        recv += <span class="str">1</span>
+        rtt = (t1 - t0) * <span class="str">1000</span>
+        <span class="kw">print</span>(<span class="str">f"Reply: {resp} | RTT: {rtt:.2f}ms"</span>)`,
+
+        TIMEOUT: `
+    <span class="kw">except</span> socket.timeout:
+        <span class="cmt"># 2 seconds passed with no reply</span>
+        <span class="kw">print</span>(<span class="str">"[WARN] No response (timeout)"</span>)`,
+
+        STATS: `
+<span class="cmt"># Final Statistics</span>
+<span class="kw">print</span>(<span class="str">f"Sent: {sent}, Recv: {recv}"</span>)
+<span class="kw">print</span>(<span class="str">"[INFO] Client terminated."</span>)`
+    };
+
+    // --- State ---
+    let isRunning = false;
+    let simulateLoss = false;
+    let sentCount = 0;
+    let recvCount = 0;
+    
+    // Elements
+    const codeView = document.getElementById('codeView');
+    const termLog = document.getElementById('termLog');
+    const packet = document.getElementById('packet');
+    const timeoutFill = document.getElementById('timeoutFill');
+    const timeoutBar = document.getElementById('timeoutBar');
+    
+    // --- Actions ---
+
+    function startApp() {
+        isRunning = true;
+        sentCount = 0; recvCount = 0;
+        updateStats();
+        
+        document.getElementById('btnStart').disabled = true;
+        document.getElementById('msgInput').disabled = false;
+        document.getElementById('btnSend').disabled = false;
+        document.getElementById('btnExit').disabled = false;
+        
+        document.getElementById('clientNode').classList.add('active');
+        
+        showCode('SETUP', 'Initialization');
+        log("[INFO] UDP Client Ready. Timeout set to 2.0s.");
+        
+        setTimeout(() => {
+            showCode('INPUT', 'Input Loop');
+            document.getElementById('msgInput').focus();
+        }, 1500);
+    }
+
+    async function sendMessage() {
+        const input = document.getElementById('msgInput');
+        const txt = input.value;
+        if(!txt) return;
+        
+        // Lock UI
+        input.disabled = true;
+        document.getElementById('btnSend').disabled = true;
+        
+        // 1. Send Logic
+        sentCount++;
+        updateStats();
+        showCode('SEND', 'Send & Timer Start');
+        log(`[SEND] Sending "${txt}"...`);
+        
+        // Animate Packet C -> S
+        await animatePacket('clientNode', 'serverNode', '#d16969');
+        
+        // 2. Wait State
+        showCode('WAIT', 'Waiting (recvfrom)...');
+        log("[WAIT] Socket is listening for reply...");
+        
+        // Start Timeout Visual
+        timeoutBar.style.display = 'block';
+        // Force reflow
+        void timeoutFill.offsetWidth; 
+        // Start filling
+        timeoutFill.style.width = '100%'; 
+        
+        // Branching Logic: Success or Timeout?
+        if (simulateLoss) {
+            // -- SCENARIO: TIMEOUT --
+            // Wait for full visual timeout (2s)
+            await wait(2000);
+            
+            showCode('TIMEOUT', 'Exception Handler');
+            log("[WARN] socket.timeout triggered! Packet lost.");
+            
+            // Flash red
+            document.getElementById('clientNode').style.borderColor = 'var(--accent-warn)';
+            setTimeout(() => document.getElementById('clientNode').style.borderColor = '', 500);
+
+        } else {
+            // -- SCENARIO: SUCCESS --
+            // Visual wait (simulated latency < 2s)
+            const latency = 600 + Math.random() * 400; // ~0.6-1.0s
+            await wait(latency);
+            
+            // Stop timeout bar visually
+            timeoutFill.style.transition = 'none';
+            timeoutFill.style.width = '0%'; // Reset immediately
+            timeoutBar.style.display = 'none';
+            
+            // Server reply C <- S
+            await animatePacket('serverNode', 'clientNode', '#6a9955');
+            
+            recvCount++;
+            updateStats();
+            showCode('SUCCESS', 'Reply Processed');
+            
+            const rtt = latency.toFixed(2);
+            log(`[RECV] Reply: "${txt.toUpperCase()}" | RTT: ${rtt}ms`);
+        }
+
+        // Cleanup after round
+        timeoutBar.style.display = 'none';
+        timeoutFill.style.width = '0%';
+        timeoutFill.style.transition = 'width 2s linear'; // Restore transition
+        
+        input.value = '';
+        input.disabled = false;
+        document.getElementById('btnSend').disabled = false;
+        input.focus();
+        
+        if(isRunning) {
+            setTimeout(() => showCode('INPUT', 'Next Iteration'), 1000);
+        }
+    }
+
+    function exitApp() {
+        isRunning = false;
+        
+        showCode('STATS', 'Summary');
+        log("--- Exiting ---");
+        log(`Total Sent: ${sentCount}`);
+        log(`Total Recv: ${recvCount}`);
+        const loss = sentCount > 0 ? ((sentCount - recvCount)/sentCount * 100).toFixed(1) : 0;
+        log(`Loss: ${loss}%`);
+        
+        document.getElementById('btnStart').disabled = false;
+        document.getElementById('msgInput').disabled = true;
+        document.getElementById('btnSend').disabled = true;
+        document.getElementById('btnExit').disabled = true;
+        document.getElementById('clientNode').classList.remove('active');
+    }
+
+    // --- Helpers ---
+
+    function toggleLoss() {
+        simulateLoss = !simulateLoss;
+        document.getElementById('lossToggle').classList.toggle('active');
+        const status = simulateLoss ? "ENABLED" : "DISABLED";
+        log(`[CONFIG] Simulated Packet Loss: ${status}`, '#888');
+        
+        // Visual indicator on server
+        if(simulateLoss) {
+            document.getElementById('serverNode').style.opacity = '0.3';
+            document.getElementById('serverNode').style.borderStyle = 'dashed';
+        } else {
+            document.getElementById('serverNode').style.opacity = '1';
+            document.getElementById('serverNode').style.borderStyle = 'solid';
+        }
+    }
+
+    function updateStats() {
+        document.getElementById('statSent').innerText = sentCount;
+        document.getElementById('statRecv').innerText = recvCount;
+        const loss = sentCount > 0 ? ((sentCount - recvCount)/sentCount * 100).toFixed(0) : 0;
+        document.getElementById('statLoss').innerText = `${loss}%`;
+    }
+
+    function showCode(key, title) {
+        // Add title badge
+        codeView.innerHTML = `<div class="code-title">${title}</div>` + snippets[key];
+    }
+
+    function log(msg, color='#ccc') {
+        const div = document.createElement('div');
+        div.style.color = color;
+        div.innerText = msg;
+        termLog.appendChild(div);
+        termLog.scrollTop = termLog.scrollHeight;
+    }
+
+    function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+    function animatePacket(fromId, toId, color) {
+        return new Promise(resolve => {
+            const fromEl = document.getElementById(fromId);
+            const toEl = document.getElementById(toId);
+            const parentRect = document.querySelector('.diagram-area').getBoundingClientRect();
+            const fRect = fromEl.getBoundingClientRect();
+            const tRect = toEl.getBoundingClientRect();
+
+            // Centers relative to diagram area
+            const startX = fRect.left + fRect.width/2 - parentRect.left;
+            const startY = fRect.top + fRect.height/2 - parentRect.top;
+            const endX = tRect.left + tRect.width/2 - parentRect.left;
+            const endY = tRect.top + tRect.height/2 - parentRect.top;
+
+            packet.style.left = `${startX}px`;
+            packet.style.top = `${startY}px`;
+            packet.style.background = color;
+            packet.style.transform = 'translate(-50%, -50%) scale(1)';
+            packet.style.transition = 'none';
+
+            // Force reflow
+            void packet.offsetWidth;
+
+            packet.style.transition = 'all 0.5s ease-in-out';
+            packet.style.left = `${endX}px`;
+            packet.style.top = `${endY}px`;
+
+            setTimeout(() => {
+                packet.style.transform = 'translate(-50%, -50%) scale(0)';
+                resolve();
+            }, 500);
+        });
+    }
+</script>
+
+</body>
+</html>

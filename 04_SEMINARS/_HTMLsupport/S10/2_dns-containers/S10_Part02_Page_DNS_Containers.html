@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker DNS & Custom Server Simulation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* --- Core Theme --- */
+        :root {
+            --bg-dark: #0f172a;
+            --panel-bg: #1e293b;
+            --term-bg: #0c0c0c;
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-purple: #8b5cf6;
+            --accent-amber: #f59e0b;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: #e2e8f0;
+        }
+
+        /* --- UI Components --- */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .code-window {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.8rem;
+            line-height: 1.4;
+            background: #111;
+            border-left: 3px solid #333;
+        }
+
+        .line-highlight {
+            background-color: rgba(59, 130, 246, 0.2);
+            border-left: 3px solid var(--accent-blue);
+            width: 100%;
+            display: inline-block;
+        }
+
+        /* --- Network Map Nodes --- */
+        .node-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            z-index: 20;
+        }
+
+        .node-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+        }
+
+        .node-active {
+            box-shadow: 0 0 0 2px var(--accent-blue), 0 0 20px rgba(59, 130, 246, 0.5);
+            border-color: var(--accent-blue) !important;
+            background-color: rgba(59, 130, 246, 0.1) !important;
+        }
+
+        .node-processing {
+            animation: pulse-purple 1.5s infinite;
+            border-color: var(--accent-purple) !important;
+        }
+
+        /* --- Animations --- */
+        @keyframes pulse-purple {
+            0% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(139, 92, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
+        }
+
+        .packet {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            background-color: var(--accent-amber);
+            border-radius: 50%;
+            display: none;
+            z-index: 50;
+            box-shadow: 0 0 10px var(--accent-amber);
+            transition: transform 0.1s linear;
+        }
+
+        .packet::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            background: inherit;
+            border-radius: inherit;
+            transform: translate(-50%, -50%) scale(1.5);
+            opacity: 0.3;
+            animation: ripple 1s infinite;
+        }
+
+        @keyframes ripple {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+            100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; }
+        }
+
+        /* --- Terminal --- */
+        .terminal-container {
+            background-color: var(--term-bg);
+            border-top: 1px solid #333;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 15px;
+            background-color: #ccc;
+            animation: blink 1s step-end infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+        /* Phase Stepper */
+        .step-dot {
+            width: 10px; height: 10px; border-radius: 50%; background: #475569;
+            transition: all 0.3s ease;
+        }
+        .step-active { background: var(--accent-green); transform: scale(1.2); box-shadow: 0 0 8px var(--accent-green); }
+        .step-line { height: 2px; background: #334155; flex: 1; margin: 0 10px; }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden selection:bg-blue-500 selection:text-white">
+
+    <!-- Header -->
+    <header class="bg-slate-800 border-b border-slate-700 h-16 flex items-center justify-between px-6 shadow-lg z-30">
+        <div class="flex items-center gap-3">
+            <div class="p-2 bg-blue-600 rounded-lg shadow-lg">
+                <i class="fa-solid fa-network-wired text-white"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-lg text-white tracking-wide">Docker DNS Simulator</h1>
+                <p class="text-xs text-slate-400">Interactive Visualization of Internal & Custom DNS</p>
+            </div>
+        </div>
+        
+        <!-- Phase Indicator (Dynamic) -->
+        <div class="flex items-center gap-4 bg-slate-900/50 px-6 py-2 rounded-full border border-slate-700" id="phase-indicator" style="opacity: 0.5;">
+            <div class="flex flex-col items-center">
+                <div class="step-dot" id="step-1"></div>
+                <span class="text-[10px] mt-1 text-slate-400">CMD</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="flex flex-col items-center">
+                <div class="step-dot" id="step-2"></div>
+                <span class="text-[10px] mt-1 text-slate-400">DNS</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="flex flex-col items-center">
+                <div class="step-dot" id="step-3"></div>
+                <span class="text-[10px] mt-1 text-slate-400">Action</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex-1 flex overflow-hidden">
+        
+        <!-- LEFT SIDEBAR: Controls & Theory -->
+        <aside class="w-96 bg-slate-900 border-r border-slate-700 flex flex-col overflow-y-auto z-20 shadow-xl">
+            
+            <!-- Context Box -->
+            <div class="p-5 border-b border-slate-700 bg-slate-800/50">
+                <h3 class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">
+                    <i class="fa-brands fa-docker mr-1"></i> Infrastructure Context
+                </h3>
+                <div class="code-window p-3 rounded text-slate-300 text-xs border border-slate-600">
+                    <span class="text-pink-400">services:</span><br>
+                    &nbsp;&nbsp;<span class="text-blue-400">web:</span> <span class="text-gray-500"># 172.18.0.2</span><br>
+                    &nbsp;&nbsp;<span class="text-blue-400">dns-server:</span> <span class="text-gray-500"># 172.18.0.3</span><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-pink-400">ports:</span> ["5353:5353/udp"]<br>
+                    &nbsp;&nbsp;<span class="text-blue-400">debug:</span> <span class="text-gray-500"># 172.18.0.4 (Client)</span>
+                </div>
+            </div>
+
+            <!-- Learning Module -->
+            <div class="p-5 flex-1">
+                <h3 class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">Simulation Controls</h3>
+                
+                <div class="space-y-3">
+                    <!-- Scenario 1 -->
+                    <button onclick="startScenario('ping')" id="btn-ping" class="w-full text-left p-3 rounded-lg border border-slate-700 bg-slate-800 hover:bg-slate-700 hover:border-blue-500 transition-all group relative overflow-hidden">
+                        <div class="absolute inset-0 bg-blue-600/5 translate-x-[-100%] group-hover:translate-x-0 transition-transform"></div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-mono text-sm font-bold text-green-400">ping web</span>
+                            <span class="text-[10px] bg-slate-900 px-2 py-0.5 rounded text-slate-400 border border-slate-700">Standard</span>
+                        </div>
+                        <p class="text-xs text-slate-400">Demonstrates Docker's built-in DNS (127.0.0.11) resolving a service name.</p>
+                    </button>
+
+                    <!-- Scenario 2 -->
+                    <button onclick="startScenario('custom')" id="btn-custom" class="w-full text-left p-3 rounded-lg border border-slate-700 bg-slate-800 hover:bg-slate-700 hover:border-purple-500 transition-all group relative overflow-hidden">
+                        <div class="absolute inset-0 bg-purple-600/5 translate-x-[-100%] group-hover:translate-x-0 transition-transform"></div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-mono text-sm font-bold text-purple-400">dig @dns-server ...</span>
+                            <span class="text-[10px] bg-slate-900 px-2 py-0.5 rounded text-slate-400 border border-slate-700">Custom UDP</span>
+                        </div>
+                        <p class="text-xs text-slate-400">Queries your Python script on port 5353 for 'myservice.lab.local'.</p>
+                    </button>
+
+                    <!-- Scenario 3 -->
+                    <button onclick="startScenario('fail')" id="btn-fail" class="w-full text-left p-3 rounded-lg border border-slate-700 bg-slate-800 hover:bg-slate-700 hover:border-red-500 transition-all group relative overflow-hidden">
+                        <div class="absolute inset-0 bg-red-600/5 translate-x-[-100%] group-hover:translate-x-0 transition-transform"></div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-mono text-sm font-bold text-red-400">dig unknown-host</span>
+                            <span class="text-[10px] bg-slate-900 px-2 py-0.5 rounded text-slate-400 border border-slate-700">Failure</span>
+                        </div>
+                        <p class="text-xs text-slate-400">Queries Python script for a domain it doesn't know.</p>
+                    </button>
+                </div>
+
+                <!-- Live Explanation Area -->
+                <div class="mt-6 p-4 bg-blue-900/10 border border-blue-500/20 rounded-lg relative overflow-hidden hidden" id="explanation-box">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
+                    <h4 class="text-blue-400 font-bold text-sm mb-2"><i class="fa-solid fa-circle-info mr-2"></i>What's happening?</h4>
+                    <p class="text-xs text-slate-300 leading-relaxed" id="explanation-text">
+                        Waiting for input...
+                    </p>
+                </div>
+            </div>
+
+            <!-- Code Peek (Bottom Left) -->
+            <div class="h-1/3 bg-black border-t border-slate-700 p-4 flex flex-col">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-xs font-bold text-slate-500 uppercase">File: S10_Part02_Script_DNS_Server.py</span>
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse hidden" id="code-active-indicator"></span>
+                </div>
+                <div class="flex-1 overflow-hidden relative">
+                    <pre class="code-window h-full p-2 text-slate-400 custom-scrollbar overflow-y-auto" id="python-code">
+def main():
+  sock.bind((IP, 5353))
+  while True:
+    data, addr = sock.recvfrom(1024)
+    req = DNSRecord.parse(data)
+    qname = str(req.q.qname)
+
+    <span id="line-check">if qname == TARGET_NAME:</span>
+      <span id="line-answer">reply.add_answer(RR(
+        rdata=A("10.10.10.10")
+      ))</span>
+    <span id="line-else">else:</span>
+      <span id="line-pass">pass # No answer</span>
+
+    <span id="line-send">sock.sendto(reply.pack(), addr)</span>
+</pre>
+                </div>
+            </div>
+        </aside>
+
+        <!-- RIGHT MAIN: Network Map & Terminal -->
+        <main class="flex-1 flex flex-col relative bg-slate-800">
+            
+            <!-- Network Map -->
+            <div class="flex-1 relative overflow-hidden" id="network-canvas">
+                <!-- Background Grid -->
+                <div class="absolute inset-0" style="background-image: radial-gradient(#334155 1px, transparent 1px); background-size: 24px 24px; opacity: 0.2;"></div>
+                
+                <!-- Floating Info Label -->
+                <div class="absolute top-4 left-4 z-10">
+                    <div class="px-3 py-1 bg-slate-900/80 rounded border border-slate-700 text-xs text-slate-400 font-mono">
+                        Network: bridge (172.18.0.0/16)
+                    </div>
+                </div>
+
+                <!-- --- NODES --- -->
+                
+                <!-- DOCKER DNS (Infrastructure) -->
+                <div id="node-docker" class="node-card absolute top-10 left-1/2 -translate-x-1/2 w-48 bg-slate-800 border border-slate-600 rounded-xl p-3 flex flex-col items-center gap-2">
+                    <div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-900/50">
+                        <i class="fa-brands fa-docker text-2xl text-white"></i>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-sm font-bold text-white">Embedded DNS</div>
+                        <div class="text-[10px] font-mono text-slate-400">127.0.0.11</div>
+                    </div>
+                    <!-- Internal Table Representation -->
+                    <div class="w-full mt-1 bg-slate-900 p-1 rounded border border-slate-700">
+                        <div class="flex justify-between text-[9px] text-slate-500 px-1 border-b border-slate-800">
+                            <span>web</span> <span>172.18.0.2</span>
+                        </div>
+                        <div class="flex justify-between text-[9px] text-slate-500 px-1">
+                            <span>db</span> <span>172.18.0.5</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DEBUG (Client) -->
+                <div id="node-client" class="node-card absolute bottom-12 left-20 w-44 bg-slate-800 border-2 border-slate-600 rounded-xl p-4">
+                    <div class="absolute -top-3 left-3 bg-slate-700 px-2 py-0.5 rounded text-[10px] font-bold text-white tracking-wider border border-slate-600">CLIENT</div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center text-white">
+                            <i class="fa-solid fa-terminal"></i>
+                        </div>
+                        <div>
+                            <div class="text-sm font-bold text-white">debug</div>
+                            <div class="text-[10px] font-mono text-slate-400">172.18.0.4</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- WEB (Target) -->
+                <div id="node-web" class="node-card absolute top-40 right-20 w-44 bg-slate-800 border-2 border-green-800 rounded-xl p-4 opacity-80">
+                    <div class="absolute -top-3 right-3 bg-green-900 px-2 py-0.5 rounded text-[10px] font-bold text-green-100 tracking-wider border border-green-700">HTTP :8000</div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-green-700 rounded-lg flex items-center justify-center text-white">
+                            <i class="fa-brands fa-python"></i>
+                        </div>
+                        <div>
+                            <div class="text-sm font-bold text-white">web</div>
+                            <div class="text-[10px] font-mono text-slate-400">172.18.0.2</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DNS SERVER (Custom) -->
+                <div id="node-custom" class="node-card absolute bottom-12 right-20 w-48 bg-slate-800 border-2 border-purple-800 rounded-xl p-4">
+                    <div class="absolute -top-3 right-3 bg-purple-900 px-2 py-0.5 rounded text-[10px] font-bold text-purple-100 tracking-wider border border-purple-700">UDP :5353</div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-purple-700 rounded-lg flex items-center justify-center text-white">
+                            <i class="fa-solid fa-server"></i>
+                        </div>
+                        <div>
+                            <div class="text-sm font-bold text-white">dns-server</div>
+                            <div class="text-[10px] font-mono text-slate-400">172.18.0.3</div>
+                        </div>
+                    </div>
+                    <div class="mt-2 pt-2 border-t border-slate-700">
+                        <div class="text-[9px] text-purple-300 font-mono text-center">
+                            Records: {"myservice": "10.10.10.10"}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Animated Packet -->
+                <div id="packet" class="packet"></div>
+                
+                <!-- Status Overlay on Map -->
+                <div id="map-status" class="absolute bottom-4 left-1/2 -translate-x-1/2 bg-slate-900/90 text-white text-xs px-4 py-2 rounded-full border border-slate-700 backdrop-blur opacity-0 transition-opacity flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></span>
+                    <span id="map-status-text">Resolving...</span>
+                </div>
+
+            </div>
+
+            <!-- Terminal Output -->
+            <div class="h-64 terminal-container flex flex-col relative z-20">
+                <!-- Mac-style window controls -->
+                <div class="h-8 bg-slate-800 flex items-center px-4 gap-2 border-b border-slate-700">
+                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                    <div class="flex-1 text-center text-xs text-slate-500 font-sans">root@debug: /</div>
+                </div>
+                
+                <!-- Output Content -->
+                <div id="terminal" class="flex-1 p-4 text-xs md:text-sm text-slate-300 overflow-y-auto font-mono">
+                    <div class="text-slate-500 mb-2"># Debug container shell ready.</div>
+                    <div class="text-slate-500 mb-2"># Select a simulation from the left panel to begin.</div>
+                    <div id="terminal-lines"></div>
+                    <!-- Typing cursor -->
+                    <div class="mt-1">
+                        <span class="text-green-500">root@debug:/#</span> <span id="current-command"></span><span class="cursor"></span>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        /* --- CONSTANTS & CONFIG --- */
+        const els = {
+            terminalLines: document.getElementById('terminal-lines'),
+            currentCmd: document.getElementById('current-command'),
+            packet: document.getElementById('packet'),
+            mapStatus: document.getElementById('map-status'),
+            mapStatusText: document.getElementById('map-status-text'),
+            explanationBox: document.getElementById('explanation-box'),
+            explanationText: document.getElementById('explanation-text'),
+            phaseIndicator: document.getElementById('phase-indicator'),
+            steps: [document.getElementById('step-1'), document.getElementById('step-2'), document.getElementById('step-3')],
+            codeLines: {
+                check: document.getElementById('line-check'),
+                answer: document.getElementById('line-answer'),
+                else: document.getElementById('line-else'),
+                pass: document.getElementById('line-pass'),
+                send: document.getElementById('line-send')
+            },
+            codeIndicator: document.getElementById('code-active-indicator'),
+            nodes: {
+                client: document.getElementById('node-client'),
+                docker: document.getElementById('node-docker'),
+                web: document.getElementById('node-web'),
+                custom: document.getElementById('node-custom')
+            }
+        };
+
+        const CODE_DELAY = 600;
+        let isRunning = false;
+
+        /* --- UTILS --- */
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+        function setPhase(stepIndex) {
+            els.phaseIndicator.style.opacity = '1';
+            els.steps.forEach((el, idx) => {
+                if (idx === stepIndex) el.classList.add('step-active');
+                else el.classList.remove('step-active');
+            });
+        }
+
+        function resetPhase() {
+            els.phaseIndicator.style.opacity = '0.5';
+            els.steps.forEach(el => el.classList.remove('step-active'));
+        }
+
+        function showExplanation(text) {
+            els.explanationBox.classList.remove('hidden');
+            els.explanationBox.classList.add('animate-fade-in');
+            els.explanationText.innerHTML = text;
+        }
+
+        function highlightCode(lineId) {
+            // Reset all
+            Object.values(els.codeLines).forEach(el => el.className = '');
+            els.codeIndicator.classList.remove('hidden');
+            
+            if (lineId && els.codeLines[lineId]) {
+                els.codeLines[lineId].className = 'line-highlight';
+                // Auto scroll to line
+                els.codeLines[lineId].scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        function clearCodeHighlight() {
+            Object.values(els.codeLines).forEach(el => el.className = '');
+            els.codeIndicator.classList.add('hidden');
+        }
+
+        /* --- TERMINAL LOGIC --- */
+        async function typeCommand(cmd) {
+            els.currentCmd.innerText = "";
+            for (let char of cmd) {
+                els.currentCmd.innerText += char;
+                await sleep(30 + Math.random() * 50);
+            }
+            await sleep(300);
+            // Commit line
+            const div = document.createElement('div');
+            div.innerHTML = `<span class="text-green-500">root@debug:/#</span> ${cmd}`;
+            els.terminalLines.appendChild(div);
+            els.currentCmd.innerText = "";
+            
+            // Auto scroll
+            const container = document.getElementById('terminal');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function printOutput(lines, color = "text-slate-300") {
+            const container = document.getElementById('terminal');
+            lines.forEach(line => {
+                const div = document.createElement('div');
+                div.className = color + " whitespace-pre-wrap leading-tight";
+                div.textContent = line;
+                els.terminalLines.appendChild(div);
+            });
+            container.scrollTop = container.scrollHeight;
+        }
+
+        /* --- ANIMATION LOGIC --- */
+        function getPos(el) {
+            const rect = el.getBoundingClientRect();
+            const parent = document.getElementById('network-canvas').getBoundingClientRect();
+            return {
+                x: rect.left + rect.width / 2 - parent.left,
+                y: rect.top + rect.height / 2 - parent.top
+            };
+        }
+
+        async function animatePacket(fromId, toId, type = "request") {
+            const from = getPos(els.nodes[fromId]);
+            const to = getPos(els.nodes[toId]);
+            const packet = els.packet;
+
+            // Style packet based on type
+            packet.style.backgroundColor = type === "response" ? "var(--accent-green)" : "var(--accent-amber)";
+            packet.style.boxShadow = `0 0 10px ${type === "response" ? "var(--accent-green)" : "var(--accent-amber)"}`;
+
+            packet.style.left = from.x + "px";
+            packet.style.top = from.y + "px";
+            packet.style.display = "block";
+            
+            // Force reflow
+            void packet.offsetWidth;
+
+            packet.style.transition = "all 1s ease-in-out";
+            packet.style.left = to.x + "px";
+            packet.style.top = to.y + "px";
+
+            await sleep(1000);
+            packet.style.display = "none";
+            packet.style.transition = "none"; // reset
+        }
+
+        function setNodeState(nodeId, state) {
+            if (state === 'active') els.nodes[nodeId].classList.add('node-active');
+            else els.nodes[nodeId].classList.remove('node-active');
+            
+            if (state === 'processing') els.nodes[nodeId].classList.add('node-processing');
+            else els.nodes[nodeId].classList.remove('node-processing');
+        }
+
+        function updateMapStatus(text, show=true) {
+            els.mapStatusText.textContent = text;
+            els.mapStatus.style.opacity = show ? 1 : 0;
+        }
+
+        /* --- SCENARIOS --- */
+
+        async function startScenario(type) {
+            if (isRunning) return;
+            isRunning = true;
+            
+            // Reset UI
+            els.terminalLines.innerHTML = ""; // Clean slate for clarity
+            clearCodeHighlight();
+            resetPhase();
+            
+            try {
+                if (type === 'ping') await scenarioPing();
+                if (type === 'custom') await scenarioCustom(true);
+                if (type === 'fail') await scenarioCustom(false);
+            } catch(e) { console.error(e); }
+            
+            isRunning = false;
+            updateMapStatus("", false);
+            resetPhase();
+            setNodeState('client', 'off');
+            setNodeState('web', 'off');
+            setNodeState('docker', 'off');
+            setNodeState('custom', 'off');
+        }
+
+        async function scenarioPing() {
+            setPhase(0);
+            showExplanation("<b>Step 1: The Command.</b><br>You type `ping web`. The `debug` container doesn't know the IP of 'web', so it must resolve the name first.");
+            setNodeState('client', 'active');
+            await typeCommand("ping -c 2 web");
+
+            // --- PHASE 1: DNS ---
+            setPhase(1);
+            showExplanation("<b>Step 2: DNS Resolution.</b><br>The client asks Docker's internal DNS (127.0.0.11): <i>'Where is web?'</i>");
+            updateMapStatus("DNS Query: web -> 127.0.0.11");
+            
+            await animatePacket('client', 'docker', 'request');
+            setNodeState('docker', 'processing');
+            await sleep(500);
+
+            showExplanation("<b>Step 3: Lookup.</b><br>Docker checks its internal service list, finds `web` matches IP `172.18.0.2`, and replies.");
+            updateMapStatus("Resolved: web = 172.18.0.2");
+            setNodeState('docker', 'off');
+            await animatePacket('docker', 'client', 'response');
+
+            // --- PHASE 2: ICMP ---
+            setPhase(2);
+            showExplanation("<b>Step 4: ICMP Traffic.</b><br>Now that the client knows the IP, it sends the actual PING packets (ICMP Echo Request) directly to the web container.");
+            updateMapStatus("PING 172.18.0.2");
+            
+            printOutput(["PING web (172.18.0.2): 56 data bytes"]);
+            
+            // Ping 1
+            await animatePacket('client', 'web', 'request');
+            setNodeState('web', 'active');
+            await sleep(200);
+            await animatePacket('web', 'client', 'response');
+            printOutput(["64 bytes from 172.18.0.2: seq=0 ttl=64 time=0.104 ms"]);
+
+            // Ping 2
+            await sleep(500);
+            await animatePacket('client', 'web', 'request');
+            await sleep(200);
+            await animatePacket('web', 'client', 'response');
+            printOutput([
+                "64 bytes from 172.18.0.2: seq=1 ttl=64 time=0.089 ms",
+                "",
+                "--- web ping statistics ---",
+                "2 packets transmitted, 2 packets received, 0% packet loss"
+            ]);
+            setNodeState('web', 'off');
+            showExplanation("<b>Complete.</b><br>Communication established successfully via internal Service Discovery.");
+        }
+
+        async function scenarioCustom(success) {
+            const domain = success ? "myservice.lab.local" : "random.host.local";
+            
+            setPhase(0);
+            showExplanation(`<b>Step 1: Custom Query.</b><br>We explicitly ask our Python server (<code>@dns-server</code>) to resolve <code>${domain}</code> on UDP port 5353.`);
+            setNodeState('client', 'active');
+            await typeCommand(`dig @dns-server -p 5353 ${domain}`);
+
+            // --- PHASE 1: UDP SEND ---
+            setPhase(1);
+            updateMapStatus(`UDP:5353 Query for ${domain}`);
+            await animatePacket('client', 'custom', 'request');
+            setNodeState('custom', 'processing');
+
+            // --- PHASE 2: PYTHON LOGIC ---
+            showExplanation("<b>Step 2: Python Script Execution.</b><br>The script receives the raw bytes, parses the header, and checks the question section.");
+            
+            // Animate Code Lines
+            highlightCode('check');
+            await sleep(CODE_DELAY);
+
+            if (success) {
+                showExplanation("<b>Match Found!</b><br>The hostname matches `TARGET_NAME`. The script prepares a resource record (RR) with the answer.");
+                highlightCode('answer');
+                await sleep(CODE_DELAY);
+                
+                highlightCode('send');
+                showExplanation("<b>Sending Reply.</b><br>The script packs the DNSRecord object back into bytes and sends it to the client.");
+                await sleep(CODE_DELAY);
+                
+                setNodeState('custom', 'off');
+                clearCodeHighlight();
+                
+                setPhase(2);
+                updateMapStatus("Reply: A 10.10.10.10");
+                await animatePacket('custom', 'client', 'response');
+
+                printOutput([
+                    `; <<>> DiG 9.18.1 <<>> @dns-server -p 5353 ${domain}`,
+                    ";; global options: +cmd",
+                    ";; Got answer:",
+                    ";; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 4129",
+                    ";; flags: qr aa rd; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 0",
+                    "",
+                    ";; QUESTION SECTION:",
+                    `;${domain}.            IN      A`,
+                    "",
+                    ";; ANSWER SECTION:",
+                    `${domain}.     30      IN      A       10.10.10.10`,
+                    "",
+                    ";; Query time: 4 msec",
+                    ";; SERVER: 172.18.0.3#5353(dns-server)"
+                ]);
+
+            } else {
+                showExplanation("<b>No Match.</b><br>The hostname does NOT match. The script executes the `else` block (pass) and sends an empty reply.");
+                highlightCode('else');
+                await sleep(CODE_DELAY);
+                highlightCode('pass');
+                await sleep(CODE_DELAY);
+                highlightCode('send');
+                await sleep(CODE_DELAY);
+
+                setNodeState('custom', 'off');
+                clearCodeHighlight();
+
+                setPhase(2);
+                updateMapStatus("Reply: 0 Answers");
+                await animatePacket('custom', 'client', 'response');
+
+                printOutput([
+                    `; <<>> DiG 9.18.1 <<>> @dns-server -p 5353 ${domain}`,
+                    ";; global options: +cmd",
+                    ";; Got answer:",
+                    ";; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 8291",
+                    ";; flags: qr aa rd; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 0",
+                    "",
+                    ";; QUESTION SECTION:",
+                    `;${domain}.            IN      A`,
+                    "",
+                    ";; ANSWER SECTION:",
+                    "",
+                    ";; Query time: 2 msec",
+                    ";; SERVER: 172.18.0.3#5353(dns-server)"
+                ]);
+            }
+        }
+    </script>
+</body>
+</html>
