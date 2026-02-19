@@ -1,0 +1,3652 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="Revolvix" name="author"/>
+<meta content="Curs 6 – NAT/PAT, ARP, DHCP, NDP, ICMP | ASE-CSIE Computer Networks" name="description"/>
+<title>Week 6 – Network Support Protocols | ASE-CSIE Computer Networks</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&amp;family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<style>
+        :root {
+            --primary: #0f172a;
+            --primary-light: #1e293b;
+            --secondary: #0ea5e9;
+            --secondary-dark: #0284c7;
+            --accent: #f59e0b;
+            --accent-warm: #ea580c;
+            --success: #10b981;
+            --success-dark: #059669;
+            --danger: #ef4444;
+            --purple: #8b5cf6;
+            --purple-dark: #7c3aed;
+            --bg-light: #f8fafc;
+            --bg-cool: #f0f9ff;
+            --bg-warm: #fffbeb;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --gradient-primary: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --gradient-accent: linear-gradient(135deg, #0ea5e9 0%, #8b5cf6 100%);
+            --gradient-warm: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.7;
+        }
+        
+        /* Progress Bar */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: var(--gradient-accent);
+            z-index: 1000;
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Slide Counter */
+        .slide-counter {
+            position: fixed;
+            top: 1rem;
+            right: 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            background: white;
+            padding: 0.5rem 1rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            z-index: 100;
+        }
+        
+        /* Course Identifier */
+        .course-id {
+            position: fixed;
+            top: 1rem;
+            left: 1.5rem;
+            font-family: 'Source Serif 4', serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--primary);
+            background: white;
+            padding: 0.5rem 1rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            z-index: 100;
+        }
+        
+        /* Presentation Container */
+        .presentation {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Slide Base */
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 4rem 4rem 5rem;
+            display: none;
+            flex-direction: column;
+            background: var(--bg-light);
+            overflow-y: auto;
+        }
+        
+        .slide.active {
+            display: flex;
+            animation: slideIn 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        @keyframes slideIn {
+            from { 
+                opacity: 0; 
+                transform: translateX(30px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateX(0); 
+            }
+        }
+        
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+        .delay-5 { animation-delay: 0.5s; }
+        .delay-6 { animation-delay: 0.6s; }
+        
+        /* Typography */
+        h1 {
+            font-family: 'Source Serif 4', serif;
+            font-size: 3.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+        
+        h1.gradient {
+            background: var(--gradient-accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        h2 {
+            font-family: 'Source Serif 4', serif;
+            font-size: 2.2rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+        }
+        
+        h3 {
+            font-family: 'Source Serif 4', serif;
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--secondary-dark);
+            margin: 1.5rem 0 1rem;
+        }
+        
+        h4 {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+        }
+        
+        p {
+            margin-bottom: 0.75rem;
+            color: var(--text-dark);
+        }
+        
+        .text-muted { color: var(--text-muted); }
+        .text-accent { color: var(--secondary); font-weight: 600; }
+        .text-warning { color: var(--accent); font-weight: 600; }
+        .text-danger { color: var(--danger); font-weight: 600; }
+        .text-success { color: var(--success); font-weight: 600; }
+        
+        /* Layout */
+        .slide-header {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+        
+        .slide-content {
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        .columns {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .columns-2 { grid-template-columns: repeat(2, 1fr); }
+        .columns-3 { grid-template-columns: repeat(3, 1fr); }
+        .columns-4 { grid-template-columns: repeat(4, 1fr); }
+        
+        .columns-60-40 { grid-template-columns: 60% 40%; }
+        .columns-40-60 { grid-template-columns: 40% 60%; }
+        
+        /* Cards */
+        .card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        }
+        
+        /* Box Tipuri with Left Borders */
+        .highlight-box {
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--purple) 100%);
+            color: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+        
+        .highlight-box h4 { color: white; }
+        .highlight-box p, .highlight-box li { color: rgba(255,255,255,0.95); }
+        
+        .definition-box {
+            background: linear-gradient(90deg, rgba(16, 185, 129, 0.08), rgba(16, 185, 129, 0.02));
+            border-left: 4px solid var(--success);
+            border-radius: 0 16px 16px 0;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+        
+        .story-box {
+            background: linear-gradient(90deg, rgba(139, 92, 246, 0.08), rgba(139, 92, 246, 0.02));
+            border-left: 4px solid var(--purple);
+            border-radius: 0 16px 16px 0;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+        
+        .warning-box {
+            background: linear-gradient(90deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.02));
+            border-left: 4px solid var(--accent);
+            border-radius: 0 16px 16px 0;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+        
+        .insight-box {
+            background: linear-gradient(90deg, rgba(239, 68, 68, 0.08), rgba(239, 68, 68, 0.02));
+            border-left: 4px solid var(--danger);
+            border-radius: 0 16px 16px 0;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+        
+        /* Code Blocks */
+        pre, .code-block {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+            padding: 1.25rem;
+            border-radius: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            overflow-x: auto;
+            margin: 1rem 0;
+            position: relative;
+            white-space: pre-wrap;
+        }
+        
+        pre[data-lang]::before {
+            content: attr(data-lang);
+            position: absolute;
+            top: 0.75rem;
+            right: 1rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .code-block .comment { color: #64748b; font-style: italic; }
+        .code-block .keyword { color: #f472b6; }
+        .code-block .string { color: #a5f3fc; }
+        .code-block .number { color: #fcd34d; }
+        .code-block .function { color: #60a5fa; }
+        .code-block .builtin { color: #c4b5fd; }
+        
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--primary-light);
+            color: var(--secondary);
+            padding: 0.2rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.9em;
+        }
+        
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            margin: 1rem 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        
+        th {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 1rem 1.25rem;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+        }
+        
+        th:first-child { border-radius: 16px 0 0 0; }
+        th:last-child { border-radius: 0 16px 0 0; }
+        
+        td {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        tr:hover td {
+            background: var(--bg-cool);
+        }
+        
+        tr:last-child td { border-bottom: none; }
+        
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .badge-primary { background: rgba(14, 165, 233, 0.15); color: var(--secondary-dark); }
+        .badge-success { background: rgba(16, 185, 129, 0.15); color: var(--success-dark); }
+        .badge-warning { background: rgba(245, 158, 11, 0.15); color: var(--accent-warm); }
+        .badge-danger { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+        .badge-purple { background: rgba(139, 92, 246, 0.15); color: var(--purple-dark); }
+        
+        /* Protocol Header Visualisation */
+        .protocol-header {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+        
+        .header-row {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .header-row:last-child { border-bottom: none; }
+        
+        .header-field {
+            flex: 1;
+            padding: 0.75rem;
+            text-align: center;
+            border-right: 1px solid var(--border);
+            background: var(--bg-light);
+        }
+        
+        .header-field:last-child { border-right: none; }
+        
+        .header-field.span-2 { flex: 2; }
+        .header-field.span-4 { flex: 4; }
+        .header-field.span-8 { flex: 8; }
+        
+        .field-name {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .field-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            color: var(--primary);
+            margin: 0.25rem 0;
+        }
+        
+        .field-bits {
+            font-size: 0.65rem;
+            color: var(--secondary);
+        }
+        
+        /* Topology/ASCII Diagrams */
+        .topology {
+            background: var(--gradient-primary);
+            color: #e2e8f0;
+            padding: 1.5rem 2rem;
+            border-radius: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            white-space: pre;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        
+        /* SVG Diagram Container */
+        .diagram-container {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin: 1rem 0;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .diagram-container svg {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        /* Quiz Components */
+        .quiz-container {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+        
+        .quiz-question {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+        
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        .quiz-option {
+            background: var(--bg-light);
+            padding: 1rem 1.25rem;
+            border-radius: 12px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .quiz-option:hover {
+            border-color: var(--secondary);
+            background: var(--bg-cool);
+        }
+        
+        .quiz-option.correct {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: var(--success);
+        }
+        
+        .quiz-option.incorrect {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: var(--danger);
+        }
+        
+        .quiz-feedback {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 12px;
+            display: none;
+        }
+        
+        .quiz-feedback.show { display: block; }
+        .quiz-feedback.correct { background: rgba(16, 185, 129, 0.1); color: var(--success-dark); }
+        .quiz-feedback.incorrect { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+        
+        /* Reveal Components */
+        .reveal-btn {
+            background: var(--gradient-accent);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .reveal-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 16px rgba(14, 165, 233, 0.3);
+        }
+        
+        .reveal-content {
+            display: none;
+            margin-top: 1rem;
+            padding: 1.25rem;
+            background: var(--bg-cool);
+            border-radius: 12px;
+            animation: fadeUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .reveal-content.show { display: block; }
+        
+        /* Interactive Calculator Panel */
+        .interactive-panel {
+            background: white;
+            border: 2px solid var(--secondary);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+        
+        .interactive-panel h4 {
+            color: var(--secondary-dark);
+            margin-bottom: 1rem;
+        }
+        
+        .slider-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .slider-row label {
+            min-width: 150px;
+            font-weight: 500;
+        }
+        
+        .slider-row input[type="range"] {
+            flex: 1;
+            height: 8px;
+            border-radius: 4px;
+            background: var(--border);
+            appearance: none;
+            cursor: pointer;
+        }
+        
+        .slider-row input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--secondary);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .slider-row input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+        
+        .slider-value {
+            min-width: 60px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            color: var(--secondary-dark);
+        }
+        
+        .result-display {
+            background: var(--gradient-primary);
+            color: #f1f5f9;
+            padding: 1.25rem;
+            border-radius: 12px;
+            margin-top: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .result-display p, .result-display span, .result-display strong {
+            color: #f1f5f9;
+        }
+        
+        /* Lists */
+        ul, ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        li {
+            margin-bottom: 0.5rem;
+            padding-left: 0.5rem;
+        }
+        
+        ul li::marker { color: var(--secondary); }
+        ol li::marker { color: var(--secondary); font-weight: 600; }
+        
+        /* Navigation Controls */
+        .nav-controls {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            background: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+            z-index: 100;
+        }
+        
+        .nav-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .nav-btn:hover:not(:disabled) {
+            background: var(--secondary);
+            transform: scale(1.1);
+        }
+        
+        .nav-btn:disabled {
+            background: var(--border);
+            cursor: not-allowed;
+        }
+        
+        .nav-btn.toc-btn {
+            background: var(--purple);
+        }
+        
+        .nav-btn.fullscreen-btn {
+            background: var(--accent);
+        }
+        
+        /* Footer Attribution */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 0.5rem 1.5rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            z-index: 50;
+        }
+        
+        /* Table of Contents Modal */
+        .toc-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+        }
+        
+        .toc-modal.show { display: flex; }
+        
+        .toc-content {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 700px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.2);
+        }
+        
+        .toc-content h2 {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+        
+        .toc-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .toc-section h4 {
+            color: var(--secondary-dark);
+            margin-bottom: 0.75rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .toc-item {
+            padding: 0.5rem 1rem;
+            margin: 0.25rem 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 0.95rem;
+        }
+        
+        .toc-item:hover {
+            background: var(--bg-cool);
+        }
+        
+        .toc-item span {
+            color: var(--text-muted);
+            margin-right: 0.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+        }
+        
+        .toc-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: white;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+        
+        .toc-close:hover { opacity: 1; }
+        
+        /* Statistics Display */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        
+        .stat-number {
+            font-family: 'Source Serif 4', serif;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--secondary);
+            line-height: 1;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+        
+        /* Centered Content Slide */
+        .slide-centered {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+            margin: 1.5rem 0;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--gradient-accent);
+            border-radius: 2px;
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding: 1rem 0 1rem 1.5rem;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2.35rem;
+            top: 1.25rem;
+            width: 12px;
+            height: 12px;
+            background: var(--secondary);
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 0 0 3px var(--secondary);
+        }
+        
+        .timeline-year {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            color: var(--secondary-dark);
+            font-size: 0.9rem;
+        }
+        
+        .timeline-content {
+            margin-top: 0.5rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .slide { padding: 3rem; }
+            h1 { font-size: 2.5rem; }
+            h2 { font-size: 1.8rem; }
+            .columns-3, .columns-4 { grid-template-columns: repeat(2, 1fr); }
+        }
+        
+        @media (max-width: 768px) {
+            .slide { padding: 2rem 1.5rem 4rem; }
+            h1 { font-size: 2rem; }
+            h2 { font-size: 1.5rem; }
+            .columns, .columns-2, .columns-3, .columns-4 { grid-template-columns: 1fr; }
+            .course-id, .slide-counter { font-size: 0.75rem; padding: 0.4rem 0.75rem; }
+        }
+    </style>
+</head>
+<body>
+<!-- Progress Bar -->
+<div aria-valuemin="1" class="progress-bar" id="progressBar" role="progressbar"></div>
+<!-- Course Identifier -->
+<div class="course-id">CSIE · Computer Networks</div>
+<!-- Slide Counter -->
+<div aria-live="polite" class="slide-counter" id="slideCounter">1 / 55</div>
+<!-- Main Presentation -->
+<div class="presentation" id="presentation">
+<!-- ==================== INTRODUCTION SECTION ==================== -->
+<!-- Slide 1: Title -->
+<div class="slide slide-centered active" data-slide="1">
+<div style="max-width: 900px;">
+<p class="text-muted" style="font-size: 1.1rem; margin-bottom: 1rem;">Curs 6 · Semester 2 · Anul III</p>
+<h1 class="gradient" style="font-size: 4rem; margin-bottom: 1.5rem;">Network Support Protocols</h1>
+<h2 style="color: var(--text-muted); font-weight: 400; font-size: 1.8rem; margin-bottom: 3rem;">NAT/PAT · ARP · DHCP · NDP · ICMP</h2>
+<div class="stat-grid" style="max-width: 700px; margin: 0 auto;">
+<div class="stat-item">
+<div class="stat-number">75</div>
+<div class="stat-label">minutes</div>
+</div>
+<div class="stat-item">
+<div class="stat-number">5</div>
+<div class="stat-label">protocols</div>
+</div>
+<div class="stat-item">
+<div class="stat-number">∞</div>
+<div class="stat-label">devices conectate</div>
+</div>
+</div>
+<p style="margin-top: 3rem; color: var(--text-muted);">
+                    Computer Networks · Bucharest University of Economic Studies · 2025-2026
+                </p>
+</div>
+</div>
+<!-- Slide 2: Course Roadmap -->
+<div class="slide" data-slide="2">
+<div class="slide-header">
+<h2>📍 Where We Are in the Course</h2>
+</div>
+<div class="slide-content">
+<div class="diagram-container">
+<svg style="max-width: 800px;" viewbox="0 0 800 200">
+<!-- Timeline base -->
+<line stroke="#e2e8f0" stroke-width="4" x1="50" x2="750" y1="100" y2="100"></line>
+<!-- Completed weeks -->
+<circle cx="100" cy="100" fill="#10b981" r="20"></circle>
+<text fill="white" font-size="12" font-weight="600" text-anchor="middle" x="100" y="105">1</text>
+<text fill="#64748b" font-size="10" text-anchor="middle" x="100" y="140">Fundamentals</text>
+<circle cx="200" cy="100" fill="#10b981" r="20"></circle>
+<text fill="white" font-size="12" font-weight="600" text-anchor="middle" x="200" y="105">2</text>
+<text fill="#64748b" font-size="10" text-anchor="middle" x="200" y="140">OSI/TCP-IP</text>
+<circle cx="300" cy="100" fill="#10b981" r="20"></circle>
+<text fill="white" font-size="12" font-weight="600" text-anchor="middle" x="300" y="105">3</text>
+<text fill="#64748b" font-size="10" text-anchor="middle" x="300" y="140">Socket-uri</text>
+<circle cx="400" cy="100" fill="#10b981" r="20"></circle>
+<text fill="white" font-size="12" font-weight="600" text-anchor="middle" x="400" y="105">4-5</text>
+<text fill="#64748b" font-size="10" text-anchor="middle" x="400" y="140">Fizic/Linka</text>
+<!-- Current week (highlighted) -->
+<circle cx="500" cy="100" fill="#0ea5e9" r="28" stroke="#0284c7" stroke-width="4"></circle>
+<text fill="white" font-size="14" font-weight="700" text-anchor="middle" x="500" y="105">6</text>
+<text fill="#0ea5e9" font-size="11" font-weight="600" text-anchor="middle" x="500" y="145">Suport Network</text>
+<text fill="#0ea5e9" font-size="10" text-anchor="middle" x="500" y="60">← YOU ARE HERE</text>
+<!-- Future weeks -->
+<circle cx="600" cy="100" fill="#e2e8f0" r="20"></circle>
+<text fill="#64748b" font-size="12" font-weight="600" text-anchor="middle" x="600" y="105">7</text>
+<text fill="#94a3b8" font-size="10" text-anchor="middle" x="600" y="140">routing</text>
+<circle cx="700" cy="100" fill="#e2e8f0" r="20"></circle>
+<text fill="#64748b" font-size="12" font-weight="600" text-anchor="middle" x="700" y="105">8+</text>
+<text fill="#94a3b8" font-size="10" text-anchor="middle" x="700" y="140">Transport/application</text>
+</svg>
+</div>
+<div class="columns" style="margin-top: 2rem;">
+<div class="card">
+<h4>🔙 Prerequisites (Weeksle 1-5)</h4>
+<ul>
+<li>Modelele OSI and TCP/IP</li>
+<li>Fundamentalsle addressrii IP</li>
+<li>Subnetting and VLSM</li>
+<li>Bazele programarii with socket-uri</li>
+</ul>
+</div>
+<div class="card" style="border: 2px solid var(--secondary);">
+<h4>📌 Aceast Weekaman (Week 6)</h4>
+<ul>
+<li><strong>NAT/PAT</strong> – Traducere addresses</li>
+<li><strong>ARP</strong> – Rezolutie IP spre MAC</li>
+<li><strong>DHCP</strong> – configuration dinamic</li>
+<li><strong>ICMP</strong> – Diagnosticare network</li>
+</ul>
+</div>
+<div class="card">
+<h4>🔜 Urmeaz (Week 7)</h4>
+<ul>
+<li>Protocols of routing</li>
+<li>Fundamentalsle RIP, OSPF</li>
+<li>Path selection algorithms</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 3: Learning Objectives -->
+<div class="slide" data-slide="3">
+<div class="slide-header">
+<h2>🎯 Learning Objectives</h2>
+</div>
+<div class="slide-content">
+<p style="margin-bottom: 1.5rem;">By the end of this lecture, you will be able to:</p>
+<div class="columns">
+<div class="definition-box">
+<h4>📚 Recall &amp; Understanding</h4>
+<ul>
+<li><strong>Definesti</strong> NAT, PAT, ARP, DHCP, NDP and ICMP</li>
+<li><strong>Explici</strong> of ce epuizarea IPv4 a condus at adoptarea NAT</li>
+<li><strong>Descrii</strong> the process DORA al DHCP</li>
+<li><strong>Identifici</strong> role ICMP in diagnosticarea networks</li>
+</ul>
+</div>
+<div class="story-box">
+<h4>🔧 Application &amp; Analysis</h4>
+<ul>
+<li><strong>Configurezi</strong> NAT/MASQUERADE using iptables</li>
+<li><strong>Demonstrezi</strong> rezolutia ARP with unelte from linia of command</li>
+<li><strong>Diferentiezi</strong> between NAT static, NAT dinamic and PAT</li>
+<li><strong>Diagnostichezi</strong> problems of conectivitate using ping and traceroute</li>
+</ul>
+</div>
+</div>
+<div class="warning-box" style="margin-top: 1rem;">
+<h4>💡 Evaluation and Creare</h4>
+<ul>
+<li><strong>Evaluezi</strong> compromisurile NAT in retelistic moderna</li>
+<li><strong>Critici</strong> incalcarea principiului end-to-end of to NAT</li>
+<li><strong>Proiectezi</strong> un module of monitorizare a networks using components from starterkit</li>
+</ul>
+</div>
+</div>
+</div>
+<!-- Slide 4: Historical Hook - The IPv4 Crisis -->
+<div class="slide" data-slide="4">
+<div class="slide-header">
+<h2>🚨 The Crisis That Changed the Internet</h2>
+</div>
+<div class="slide-content">
+<div class="story-box">
+<h4>📅 3 Februarie 2011 — O Ceremonie Historical</h4>
+<p style="font-size: 1.1rem;">At the Internet Assigned Numbers Authority (IANA), representatives of the five Regional Internet Registries gathered for a formal event. The final five /8 IPv4 address blocks — approximately 16.7 million addresses each — were officially allocated.</p>
+<p style="margin-top: 1rem; font-style: italic; color: var(--purple-dark);">"Am epuizat addressesle IPv4. this is un moment istoric."</p>
+<p style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-muted);">— John Curran, CEO al ARIN</p>
+</div>
+<div class="columns" style="margin-top: 1.5rem;">
+<div class="card">
+<h4>The Problem</h4>
+<div class="stat-number" style="font-size: 2.5rem;">2³²</div>
+<p>= 4,294,967,296 IPv4 addresses total</p>
+<p class="text-danger" style="margin-top: 0.5rem; font-weight: 600;">But over 20 billion devices need connectivity today!</p>
+</div>
+<div class="card" style="background: var(--bg-cool);">
+<h4>The "Temptimery" solution</h4>
+<div class="stat-number" style="font-size: 2.5rem; color: var(--success);">NAT</div>
+<p>Network Adres Traducere</p>
+<p style="margin-top: 0.5rem;">A clever hack from 1994 that extended IPv4's lifespan by <strong>30+ years</strong></p>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 5: Why This Matters for Developers -->
+<div class="slide" data-slide="5">
+<div class="slide-header">
+<h2>💼 Why It Matters for Developers Software</h2>
+</div>
+<div class="slide-content">
+<div class="highlight-box">
+<h4>🎯 Real-World Relevance</h4>
+<p>These protocols are not academic curiosities — they are the foundation of every modern infrastructure you will work with.</p>
+</div>
+<div class="table-container" style="margin-top: 1.5rem;">
+<table>
+<tr>
+<th>Context</th>
+<th>How This Lecture Applies</th>
+</tr>
+<tr>
+<td><span class="badge badge-primary">Cloud/DevOps</span></td>
+<td>AWS VPC NAT Gateways, Azure Virtual Networks, GCP Cloud NAT — all built on these concepts</td>
+</tr>
+<tr>
+<td><span class="badge badge-success">Web Development</span></td>
+<td>Understandinging why WebRTC needs STUN/TURN servers, debugging connection issues through NAT</td>
+</tr>
+<tr>
+<td><span class="badge badge-warning">Containerisation</span></td>
+<td>Docker bridge networks, Kubernetes Services, ingress controllers — all use NAT internally</td>
+</tr>
+<tr>
+<td><span class="badge badge-danger">Security</span></td>
+<td>Attackuri ARP spoofing, DHCP starvation, recunoastere network — understandrea vulnerabilitatilor</td>
+</tr>
+<tr>
+<td><span class="badge badge-purple">IoT/Sisteme Incorptimete</span></td>
+<td>Device provisioning with DHCP, gateway configuration, IPv6 transition with NDP</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<!-- Slide 6: The Analogy - Hotel Telephone System -->
+<div class="slide" data-slide="6">
+<div class="slide-header">
+<h2>🏨 Analogia The systemui Telefonic of Hotel</h2>
+</div>
+<div class="slide-content">
+<div class="story-box">
+<h4>📞 Understanding NAT Through a Real-World Analogy</h4>
+<p>Imagineaza-ti un hotel with 500 of camere, but o singur linie telefonic externa...</p>
+</div>
+<div class="columns" style="margin-top: 1.5rem;">
+<div class="card">
+<h4>🏠 Far NAT (Linii Directe)</h4>
+<p>each camer ar would nevoie of propriul numar of telefon extern. Cu numere of telefon limitate availablee at level mondial, this lucru becomes imposibil for hoteluri mari.</p>
+<p class="text-danger" style="margin-top: 0.75rem;">❌ Scump and nepractic</p>
+</div>
+<div class="card" style="border: 2px solid var(--success);">
+<h4>🔄 Cu NAT (Central Telefonic a Hotelului)</h4>
+<p>All camerele impart un numar extern. Centrala (router NAT) uses <strong>interioare</strong> (ports) for a directiona apelurile to camera correct.</p>
+<p class="text-success" style="margin-top: 0.75rem;">✓ Eficient and scalabil</p>
+</div>
+</div>
+<div class="topology" style="margin-top: 1.5rem;">
+  Guest in Room 101 ──┐                                    ┌── External World
+  Guest in Room 102 ──┼── Hotel Switchboard ──► Single ───┤   (Public Phone
+  Guest in Room 103 ──┤   (NAT Router)         External     Network)
+  ...                 │                        Number
+  Guest in Room 500 ──┘                        (Public IP)
+  
+  Analogy:
+  • Room Number    = Private IP Adres (192.168.1.x)
+  • Extension      = Port Number
+  • Hotel Number   = Public IP address
+  • Switchboard    = NAT Router
+                </div>
+</div>
+</div>
+<!-- Slide 7: Protocol Overview Diagram -->
+<div class="slide" data-slide="7">
+<div class="slide-header">
+<h2>🗺️ Peisajul Protocols of Azi</h2>
+</div>
+<div class="slide-content">
+<div class="diagram-container">
+<svg style="max-width: 800px;" viewbox="0 0 800 350">
+<!-- Background sections -->
+<rect fill="#f0f9ff" height="150" rx="15" stroke="#0ea5e9" stroke-width="2" width="360" x="20" y="20"></rect>
+<text fill="#0284c7" font-size="14" font-weight="600" text-anchor="middle" x="200" y="50">Gestionarea Adreselor</text>
+<rect fill="#fef3c7" height="150" rx="15" stroke="#f59e0b" stroke-width="2" width="360" x="420" y="20"></rect>
+<text fill="#d97706" font-size="14" font-weight="600" text-anchor="middle" x="600" y="50">Rezolutie and Descoperire</text>
+<rect fill="#fce7f3" height="130" rx="15" stroke="#ec4899" stroke-width="2" width="360" x="220" y="200"></rect>
+<text fill="#be185d" font-size="14" font-weight="600" text-anchor="middle" x="400" y="230">Diagnosticare and Control</text>
+<!-- Protocol boxes -->
+<rect fill="#0ea5e9" height="80" rx="10" width="100" x="50" y="70"></rect>
+<text fill="white" font-size="16" font-weight="700" text-anchor="middle" x="100" y="100">NAT</text>
+<text fill="white" font-size="10" text-anchor="middle" x="100" y="120">address</text>
+<text fill="white" font-size="10" text-anchor="middle" x="100" y="132">Traducere</text>
+<rect fill="#0284c7" height="80" rx="10" width="100" x="170" y="70"></rect>
+<text fill="white" font-size="16" font-weight="700" text-anchor="middle" x="220" y="100">DHCP</text>
+<text fill="white" font-size="10" text-anchor="middle" x="220" y="120">Dinamic</text>
+<text fill="white" font-size="10" text-anchor="middle" x="220" y="132">configuration</text>
+<rect fill="#f59e0b" height="80" rx="10" width="100" x="450" y="70"></rect>
+<text fill="white" font-size="16" font-weight="700" text-anchor="middle" x="500" y="100">ARP</text>
+<text fill="white" font-size="10" text-anchor="middle" x="500" y="120">IP → MAC</text>
+<text fill="white" font-size="10" text-anchor="middle" x="500" y="132">(IPv4)</text>
+<rect fill="#d97706" height="80" rx="10" width="100" x="570" y="70"></rect>
+<text fill="white" font-size="16" font-weight="700" text-anchor="middle" x="620" y="100">NDP</text>
+<text fill="white" font-size="10" text-anchor="middle" x="620" y="120">Vecin</text>
+<text fill="white" font-size="10" text-anchor="middle" x="620" y="132">(IPv6)</text>
+<rect fill="#ec4899" height="60" rx="10" width="200" x="300" y="250"></rect>
+<text fill="white" font-size="18" font-weight="700" text-anchor="middle" x="400" y="280">ICMP</text>
+<text fill="white" font-size="10" text-anchor="middle" x="400" y="298">Raportare Erori and Diagnosticare</text>
+<!-- Arrows showing relationships -->
+<path d="M 100 150 L 100 200 L 300 250" fill="none" stroke="#64748b" stroke-dasharray="5,5" stroke-width="2"></path>
+<path d="M 500 150 L 500 200 L 400 250" fill="none" stroke="#64748b" stroke-dasharray="5,5" stroke-width="2"></path>
+</svg>
+</div>
+<div class="columns" style="margin-top: 1rem;">
+<div class="card">
+<p><span class="badge badge-primary">NAT/DHCP</span> gestioneaz <strong>cum</strong> dispozitivele obtin and partajeaz addresses</p>
+</div>
+<div class="card">
+<p><span class="badge badge-warning">ARP/NDP</span> rezolv <strong>unde</strong> to trimit frames local</p>
+</div>
+<div class="card">
+<p><span class="badge badge-purple">ICMP</span> raporteaz <strong>ce</strong> a mers wrong and allows diagnosticarea</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 8: RFC 1918 - Private Adresaes -->
+<div class="slide" data-slide="8">
+<div class="slide-header">
+<h2>🏠 Spatii of addresses Private (RFC 1918)</h2>
+</div>
+<div class="slide-content">
+<div class="definition-box">
+<h4>📜 RFC 1918 (Februarie 1996)</h4>
+<p><em>"Alocarea Adreselor for Internet-uri Private"</em> — A definit trei blocuri of addresses IPv4 rezervate for uz privat, which not vor fi never rutate on Internet-ul public.</p>
+</div>
+<div class="table-container" style="margin-top: 1rem;">
+<table>
+<tr>
+<th>Nume</th>
+<th>Bloc CIDR</th>
+<th>Interval addresses</th>
+<th>Total addresses</th>
+<th>Utilizare Comuna</th>
+</tr>
+<tr>
+<td><span class="badge badge-primary">bloc 24-bits</span></td>
+<td><code>10.0.0.0/8</code></td>
+<td>10.0.0.0 – 10.255.255.255</td>
+<td>16,777,216</td>
+<td>Large enterprises, cloud VPCs</td>
+</tr>
+<tr>
+<td><span class="badge badge-warning">bloc 20-bits</span></td>
+<td><code>172.16.0.0/12</code></td>
+<td>172.16.0.0 – 172.31.255.255</td>
+<td>1,048,576</td>
+<td>Organizatii medii</td>
+</tr>
+<tr>
+<td><span class="badge badge-success">bloc 16-bits</span></td>
+<td><code>192.168.0.0/16</code></td>
+<td>192.168.0.0 – 192.168.255.255</td>
+<td>65,536</td>
+<td>networks of acasa, birouri small</td>
+</tr>
+</table>
+</div>
+<div class="warning-box" style="margin-top: 1rem;">
+<h4>⚠️ Critical Characteristics</h4>
+<ul>
+<li><strong>Not routable</strong> on the public Internet — packets with private source addresses are dropped by ISP routers</li>
+<li><strong>Reusable</strong> in any organisation — the same 192.168.1.1 exists in millions of networks worldwide</li>
+<li><strong>Require NAT</strong> for Internet access — translation must occur at the network boundary</li>
+</ul>
+</div>
+</div>
+</div>
+<!-- ==================== NAT/PAT SECTION ==================== -->
+<!-- Slide 9: NAT Section Title -->
+<div class="slide slide-centered" data-slide="9" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
+<div style="max-width: 800px;">
+<p style="color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-bottom: 1rem;">SECTION 1 OF 5</p>
+<h1 style="color: white; font-size: 3.5rem;">Network Adres Traducere</h1>
+<p style="color: rgba(255,255,255,0.8); font-size: 1.3rem; margin-top: 1.5rem;">NAT &amp; PAT — The Protocol That Saved IPv4</p>
+<div style="margin-top: 3rem; display: flex; gap: 2rem; justify-content: center;">
+<div style="text-align: center;">
+<div style="font-size: 2.5rem; color: #0ea5e9; font-weight: 700;">1994</div>
+<div style="color: rgba(255,255,255,0.6); font-size: 0.85rem;">RFC 1631</div>
+</div>
+<div style="text-align: center;">
+<div style="font-size: 2.5rem; color: #10b981; font-weight: 700;">99%</div>
+<div style="color: rgba(255,255,255,0.6); font-size: 0.85rem;">of home networks</div>
+</div>
+<div style="text-align: center;">
+<div style="font-size: 2.5rem; color: #f59e0b; font-weight: 700;">L3/L4</div>
+<div style="color: rgba(255,255,255,0.6); font-size: 0.85rem;">layer operation</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 10: NAT Basic Principle -->
+<div class="slide" data-slide="10">
+<div class="slide-header">
+<h2>🔄 NAT — Basic Principle</h2>
+</div>
+<div class="slide-content">
+<div class="topology">
+┌─────────────────────┐        ┌──────────────────┐        ┌─────────────────────┐
+│    Network Privat   │        │   NAT Router     │        │   Public Internet   │
+│    192.168.1.0/24   │        │   (Gateway)      │        │                     │
+│                     │        │                  │        │                     │
+│  h1: 192.168.1.10   │────────│  Private ←→ Public  │────────│  Web Server        │
+│  h2: 192.168.1.20   │        │  192.168.1.1     │        │  93.184.216.34     │
+│  h3: 192.168.1.30   │        │  203.0.113.5     │        │  (example.com)     │
+└─────────────────────┘        └──────────────────┘        └─────────────────────┘
+                                       │
+                              Tabel of Traducere
+                           ┌────────────────────┐
+                           │ Internal → External │
+                           │ 192.168.1.10:54321 │
+                           │    → 203.0.113.5:40001 │
+                           └────────────────────┘
+                </div>
+<div class="columns" style="margin-top: 1.5rem;">
+<div class="card">
+<h4>📤 Iesire Packet (to Internet)</h4>
+<pre data-lang="packet">Before NAT:
+  SRC: 192.168.1.10:54321
+  DST: 93.184.216.34:80
+       ↓ NAT Traducere
+After NAT:
+  SRC: 203.0.113.5:40001  ← Changed!
+  DST: 93.184.216.34:80</pre>
+</div>
+<div class="card">
+<h4>📥 Intrare Response (from Internet)</h4>
+<pre data-lang="packet">Before NAT (reverse):
+  SRC: 93.184.216.34:80
+  DST: 203.0.113.5:40001
+       ↓ Reverse Lookup
+After NAT:
+  SRC: 93.184.216.34:80
+  DST: 192.168.1.10:54321 ← Restored!</pre>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 11: Tipuri of NAT -->
+<div class="slide" data-slide="11">
+<div class="slide-header">
+<h2>📊 types of NAT</h2>
+</div>
+<div class="slide-content">
+<div class="columns-3">
+<div class="card">
+<h4>NAT Static (1:1)</h4>
+<p><span class="badge badge-primary">Permanent Mapping</span></p>
+<pre style="font-size: 0.85rem;">192.168.1.100 ↔ 203.0.113.10
+     (fixed, never changes)</pre>
+<p style="margin-top: 0.75rem;"><strong>Use case:</strong> Internal servers that need to be accessible from the Internet (web servers, mail servers)</p>
+<p class="text-muted" style="font-size: 0.85rem; margin-top: 0.5rem;">Requires one public IP per internal host</p>
+</div>
+<div class="card">
+<h4>NAT Dinamic (Pool)</h4>
+<p><span class="badge badge-warning">Temptimery Allocation</span></p>
+<pre style="font-size: 0.85rem;">Pool: 203.0.113.1-10
+Host gets first available</pre>
+<p style="margin-top: 0.75rem;"><strong>Use case:</strong> Organisations with multiple public IPs but more internal hosts</p>
+<p class="text-muted" style="font-size: 0.85rem; margin-top: 0.5rem;">Mapping released when connection closes</p>
+</div>
+<div class="card" style="border: 3px solid var(--success); background: var(--bg-cool);">
+<h4>PAT / NAT Overload ⭐</h4>
+<p><span class="badge badge-success">Most Common</span></p>
+<pre style="font-size: 0.85rem;">All hosts → 203.0.113.5
+Differentiated by PORTS</pre>
+<p style="margin-top: 0.75rem;"><strong>Use case:</strong> Home networks, SMEs — 99% of deployments</p>
+<p class="text-success" style="font-size: 0.85rem; margin-top: 0.5rem;">One public IP serves thousands of hosts!</p>
+</div>
+</div>
+<div class="insight-box" style="margin-top: 1rem;">
+<h4>💡 Key Insight: Why PAT Dominates</h4>
+<p>With ~65,000 available ports per protocol (TCP/UDP), a single public IP can theoretically support 65,000+ simultaneous connections. In practice, this means one public IP can serve an entire office building or residential block.</p>
+</div>
+</div>
+</div>
+<!-- Slide 12: PAT/MASQUERADE Table -->
+<div class="slide" data-slide="12">
+<div class="slide-header">
+<h2>📋 table of Traducere NAT</h2>
+</div>
+<div class="slide-content">
+<p>The NAT router maintains a <strong>translation table</strong> mapping internal addresses to external addresses. For PAT, this includess port numbers.</p>
+<div class="table-container" style="margin-top: 1rem;">
+<table>
+<tr>
+<th>Internal IP</th>
+<th>Internal Port</th>
+<th>External IP</th>
+<th>External Port</th>
+<th>Protocol</th>
+<th>Destination</th>
+</tr>
+<tr>
+<td>192.168.1.10</td>
+<td>54321</td>
+<td>203.0.113.5</td>
+<td>40001</td>
+<td><span class="badge badge-primary">TCP</span></td>
+<td>93.184.216.34:80</td>
+</tr>
+<tr>
+<td>192.168.1.20</td>
+<td>54321</td>
+<td>203.0.113.5</td>
+<td>40002</td>
+<td><span class="badge badge-primary">TCP</span></td>
+<td>93.184.216.34:443</td>
+</tr>
+<tr>
+<td>192.168.1.10</td>
+<td>12345</td>
+<td>203.0.113.5</td>
+<td>40003</td>
+<td><span class="badge badge-warning">UDP</span></td>
+<td>8.8.8.8:53</td>
+</tr>
+<tr>
+<td>192.168.1.30</td>
+<td>54321</td>
+<td>203.0.113.5</td>
+<td>40004</td>
+<td><span class="badge badge-primary">TCP</span></td>
+<td>93.184.216.34:80</td>
+</tr>
+</table>
+</div>
+<div class="highlight-box" style="margin-top: 1rem;">
+<h4>🔍 Critical Observation</h4>
+<p>Notice that hosts 192.168.1.10, 192.168.1.20, and 192.168.1.30 all use the <strong>same internal port</strong> (54321). The NAT router assigns <strong>unique external ports</strong> (40001, 40002, 40004) to distinguish them. This is the essence of Port Adres Traducere!</p>
+</div>
+</div>
+</div>
+<!-- Slide 13: Interactive PAT Demo -->
+<div class="slide" data-slide="13">
+<div class="slide-header">
+<h2>🎮 Interactive: PAT in Actiune</h2>
+</div>
+<div class="slide-content">
+<div class="interactive-panel">
+<h4>📊 PAT Simulation</h4>
+<p style="margin-bottom: 1rem;">Adjust the number of simultaneous connections to see how PAT handles them:</p>
+<div class="slider-row">
+<label>Active Connections:</label>
+<input id="pat-connections" max="100" min="1" oninput="updataPATDemo()" type="range" value="10"/>
+<span class="slider-value" id="pat-conn-value">10</span>
+</div>
+<div class="columns" style="margin-top: 1rem;">
+<div class="card">
+<h4>🏠 Internal Adresaes Used</h4>
+<p id="pat-internal-ips" style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;">Loading...</p>
+</div>
+<div class="card">
+<h4>🌐 External (Public) View</h4>
+<p><strong>Single IP:</strong> 203.0.113.5</p>
+<p style="margin-top: 0.5rem;"><strong>Ports allocated:</strong> <span id="pat-ports-used">40001-40010</span></p>
+</div>
+</div>
+<div class="result-display">
+<p>→ All <span id="pat-conn-count">10</span> connections appear to the Internet as coming from <strong>203.0.113.5</strong>, distinguished only by port numbers.</p>
+<p style="margin-top: 0.5rem;">→ Port utilisation: <span id="pat-util">0.015%</span> of available ports</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 14: NAT in the Starterkit -->
+<div class="slide" data-slide="14">
+<div class="slide-header">
+<h2>🔬 NAT in Starterkit-ul Weeksi 6</h2>
+</div>
+<div class="slide-content">
+<p>The starterkit includess a complete NAT demonstration topology using Mininet:</p>
+<div class="topology" style="margin-top: 1rem;">
+# From: WEEK6/mininet/topologies/topo_nat.py
+
+       (private)                         (public)
+      h1 ───┐                           ┌─── h3
+           s1 ─── rnat ─── s2 ──────────┘
+      h2 ───┘     (NAT Router)
+
+  Adresaing:
+  • h1: 192.168.1.10/24    gw 192.168.1.1
+  • h2: 192.168.1.20/24    gw 192.168.1.1
+  • rnat(private): 192.168.1.1/24
+  • rnat(public): 203.0.113.1/24  (TEST-NET-3, RFC 5737)
+  • h3: 203.0.113.2/24     gw 203.0.113.1
+                </div>
+<div class="columns" style="margin-top: 1rem;">
+<div class="card">
+<h4>📁 Key Files</h4>
+<pre style="font-size: 0.85rem;">WEEK6/
+├── mininet/topologies/
+│   └── topo_nat.py        # Topology definition
+├── seminar/python/apps/
+│   └── nat_observer.py    # Observe translations
+└── scripts/
+    └── run_nat_demo.sh    # Launch demo</pre>
+</div>
+<div class="card">
+<h4>🚀 Running the Demo</h4>
+<pre data-lang="bash"># Quick start
+cd ~/WEEK6
+make nat-demo
+
+# Or step-by-step
+sudo python3 mininet/topologies/topo_nat.py --cli
+
+# Useful commands in Mininet CLI:
+h1 ping 203.0.113.2
+rnat iptables -t nat -L -n -v</pre>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 15: Python NAT Configurare -->
+<div class="slide" data-slide="15">
+<div class="slide-header">
+<h2>🐍 Configurationa NAT with Python and iptables</h2>
+</div>
+<div class="slide-content">
+<p>From <code>topo_nat.py</code>, here's how NAT is configured programmatically:</p>
+<pre data-lang="python" style="font-size: 0.9rem;"><span class="keyword">def</span> <span class="function">configure_network</span>(net: Mininet) -&gt; <span class="builtin">None</span>:
+    <span class="string">"""Configure Adres IPes, routes and NAT rules."""</span>
+    h1, h2, h3 = net.get(<span class="string">"h1"</span>, <span class="string">"h2"</span>, <span class="string">"h3"</span>)
+    rnat = net.get(<span class="string">"rnat"</span>)
+    
+    <span class="comment"># === Adres IP configuration ===</span>
+    <span class="comment"># Private network (192.168.1.0/24)</span>
+    h1.setIP(<span class="string">"192.168.1.10/24"</span>, intf=<span class="string">"h1-eth0"</span>)
+    h2.setIP(<span class="string">"192.168.1.20/24"</span>, intf=<span class="string">"h2-eth0"</span>)
+    rnat.setIP(<span class="string">"192.168.1.1/24"</span>, intf=<span class="string">"rnat-eth0"</span>)
+    
+    <span class="comment"># Public network (203.0.113.0/24 - TEST-NET-3)</span>
+    rnat.setIP(<span class="string">"203.0.113.1/24"</span>, intf=<span class="string">"rnat-eth1"</span>)
+    h3.setIP(<span class="string">"203.0.113.2/24"</span>, intf=<span class="string">"h3-eth0"</span>)
+    
+    <span class="comment"># === NAT configuration (iptables) ===</span>
+    <span class="comment"># Activeaz routinga IP</span>
+    rnat.cmd(<span class="string">"sysctl -w net.ipv4.ip_forward=1"</span>)
+    
+    <span class="comment"># NAT MASQUERADE for traffic from private network</span>
+    rnat.cmd(<span class="string">"iptables -t nat -A POSTROUTING -o rnat-eth1 "</span>
+             <span class="string">"-s 192.168.1.0/24 -j MASQUERADE"</span>)</pre>
+<div class="definition-box" style="margin-top: 1rem;">
+<h4>🔑 Key iptables Components</h4>
+<ul>
+<li><code>-t nat</code> — Use the NAT table (not the default filter table)</li>
+<li><code>-A POSTROUTING</code> — Apply after routing decision, just before packet leaves</li>
+<li><code>-o rnat-eth1</code> — Only for packets exiting via the public interface</li>
+<li><code>-s 192.168.1.0/24</code> — Only for packets from the private subnet</li>
+<li><code>-j MASQUERADE</code> — Perform PAT using the outgoing interface's IP</li>
+</ul>
+</div>
+</div>
+</div>
+<!-- Slide 16: NAT Observer Application -->
+<div class="slide" data-slide="16">
+<div class="slide-header">
+<h2>👁️ Observarea Traducerilor NAT</h2>
+</div>
+<div class="slide-content">
+<p>The <code>nat_observer.py</code> application demonstrates how external servers perceive connections from behind NAT:</p>
+<pre data-lang="python" style="font-size: 0.85rem;"><span class="keyword">def</span> <span class="function">run_server</span>(bind_addr: <span class="builtin">str</span>, port: <span class="builtin">int</span>) -&gt; <span class="builtin">None</span>:
+    <span class="string">"""Start a TCP server that displays source IP:port for each connection."""</span>
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, <span class="number">1</span>)
+    sock.bind((bind_addr, port))
+    sock.listen(<span class="number">5</span>)
+    
+    <span class="keyword">while</span> <span class="builtin">True</span>:
+        client_sock, client_addr = sock.accept()
+        client_ip, client_port = client_addr
+        
+        <span class="comment"># The server sees the NAT router's public IP, not the private IP!</span>
+        <span class="builtin">print</span>(<span class="string">f"Connection from <span class="function">{client_ip}</span>:<span class="function">{client_port}</span>"</span>)
+        <span class="comment"># If h1 (192.168.1.10) connects, we see: "Connection from 203.0.113.1:40001"</span></pre>
+<div class="columns" style="margin-top: 1rem;">
+<div class="card">
+<h4>🖥️ On the Server (h3)</h4>
+<pre data-lang="bash">python3 nat_observer.py server \
+    --bind 203.0.113.2 --port 5000
+
+# Output:
+[NAT Observer Server]
+Listening on 203.0.113.2:5000
+Connection from 203.0.113.1:40001
+Connection from 203.0.113.1:40002</pre>
+</div>
+<div class="card">
+<h4>💻 On Clients (h1, h2)</h4>
+<pre data-lang="bash"># From h1
+python3 nat_observer.py client \
+    --host 203.0.113.2 --port 5000 \
+    --msg "Hello from h1"
+
+# Local view: 192.168.1.10:54321
+# Server sees: 203.0.113.1:40001</pre>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 17: NAT Dezavantajs -->
+<div class="slide" data-slide="17">
+<div class="slide-header">
+<h2>⚠️ Disadvantages NAT and Compromisuri</h2>
+</div>
+<div class="slide-content">
+<div class="table-container">
+<table>
+<tr>
+<th>Problem</th>
+<th>Impact</th>
+<th>Real-World Example</th>
+</tr>
+<tr>
+<td>Intrare connections blocked</td>
+<td>Port forwarding required</td>
+<td>Hosting a game server at home</td>
+</tr>
+<tr>
+<td>End-to-end principle violated</td>
+<td>P2P, VoIP applications struggle</td>
+<td>Skype, BitTorrent, WebRTC</td>
+</tr>
+<tr>
+<td>Nivel violation</td>
+<td>L4 ports used to solve L3 problem</td>
+<td>Debugging complexity increases</td>
+</tr>
+<tr>
+<td>Protocol-specific issues</td>
+<td>ALGs (Application Nivel Gateways) needed</td>
+<td>FTP active mode, SIP, IPSec</td>
+</tr>
+<tr>
+<td>Single point of failure</td>
+<td>NAT router handles all translations</td>
+<td>Router crash = network outage</td>
+</tr>
+</table>
+</div>
+<div class="insight-box" style="margin-top: 1rem;">
+<h4>🎓 The End-to-End Principle</h4>
+<p>The Internet was originally designed so that any host could communicate directly with any other host. NAT fundamentally breaks this model by "hiding" hosts behind a router, requiring workarounds like:</p>
+<ul style="margin-top: 0.5rem;">
+<li><strong>STUN</strong> — Session Traversal Utilities for NAT (discover external address)</li>
+<li><strong>TURN</strong> — Traversal Using Relays around NAT (relay through server)</li>
+<li><strong>ICE</strong> — Interactive Connectivity Establishment (combine methods)</li>
+</ul>
+</div>
+</div>
+</div>
+<!-- Slide 18: Think About It - NAT Problems -->
+<div class="slide" data-slide="18">
+<div class="slide-header">
+<h2>🤔 Gandeste-te at Asta...</h2>
+</div>
+<div class="slide-content">
+<div class="quiz-container">
+<p class="quiz-question">What happens if an external server tries to initiate a connection to 192.168.1.10?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Apas for a dezvalui answer</button>
+<div class="reveal-content">
+<h4 class="text-danger">❌ The connection fails!</h4>
+<p style="margin-top: 0.75rem;">The address 192.168.1.10 is not routable on the public Internet. Even if an ISP router somehow didn't drop the packet, no router would know how to reach this destination — it could be in any of millions of private networks.</p>
+<p style="margin-top: 0.75rem;"><strong>solution:</strong> Port forwarding — configure the NAT router to redirect incoming connections on a specific port to an internal host.</p>
+<pre data-lang="bash" style="margin-top: 0.5rem;"># Example: Forward port 8080 to internal web server
+iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 8080 \
+    -j DNAT --to-destination 192.168.1.100:80</pre>
+</div>
+</div>
+<div class="quiz-container" style="margin-top: 1rem;">
+<p class="quiz-question">Why might online games and VoIP have problems with NAT?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Apas for a dezvalui answer</button>
+<div class="reveal-content">
+<h4 class="text-warning">⚠️ NAT breaks direct peer-to-peer communication!</h4>
+<p style="margin-top: 0.75rem;">In the original Internet model, any host could contact any other host directly. NAT "hides" devices, making direct connections impossible.</p>
+<p style="margin-top: 0.75rem;"><strong>Affected applications:</strong></p>
+<ul>
+<li><strong>Online gaming</strong> — Peer-to-peer multiplayer requires both players to connect to each other</li>
+<li><strong>VoIP</strong> — Voice packets need low latency; relaying adds delay</li>
+<li><strong>WebRTC</strong> — Browser-to-browser video calls must traverse NAT</li>
+<li><strong>File sharing</strong> — BitTorrent peers behind NAT cannot receive connections</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 19: NAT Quiz -->
+<div class="slide" data-slide="19">
+<div class="slide-header">
+<h2>✅ Knowledge Check: NAT</h2>
+</div>
+<div class="slide-content">
+<div class="quiz-container">
+<p class="quiz-question">Which type of NAT allows thousands of internal hosts to share a single public Adres IP?</p>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkQuiz(this, false)">A) NAT Static (1:1 mapping)</div>
+<div class="quiz-option" onclick="checkQuiz(this, false)">B) NAT Dinamic (address pool)</div>
+<div class="quiz-option" onclick="checkQuiz(this, true)">C) PAT / NAT Overload (port-based)</div>
+<div class="quiz-option" onclick="checkQuiz(this, false)">D) Bidirectional NAT</div>
+</div>
+<div class="quiz-feedback correct">✓ correct! PAT (Traducere addresses of Port) distinguishes connections by port numbers, allowing many hosts to share one IP.</div>
+<div class="quiz-feedback incorrect">✗ Not quite. PAT (Traducere addresses of Port) uses different port numbers to multiplex many internal addresses onto one external IP.</div>
+</div>
+<div class="quiz-container" style="margin-top: 1rem;">
+<p class="quiz-question">What does the iptables target <code>MASQUERADE</code> do?</p>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkQuiz(this, false)">A) Blocks all incoming connections</div>
+<div class="quiz-option" onclick="checkQuiz(this, true)">B) Performs PAT using the outgoing interface's IP dynamically</div>
+<div class="quiz-option" onclick="checkQuiz(this, false)">C) Encrypts packets before transmission</div>
+<div class="quiz-option" onclick="checkQuiz(this, false)">D) Creates a VPN tunnel</div>
+</div>
+<div class="quiz-feedback correct">✓ correct! MASQUERADE is PAT that automatically uses the outgoing interface's current IP — perfect for dynamic addresses (DHCP).</div>
+<div class="quiz-feedback incorrect">✗ MASQUERADE performs source NAT (PAT) using the outgoing interface's Adres IP, ideal for connections with dynamic external IPs.</div>
+</div>
+</div>
+</div>
+<!-- Slide 20: NAT Historical Context -->
+<div class="slide" data-slide="20">
+<div class="slide-header">
+<h2>📜 NAT: Context Istoric</h2>
+</div>
+<div class="slide-content">
+<div class="timeline">
+<div class="timeline-item">
+<div class="timeline-year">1981</div>
+<div class="timeline-content">
+<strong>IPv4 Published (RFC 791)</strong>
+<p class="text-muted">4.3 billion addresses seemed infinite for a research network.</p>
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-year">1991</div>
+<div class="timeline-content">
+<strong>First Adres Exhaustion Warnings</strong>
+<p class="text-muted">IETF begins discussing IPv4 scarcity as commercial Internet grows.</p>
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-year">1994</div>
+<div class="timeline-content">
+<strong>NAT Proposed (RFC 1631)</strong>
+<p class="text-muted">"The IP Network Adres Translator" — originally a temptimery solution.</p>
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-year">1996</div>
+<div class="timeline-content">
+<strong>RFC 1918 Published</strong>
+<p class="text-muted">Private address ranges formalised, enabling NAT deployment.</p>
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-year">1998</div>
+<div class="timeline-content">
+<strong>IPv6 Published (RFC 2460)</strong>
+<p class="text-muted">The "real" solution with 2¹²⁸ addresses — 340 undecillion!</p>
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-year">2011</div>
+<div class="timeline-content">
+<strong>IPv4 Exhaustion</strong>
+<p class="text-muted">IANA allocates final IPv4 blocks. The "temptimery" NAT is now permanent.</p>
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-year">2025</div>
+<div class="timeline-content">
+<strong>Today</strong>
+<p class="text-muted">~45% of traffic uses IPv6, but NAT remains essential for IPv4.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ==================== ARP SECTION ==================== -->
+<!-- Slide 21: ARP Section Title -->
+<div class="slide slide-centered" data-slide="21" style="background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);">
+<div style="max-width: 800px;">
+<p style="color: rgba(255,255,255,0.7); font-size: 0.9rem; margin-bottom: 1rem;">SECTION 2 OF 5</p>
+<h1 style="color: white; font-size: 3.5rem;">Adres Resolution Protocol</h1>
+<p style="color: rgba(255,255,255,0.9); font-size: 1.3rem; margin-top: 1.5rem;">ARP — Bridging IP and Ethernet</p>
+<div style="margin-top: 3rem; display: flex; gap: 2rem; justify-content: center;">
+<div style="text-align: center;">
+<div style="font-size: 2.5rem; color: white; font-weight: 700;">1982</div>
+<div style="color: rgba(255,255,255,0.7); font-size: 0.85rem;">RFC 826</div>
+</div>
+<div style="text-align: center;">
+<div style="font-size: 2.5rem; color: white; font-weight: 700;">L2↔L3</div>
+<div style="color: rgba(255,255,255,0.7); font-size: 0.85rem;">layer bridge</div>
+</div>
+<div style="text-align: center;">
+<div style="font-size: 2.5rem; color: white; font-weight: 700;">IPv4</div>
+<div style="color: rgba(255,255,255,0.7); font-size: 0.85rem;">only</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 22: ARP Introduction -->
+<div class="slide" data-slide="22">
+<div class="slide-header">
+<h2>🔗 ARP — problem Fundamentala</h2>
+</div>
+<div class="slide-content">
+<div class="highlight-box">
+<h4>❓ The Core Question</h4>
+<p style="font-size: 1.1rem;">To send an Ethernet frame, we need the destination's <strong>MAC address</strong>. But applications and routing work with <strong>Adres IPes</strong>. How do we find the MAC address for a given IP?</p>
+<p style="margin-top: 1rem; font-size: 1.3rem; font-weight: 600;">ARP answers: "Who has Adres IP X? Tell me your MAC address!"</p>
+</div>
+<div class="diagram-container" style="margin-top: 1.5rem;">
+<svg style="max-width: 700px;" viewbox="0 0 700 200">
+<!-- Host A -->
+<rect fill="#0ea5e9" height="100" rx="10" width="140" x="50" y="60"></rect>
+<text fill="white" font-size="14" font-weight="600" text-anchor="middle" x="120" y="95">Host A</text>
+<text fill="white" font-size="11" text-anchor="middle" x="120" y="115">192.168.1.10</text>
+<text fill="rgba(255,255,255,0.8)" font-size="10" text-anchor="middle" x="120" y="132">MAC: AA:AA:AA:AA:AA:AA</text>
+<!-- Network -->
+<rect fill="#e2e8f0" height="50" rx="25" stroke="#94a3b8" stroke-width="2" width="200" x="250" y="85"></rect>
+<text fill="#64748b" font-size="12" text-anchor="middle" x="350" y="115">Local Network (Subnet)</text>
+<!-- Host B -->
+<rect fill="#10b981" height="100" rx="10" width="140" x="510" y="60"></rect>
+<text fill="white" font-size="14" font-weight="600" text-anchor="middle" x="580" y="95">Host B</text>
+<text fill="white" font-size="11" text-anchor="middle" x="580" y="115">192.168.1.20</text>
+<text fill="rgba(255,255,255,0.8)" font-size="10" text-anchor="middle" x="580" y="132">MAC: BB:BB:BB:BB:BB:BB</text>
+<!-- ARP Request arrow -->
+<path d="M 190 90 L 250 90" marker-end="url(#arrowhead)" stroke="#f59e0b" stroke-width="3"></path>
+<text fill="#f59e0b" font-size="10" font-weight="600" text-anchor="middle" x="220" y="75">ARP Request</text>
+<text fill="#64748b" font-size="9" text-anchor="middle" x="220" y="60">(broadcast)</text>
+<!-- ARP Reply arrow -->
+<path d="M 450 130 L 510 130" marker-start="url(#arrowhead2)" stroke="#10b981" stroke-width="3"></path>
+<text fill="#10b981" font-size="10" font-weight="600" text-anchor="middle" x="480" y="155">ARP Reply</text>
+<text fill="#64748b" font-size="9" text-anchor="middle" x="480" y="170">(unicast)</text>
+<defs>
+<marker id="arrowhead" markerheight="7" markerwidth="10" orient="auto" refx="9" refy="3.5">
+<polygon fill="#f59e0b" points="0 0, 10 3.5, 0 7"></polygon>
+</marker>
+<marker id="arrowhead2" markerheight="7" markerwidth="10" orient="auto" refx="1" refy="3.5">
+<polygon fill="#10b981" points="10 0, 0 3.5, 10 7"></polygon>
+</marker>
+</defs>
+</svg>
+</div>
+<div class="columns" style="margin-top: 1rem;">
+<div class="card">
+<h4>📤 ARP Request (Broadcast)</h4>
+<pre style="font-size: 0.85rem;">"Who has 192.168.1.20?
+ Tell 192.168.1.10"
+ 
+Sent to: FF:FF:FF:FF:FF:FF
+(all devices on subnet)</pre>
+</div>
+<div class="card">
+<h4>📥 ARP Reply (Aicast)</h4>
+<pre style="font-size: 0.85rem;">"192.168.1.20 is at
+ BB:BB:BB:BB:BB:BB"
+ 
+Sent directly to requester</pre>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 23: ARP Process Steps -->
+<div class="slide" data-slide="23">
+<div class="slide-header">
+<h2>📡 Cum Works ARP — Step with Step</h2>
+</div>
+<div class="slide-content">
+<div class="columns-3">
+<div class="card">
+<h4>1️⃣ Check Cache</h4>
+<p>Before sending an ARP request, the host checks its local <strong>ARP cache</strong>.</p>
+<pre data-lang="bash" style="font-size: 0.8rem;">$ ip neigh show
+192.168.1.1 dev eth0 lladdr 
+  00:11:22:33:44:55 REACHABLE</pre>
+<p class="text-muted" style="font-size: 0.85rem; margin-top: 0.5rem;">If found → use cached MAC</p>
+</div>
+<div class="card">
+<h4>2️⃣ ARP Request</h4>
+<p>If not cached, send <span class="badge badge-warning">broadcast</span> to all devices on the subnet.</p>
+<pre style="font-size: 0.8rem;">Operation: Request (1)
+Sender IP: 192.168.1.10
+Sender MAC: AA:AA:...
+Target IP: 192.168.1.20
+Target MAC: 00:00:... (unknown)</pre>
+</div>
+<div class="card">
+<h4>3️⃣ ARP Reply &amp; Cache</h4>
+<p>Target responds with <span class="badge badge-success">unicast</span>, both sides cache the mapping.</p>
+<pre style="font-size: 0.8rem;">Operation: Reply (2)
+Sender IP: 192.168.1.20
+Sender MAC: BB:BB:...
+
+Cache timeout: 60-300 seconds</pre>
+</div>
+</div>
+<div class="warning-box" style="margin-top: 1rem;">
+<h4>⚡ Performance Disadvantagesideration</h4>
+<p>ARP requests are <strong>broadcast</strong>, which means every device on the subnet must process them. In large Nivel 2 domains, excessive ARP traffic ("ARP storms") can degrade performance. This is one reason for keeping broadcast domains small through proper subnetting and VLANs.</p>
+</div>
+</div>
+</div>
+<!-- Slide 24: ARP Commands -->
+<div class="slide" data-slide="24">
+<div class="slide-header">
+<h2>🖥️ Lucrul with ARP — Aelte from Linia of command</h2>
+</div>
+<div class="slide-content">
+<div class="columns">
+<div class="card">
+<h4>Linux (Modern)</h4>
+<pre data-lang="bash"># View ARP cache
+ip neigh show
+
+# Adaug intrare statica
+sudo ip neigh add 192.168.1.1 \
+    lladdr 00:11:22:33:44:55 dev eth0
+
+# Sterge intrare
+sudo ip neigh del 192.168.1.1 dev eth0
+
+# Flush entire cache
+sudo ip neigh flush all
+
+# Monitor ARP in real-time
+sudo ip -s neigh show</pre>
+</div>
+<div class="card">
+<h4>Cross-Platform / Legacy</h4>
+<pre data-lang="bash"># View ARP cache (all systems)
+arp -a
+
+# Windows
+arp -d *           # Clear cache
+
+# Linux (legacy)
+arp -n             # Numeric output
+arp -d 192.168.1.1 # Sterge intrare
+
+# macOS
+arp -a -l          # Long format
+
+# Capture ARP with tcpdump
+sudo tcpdump -i eth0 arp</pre>
+</div>
+</div>
+<div class="definition-box" style="margin-top: 1rem;">
+<h4>📊 ARP Cache States (Linux)</h4>
+<ul>
+<li><strong>REACHABLE</strong> — Recently verified, can be used immediately</li>
+<li><strong>STALE</strong> — May be outdatad, will be verified on next use</li>
+<li><strong>DELAY</strong> — Waiting for checkon probe</li>
+<li><strong>PROBE</strong> — Actively sending checkon requests</li>
+<li><strong>FAILED</strong> — Resolution failed, entry will be removed</li>
+</ul>
+</div>
+</div>
+</div>
+<!-- Slide 25: ARP Security Vulnerabilities -->
+<div class="slide" data-slide="25">
+<div class="slide-header">
+<h2>🔓 Vulnerabilitati of security ARP</h2>
+</div>
+<div class="slide-content">
+<div class="insight-box">
+<h4>⚠️ ARP Has No Authentication!</h4>
+<p>The ARP protocol was designed for trusted networks. <strong>Any device can claim any Adres IP</strong> by sending unsolicited ARP replies. This fundamental flaw enables several attacks.</p>
+</div>
+<div class="topology" style="margin-top: 1rem;">
+                    ARP Spoofing / Poisoning Attack
+                    
+     Victim                                          Gateway
+  (wants to reach                                (192.168.1.1)
+   the gateway)                                        │
+        │                                              │
+        │      ┌─────────────────────────────┐        │
+        │◄─────┤ FALSE ARP Reply:            │        │
+        │      │ "Gateway 192.168.1.1 is at  │        │
+        │      │  ATTACKER's MAC address"    │        │
+        │      └─────────────────────────────┘        │
+        │                   │                          │
+        │                   │                          │
+        ▼                   ▼                          │
+   ┌─────────────────────────────────────────┐        │
+   │           ATTACKER (MITM)               │────────┘
+   │   Intercepts all victim's traffic       │
+   └─────────────────────────────────────────┘
+                </div>
+<div class="columns" style="margin-top: 1rem;">
+<div class="card">
+<h4>🎯 Attack types</h4>
+<ul>
+<li><strong>ARP Spoofing</strong> — Impersonate another host</li>
+<li><strong>ARP Cache Poisoning</strong> — Corrupt routing entries</li>
+<li><strong>MITM</strong> — Intercept and modify traffic</li>
+<li><strong>DoS</strong> — Disrupt connectivity</li>
+</ul>
+</div>
+<div class="card">
+<h4>🛡️ Aparari</h4>
+<ul>
+<li><strong>DAI</strong> — Dinamic ARP Inspection (switch)</li>
+<li><strong>Static ARP</strong> — For critical hosts/gateways</li>
+<li><strong>HTTPS/TLS</strong> — Encryption at higher layers</li>
+<li><strong>VPNs</strong> — Tunnel traffic securely</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 26: Proxy ARP -->
+<div class="slide" data-slide="26">
+<div class="slide-header">
+<h2>🔄 Proxy ARP</h2>
+</div>
+<div class="slide-content">
+<div class="definition-box">
+<h4>📜 Definition</h4>
+<p><strong>Proxy ARP</strong> is a technique where a router answers ARP requests on behalf of hosts on another network. The router responds with its own MAC address, then forwards packets appropriately.</p>
+</div>
+<div class="topology" style="margin-top: 1rem;">
+  Subnet A (192.168.1.0/24)         Router           Subnet B (192.168.2.0/24)
+  ┌──────────────────────┐    ┌──────────────┐    ┌──────────────────────┐
+  │  Host A              │    │  Proxy ARP   │    │  Host B              │
+  │  192.168.1.10        │────│  Router      │────│  192.168.2.20        │
+  └──────────────────────┘    └──────────────┘    └──────────────────────┘
+  
+  1. Host A wants to reach 192.168.2.20
+  2. Host A sends ARP request for 192.168.2.20 (even though different subnet!)
+  3. Router responds: "192.168.2.20 is at MY_MAC" (Proxy ARP)
+  4. Host A sends frames to router's MAC, router forwards to Subnet B
+                </div>
+<div class="columns" style="margin-top: 1rem;">
+<div class="card">
+<h4>✅ Avantajs</h4>
+<ul>
+<li>Hosts don't need proper routing configuration</li>
+<li>Simplifies migration between subnets</li>
+<li>Can connect misconfigured hosts</li>
+</ul>
+</div>
+<div class="card">
+<h4>❌ Dezavantajs</h4>
+<ul>
+<li>Increases ARP table size on router</li>
+<li>Can mask network misconfigurations</li>
+<li>Security risk if not properly controlled</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 27: ARP Quiz -->
+<div class="slide" data-slide="27">
+<div class="slide-header">
+<h2>✅ Knowledge Check: ARP</h2>
+</div>
+<div class="slide-content">
+<div class="quiz-container">
+<p class="quiz-question">ARP requests are sent as:</p>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkQuiz(this, false)">A) Aicast to the target Adres IP</div>
+<div class="quiz-option" onclick="checkQuiz(this, true)">B) Broadcast to all devices on the subnet (FF:FF:FF:FF:FF:FF)</div>
+<div class="quiz-option" onclick="checkQuiz(this, false)">C) Multicast to a special ARP group</div>
+<div class="quiz-option" onclick="checkQuiz(this, false)">D) Anycast to the nearest router</div>
+</div>
+<div class="quiz-feedback correct">✓ correct! ARP requests are broadcast because the sender doesn't yet know the target's MAC address.</div>
+<div class="quiz-feedback incorrect">✗ ARP requests must be broadcast (FF:FF:FF:FF:FF:FF) because the sender doesn't know who has the target IP.</div>
+</div>
+<div class="quiz-container" style="margin-top: 1rem;">
+<p class="quiz-question">Why is ARP spoofing possible?</p>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkQuiz(this, false)">A) ARP uses weak encryption</div>
+<div class="quiz-option" onclick="checkQuiz(this, false)">B) ARP operates at Nivel 4</div>
+<div class="quiz-option" onclick="checkQuiz(this, true)">C) ARP has no authentication mechanism</div>
+<div class="quiz-option" onclick="checkQuiz(this, false)">D) ARP requires root privileges</div>
+</div>
+<div class="quiz-feedback correct">✓ correct! ARP was designed for trusted networks and has no way to verify the authenticity of replies.</div>
+<div class="quiz-feedback incorrect">✗ The vulnerability exists because ARP has no authentication — any device can claim any Adres IP.</div>
+</div>
+</div>
+</div>
+<!-- ==================== DHCP SECTION ==================== -->
+<!-- Slide 28: DHCP Section Title -->
+<div class="slide slide-centered" data-slide="28" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+<div style="max-width: 800px;">
+<p style="color: rgba(255,255,255,0.7); font-size: 0.9rem; margin-bottom: 1rem;">SECTION 3 OF 5</p>
+<h1 style="color: white; font-size: 3.5rem;">Dinamic Host configuration</h1>
+<p style="color: rgba(255,255,255,0.9); font-size: 1.3rem; margin-top: 1.5rem;">DHCP &amp; BOOTP — Automatic Network Setup</p>
+<div style="margin-top: 3rem; display: flex; gap: 2rem; justify-content: center;">
+<div style="text-align: center;">
+<div style="font-size: 2.5rem; color: white; font-weight: 700;">1993</div>
+<div style="color: rgba(255,255,255,0.7); font-size: 0.85rem;">RFC 1531</div>
+</div>
+<div style="text-align: center;">
+<div style="font-size: 2.5rem; color: white; font-weight: 700;">DORA</div>
+<div style="color: rgba(255,255,255,0.7); font-size: 0.85rem;">4-step process</div>
+</div>
+<div style="text-align: center;">
+<div style="font-size: 2.5rem; color: white; font-weight: 700;">UDP</div>
+<div style="color: rgba(255,255,255,0.7); font-size: 0.85rem;">ports 67/68</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 29: DHCP Introduction -->
+<div class="slide" data-slide="29">
+<div class="slide-header">
+<h2>🌐 DHCP — the protocol of configuration Dinamic a Hostsi</h2>
+</div>
+<div class="slide-content">
+<div class="highlight-box">
+<h4>🎯 What DHCP Provides Automatically</h4>
+<div class="columns-3" style="margin-top: 1rem;">
+<div>
+<p style="font-weight: 600;">Essential</p>
+<ul>
+<li>IP address</li>
+<li>Subnet Mask</li>
+<li>Default Gateway</li>
+<li>DNS Servers</li>
+</ul>
+</div>
+<div>
+<p style="font-weight: 600;">Common Options</p>
+<ul>
+<li>Domain Nume</li>
+<li>Lease Duration</li>
+<li>NTP Servers</li>
+<li>WINS Servers</li>
+</ul>
+</div>
+<div>
+<p style="font-weight: 600;">Advanced</p>
+<ul>
+<li>TFTP Server (PXE boot)</li>
+<li>SIP Servers (VoIP)</li>
+<li>Custom Options</li>
+<li>Vendor Extensions</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="quiz-container" style="margin-top: 1.5rem;">
+<p class="quiz-question">🤔 Why not configure each device manually?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Think about it...</button>
+<div class="reveal-content">
+<p>Imagine manually configuring:</p>
+<ul>
+<li>🏢 A company with <strong>10,000 employees</strong> — each device needs unique IP, correct gateway, DNS...</li>
+<li>🎓 A university campus with <strong>50,000 students</strong> — devices come and go constantly</li>
+<li>☕ A café with public WiFi — dozens of random devices daily</li>
+<li>📱 Your home — phones, laptops, tablets, smart devices, guests...</li>
+</ul>
+<p style="margin-top: 0.75rem;"><strong>DHCP handles all this automatically in seconds!</strong></p>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 30: DORA Process -->
+<div class="slide" data-slide="30">
+<div class="slide-header">
+<h2>📨 Procesul DORA al DHCP</h2>
+</div>
+<div class="slide-content">
+<div class="diagram-container">
+<svg style="max-width: 800px;" viewbox="0 0 800 280">
+<!-- Client -->
+<rect fill="#f8fafc" height="220" rx="10" stroke="#e2e8f0" stroke-width="2" width="120" x="50" y="30"></rect>
+<text fill="#1e293b" font-size="14" font-weight="600" text-anchor="middle" x="110" y="55">Client</text>
+<text fill="#64748b" font-size="10" text-anchor="middle" x="110" y="75">(new device)</text>
+<!-- Server -->
+<rect fill="#f8fafc" height="220" rx="10" stroke="#e2e8f0" stroke-width="2" width="120" x="630" y="30"></rect>
+<text fill="#1e293b" font-size="14" font-weight="600" text-anchor="middle" x="690" y="55">DHCP Server</text>
+<text fill="#64748b" font-size="10" text-anchor="middle" x="690" y="75">(has address pool)</text>
+<!-- DISCOVER -->
+<path d="M 170 100 L 630 100" marker-end="url(#arr1)" stroke="#f59e0b" stroke-width="3"></path>
+<rect fill="#f59e0b" height="30" rx="5" width="160" x="320" y="85"></rect>
+<text fill="white" font-size="12" font-weight="600" text-anchor="middle" x="400" y="105">D - DISCOVER</text>
+<text fill="#64748b" font-size="9" text-anchor="end" x="270" y="95">broadcast</text>
+<!-- OFFER -->
+<path d="M 630 140 L 170 140" marker-end="url(#arr2)" stroke="#0ea5e9" stroke-width="3"></path>
+<rect fill="#0ea5e9" height="30" rx="5" width="160" x="320" y="125"></rect>
+<text fill="white" font-size="12" font-weight="600" text-anchor="middle" x="400" y="145">O - OFFER</text>
+<text fill="#64748b" font-size="9" text-anchor="start" x="530" y="135">unicast/broadcast</text>
+<!-- REQUEST -->
+<path d="M 170 180 L 630 180" marker-end="url(#arr1)" stroke="#8b5cf6" stroke-width="3"></path>
+<rect fill="#8b5cf6" height="30" rx="5" width="160" x="320" y="165"></rect>
+<text fill="white" font-size="12" font-weight="600" text-anchor="middle" x="400" y="185">R - REQUEST</text>
+<text fill="#64748b" font-size="9" text-anchor="end" x="270" y="175">broadcast</text>
+<!-- ACK -->
+<path d="M 630 220 L 170 220" marker-end="url(#arr2)" stroke="#10b981" stroke-width="3"></path>
+<rect fill="#10b981" height="30" rx="5" width="160" x="320" y="205"></rect>
+<text fill="white" font-size="12" font-weight="600" text-anchor="middle" x="400" y="225">A - ACK</text>
+<text fill="#64748b" font-size="9" text-anchor="start" x="530" y="215">unicast</text>
+<defs>
+<marker id="arr1" markerheight="7" markerwidth="10" orient="auto" refx="9" refy="3.5">
+<polygon fill="#64748b" points="0 0, 10 3.5, 0 7"></polygon>
+</marker>
+<marker id="arr2" markerheight="7" markerwidth="10" orient="auto" refx="1" refy="3.5">
+<polygon fill="#64748b" points="10 0, 0 3.5, 10 7"></polygon>
+</marker>
+</defs>
+</svg>
+</div>
+<div class="columns-4" style="margin-top: 1rem;">
+<div class="card" style="border-left: 4px solid #f59e0b;">
+<h4 style="color: #f59e0b;">DISCOVER</h4>
+<p class="text-muted" style="font-size: 0.85rem;">Clientul difuzeaza: "Any DHCP servers out there?"</p>
+</div>
+<div class="card" style="border-left: 4px solid #0ea5e9;">
+<h4 style="color: #0ea5e9;">OFFER</h4>
+<p class="text-muted" style="font-size: 0.85rem;">Server responds: "Here's an IP you can use"</p>
+</div>
+<div class="card" style="border-left: 4px solid #8b5cf6;">
+<h4 style="color: #8b5cf6;">REQUEST</h4>
+<p class="text-muted" style="font-size: 0.85rem;">Client accepts: "I'll take that one!"</p>
+</div>
+<div class="card" style="border-left: 4px solid #10b981;">
+<h4 style="color: #10b981;">ACK</h4>
+<p class="text-muted" style="font-size: 0.85rem;">Server confirms: "It's yours for X seconds"</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 31: DHCP Details -->
+<div class="slide" data-slide="31">
+<div class="slide-header">
+<h2>📊 Detalii Messages DHCP</h2>
+</div>
+<div class="slide-content">
+<div class="table-container">
+<table>
+<tr>
+<th>Step</th>
+<th>Message</th>
+<th>Source</th>
+<th>Destination</th>
+<th>Key Content</th>
+</tr>
+<tr>
+<td><span class="badge badge-warning">D</span></td>
+<td>DHCPDISCOVER</td>
+<td>0.0.0.0:68</td>
+<td>255.255.255.255:67</td>
+<td>Client MAC, requested options</td>
+</tr>
+<tr>
+<td><span class="badge badge-primary">O</span></td>
+<td>DHCPOFFER</td>
+<td>Server:67</td>
+<td>255.255.255.255:68 or Client:68</td>
+<td>Offered IP, lease time, options</td>
+</tr>
+<tr>
+<td><span class="badge badge-purple">R</span></td>
+<td>DHCPREQUEST</td>
+<td>0.0.0.0:68</td>
+<td>255.255.255.255:67</td>
+<td>Requested IP, server identifier</td>
+</tr>
+<tr>
+<td><span class="badge badge-success">A</span></td>
+<td>DHCPACK</td>
+<td>Server:67</td>
+<td>Client:68</td>
+<td>Confirmed IP, all configuration</td>
+</tr>
+</table>
+</div>
+<div class="columns" style="margin-top: 1rem;">
+<div class="definition-box">
+<h4>⏰ Lease Time</h4>
+<p>The client "leases" the Adres IP for a specific duration. Before the lease expires, the client must:</p>
+<ul>
+<li><strong>T1 (50%)</strong> — Attempt renewal with original server</li>
+<li><strong>T2 (87.5%)</strong> — Attempt rebinding with any server</li>
+<li><strong>Expiry</strong> — Release IP and restart DORA</li>
+</ul>
+</div>
+<div class="warning-box">
+<h4>⚠️ Why Broadcast REQUEST?</h4>
+<p>The REQUEST is broadcast (not unicast to the offering server) because:</p>
+<ul>
+<li>Multiple servers may have made offers</li>
+<li>Non-selected servers need to know to free their offered IPs</li>
+<li>Client still doesn't have a valid IP to send from</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 32: BOOTP Heritage -->
+<div class="slide" data-slide="32">
+<div class="slide-header">
+<h2>📜 BOOTP — Predecesorul DHCP</h2>
+</div>
+<div class="slide-content">
+<div class="story-box">
+<h4>🕰️ Historical Context</h4>
+<p><strong>BOOTP</strong> (the protocol Bootstrap, RFC 951, 1985) was designed to boot diskless workstations over the network. DHCP (1993) was built as an extension to BOOTP, maintaining backward compatibility.</p>
+</div>
+<div class="table-container" style="margin-top: 1rem;">
+<table>
+<tr>
+<th>Feature</th>
+<th>BOOTP</th>
+<th>DHCP</th>
+</tr>
+<tr>
+<td>Adres allocation</td>
+<td>Static (admin-configured)</td>
+<td>Dinamic (from pool)</td>
+</tr>
+<tr>
+<td>Lease concept</td>
+<td>No (permanent allocation)</td>
+<td>Yes (temptimery lease)</td>
+</tr>
+<tr>
+<td>configuration options</td>
+<td>Limited set</td>
+<td>Extensible (255 options)</td>
+</tr>
+<tr>
+<td>Message types</td>
+<td>Request/Reply only</td>
+<td>DORA + NAK, Release, Inform</td>
+</tr>
+<tr>
+<td>Ports</td>
+<td>UDP 67/68</td>
+<td>Same (backward compatible)</td>
+</tr>
+</table>
+</div>
+<div class="insight-box" style="margin-top: 1rem;">
+<h4>💡 Modern Relevance</h4>
+<p>BOOTP concepts live on in <strong>PXE boot</strong> (Preboot eXecution Environment) used for:</p>
+<ul style="margin-top: 0.5rem;">
+<li>Operating system deployment in enterprises</li>
+<li>Diskless workstations and thin clients</li>
+<li>Cloud infrastructure provisioning</li>
+</ul>
+</div>
+</div>
+</div>
+<!-- Slide 33: DHCP Relay -->
+<div class="slide" data-slide="33">
+<div class="slide-header">
+<h2>🔄 Agent Releu DHCP</h2>
+</div>
+<div class="slide-content">
+<div class="definition-box">
+<h4>📜 The Problem</h4>
+<p>DHCP DISCOVER messages are broadcast, but <strong>broadcasts don't cross routers</strong>. How can a centralised DHCP server serve multiple subnets?</p>
+</div>
+<div class="topology" style="margin-top: 1rem;">
+          Subnet A                    Router               Subnet B
+       192.168.1.0/24              (Relay Agent)         192.168.2.0/24
+  ┌──────────────────┐         ┌──────────────┐       ┌──────────────────┐
+  │   Client         │         │              │       │   DHCP Server    │
+  │   (new device)   │◄───────►│  ip helper   │◄─────►│   192.168.2.10   │
+  │   no IP yet      │         │              │       │                  │
+  └──────────────────┘         └──────────────┘       └──────────────────┘
+  
+  1. Clientul difuzeaz DISCOVER on Subnet A
+  2. Router (relay) receives broadcast, converts to unicast
+  3. Router forwards to DHCP server (192.168.2.10) with giaddr field set
+  4. Server knows client is on Subnet A, assigns from correct pool
+  5. Server responds to relay, relay broadcasts to client
+                </div>
+<div class="columns" style="margin-top: 1rem;">
+<div class="card">
+<h4>Cisco configuration</h4>
+<pre data-lang="config" style="font-size: 0.85rem;">interface GigabitEthernet0/0
+ ip address 192.168.1.1 255.255.255.0
+ ip helper-address 192.168.2.10</pre>
+</div>
+<div class="card">
+<h4>Linux configuration</h4>
+<pre data-lang="bash" style="font-size: 0.85rem;"># Using dhcrelay
+dhcrelay -i eth0 192.168.2.10
+
+# Or with systemd
+# /etc/default/isc-dhcp-relay
+SERVERS="192.168.2.10"
+INTERFACES="eth0"</pre>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 34: DHCP Security -->
+<div class="slide" data-slide="34">
+<div class="slide-header">
+<h2>🔒 Preocupari of security DHCP</h2>
+</div>
+<div class="slide-content">
+<div class="columns">
+<div class="insight-box">
+<h4>🏴‍☠️ DHCP Server Rogue</h4>
+<p>An attacker sets up a fake DHCP server that:</p>
+<ul>
+<li>Provides wrong gateway → MITM attacks</li>
+<li>Provides incorrect DNS → DNS spoofing</li>
+<li>Provides short leases → DoS</li>
+</ul>
+</div>
+<div class="insight-box">
+<h4>💀 DHCP Starvation</h4>
+<p>Attacker exhausts the address pool by:</p>
+<ul>
+<li>Sending DISCOVER with spoofed MACs</li>
+<li>Requesting all available addresses</li>
+<li>Legitimate clients get no IP → DoS</li>
+</ul>
+</div>
+</div>
+<div class="definition-box" style="margin-top: 1rem;">
+<h4>🛡️ DHCP Snooping (Defence)</h4>
+<p>A switch feature that creates a binding table of valid DHCP assignments:</p>
+<ul>
+<li><strong>Trusted ports</strong> — Connect to legitimate DHCP servers only</li>
+<li><strong>Atrusted ports</strong> — Block DHCP OFFER/ACK from clients</li>
+<li><strong>Limitare of rata</strong> — Prevent DISCOVER floods</li>
+<li>Works with <strong>Dinamic ARP Inspection</strong> for complete protection</li>
+</ul>
+</div>
+</div>
+</div>
+<!-- Slide 35: DHCP Quiz -->
+<div class="slide" data-slide="35">
+<div class="slide-header">
+<h2>✅ Knowledge Check: DHCP</h2>
+</div>
+<div class="slide-content">
+<div class="quiz-container">
+<p class="quiz-question">What is the correct order of DHCP messages for initial address assignment?</p>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkQuiz(this, false)">A) Request → Offer → Discover → Acknowledge</div>
+<div class="quiz-option" onclick="checkQuiz(this, false)">B) Discover → Request → Offer → Acknowledge</div>
+<div class="quiz-option" onclick="checkQuiz(this, true)">C) Discover → Offer → Request → Acknowledge</div>
+<div class="quiz-option" onclick="checkQuiz(this, false)">D) Offer → Discover → Acknowledge → Request</div>
+</div>
+<div class="quiz-feedback correct">✓ correct! DORA: Discover → Offer → Request → Acknowledge</div>
+<div class="quiz-feedback incorrect">✗ Retine DORA: Discover (client) → Offer (server) → Request (client) → Acknowledge (server)</div>
+</div>
+<div class="quiz-container" style="margin-top: 1rem;">
+<p class="quiz-question">Why is a DHCP Relay Agent needed?</p>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkQuiz(this, false)">A) To encrypt DHCP traffic for security</div>
+<div class="quiz-option" onclick="checkQuiz(this, true)">B) To forward DHCP broadcasts across router boundaries</div>
+<div class="quiz-option" onclick="checkQuiz(this, false)">C) To provide redundant DHCP servers</div>
+<div class="quiz-option" onclick="checkQuiz(this, false)">D) To translate between IPv4 and IPv6 DHCP</div>
+</div>
+<div class="quiz-feedback correct">✓ correct! Broadcast packets don't cross routers, so a relay converts them to unicast.</div>
+<div class="quiz-feedback incorrect">✗ DHCP uses broadcasts which don't cross routers — the relay agent forwards them as unicast to remote servers.</div>
+</div>
+</div>
+</div>
+<!-- ==================== NDP SECTION ==================== -->
+<!-- Slide 36: NDP Section Title -->
+<div class="slide slide-centered" data-slide="36" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);">
+<div style="max-width: 800px;">
+<p style="color: rgba(255,255,255,0.7); font-size: 0.9rem; margin-bottom: 1rem;">SECTION 4 OF 5</p>
+<h1 style="color: white; font-size: 3.5rem;">Vecin Discovery Protocol</h1>
+<p style="color: rgba(255,255,255,0.9); font-size: 1.3rem; margin-top: 1.5rem;">NDP — IPv6's Aified Discovery Mechanism</p>
+<div style="margin-top: 3rem; display: flex; gap: 2rem; justify-content: center;">
+<div style="text-align: center;">
+<div style="font-size: 2.5rem; color: white; font-weight: 700;">1998</div>
+<div style="color: rgba(255,255,255,0.7); font-size: 0.85rem;">RFC 2461</div>
+</div>
+<div style="text-align: center;">
+<div style="font-size: 2.5rem; color: white; font-weight: 700;">ICMPv6</div>
+<div style="color: rgba(255,255,255,0.7); font-size: 0.85rem;">based</div>
+</div>
+<div style="text-align: center;">
+<div style="font-size: 2.5rem; color: white; font-weight: 700;">SLAAC</div>
+<div style="color: rgba(255,255,255,0.7); font-size: 0.85rem;">auto-config</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 37: NDP Introduction -->
+<div class="slide" data-slide="37">
+<div class="slide-header">
+<h2>🔍 NDP — Ce Face IPv6 different</h2>
+</div>
+<div class="slide-content">
+<div class="definition-box">
+<h4>📜 Vecin Discovery Protocol (RFC 4861)</h4>
+<p>NDP is an IPv6 protocol that <strong>combines and improves</strong> upon multiple IPv4 protocols. It uses ICMPv6 messages instead of separate protocols.</p>
+</div>
+<div class="table-container" style="margin-top: 1rem;">
+<table>
+<tr>
+<th>function</th>
+<th>IPv4 Protocol</th>
+<th>IPv6 (NDP)</th>
+</tr>
+<tr>
+<td>Adres resolution (IP → MAC)</td>
+<td>ARP (separate protocol)</td>
+<td>Vecin Solicitation/Advertisement</td>
+</tr>
+<tr>
+<td>Router discovery</td>
+<td>ICMP Router Discovery (rarely used)</td>
+<td>Router Solicitation/Advertisement</td>
+</tr>
+<tr>
+<td>Duplicate address detection</td>
+<td>Gratuitous ARP (non-standard)</td>
+<td>DAD via Vecin Solicitation</td>
+</tr>
+<tr>
+<td>Redirectionare</td>
+<td>ICMP Redirectionare</td>
+<td>NDP Redirectionare</td>
+</tr>
+<tr>
+<td>Autoconfiguration</td>
+<td>DHCP required</td>
+<td>SLAAC (Stateless Address Autoconfiguration)</td>
+</tr>
+</table>
+</div>
+<div class="highlight-box" style="margin-top: 1rem;">
+<h4>💡 Key Improvement: Multicast Instead of Broadcast</h4>
+<p>Alike ARP's broadcasts that reach all devices, NDP uses <strong>solicited-nodee multicast addresses</strong> — only devices with matching addresses process the message, reducing network noise.</p>
+</div>
+</div>
+</div>
+<!-- Slide 38: NDP Message Tipuri -->
+<div class="slide" data-slide="38">
+<div class="slide-header">
+<h2>📨 types of Messages NDP</h2>
+</div>
+<div class="slide-content">
+<div class="columns">
+<div class="card" style="border-left: 4px solid #0ea5e9;">
+<h4>🔍 Vecin Solicitation (NS)</h4>
+<p><span class="badge badge-primary">ICMPv6 Tip 135</span></p>
+<p style="margin-top: 0.5rem;">Equivaslow to ARP Request. Asks "What is the link-layer address for this IPv6 address?"</p>
+<p class="text-muted" style="font-size: 0.85rem; margin-top: 0.5rem;">Sent to solicited-nodee multicast address</p>
+</div>
+<div class="card" style="border-left: 4px solid #10b981;">
+<h4>📢 Vecin Advertisement (NA)</h4>
+<p><span class="badge badge-success">ICMPv6 Tip 136</span></p>
+<p style="margin-top: 0.5rem;">Equivaslow to ARP Reply. Provides link-layer address mapping.</p>
+<p class="text-muted" style="font-size: 0.85rem; margin-top: 0.5rem;">Sent unicast to requester or multicast</p>
+</div>
+</div>
+<div class="columns" style="margin-top: 1rem;">
+<div class="card" style="border-left: 4px solid #f59e0b;">
+<h4>📡 Router Solicitation (RS)</h4>
+<p><span class="badge badge-warning">ICMPv6 Tip 133</span></p>
+<p style="margin-top: 0.5rem;">Sent by hosts at startup asking routers to annewnce themselves.</p>
+<p class="text-muted" style="font-size: 0.85rem; margin-top: 0.5rem;">Sent to all-routers multicast (ff02::2)</p>
+</div>
+<div class="card" style="border-left: 4px solid #8b5cf6;">
+<h4>📣 Router Advertisement (RA)</h4>
+<p><span class="badge badge-purple">ICMPv6 Tip 134</span></p>
+<p style="margin-top: 0.5rem;">Routers advertise their presence and provide network configuration (prefix, flags, lifetime).</p>
+<p class="text-muted" style="font-size: 0.85rem; margin-top: 0.5rem;">Periodic or in response to RS</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 39: SLAAC -->
+<div class="slide" data-slide="39">
+<div class="slide-header">
+<h2>⚡ SLAAC — Stateless Address Autoconfiguration</h2>
+</div>
+<div class="slide-content">
+<div class="story-box">
+<h4>🎯 The Promise</h4>
+<p>A device can configure its own IPv6 address <strong>without a DHCP server</strong> — just by listening to Router Advertisements and combining the prefix with its own interface identifier.</p>
+</div>
+<div class="topology" style="margin-top: 1rem;">
+  SLAAC Process:
+  
+  1. Device generates Link-Local address (fe80::...)
+  2. Device sends Router Solicitation (RS)
+  3. Router responds with Router Advertisement (RA) containing:
+     • Network prefix (e.g., 2001:db8:1234::/64)
+     • Flags (A=autoconfigure, M=managed, O=other config)
+     • Valid/Preferred lifetime
+  
+  4. Device combines:
+     ┌────────────────────┬────────────────────────────────┐
+     │  Network Prefix    │  Interface ID (from MAC)       │
+     │  2001:db8:1234::   │  ::abcd:efab:1234:5678        │
+     └────────────────────┴────────────────────────────────┘
+                          ↓
+     Global address: 2001:db8:1234::abcd:efab:1234:5678/64
+  
+  5. Device performs DAD (Duplicate Adres Detection) before using
+                </div>
+<div class="warning-box" style="margin-top: 1rem;">
+<h4>⚠️ Privacy Extension (RFC 4941)</h4>
+<p>Classic SLAAC uses MAC-derived interface IDs, which enables tracking. Modern systems use <strong>temptimery, randomised addresses</strong> for outgoing connections while keeping stable addresses for incoming connections.</p>
+</div>
+</div>
+</div>
+<!-- ==================== ICMP SECTION ==================== -->
+<!-- Slide 40: ICMP Section Title -->
+<div class="slide slide-centered" data-slide="40" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+<div style="max-width: 800px;">
+<p style="color: rgba(255,255,255,0.7); font-size: 0.9rem; margin-bottom: 1rem;">SECTION 5 OF 5</p>
+<h1 style="color: white; font-size: 3.5rem;">the protocol of Messages of Control Internet</h1>
+<p style="color: rgba(255,255,255,0.9); font-size: 1.3rem; margin-top: 1.5rem;">ICMP — The Network's Feedback System</p>
+<div style="margin-top: 3rem; display: flex; gap: 2rem; justify-content: center;">
+<div style="text-align: center;">
+<div style="font-size: 2.5rem; color: white; font-weight: 700;">1981</div>
+<div style="color: rgba(255,255,255,0.7); font-size: 0.85rem;">RFC 792</div>
+</div>
+<div style="text-align: center;">
+<div style="font-size: 2.5rem; color: white; font-weight: 700;">ping</div>
+<div style="color: rgba(255,255,255,0.7); font-size: 0.85rem;">traceroute</div>
+</div>
+<div style="text-align: center;">
+<div style="font-size: 2.5rem; color: white; font-weight: 700;">L3</div>
+<div style="color: rgba(255,255,255,0.7); font-size: 0.85rem;">protocol</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 41: ICMP Introduction -->
+<div class="slide" data-slide="41">
+<div class="slide-header">
+<h2>📡 ICMP — The system Nervos al network</h2>
+</div>
+<div class="slide-content">
+<div class="highlight-box">
+<h4>🎯 Scop</h4>
+<p>ICMP provides <strong>feedback about problems</strong> in the network. It doesn't carry user data — it carries control messages about the network itself.</p>
+</div>
+<div class="columns" style="margin-top: 1.5rem;">
+<div class="card">
+<h4>🔴 Error Messages</h4>
+<ul>
+<li><strong>destination Inaccesibila</strong> — Cannot reach target (no route, port closed, etc.)</li>
+<li><strong>Timp Depasit</strong> — TTL reached zero</li>
+<li><strong>Parameter Problem</strong> — Invalid header field</li>
+<li><strong>Source Quench</strong> — Slow down! (deprecated)</li>
+<li><strong>Redirectionare</strong> — Use a better route</li>
+</ul>
+</div>
+<div class="card">
+<h4>🟢 Informational Messages</h4>
+<ul>
+<li><strong>Echo Request/Reply</strong> — ping!</li>
+<li><strong>Timestamp Request/Reply</strong> — Clock synchronisation</li>
+<li><strong>Adres Mask Request/Reply</strong> — Subnet Mask discovery</li>
+<li><strong>Router Advertisement/Solicitation</strong> — Gateway discovery</li>
+</ul>
+</div>
+</div>
+<div class="definition-box" style="margin-top: 1rem;">
+<h4>📊 ICMP Header Structure</h4>
+<div class="protocol-header">
+<div class="header-row">
+<div class="header-field span-2">
+<div class="field-name">Tip</div>
+<div class="field-value">8 bits</div>
+<div class="field-bits">Message type</div>
+</div>
+<div class="header-field span-2">
+<div class="field-name">Code</div>
+<div class="field-value">8 bits</div>
+<div class="field-bits">Subtype</div>
+</div>
+<div class="header-field span-4">
+<div class="field-name">Checksum</div>
+<div class="field-value">16 bits</div>
+<div class="field-bits">Error detection</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 42: ping and traceroute -->
+<div class="slide" data-slide="42">
+<div class="slide-header">
+<h2>🛠️ Aelte of Diagnostic: ping and traceroute</h2>
+</div>
+<div class="slide-content">
+<div class="columns">
+<div class="card">
+<h4>🏓 ping (ICMP Echo)</h4>
+<p>Send ICMP Echo Request (Tip 8), expects Echo Reply (Tip 0).</p>
+<pre data-lang="bash" style="font-size: 0.8rem;">$ ping -c 4 google.com
+PING google.com (142.250.186.78) 56(84) bytes
+64 bytes from 142.250.186.78: icmp_seq=1 ttl=117 time=12.3 ms
+64 bytes from 142.250.186.78: icmp_seq=2 ttl=117 time=11.8 ms
+64 bytes from 142.250.186.78: icmp_seq=3 ttl=117 time=12.1 ms
+64 bytes from 142.250.186.78: icmp_seq=4 ttl=117 time=11.9 ms
+
+--- google.com ping statistics ---
+4 packets transmitted, 4 received, 0% packet loss
+rtt min/avg/max/mdev = 11.8/12.0/12.3/0.2 ms</pre>
+</div>
+<div class="card">
+<h4>🗺️ traceroute (TTL exploitation)</h4>
+<p>Send packets with TTL crescator to discover the path.</p>
+<pre data-lang="bash" style="font-size: 0.8rem;">$ traceroute google.com
+traceroute to google.com (142.250.186.78)
+ 1  router.local (192.168.1.1)  1.234 ms
+ 2  isp-gateway (10.0.0.1)  8.456 ms
+ 3  core-router.isp.net  15.789 ms
+ 4  peering.google.com  18.234 ms
+ 5  142.250.186.78  12.345 ms</pre>
+<p class="text-muted" style="font-size: 0.85rem; margin-top: 0.5rem;">Each hop sends back ICMP Timp Depasit when TTL=0</p>
+</div>
+</div>
+<div class="warning-box" style="margin-top: 1rem;">
+<h4>⚠️ Firewalls and ICMP</h4>
+<p>Many firewalls block ICMP for security reasons (prevents ping floods, hides network topology). This can make diagnostics difficult. Windows <code>tracert</code> uses ICMP, while Aix <code>traceroute</code> traditionally uses UDP (can be changed with <code>-I</code> flag).</p>
+</div>
+</div>
+</div>
+<!-- Slide 43: ICMP Message Tipuri -->
+<div class="slide" data-slide="43">
+<div class="slide-header">
+<h2>📊 types Comune of Messages ICMP</h2>
+</div>
+<div class="slide-content">
+<div class="table-container">
+<table>
+<tr>
+<th>Tip</th>
+<th>Nume</th>
+<th>Common Codes</th>
+<th>When You See It</th>
+</tr>
+<tr>
+<td>0</td>
+<td>Echo Reply</td>
+<td>0 (no code)</td>
+<td>Answer at ping</td>
+</tr>
+<tr>
+<td>3</td>
+<td>destination Inaccesibila</td>
+<td>0=Net, 1=Host, 3=Port, 4=Fragmentation</td>
+<td>Connection refused, no route</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Redirectionare</td>
+<td>0=Network, 1=Host</td>
+<td>Use a different gateway</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Echo Request</td>
+<td>0 (no code)</td>
+<td>ping sends this</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Timp Depasit</td>
+<td>0=TTL exceeded, 1=Fragment reassembly</td>
+<td>traceroute relies on this</td>
+</tr>
+</table>
+</div>
+<div class="columns" style="margin-top: 1rem;">
+<div class="card">
+<h4>destination Inaccesibil Codes</h4>
+<pre style="font-size: 0.8rem;">Code 0: Network unreachable
+Code 1: Host unreachable
+Code 2: Protocol unreachable
+Code 3: Port unreachable   ← UDP "connection refused"
+Code 4: Fragmentation needed but DF set
+Code 5: Source route failed</pre>
+</div>
+<div class="card">
+<h4>Practical Interpretation</h4>
+<ul>
+<li><strong>"Network unreachable"</strong> → routing problem</li>
+<li><strong>"Host unreachable"</strong> → ARP/NDP failed</li>
+<li><strong>"Port unreachable"</strong> → No service listening</li>
+<li><strong>"Fragmentation needed"</strong> → MTU issues</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 44: ICMP Quiz -->
+<div class="slide" data-slide="44">
+<div class="slide-header">
+<h2>✅ Knowledge Check: ICMP and NDP</h2>
+</div>
+<div class="slide-content">
+<div class="quiz-container">
+<p class="quiz-question">What ICMP message type does <code>ping</code> send?</p>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkQuiz(this, false)">A) Echo Reply (Tip 0)</div>
+<div class="quiz-option" onclick="checkQuiz(this, true)">B) Echo Request (Tip 8)</div>
+<div class="quiz-option" onclick="checkQuiz(this, false)">C) destination Inaccesibil (Tip 3)</div>
+<div class="quiz-option" onclick="checkQuiz(this, false)">D) Timp Depasit (Tip 11)</div>
+</div>
+<div class="quiz-feedback correct">✓ correct! ping sends Echo Request (Tip 8) and expects Echo Reply (Tip 0) back.</div>
+<div class="quiz-feedback incorrect">✗ ping sends Echo Request (Tip 8). Echo Reply (Tip 0) is what comes back.</div>
+</div>
+<div class="quiz-container" style="margin-top: 1rem;">
+<p class="quiz-question">Which IPv4 protocol does NDP replace in IPv6?</p>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkQuiz(this, false)">A) ICMP only</div>
+<div class="quiz-option" onclick="checkQuiz(this, false)">B) DHCP only</div>
+<div class="quiz-option" onclick="checkQuiz(this, true)">C) ARP and parts of ICMP Router Discovery</div>
+<div class="quiz-option" onclick="checkQuiz(this, false)">D) TCP</div>
+</div>
+<div class="quiz-feedback correct">✓ correct! NDP handles address resolution (like ARP) and router discovery, all via ICMPv6.</div>
+<div class="quiz-feedback incorrect">✗ NDP replaces ARP for address resolution and provides improved router/neighbour discovery via ICMPv6.</div>
+</div>
+</div>
+</div>
+<!-- SECTION: Practical Integration -->
+<!-- Slide 45: Section Title - Practical Integration -->
+<div class="slide section-title" data-slide="45" style="background: linear-gradient(135deg, #0f172a 0%, #334155 100%);">
+<div class="slide-content" style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; color: white;">
+<div class="section-number" style="font-size: 1.2rem; text-transform: uppercase; letter-spacing: 3px; color: #cbd5e1; margin-bottom: 1rem;">Section VI</div>
+<h1 style="font-family: 'Source Serif 4', serif; font-size: 3.5rem; font-weight: 700; margin-bottom: 1rem; color: #ffffff;">Practical Integration</h1>
+<p style="font-size: 1.3rem; color: #e2e8f0; max-width: 600px; text-align: center;">SDN Fundamentals &amp; Week 6 Project</p>
+<div style="display: flex; gap: 2rem; margin-top: 2rem;">
+<div style="text-align: center;">
+<div style="font-size: 2rem; font-weight: 700; color: #0ea5e9;">🔄</div>
+<div style="font-size: 0.9rem; color: #cbd5e1;">SDN Basics</div>
+</div>
+<div style="text-align: center;">
+<div style="font-size: 2rem; font-weight: 700; color: #10b981;">🐍</div>
+<div style="font-size: 0.9rem; color: #cbd5e1;">Mininet</div>
+</div>
+<div style="text-align: center;">
+<div style="font-size: 2rem; font-weight: 700; color: #f59e0b;">📋</div>
+<div style="font-size: 0.9rem; color: #cbd5e1;">Deliverables</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 46: SDN Introduction -->
+<div class="slide" data-slide="46">
+<div class="slide-header">
+<h2>Software-Defined Networking: Schimbarea of Paradigma</h2>
+</div>
+<div class="slide-content">
+<div class="story-box">
+<strong>📖 Historical Context:</strong> Traditional networks coupled control and data planes in each device. SDN emerged from Stanford's OpenFlow project (2008), separating "brains" from "brawn".
+                </div>
+<div class="columns" style="margin-top: 1.5rem;">
+<div class="card" style="border-left-color: var(--text-muted);">
+<h4>🏛️ Retelistic Traditionala</h4>
+<ul>
+<li>Control plane in each device</li>
+<li>Distributed decision-making</li>
+<li>Vendor-specific configuration</li>
+<li>CLI/SNMP management</li>
+<li>Hardware-centric</li>
+</ul>
+</div>
+<div class="card" style="border-left-color: var(--secondary);">
+<h4>🚀 Software-Defined Networking</h4>
+<ul>
+<li>Centralised controller</li>
+<li>Global network view</li>
+<li>Programmable via APIs</li>
+<li>Vendor-neutral protocols</li>
+<li>Software-centric</li>
+</ul>
+</div>
+</div>
+<div class="diagram-container" style="margin-top: 1.5rem;">
+<svg style="max-width: 800px; min-height: 200px;" viewbox="0 0 700 220">
+<!-- Traditional Side -->
+<text fill="#64748b" font-size="14" font-weight="600" text-anchor="middle" x="150" y="25">Traditional</text>
+<g transform="translate(50, 50)">
+<rect fill="#64748b" height="60" opacity="0.2" rx="5" stroke="#64748b" width="90" x="0" y="0"></rect>
+<text fill="#1e293b" font-size="11" text-anchor="middle" x="45" y="25">Control</text>
+<text fill="#1e293b" font-size="11" text-anchor="middle" x="45" y="45">Data</text>
+<text fill="#64748b" font-size="10" text-anchor="middle" x="45" y="75">Router A</text>
+</g>
+<g transform="translate(160, 50)">
+<rect fill="#64748b" height="60" opacity="0.2" rx="5" stroke="#64748b" width="90" x="0" y="0"></rect>
+<text fill="#1e293b" font-size="11" text-anchor="middle" x="45" y="25">Control</text>
+<text fill="#1e293b" font-size="11" text-anchor="middle" x="45" y="45">Data</text>
+<text fill="#64748b" font-size="10" text-anchor="middle" x="45" y="75">Router B</text>
+</g>
+<line stroke="#64748b" stroke-width="2" x1="140" x2="160" y1="80" y2="80"></line>
+<!-- Arrow -->
+<path d="M290 90 L340 90" marker-end="url(#arrowBlue)" stroke="#0ea5e9" stroke-width="3"></path>
+<defs><marker id="arrowBlue" markerheight="7" markerwidth="10" orient="auto" refx="9" refy="3.5"><polygon fill="#0ea5e9" points="0 0, 10 3.5, 0 7"></polygon></marker></defs>
+<!-- SDN Side -->
+<text fill="#0ea5e9" font-size="14" font-weight="600" text-anchor="middle" x="520" y="25">Software-Defined</text>
+<g transform="translate(440, 40)">
+<rect fill="#0ea5e9" height="50" opacity="0.2" rx="5" stroke="#0ea5e9" stroke-width="2" width="160" x="0" y="0"></rect>
+<text fill="#0ea5e9" font-size="12" font-weight="600" text-anchor="middle" x="80" y="32">SDN Controller</text>
+</g>
+<g transform="translate(390, 120)">
+<rect fill="#10b981" height="45" opacity="0.2" rx="5" stroke="#10b981" stroke-width="2" width="70" x="0" y="0"></rect>
+<text fill="#1e293b" font-size="11" text-anchor="middle" x="35" y="28">Switch</text>
+</g>
+<g transform="translate(485, 120)">
+<rect fill="#10b981" height="45" opacity="0.2" rx="5" stroke="#10b981" stroke-width="2" width="70" x="0" y="0"></rect>
+<text fill="#1e293b" font-size="11" text-anchor="middle" x="35" y="28">Switch</text>
+</g>
+<g transform="translate(580, 120)">
+<rect fill="#10b981" height="45" opacity="0.2" rx="5" stroke="#10b981" stroke-width="2" width="70" x="0" y="0"></rect>
+<text fill="#1e293b" font-size="11" text-anchor="middle" x="35" y="28">Switch</text>
+</g>
+<line stroke="#0ea5e9" stroke-dasharray="4" stroke-width="2" x1="520" x2="425" y1="90" y2="120"></line>
+<line stroke="#0ea5e9" stroke-dasharray="4" stroke-width="2" x1="520" x2="520" y1="90" y2="120"></line>
+<line stroke="#0ea5e9" stroke-dasharray="4" stroke-width="2" x1="520" x2="615" y1="90" y2="120"></line>
+<text fill="#64748b" font-size="10" text-anchor="middle" x="520" y="195">the protocol OpenFlow</text>
+</svg>
+</div>
+</div>
+</div>
+<!-- Slide 47: Week 6 Starterkit Overview -->
+<div class="slide" data-slide="47">
+<div class="slide-header">
+<h2>Starterkit Week 6: Demonstratie NAT and SDN</h2>
+</div>
+<div class="slide-content">
+<div class="highlight-box">
+                    Your starterkit contains a complete NAT demonstration environment using Mininet, with both traditional Linux NAT (iptables) and an SDN-controlled policy engine.
+                </div>
+<h4 style="margin-top: 1.5rem; color: var(--primary);">📂 Key Files</h4>
+<div class="code-block" data-lang="directory structure">
+<span class="comment">WEEK6/</span>
+├── mininet/topologies/
+│   └── <span class="function">topo_nat.py</span> <span class="comment"># NAT topology: h1,h2 (private) ↔ rnat ↔ h3 (public)</span>
+├── seminar/python/apps/
+│   ├── <span class="function">nat_observer.py</span> <span class="comment"># Server showing PAT translations</span>
+│   ├── <span class="function">tcp_echo.py</span> <span class="comment"># TCP echo server/client</span>
+│   └── <span class="function">udp_echo.py</span> <span class="comment"># UDP echo server/client</span>
+├── seminar/python/controllers/
+│   └── <span class="function">sdn_policy_controller.py</span> <span class="comment"># OS-Ken SDN controller</span>
+└── scripts/
+    ├── <span class="function">run_nat_demo.sh</span> <span class="comment"># Launch NAT demonstration</span>
+    └── <span class="function">run_sdn_demo.sh</span> <span class="comment"># Launch SDN demo</span></div>
+<h4 style="margin-top: 1.5rem; color: var(--primary);">🌐 Network Topology</h4>
+<div class="diagram-container">
+<svg style="max-width: 800px; min-height: 200px;" viewbox="0 0 700 220">
+<!-- Network Privat -->
+<rect fill="#fef3c7" height="150" rx="10" stroke="#f59e0b" stroke-dasharray="5" stroke-width="2" width="210" x="20" y="45"></rect>
+<text fill="#f59e0b" font-size="12" font-weight="600" text-anchor="middle" x="125" y="35">Network Privat (192.168.1.0/24)</text>
+<rect fill="#fff" height="50" rx="5" stroke="#1e293b" stroke-width="2" width="80" x="40" y="70"></rect>
+<text font-size="12" font-weight="600" text-anchor="middle" x="80" y="97">h1</text>
+<text fill="#64748b" font-size="10" text-anchor="middle" x="80" y="135">192.168.1.1</text>
+<rect fill="#fff" height="50" rx="5" stroke="#1e293b" stroke-width="2" width="80" x="140" y="70"></rect>
+<text font-size="12" font-weight="600" text-anchor="middle" x="180" y="97">h2</text>
+<text fill="#64748b" font-size="10" text-anchor="middle" x="180" y="135">192.168.1.2</text>
+<!-- Router NAT -->
+<rect fill="#0ea5e9" height="70" opacity="0.2" rx="8" stroke="#0ea5e9" stroke-width="2" width="120" x="280" y="80"></rect>
+<text fill="#0ea5e9" font-size="14" font-weight="600" text-anchor="middle" x="340" y="110">rnat</text>
+<text fill="#64748b" font-size="10" text-anchor="middle" x="340" y="130">.1 ↔ 203.0.113.1</text>
+<text fill="#ef4444" font-size="10" text-anchor="middle" x="340" y="170">iptables MASQUERADE</text>
+<!-- Network Public -->
+<rect fill="#dcfce7" height="150" rx="10" stroke="#10b981" stroke-dasharray="5" stroke-width="2" width="210" x="450" y="45"></rect>
+<text fill="#10b981" font-size="12" font-weight="600" text-anchor="middle" x="555" y="35">Network Public (203.0.113.0/24)</text>
+<rect fill="#fff" height="70" rx="5" stroke="#1e293b" stroke-width="2" width="100" x="510" y="80"></rect>
+<text font-size="12" font-weight="600" text-anchor="middle" x="560" y="107">h3</text>
+<text fill="#64748b" font-size="10" text-anchor="middle" x="560" y="127">203.0.113.2</text>
+<text fill="#8b5cf6" font-size="9" text-anchor="middle" x="560" y="160">nat_observer.py</text>
+<!-- Connections -->
+<line stroke="#1e293b" stroke-width="3" x1="230" x2="280" y1="105" y2="110"></line>
+<line stroke="#1e293b" stroke-width="3" x1="400" x2="450" y1="115" y2="115"></line>
+</svg>
+</div>
+</div>
+</div>
+<!-- Slide 48: NAT Observer Application -->
+<div class="slide" data-slide="48">
+<div class="slide-header">
+<h2>Observator NAT: PAT in Actiune</h2>
+</div>
+<div class="slide-content">
+<p>The <code>nat_observer.py</code> application runs on the "public" server (h3) and logs the source address/port of incoming connections—revealing the NAT router's translated addresses.</p>
+<div class="code-block" data-lang="python">
+<span class="comment"># From seminar/python/apps/nat_observer.py</span>
+<span class="keyword">import</span> socket
+<span class="keyword">import</span> threading
+
+<span class="keyword">def</span> <span class="function">handle_client</span>(conn, addr):
+    <span class="string">"""Log the translated source address and port"""</span>
+<span class="builtin">print</span>(<span class="string">f"Connection from </span><span class="number">{addr[0]}</span><span class="string">:</span><span class="number">{addr[1]}</span><span class="string">"</span>)
+    <span class="comment"># addr will show NAT router's public IP + ephemeral port</span>
+    data = conn.recv(<span class="number">1024</span>)
+    conn.sendall(<span class="string">f"Server saw you as </span><span class="number">{addr}</span><span class="string">"</span>.encode())
+    conn.close()
+
+<span class="keyword">def</span> <span class="function">main</span>():
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, <span class="number">1</span>)
+    server.bind((<span class="string">'0.0.0.0'</span>, <span class="number">9090</span>))  <span class="comment"># Week 6 standard TCP port</span>
+    server.listen(<span class="number">5</span>)
+    <span class="builtin">print</span>(<span class="string">"NAT Observer listening on port 9090..."</span>)
+    <span class="keyword">while</span> <span class="keyword">True</span>:
+        conn, addr = server.accept()
+        threading.Thread(target=handle_client, args=(conn, addr)).start()</div>
+<div class="warning-box" style="margin-top: 1rem;">
+<strong>⚠️ What You'll Observe:</strong> When h1 (192.168.1.1) connects, h3 sees <code>203.0.113.1:49152</code>. When h2 connects simultaneously, h3 sees <code>203.0.113.1:49153</code>—same IP, different ports. This is PAT in action!
+                </div>
+</div>
+</div>
+<!-- Slide 49: iptables NAT Configurare -->
+<div class="slide" data-slide="49">
+<div class="slide-header">
+<h2>NAT Linux with iptables: Tinta MASQUERADE</h2>
+</div>
+<div class="slide-content">
+<div class="definition-box">
+<strong>MASQUERADE</strong>: A special iptables target that automatically uses the outgoing interface's Adres IP for NAT translation. Essential for interfaces with dynamic Adres IPes (e.g., DHCP).
+                </div>
+<div class="code-block" data-lang="bash" style="margin-top: 1.5rem;">
+<span class="comment"># From scripts/run_nat_demo.sh - NAT router configuration</span>
+<span class="comment"># 1. Enable IP forwarding (kernel parameter)</span>
+<span class="keyword">echo</span> <span class="number">1</span> &gt; /proc/sys/net/ipv4/ip_forward
+<span class="comment"># Or permanently: sysctl -w net.ipv4.ip_forward=1</span>
+<span class="comment"># 2. Set up NAT with MASQUERADE</span>
+iptables -t nat -A POSTROUTING \
+    -s <span class="number">192.168.1.0/24</span> \      <span class="comment"># Source: private network</span>
+    -o eth-pub \              <span class="comment"># Out interface: public-facing</span>
+    -j MASQUERADE             <span class="comment"># NAT to interface's IP</span>
+<span class="comment"># 3. Verify the rule</span>
+iptables -t nat -L POSTROUTING -v -n
+<span class="comment"># Chain POSTROUTING (policy ACCEPT)
+# pkts bytes target     prot opt in  out      source        destination
+#    0     0 MASQUERADE all  --  *   eth-pub  192.168.1.0/24  0.0.0.0/0</span></div>
+<div class="columns" style="margin-top: 1.5rem;">
+<div class="card">
+<h4>MASQUERADE vs SNAT</h4>
+<table class="comparison-table">
+<tr><th>Feature</th><th>MASQUERADE</th><th>SNAT</th></tr>
+<tr><td>Adres IP</td><td>Dinamic (from interface)</td><td>Static (specified)</td></tr>
+<tr><td>Performance</td><td>Slightly slower</td><td>Faster</td></tr>
+<tr><td>Use case</td><td>Home routers, VMs</td><td>Data centres</td></tr>
+</table>
+</div>
+<div class="card">
+<h4>iptables NAT Tables</h4>
+<ul>
+<li><strong>PREROUTING</strong>: DNAT (inbound)</li>
+<li><strong>OUTPUT</strong>: Local NAT</li>
+<li><strong>POSTROUTING</strong>: SNAT/MASQ (outbound)</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 50: Week 6 Project Deliverables -->
+<div class="slide" data-slide="50">
+<div class="slide-header">
+<h2>📋 Livrabile Proiect Week 6</h2>
+</div>
+<div class="slide-content">
+<div class="highlight-box">
+                    This week's practical work focuses on observing and configuring NAT/PAT, understanding address resolution, and working with network diagnostics.
+                </div>
+<h4 style="margin-top: 1.5rem; color: var(--primary);">Required Tasks</h4>
+<div class="columns">
+<div class="card" style="border-left-color: var(--success);">
+<h4>✅ Core Exercises</h4>
+<ol style="margin-left: 1.2rem;">
+<li>Run <code>topo_nat.py</code> and observe PAT translations</li>
+<li>Capture traffic with Wireshark/tcpdump</li>
+<li>Identify ICMP messages during connectivity tests</li>
+<li>Examine ARP cache changes</li>
+<li>Modify <code>nat_observer.py</code> to log UDP</li>
+</ol>
+</div>
+<div class="card" style="border-left-color: var(--purple);">
+<h4>🔬 Advanced Tasks</h4>
+<ol style="margin-left: 1.2rem;">
+<li>Implement port forwarding (DNAT)</li>
+<li>Create a DHCP server mock-up</li>
+<li>Analyse NDP on an IPv6 topology</li>
+<li>Compare ARP vs NDP packet counts</li>
+</ol>
+</div>
+</div>
+<h4 style="margin-top: 1.5rem; color: var(--primary);">Assessment Criteria</h4>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Weight</th>
+<th>Focus</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>NAT Demonstration</td>
+<td>40%</td>
+<td>Correct PAT observation, iptables config</td>
+</tr>
+<tr>
+<td>Traffic Analysis</td>
+<td>30%</td>
+<td>Wireshark captures, protocol identification</td>
+</tr>
+<tr>
+<td>Documentation</td>
+<td>20%</td>
+<td>Clear explanations, diagrams</td>
+</tr>
+<tr>
+<td>Code Quality</td>
+<td>10%</td>
+<td>Modified Python scripts</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- SECTION: Wrap-Up -->
+<!-- Slide 51: Key Takeaways -->
+<div class="slide" data-slide="51">
+<div class="slide-header">
+<h2>🎯 Key Conclusions</h2>
+</div>
+<div class="slide-content">
+<div class="columns">
+<div class="card" style="border-left-color: var(--secondary);">
+<h4>NAT/PAT</h4>
+<ul>
+<li>NAT maps private ↔ public addresses</li>
+<li>PAT uses ports to multiplex many hosts</li>
+<li>Breaks end-to-end connectivity model</li>
+<li>IPv6 aims to eliminate NAT need</li>
+</ul>
+</div>
+<div class="card" style="border-left-color: var(--accent);">
+<h4>ARP</h4>
+<ul>
+<li>Resolves IPv4 → MAC on local segment</li>
+<li>Broadcast request, unicast reply</li>
+<li>Vulnerable to spoofing attacks</li>
+<li>Cache reduces repeated broadcasts</li>
+</ul>
+</div>
+</div>
+<div class="columns" style="margin-top: 1rem;">
+<div class="card" style="border-left-color: var(--success);">
+<h4>DHCP</h4>
+<ul>
+<li>Automates IP configuration (DORA)</li>
+<li>Lease-based address assignment</li>
+<li>Relay agents extend across subnets</li>
+<li>Security requires DHCP Snooping</li>
+</ul>
+</div>
+<div class="card" style="border-left-color: var(--purple);">
+<h4>NDP (IPv6)</h4>
+<ul>
+<li>Replaces ARP with NS/NA (ICMPv6)</li>
+<li>Multicast instead of broadcast</li>
+<li>SLAAC: stateless autoconfiguration</li>
+<li>Built-in DAD prevents conflicts</li>
+</ul>
+</div>
+</div>
+<div class="insight-box" style="margin-top: 1rem;">
+<strong>💡 The Big Picture:</strong> These protocols form the "invisible infrastructure" that makes IP networking usable. Without them, we'd manually configure every address and maintain static mappings—impractical at any scale.
+                </div>
+</div>
+</div>
+<!-- Slide 52: Protocol Summary Table -->
+<div class="slide" data-slide="52">
+<div class="slide-header">
+<h2>📊 Comparison Summary a Protocols</h2>
+</div>
+<div class="slide-content">
+<table>
+<thead>
+<tr>
+<th>Protocol</th>
+<th>Scop</th>
+<th>Nivel</th>
+<th>Key RFC</th>
+<th>IPv6 Equivaslow</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>NAT</strong></td>
+<td>Traducere addresses</td>
+<td>Network (L3)</td>
+<td>RFC 3022</td>
+<td>NPTv6 (rare)</td>
+</tr>
+<tr>
+<td><strong>ARP</strong></td>
+<td>IPv4 → MAC</td>
+<td>Link/Network</td>
+<td>RFC 826</td>
+<td>NDP (NS/NA)</td>
+</tr>
+<tr>
+<td><strong>DHCP</strong></td>
+<td>Adres assignment</td>
+<td>Application (L7)</td>
+<td>RFC 2131</td>
+<td>DHCPv6/SLAAC</td>
+</tr>
+<tr>
+<td><strong>ICMP</strong></td>
+<td>Raportare errors</td>
+<td>Network (L3)</td>
+<td>RFC 792</td>
+<td>ICMPv6 (RFC 4443)</td>
+</tr>
+<tr>
+<td><strong>NDP</strong></td>
+<td>Descoperire vecini</td>
+<td>Network (L3)</td>
+<td>RFC 4861</td>
+<td>N/A (Doar IPv6)</td>
+</tr>
+</tbody>
+</table>
+<div class="columns" style="margin-top: 1.5rem;">
+<div class="card">
+<h4>🔗 Cross-Nivel Dependencies</h4>
+<p>ARP operates between L2 and L3. DHCP uses UDP (L4) but configures L3 addressing. NAT modifies both L3 headers and L4 port numbers. Understandinging these interactions is crucial for troubleshooting.</p>
+</div>
+<div class="card">
+<h4>📈 Evolution Trend</h4>
+<p>IPv6 consolidatas many IPv4 mechanisms into ICMPv6/NDP. This simplifies the protocol stack but requires learning new concepts like SLAAC and link-local addressing.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 53: References & Lectur Suplimentar -->
+<div class="slide" data-slide="53">
+<div class="slide-header">
+<h2>📚 References and Lectur Suplimentara</h2>
+</div>
+<div class="slide-content">
+<h4 style="color: var(--primary);">Core RFCs</h4>
+<div class="columns">
+<div class="card">
+<ul style="font-size: 0.95rem;">
+<li><strong>RFC 1918</strong> – Adres Allocation for Private Internets</li>
+<li><strong>RFC 3022</strong> – Traditional IP Network Adres Translator</li>
+<li><strong>RFC 826</strong> – An Ethernet Adres Resolution Protocol</li>
+<li><strong>RFC 2131</strong> – Dinamic Host configuration Protocol</li>
+</ul>
+</div>
+<div class="card">
+<ul style="font-size: 0.95rem;">
+<li><strong>RFC 792</strong> – the protocol of Messages of Control Internet</li>
+<li><strong>RFC 4861</strong> – Neighbor Discovery for IPv6</li>
+<li><strong>RFC 4862</strong> – IPv6 Stateless Address Autoconfiguration</li>
+<li><strong>RFC 4941</strong> – Privacy Extensions for SLAAC</li>
+</ul>
+</div>
+</div>
+<h4 style="margin-top: 1.5rem; color: var(--primary);">Carti</h4>
+<ul>
+<li><strong>Kurose &amp; Ross</strong> – <em>Computer Networking: A Top-Down Approach</em> (7th ed.), Ch. 4</li>
+<li><strong>Rhodes &amp; Goetzen</strong> – <em>Foundations of Python Network Programming</em>, Ch. 1–3</li>
+<li><strong>Tanenbaum &amp; Wetherall</strong> – <em>Computer Networks</em> (5th ed.), Ch. 5</li>
+</ul>
+<h4 style="margin-top: 1.5rem; color: var(--primary);">Online Resources</h4>
+<ul>
+<li><strong>Wireshark Wiki</strong> – Protocol dissector documentation</li>
+<li><strong>Linux netfilter/iptables</strong> – <code>https://netfilter.org/</code></li>
+<li><strong>Mininet Walkthrough</strong> – <code>http://mininet.org/walkthrough/</code></li>
+</ul>
+</div>
+</div>
+<!-- Slide 54: Final complete Quiz -->
+<div class="slide" data-slide="54">
+<div class="slide-header">
+<h2>🏆 Quiz Final Cuprinzator</h2>
+</div>
+<div class="slide-content">
+<div class="quiz-container">
+<p class="quiz-question">A company with 500 employees uses a single public IP. Which technology makes this possible?</p>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkQuiz(this, false)">A) NAT Static (1:1 mapping)</div>
+<div class="quiz-option" onclick="checkQuiz(this, true)">B) PAT/NAT Overload (port-based multiplexing)</div>
+<div class="quiz-option" onclick="checkQuiz(this, false)">C) ARP (address resolution)</div>
+<div class="quiz-option" onclick="checkQuiz(this, false)">D) DHCP (address assignment)</div>
+</div>
+<div class="quiz-feedback correct">✓ correct! PAT uses ephemeral port numbers to distinguish between multiple internal hosts sharing one public IP.</div>
+<div class="quiz-feedback incorrect">✗ PAT (Traducere addresses of Port) allows many hosts to share a single public IP by using different source ports.</div>
+</div>
+<div class="quiz-container" style="margin-top: 1rem;">
+<p class="quiz-question">Which protocol's vulnerability enables man-in-the-middle attacks on a local network?</p>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkQuiz(this, true)">A) ARP – no authentication of replies</div>
+<div class="quiz-option" onclick="checkQuiz(this, false)">B) ICMP – error messages can be forged</div>
+<div class="quiz-option" onclick="checkQuiz(this, false)">C) DHCP – rogue servers possible</div>
+<div class="quiz-option" onclick="checkQuiz(this, false)">D) NAT – external visibility concerns</div>
+</div>
+<div class="quiz-feedback correct">✓ correct! ARP has no authentication, allowing attackers to send false replies and redirect traffic through their machine.</div>
+<div class="quiz-feedback incorrect">✗ ARP spoofing is the classic LAN-based MITM attack. DHCP and ICMP have issues, but ARP poisoning is the primary MITM vector.</div>
+</div>
+<div class="quiz-container" style="margin-top: 1rem;">
+<p class="quiz-question">In DHCP, what does the 'R' in DORA stand for?</p>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkQuiz(this, false)">A) Renew</div>
+<div class="quiz-option" onclick="checkQuiz(this, true)">B) Request</div>
+<div class="quiz-option" onclick="checkQuiz(this, false)">C) Reply</div>
+<div class="quiz-option" onclick="checkQuiz(this, false)">D) Release</div>
+</div>
+<div class="quiz-feedback correct">✓ correct! DORA = Discover, Offer, Request, Acknowledge. The client Requests the offered address.</div>
+<div class="quiz-feedback incorrect">✗ DORA: Discover → Offer → Request → Acknowledge. Request is step 3 where the client formally accepts an offer.</div>
+</div>
+</div>
+</div>
+<!-- Slide 55: End Slide / Next Week Preview -->
+<div class="slide" data-slide="55" style="background: var(--gradient-primary);">
+<div class="slide-content" style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; color: white; text-align: center;">
+<h1 style="font-family: 'Source Serif 4', serif; font-size: 3rem; font-weight: 700; margin-bottom: 1rem;">Week 6 Complete</h1>
+<p style="font-size: 1.3rem; color: #94a3b8; max-width: 600px; margin-bottom: 2rem;">NAT/PAT, ARP, DHCP, NDP, ICMP</p>
+<div style="background: rgba(255,255,255,0.1); padding: 2rem; border-radius: 16px; max-width: 500px; margin-bottom: 2rem;">
+<h3 style="color: #0ea5e9; margin-bottom: 1rem;">📅 Next Week: routing Protocols</h3>
+<p style="font-size: 0.95rem; color: #cbd5e1;">RIP, IGRP, OSPF – How routers discover and share network topology information</p>
+</div>
+<div style="display: flex; gap: 3rem; margin-top: 1rem;">
+<div style="text-align: center;">
+<div style="font-size: 2.5rem;">55</div>
+<div style="font-size: 0.8rem; color: #64748b;">Slides</div>
+</div>
+<div style="text-align: center;">
+<div style="font-size: 2.5rem;">5</div>
+<div style="font-size: 0.8rem; color: #64748b;">Protocols</div>
+</div>
+<div style="text-align: center;">
+<div style="font-size: 2.5rem;">8</div>
+<div style="font-size: 0.8rem; color: #64748b;">RFCs</div>
+</div>
+</div>
+<p style="margin-top: 3rem; font-size: 0.9rem; color: #64748b;">
+                    Bucharest University of Economic Studies – Faculty CSIE<br/>
+                    Computer Networks • BSc Economic Informatics • Year 3, Semester 2
+                </p>
+</div>
+</div>
+</div><!-- End .presentation -->
+<!-- Navigation Controls -->
+<div class="nav-controls">
+<button class="nav-btn" onclick="prevSlide()" title="Previous (←)">
+<svg fill="none" height="20" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="20">
+<polyline points="15 18 9 12 15 6"></polyline>
+</svg>
+</button>
+<button class="nav-btn" onclick="openTOC()" title="Table of Contents (T)">
+<svg fill="none" height="20" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="20">
+<line x1="3" x2="21" y1="6" y2="6"></line>
+<line x1="3" x2="21" y1="12" y2="12"></line>
+<line x1="3" x2="21" y1="18" y2="18"></line>
+</svg>
+</button>
+<button class="nav-btn" onclick="toggleFullscreen()" title="Fullscreen (F)">
+<svg fill="none" height="20" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="20">
+<polyline points="15 3 21 3 21 9"></polyline>
+<polyline points="9 21 3 21 3 15"></polyline>
+<line x1="21" x2="14" y1="3" y2="10"></line>
+<line x1="3" x2="10" y1="21" y2="14"></line>
+</svg>
+</button>
+<button class="nav-btn" onclick="nextSlide()" title="Next (→)">
+<svg fill="none" height="20" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="20">
+<polyline points="9 18 15 12 9 6"></polyline>
+</svg>
+</button>
+</div>
+<!-- Footer Attribution -->
+<div class="footer">by Revolvix</div>
+<!-- Table of Contents Modal -->
+<div class="toc-modal" id="tocModal">
+<div class="toc-content">
+<div class="toc-header">
+<h2>📑 Contents</h2>
+<button class="toc-close" onclick="closeTOC()">×</button>
+</div>
+<div class="toc-body">
+<div class="toc-section">
+<div class="toc-section-title">Introduction</div>
+<div class="toc-item" onclick="goToSlide(1)">1. Pagina of Titlu</div>
+<div class="toc-item" onclick="goToSlide(2)">2. Parcursul Cursului</div>
+<div class="toc-item" onclick="goToSlide(3)">3. Learning Objectives</div>
+<div class="toc-item" onclick="goToSlide(4)">4. Context Istoric: Epuizarea IPv4</div>
+<div class="toc-item" onclick="goToSlide(5)">5. Why It Matters for Developers</div>
+<div class="toc-item" onclick="goToSlide(6)">6. Analogy: Telefoanele of Hotel</div>
+<div class="toc-item" onclick="goToSlide(7)">7. Privire of Ansamblu about Protocols</div>
+<div class="toc-item" onclick="goToSlide(8)">8. RFC 1918: Spatii of addresses Private</div>
+</div>
+<div class="toc-section">
+<div class="toc-section-title">NAT/PAT (Section I)</div>
+<div class="toc-item" onclick="goToSlide(9)">9. Sectiune: NAT/PAT</div>
+<div class="toc-item" onclick="goToSlide(10)">10. Principle of Baz NAT</div>
+<div class="toc-item" onclick="goToSlide(11)">11. Comparison types NAT</div>
+<div class="toc-item" onclick="goToSlide(12)">12. table of Traducere PAT</div>
+<div class="toc-item" onclick="goToSlide(13)">13. computer PAT Interactive</div>
+<div class="toc-item" onclick="goToSlide(14)">14. Starterkit: topology NAT</div>
+<div class="toc-item" onclick="goToSlide(15)">15. configuration Python/iptables</div>
+<div class="toc-item" onclick="goToSlide(16)">16. application Observator NAT</div>
+<div class="toc-item" onclick="goToSlide(17)">17. Disadvantages NAT</div>
+<div class="toc-item" onclick="goToSlide(18)">18. Gandeste-te: problems NAT</div>
+<div class="toc-item" onclick="goToSlide(19)">19. checkon: NAT/PAT</div>
+<div class="toc-item" onclick="goToSlide(20)">20. Cronologie Historical NAT</div>
+</div>
+<div class="toc-section">
+<div class="toc-section-title">ARP (Section II)</div>
+<div class="toc-item" onclick="goToSlide(21)">21. Sectiune: ARP</div>
+<div class="toc-item" onclick="goToSlide(22)">22. problem Fundamentala</div>
+<div class="toc-item" onclick="goToSlide(23)">23. Diagrama Procesului ARP</div>
+<div class="toc-item" onclick="goToSlide(24)">24. Cache ARP and commands</div>
+<div class="toc-item" onclick="goToSlide(25)">25. security: ARP Spoofing</div>
+<div class="toc-item" onclick="goToSlide(26)">26. Proxy ARP</div>
+<div class="toc-item" onclick="goToSlide(27)">27. checkon: ARP</div>
+</div>
+<div class="toc-section">
+<div class="toc-section-title">DHCP (Section III)</div>
+<div class="toc-item" onclick="goToSlide(28)">28. Sectiune: DHCP</div>
+<div class="toc-item" onclick="goToSlide(29)">29. Ce Ofer DHCP</div>
+<div class="toc-item" onclick="goToSlide(30)">30. Procesul DORA</div>
+<div class="toc-item" onclick="goToSlide(31)">31. Detalii Messages</div>
+<div class="toc-item" onclick="goToSlide(32)">32. Mecanisme Timp of Inchiriere</div>
+<div class="toc-item" onclick="goToSlide(33)">33. The BOOTP Legacy</div>
+<div class="toc-item" onclick="goToSlide(34)">34. Agenti Releu DHCP</div>
+<div class="toc-item" onclick="goToSlide(35)">35. checkon: DHCP</div>
+</div>
+<div class="toc-section">
+<div class="toc-section-title">NDP (Section IV)</div>
+<div class="toc-item" onclick="goToSlide(36)">36. Sectiune: NDP</div>
+<div class="toc-item" onclick="goToSlide(37)">37. Comparison IPv4 vs IPv6</div>
+<div class="toc-item" onclick="goToSlide(38)">38. types of Messages NDP</div>
+<div class="toc-item" onclick="goToSlide(39)">39. Procesul SLAAC</div>
+</div>
+<div class="toc-section">
+<div class="toc-section-title">ICMP (Section V)</div>
+<div class="toc-item" onclick="goToSlide(40)">40. Sectiune: ICMP</div>
+<div class="toc-item" onclick="goToSlide(41)">41. ICMP Scop and types</div>
+<div class="toc-item" onclick="goToSlide(42)">42. ping and traceroute</div>
+<div class="toc-item" onclick="goToSlide(43)">43. types Comune of Messages</div>
+<div class="toc-item" onclick="goToSlide(44)">44. checkon: ICMP and NDP</div>
+</div>
+<div class="toc-section">
+<div class="toc-section-title">Practical Integration (Section VI)</div>
+<div class="toc-item" onclick="goToSlide(45)">45. Sectiune: SDN and Proiect</div>
+<div class="toc-item" onclick="goToSlide(46)">46. Introduction SDN</div>
+<div class="toc-item" onclick="goToSlide(47)">47. presentation Starterkit Week 6</div>
+<div class="toc-item" onclick="goToSlide(48)">48. application Observator NAT</div>
+<div class="toc-item" onclick="goToSlide(49)">49. configuration NAT iptables</div>
+<div class="toc-item" onclick="goToSlide(50)">50. Livrabile Proiect</div>
+</div>
+<div class="toc-section">
+<div class="toc-section-title">Wrap-Up</div>
+<div class="toc-item" onclick="goToSlide(51)">51. Key Conclusions</div>
+<div class="toc-item" onclick="goToSlide(52)">52. Summary Protocols</div>
+<div class="toc-item" onclick="goToSlide(53)">53. References</div>
+<div class="toc-item" onclick="goToSlide(54)">54. Quiz Final</div>
+<div class="toc-item" onclick="goToSlide(55)">55. Final / Week Urmatoare</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+        // ========================================
+        // PRESENTATION ENGINE
+        // ========================================
+        
+        const TOTAL_SLIDES = 55;
+        let currentSlide = 1;
+        
+        // Initialize presentation
+        document.addEventListener('DOMContentLoaded', () => {
+            showSlide(1);
+            updataProgress();
+            
+            // Check for URL hash
+            const hash = window.location.hash;
+            if (hash && hash.startsWith('#slide-')) {
+                const slideNum = parseInt(hash.replace('#slide-', ''));
+                if (slideNum >= 1 && slideNum <= TOTAL_SLIDES) {
+                    goToSlide(slideNum);
+                }
+            }
+        });
+        
+        // Navigation Functies
+        function showSlide(n) {
+            const slides = document.querySelectorAll('.slide');
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active');
+                if (index === n - 1) {
+                    slide.classList.add('active');
+                }
+            });
+            currentSlide = n;
+            updataProgress();
+            updataCounter();
+            window.location.hash = `slide-${n}`;
+        }
+        
+        function nextSlide() {
+            if (currentSlide < TOTAL_SLIDES) {
+                showSlide(currentSlide + 1);
+            }
+        }
+        
+        function prevSlide() {
+            if (currentSlide > 1) {
+                showSlide(currentSlide - 1);
+            }
+        }
+        
+        function goToSlide(n) {
+            if (n >= 1 && n <= TOTAL_SLIDES) {
+                showSlide(n);
+                closeTOC();
+            }
+        }
+        
+        function updataProgress() {
+            const progress = ((currentSlide - 1) / (TOTAL_SLIDES - 1)) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+        }
+        
+        function updataCounter() {
+            document.getElementById('slideCounter').textContent = `${currentSlide} / ${TOTAL_SLIDES}`;
+        }
+        
+        // Keyboard Navigation
+        document.addEventListener('keydown', (e) => {
+            // Don't navigate if typing in an input
+            if (e.target.tagNume === 'INPUT' || e.target.tagNume === 'TEXTAREA') return;
+            
+            switch(e.key) {
+                case 'ArrowRight':
+                case ' ':
+                    e.preventDefault();
+                    nextSlide();
+                    break;
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    prevSlide();
+                    break;
+                case 'Home':
+                    e.preventDefault();
+                    goToSlide(1);
+                    break;
+                case 'End':
+                    e.preventDefault();
+                    goToSlide(TOTAL_SLIDES);
+                    break;
+                case 'f':
+                case 'F':
+                    e.preventDefault();
+                    toggleFullscreen();
+                    break;
+                case 't':
+                case 'T':
+                    e.preventDefault();
+                    openTOC();
+                    break;
+                case 'Escape':
+                    closeTOC();
+                    break;
+            }
+        });
+        
+        // Touch/Swipe Navigation
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, false);
+        
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, false);
+        
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            const diff = touchStartX - touchEndX;
+            
+            if (Math.abs(diff) > swipeThreshold) {
+                if (diff > 0) {
+                    nextSlide(); // Swipe left = next
+                } else {
+                    prevSlide(); // Swipe right = prev
+                }
+            }
+        }
+        
+        // Fullscreen
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log('Fullscreen error:', err);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+        
+        // Table of Contents
+        function openTOC() {
+            document.getElementById('tocModal').classList.add('show');
+        }
+        
+        function closeTOC() {
+            document.getElementById('tocModal').classList.remove('show');
+        }
+        
+        // Close TOC when clicking outside
+        document.getElementById('tocModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('tocModal')) {
+                closeTOC();
+            }
+        });
+        
+        // ========================================
+        // INTERACTIVE COMPONENTS
+        // ========================================
+        
+        // Quiz System
+        function checkQuiz(element, isCorrect) {
+            const container = element.closest('.quiz-container');
+            const options = container.querySelectorAll('.quiz-option');
+            const feedbackCorrect = container.querySelector('.quiz-feedback.correct');
+            const feedbackIncorrect = container.querySelector('.quiz-feedback.incorrect');
+            
+            // Disable all options
+            options.forEach(opt => {
+                opt.style.pointerEvents = 'none';
+                opt.style.opacity = '0.7';
+            });
+            
+            // Highlight selected
+            if (isCorrect) {
+                element.classList.add('correct');
+                feedbackCorrect.classList.add('show');
+            } else {
+                element.classList.add('incorrect');
+                feedbackIncorrect.classList.add('show');
+                // Also highlight the correct answer
+                options.forEach(opt => {
+                    if (opt.getAttribute('onclick').includess('true')) {
+                        opt.classList.add('correct');
+                    }
+                });
+            }
+        }
+        
+        // Reveal System
+        function toggleReveal(btn) {
+            const content = btn.nextElementSibling;
+            if (content && content.classList.contains('reveal-content')) {
+                content.classList.toggle('show');
+                btn.textContent = content.classList.contains('show') ? '🔼 Hide' : '🔽 Show Answer';
+            }
+        }
+        
+        // PAT Calculator
+        function updataPATDemo() {
+            const slider = document.getElementById('patConnections');
+            if (!slider) return;
+            
+            const connections = parseInt(slider.value);
+            const portStart = 49152;
+            const portEnd = portStart + connections - 1;
+            const utilization = ((connections / 16383) * 100).toFixed(2);
+            
+            document.getElementById('patConnectionCount').textContent = connections;
+            document.getElementById('patPortRange').textContent = `${portStart}–${portEnd}`;
+            document.getElementById('patUtilization').textContent = `${utilization}%`;
+        }
+        
+        // Initialize interactive elements on load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize PAT demo if present
+            const patSlider = document.getElementById('patConnections');
+            if (patSlider) {
+                updataPATDemo();
+            }
+        });
+    </script>
+</body>
+</html>
