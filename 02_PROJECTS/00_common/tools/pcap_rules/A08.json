@@ -1,0 +1,19 @@
+{
+  "project": "A08",
+  "pcap_relpath": "artifacts/pcap/traffic_e2.pcap",
+  "decode_as": [],
+  "rules": [
+    {
+      "id": "R1",
+      "filter": "udp.port==4789",
+      "condition": ">= 5",
+      "description": "VXLAN traffic (UDP/4789) is present."
+    },
+    {
+      "id": "R2",
+      "filter": "arp || icmp",
+      "condition": ">= 1",
+      "description": "Tunnelled L2/L3 traffic (ARP/ICMP) is observable."
+    }
+  ]
+}

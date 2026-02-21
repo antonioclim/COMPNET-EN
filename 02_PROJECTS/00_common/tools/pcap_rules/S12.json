@@ -1,0 +1,39 @@
+{
+  "project": "S12",
+  "pcap_relpath": "artifacts/pcap/traffic_e2.pcap",
+  "decode_as": [
+    "tcp.port==5443,tls"
+  ],
+  "rules": [
+    {
+      "id": "R1",
+      "filter": "tcp.dstport==5443 && tcp.flags.syn==1 && tcp.flags.ack==0",
+      "condition": ">= 1",
+      "description": "TCP handshake to the TLS service."
+    },
+    {
+      "id": "R2",
+      "filter": "tls.handshake.type==1",
+      "condition": ">= 1",
+      "description": "ClientHello in the TLS handshake."
+    },
+    {
+      "id": "R3",
+      "filter": "tls.handshake.type==2",
+      "condition": ">= 1",
+      "description": "ServerHello in the TLS handshake."
+    },
+    {
+      "id": "R4",
+      "filter": "tls.handshake.type==11 || tls.handshake.certificate",
+      "condition": ">= 1",
+      "description": "Server certificate transmitted."
+    },
+    {
+      "id": "R5",
+      "filter": "tcp.port==5443 && tcp.len>0",
+      "condition": ">= 3",
+      "description": "Application traffic over TLS (data-bearing segments)."
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "project": "A06",
+  "pcap_relpath": "artifacts/pcap/traffic_e2.pcap",
+  "decode_as": [
+    "udp.port==67,bootp",
+    "udp.port==68,bootp"
+  ],
+  "rules": [
+    {
+      "id": "R1",
+      "filter": "bootp.option.dhcp==1",
+      "condition": ">= 1",
+      "description": "DHCP Discover."
+    },
+    {
+      "id": "R2",
+      "filter": "bootp.option.dhcp==2",
+      "condition": ">= 1",
+      "description": "DHCP Offer."
+    },
+    {
+      "id": "R3",
+      "filter": "bootp.option.dhcp==3",
+      "condition": ">= 1",
+      "description": "DHCP Request."
+    },
+    {
+      "id": "R4",
+      "filter": "bootp.option.dhcp==5",
+      "condition": ">= 1",
+      "description": "DHCP ACK."
+    },
+    {
+      "id": "R5",
+      "filter": "ip && (tcp || udp || icmp)",
+      "condition": ">= 10",
+      "description": "Post-DHCP IP traffic (NAT test)."
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "project": "S07",
+  "pcap_relpath": "artifacts/pcap/traffic_e2.pcap",
+  "decode_as": [
+    "udp.port==5300,dns",
+    "udp.port==53,dns"
+  ],
+  "rules": [
+    {
+      "id": "R1",
+      "filter": "udp.dstport==5300 && dns.flags.response==0",
+      "condition": ">= 3",
+      "description": "At least 3 client → resolver queries (local zone plus forwarding plus cache)."
+    },
+    {
+      "id": "R2",
+      "filter": "udp.srcport==5300 && dns.flags.response==1",
+      "condition": ">= 3",
+      "description": "At least 3 resolver → client responses."
+    },
+    {
+      "id": "R3",
+      "filter": "udp.dstport==53 && dns.flags.response==0",
+      "condition": ">= 1",
+      "description": "At least one query forwarded to upstream (port 53)."
+    },
+    {
+      "id": "R4",
+      "filter": "udp.dstport==53 && dns.qry.name",
+      "condition": "<= 2",
+      "description": "A limited number of upstream queries (cache demonstration)."
+    },
+    {
+      "id": "R5",
+      "filter": "dns.flags.rcode==3",
+      "condition": ">= 1",
+      "description": "At least one NXDOMAIN response (negative caching)."
+    }
+  ]
+}

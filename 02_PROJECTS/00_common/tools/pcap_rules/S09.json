@@ -1,0 +1,37 @@
+{
+  "project": "S09",
+  "pcap_relpath": "artifacts/pcap/traffic_e2.pcap",
+  "decode_as": [],
+  "rules": [
+    {
+      "id": "R1",
+      "filter": "tcp.dstport==9000 && tcp.flags.syn==1 && tcp.flags.ack==0",
+      "condition": ">= 1",
+      "description": "Handshake to the tunnel."
+    },
+    {
+      "id": "R2",
+      "filter": "tcp.port==9000 && frame contains \"TNL1O\"",
+      "condition": ">= 1",
+      "description": "OPEN frame (magic TNL1 plus type O)."
+    },
+    {
+      "id": "R3",
+      "filter": "tcp.port==9000 && frame contains \"TNL1D\"",
+      "condition": ">= 1",
+      "description": "DATA frame (magic TNL1 plus type D)."
+    },
+    {
+      "id": "R4",
+      "filter": "tcp.port==9000 && frame contains \"TNL1C\"",
+      "condition": ">= 1",
+      "description": "CLOSE frame (magic TNL1 plus type C)."
+    },
+    {
+      "id": "R5",
+      "filter": "tcp.port==9000 && tcp.len>0",
+      "condition": ">= 5",
+      "description": "Sufficient payload traffic for multiplexing (at least 5 data-bearing segments)."
+    }
+  ]
+}

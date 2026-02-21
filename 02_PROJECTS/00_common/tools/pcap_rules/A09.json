@@ -1,0 +1,31 @@
+{
+  "project": "A09",
+  "pcap_relpath": "artifacts/pcap/traffic_e2.pcap",
+  "decode_as": [],
+  "rules": [
+    {
+      "id": "R1",
+      "filter": "tcp.port==6653",
+      "condition": ">= 1",
+      "description": "OpenFlow control-plane traffic is present."
+    },
+    {
+      "id": "R2",
+      "filter": "tcp.port==6653 && tcp.len>0",
+      "condition": ">= 5",
+      "description": "At least 5 OpenFlow segments with payload (block installation)."
+    },
+    {
+      "id": "R3",
+      "filter": "tcp.flags.syn==1 && tcp.flags.ack==0",
+      "condition": ">= 10",
+      "description": "Scan/attack traffic (SYN)."
+    },
+    {
+      "id": "R4",
+      "filter": "icmp || tcp",
+      "condition": ">= 1",
+      "description": "Legitimate traffic (for comparison) in the same capture."
+    }
+  ]
+}
