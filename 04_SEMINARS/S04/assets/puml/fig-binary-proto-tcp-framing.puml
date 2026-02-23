@@ -1,0 +1,58 @@
+@startuml fig-binary-proto-tcp-framing
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title Binary Protocol over TCP — LEN_BYTE + Pickle Framing
+
+participant "Client\n(interactive prompt)" as C #FFE0B2
+participant "Server\n127.0.0.1:3333" as S #C8E6C9
+
+C -> S : TCP connect
+
+== Binary Request/Response ==
+
+note over C
+  User types: add user1 Alice
+  Client builds:
+    Request(cmd="add",
+      key="user1", resource="Alice")
+  pickle.dump -> bytes
+  Prepend LEN_BYTE (1 byte)
+end note
+
+C -[#1565C0]> S : [LEN_BYTE] [pickled Request]
+note right of S
+  Read data[0] = message_length
+  Read remaining bytes
+  pickle.load -> Request object
+  Execute: state.add("user1","Alice")
+  Build: Response("user1 added")
+  pickle.dump + LEN_BYTE
+end note
+S -[#43A047]-> C : [LEN_BYTE] [pickled Response]
+
+note over C
+  pickle.load -> Response
+  Display: response.payload
+end note
+
+== keys Command ==
+
+C -[#1565C0]> S : [LEN_BYTE] [pickled Request(cmd="keys")]
+S -[#43A047]-> C : [LEN_BYTE] [pickled Response("user1")]
+
+== Termination ==
+
+C -> S : exit (client closes socket)
+
+legend right
+  Each message is prefixed with a single byte
+  indicating total message length (max 255 B).
+  Payload is serialised with Python pickle.
+  Not human-readable in Wireshark — appears
+  as a binary blob in the TCP stream.
+endlegend
+@enduml

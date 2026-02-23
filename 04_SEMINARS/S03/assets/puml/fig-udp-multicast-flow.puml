@@ -1,0 +1,47 @@
+@startuml fig-udp-multicast-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title UDP multicast communication (IPv4 group 224.0.0.1)
+
+participant "Sender\nIP_MULTICAST_TTL=32" as S #FFE0B2
+participant "Multicast Group\n224.0.0.1:5001" as G #E1BEE7
+participant "Receiver A\nIP_ADD_MEMBERSHIP" as RA #C8E6C9
+participant "Receiver B\nIP_ADD_MEMBERSHIP" as RB #C8E6C9
+participant "Host X\n(not subscribed)" as HX #ECEFF1
+
+== GROUP SUBSCRIPTION ==
+
+RA -[#1565C0]> G : setsockopt(IP_ADD_MEMBERSHIP)
+RB -[#1565C0]> G : setsockopt(IP_ADD_MEMBERSHIP)
+
+note over RA, RB
+  Receivers join the multicast group
+  via IGMP (handled by the kernel).
+end note
+
+== DATA DELIVERY ==
+
+S -[#1565C0]> G : sendto("Hello, multicast!",\n224.0.0.1:5001)
+G -[#43A047]-> RA : datagram delivered
+G -[#43A047]-> RB : datagram delivered
+G -[#E53935]->x HX : not delivered\n(not subscribed)
+
+|||
+
+S -[#1565C0]> G : sendto("m2", 224.0.0.1:5001)
+G -[#43A047]-> RA : datagram delivered
+G -[#43A047]-> RB : datagram delivered
+
+legend right
+  Multicast delivers only to hosts that
+  have joined the group (class D address).
+  The kernel uses IGMP to manage membership.
+  Unlike broadcast, non-subscribers do not
+  receive the traffic, reducing network load.
+  TTL controls the multicast scope (hops).
+endlegend
+@enduml

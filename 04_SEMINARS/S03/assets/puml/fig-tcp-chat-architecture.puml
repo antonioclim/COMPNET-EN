@@ -1,0 +1,46 @@
+@startuml fig-tcp-chat-architecture
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title TCP multi-client chat server (thread per client)
+
+package "Server Process — 127.0.0.1:3333" as srv #F5F5F5 {
+  rectangle "Main Thread\naccept loop" as main #E3F2FD
+  rectangle "clients[ ] list\n(shared, lock-protected)" as clist #FFF9C4
+
+  rectangle "Thread 1\nhandle(client_1)" as t1 #C8E6C9
+  rectangle "Thread 2\nhandle(client_2)" as t2 #C8E6C9
+  rectangle "Thread 3\nhandle(client_3)" as t3 #C8E6C9
+}
+
+rectangle "Client A\nnc 127.0.0.1 3333" as ca #FFE0B2
+rectangle "Client B\nnc 127.0.0.1 3333" as cb #FFE0B2
+rectangle "Client C\nnc 127.0.0.1 3333" as cc #FFE0B2
+
+ca -[#1565C0]-> main : connect
+cb -[#1565C0]-> main : connect
+cc -[#1565C0]-> main : connect
+
+main -[#43A047]-> t1 : spawn for A
+main -[#43A047]-> t2 : spawn for B
+main -[#43A047]-> t3 : spawn for C
+
+t1 .[#1565C0].> clist : read/write
+t2 .[#1565C0].> clist : read/write
+t3 .[#1565C0].> clist : read/write
+
+t1 -[#FF9800]-> cb : forward msg
+t1 -[#FF9800]-> cc : forward msg
+
+legend right
+  Each client connection spawns a thread.
+  Threads share a global clients[ ] list
+  protected by a threading.Lock.
+  A message from one client is forwarded
+  to all other entries in the list.
+  This implements a simple chat broadcast.
+endlegend
+@enduml

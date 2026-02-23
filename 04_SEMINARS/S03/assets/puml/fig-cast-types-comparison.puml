@@ -1,0 +1,57 @@
+@startuml fig-cast-types-comparison
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 10
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Comparison of addressing modes: unicast, broadcast, multicast and anycast
+
+package "Unicast (one-to-one)" as uni #E8F5E9 {
+  rectangle "Sender" as us #FFE0B2
+  rectangle "Receiver" as ur #C8E6C9
+  rectangle "Host B" as ub #ECEFF1
+  rectangle "Host C" as uc #ECEFF1
+  us -[#43A047]-> ur : delivered
+  us .[#E53935].> ub : not sent
+  us .[#E53935].> uc : not sent
+}
+
+package "Broadcast (one-to-all)" as bcast #FFF3E0 {
+  rectangle "Sender" as bs #FFE0B2
+  rectangle "Host A" as ba #C8E6C9
+  rectangle "Host B" as bb #C8E6C9
+  rectangle "Host C" as bc #C8E6C9
+  bs -[#43A047]-> ba : delivered
+  bs -[#43A047]-> bb : delivered
+  bs -[#43A047]-> bc : delivered
+}
+
+package "Multicast (one-to-group)" as mcast #FCE4EC {
+  rectangle "Sender" as ms #FFE0B2
+  rectangle "Member A" as ma #C8E6C9
+  rectangle "Member B" as mb #C8E6C9
+  rectangle "Non-member" as mn #ECEFF1
+  ms -[#43A047]-> ma : delivered
+  ms -[#43A047]-> mb : delivered
+  ms .[#E53935].> mn : not delivered
+}
+
+package "Anycast (one-to-nearest)" as acast #F5F5F5 {
+  rectangle "Client" as ac #FFE0B2
+  rectangle "Server S1\n(nearest)" as as1 #C8E6C9
+  rectangle "Server S2" as as2 #ECEFF1
+  rectangle "Server S3" as as3 #ECEFF1
+  ac -[#43A047]-> as1 : routed to nearest
+  ac .[#E53935].> as2 : not reached
+  ac .[#E53935].> as3 : not reached
+}
+
+legend bottom
+  Unicast: single destination, single recipient.
+  Broadcast: all hosts on the local segment receive.
+  Multicast: only group members receive (IGMP subscription).
+  Anycast: routing selects the topologically nearest server.
+  Each model trades off efficiency, scope and complexity.
+endlegend
+@enduml

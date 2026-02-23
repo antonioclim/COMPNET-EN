@@ -1,0 +1,47 @@
+@startuml fig-netcat-tcp-vs-udp
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title Netcat — TCP vs UDP communication patterns
+
+box "TCP session (port 9000)" #E3F2FD
+    participant "Server\nnc -l -p 9000" as ts #C8E6C9
+    participant "Client\nnc 127.0.0.1 9000" as tc #FFE0B2
+end box
+
+tc -> ts : SYN
+ts --> tc : SYN-ACK
+tc -> ts : ACK
+
+== TCP CONNECTION ESTABLISHED ==
+
+tc -> ts : "Hello" (bidirectional stream)
+ts --> tc : "Reply"
+tc -> ts : FIN
+ts --> tc : FIN-ACK
+
+== TCP CONNECTION CLOSED ==
+
+|||
+
+box "UDP exchange (port 9001)" #E8F5E9
+    participant "Server\nnc -u -l -p 9001" as us #C8E6C9
+    participant "Client\necho ... | nc -u" as uc #FFE0B2
+end box
+
+uc -> us : UDP datagram "test UDP"
+
+uc ->x us : (no session — each message\nis independent)
+
+legend right
+  TCP: three-way handshake establishes a
+  reliable, bidirectional byte stream.
+  UDP: no handshake, no session, no
+  guaranteed delivery — fire and forget.
+  Netcat makes both modes observable
+  with minimal setup.
+endlegend
+@enduml

@@ -1,0 +1,44 @@
+@startuml fig-tcp-vs-udp-wireshark
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title TCP vs UDP — What Wireshark Reveals
+
+box "TCP Session (port 12345)" #E8F5E9
+  participant "TCP Client" as TC #FFE0B2
+  participant "TCP Server" as TS #C8E6C9
+end box
+
+box "UDP Exchange (port 12345)" #FFF3E0
+  participant "UDP Client" as UC #FFE0B2
+  participant "UDP Server" as US #C8E6C9
+end box
+
+== TCP: CONNECTION SETUP (3 packets) ==
+TC -> TS : SYN
+TS --> TC : SYN-ACK
+TC -> TS : ACK
+
+== TCP: DATA (2+ packets) ==
+TC -> TS : PSH-ACK "hello"
+TS --> TC : PSH-ACK "HELLO"
+
+== TCP: TEARDOWN (3 packets) ==
+TC -> TS : FIN-ACK
+TS --> TC : FIN-ACK
+TC -> TS : ACK
+
+== UDP: DATA (2 packets total) ==
+UC -> US : "hello" (single datagram)
+US --> UC : "HELLO" (single datagram)
+
+legend bottom
+  TCP: minimum 8 packets for one request–response.
+  UDP: exactly 2 packets for one request–response.
+  TCP groups packets into a stream (tcp.stream).
+  UDP has no stream concept — each datagram is standalone.
+endlegend
+@enduml

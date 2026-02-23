@@ -1,0 +1,42 @@
+@startuml fig-text-vs-binary-comparison
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Text Protocol vs Binary Protocol — Framing Comparison
+
+together {
+    package "Text Protocol (Part 1)" as textpkg #E8F5E9 {
+        rectangle "Framing\n<LEN> SP <payload>\nASCII digits + space" as tf #C8E6C9
+        rectangle "Encoding\nUTF-8 plain text\nHuman-readable" as te #C8E6C9
+        rectangle "Debugging\nWireshark: follow TCP stream\nnc / telnet compatible" as td #C8E6C9
+        rectangle "Overhead\nVariable-length header\nLarger for small payloads" as to #C8E6C9
+    }
+}
+
+together {
+    package "Binary Protocol (Part 2)" as binpkg #E3F2FD {
+        rectangle "Framing\n[LEN_BYTE] [pickled data]\nSingle byte length prefix" as bf #BBDEFB
+        rectangle "Encoding\nPython pickle\nNot human-readable" as be #BBDEFB
+        rectangle "Debugging\nRequires deserialiser\nOpaque in Wireshark" as bd #BBDEFB
+        rectangle "Overhead\nCompact (1 B header)\nMax message: 255 bytes" as bo #BBDEFB
+    }
+}
+
+tf -[hidden]down-> te
+te -[hidden]down-> td
+td -[hidden]down-> to
+
+bf -[hidden]down-> be
+be -[hidden]down-> bd
+bd -[hidden]down-> bo
+
+legend bottom
+  Text protocols excel at debuggability and interoperability.
+  Binary protocols are more compact and support structured objects.
+  The choice depends on the use case: diagnostics favour text,
+  performance-critical systems favour binary (protobuf, gRPC).
+endlegend
+@enduml

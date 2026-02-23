@@ -1,0 +1,40 @@
+@startuml fig-basic-tools-overview
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Basic diagnostic tools — ping, netstat and nslookup
+
+rectangle "Local host" as local #FFE0B2
+
+package "Diagnostic tools" as tools #F5F5F5 {
+    rectangle "ping\n(ICMP echo)" as ping #BBDEFB
+    rectangle "netstat\n(connection state)" as netstat #BBDEFB
+    rectangle "nslookup\n(DNS query)" as nslookup #BBDEFB
+}
+
+rectangle "Remote host\n(e.g. google.com)" as remote #C8E6C9
+database "DNS server\n(resolver)" as dns #E1BEE7
+rectangle "Local sockets\n(TCP/UDP ports)" as sockets #FFF9C4
+
+local --> ping : check reachability
+ping --> remote : ICMP Echo Request
+remote --> ping : ICMP Echo Reply
+
+local --> netstat : inspect open ports
+netstat --> sockets : list LISTEN /\nESTABLISHED
+
+local --> nslookup : resolve domain name
+nslookup --> dns : DNS query
+dns --> nslookup : A / AAAA record
+
+legend bottom
+  ping: tests reachability and measures RTT (round-trip time).
+  netstat -tulnp: shows listening ports and active connections.
+  nslookup: queries a DNS server for name-to-IP resolution.
+  These three tools form the first diagnostic step in any
+  network troubleshooting workflow.
+endlegend
+@enduml

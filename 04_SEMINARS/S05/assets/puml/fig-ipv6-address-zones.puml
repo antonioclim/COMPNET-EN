@@ -1,0 +1,35 @@
+@startuml fig-ipv6-address-zones
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title IPv6 Address Scopes and Common Types
+
+package "Global Scope" as global #E8F5E9 {
+    rectangle "Global Unicast\n2000::/3\n(routable on the Internet)" as gu #C8E6C9
+
+    package "Site / Organisation" as site #FFF3E0 {
+        rectangle "Unique Local\nfc00::/7\n(private, not globally routed)" as ul #FFE0B2
+
+        package "Single Link" as link #E3F2FD {
+            rectangle "Link-Local\nfe80::/10\n(auto-configured, never routed)" as ll #BBDEFB
+            rectangle "Loopback\n::1\n(self only)" as lo #ECEFF1
+        }
+    }
+}
+
+rectangle "Multicast\nff00::/8\n(scope encoded in address)" as mc #E1BEE7
+rectangle "Anycast\n(same address on multiple nodes\ndelivered to nearest)" as ac #FFF9C4
+
+gu -[hidden]down-> site
+mc -[hidden]right-> ac
+
+legend bottom
+  Link-local: always present, used for NDP and routing.
+  Global unicast: reachable on the public Internet.
+  Unique local: equivalent of IPv4 private ranges.
+  Multicast replaces IPv4 broadcast entirely.
+endlegend
+@enduml

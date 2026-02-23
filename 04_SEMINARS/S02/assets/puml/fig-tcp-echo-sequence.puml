@@ -1,0 +1,43 @@
+@startuml fig-tcp-echo-sequence
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title TCP Echo Server — Full Connection Lifecycle
+
+participant "Client\npython3 / nc\n127.0.0.1:ephemeral" as C #FFE0B2
+participant "Server\nS02_Part01\n127.0.0.1:12345" as S #C8E6C9
+
+== THREE-WAY HANDSHAKE ==
+
+C -> S : SYN
+S --> C : SYN-ACK
+C -> S : ACK
+
+== DATA EXCHANGE ==
+
+C -> S : PSH-ACK "Hello, world"
+note right of S
+  Server calls recv(1024),
+  converts to uppercase,
+  replies with sendall()
+end note
+S --> C : PSH-ACK "HELLO, WORLD"
+C -> S : ACK
+
+== CONNECTION TEARDOWN ==
+
+C -> S : FIN-ACK
+S --> C : FIN-ACK
+C -> S : ACK
+
+legend right
+  1. Client initiates TCP handshake
+  2. Data flows as a byte stream
+  3. Server echoes the message in uppercase
+  4. Either side may initiate teardown
+  Wireshark filter: tcp.port == 12345
+endlegend
+@enduml

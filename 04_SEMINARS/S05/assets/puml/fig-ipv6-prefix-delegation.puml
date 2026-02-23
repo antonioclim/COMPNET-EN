@@ -1,0 +1,36 @@
+@startuml fig-ipv6-prefix-delegation
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title IPv6 Prefix Delegation: /48 → /64 Subnets
+
+rectangle "ISP Allocation\n2001:db8:1234::/48\n(65 536 possible /64 subnets)" as isp #E3F2FD
+
+package "Organisation Subnets (/64)" as org #E8F5E9 {
+    rectangle "Servers\n2001:db8:1234:1::/64" as srv #C8E6C9
+    rectangle "LAN Clients\n2001:db8:1234:2::/64" as lan #C8E6C9
+    rectangle "IoT Devices\n2001:db8:1234:3::/64" as iot #C8E6C9
+    rectangle "Router Transit\n2001:db8:1234:ff::/64" as rtr #BBDEFB
+}
+
+isp -[#1565C0]down-> srv : Subnet ID = 0001
+isp -[#1565C0]down-> lan : Subnet ID = 0002
+isp -[#1565C0]down-> iot : Subnet ID = 0003
+isp -[#1565C0]down-> rtr : Subnet ID = 00ff
+
+rectangle "Host within each /64\n2001:db8:1234:X::1 … :ffff:ffff:ffff:ffff" as host #FFF9C4
+
+org -[#43A047]down-> host : 2⁶⁴ addresses per subnet
+
+legend right
+  The 16-bit Subnet ID (bits 49–64)
+  selects among /64 prefixes.
+  SLAAC requires /64 — do not use longer
+  prefixes on LANs.
+  Numbering is flexible: hex values chosen
+  by the network administrator.
+endlegend
+@enduml

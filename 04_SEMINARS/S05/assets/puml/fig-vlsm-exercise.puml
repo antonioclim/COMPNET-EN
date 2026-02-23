@@ -1,0 +1,37 @@
+@startuml fig-vlsm-exercise
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 10
+skinparam shadowing false
+skinparam roundcorner 12
+left to right direction
+
+title VLSM Allocation Example: 10.0.0.0/24
+
+card "Available Block\n10.0.0.0/24\n(256 addresses)" as block #E3F2FD
+
+package "Allocated Subnets (largest first)" as alloc #E8F5E9 {
+    card "A: 100 hosts\n/25 (126 usable)\n10.0.0.0/25\n.0 – .127" as a #C8E6C9
+
+    card "B: 50 hosts\n/26 (62 usable)\n10.0.0.128/26\n.128 – .191" as b #C8E6C9
+
+    card "C: 10 hosts\n/28 (14 usable)\n10.0.0.192/28\n.192 – .207" as c #C8E6C9
+
+    card "D: 2 hosts (P2P)\n/30 (2 usable)\n10.0.0.208/30\n.208 – .211" as d #C8E6C9
+}
+
+card "Free\n10.0.0.212 – .255\n(44 addresses)" as free #ECEFF1
+
+block -[#1565C0]-> a : step 1
+a -[#43A047]-> b : step 2
+b -[#43A047]-> c : step 3
+c -[#43A047]-> d : step 4
+d -[#FF9800]-> free : remaining
+
+legend bottom
+  Sort requirements descending: 100, 50, 10, 2.
+  Pick smallest power-of-two block that fits.
+  Advance the pointer after each allocation.
+  Remaining space: 44 addresses for future use.
+endlegend
+@enduml

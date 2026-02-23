@@ -1,0 +1,48 @@
+@startuml fig-udp-anycast-simulation
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam sequenceMessageAlign center
+
+title Simulated UDP anycast over IPv6 (laboratory setup)
+
+participant "Client\nAF_INET6\ntarget: [::1]:5007" as C #FFE0B2
+participant "Server S1\nbind [::]:5007\nserver_id = S1" as S1 #C8E6C9
+participant "Server S2\nbind [::]:5007\nserver_id = S2" as S2 #ECEFF1
+
+note over C
+  In a real anycast deployment
+  routing selects the nearest
+  server. Here we simulate
+  on loopback (::1).
+end note
+
+C -[#1565C0]> S1 : "Hello, anycast server!"
+S1 -[#43A047]-> C : "[S1] Reply from anycast server"
+
+note over S1
+  The kernel delivers the datagram
+  to whichever process is bound
+  to the address. In a true anycast
+  network, BGP or OSPF would choose.
+end note
+
+|||
+
+note over S2 #FFEBEE
+  S2 does not receive the packet
+  in this local simulation because
+  both servers share the same host.
+end note
+
+legend right
+  This laboratory exercise simulates anycast
+  on localhost using IPv6 (AF_INET6).
+  Real anycast requires identical addresses
+  announced from multiple locations via
+  routing protocols (BGP, OSPF).
+  The network routes to the nearest instance.
+endlegend
+@enduml

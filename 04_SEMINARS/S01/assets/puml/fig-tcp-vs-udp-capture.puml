@@ -1,0 +1,48 @@
+@startuml fig-tcp-vs-udp-capture
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title TCP vs UDP as observed in Wireshark captures
+
+box "TCP capture (port 9200)" #E3F2FD
+    participant "nc client" as tc #FFE0B2
+    participant "Wireshark" as ws1 #FFF9C4
+    participant "nc -l -p 9200" as ts #C8E6C9
+end box
+
+tc -[#1565C0]> ts : SYN (Seq=x)
+ws1 <-[#333333]- tc : captured
+ts -[#43A047]-> tc : SYN-ACK (Seq=y, Ack=x+1)
+ws1 <-[#333333]- ts : captured
+tc -[#1565C0]> ts : ACK (Ack=y+1)
+
+== HANDSHAKE COMPLETE ==
+
+tc -[#1565C0]> ts : PSH-ACK "message"
+ws1 <-[#333333]- tc : payload visible
+ts -[#43A047]-> tc : ACK
+
+|||
+|||
+
+box "UDP capture (port 9201)" #E8F5E9
+    participant "echo | nc -u" as uc #FFE0B2
+    participant "Wireshark" as ws2 #FFF9C4
+    participant "nc -u -l -p 9201" as us #C8E6C9
+end box
+
+uc -[#1565C0]> us : UDP datagram "test"
+ws2 <-[#333333]- uc : single packet
+uc -[#E53935]>x us : no ACK, no session
+
+legend right
+  TCP in Wireshark: SYN/SYN-ACK/ACK visible,
+  stream index assigned, seq/ack tracking.
+  UDP in Wireshark: each datagram is a standalone
+  packet — no handshake, no stream, no ACK.
+  Display filter: tcp.stream eq N or udp.port == P.
+endlegend
+@enduml

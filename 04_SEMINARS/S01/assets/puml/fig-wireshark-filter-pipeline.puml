@@ -1,0 +1,38 @@
+@startuml fig-wireshark-filter-pipeline
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+left to right direction
+
+title Wireshark filter pipeline — capture vs display
+
+card "Network\ntraffic" as traffic #FFE0B2
+
+package "Capture filter (libpcap / BPF)" as capf #E3F2FD {
+    card "tcp port 9200" as cap_rule #BBDEFB
+}
+
+database "Packet\nbuffer\n(.pcap)" as buffer #FFF9C4
+
+package "Display filter (Wireshark)" as dispf #E8F5E9 {
+    card "tcp.stream eq 0" as disp_rule #C8E6C9
+}
+
+card "Displayed\npackets" as display #C8E6C9
+
+traffic --> cap_rule : all frames
+cap_rule --> buffer : matching\nframes only
+buffer --> disp_rule : all captured\npackets
+disp_rule --> display : filtered\nview
+
+legend bottom
+  Capture filter: applied before recording (BPF syntax).
+  Cannot be changed once capture starts.
+  Display filter: applied after capture (Wireshark syntax).
+  Can be modified at any time during analysis.
+  Use capture filters to reduce volume; use display
+  filters to focus on specific conversations.
+endlegend
+@enduml

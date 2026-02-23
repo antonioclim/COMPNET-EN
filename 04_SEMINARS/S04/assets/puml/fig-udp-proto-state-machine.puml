@@ -1,0 +1,30 @@
+@startuml fig-udp-proto-state-machine
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+
+title UDP Protocol State Machine (Per Client Address)
+
+state "DISCONNECTED" as disc #FFE0B2 : Client (ip, port) is not registered.\nSEND, LIST, DISCONNECT and CLEAR\nreturn ERR_CONNECTED.
+state "CONNECTED" as conn #C8E6C9 : Client is registered.\nNotes list exists in state.\nAll commands are permitted.
+
+[*] --> disc : initial state\nfor every new address
+
+disc --> conn : CONNECT\n-> OK
+conn --> conn : CONNECT\n-> OK (idempotent)
+conn --> conn : SEND <note>\n-> OK (note stored)
+conn --> conn : LIST\n-> OK (notes returned)
+conn --> conn : CLEAR\n-> OK (notes cleared)
+conn --> disc : DISCONNECT\n-> OK (session removed)
+
+disc -[#E53935]-> disc : SEND / LIST / DISCONNECT / CLEAR\n-> ERR_CONNECTED
+
+legend right
+  State is keyed by (ip, port) tuple.
+  Each UDP client has an independent state.
+  CLEAR empties the notes list but keeps
+  the connection active (remains CONNECTED).
+  DISCONNECT removes the client entirely.
+endlegend
+@enduml

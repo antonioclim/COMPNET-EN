@@ -1,0 +1,38 @@
+@startuml fig-udp-echo-sequence
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title UDP Echo Server — Datagram Exchange (No Connection)
+
+participant "Client\npython3 / nc -u\n127.0.0.1:ephemeral" as C #FFE0B2
+participant "Server\nS02_Part07\n0.0.0.0:12345" as S #C8E6C9
+
+note over C, S
+  No handshake — datagrams are sent immediately.
+  Each request–response pair is independent.
+end note
+
+C -> S : sendto("ping")
+S --> C : sendto("PING")
+|||
+C -> S : sendto("upper:hello world")
+S --> C : sendto("UPPER:HELLO WORLD")
+|||
+C -> S : sendto("abc")
+S --> C : sendto("ABC")
+
+note over C
+  Client may set a timeout (e.g. 2 s).
+  If no reply arrives → timeout warning.
+end note
+
+legend right
+  UDP is connectionless: no SYN/ACK.
+  Each datagram is routed independently.
+  Lost datagrams are not retransmitted.
+  Wireshark filter: udp.port == 12345
+endlegend
+@enduml

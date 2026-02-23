@@ -1,0 +1,46 @@
+@startuml fig-udp-broadcast-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title UDP broadcast communication (IPv4)
+
+participant "Sender\nSO_BROADCAST=1" as S #FFE0B2
+participant "Network\n255.255.255.255:5007" as N #E3F2FD
+participant "Receiver A\nbind 0.0.0.0:5007" as RA #C8E6C9
+participant "Receiver B\nbind 0.0.0.0:5007" as RB #C8E6C9
+participant "Receiver C\nbind 0.0.0.0:5007" as RC #C8E6C9
+
+S -[#1565C0]> N : sendto("Hello #0",\n255.255.255.255:5007)
+N -[#43A047]-> RA : datagram delivered
+N -[#43A047]-> RB : datagram delivered
+N -[#43A047]-> RC : datagram delivered
+
+|||
+
+S -[#1565C0]> N : sendto("Hello #1",\n255.255.255.255:5007)
+N -[#43A047]-> RA : datagram delivered
+N -[#43A047]-> RB : datagram delivered
+N -[#43A047]-> RC : datagram delivered
+
+note over S
+  Sender sets SO_BROADCAST
+  socket option before sending.
+end note
+
+note over RA, RC
+  All processes bound to port 5007
+  receive every broadcast datagram.
+end note
+
+legend right
+  Broadcast sends to all hosts on the
+  local network segment (L2 domain).
+  Destination: 255.255.255.255 or
+  the subnet broadcast (e.g. 192.168.1.255).
+  Routers do not forward broadcasts.
+  Every listening process receives the data.
+endlegend
+@enduml

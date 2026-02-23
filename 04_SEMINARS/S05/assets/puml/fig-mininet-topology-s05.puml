@@ -1,0 +1,37 @@
+@startuml fig-mininet-topology-s05
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Mininet Topology — S05: Two Hosts with Router
+
+package "Subnet A\n10.0.1.0/24" as subA #E8F5E9 {
+    component "h1\nh1-eth0\n10.0.1.10" as h1 #FFE0B2
+    component "r1 (eth0)\nr1-eth0\n10.0.1.1" as r1a #BBDEFB
+}
+
+package "Subnet B\n10.0.2.0/24" as subB #FFF3E0 {
+    component "r1 (eth1)\nr1-eth1\n10.0.2.1" as r1b #BBDEFB
+    component "h2\nh2-eth0\n10.0.2.10" as h2 #FFE0B2
+}
+
+rectangle "r1\nLinux Router\nip_forward = 1" as r1box #90CAF9
+
+h1 -[#1565C0]right-> r1a : link
+r1a -[#1565C0]right-> r1box
+r1box -[#1565C0]right-> r1b
+r1b -[#1565C0]right-> h2 : link
+
+h1 -[#43A047,dashed]-> r1a : default via\n10.0.1.1
+h2 -[#43A047,dashed]-> r1b : default via\n10.0.2.1
+
+legend bottom
+  h1 and h2 are on different subnets.
+  r1 has two interfaces, one in each subnet.
+  IP forwarding must be enabled on r1.
+  Default routes on h1 and h2 point to r1.
+  Verify with: ping, traceroute and tcpdump.
+endlegend
+@enduml

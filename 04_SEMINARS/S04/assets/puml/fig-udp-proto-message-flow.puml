@@ -1,0 +1,62 @@
+@startuml fig-udp-proto-message-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title UDP Custom Protocol — Message Exchange Sequence
+
+participant "Client\n(interactive CLI)" as C #FFE0B2
+participant "Server\n0.0.0.0:4000\n(UDP)" as S #C8E6C9
+
+note over S: State per (ip, port):\ninitially DISCONNECTED
+
+== Registration ==
+
+C -[#1565C0]> S : RequestMessage(CONNECT)
+note right of S: state.add_connection(addr)
+S -[#43A047]-> C : ResponseMessage(OK)
+
+== Storing Notes ==
+
+C -[#1565C0]> S : RequestMessage(SEND, "first note")
+note right of S: state.add_note(addr, "first note")
+S -[#43A047]-> C : ResponseMessage(OK)
+
+C -[#1565C0]> S : RequestMessage(SEND, "second note")
+S -[#43A047]-> C : ResponseMessage(OK)
+
+== Listing Notes ==
+
+C -[#1565C0]> S : RequestMessage(LIST)
+S -[#43A047]-> C : ResponseMessage(OK, "first note\nsecond note")
+
+== Clearing Notes ==
+
+C -[#1565C0]> S : RequestMessage(CLEAR)
+note right of S: state.clear_notes(addr)
+S -[#43A047]-> C : ResponseMessage(OK)
+
+C -[#1565C0]> S : RequestMessage(LIST)
+S -[#43A047]-> C : ResponseMessage(OK, "")
+
+== Disconnection ==
+
+C -[#1565C0]> S : RequestMessage(DISCONNECT)
+note right of S: state.remove_connection(addr)
+S -[#43A047]-> C : ResponseMessage(OK)
+
+== Error Case: Command Without Connection ==
+
+C -[#1565C0]> S : RequestMessage(LIST)
+S -[#E53935]-> C : ResponseMessage(ERR_CONNECTED)
+
+legend right
+  Messages are serialised with pickle
+  and sent as UDP datagrams.
+  Each datagram is self-contained (no stream framing).
+  The server identifies clients by their
+  (ip, port) address tuple.
+endlegend
+@enduml

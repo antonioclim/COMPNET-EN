@@ -1,0 +1,43 @@
+@startuml fig-s02-command-protocol
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+
+title Command Protocol — Server-Side Decision Logic
+
+start
+
+:Receive message from client;
+
+:Decode bytes to UTF-8 string;
+
+:Strip whitespace;
+
+if (message == "ping") then (yes)
+  #C8E6C9:response = "PONG";
+elseif (message starts with "upper:") then (yes)
+  #BBDEFB:Extract text after "upper:"
+  response = text.upper();
+else (default)
+  #FFCDD2:response = "UNKNOWN COMMAND";
+endif
+
+:Encode response to bytes;
+
+:Send response to client;
+
+:Log client IP, port,
+message text and byte count;
+
+stop
+
+legend right
+  This protocol is identical for
+  both the TCP and UDP servers.
+  TCP: response via sendall()
+  UDP: response via sendto()
+  Students implement this in
+  Part02 (TCP) and Part08 (UDP).
+endlegend
+@enduml

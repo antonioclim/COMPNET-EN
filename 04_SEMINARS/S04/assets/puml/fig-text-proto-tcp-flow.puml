@@ -1,0 +1,52 @@
+@startuml fig-text-proto-tcp-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title Text Protocol over TCP — Message Exchange with Length Framing
+
+participant "Client\n(TCP)" as C #FFE0B2
+participant "Server\n127.0.0.1:3333" as S #C8E6C9
+
+C -> S : TCP connect
+note right of S: Thread spawned for client
+
+== Request/Response Cycle ==
+
+C -> S : "20 add user1 Alice"
+note right of S
+  Parse: LEN=20, cmd=add
+  key=user1, resource=Alice
+  state.add("user1", "Alice")
+end note
+S --> C : "13 user1 added"
+
+C -> S : "14 get user1"
+S --> C : "8 Alice"
+
+C -> S : "17 remove user1"
+S --> C : "15 user1 removed"
+
+C -> S : "7 count"
+S --> C : "8 0 keys"
+
+== Unrecognised Command ==
+
+C -> S : "16 foo something"
+S --> C : "25 ERR unknown command"
+
+== Termination ==
+
+C -> S : "6 exit"
+note over C: Client closes socket
+
+legend right
+  Framing: "<LEN> <payload>" where LEN is the
+  total character count of the entire message.
+  The server reads LEN, then receives exactly
+  that many characters before parsing.
+  The protocol is stateless per request.
+endlegend
+@enduml
