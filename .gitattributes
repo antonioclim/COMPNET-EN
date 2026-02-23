@@ -1,0 +1,21 @@
+# Default: normalise line endings to LF for text files.
+# Git will keep files listed as binary untouched.
+
+* text=auto eol=lf
+
+# Common binary formats
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.pdf binary
+*.jar binary
+*.zip binary
+
+# Windows-specific scripts
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Shell scripts
+*.sh text eol=lf
