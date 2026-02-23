@@ -1,0 +1,32 @@
+@startuml fig-osi-layers
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title The OSI Reference Model — Seven Layers
+
+rectangle "**7 — Application**\nUser-facing services\n(HTTP, FTP, SMTP, DNS)" as L7 #E1BEE7
+rectangle "**6 — Presentation**\nData representation\n(TLS, UTF-8, JSON, ASN.1)" as L6 #E1BEE7
+rectangle "**5 — Session**\nDialogue management\n(session setup, teardown)" as L5 #E1BEE7
+rectangle "**4 — Transport**\nProcess-to-process delivery\n(TCP segment / UDP datagram)" as L4 #C8E6C9
+rectangle "**3 — Network**\nEnd-to-end packet delivery\n(IP packet)" as L3 #BBDEFB
+rectangle "**2 — Data Link**\nNode-to-node frame transfer\n(Ethernet frame)" as L2 #E3F2FD
+rectangle "**1 — Physical**\nBit transmission\n(electrical / optical / radio signal)" as L1 #F5F5F5
+
+L7 -down-> L6
+L6 -down-> L5
+L5 -down-> L4
+L4 -down-> L3
+L3 -down-> L2
+L2 -down-> L1
+
+legend right
+  The OSI model organises network
+  communication into seven layers.
+  Each layer provides services to
+  the layer above and consumes
+  services from the layer below.
+endlegend
+@enduml

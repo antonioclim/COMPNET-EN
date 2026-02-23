@@ -1,0 +1,39 @@
+@startuml fig-network-vs-system
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Computing system vs computer network
+
+package "Computing system (internal)" as sys #FFF3E0 {
+    rectangle "CPU" as cpu #FFE0B2
+    rectangle "Memory (RAM)" as mem #FFE0B2
+    rectangle "Storage" as stor #FFE0B2
+    rectangle "System bus / chipset" as bus #ECEFF1
+    cpu --> bus : data + control
+    mem --> bus : read / write
+    stor --> bus : I/O
+}
+
+package "Computer network (between systems)" as net #E8F5E9 {
+    rectangle "System A\n(NIC)" as a #C8E6C9
+    rectangle "Switch" as sw #BBDEFB
+    rectangle "System B\n(NIC)" as b #C8E6C9
+    rectangle "Router\n(optional)" as r #E3F2FD
+    a --> sw : Ethernet frame
+    sw --> b : forwarded frame
+    sw --> r : inter-network traffic
+}
+
+sys -[hidden]right- net
+
+legend right
+  A computing system communicates internally
+  via a shared bus (CPU, memory and storage).
+  A network connects multiple systems through
+  NICs, switches and routers.
+  Physical link + logical protocol = communication.
+endlegend
+@enduml

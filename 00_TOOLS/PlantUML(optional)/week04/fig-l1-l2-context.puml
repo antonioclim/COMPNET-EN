@@ -1,0 +1,29 @@
+@startuml fig-l1-l2-context
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Context: Physical Layer (L1) and Data Link Layer (L2)
+
+rectangle "L7–L5  Upper Layers\n(Application, Presentation, Session)" as upper #ECEFF1
+rectangle "L4  Transport\n(TCP / UDP)" as L4 #ECEFF1
+rectangle "L3  Network\n(IP — addressing and routing)" as L3 #F5F5F5
+rectangle "**L2  Data Link**\n(frames, MAC addressing, CRC)" as L2 #BBDEFB
+rectangle "**L1  Physical**\n(bits, electrical/optical/radio signal)" as L1 #E3F2FD
+rectangle "Medium\n(copper, fibre or air)" as MED #FFF9C4
+
+upper -down-> L4
+L4 -down-> L3
+L3 -down-> L2 : passes packets
+L2 -down-> L1 : passes frames as bits
+L1 -down-> MED : transmits signal
+
+legend right
+  This lecture focuses on L1 and L2.
+  L1 converts bits into physical signals.
+  L2 adds addressing, framing and error detection
+  to compensate for the limitations of L1.
+endlegend
+@enduml

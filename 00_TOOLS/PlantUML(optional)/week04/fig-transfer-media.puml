@@ -1,0 +1,34 @@
+@startuml fig-transfer-media
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Transmission Media — Guided vs Unguided
+
+package "Guided Media" as guided #E8F5E9 {
+    rectangle "Twisted Pair (UTP/STP)\nElectrical signal\n~100 m (Cat 5e/6)" as tp #C8E6C9
+    rectangle "Coaxial Cable\nElectrical signal\n~500 m (10Base5)" as coax #C8E6C9
+    rectangle "Optical Fibre\nLight signal\nSingle-mode: ~80 km\nMulti-mode: ~2 km" as fibre #C8E6C9
+}
+
+package "Unguided Media" as unguided #FFF3E0 {
+    rectangle "Radio Waves\nElectromagnetic signal\nWi-Fi, LTE, Bluetooth" as radio #FFE0B2
+}
+
+rectangle "Sender" as S #E3F2FD
+rectangle "Receiver" as R #E3F2FD
+
+S -right-> guided
+guided -right-> R
+S -right-> unguided
+unguided -right-> R
+
+legend bottom
+  Guided media confine the signal to a physical conductor.
+  Unguided media propagate through free space.
+  Key properties: attenuation, noise, bandwidth
+  and maximum practical distance.
+endlegend
+@enduml

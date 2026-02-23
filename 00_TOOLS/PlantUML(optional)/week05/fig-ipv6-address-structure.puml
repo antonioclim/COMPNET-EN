@@ -1,0 +1,34 @@
+@startuml fig-ipv6-address-structure
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam roundcorner 12
+
+title IPv6 Address Logical Structure (Global Unicast)
+
+rectangle "128-bit IPv6 Address" as full #F5F5F5 {
+    rectangle "Global Routing Prefix\n(48 bits — assigned by ISP)" as grp #E3F2FD
+    rectangle "Subnet ID\n(16 bits — chosen by org)" as sid #E1BEE7
+    rectangle "Interface ID\n(64 bits — host identifier)" as iid #C8E6C9
+}
+
+grp -[hidden]right-> sid
+sid -[hidden]right-> iid
+
+rectangle "Example: 2001:0db8:abcd : 0012 : 0000:0000:0000:0001" as ex #FFF9C4
+
+full -[hidden]down-> ex
+
+rectangle "/48 prefix\n(org gets 65 536 subnets)" as p48 #BBDEFB
+rectangle "/64 prefix\n(each LAN)" as p64 #90CAF9
+
+p48 -[#1565C0]down-> p64 : extend by 16 bits\n(Subnet ID)
+
+legend bottom
+  Common model: /48 for the organisation, /64 per LAN.
+  2¹⁶ = 65 536 possible /64 subnets within a /48.
+  Interface ID may come from SLAAC, DHCPv6 or manual config.
+  SLAAC requires exactly /64 prefix length.
+endlegend
+@enduml

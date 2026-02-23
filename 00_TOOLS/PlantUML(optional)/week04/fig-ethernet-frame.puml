@@ -1,0 +1,33 @@
+@startuml fig-ethernet-frame
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 10
+skinparam shadowing false
+skinparam roundcorner 12
+left to right direction
+
+title Ethernet II Frame Format (IEEE 802.3)
+
+rectangle "Preamble\n7 bytes\n10101010..." as pre #ECEFF1
+rectangle "SFD\n1 byte\n10101011" as sfd #ECEFF1
+rectangle "Dest MAC\n6 bytes" as dmac #BBDEFB
+rectangle "Src MAC\n6 bytes" as smac #BBDEFB
+rectangle "EtherType\n2 bytes" as etype #E1BEE7
+rectangle "Payload\n46–1500\nbytes" as pay #FFF9C4
+rectangle "FCS (CRC-32)\n4 bytes" as fcs #C8E6C9
+
+pre -right-> sfd
+sfd -right-> dmac
+dmac -right-> smac
+smac -right-> etype
+etype -right-> pay
+pay -right-> fcs
+
+legend bottom
+  Preamble and SFD synchronise the receiver clock.
+  EtherType identifies the upper-layer protocol
+  (0x0800 = IPv4, 0x0806 = ARP, 0x86DD = IPv6).
+  Minimum frame size: 64 bytes (excluding preamble).
+  FCS detects bit errors via CRC-32.
+endlegend
+@enduml

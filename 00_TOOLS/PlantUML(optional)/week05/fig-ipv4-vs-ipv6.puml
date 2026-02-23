@@ -1,0 +1,39 @@
+@startuml fig-ipv4-vs-ipv6
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title IPv4 vs IPv6 — Quick Comparison
+
+together {
+    card "**IPv4**" as v4 #E3F2FD {
+        rectangle "32-bit addresses" as v4a #BBDEFB
+        rectangle "Variable header + checksum" as v4b #BBDEFB
+        rectangle "Broadcast exists" as v4c #BBDEFB
+        rectangle "Fragmentation in-network" as v4d #BBDEFB
+        rectangle "NAT commonly required" as v4e #BBDEFB
+    }
+
+    card "**IPv6**" as v6 #E8F5E9 {
+        rectangle "128-bit addresses" as v6a #C8E6C9
+        rectangle "Fixed 40 B header, no checksum" as v6b #C8E6C9
+        rectangle "No broadcast (multicast only)" as v6c #C8E6C9
+        rectangle "Fragmentation at source only" as v6d #C8E6C9
+        rectangle "End-to-end by design" as v6e #C8E6C9
+    }
+}
+
+v4a -[#1565C0]right-> v6a : expanded
+v4b -[#1565C0]right-> v6b : simplified
+v4c -[#1565C0]right-> v6c : replaced
+v4d -[#1565C0]right-> v6d : moved
+v4e -[#1565C0]right-> v6e : eliminated
+
+legend bottom
+  IPv6 simplifies the header and removes broadcast.
+  Address space grows from ~4.3 billion to ~3.4 x 10^38.
+  SLAAC enables automatic address configuration.
+endlegend
+@enduml

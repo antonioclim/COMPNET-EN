@@ -1,0 +1,36 @@
+@startuml fig-vlan
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title VLANs — Logical Segmentation over Shared Infrastructure
+
+package "VLAN 10 — Engineering" as vlan10 #E8F5E9 {
+    rectangle "PC-A\nPort 1 (access)" as A #C8E6C9
+    rectangle "PC-B\nPort 2 (access)" as B #C8E6C9
+}
+
+package "VLAN 20 — Finance" as vlan20 #E3F2FD {
+    rectangle "PC-C\nPort 3 (access)" as C #BBDEFB
+    rectangle "PC-D\nPort 4 (access)" as D #BBDEFB
+}
+
+rectangle "Switch\n(802.1Q capable)" as SW #F5F5F5
+rectangle "Router / L3 Switch\n(inter-VLAN routing)" as R #E1BEE7
+
+A -- SW : untagged
+B -- SW : untagged
+C -- SW : untagged
+D -- SW : untagged
+SW == R : trunk (tagged\n802.1Q)
+
+legend right
+  Each VLAN forms a separate broadcast domain.
+  Access ports carry untagged frames for one VLAN.
+  The trunk port carries tagged frames (802.1Q)
+  for multiple VLANs between switches or to a router.
+  Inter-VLAN traffic requires a Layer 3 device.
+endlegend
+@enduml

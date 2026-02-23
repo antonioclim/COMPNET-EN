@@ -1,0 +1,43 @@
+@startuml fig-vlsm-allocation
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+
+title VLSM Allocation Process (IPv4)
+
+start
+
+:Collect host requirements\nfor all subnets;
+
+:Sort requirements in\n**descending** order;
+
+:Select the starting\naddress block (e.g. 10.0.0.0/24);
+
+repeat
+    :Take the largest remaining\nrequirement;
+
+    :Find the smallest prefix\nthat fits (round up to\nnext power of two + 2);
+
+    :Allocate from the current\nfree position;
+
+    :Record: network address,\nbroadcast, host range;
+
+    :Advance pointer past\nallocated block;
+
+repeat while (More subnets needed?) is (yes)
+->no;
+
+:Verify no overlaps\nand all requirements met;
+
+stop
+
+legend right
+  Example: 10.0.0.0/24
+  100 hosts → /25 (10.0.0.0)
+  50 hosts  → /26 (10.0.0.128)
+  10 hosts  → /28 (10.0.0.192)
+  2 hosts   → /30 (10.0.0.208)
+  Always allocate largest first.
+endlegend
+@enduml

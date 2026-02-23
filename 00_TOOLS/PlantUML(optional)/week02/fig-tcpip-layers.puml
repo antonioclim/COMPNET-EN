@@ -1,0 +1,29 @@
+@startuml fig-tcpip-layers
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title The TCP/IP Model — Four Layers
+
+rectangle "**Application**\nHTTP, DNS, SMTP, FTP, SSH\n//user data and application logic//" as app #E1BEE7
+
+rectangle "**Transport**\nTCP (reliable, connection-oriented)\nUDP (fast, connectionless)" as tr #C8E6C9
+
+rectangle "**Internet**\nIP (addressing, routing)\nICMP (diagnostics, error reporting)" as inet #BBDEFB
+
+rectangle "**Network Access**\nEthernet, Wi-Fi, PPP\n//physical and data-link functions//" as net #E3F2FD
+
+app -down-> tr : segments / datagrams
+tr -down-> inet : packets
+inet -down-> net : frames → bits
+
+legend right
+  The TCP/IP model reflects real
+  Internet protocol design.
+  It merges OSI layers 5–7 into
+  Application and layers 1–2 into
+  Network Access for simplicity.
+endlegend
+@enduml

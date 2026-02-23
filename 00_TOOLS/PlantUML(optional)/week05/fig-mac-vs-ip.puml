@@ -1,0 +1,33 @@
+@startuml fig-mac-vs-ip
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title MAC vs IP Addressing: Local (L2) vs Global (L3)
+
+package "LAN A" as lanA #E8F5E9 {
+    component "Host A\nMAC_A\nIP_A" as A #C8E6C9
+    component "Switch" as SWA #E3F2FD
+    component "Router R\n(iface LAN A)\nMAC_R1 · IP_R1" as R1 #BBDEFB
+    A -- SWA
+    SWA -- R1
+}
+
+package "LAN B" as lanB #FFF3E0 {
+    component "Router R\n(iface LAN B)\nMAC_R2 · IP_R2" as R2 #BBDEFB
+    component "Switch" as SWB #E3F2FD
+    component "Host B\nMAC_B\nIP_B" as B #FFE0B2
+    R2 -- SWB
+    SWB -- B
+}
+
+R1 -[#1565C0]-> R2 : L3 packet: IP_A → IP_B\n(IP unchanged end-to-end)
+
+legend bottom
+  MAC addresses change at each hop (local scope).
+  IP addresses remain constant end-to-end (global scope).
+  The router rewrites L2 headers but preserves L3 headers.
+endlegend
+@enduml

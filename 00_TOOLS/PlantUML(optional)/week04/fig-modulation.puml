@@ -1,0 +1,34 @@
+@startuml fig-modulation
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Modulation Techniques: ASK, FSK, PSK and QAM
+
+rectangle "Digital Data\n(baseband bit stream)" as data #FFF9C4
+rectangle "Carrier Wave\n(sinusoidal at frequency f)" as carrier #E3F2FD
+
+rectangle "ASK\nAmplitude Shift Keying\nVaries amplitude\nSimple but noise-sensitive" as ask #BBDEFB
+rectangle "FSK\nFrequency Shift Keying\nVaries frequency\nMore robust than ASK" as fsk #BBDEFB
+rectangle "PSK\nPhase Shift Keying\nVaries phase\nGood spectral efficiency" as psk #BBDEFB
+rectangle "QAM\nQuadrature Amplitude Modulation\nVaries amplitude + phase\nHigh throughput (Wi-Fi, LTE)" as qam #E1BEE7
+
+data -down-> ask
+data -down-> fsk
+data -down-> psk
+data -down-> qam
+
+carrier -down-> ask
+carrier -down-> fsk
+carrier -down-> psk
+carrier -down-> qam
+
+legend bottom
+  Modulation impresses digital data onto
+  an analogue carrier for transmission.
+  QAM combines amplitude and phase variation
+  to achieve higher data rates per symbol.
+endlegend
+@enduml

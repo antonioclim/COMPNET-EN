@@ -1,0 +1,60 @@
+@startuml fig-topologies
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Common network topologies
+
+package "Bus (multipoint, symmetric)" as bus_pkg #E3F2FD {
+    rectangle "N1" as b1 #BBDEFB
+    rectangle "N2" as b2 #BBDEFB
+    rectangle "N3" as b3 #BBDEFB
+    rectangle "Shared medium" as bm #ECEFF1
+    b1 -- bm
+    b2 -- bm
+    b3 -- bm
+}
+
+package "Star (point-to-point, asymmetric)" as star_pkg #E8F5E9 {
+    rectangle "N1" as s1 #C8E6C9
+    rectangle "N2" as s2 #C8E6C9
+    rectangle "N3" as s3 #C8E6C9
+    rectangle "Centre\n(hub/switch)" as sc #90CAF9
+    s1 -- sc
+    s2 -- sc
+    s3 -- sc
+}
+
+package "Ring (point-to-point, symmetric)" as ring_pkg #FFF3E0 {
+    rectangle "N1" as r1 #FFE0B2
+    rectangle "N2" as r2 #FFE0B2
+    rectangle "N3" as r3 #FFE0B2
+    rectangle "N4" as r4 #FFE0B2
+    r1 -- r2
+    r2 -- r3
+    r3 -- r4
+    r4 -- r1
+}
+
+package "Mesh (point-to-point, symmetric)" as mesh_pkg #FCE4EC {
+    rectangle "N1" as m1 #E1BEE7
+    rectangle "N2" as m2 #E1BEE7
+    rectangle "N3" as m3 #E1BEE7
+    rectangle "N4" as m4 #E1BEE7
+    m1 -- m2
+    m1 -- m3
+    m1 -- m4
+    m2 -- m3
+    m2 -- m4
+    m3 -- m4
+}
+
+legend bottom
+  Bus: shared medium, collision domain.
+  Star: central device, single point of failure.
+  Ring: token passing, sequential forwarding.
+  Mesh: redundant paths, high fault tolerance.
+endlegend
+@enduml

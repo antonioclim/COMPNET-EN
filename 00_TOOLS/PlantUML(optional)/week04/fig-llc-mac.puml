@@ -1,0 +1,30 @@
+@startuml fig-llc-mac
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Data Link Layer: LLC and MAC Sublayers
+
+rectangle "L3 Network (IP)" as L3 #F5F5F5
+
+package "L2 Data Link" as dl #E3F2FD {
+    rectangle "LLC — Logical Link Control\n(IEEE 802.2)\nInterface towards upper layers\nMultiplexing, flow control" as LLC #BBDEFB
+    rectangle "MAC — Media Access Control\nFrame construction and addressing\nMAC addresses (48-bit)\nCRC error detection\nMedium access rules" as MAC #90CAF9
+    LLC -down-> MAC : PDU
+}
+
+rectangle "L1 Physical (medium)" as L1 #FFF9C4
+
+L3 -down-> LLC : IP packet
+MAC -down-> L1 : frame (bits)
+
+legend right
+  LLC is medium-independent and provides a
+  uniform interface for network-layer protocols.
+  MAC is technology-specific (Ethernet, Wi-Fi)
+  and handles frame delimitation, addressing
+  and medium access control.
+endlegend
+@enduml

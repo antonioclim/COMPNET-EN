@@ -1,0 +1,41 @@
+@startuml fig-media
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Transmission media — guided vs unguided
+
+package "Guided media" as guided #E3F2FD {
+    rectangle "Coaxial cable" as coax #BBDEFB
+    rectangle "Twisted pair\n(UTP / STP)" as tp #BBDEFB
+    rectangle "Optical fibre" as fibre #90CAF9
+}
+
+package "Unguided media" as unguided #FFF3E0 {
+    rectangle "Radio waves\n(Wi-Fi, Bluetooth)" as radio #FFE0B2
+    rectangle "Microwave /\nSatellite" as mwave #FFE0B2
+}
+
+rectangle "Host A" as a #C8E6C9
+rectangle "Host B" as b #C8E6C9
+
+a --> coax : electrical signal
+a --> tp : electrical signal
+a --> fibre : optical signal
+a --> radio : electromagnetic wave
+
+coax --> b
+tp --> b
+fibre --> b
+radio --> b
+
+legend right
+  Guided: signal travels along a physical conductor
+  (copper or glass). Predictable attenuation.
+  Unguided: signal propagates through air.
+  Subject to interference and spectrum sharing.
+  Bandwidth and latency vary by medium type.
+endlegend
+@enduml

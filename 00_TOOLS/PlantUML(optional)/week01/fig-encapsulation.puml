@@ -1,0 +1,29 @@
+@startuml fig-encapsulation
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Encapsulation across the protocol stack
+
+rectangle "Application layer\n(Message / Data)" as app #FFF9C4
+rectangle "Transport layer (TCP/UDP)\n[ L4 Header | Data ]" as l4 #E1BEE7
+rectangle "Network layer (IP)\n[ L3 Header | Segment ]" as l3 #BBDEFB
+rectangle "Data link layer (Ethernet)\n[ L2 Header | Packet | FCS ]" as l2 #C8E6C9
+rectangle "Physical layer\n(bits on the wire)" as l1 #ECEFF1
+
+app --> l4 : add transport header\n(port numbers)
+l4 --> l3 : add network header\n(IP addresses)
+l3 --> l2 : add frame header + FCS\n(MAC addresses)
+l2 --> l1 : encode and transmit bits
+
+legend right
+  Each layer wraps the payload from above
+  with its own header (encapsulation).
+  The receiver strips headers in reverse
+  order (decapsulation).
+  Transfer units: message, segment/datagram,
+  packet, frame, bits.
+endlegend
+@enduml

@@ -1,0 +1,40 @@
+@startuml fig-tcp-vs-udp-layers
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title TCP vs UDP Traffic — Layer Mapping in a Capture
+
+together {
+  package "TCP Connection (port 9000)" as tcp #E8F5E9 {
+    rectangle "Application\n\"Hello from client\"" as TA #FFE0B2
+    rectangle "Transport (TCP)\nSYN → SYN-ACK → ACK\nthen data + ACKs" as TT #C8E6C9
+    rectangle "Network (IP)\nSrc / Dst addresses" as TN #BBDEFB
+    rectangle "Network Access\nEthernet / loopback" as TL #E3F2FD
+
+    TA -down-> TT : segment
+    TT -down-> TN : packet
+    TN -down-> TL : frame
+  }
+
+  package "UDP Exchange (port 9001)" as udp #FFF3E0 {
+    rectangle "Application\n\"Hello from client\"" as UA #FFE0B2
+    rectangle "Transport (UDP)\nNo handshake\nsingle datagram" as UT #C8E6C9
+    rectangle "Network (IP)\nSrc / Dst addresses" as UN #BBDEFB
+    rectangle "Network Access\nEthernet / loopback" as UL #E3F2FD
+
+    UA -down-> UT : datagram
+    UT -down-> UN : packet
+    UN -down-> UL : frame
+  }
+}
+
+legend bottom
+  TCP requires a three-way handshake before data.
+  UDP sends datagrams immediately (no setup).
+  Both share the IP and network access layers.
+  Wireshark reveals each layer's headers separately.
+endlegend
+@enduml

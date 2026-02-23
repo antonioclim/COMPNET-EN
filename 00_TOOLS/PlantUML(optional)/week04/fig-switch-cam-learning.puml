@@ -1,0 +1,53 @@
+@startuml fig-switch-cam-learning
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam sequenceMessageAlign center
+
+title Switch CAM Table Learning — Step-by-Step
+
+participant "Host A\nMAC_A\nPort 1" as A #FFE0B2
+participant "Switch" as SW #E3F2FD
+participant "Host B\nMAC_B\nPort 2" as B #FFE0B2
+participant "Host C\nMAC_C\nPort 3" as C #FFE0B2
+
+== Step 1: A sends a frame to B (destination unknown) ==
+
+A -> SW : Frame (src=MAC_A, dst=MAC_B)
+
+note right of SW
+  CAM learns: MAC_A -> Port 1
+  MAC_B unknown -> flood
+end note
+
+SW -> B : Frame (flooded)
+SW -> C : Frame (flooded)
+
+== Step 2: B replies to A (destination now known) ==
+
+B -> SW : Frame (src=MAC_B, dst=MAC_A)
+
+note right of SW
+  CAM learns: MAC_B -> Port 2
+  MAC_A known on Port 1 -> forward
+end note
+
+SW -> A : Frame (forwarded to Port 1 only)
+
+== Step 3: Ageing ==
+
+note over SW
+  Inactive entries expire after timeout
+  (typically 300 s on Cisco switches)
+end note
+
+legend right
+  The switch builds its CAM table dynamically
+  by inspecting source MAC addresses.
+  Unknown destinations are flooded;
+  known destinations are forwarded directly.
+  Entries age out to handle host movement.
+endlegend
+@enduml

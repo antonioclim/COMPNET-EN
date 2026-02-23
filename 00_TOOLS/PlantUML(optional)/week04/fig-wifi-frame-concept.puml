@@ -1,0 +1,37 @@
+@startuml fig-wifi-frame-concept
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 10
+skinparam shadowing false
+skinparam roundcorner 12
+left to right direction
+
+title IEEE 802.11 Frame Structure (Conceptual)
+
+rectangle "Frame Control\n2 B\nversion, type\nsubtype, flags\nToDS / FromDS" as fc #E1BEE7
+rectangle "Duration\n/ ID\n2 B" as dur #ECEFF1
+rectangle "Address 1\n6 B\n(receiver)" as a1 #BBDEFB
+rectangle "Address 2\n6 B\n(transmitter)" as a2 #BBDEFB
+rectangle "Address 3\n6 B\n(BSSID / AP)" as a3 #BBDEFB
+rectangle "Seq\nCtrl\n2 B" as seq #ECEFF1
+rectangle "Address 4\n6 B\n(optional)" as a4 #90CAF9
+rectangle "Payload\n0–2304 B" as pay #FFF9C4
+rectangle "FCS\n4 B" as fcs #C8E6C9
+
+fc -right-> dur
+dur -right-> a1
+a1 -right-> a2
+a2 -right-> a3
+a3 -right-> seq
+seq -right-> a4
+a4 -right-> pay
+pay -right-> fcs
+
+legend bottom
+  Frame types: management, control and data.
+  Address 4 is present only in WDS (wireless
+  distribution system) or mesh scenarios.
+  ToDS/FromDS bits determine address semantics.
+  FCS provides error detection via CRC-32.
+endlegend
+@enduml

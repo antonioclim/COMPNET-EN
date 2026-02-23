@@ -1,0 +1,50 @@
+@startuml fig-udp-session-ack-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title UDP session management with token and acknowledgement
+
+participant "Client\n:9300 (ephemeral)" as C #FFE0B2
+participant "Server\nUDP :9300" as S #C8E6C9
+
+== SESSION ESTABLISHMENT ==
+
+C -[#1565C0]> S : HELLO
+S -[#43A047]-> C : TOKEN:a3f8b1c2
+
+note over S
+  Server generates a unique token
+  and stores it with seq=0.
+end note
+
+== DATA EXCHANGE ==
+
+C -[#1565C0]> S : MSG:a3f8b1c2:message 1
+S -[#43A047]-> C : ACK:a3f8b1c2:1
+
+C -[#1565C0]> S : MSG:a3f8b1c2:message 2
+S -[#43A047]-> C : ACK:a3f8b1c2:2
+
+C -[#1565C0]> S : MSG:a3f8b1c2:message 3
+S -[#43A047]-> C : ACK:a3f8b1c2:3
+
+== ERROR HANDLING ==
+
+C -[#E53935]> S : MSG:invalid_tok:text
+S -[#E53935]-> C : ERR:TOKEN
+
+C -[#E53935]> S : MSG:bad_format
+S -[#E53935]-> C : ERR:FORMAT
+
+legend right
+  UDP provides no session state natively.
+  The application layer implements:
+  1. Session via HELLO / TOKEN exchange
+  2. Sequencing via server-side counter
+  3. Acknowledgement via ACK replies
+  4. Error signalling via ERR messages
+endlegend
+@enduml

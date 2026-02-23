@@ -1,0 +1,26 @@
+@startuml fig-l3-role
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Network Layer (L3): Role and Position in the Protocol Stack
+
+rectangle "L4 — Transport\n(TCP / UDP)" as L4 #BBDEFB
+rectangle "L3 — Network\n(IP)\nPackets · Routing · Addressing" as L3 #90CAF9
+rectangle "L2 — Data Link\n(Ethernet / Wi-Fi)\nFrames" as L2 #E3F2FD
+rectangle "L1 — Physical\n(Medium / Signal)" as L1 #F5F5F5
+
+L4 -down-> L3 : segments → packets
+L3 -down-> L2 : packets → frames
+L2 -down-> L1 : frames → bits
+
+legend right
+  L3 is responsible for:
+  – hierarchical addressing (IP)
+  – routing between networks
+  – fragmentation (IPv4 only)
+  – TTL / Hop Limit enforcement
+endlegend
+@enduml

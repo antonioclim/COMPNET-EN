@@ -1,0 +1,48 @@
+@startuml fig-tcp-framing-strategies
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title TCP framing strategies (stream to messages)
+
+package "Strategy 1: Delimiter" as s1 #E8F5E9 {
+  rectangle "H  e  l  l  o  \\n  W  o  r  l  d  \\n" as delim #C8E6C9
+  note bottom of delim
+    Split on delimiter character (e.g. \\n).
+    Simple but payload must not contain
+    the delimiter unless escaped.
+  end note
+}
+
+package "Strategy 2: Length Prefix" as s2 #FFF3E0 {
+  rectangle "[0005] H e l l o [0005] W o r l d" as lenpfx #FFE0B2
+  note bottom of lenpfx
+    Fixed-size header carries payload length.
+    Allows binary payloads.
+    Requires reading exactly N bytes.
+  end note
+}
+
+package "Strategy 3: TLV (Type-Length-Value)" as s3 #FCE4EC {
+  rectangle "[T=0x01][L=0005][V=Hello]  [T=0x02][L=0005][V=World]" as tlv #E1BEE7
+  note bottom of tlv
+    Each field includes type, length and value.
+    Extensible and self-describing.
+    Used in many binary protocols.
+  end note
+}
+
+s1 -[hidden]-> s2
+s2 -[hidden]-> s3
+
+legend right
+  TCP delivers a byte stream with no
+  message boundaries. The application
+  must impose its own framing scheme.
+  Delimiter: simplest for text protocols.
+  Length prefix: reliable for binary data.
+  TLV: most flexible and extensible.
+endlegend
+@enduml

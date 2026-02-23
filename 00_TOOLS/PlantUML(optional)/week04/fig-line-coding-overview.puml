@@ -1,0 +1,28 @@
+@startuml fig-line-coding-overview
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Line Coding Schemes: NRZ, NRZI and Manchester
+
+rectangle "Bit Sequence: 1 0 1 1 0 0 1 0" as bits #FFF9C4
+
+rectangle "NRZ (Non-Return-to-Zero)\nHigh = 1, Low = 0\nNo transition within bit period\nProblem: long runs lose sync" as nrz #BBDEFB
+
+rectangle "NRZI (NRZ Inverted)\nTransition at start = 1\nNo transition = 0\nBetter for runs of 1s" as nrzi #BBDEFB
+
+rectangle "Manchester\nMid-bit transition encodes data\nHigh-to-low = 1, Low-to-high = 0\nSelf-clocking, but doubles bandwidth" as man #BBDEFB
+
+bits -down-> nrz : encode
+bits -down-> nrzi : encode
+bits -down-> man : encode
+
+legend bottom
+  Line coding maps bits to voltage levels on copper.
+  The goal is to maintain clock synchronisation
+  and avoid prolonged DC components.
+  Manchester guarantees a transition every bit period.
+endlegend
+@enduml

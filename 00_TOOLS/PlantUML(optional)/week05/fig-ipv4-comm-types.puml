@@ -1,0 +1,39 @@
+@startuml fig-ipv4-comm-types
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title IPv4 Communication Types: Unicast, Multicast and Broadcast
+
+package "Network Segment" as seg #F5F5F5 {
+    component "Sender" as S #FFE0B2
+    component "Host A" as A #E3F2FD
+    component "Host B" as B #E3F2FD
+    component "Host C" as C #E3F2FD
+    component "Host D" as D #E3F2FD
+}
+
+rectangle "**Unicast**\nOne → One" as uni #E8F5E9 {
+}
+rectangle "**Multicast**\nOne → Group" as multi #FFF3E0 {
+}
+rectangle "**Broadcast**\nOne → All" as bcast #FFEBEE {
+}
+
+S -[#43A047]down-> A : unicast
+S -[#FF9800]down-> B : multicast
+S -[#FF9800]down-> C : multicast
+S -[#E53935]down-> D : broadcast
+S -[#E53935]down-> A : broadcast
+S -[#E53935]down-> B : broadcast
+S -[#E53935]down-> C : broadcast
+
+legend right
+  Unicast: single destination host.
+  Multicast: members of a group (224.0.0.0/4).
+  Broadcast: all hosts in the segment.
+  IPv6 replaces broadcast with multicast.
+endlegend
+@enduml

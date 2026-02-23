@@ -1,0 +1,43 @@
+@startuml fig-circuit-vs-packet
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Circuit switching vs packet switching
+
+package "Circuit switching" as circuit #E3F2FD {
+    rectangle "Host A" as ca #FFE0B2
+    rectangle "Switch 1" as cs1 #BBDEFB
+    rectangle "Switch 2" as cs2 #BBDEFB
+    rectangle "Host B" as cb #C8E6C9
+
+    ca --> cs1 : dedicated channel
+    cs1 --> cs2 : dedicated channel
+    cs2 --> cb : dedicated channel
+}
+
+package "Packet switching" as packet #E8F5E9 {
+    rectangle "Host A" as pa #FFE0B2
+    rectangle "Router 1" as pr1 #BBDEFB
+    rectangle "Router 2" as pr2 #BBDEFB
+    rectangle "Router 3" as pr3 #BBDEFB
+    rectangle "Host B" as pb #C8E6C9
+
+    pa --> pr1 : packets
+    pr1 --> pr2 : packet 1
+    pr2 --> pb : packet 1
+    pr1 --> pr3 : packet 2
+    pr3 --> pb : packet 2
+}
+
+legend bottom
+  Circuit: resources reserved end-to-end for the
+  entire session (e.g. traditional telephony).
+  Packet: each packet is routed independently;
+  packets may follow different paths.
+  Packet switching enables statistical multiplexing
+  and more efficient use of link capacity.
+endlegend
+@enduml
