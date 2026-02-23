@@ -28,4 +28,4 @@ Thirteen practical seminars (S01–S13) progress from basic network analysis thr
 
 ## Diagrams
 
-Each seminar has `assets/puml/` with PlantUML sources and `assets/render.sh` for PNG generation. The render script requires Java and `plantuml.jar` in `00_TOOLS/`. Regenerated PNGs are written to `assets/images/`.
+Each seminar has `assets/puml/` with PlantUML sources and `assets/render.sh` for PNG generation. The render script requires Java and `plantuml.jar` in `00_TOOLS/`. If the JAR is absent, run `bash 00_TOOLS/plantuml/get_plantuml_jar.sh`. Regenerated PNGs are written to `assets/images/`.
