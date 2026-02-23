@@ -1,0 +1,36 @@
+@startuml fig-jsonrpc-request-response
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title JSON-RPC Request / Response Flow
+
+participant "Python Client\n(requests.post)" as C #FFE0B2
+participant "JSON-RPC Server\n(api.mathjs.org)" as S #C8E6C9
+
+C -> S : HTTP POST /v4/\nContent-Type: application/json\n\n{"jsonrpc":"2.0",\n "id":1,\n "method":"evaluate",\n "params":["2+3"]}
+
+S --> C : HTTP 200 OK\nContent-Type: application/json\n\n{"jsonrpc":"2.0",\n "id":1,\n "result":"5"}
+
+...
+
+C -> S : HTTP POST /v4/\n\n{"jsonrpc":"2.0",\n "id":2,\n "method":"evaluate",\n "params":["10*5-3"]}
+
+S --> C : HTTP 200 OK\n\n{"jsonrpc":"2.0",\n "id":2,\n "result":"47"}
+
+...
+
+C -> S : HTTP POST /v4/\n\n{"jsonrpc":"2.0",\n "id":3,\n "method":"badmethod",\n "params":[]}
+
+S --> C #E53935 : HTTP 200 OK\n\n{"jsonrpc":"2.0",\n "id":3,\n "error":{"code":-32601,\n  "message":"Method not found"}}
+
+legend right
+  JSON-RPC uses HTTP POST with a JSON body.
+  Each request carries a method, params and id.
+  Successful responses contain "result";
+  failed ones contain an "error" object.
+  The protocol is stateless and transport-agnostic.
+endlegend
+@enduml

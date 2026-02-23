@@ -1,0 +1,26 @@
+version: '3.9'
+services:
+  web:
+    image: python:3
+    command:
+    - python3
+    - -m
+    - http.server
+    - '8000'
+    expose:
+    - '8000'
+  dns-server:
+    build:
+      context: .
+      dockerfile: S10_Part02_Config_Dockerfile
+    command:
+    - python3
+    - S10_Part02_Script_DNS_Server.py
+    ports:
+    - 5353:5353/udp
+  debug:
+    image: busybox
+    command:
+    - sh
+    stdin_open: true
+    tty: true

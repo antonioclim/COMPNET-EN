@@ -1,0 +1,49 @@
+@startuml fig-dns-custom-server-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title Custom DNS Server — UDP Query and Response Flow
+
+participant "debug container\n(dig client)" as C #FFE0B2
+participant "dns-server\nPython + dnslib\nUDP :5353" as S #E1BEE7
+
+== Successful Resolution ==
+
+C -> S : UDP datagram\nQuery: A myservice.lab.local?
+activate S
+S -> S : parse with DNSRecord.parse()\ncheck qname == TARGET_NAME
+S -[#43A047]-> C : DNS Reply\nAnswer: A 10.10.10.10\nTTL=30
+deactivate S
+
+note right of S
+  dnslib constructs a valid
+  DNS response with RR record.
+end note
+
+|||
+
+== Unknown Domain ==
+
+C -> S : UDP datagram\nQuery: A doesnotexist.local?
+activate S
+S -> S : parse query\nqname != TARGET_NAME
+S -[#FF9800]-> C : DNS Reply\nNo answer records\n(NOERROR, 0 answers)
+deactivate S
+
+note right of S
+  A valid response with zero
+  answer records — not an error,
+  simply "no data".
+end note
+
+legend right
+  The server receives raw UDP bytes,
+  parses them into a DNS query object,
+  builds a reply and sends it back.
+  dnslib handles encoding and decoding
+  of the binary DNS wire format.
+endlegend
+@enduml

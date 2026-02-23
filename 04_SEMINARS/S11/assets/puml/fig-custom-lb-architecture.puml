@@ -1,0 +1,35 @@
+@startuml fig-custom-lb-architecture
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Custom Python Load Balancer — Docker Compose Topology
+
+rectangle "Host machine" as HOST #F5F5F5 {
+    rectangle "curl / browser\nlocalhost:8080" as CLIENT #FFE0B2
+}
+
+package "Docker network: lbnet" as NET #E3F2FD {
+    rectangle "lb-custom\nPython socket server\nlistens :8080\n(exposed on host)" as LB #90CAF9
+
+    rectangle "web1-lb:8000\npython http.server\n(not exposed)" as W1 #C8E6C9
+    rectangle "web2-lb:8000\npython http.server\n(not exposed)" as W2 #C8E6C9
+    rectangle "web3-lb:8000\npython http.server\n(not exposed)" as W3 #C8E6C9
+}
+
+CLIENT -[#1565C0]-> LB : HTTP request\nport 8080
+
+LB -[#FF9800]-> W1 : socket forward\n(round robin)
+LB -[#FF9800]-> W2 : socket forward\n(round robin)
+LB -[#FF9800]-> W3 : socket forward\n(round robin)
+
+legend right
+  Nginx is replaced by a Python script using
+  raw TCP sockets and threading.
+  No health checks, no keep-alive, no retry.
+  Each client spawns a new thread that
+  forwards the request to the next backend.
+endlegend
+@enduml

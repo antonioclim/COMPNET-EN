@@ -1,0 +1,39 @@
+@startuml fig-dns-docker-topology
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Docker Compose DNS Topology — Seminar 10 Part 2
+
+package "Docker Compose Network" as net #F5F5F5 {
+
+    component "web\npython:3\nhttp.server :8000" as web #C8E6C9
+
+    component "dns-server\nPython + dnslib\nUDP :5353" as dns #E1BEE7
+
+    component "debug\nbusybox\n(interactive shell)" as debug #FFE0B2
+
+    cloud "Docker Embedded\nDNS Resolver\n127.0.0.11" as ddns #ECEFF1
+}
+
+debug -[#1565C0]down-> ddns : dig web\n(service name)
+ddns -[#43A047]down-> web : resolves to\ncontainer IP
+
+debug -[#1565C0]-> dns : dig @dns-server\nmyservice.lab.local
+dns -[#43A047]-> debug : A 10.10.10.10
+
+note right of dns
+  Custom DNS answers only
+  myservice.lab.local with
+  a fixed IP (10.10.10.10).
+end note
+
+legend bottom
+  Docker's embedded DNS resolves service names
+  automatically within the Compose network.
+  The custom Python DNS server demonstrates
+  how a DNS query and response work over UDP.
+endlegend
+@enduml

@@ -1,0 +1,6 @@
+FROM python:3.10
+
+RUN pip install paramiko
+
+WORKDIR /app
+COPY S10_Part03_Script_Paramiko_Client.py /app/

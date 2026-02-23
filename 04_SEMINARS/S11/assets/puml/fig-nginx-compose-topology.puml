@@ -1,0 +1,35 @@
+@startuml fig-nginx-compose-topology
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Nginx Reverse Proxy — Docker Compose Topology
+
+rectangle "Host machine" as HOST #F5F5F5 {
+    rectangle "curl / browser\nlocalhost:8080" as CLIENT #FFE0B2
+}
+
+package "Docker network: lbnet" as NET #E3F2FD {
+    rectangle "nginx-proxy\n(reverse proxy)\nlistens :80\nexposed :8080" as NGINX #90CAF9
+
+    rectangle "web1:8000\npython http.server\n(not exposed)" as W1 #C8E6C9
+    rectangle "web2:8000\npython http.server\n(not exposed)" as W2 #C8E6C9
+    rectangle "web3:8000\npython http.server\n(not exposed)" as W3 #C8E6C9
+}
+
+CLIENT -[#1565C0]-> NGINX : HTTP request\nport 8080 → 80
+
+NGINX -[#43A047]-> W1 : proxy_pass\n(round robin)
+NGINX -[#43A047]-> W2 : proxy_pass\n(round robin)
+NGINX -[#43A047]-> W3 : proxy_pass\n(round robin)
+
+legend right
+  Only nginx is exposed on the host (8080).
+  Backend containers communicate via the
+  internal Docker network (lbnet) on port 8000.
+  The upstream block uses round-robin by default.
+  Backends are isolated from external access.
+endlegend
+@enduml

@@ -1,0 +1,3 @@
+FROM python:3
+RUN pip install dnslib
+COPY S10_Part02_Script_DNS_Server.py /S10_Part02_Script_DNS_Server.py

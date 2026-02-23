@@ -1,0 +1,43 @@
+@startuml fig-s10-services-overview
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Seminar 10 — Docker Services Overview
+
+package "Part 2: DNS in Containers" as p2 #E8F5E9 {
+    component "web\nhttp.server :8000" as p2web #C8E6C9
+    component "dns-server\ndnslib UDP :5353" as p2dns #E1BEE7
+    component "debug\nbusybox (shell)" as p2dbg #FFE0B2
+}
+
+package "Part 3: SSH + Paramiko" as p3 #E3F2FD {
+    component "ssh-server\nopenssh :22\n(host :2222)" as p3srv #C8E6C9
+    component "ssh-client\nPython + Paramiko" as p3cli #FFE0B2
+    database "ssh_data\n(shared volume)" as p3vol #FFF9C4
+}
+
+package "Part 4: SSH Port Forwarding" as p4 #FCE4EC {
+    component "web\nhttp.server :8000\n(internal)" as p4web #C8E6C9
+    component "ssh-bastion\nsshd :22\n(host :2222)" as p4bas #E1BEE7
+}
+
+p2dbg -[#1565C0]-> p2dns : dig queries
+p2dbg -[#1565C0]-> p2web : dig / ping
+
+p3cli -[#1565C0]-> p3srv : SSH + SFTP
+p3srv -[#43A047]-> p3vol : read/write files
+
+p4bas -[#1565C0]-> p4web : forwarded HTTP
+note bottom of p4bas : Host connects via\nssh -L 9000:web:8000
+
+legend bottom
+  Three independent Docker Compose stacks
+  each demonstrate a different network service.
+  Part 2: DNS resolution and custom DNS.
+  Part 3: remote execution and file transfer.
+  Part 4: SSH tunnelling to an internal HTTP service.
+endlegend
+@enduml

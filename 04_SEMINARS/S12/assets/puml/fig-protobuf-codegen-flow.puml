@@ -1,0 +1,41 @@
+@startuml fig-protobuf-codegen-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+left to right direction
+
+title Protocol Buffers Code Generation Pipeline
+
+rectangle ".proto File\n(Calculator.proto)" as proto #FFF9C4 {
+    rectangle "message AddRequest {\n  int32 a = 1;\n  int32 b = 2;\n}" as m1 #BBDEFB
+    rectangle "service Calculator {\n  rpc Add(AddRequest)\n    returns (AddResponse);\n}" as m2 #BBDEFB
+}
+
+rectangle "protoc Compiler\n(grpc_tools.protoc)" as protoc #E1BEE7
+
+rectangle "Generated Python Code" as gen #E8F5E9 {
+    rectangle "_pb2.py\n(message classes:\nAddRequest, AddResponse,\nMultiplyRequest, ...)" as pb2 #C8E6C9
+    rectangle "_pb2_grpc.py\n(CalculatorServicer,\nCalculatorStub,\nadd_...Servicer_to_server)" as grpc_pb #C8E6C9
+}
+
+rectangle "Server imports\nand implements\nCalculatorServicer" as srv #FFE0B2
+
+rectangle "Client imports\nand uses\nCalculatorStub" as cli #FFE0B2
+
+proto -right-> protoc : input
+protoc -right-> gen : --python_out\n--grpc_python_out
+pb2 -down-> srv : import
+grpc_pb -down-> srv : import
+pb2 -down-> cli : import
+grpc_pb -down-> cli : import
+
+legend bottom
+  The .proto file is the single source of truth.
+  protoc generates message classes (_pb2) and
+  service stubs (_pb2_grpc) for Python.
+  Both server and client import the same
+  generated modules, ensuring type safety.
+endlegend
+@enduml

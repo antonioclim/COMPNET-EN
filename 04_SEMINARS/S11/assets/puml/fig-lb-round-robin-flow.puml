@@ -1,0 +1,49 @@
+@startuml fig-lb-round-robin-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title Custom Load Balancer: Round-Robin Request Distribution
+
+participant "Client\n(curl)" as C #FFE0B2
+participant "Load balancer\n:8080" as LB #BBDEFB
+participant "web1\n:8000" as W1 #C8E6C9
+participant "web2\n:8000" as W2 #C8E6C9
+participant "web3\n:8000" as W3 #C8E6C9
+
+C -> LB : HTTP GET / (request 1)
+LB -> W1 : socket forward (index=0)
+W1 --> LB : "Hello from web1"
+LB --> C : relay response
+
+|||
+
+C -> LB : HTTP GET / (request 2)
+LB -> W2 : socket forward (index=1)
+W2 --> LB : "Hello from web2"
+LB --> C : relay response
+
+|||
+
+C -> LB : HTTP GET / (request 3)
+LB -> W3 : socket forward (index=2)
+W3 --> LB : "Hello from web3"
+LB --> C : relay response
+
+|||
+
+C -> LB : HTTP GET / (request 4)
+LB -> W1 : socket forward (index=0, wraps)
+W1 --> LB : "Hello from web1"
+LB --> C : relay response
+
+legend right
+  The global backend_index increments with
+  each request and wraps using modulo.
+  Each client thread: accept → select backend
+  → open new socket → forward → relay → close.
+  No connection reuse or keep-alive support.
+endlegend
+@enduml

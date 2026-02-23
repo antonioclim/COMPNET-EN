@@ -1,0 +1,41 @@
+@startuml fig-nginx-vs-custom-lb-comparison
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+left to right direction
+
+title Nginx vs Custom Python Load Balancer: Feature Comparison
+
+together {
+    card "**Nginx**\n(production-grade)" as NGINX #C8E6C9 {
+        rectangle "Round-robin LB" as N1 #E8F5E9
+        rectangle "Header rewriting" as N2 #E8F5E9
+        rectangle "Health checks" as N3 #E8F5E9
+        rectangle "Retry on failure" as N4 #E8F5E9
+        rectangle "Keep-alive / pipelining" as N5 #E8F5E9
+        rectangle "Non-blocking I/O" as N6 #E8F5E9
+    }
+}
+
+together {
+    card "**Custom Python LB**\n(didactic prototype)" as CUSTOM #FFF3E0 {
+        rectangle "Round-robin LB" as C1 #E8F5E9
+        rectangle "No header rewriting" as C2 #FFCDD2
+        rectangle "No health checks" as C3 #FFCDD2
+        rectangle "No retry logic" as C4 #FFCDD2
+        rectangle "No keep-alive" as C5 #FFCDD2
+        rectangle "Blocking threads" as C6 #FFCDD2
+    }
+}
+
+legend bottom
+  Green: feature present and functional
+  Red: feature absent or not implemented
+  The custom LB demonstrates the core concept
+  of request distribution but lacks resilience
+  and performance optimisations that production
+  reverse proxies provide out of the box.
+endlegend
+@enduml

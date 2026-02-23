@@ -1,0 +1,42 @@
+@startuml fig-rpc-vs-rest
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title RPC vs REST — Paradigm Comparison
+
+together {
+    rectangle "RPC (Remote Procedure Call)" as rpc_box #E8F5E9 {
+        rectangle "Client Code" as rc #FFE0B2
+        rectangle "Stub / Proxy\n(generated from .proto or IDL)" as rs #C8E6C9
+        rectangle "Server\n(implements service methods)" as rserv #C8E6C9
+
+        rc -down-> rs : call Add(a=1, b=2)
+        rs -down-> rserv : serialised request\n(Protobuf / JSON)
+        rserv -up-> rs : serialised response
+        rs -up-> rc : AddResponse(result=3)
+    }
+
+    rectangle "REST (Representational State Transfer)" as rest_box #FFF3E0 {
+        rectangle "Client Code" as ec #FFE0B2
+        rectangle "HTTP Library\n(requests, fetch)" as eh #BBDEFB
+        rectangle "Server\n(routes mapped to resources)" as eserv #C8E6C9
+
+        ec -down-> eh : GET /users/1
+        eh -down-> eserv : HTTP/1.1 request\n(JSON body)
+        eserv -up-> eh : HTTP response\n200 OK + JSON
+        eh -up-> ec : parsed JSON object
+    }
+}
+
+legend bottom
+  RPC is procedure-oriented: the client calls
+  named methods on a remote service.
+  REST is resource-oriented: the client operates
+  on URIs using standard HTTP verbs.
+  RPC typically uses a strict contract (IDL);
+  REST relies on conventions and documentation.
+endlegend
+@enduml

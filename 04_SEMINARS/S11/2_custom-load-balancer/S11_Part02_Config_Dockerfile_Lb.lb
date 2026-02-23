@@ -1,0 +1,7 @@
+FROM python:3.11-alpine
+
+WORKDIR /app
+
+COPY S11_Part02_Script_Simple_Lb.py /app/S11_Part02_Script_Simple_Lb.py
+
+CMD ["python3", "S11_Part02_Script_Simple_Lb.py"]

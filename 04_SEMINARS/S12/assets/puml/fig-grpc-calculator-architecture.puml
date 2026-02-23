@@ -1,0 +1,43 @@
+@startuml fig-grpc-calculator-architecture
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title gRPC Calculator — Service Architecture
+
+rectangle "Client Process" as client_proc #FFF3E0 {
+    rectangle "main()\n(user input + logging)" as cmain #FFE0B2
+    rectangle "CalculatorStub\n(generated proxy)" as stub #BBDEFB
+    rectangle "gRPC Channel\ninsecure_channel\n(localhost:50051)" as chan #E3F2FD
+}
+
+rectangle "Server Process" as server_proc #E8F5E9 {
+    rectangle "grpc.server()\nThreadPoolExecutor\n(max_workers=10)" as pool #C8E6C9
+    rectangle "CalculatorService\n(extends CalculatorServicer)" as svc #C8E6C9 {
+        rectangle "Add(a, b) → result" as m_add #BBDEFB
+        rectangle "Multiply(a, b) → result" as m_mul #BBDEFB
+        rectangle "Power(base, exp) → result" as m_pow #BBDEFB
+    }
+}
+
+rectangle ".proto Contract\n(shared definition)" as proto #FFF9C4
+
+cmain -down-> stub : call_add(stub, a, b)
+stub -down-> chan : serialise (Protobuf)
+chan -right-> pool : HTTP/2\n:50051
+pool -down-> svc : dispatch method
+
+proto -up-> stub : generates stub
+proto -up-> svc : generates servicer
+
+legend right
+  The .proto contract generates both the
+  client stub and the server servicer base class.
+  The client serialises requests via Protobuf
+  over an HTTP/2 channel. The server dispatches
+  incoming calls to the matching method handler
+  using a thread pool for concurrency.
+endlegend
+@enduml

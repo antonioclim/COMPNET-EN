@@ -1,0 +1,43 @@
+@startuml fig-vuln-enumeration-tools
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+left to right direction
+
+title Vulnerability Enumeration — Techniques and Tools
+
+rectangle "Target Services\n172.20.0.10–12" as targets #FFCDD2
+
+package "Automated Scanning" as auto #E3F2FD {
+    rectangle "nmap NSE\n--script vuln\n(CVE detection\nbackdoor checks)" as nmap #BBDEFB
+    rectangle "nikto\n(web vulnerability\nscanner: paths\nversions, configs)" as nikto #BBDEFB
+}
+
+package "Manual Analysis" as manual #FFF3E0 {
+    rectangle "curl -I\n(server headers\nversion fingerprint\nHTTP methods)" as curl #FFE0B2
+    rectangle "nc (netcat)\n(banner grabbing\nFTP/SSH/SMTP\nraw interaction)" as nc #FFE0B2
+}
+
+rectangle "Enumeration Report\n(identified CVEs\nmisconfigurations\noutdated versions)" as report #C8E6C9
+
+nmap -[#1565C0]-> targets : scan
+nikto -[#1565C0]-> targets : scan
+curl -[#FF9800]-> targets : probe
+nc -[#FF9800]-> targets : probe
+
+targets .[#43A047].> report
+nmap .[#43A047].> report
+nikto .[#43A047].> report
+curl .[#43A047].> report
+nc .[#43A047].> report
+
+legend bottom
+Automated tools (nmap NSE, nikto) provide
+breadth; manual techniques (curl, netcat)
+provide depth and verification.
+Combining both ensures thorough coverage
+and reduces false positives.
+endlegend
+@enduml

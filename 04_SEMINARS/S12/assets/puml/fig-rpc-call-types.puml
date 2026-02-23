@@ -1,0 +1,50 @@
+@startuml fig-rpc-call-types
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title RPC Call Types (gRPC Streaming Models)
+
+participant "Client" as C #FFE0B2
+participant "Server" as S #C8E6C9
+
+== 1. Unary RPC ==
+
+C -> S : single request
+S --> C : single response
+
+== 2. Server Streaming ==
+
+C -> S : single request
+S --> C : response chunk 1
+S --> C : response chunk 2
+S --> C : response chunk N
+S --> C : stream end
+
+== 3. Client Streaming ==
+
+C -> S : request chunk 1
+C -> S : request chunk 2
+C -> S : request chunk N
+C -> S : stream end
+S --> C : single response
+
+== 4. Bidirectional Streaming ==
+
+C -> S : request chunk 1
+S --> C : response chunk 1
+C -> S : request chunk 2
+S --> C : response chunk 2
+C -> S : stream end
+S --> C : stream end
+
+legend right
+  Unary: one request, one response (most common).
+  Server streaming: one request, multiple responses.
+  Client streaming: multiple requests, one response.
+  Bidirectional: both sides stream concurrently.
+  This seminar focuses on unary RPC.
+endlegend
+@enduml

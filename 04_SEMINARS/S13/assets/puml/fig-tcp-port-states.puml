@@ -1,0 +1,52 @@
+@startuml fig-tcp-port-states
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title TCP Connect Scan — Port State Behaviour
+
+participant "Scanner\n(connect_ex)" as scanner #FFE0B2
+participant "Open Port\n(service listening)" as open #C8E6C9
+participant "Closed Port\n(no service)" as closed #FFCDD2
+participant "Filtered Port\n(firewall drops)" as filtered #ECEFF1
+
+== PORT OPEN (result = 0) ==
+
+scanner -> open : SYN
+open --> scanner : SYN-ACK
+scanner -> open : ACK
+note right of open
+connect_ex() returns 0
+Three-way handshake completes
+end note
+
+== PORT CLOSED (result ≠ 0) ==
+
+scanner -> closed : SYN
+closed --> scanner : RST-ACK
+note right of closed
+connect_ex() returns error code
+Kernel immediately rejects
+end note
+
+== PORT FILTERED (timeout) ==
+
+scanner -> filtered : SYN
+...timeout expires (0.2 s)...
+note right of filtered
+connect_ex() returns error code
+No response received at all
+The simple scanner cannot
+distinguish closed from filtered
+end note
+
+legend right
+A TCP connect scan uses the full
+three-way handshake to test ports.
+Open: handshake succeeds (result = 0).
+Closed: RST received immediately.
+Filtered: no response before timeout.
+endlegend
+@enduml

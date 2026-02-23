@@ -1,0 +1,41 @@
+@startuml fig-reverse-proxy-concept
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Forward Proxy vs Reverse Proxy
+
+package "Forward proxy scenario" as FP #FFF3E0 {
+    rectangle "Client A" as CA #FFE0B2
+    rectangle "Client B" as CB #FFE0B2
+    rectangle "Forward proxy\n(represents clients)" as FPROXY #BBDEFB
+    cloud "Internet\nservers" as INET #F5F5F5
+    
+    CA -[#1565C0]-> FPROXY : request
+    CB -[#1565C0]-> FPROXY : request
+    FPROXY -[#1565C0]-> INET : forwarded request\n(client identity hidden)
+}
+
+package "Reverse proxy scenario" as RP #E8F5E9 {
+    rectangle "External\nclient" as EC #FFE0B2
+    rectangle "Reverse proxy\n(represents backends)" as RPROXY #BBDEFB
+    rectangle "Backend 1" as B1 #C8E6C9
+    rectangle "Backend 2" as B2 #C8E6C9
+    rectangle "Backend 3" as B3 #C8E6C9
+    
+    EC -[#1565C0]-> RPROXY : request
+    RPROXY -[#43A047]-> B1 : distribute
+    RPROXY -[#43A047]-> B2 : distribute
+    RPROXY -[#43A047]-> B3 : distribute
+}
+
+legend right
+  Forward proxy: sits in front of clients
+  and hides their identity from servers.
+  Reverse proxy: sits in front of backends
+  and hides their topology from clients.
+  Load balancing is a reverse proxy function.
+endlegend
+@enduml

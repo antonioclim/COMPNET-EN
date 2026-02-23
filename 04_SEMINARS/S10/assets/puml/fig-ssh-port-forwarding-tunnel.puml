@@ -1,0 +1,46 @@
+@startuml fig-ssh-port-forwarding-tunnel
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title SSH Local Port Forwarding — Tunnel to an Internal HTTP Service
+
+rectangle "Host Machine" as host #FFF3E0 {
+    rectangle "Browser / curl\nlocalhost:9000" as browser #FFE0B2
+    rectangle "SSH Client\nssh -L 9000:web:8000\nlabuser@localhost -p 2222" as sshcli #BBDEFB
+}
+
+rectangle "Docker Compose Network" as docker #F5F5F5 {
+    rectangle "ssh-bastion\n(sshd)\n:22 → host :2222" as bastion #E3F2FD
+    rectangle "web\npython http.server\n:8000 (internal only)" as web #C8E6C9
+}
+
+browser -[#1565C0]down-> sshcli : HTTP request\nto localhost:9000
+sshcli -[#1565C0]down-> bastion : SSH tunnel\n(encrypted, port 2222)
+bastion -[#43A047]right-> web : forwarded to\nweb:8000
+web -[#43A047]left-> bastion : HTTP response
+bastion -[#43A047]up-> sshcli : tunnelled back
+sshcli -[#43A047]up-> browser : HTTP response
+
+note right of web
+  Port 8000 is only exposed
+  internally (Docker "expose").
+  No direct host access.
+end note
+
+note left of bastion
+  The bastion acts as a
+  jump host: it forwards
+  traffic within the
+  Docker network.
+end note
+
+legend bottom
+  ssh -L binds a local port and tunnels traffic
+  through the SSH connection to a remote destination.
+  The web container is invisible to the host but
+  reachable via the bastion's Docker DNS.
+endlegend
+@enduml

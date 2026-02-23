@@ -1,0 +1,46 @@
+@startuml fig-ssh-paramiko-workflow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title Paramiko SSH Workflow — Remote Execution and SFTP Transfer
+
+participant "ssh-client\n(Python + Paramiko)" as C #FFE0B2
+participant "ssh-server\n(openssh-server)\nlabuser:labpass" as S #C8E6C9
+database "Shared Volume\n/home/labuser/storage" as V #FFF9C4
+
+== 1. SSH Connection ==
+
+C -> S : SSH2 handshake\n(host key exchange)
+S -[#43A047]-> C : authentication accepted\n(password: labpass)
+
+== 2. Remote Command Execution ==
+
+C -> S : exec_command("uname -a")
+activate S
+S -[#43A047]-> C : stdout: Linux ssh-server ...\n→ saved to ssh_output.txt
+deactivate S
+
+== 3. SFTP Upload ==
+
+C -> S : open SFTP session
+C -[#1565C0]> S : sftp.put("local_upload_file.txt",\n"/home/labuser/storage/uploaded_from_client.txt")
+S -> V : write file
+S -[#43A047]-> C : upload complete
+
+== 4. SFTP Download ==
+
+C -[#1565C0]> S : sftp.get("/etc/hostname",\n"downloaded_hostname.txt")
+S -[#43A047]-> C : file content\n→ saved locally
+
+C -> S : close SFTP + SSH
+
+legend right
+  Paramiko provides a Python API for SSH2:
+  exec_command() runs remote shell commands,
+  open_sftp() enables file transfers.
+  Docker service names resolve via internal DNS.
+endlegend
+@enduml

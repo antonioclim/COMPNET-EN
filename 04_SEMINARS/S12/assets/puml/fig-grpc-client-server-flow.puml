@@ -1,0 +1,51 @@
+@startuml fig-grpc-client-server-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title gRPC Calculator — Client / Server Interaction Flow
+
+participant "Client\n(gRPC_Client.py)" as C #FFE0B2
+participant "gRPC Channel\nlocalhost:50051\n(HTTP/2)" as CH #E3F2FD
+participant "Server\n(gRPC_Server.py)\nCalculatorService" as S #C8E6C9
+
+== Channel Setup ==
+
+C -> CH : insecure_channel("localhost:50051")
+C -> CH : CalculatorStub(channel)
+
+== Unary Call: Add ==
+
+C -> CH : stub.Add(AddRequest(a=2, b=3))
+CH -> S : HTTP/2 POST\nProtobuf: AddRequest
+S --> CH : AddResponse(result=5)
+CH --> C : response.result = 5
+
+== Unary Call: Multiply ==
+
+C -> CH : stub.Multiply(MultiplyRequest(a=4, b=5))
+CH -> S : HTTP/2 POST\nProtobuf: MultiplyRequest
+S --> CH : MultiplyResponse(result=20)
+CH --> C : response.result = 20
+
+== Unary Call: Power ==
+
+C -> CH : stub.Power(PowerRequest(base=2, exponent=10))
+CH -> S : HTTP/2 POST\nProtobuf: PowerRequest
+S --> CH : PowerResponse(result=1024)
+CH --> C : response.result = 1024
+
+== Teardown ==
+
+C -> CH : channel.close()
+
+legend right
+  Each unary call follows the same pattern:
+  build request → serialise to Protobuf →
+  send over HTTP/2 → deserialise response.
+  The stub abstracts transport details so
+  the client code resembles a local function call.
+endlegend
+@enduml

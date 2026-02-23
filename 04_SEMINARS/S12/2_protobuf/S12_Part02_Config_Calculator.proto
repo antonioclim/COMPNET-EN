@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+// The package is optional but recommended
+package seminar12;
+
+// ---------------------
+// Request messages
+// ---------------------
+
+// Request for Add(a, b)
+message AddRequest {
+  int32 a = 1;
+  int32 b = 2;
+}
+
+// Request for Multiply(a, b)
+message MultiplyRequest {
+  int32 a = 1;
+  int32 b = 2;
+}
+
+// TODO (student):
+// ------------
+// Add a message PowerRequest here
+// with fields int32 base and int32 exponent
+// ------------
+
+
+// -------------------------
+// Response messages
+// -------------------------
+
+message AddResponse {
+  int32 result = 1;
+}
+
+message MultiplyResponse {
+  int32 result = 1;
+}
+
+// TODO (student):
+// ------------
+// Add a message PowerResponse here
+// with field int32 result
+// ------------
+
+
+// -------------------------
+// Service definition
+// -------------------------
+
+service Calculator {
+  rpc Add (AddRequest) returns (AddResponse);
+  rpc Multiply (MultiplyRequest) returns (MultiplyResponse);
+
+  // TODO (student):
+  // --------------
+  // Add the RPC method Power here
+  // which receives PowerRequest and returns PowerResponse
+  // --------------
+}

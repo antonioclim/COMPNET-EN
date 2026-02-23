@@ -1,0 +1,22 @@
+version: '3.9'
+services:
+  web:
+    image: python:3.10-slim
+    working_dir: /app
+    command:
+    - sh
+    - -c
+    - cp S10_Part04_Page_Index.html index.html && python -m http.server 8000
+    expose:
+    - '8000'
+    volumes:
+    - ./web-content:/app
+  ssh-bastion:
+    build:
+      context: ./ssh-bastion
+      dockerfile: S10_Part04_Config_Dockerfile
+    container_name: ssh-bastion
+    ports:
+    - '2222:22'
+    depends_on:
+    - web
