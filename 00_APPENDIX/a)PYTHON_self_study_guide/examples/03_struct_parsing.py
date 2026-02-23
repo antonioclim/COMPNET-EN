@@ -13,7 +13,7 @@ Version: 2.1 — with subgoal labels and extended comments
 | Packet Element   | Letter Element                       |
 |------------------|--------------------------------------|
 | IP Header        | Envelope with addresses (from, to)   |
-| TCP Header       | Stamp and regilayerion number        |
+| TCP Header       | Stamp and registration number        |
 | Payload          | Letter contents inside envelope      |
 | Checksum         | Wax seal (verifies integrity)        |
 | TTL              | "Return after 30 days if..."         |

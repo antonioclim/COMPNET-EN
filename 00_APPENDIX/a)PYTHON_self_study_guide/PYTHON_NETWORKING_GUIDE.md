@@ -83,7 +83,7 @@ netROwsl/
 │   │   │   └── ...
 │   │   ├── apps/                     # Complete demo applications
 │   │   └── utils/                    # Reusable helper functions
-│   ├── scripts/                      # Orchelayerion scripts
+│   ├── scripts/                      # Orchestration scripts
 │   ├── docker/                       # Docker configurations
 │   ├── docs/                         # Documentation
 │   ├── tests/                        # Automated tests
@@ -163,7 +163,7 @@ Open and study the structure of these files:
 Exercise 1.01: Measuring Latency with Ping
 COMPUTER NETWORKS Course - ASE, Informatics | by Revolvix
 
-This exercise demonlayeres measuring network latency...
+This exercise demonstrates measuring network latency...
 """
 ```
 - The first line tells the shell which interpreter to use
@@ -678,7 +678,7 @@ python3 ex_5_01_cidr_flsm.py --help
 | Packet Element | Letter Element |
 |----------------|----------------|
 | **IP Header** | Envelope with addresses (sender, recipient) |
-| **TCP Header** | Stamp and regilayerion number |
+| **TCP Header** | Stamp and registration number |
 | **Payload** | Letter contents inside the envelope |
 | **Checksum** | Wax seal (verifies integrity) |
 | **TTL** | "Return after 30 days if undelivered" |
