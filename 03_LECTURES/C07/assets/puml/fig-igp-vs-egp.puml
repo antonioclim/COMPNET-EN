@@ -1,0 +1,43 @@
+@startuml fig-igp-vs-egp
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title IGP vs EGP — Interior and Exterior Gateway Protocols
+
+package "Autonomous System 1 (AS 100)" as as1 #E8F5E9 {
+    rectangle "RIP\n(distance-vector)" as rip #C8E6C9
+    rectangle "OSPF\n(link-state)" as ospf #C8E6C9
+    rectangle "IS-IS\n(link-state)" as isis #ECEFF1
+    rectangle "EIGRP\n(hybrid, Cisco)" as eigrp #ECEFF1
+
+    rectangle "Border\nRouter" as br1 #BBDEFB
+}
+
+package "Autonomous System 2 (AS 200)" as as2 #E3F2FD {
+    rectangle "OSPF" as ospf2 #BBDEFB
+    rectangle "Border\nRouter" as br2 #BBDEFB
+}
+
+br1 <-[#1565C0]-> br2 : **BGP**\n(EGP: between\nautonomous systems)
+
+rip -[hidden]right- ospf
+ospf -[hidden]right- isis
+isis -[hidden]right- eigrp
+
+rectangle "Classification" as cls #FFF9C4 {
+    rectangle "IGP: inside one AS\nRIP, OSPF, EIGRP, IS-IS" as igp #E8F5E9
+    rectangle "EGP: between ASes\nBGP (Border Gateway Protocol)" as egp #E3F2FD
+}
+
+legend right
+  IGP protocols operate within a single
+  autonomous system (internal routing).
+  EGP (BGP) exchanges reachability
+  information between autonomous systems.
+  BGP is the protocol that glues the
+  Internet together at a global scale.
+endlegend
+@enduml

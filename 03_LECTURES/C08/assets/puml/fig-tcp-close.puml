@@ -1,0 +1,44 @@
+@startuml fig-tcp-close
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title TCP Graceful Connection Teardown (Four-Segment Close)
+
+participant "Initiator\n(active close)" as A #FFE0B2
+participant "Responder\n(passive close)" as B #C8E6C9
+
+note over A : ESTABLISHED
+note over B : ESTABLISHED
+
+A -[#1565C0]> B : FIN (Seq = u)
+note over A : FIN-WAIT-1
+
+B -[#43A047]> A : ACK (Ack = u + 1)
+note over A : FIN-WAIT-2
+note over B : CLOSE-WAIT
+
+|||
+note over B : application closes socket
+
+B -[#1565C0]> A : FIN (Seq = v)
+note over B : LAST-ACK
+
+A -[#43A047]> B : ACK (Ack = v + 1)
+note over A : TIME-WAIT
+note over B : CLOSED
+
+|||
+note over A #FFF9C4 : waits 2 x MSL\nthen transitions\nto CLOSED
+
+legend right
+  Step 1: Initiator sends FIN
+  Step 2: Responder acknowledges with ACK
+  Step 3: Responder sends its own FIN
+  Step 4: Initiator acknowledges with ACK
+  TIME-WAIT ensures delayed segments
+  do not corrupt a new connection.
+endlegend
+@enduml

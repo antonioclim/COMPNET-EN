@@ -1,0 +1,39 @@
+@startuml fig-nat-dynamic
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Dynamic NAT: Public Address Pool
+
+package "Private LAN" as lan #FFF3E0 {
+    rectangle "Host A\n192.168.0.11" as A #FFE0B2
+    rectangle "Host B\n192.168.0.12" as B #FFE0B2
+    rectangle "Host C\n192.168.0.13" as C2 #FFE0B2
+}
+
+rectangle "NAT Router\nPool: 203.0.113.20–.29" as R #E3F2FD
+
+cloud "Internet" as inet #F5F5F5 {
+    rectangle "Server" as S #C8E6C9
+}
+
+A --> R : request
+B --> R : request
+C2 --> R : request
+
+R --> S : .20 (A)\n.21 (B)\n.22 (C)
+
+rectangle "NAT Table" as TBL #FFF9C4 {
+}
+
+legend right
+  Each active host receives a
+  temporary public IP from the pool.
+  When the session ends the address
+  returns to the pool for reuse.
+  If the pool is exhausted new
+  connections are denied.
+endlegend
+@enduml

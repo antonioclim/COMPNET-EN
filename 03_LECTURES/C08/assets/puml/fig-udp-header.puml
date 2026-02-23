@@ -1,0 +1,33 @@
+@startuml fig-udp-header
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title UDP Header Structure (8 bytes, fixed)
+
+rectangle "**UDP Header**" as hdr #E3F2FD {
+
+  rectangle "Source Port\n(16 bits)" as sp #BBDEFB
+  rectangle "Destination Port\n(16 bits)" as dp #BBDEFB
+
+  rectangle "Length\n(16 bits)\nheader + data" as len #FFF9C4
+  rectangle "Checksum\n(16 bits)\noptional in IPv4\nmandatory in IPv6" as chk #E1BEE7
+}
+
+sp -[hidden]right- dp
+len -[hidden]right- chk
+
+rectangle "**Data (payload)**" as payload #F5F5F5
+
+hdr -down-> payload : carries
+
+legend right
+  UDP provides a minimal transport header.
+  No sequence numbers, no acknowledgements
+  and no flow control — the application
+  must handle reliability if required.
+  Maximum datagram: 65 535 bytes (incl. header).
+endlegend
+@enduml

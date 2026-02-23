@@ -1,0 +1,41 @@
+@startuml fig-presentation-pipeline
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Presentation layer pipeline (L6 functions)
+
+rectangle "Application object\n(struct, dict, class)" as obj #FFE0B2
+rectangle "Serialisation\n(JSON, XML, Protobuf)" as ser #FFF9C4
+rectangle "Text encoding\n(UTF-8, ASCII)" as enc #BBDEFB
+rectangle "Compression\n(gzip, brotli)" as cmp #E1BEE7
+rectangle "Transport payload\n(bytes on the wire)" as wire #C8E6C9
+
+obj -down-> ser : structure → format
+ser -down-> enc : characters → bytes
+enc -down-> cmp : reduce size
+cmp -down-> wire : transmit
+
+note right of ser
+  Both endpoints must
+  agree on the format.
+end note
+
+note right of enc
+  Charset mismatch causes
+  garbled text (mojibake).
+end note
+
+note right of cmp
+  Trades CPU cycles
+  for less bandwidth.
+end note
+
+legend bottom
+  Each stage is a presentation-layer responsibility.
+  The receiver applies the inverse pipeline: decompress → decode → deserialise.
+  On the modern Internet these steps are handled by libraries, not a separate protocol.
+endlegend
+@enduml

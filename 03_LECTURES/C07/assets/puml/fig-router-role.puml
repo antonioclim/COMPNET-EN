@@ -1,0 +1,35 @@
+@startuml fig-router-role
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Role of a Router
+
+rectangle "LAN A\n192.168.1.0/24" as lana #E3F2FD
+rectangle "Router" as r #C8E6C9
+rectangle "LAN B\n10.0.0.0/24" as lanb #E3F2FD
+rectangle "LAN C\n172.16.0.0/16" as lanc #E3F2FD
+
+lana -right-> r : IP packets\n(interface eth0)
+r -right-> lanb : IP packets\n(interface eth1)
+r -down-> lanc : IP packets\n(interface eth2)
+
+rectangle "Secondary functions" as sec #FFF9C4 {
+    rectangle "Filtering\n(ACL)" as acl #ECEFF1
+    rectangle "NAT /\nPAT" as nat #ECEFF1
+    rectangle "QoS" as qos #ECEFF1
+    rectangle "Tunnelling" as tun #ECEFF1
+}
+
+r -down-> sec : optional
+
+legend right
+  A router connects two or more networks.
+  It receives packets and decides on which
+  interface to forward them (next hop).
+  Secondary functions include filtering,
+  NAT, QoS and tunnelling.
+endlegend
+@enduml

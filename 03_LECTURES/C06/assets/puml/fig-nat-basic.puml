@@ -1,0 +1,31 @@
+@startuml fig-nat-basic
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title NAT Concept: Source Address Rewriting
+
+package "Private LAN (RFC 1918)" as lan #FFF3E0 {
+    rectangle "Host\n192.168.0.10" as H #FFE0B2
+    rectangle "NAT Router\nLAN: 192.168.0.1\nWAN: 203.0.113.5" as R #E3F2FD
+    H -right-> R : src: 192.168.0.10
+}
+
+cloud "Internet" as inet #F5F5F5 {
+    rectangle "Server\n198.51.100.20" as S #C8E6C9
+}
+
+R -right-> S : src rewritten\nto 203.0.113.5
+S -left-> R : dst: 203.0.113.5
+R -left-> H : dst restored\nto 192.168.0.10
+
+legend right
+  NAT modifies the source IP in
+  outbound packets and reverses
+  the change for inbound replies.
+  The router maintains a mapping
+  table to track translations.
+endlegend
+@enduml

@@ -1,0 +1,39 @@
+@startuml fig-ndp
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title NDP (IPv6): Neighbour and Router Discovery
+
+participant "IPv6 Host\n(new on link)" as H #FFE0B2
+participant "IPv6 Router" as R #E3F2FD
+participant "Neighbour Host" as N #C8E6C9
+
+== Router Discovery ==
+
+H -[#1565C0]> R : RS (Router Solicitation)\nmulticast ff02::2
+R -[#43A047]> H : RA (Router Advertisement)\nprefix, gateway, flags, MTU
+
+== Address Autoconfiguration (SLAAC) ==
+
+H -> H : Generate global address\nprefix + interface ID (or random)
+
+== Duplicate Address Detection (DAD) ==
+
+H -[#FF9800]> H : NS for own address\n(solicited-node multicast)
+H -> H : No NA received → address is unique
+
+== Neighbour Resolution ==
+
+H -[#1565C0]> N : NS (Neighbour Solicitation)\n"What is your link-layer address?"
+N -[#43A047]> H : NA (Neighbour Advertisement)\nlink-layer address included
+
+legend right
+  NDP replaces ARP and adds router
+  discovery, prefix learning, DAD and
+  SLAAC. All NDP messages use ICMPv6.
+  Filtering ICMPv6 breaks IPv6.
+endlegend
+@enduml

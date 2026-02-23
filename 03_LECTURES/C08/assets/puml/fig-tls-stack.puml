@@ -1,0 +1,35 @@
+@startuml fig-tls-stack
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title TLS/DTLS Position in the TCP/IP Stack
+
+rectangle "Application Layer\n(HTTP, SMTP, FTP, …)" as app #FFE0B2
+
+rectangle "**TLS** (over TCP)\n**DTLS** (over UDP)\nEncryption, integrity and authentication" as tls #E1BEE7
+
+rectangle "Transport Layer\nTCP / UDP" as transport #C8E6C9
+
+rectangle "Network Layer\nIP (IPv4 / IPv6)" as network #BBDEFB
+
+rectangle "Data Link Layer\nEthernet, Wi-Fi, …" as link #E3F2FD
+
+rectangle "Physical Layer\nBits / signals" as phys #F5F5F5
+
+app -down-> tls : plaintext
+tls -down-> transport : encrypted records
+transport -down-> network : segments / datagrams
+network -down-> link : packets
+link -down-> phys : frames
+
+legend right
+  TLS sits between the application and
+  transport layers. It encrypts data before
+  handing it to TCP (or DTLS to UDP).
+  The application sees a secure channel;
+  the network sees only ciphertext.
+endlegend
+@enduml

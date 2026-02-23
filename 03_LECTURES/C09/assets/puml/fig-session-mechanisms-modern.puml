@@ -1,0 +1,35 @@
+@startuml fig-session-mechanisms-modern
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Modern session mechanisms (L5 concepts in L7 implementations)
+
+package "Session-layer responsibility (L5 concept)" as l5pkg #FFF3E0 {
+  card "Identify the\nconversation" as id #FFE0B2
+  card "Maintain state\nacross requests" as state #FFE0B2
+  card "Handle expiry\nand resumption" as expiry #FFE0B2
+}
+
+package "Application-layer implementations (L7 reality)" as l7pkg #E3F2FD {
+  card "HTTP cookies\n(Set-Cookie / Cookie)" as cookies #BBDEFB
+  card "Tokens\n(JWT, OAuth 2.0)" as tokens #BBDEFB
+  card "Server-side sessions\n(Redis, database)" as server_sess #BBDEFB
+  card "TLS session\nresumption" as tls #E1BEE7
+  card "WebSocket\nconnections" as ws #BBDEFB
+}
+
+id -down-> cookies : session ID
+id -down-> tokens : signed claim
+state -down-> server_sess : key-value store
+expiry -down-> tls : session tickets
+expiry -down-> ws : persistent channel
+
+legend bottom
+  Every mechanism above solves a session-layer problem.
+  None operates as a standalone L5 protocol on the wire.
+  The OSI session layer survives as a design concern, not a protocol.
+endlegend
+@enduml

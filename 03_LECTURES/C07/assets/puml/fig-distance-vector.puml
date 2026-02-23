@@ -1,0 +1,42 @@
+@startuml fig-distance-vector
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Distance-Vector Routing (Bellman–Ford Concept)
+
+rectangle "Router A" as A #E3F2FD
+rectangle "Router B" as B #E3F2FD
+rectangle "Router C" as C #E3F2FD
+rectangle "Network X\n10.5.0.0/24" as X #C8E6C9
+
+A -right- B : cost 4
+B -right- C : cost 2
+C -right- X : cost 1
+
+A -[hidden]down- note1
+
+rectangle "A's distance vector" as dvA #FFF9C4 {
+    rectangle "to X: dist=7, via B" as dA #ECEFF1
+}
+
+rectangle "B's distance vector" as dvB #FFF9C4 {
+    rectangle "to X: dist=3, via C" as dB #ECEFF1
+}
+
+A .down. dvA
+B .down. dvB
+
+A <--> B : periodic\ntable exchange
+B <--> C : periodic\ntable exchange
+
+legend right
+  Each router knows only a distance and a
+  next hop for each destination (no full map).
+  Routers periodically exchange their vectors.
+  Algorithm: Bellman–Ford (conceptually).
+  Associated protocol: RIP.
+endlegend
+@enduml

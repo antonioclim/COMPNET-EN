@@ -1,0 +1,34 @@
+@startuml fig-dhcp-relay
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title DHCP Relay: Forwarding Across Subnet Boundaries
+
+participant "Client\n(Subnet A)" as C #FFE0B2
+participant "Router\n(Relay Agent)" as R #E3F2FD
+participant "DHCP Server\n(Subnet B)" as S #C8E6C9
+
+C -[#1565C0]> R : Discover (broadcast)\nUDP 68 → 67
+R -[#1565C0]> S : Discover (unicast)\n+ relay agent info (giaddr)
+
+S -[#43A047]> R : Offer (unicast to relay)
+R -[#43A047]> C : Offer (broadcast/unicast local)
+
+C -[#1565C0]> R : Request (broadcast)
+R -[#1565C0]> S : Request (unicast)
+
+S -[#43A047]> R : Acknowledge
+R -[#43A047]> C : Acknowledge
+
+legend right
+  Broadcasts do not cross routers.
+  The relay agent converts DHCP
+  broadcasts into unicast messages
+  directed at the remote server.
+  The giaddr field tells the server
+  which subnet the client belongs to.
+endlegend
+@enduml

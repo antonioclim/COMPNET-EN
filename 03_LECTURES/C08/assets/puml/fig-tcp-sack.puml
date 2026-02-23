@@ -1,0 +1,41 @@
+@startuml fig-tcp-sack
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title Selective Acknowledgement (SACK) — Retransmission Example
+
+participant "Sender" as S #FFE0B2
+participant "Receiver" as R #C8E6C9
+
+S -> R : Segment 1 (bytes 0–999)
+S -> R : Segment 2 (bytes 1000–1999)
+S -[#E53935]x R : <color:#E53935>Segment 3 (bytes 2000–2999) — LOST</color>
+S -> R : Segment 4 (bytes 3000–3999)
+S -> R : Segment 5 (bytes 4000–4999)
+
+|||
+
+R -[#1565C0]> S : ACK = 2000\nSACK blocks: [3000–5000)
+
+note right of R #FFF9C4
+  Cumulative ACK: next expected = 2000
+  SACK reports: bytes 3000–4999 received
+  Only segment 3 needs retransmission
+end note
+
+|||
+
+S -[#FF9800]> R : Retransmit segment 3 (bytes 2000–2999)
+R -[#43A047]> S : ACK = 5000 (all data received)
+
+legend right
+  SACK reduces unnecessary retransmissions.
+  The receiver reports non-contiguous ranges
+  so the sender retransmits only the gap.
+  Requires SACK Permitted negotiation
+  during the three-way handshake.
+endlegend
+@enduml

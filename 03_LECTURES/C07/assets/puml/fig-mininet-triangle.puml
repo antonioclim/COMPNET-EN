@@ -1,0 +1,42 @@
+@startuml fig-mininet-triangle
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Mininet Triangle Topology — Three Routers with LANs
+
+package "LAN 1\n10.1.0.0/24" as lan1 #FFF3E0 {
+    rectangle "h1\n10.1.0.2" as h1 #FFE0B2
+}
+
+package "LAN 2\n10.2.0.0/24" as lan2 #FFF3E0 {
+    rectangle "h2\n10.2.0.2" as h2 #FFE0B2
+}
+
+package "LAN 3\n10.3.0.0/24" as lan3 #FFF3E0 {
+    rectangle "h3\n10.3.0.2" as h3 #FFE0B2
+}
+
+rectangle "r1\n10.1.0.1\n(r1-eth0)" as r1 #C8E6C9
+rectangle "r2\n10.2.0.1\n(r2-eth0)" as r2 #C8E6C9
+rectangle "r3\n10.3.0.1\n(r3-eth0)" as r3 #C8E6C9
+
+h1 -down- r1 : r1-eth0
+h2 -down- r2 : r2-eth0
+h3 -down- r3 : r3-eth0
+
+r1 -right- r2 : 10.12.0.0/24\n(r1-eth1 ↔ r2-eth1)
+r2 -down- r3 : 10.23.0.0/24\n(r2-eth2 ↔ r3-eth2)
+r1 -down- r3 : 10.13.0.0/24\n(r1-eth2 ↔ r3-eth1)
+
+legend right
+  Triangle of routers with full-mesh links.
+  Scenario "link-down": r1-r2 fails and
+  traffic reroutes via r3.
+  Scenario "asymmetric": r1 knows a route
+  to r2 but r2 has no return route.
+  Run: sudo python3 tringle-net.py <mode>
+endlegend
+@enduml

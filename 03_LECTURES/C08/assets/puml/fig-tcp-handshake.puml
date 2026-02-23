@@ -1,0 +1,39 @@
+@startuml fig-tcp-handshake
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title TCP Connection Establishment (Three-Way Handshake)
+
+participant "Client\n(ephemeral port)" as C #FFE0B2
+participant "Server\n(well-known port)" as S #C8E6C9
+
+note over C : CLOSED
+note over S : LISTEN
+
+C -[#1565C0]> S : SYN (Seq = x)
+note over C : SYN-SENT
+
+S -[#1565C0]> C : SYN-ACK (Seq = y, Ack = x + 1)
+note over S : SYN-RECEIVED
+
+C -[#43A047]> S : ACK (Seq = x + 1, Ack = y + 1)
+
+== CONNECTION ESTABLISHED ==
+
+note over C : ESTABLISHED
+note over S : ESTABLISHED
+
+C <-> S : Data transfer
+
+legend right
+  Step 1: Client sends SYN with initial Seq
+  Step 2: Server replies SYN-ACK with its Seq
+  Step 3: Client confirms with ACK
+  Both sides exchange initial sequence
+  numbers and negotiate TCP options
+  (MSS, SACK, window scale).
+endlegend
+@enduml

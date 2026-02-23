@@ -1,0 +1,54 @@
+@startuml fig-tcp-states
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 10
+skinparam shadowing false
+
+title TCP Socket State Machine
+
+state "CLOSED" as closed #F5F5F5
+state "LISTEN" as listen #E3F2FD
+state "SYN-SENT" as synsent #BBDEFB
+state "SYN-RECEIVED" as synrcvd #BBDEFB
+state "ESTABLISHED" as estab #C8E6C9
+state "FIN-WAIT-1" as fw1 #FFE0B2
+state "FIN-WAIT-2" as fw2 #FFE0B2
+state "CLOSING" as closing #FFF9C4
+state "TIME-WAIT" as tw #FFF9C4
+state "CLOSE-WAIT" as cw #E1BEE7
+state "LAST-ACK" as lack #E1BEE7
+
+[*] --> closed
+
+closed --> listen : passive open\n(server)
+closed --> synsent : active open\nsend SYN (client)
+
+listen --> synrcvd : recv SYN\nsend SYN-ACK
+synsent --> synrcvd : recv SYN\nsend SYN-ACK
+synsent --> estab : recv SYN-ACK\nsend ACK
+synrcvd --> estab : recv ACK
+
+estab --> fw1 : close()\nsend FIN
+estab --> cw : recv FIN\nsend ACK
+
+fw1 --> fw2 : recv ACK
+fw1 --> closing : recv FIN\nsend ACK
+fw1 --> tw : recv FIN+ACK\nsend ACK
+
+fw2 --> tw : recv FIN\nsend ACK
+
+closing --> tw : recv ACK
+
+tw --> closed : timeout\n(2 x MSL)
+
+cw --> lack : close()\nsend FIN
+lack --> closed : recv ACK
+
+legend right
+  Blue: connection establishment states
+  Green: data transfer (ESTABLISHED)
+  Orange: active close path
+  Purple: passive close path
+  Yellow: transitional / waiting states
+endlegend
+@enduml

@@ -1,0 +1,48 @@
+@startuml fig-ospf-areas
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title OSPF Area Hierarchy with Backbone (Area 0)
+
+package "Area 1\n(stub area)" as area1 #E8F5E9 {
+    rectangle "R-A1" as A1 #C8E6C9
+    rectangle "R-A1-2" as A12 #C8E6C9
+    A1 -- A12 : internal\nlink
+}
+
+package "Area 0 (Backbone)" as area0 #E3F2FD {
+    rectangle "ABR 1\n(Area Border\nRouter)" as ABR1 #BBDEFB
+    rectangle "Core\nRouter" as CORE #BBDEFB
+    rectangle "ABR 2\n(Area Border\nRouter)" as ABR2 #BBDEFB
+    ABR1 -- CORE : backbone\nlink
+    CORE -- ABR2 : backbone\nlink
+}
+
+package "Area 2\n(normal area)" as area2 #E8F5E9 {
+    rectangle "R-A2" as A2 #C8E6C9
+    rectangle "R-A2-2" as A22 #C8E6C9
+    A2 -- A22 : internal\nlink
+}
+
+A12 -down- ABR1 : inter-area\nlink
+ABR2 -down- A2 : inter-area\nlink
+
+rectangle "OSPF operation" as ops #FFF9C4 {
+    rectangle "Hello: neighbour discovery" as hello #ECEFF1
+    rectangle "LSDB sync between neighbours" as lsdb #ECEFF1
+    rectangle "DR/BDR election (multi-access)" as dr #ECEFF1
+    rectangle "SPF (Dijkstra) route calculation" as spf #ECEFF1
+}
+
+legend right
+  Inter-area traffic always passes through
+  Area 0 (the backbone).
+  ABRs summarise routes between areas.
+  Within each area, all routers share the
+  same LSDB and run SPF independently.
+  Hello packets maintain adjacencies.
+endlegend
+@enduml

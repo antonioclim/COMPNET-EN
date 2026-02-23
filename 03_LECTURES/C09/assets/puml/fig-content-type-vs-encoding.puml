@@ -1,0 +1,38 @@
+@startuml fig-content-type-vs-encoding
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title Content-Type vs Content-Encoding in HTTP
+
+participant "Client\n(browser / curl)" as C #FFE0B2
+participant "Server\n(HTTP origin)" as S #C8E6C9
+
+C -> S : GET /data.json\nAccept: application/json\nAccept-Encoding: gzip
+
+S --> C : 200 OK\nContent-Type: application/json; charset=utf-8\nContent-Encoding: gzip\n\n[gzip-compressed JSON body]
+
+note right of S
+  Content-Type = what the data is
+  (MIME type + charset)
+end note
+
+note right of S
+  Content-Encoding = how the data
+  is wrapped for transfer (gzip)
+end note
+
+note left of C
+  The client first decompresses
+  (undo Content-Encoding), then
+  interprets (use Content-Type).
+end note
+
+legend bottom
+  Content-Type describes the semantic meaning of the payload.
+  Content-Encoding describes the transfer-level transformation.
+  The receiver must reverse the encoding before parsing the content type.
+endlegend
+@enduml

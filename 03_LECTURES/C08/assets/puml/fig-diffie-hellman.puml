@@ -1,0 +1,57 @@
+@startuml fig-diffie-hellman
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title Diffie–Hellman Key Exchange
+
+participant "Alice" as A #FFE0B2
+participant "Eve\n(eavesdropper)" as E #FFCDD2
+participant "Bob" as B #C8E6C9
+
+note over A #FFF9C4
+  Public: p, g
+  Private: a
+  Computes: A_pub = g^^a^^ mod p
+end note
+
+note over B #FFF9C4
+  Public: p, g
+  Private: b
+  Computes: B_pub = g^^b^^ mod p
+end note
+
+A -[#1565C0]> B : A_pub = g^^a^^ mod p
+
+note over E #FFEBEE
+  Eve sees A_pub and B_pub
+  but cannot derive the
+  shared secret (discrete
+  logarithm problem)
+end note
+
+B -[#1565C0]> A : B_pub = g^^b^^ mod p
+
+note over A #C8E6C9
+  K = B_pub^^a^^ mod p
+end note
+
+note over B #C8E6C9
+  K = A_pub^^b^^ mod p
+end note
+
+note over A, B #E8F5E9
+  Shared secret K is identical
+  on both sides — never transmitted
+end note
+
+legend right
+  Both parties agree on public p and g.
+  Each generates a private exponent.
+  The shared secret is computed locally
+  without ever crossing the network.
+  This forms the basis of TLS key exchange.
+endlegend
+@enduml

@@ -1,0 +1,30 @@
+@startuml fig-proxy-arp
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title Proxy ARP: Router Replies on Behalf of a Remote Host
+
+participant "Host A\nLAN 1\nIP_A" as A #FFE0B2
+participant "Router\nMAC_R" as R #E3F2FD
+participant "Host B\nLAN 2\nIP_B" as B #C8E6C9
+
+A -[#1565C0]> R : ARP Request (broadcast)\n"Who has IP_B?"
+
+R -[#43A047]> A : ARP Reply (proxy)\n"IP_B is at MAC_R"
+
+== Host A believes IP_B lives at MAC_R ==
+
+A -> R : Ethernet frame dst=MAC_R\n(carrying IP packet for IP_B)
+R -> B : Router forwards to LAN 2\n(new Ethernet frame dst=MAC_B)
+
+legend right
+  Host B is on a different subnet.
+  The router intercepts the ARP request
+  and replies with its own MAC address.
+  Host A sends frames to the router
+  which then forwards them to Host B.
+endlegend
+@enduml

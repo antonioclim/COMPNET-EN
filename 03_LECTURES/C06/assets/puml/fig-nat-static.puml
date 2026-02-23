@@ -1,0 +1,31 @@
+@startuml fig-nat-static
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title Static NAT (1:1 Mapping)
+
+participant "External Client\n(Internet)" as C #FFE0B2
+participant "NAT Router\nWAN: 203.0.113.10\nLAN: 192.168.1.1" as R #E3F2FD
+participant "Internal Server\n192.168.1.100" as S #C8E6C9
+
+== INBOUND (client reaches private server) ==
+
+C -> R : dst: 203.0.113.10
+R -> S : DNAT → 192.168.1.100
+
+== OUTBOUND (server replies) ==
+
+S -> R : src: 192.168.1.100
+R -> C : SNAT → 203.0.113.10
+
+legend right
+  Static NAT provides a permanent
+  one-to-one mapping between a
+  public and a private address.
+  The server is reachable from
+  the Internet via the public IP.
+endlegend
+@enduml

@@ -1,0 +1,26 @@
+@startuml fig-l2-l3-changes
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title L2 Addresses Change per Hop — L3 Addresses Remain End-to-End
+
+participant "Host S\nIP: IP_S\nMAC: MAC_S" as S #FFE0B2
+participant "Router R1\nMAC: R1a / R1b" as R1 #C8E6C9
+participant "Router R2\nMAC: R2a / R2b" as R2 #C8E6C9
+participant "Host D\nIP: IP_D\nMAC: MAC_D" as D #FFE0B2
+
+S -> R1 : **L2:** MAC_S → MAC_R1a\n**L3:** IP_S → IP_D\nTTL = 64
+R1 -> R2 : **L2:** MAC_R1b → MAC_R2a\n**L3:** IP_S → IP_D\nTTL = 63
+R2 -> D : **L2:** MAC_R2b → MAC_D\n**L3:** IP_S → IP_D\nTTL = 62
+
+legend right
+  Source and destination IP remain the same
+  across every hop (end-to-end principle).
+  Source and destination MAC change at
+  each router (next-hop L2 rewrite).
+  TTL / Hop Limit decreases by one at each hop.
+endlegend
+@enduml
