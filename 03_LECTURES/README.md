@@ -28,7 +28,14 @@ PNG files are generated from `.puml` sources. From any lecture directory run:
 cd C01/assets && bash render.sh
 ```
 
-The script requires Java and expects `plantuml.jar` to be present in `00_TOOLS/`. Regenerated PNGs are written to `assets/images/`.
+The script requires Java and expects `plantuml.jar` to be present in `00_TOOLS/`.
+If the JAR is absent, obtain it with:
+
+```
+bash 00_TOOLS/plantuml/get_plantuml_jar.sh
+```
+
+Regenerated PNGs are written to `assets/images/`.
 
 ## Scenarios
 
