@@ -1,0 +1,38 @@
+@startuml fig-tcp-connect-scan
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title TCP Connect Scan — Three Possible Outcomes
+
+participant "Scanner\n(port_scanner.py)" as SC #FFE0B2
+participant "Target Host" as TH #E3F2FD
+
+== Port OPEN (service listening) ==
+
+SC -[#1565C0]> TH : SYN (connect attempt)
+TH -[#43A047]-> SC : SYN-ACK (accepted)
+SC -[#1565C0]> TH : ACK (connection established)
+SC -[#1565C0]> TH : RST (scanner closes immediately)
+
+== Port CLOSED (no service) ==
+
+SC -[#1565C0]> TH : SYN (connect attempt)
+TH -[#E53935]-> SC : RST (ConnectionRefusedError)
+
+== Port FILTERED (firewall / no response) ==
+
+SC -[#1565C0]> TH : SYN (connect attempt)
+SC -[#FF9800]>x SC : timeout expires\n(socket.timeout)
+
+legend right
+  OPEN: full TCP handshake succeeds.
+  CLOSED: target immediately rejects (RST).
+  FILTERED: no response within the timeout
+  (typically a firewall drops the SYN).
+  A connect scan completes the full handshake
+  unlike a SYN scan which stops after SYN-ACK.
+endlegend
+@enduml

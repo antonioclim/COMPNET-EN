@@ -1,0 +1,42 @@
+@startuml fig-sdn-traffic-policy
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title SDN Traffic Policy: Selective Permit and Drop by Protocol
+
+participant "h1\n10.0.10.1" as H1 #FFE0B2
+participant "s1 (OVS)\n+ Os-Ken" as S1 #90CAF9
+participant "h2\n10.0.10.2" as H2 #C8E6C9
+participant "h3\n10.0.10.3" as H3 #FFCDD2
+
+== TCP between h1 and h2 — PERMITTED ==
+
+H1 -[#43A047]> S1 : TCP SYN → h2 (packet_in)
+S1 -[#43A047]> H2 : flow installed (priority 10)\nforward to port 2
+H2 -[#43A047]> S1 : TCP SYN-ACK
+S1 -[#43A047]> H1 : forward to port 1
+
+== TCP towards h3 — BLOCKED ==
+
+H1 -[#E53935]> S1 : TCP SYN → h3 (packet_in)
+S1 -[#E53935]>x H3 : drop flow installed (priority 20)\nactions = [] (no output)
+
+== UDP towards h3 — PERMITTED (after modification) ==
+
+H1 -[#1565C0]> S1 : UDP → h3 (packet_in)
+S1 -[#1565C0]> H3 : flow installed (ip_proto=17)\nforward to port 3
+H3 -[#1565C0]> S1 : UDP reply
+S1 -[#1565C0]> H1 : forward to port 1
+
+legend right
+  The controller inspects ip_proto:
+  TCP (6) towards h3 → drop flow
+  UDP (17) towards h3 → permit flow
+  TCP between h1 ↔ h2 → permit flow
+  This demonstrates fine-grained
+  application-aware SDN policies.
+endlegend
+@enduml

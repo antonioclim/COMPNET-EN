@@ -1,0 +1,47 @@
+@startuml fig-nginx-reverse-proxy
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title nginx Reverse Proxy Architecture — Seminar 08
+
+rectangle "Client\n(curl / browser)" as client #FFE0B2
+
+package "Host Machine" as host #F5F5F5 {
+
+  package "Docker Container\nnginx:alpine\nnetwork_mode: host" as docker #E3F2FD {
+    rectangle "**nginx**\nlistens on :8080\nreverse proxy" as nginx #90CAF9
+  }
+
+  rectangle "**Python Back-end**\nhttp.server / socket server\nlistens on :8000" as backend #C8E6C9
+}
+
+client -down-> nginx : HTTP request\nport 8080
+nginx -down-> backend : proxy_pass\nhttp://127.0.0.1:8000
+
+nginx -[hidden]right- backend
+
+note right of nginx #FFF9C4
+  proxy_set_header Host $host
+  proxy_set_header X-Real-IP $remote_addr
+  add_header X-Student-Lab "Seminar8"
+end note
+
+note bottom of backend #E8F5E9
+  The back-end is unaware of
+  the proxy. It receives the
+  request as if from localhost.
+end note
+
+legend bottom
+  The client connects to nginx on port 8080.
+  nginx forwards the request to the Python
+  server on port 8000 and relays the response.
+  Custom headers (X-Student-Lab) prove
+  that traffic traverses the proxy.
+  network_mode: host allows the container
+  to reach 127.0.0.1 on the host.
+endlegend
+@enduml

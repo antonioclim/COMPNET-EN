@@ -1,0 +1,36 @@
+@startuml fig-pseudo-ftp-passive-get-sequence
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title Pseudo-FTP — passive_get sequence
+
+participant "Client\n(pseudo_ftp_client.py)" as C #FFE0B2
+participant "Server\n(pseudo_ftp_server.py)" as S #C8E6C9
+participant "Server data\nlistener" as SL #FFF9C4
+
+C -> S : <color:#1565C0>"passive_get filename"</color>\n(control connection :3333)
+
+S -> S : open FILE_ROOT/filename
+S -> S : bind() + listen()\non ephemeral port Q
+activate SL
+
+S --> C : <color:#FF9800>str(Q)</color>\n(port number on control connection)
+
+C -> SL : <color:#43A047>connect(server_ip, Q)</color>\n(data connection)
+SL -> C : send(1-byte length + content)
+deactivate SL
+
+S --> C : "done!"\n(control connection)
+
+C -> C : save to ./client-temp/filename
+
+legend bottom
+  Passive mode: the server opens a temporary listener.
+  The client connects to the server on the announced port.
+  This mirrors real FTP PASV/passive transfer behaviour.
+  Works through NAT because the client initiates both connections.
+endlegend
+@enduml

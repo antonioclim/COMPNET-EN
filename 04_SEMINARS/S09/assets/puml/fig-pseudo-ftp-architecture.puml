@@ -1,0 +1,34 @@
+@startuml fig-pseudo-ftp-architecture
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Pseudo-FTP architecture (control + data sockets)
+
+package "Client process" as cpkg #FFF3E0 {
+  card "Command loop\n(-> prompt)" as cmd_loop #FFE0B2
+  card "Local storage\n./client-temp/" as local_fs #FFF9C4
+}
+
+package "Server process" as spkg #E8F5E9 {
+  card "Control listener\n127.0.0.1:3333" as ctrl #C8E6C9
+  card "Command dispatcher\nprocess_command()" as dispatch #BBDEFB
+  card "File storage\n./temp/" as server_fs #FFF9C4
+}
+
+cmd_loop -right-> ctrl : <color:#1565C0>control connection (TCP)\nlist, help, active_*, passive_*</color>
+ctrl -down-> dispatch : decode + route
+dispatch -down-> server_fs : read / write
+
+cmd_loop .right.> dispatch : <color:#43A047>data connection (TCP)\ntemporary socket per transfer</color>
+cmd_loop -down-> local_fs : save / load files
+
+legend bottom
+  The control connection is permanent (port 3333).
+  Each file transfer opens a temporary data socket.
+  Active mode: client listens; passive mode: server listens.
+  File length is encoded on 1 byte (max 255 — demonstrative only).
+endlegend
+@enduml

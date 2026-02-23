@@ -1,0 +1,41 @@
+@startuml fig-s08-docker-compose-topology
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Docker Compose Service Topology — S08 nginx Proxy
+
+package "docker-compose.yml" as compose #F5F5F5 {
+
+  component "**seminar8_nginx**\nnginx:alpine\nnetwork_mode: host" as nginx #90CAF9
+
+  rectangle "Volume mount\n(read-only)" as vol #ECEFF1 {
+    rectangle "S08_Part04_Config_Nginx.conf\n→ /etc/nginx/nginx.conf:ro" as conf #FFF9C4
+  }
+}
+
+rectangle "Host Network Stack\n(shared via network_mode: host)" as hostnet #E3F2FD {
+  rectangle "Port 8080\n(nginx listen)" as p8080 #BBDEFB
+  rectangle "Port 8000\n(Python back-end)" as p8000 #C8E6C9
+}
+
+nginx -down-> vol : mounts
+nginx -down-> p8080 : binds
+nginx -right-> p8000 : proxy_pass
+
+note right of compose #FFF9C4
+  restart: unless-stopped
+  Single service definition
+  No custom Docker network needed
+end note
+
+legend bottom
+  The Docker Compose file defines one service:
+  nginx with host networking. The configuration
+  file is mounted read-only into the container.
+  nginx listens on 8080 and proxies to 8000
+  where the Python back-end runs natively.
+endlegend
+@enduml

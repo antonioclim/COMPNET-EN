@@ -1,0 +1,34 @@
+@startuml fig-sdn-openflow-topology
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title SDN Topology: Open vSwitch s1 + Os-Ken Controller
+
+rectangle "Os-Ken Controller\n127.0.0.1:6633" as CTL #E1BEE7
+
+package "Mininet Network (10.0.10.0/24)" as net #F5F5F5 {
+    rectangle "s1\n(Open vSwitch\nOpenFlow 1.3)" as S1 #90CAF9
+
+    rectangle "h1\n10.0.10.1\nMAC 00:...:01\nport 1" as H1 #FFE0B2
+    rectangle "h2\n10.0.10.2\nMAC 00:...:02\nport 2" as H2 #C8E6C9
+    rectangle "h3\n10.0.10.3\nMAC 00:...:03\nport 3" as H3 #FFCDD2
+
+    H1 -up-> S1 : s1-eth1
+    H2 -up-> S1 : s1-eth2
+    H3 -up-> S1 : s1-eth3
+}
+
+S1 -up-> CTL : OpenFlow channel\npacket_in / flow_mod
+
+legend right
+  s1 is an Open vSwitch instance
+  controlled remotely by Os-Ken.
+  All three hosts share 10.0.10.0/24.
+  autoSetMacs assigns sequential MACs.
+  The controller installs match–action
+  rules in the s1 flow table.
+endlegend
+@enduml

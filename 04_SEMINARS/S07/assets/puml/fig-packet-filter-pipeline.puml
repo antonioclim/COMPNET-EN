@@ -1,0 +1,48 @@
+@startuml fig-packet-filter-pipeline
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+
+title Packet Filter Decision Pipeline
+
+start
+
+:Receive raw frame\nfrom AF_PACKET socket;
+
+:Parse Ethernet header\n(14 bytes: dst MAC, src MAC, ethertype);
+
+if (Ethertype ==\n0x0800 ?) then (yes — IPv4)
+else (no)
+    #ECEFF1:Ignore\n(non-IPv4);
+    stop
+endif
+
+:Parse IPv4 header\n(src IP, dst IP, protocol, TTL);
+
+if (Protocol?) then (TCP = 6)
+    :Parse TCP header\n(src port, dst port);
+elseif (UDP = 17)
+    :Parse UDP header\n(src port, dst port);
+else (ICMP / other)
+    :No port information;
+endif
+
+:Call passes_filter()\nwith extracted fields;
+
+if (Filter\naccepts?) then (yes)
+    #C8E6C9:Display packet\n(src:port → dst:port, proto);
+    stop
+else (no)
+    #FFCDD2:Silently drop\n(not displayed);
+    stop
+endif
+
+legend right
+  The filter pipeline processes each packet
+  through parsing stages before applying
+  custom rules (protocol, port, IP prefix).
+  Example rules: accept TCP only, accept
+  UDP port 53, restrict to 10.0.0.0/8 sources.
+endlegend
+@enduml

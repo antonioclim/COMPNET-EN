@@ -1,0 +1,44 @@
+@startuml fig-docker-ftp-multi-client
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Docker Compose topology — multi-client FTP (Stage 4)
+
+package "Docker network: ftpnet (bridge)" as net #F5F5F5 {
+
+  package "ftp-server (python:3.12-alpine)" as srv_pkg #E8F5E9 {
+    component "pyftpdlib\nFTP :2121" as ftp #C8E6C9
+    database "server-data\n(./test)" as sdata #FFF9C4
+    database "server-anon\n(./nobody)" as sanon #ECEFF1
+    ftp -down-> sdata : read / write
+    ftp -down-> sanon : read only
+  }
+
+  package "client1 (python:3.12-alpine)" as c1_pkg #FFF3E0 {
+    component "Multi-client\nscript" as c1 #FFE0B2
+    database "client1-data" as c1d #FFF9C4
+    c1 -down-> c1d : local files
+  }
+
+  package "client2 (python:3.12-alpine)" as c2_pkg #FFF3E0 {
+    component "Multi-client\nscript" as c2 #FFE0B2
+    database "client2-data" as c2d #FFF9C4
+    c2 -down-> c2d : local files
+  }
+}
+
+c1 -right-> ftp : <color:#1565C0>FTP (STOR / RETR)\nuser: test / 12345</color>
+c2 -left-> ftp : <color:#43A047>FTP (STOR / RETR)\nuser: test / 12345</color>
+
+card "Host machine\n(port 2121 mapped)" as host #ECEFF1
+host -up-> ftp : <color:#FF9800>optional: ftp 127.0.0.1 2121</color>
+
+legend bottom
+  Three containers share the ftpnet bridge network.
+  client1 uploads a file; client2 downloads the same file via the server.
+  The host can also access the FTP server through the mapped port.
+endlegend
+@enduml

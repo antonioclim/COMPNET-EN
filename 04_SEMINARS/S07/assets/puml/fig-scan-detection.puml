@@ -1,0 +1,49 @@
+@startuml fig-scan-detection
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Port Scan Detection — Sliding Window Counter
+
+rectangle "Network Interface\n(AF_PACKET)" as nic #E3F2FD
+
+package "Detector Logic (detect_scan.py)" as detector #F5F5F5 {
+
+    rectangle "Filter: IPv4 + TCP\nSYN flag set, ACK unset" as filter #BBDEFB
+
+    rectangle "Per-Source State Table" as state #FFF9C4 {
+        rectangle "scan_state[src_ip]" as entry #ECEFF1
+        rectangle "{ port: timestamp }" as ports #ECEFF1
+        entry -right- ports
+    }
+
+    rectangle "Cleanup: remove entries\nolder than WINDOW_SECONDS" as cleanup #ECEFF1
+
+    rectangle "Count distinct\ndst_ports in window" as count #BBDEFB
+
+    rectangle "port_count >=\nPORT_THRESHOLD ?" as threshold #90CAF9
+}
+
+rectangle "**ALERT**\nPossible port scan\nfrom src_ip" as alert #FFCDD2
+
+rectangle "No action\n(below threshold)" as noalert #C8E6C9
+
+nic -down-> filter : raw packets
+filter -down-> state : SYN-only\npackets
+state -down-> cleanup : expire old
+cleanup -down-> count : active ports
+count -down-> threshold : evaluate
+threshold -right-> alert : yes (>= 10)
+threshold -left-> noalert : no
+
+legend right
+  For each source IP the detector tracks
+  distinct destination ports within a
+  configurable time window (default 5s).
+  If the count reaches the threshold
+  (default 10 ports), an alert fires.
+  Parameters: WINDOW_SECONDS, PORT_THRESHOLD.
+endlegend
+@enduml

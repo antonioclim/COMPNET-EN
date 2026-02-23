@@ -1,0 +1,43 @@
+@startuml fig-sdn-app-client-server
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title Application Traffic through SDN: Echo Servers and Clients
+
+participant "h1 (Client)\n10.0.10.1" as H1 #FFE0B2
+participant "s1 (OVS)" as S1 #90CAF9
+participant "h2 (TCP Server)\n10.0.10.2:5000" as H2 #C8E6C9
+participant "h3 (UDP Server)\n10.0.10.3:6000" as H3 #BBDEFB
+
+== TCP Echo — h1 to h2 (permitted) ==
+
+H1 -> S1 : TCP connect → 10.0.10.2:5000
+S1 -> H2 : forwarded (flow match)
+H1 -[#43A047]> H2 : send "hello"
+H2 -[#43A047]> H1 : echo "hello"
+H1 -[#43A047]> H2 : send "test"
+H2 -[#43A047]> H1 : echo "test"
+
+== TCP Echo — h1 to h3 (blocked) ==
+
+H1 -[#E53935]> S1 : TCP connect → 10.0.10.3:5000
+S1 -[#E53935]>x H3 : dropped by flow rule\n(ip_proto=6, actions=[])
+
+== UDP Echo — h1 to h3 (permitted after modification) ==
+
+H1 -[#1565C0]> S1 : UDP "msg1" → 10.0.10.3:6000
+S1 -[#1565C0]> H3 : forwarded (ip_proto=17)
+H3 -[#1565C0]> H1 : echo "msg1"
+
+legend right
+  TCP server on h2: simple echo on port 5000
+  UDP server on h3: simple echo on port 6000
+  The SDN controller distinguishes TCP
+  from UDP via ip_proto in the match.
+  Students observe the difference in
+  flow table entries for each protocol.
+endlegend
+@enduml

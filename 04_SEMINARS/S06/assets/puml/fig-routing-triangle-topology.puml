@@ -1,0 +1,34 @@
+@startuml fig-routing-triangle-topology
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Triangle Routing Topology — Three Routers with /30 Subnets
+
+rectangle "h1\n10.0.1.2/30" as H1 #FFE0B2
+
+package "Router Triangle" as tri #F5F5F5 {
+    rectangle "r1\nr1-eth0: 10.0.1.1\nr1-eth1: 10.0.12.1\nr1-eth2: 10.0.13.1" as R1 #E3F2FD
+    rectangle "r2\nr2-eth0: 10.0.12.2\nr2-eth1: 10.0.23.1" as R2 #BBDEFB
+    rectangle "r3\nr3-eth0: 10.0.3.1\nr3-eth1: 10.0.23.2\nr3-eth2: 10.0.13.2" as R3 #BBDEFB
+}
+
+rectangle "h3\n10.0.3.2/30" as H3 #FFE0B2
+
+H1 -down-> R1 : 10.0.1.0/30
+R1 -right-> R2 : 10.0.12.0/30
+R2 -down-> R3 : 10.0.23.0/30
+R1 -down-> R3 : 10.0.13.0/30
+R3 -down-> H3 : 10.0.3.0/30
+
+legend right
+  Each point-to-point link uses a
+  /30 subnet (2 usable addresses).
+  Routers are Linux nodes with
+  ip_forward=1 enabled in Mininet.
+  Students configure static routes
+  to establish h1 ↔ h3 connectivity.
+endlegend
+@enduml

@@ -1,0 +1,35 @@
+@startuml fig-pseudo-ftp-active-get-sequence
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title Pseudo-FTP — active_get sequence
+
+participant "Client\n(pseudo_ftp_client.py)" as C #FFE0B2
+participant "Client data\nlistener" as CL #FFF9C4
+participant "Server\n(pseudo_ftp_server.py)" as S #C8E6C9
+
+C -> C : bind() + listen()\non ephemeral port P
+activate CL
+
+C -> S : <color:#1565C0>"active_get filename P"</color>\n(control connection :3333)
+
+S -> S : open FILE_ROOT/filename
+
+S -> CL : <color:#43A047>connect(client_ip, P)</color>\n(data connection)
+S -> CL : send(1-byte length + content)
+CL --> S : TCP ACK
+deactivate CL
+
+S --> C : "done!"\n(control connection)
+
+C -> C : save to ./client-temp/filename
+
+legend bottom
+  Active mode: the client opens a temporary listener.
+  The server connects back to the client on the announced port.
+  This mirrors real FTP PORT/active transfer behaviour.
+endlegend
+@enduml

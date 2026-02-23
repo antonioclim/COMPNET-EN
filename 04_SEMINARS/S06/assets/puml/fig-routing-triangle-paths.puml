@@ -1,0 +1,37 @@
+@startuml fig-routing-triangle-paths
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title Alternative Routing Paths: h1 → h3 through the Triangle
+
+participant "h1\n10.0.1.2" as H1 #FFE0B2
+participant "r1" as R1 #E3F2FD
+participant "r2" as R2 #BBDEFB
+participant "r3" as R3 #BBDEFB
+participant "h3\n10.0.3.2" as H3 #FFE0B2
+
+== PATH A — Direct: r1 → r3 (default) ==
+
+H1 -[#43A047]> R1 : ping 10.0.3.2
+R1 -[#43A047]> R3 : via 10.0.13.2\n(r1-eth2 → r3-eth2)
+R3 -[#43A047]> H3 : delivered
+
+== PATH B — Indirect: r1 → r2 → r3 ==
+
+H1 -[#1565C0]> R1 : ping 10.0.3.2
+R1 -[#1565C0]> R2 : via 10.0.12.2\n(r1-eth1 → r2-eth0)
+R2 -[#1565C0]> R3 : via 10.0.23.2\n(r2-eth1 → r3-eth1)
+R3 -[#1565C0]> H3 : delivered
+
+legend right
+  Path A: 2 hops (direct r1 → r3)
+  Path B: 3 hops (r1 → r2 → r3)
+  Switching paths requires deleting
+  the old route on r1 and adding a
+  new next-hop. traceroute reveals
+  which path is currently in use.
+endlegend
+@enduml

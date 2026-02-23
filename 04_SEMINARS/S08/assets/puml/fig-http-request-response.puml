@@ -1,0 +1,37 @@
+@startuml fig-http-request-response
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title HTTP Request–Response Exchange
+
+participant "Client\n(curl / browser)" as C #FFE0B2
+participant "Server\n(Apache, nginx, Flask, …)" as S #C8E6C9
+
+C -[#1565C0]> S : **GET** /index.html HTTP/1.1\nHost: example.com\nUser-Agent: curl/8.0\nAccept: */*
+
+S -[#43A047]> C : HTTP/1.1 **200 OK**\nContent-Type: text/html\nContent-Length: 1256\n\n<html>…</html>
+
+|||
+
+C -[#1565C0]> S : **POST** /api HTTP/1.1\nContent-Type: application/json\n\n{"key": "value"}
+
+S -[#43A047]> C : HTTP/1.1 **201 Created**\nContent-Type: application/json\n\n{"status": "ok"}
+
+|||
+
+C -[#1565C0]> S : **GET** /missing HTTP/1.1
+
+S -[#E53935]> C : HTTP/1.1 **404 Not Found**
+
+legend right
+  Every HTTP exchange has a request and
+  a response. The request contains method,
+  path, headers and optional body.
+  The response contains status code,
+  headers and optional body.
+  curl -v shows the full exchange.
+endlegend
+@enduml

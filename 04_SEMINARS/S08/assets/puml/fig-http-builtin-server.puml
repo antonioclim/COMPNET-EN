@@ -1,0 +1,38 @@
+@startuml fig-http-builtin-server
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Python http.server — Built-in HTTP Server Architecture
+
+rectangle "Client\n(curl / browser)" as client #FFE0B2
+
+package "Python HTTP Server (port 8000)" as srv #E3F2FD {
+
+  rectangle "**TCPServer**\nsocketserver module\nbind + listen + accept" as tcp #BBDEFB
+
+  rectangle "**MyHandler**\nextends SimpleHTTPRequestHandler" as handler #C8E6C9 {
+    rectangle "do_GET()" as doget #E8F5E9
+  }
+
+  rectangle "/hello\ntext/plain response" as ep1 #FFF9C4
+  rectangle "/api/time\nJSON response" as ep2 #FFF9C4
+  rectangle "/* (default)\nstatic file serving\nfrom current directory" as ep3 #F5F5F5
+}
+
+client -down-> tcp : HTTP GET request
+tcp -down-> handler : dispatch to handler
+doget -down-> ep1 : path == "/hello"
+doget -down-> ep2 : path == "/api/time"
+doget -down-> ep3 : fallback to\nsuper().do_GET()
+
+legend right
+  TCPServer manages the socket lifecycle.
+  MyHandler overrides do_GET() to route
+  custom endpoints. Unrecognised paths
+  fall through to SimpleHTTPRequestHandler
+  which serves static files automatically.
+endlegend
+@enduml

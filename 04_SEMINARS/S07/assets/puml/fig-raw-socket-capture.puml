@@ -1,0 +1,40 @@
+@startuml fig-raw-socket-capture
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Raw Socket Packet Capture Architecture
+
+rectangle "Network\nMedium" as wire #F5F5F5
+
+package "Operating System (Linux Kernel)" as kernel #E3F2FD {
+    rectangle "NIC Driver\n(eth0 / h1-eth0)" as nic #BBDEFB
+    rectangle "Network Stack\n(protocol processing)" as stack #BBDEFB
+    rectangle "AF_PACKET\n(raw delivery)" as afpkt #90CAF9
+}
+
+package "User Space" as user #FFF3E0 {
+    rectangle "Normal Socket\n(TCP/UDP)\nsees own data only" as normsock #ECEFF1
+    rectangle "RAW Socket\n(AF_PACKET, ETH_P_ALL)\nsees all packets" as rawsock #FFE0B2
+}
+
+rectangle "Sniffer Application\n(packet_sniffer.py)" as sniffer #C8E6C9
+
+wire -down-> nic : frames arrive
+nic -down-> stack : deliver to stack
+nic -down-> afpkt : copy to raw\n(if promiscuous\nor ETH_P_ALL)
+stack -down-> normsock : filtered by\nport/connection
+afpkt -down-> rawsock : raw IP/Ethernet\nframes
+rawsock -down-> sniffer : recvfrom()\nreturns raw bytes
+
+legend right
+  A RAW socket (AF_PACKET) receives copies
+  of packets traversing the interface.
+  Requires root privileges (sudo).
+  Promiscuous mode captures all frames
+  on the medium, not just local traffic.
+  Normal sockets see only their own data.
+endlegend
+@enduml

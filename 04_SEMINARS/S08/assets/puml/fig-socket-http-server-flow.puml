@@ -1,0 +1,50 @@
+@startuml fig-socket-http-server-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+
+title Manual Socket HTTP Server — Request Handling Flow
+
+start
+
+:Create TCP socket\nbind to 0.0.0.0:8000\nlisten(5);
+
+repeat
+  :accept() — wait for\nincoming connection;
+
+  :recv() — read raw\nrequest bytes;
+
+  :Parse first line\n(e.g. "GET /index.html HTTP/1.1");
+
+  if (Valid request line?) then (no)
+    #FFCDD2:Send 500\nInternal Server Error;
+  else (yes)
+    if (Method == GET?) then (no)
+      #FFCDD2:Send 500\nOnly GET supported;
+    else (yes)
+      :Map path to file\nin static/ directory;
+      :Sanitise path\n(remove ".." segments);
+
+      if (File exists?) then (no)
+        #FFCDD2:Send **404 Not Found**\n<h1>404 Not Found</h1>;
+      else (yes)
+        :Read file contents;
+        :Detect MIME type\n(mimetypes module);
+        #C8E6C9:Send **200 OK**\nContent-Type + Content-Length\n+ file body;
+      endif
+    endif
+  endif
+
+  :close() connection;
+repeat while (server running?) is (yes)
+
+stop
+
+legend right
+  The server handles one connection at a time.
+  Content-Length must match the body size
+  or the client will hang or truncate.
+  Path "/" maps to the main index page.
+endlegend
+@enduml

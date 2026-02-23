@@ -1,0 +1,29 @@
+@startuml fig-ftp-control-data-channels
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title FTP dual-connection architecture (control + data)
+
+package "FTP Client" as client_pkg #FFF3E0 {
+  card "FTP client\nprocess" as client #FFE0B2
+}
+
+package "FTP Server" as server_pkg #E8F5E9 {
+  card "Control listener\nport 21" as ctrl #C8E6C9
+  card "Data transfer\n(dynamic port)" as data #BBDEFB
+  card "File system\n(server storage)" as fs #FFF9C4
+}
+
+client -right-> ctrl : <color:#1565C0>control connection\n(commands: USER, LIST, RETR, STOR)</color>
+client -right-> data : <color:#43A047>data connection\n(file content / directory listing)</color>
+data -down-> fs : read / write files
+
+legend bottom
+  FTP separates signalling (control) from payload (data).
+  The control connection persists for the entire session.
+  A new data connection is created for each transfer.
+endlegend
+@enduml

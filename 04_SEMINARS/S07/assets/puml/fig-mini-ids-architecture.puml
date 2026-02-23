@@ -1,0 +1,60 @@
+@startuml fig-mini-ids-architecture
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Mini IDS Architecture — Integrated Intrusion Detection
+
+rectangle "Network Interface\n(AF_PACKET, ETH_P_ALL)" as nic #E3F2FD
+
+package "Packet Parser" as parser #F5F5F5 {
+    rectangle "Ethernet\nheader" as eth #BBDEFB
+    rectangle "IPv4\nheader" as ipv4 #BBDEFB
+    rectangle "TCP header\n(ports + flags)" as tcp #BBDEFB
+    rectangle "UDP header\n(ports)" as udp #BBDEFB
+    eth -right-> ipv4
+    ipv4 -right-> tcp
+    ipv4 -right-> udp
+}
+
+package "Detection Engines" as engines #FFEBEE {
+    rectangle "TCP Port Scan\nDetector" as scaneng #FFCDD2
+    rectangle "UDP Spray\nDetector" as sprayeng #FFCDD2
+    rectangle "TCP Flood\nDetector" as floodeng #FFCDD2
+}
+
+package "State Tables (ids_state)" as tables #FFF9C4 {
+    rectangle "tcp_scan\n{src_ip: {port: ts}}" as tscan #ECEFF1
+    rectangle "udp_spray\n{src_ip: {port: ts}}" as uspray #ECEFF1
+    rectangle "flood\n{(dst_ip,port): {ts: ts}}" as tflood #ECEFF1
+}
+
+rectangle "log_alert()\ntimestamp + message" as logger #C8E6C9
+
+rectangle "ids_alerts.log\n(persistent file)" as logfile #E8F5E9
+rectangle "Console output\n(real-time)" as console #E8F5E9
+
+nic -down-> parser : raw frames
+tcp -down-> scaneng : SYN without ACK
+tcp -down-> floodeng : all TCP packets
+udp -down-> sprayeng : all UDP packets
+scaneng -right-> tscan : track ports
+sprayeng -right-> uspray : track ports
+floodeng -right-> tflood : track timestamps
+scaneng -down-> logger : threshold alert
+sprayeng -down-> logger : threshold alert
+floodeng -down-> logger : threshold alert
+logger -down-> logfile : append
+logger -down-> console : print
+
+legend right
+  The mini IDS combines three detection
+  engines fed by a shared packet parser.
+  TCP scan: SYN to many ports from one source.
+  UDP spray: datagrams to many ports from one source.
+  TCP flood: many packets to the same destination port.
+  All alerts are logged with timestamps.
+endlegend
+@enduml

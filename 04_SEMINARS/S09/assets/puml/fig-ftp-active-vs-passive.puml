@@ -1,0 +1,43 @@
+@startuml fig-ftp-active-vs-passive
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title FTP active mode vs passive mode
+
+participant "FTP Client" as C #FFE0B2
+participant "FTP Server\n(port 21)" as S #C8E6C9
+
+== Active mode ==
+
+C -> S : PORT <client-ip>,<client-port>
+note right of C
+  Client opens a listener.
+  Server initiates the
+  data connection back.
+end note
+S -> C : <color:#1565C0>data connection (server → client)</color>
+S --> C : file content
+C -> S : ACK (transfer complete)
+
+== Passive mode ==
+
+C -> S : PASV
+S --> C : 227 Entering Passive Mode (<server-port>)
+note right of S
+  Server opens a listener.
+  Client initiates the
+  data connection forward.
+end note
+C -> S : <color:#43A047>data connection (client → server)</color>
+S --> C : file content
+C -> S : ACK (transfer complete)
+
+legend bottom
+  Active mode fails behind NAT/firewalls (server cannot reach client).
+  Passive mode works because the client initiates both connections.
+  Passive mode is the default in virtually all modern FTP clients.
+endlegend
+@enduml

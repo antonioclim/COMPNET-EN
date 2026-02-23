@@ -1,0 +1,45 @@
+@startuml fig-sdn-architecture-concept
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title SDN Architecture: Control Plane vs Data Plane Separation
+
+package "Application Plane" as app #E8F5E9 {
+    rectangle "Network App\n(policy, monitoring)" as napp #C8E6C9
+}
+
+package "Control Plane" as ctrl #E1BEE7 {
+    rectangle "SDN Controller\n(Os-Ken, OpenDaylight)" as ctl #E1BEE7
+}
+
+package "Data Plane" as data #E3F2FD {
+    rectangle "Switch A" as swA #BBDEFB
+    rectangle "Switch B" as swB #BBDEFB
+    rectangle "Switch C" as swC #BBDEFB
+}
+
+napp -down-> ctl : northbound API
+
+ctl -down-> swA : OpenFlow\n(flow_mod, packet_out)
+ctl -down-> swB : OpenFlow
+ctl -down-> swC : OpenFlow
+
+swA -up[#FF9800]-> ctl : packet_in\n(unknown traffic)
+swB -up[#FF9800]-> ctl : packet_in
+swC -up[#FF9800]-> ctl : packet_in
+
+swA <-right-> swB : data forwarding
+swB <-right-> swC : data forwarding
+
+legend right
+  Classical networks: each device
+  decides independently (distributed).
+  SDN: a central controller holds
+  the forwarding logic and pushes
+  match–action rules to switches.
+  Switches only execute the rules.
+endlegend
+@enduml

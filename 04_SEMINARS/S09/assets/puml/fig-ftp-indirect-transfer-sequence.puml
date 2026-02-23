@@ -1,0 +1,45 @@
+@startuml fig-ftp-indirect-transfer-sequence
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title Indirect file transfer — client1 → server → client2
+
+participant "client1\n(seminar9_client1)" as C1 #FFE0B2
+participant "FTP server\n(seminar9_ftp_server)" as S #C8E6C9
+participant "client2\n(seminar9_client2)" as C2 #BBDEFB
+
+== Phase 1 — client1 uploads ==
+
+C1 -> S : connect(ftp-server, 2121)
+C1 -> S : LOGIN test / 12345
+S --> C1 : 230 Login successful
+C1 -> S : STOR from_client1.txt
+S --> C1 : 226 Transfer complete
+
+note right of S
+  File is now stored in
+  server-data/ volume.
+end note
+
+== Phase 2 — client2 downloads ==
+
+C2 -> S : connect(ftp-server, 2121)
+C2 -> S : LOGIN test / 12345
+S --> C2 : 230 Login successful
+C2 -> S : RETR from_client1.txt
+S --> C2 : 226 Transfer complete
+
+note right of C2
+  File now resides in
+  client2-data/ volume.
+end note
+
+legend bottom
+  The two clients never communicate directly.
+  The FTP server acts as a shared intermediary (store-and-forward).
+  This pattern is common in organisational file-sharing scenarios.
+endlegend
+@enduml
