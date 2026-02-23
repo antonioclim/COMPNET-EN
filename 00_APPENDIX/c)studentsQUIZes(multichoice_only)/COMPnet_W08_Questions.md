@@ -1,6 +1,5 @@
-# Computer Networks — Week 8
-
-#### Rețele de Calculatoare — Săptămâna 8
+# Week 08 — Computer Networks
+### *Rețele de Calculatoare — Săptămâna 8*
 
 > Question Pool — Practice Set
 

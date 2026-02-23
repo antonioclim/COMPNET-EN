@@ -54,7 +54,7 @@ La finalul seminarului, studentul poate:
 | `S01_Part05_Scenario_Wireshark_Netcat.md` | Scenariu demonstrație | — |
 | `S01_Part06_Tasks_Wireshark_Netcat.md` | Exercițiu individual | `wireshark_activity_output.zip` |
 
-Suplimentar: `04_SEMINARS/_HTMLsupport/S01/S01_CLI_NetcatTCP-UDP_Wireshark_sim.html` — simulator interactiv (opțional, pentru exersare individuală).
+Suplimentar: `04_SEMINARS/_HTMLsupport/S01/S01_Part01_Page_CLI_Netcat_Wireshark_Sim.html` — simulator interactiv (opțional, pentru exersare individuală).
 
 ---
 
@@ -410,7 +410,7 @@ Oprește captura. Wireshark → `S01_udp_9201.pcap` → display filter: `udp.por
 
 > *▸ Pentru capturi, studenții pot folosi `tcpdump ... tcp port 9300` / `udp port 9301` și să includă screenshot cu comanda ca dovadă de capture filter (BPF). E la fel de valid ca folosirea câmpului Capture Filter din Wireshark.*
 
-Opțional — simulator interactiv: `04_SEMINARS/_HTMLsupport/S01/S01_CLI_NetcatTCP-UDP_Wireshark_sim.html`.
+Opțional — simulator interactiv: `04_SEMINARS/_HTMLsupport/S01/S01_Part01_Page_CLI_Netcat_Wireshark_Sim.html`.
 
 ### Preview S02
 

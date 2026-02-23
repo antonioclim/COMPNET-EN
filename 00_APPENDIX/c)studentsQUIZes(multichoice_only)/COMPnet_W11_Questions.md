@@ -1,7 +1,7 @@
-# Computer Networks — Week 11
-## Rețele de Calculatoare — Săptămâna 11
+# Week 11 — Computer Networks
+### *Rețele de Calculatoare — Săptămâna 11*
 
-### Practice Questions / Întrebări de practică
+> Practice Questions / Întrebări de practică
 
 ---
 

@@ -1,5 +1,5 @@
-# Computer Networks — Week 12
-## Rețele de Calculatoare — Săptămâna 12
+# Week 12 — Computer Networks
+### *Rețele de Calculatoare — Săptămâna 12*
 
 **SMTP, POP3/IMAP, MTA/MUA/MDA, RPC (JSON-RPC, XML-RPC, gRPC), Protocol Buffers**
 

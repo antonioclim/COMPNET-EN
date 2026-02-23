@@ -1,6 +1,5 @@
-# Computer Networks — Week 6: Question Pool
-
-#### Rețele de Calculatoare — Săptămâna 6: Banca de Întrebări
+# Week 06 — Computer Networks
+### *Rețele de Calculatoare — Săptămâna 6*
 
 > NAT / MASQUERADE, iptables, Conntrack, ARP, DHCP, SDN / OpenFlow
 > 77 questions  •  Bilingual EN/RO

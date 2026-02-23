@@ -1,6 +1,5 @@
-# Computer Networks — Week 7
-
-#### Rețele de Calculatoare — Săptămâna 7
+# Week 07 — Computer Networks
+### *Rețele de Calculatoare — Săptămâna 7*
 
 > Question Pool — Practice Set
 

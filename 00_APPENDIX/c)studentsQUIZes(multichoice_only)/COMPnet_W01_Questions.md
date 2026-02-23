@@ -1,5 +1,5 @@
-# Computer Networks — Week 1
-### *Rețele de calculatoare — Săptămâna 1*
+# Week 01 — Computer Networks
+### *Rețele de Calculatoare — Săptămâna 1*
 
 > Practice Questions / Întrebări de practică
 

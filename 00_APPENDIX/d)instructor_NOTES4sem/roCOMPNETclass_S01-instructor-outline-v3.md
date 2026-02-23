@@ -349,7 +349,7 @@ Indică pe repo/Moodle cele trei fișiere de exerciții din `04_SEMINARS/S01/`:
 
 > *▸ Porturile din tasks diferă de cele din demo (9100/9101 pentru netcat, 9300/9301 pentru Wireshark) — e intenționat: exercițiul cere muncă proprie, nu copie.*
 
-Opțional — pentru studenți care vor exersare suplimentară: simulatorul interactiv HTML `04_SEMINARS/_HTMLsupport/S01/S01_CLI_NetcatTCP-UDP_Wireshark_sim.html` (se deschide local în browser).
+Opțional — pentru studenți care vor exersare suplimentară: simulatorul interactiv HTML `04_SEMINARS/_HTMLsupport/S01/S01_Part01_Page_CLI_Netcat_Wireshark_Sim.html` (se deschide local în browser).
 
 ### Preview S02
 
@@ -372,7 +372,7 @@ Opțional — pentru studenți care vor exersare suplimentară: simulatorul inte
 | Proiector | Split-screen SERVER / CLIENT |
 | Fișiere kit S01 | `04_SEMINARS/S01/` |
 | Soluții (instructor) | `04_SEMINARS/_tutorial-solve/s1/` |
-| Simulator HTML | `04_SEMINARS/_HTMLsupport/S01/S01_CLI_NetcatTCP-UDP_Wireshark_sim.html` |
+| Simulator HTML | `04_SEMINARS/_HTMLsupport/S01/S01_Part01_Page_CLI_Netcat_Wireshark_Sim.html` |
 | Ghid setup | `01_GHID_MININET-SDN/SETUP-GUIDE-COMPNET-EN.md` |
 
 ---

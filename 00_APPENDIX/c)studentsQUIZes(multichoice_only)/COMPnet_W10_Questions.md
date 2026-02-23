@@ -1,6 +1,5 @@
-# Computer Networks – Week 10
-
-#### Rețele de calculatoare – Săptămâna 10
+# Week 10 — Computer Networks
+### *Rețele de Calculatoare — Săptămâna 10*
 
 > Practice Questions / Întrebări de practică
 

@@ -1,6 +1,5 @@
-# Computer Networks — Week 9: Question Pool
-
-#### Rețele de Calculatoare — Săptămâna 9: Banca de Întrebări
+# Week 09 — Computer Networks
+### *Rețele de Calculatoare — Săptămâna 9*
 
 > OSI Session & Presentation Layers, FTP (Active/Passive), PASV, struct / Binary Protocols, CRC-32, Endianness
 > 53 questions  •  Bilingual EN/RO

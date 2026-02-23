@@ -1,4 +1,4 @@
-# Computer Networks — Week 4
+# Week 04 — Computer Networks
 ### *Rețele de Calculatoare — Săptămâna 4*
 
 > Question Pool — Practice Set

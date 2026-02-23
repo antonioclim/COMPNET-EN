@@ -1,5 +1,5 @@
-# Computer Networks — Week 5
-### *Rețele de calculatoare — Săptămâna 5*
+# Week 05 — Computer Networks
+### *Rețele de Calculatoare — Săptămâna 5*
 
 > Practice Questions / Întrebări de practică
 

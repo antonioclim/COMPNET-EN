@@ -1,5 +1,5 @@
-# Computer Networks — Week 3: Question Pool
-### *Rețele de Calculatoare — Săptămâna 3: Banca de Întrebări*
+# Week 03 — Computer Networks
+### *Rețele de Calculatoare — Săptămâna 3*
 
 > UDP Sockets, TCP vs. UDP, Broadcasting, Threaded Servers • 49 questions • Bilingual EN/RO
 

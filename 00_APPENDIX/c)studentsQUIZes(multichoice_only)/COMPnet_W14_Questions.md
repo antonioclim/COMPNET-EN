@@ -1,7 +1,7 @@
-# Computer Networks — Week 14
-## Rețele de Calculatoare — Săptămâna 14
+# Week 14 — Computer Networks
+### *Rețele de Calculatoare — Săptămâna 14*
 
-### Question Pool — Practice Set
+> Question Pool — Practice Set
 
 ---
 

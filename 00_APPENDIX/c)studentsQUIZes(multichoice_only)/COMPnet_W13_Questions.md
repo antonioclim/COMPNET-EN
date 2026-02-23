@@ -1,7 +1,7 @@
-# Computer Networks — Week 13
-## Rețele de Calculatoare — Săptămâna 13
+# Week 13 — Computer Networks
+### *Rețele de Calculatoare — Săptămâna 13*
 
-### Question Pool — Practice Set
+> Question Pool — Practice Set
 
 ---
 
