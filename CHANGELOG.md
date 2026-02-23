@@ -1,10 +1,47 @@
-# CHANGELOG: v0 (RO) → v11 (EN) CompNet 2025 Kit
+# CHANGELOG: v0 (RO) → v13 (EN) CompNet 2025 Kit
 
-**Migration scope:** Romanian-language networking course kit → Bilingual (EN primary, RO preserved) kit  
-**Generated:** 2026-02-18  
+**Migration scope:** Romanian-language networking course kit → Bilingual (EN primary, RO preserved) kit
+**Generated:** 2026-02-18
 **Method:** Automated file-by-file hash comparison + code-fingerprint matching + manual diff review
 
 ---
+
+## v13 — Phase 5: Prettier scoped formatting (2026-02-23)
+
+- Added `.prettierrc` with conservative settings (`proseWrap: preserve`, `printWidth: 120`, `endOfLine: lf`).
+- Added `.prettierignore` excluding `roCOMPNETclass_*`, bilingual quizzes, binaries and scripts.
+- Added `package.json` with `format:check`, `format:write` and offline equivalents.
+- Added `format-offline.js` — zero-dependency Node.js formatting script for offline environments.
+- Formatted 104 files (Markdown and HTML): normalised LF line endings, stripped trailing whitespace, collapsed excessive blank lines, ensured trailing newlines.
+- Updated `00_TOOLS/README.md` with local formatting instructions and scope documentation.
+- Updated root `README.md` with a formatting section.
+- No semantic changes: all diffs are whitespace-only (verified via normalised comparison).
+
+## v13 — Structural and metadata remediation (2026-02-23)
+
+- Added root `README.md` for GitHub deployment.
+- Updated `.gitignore` with project-specific entries (plantuml.jar, legacy archives, Windows artefacts).
+- Created 9 missing `images/` directories with `.gitkeep` (8 seminars + 1 project).
+- Created missing `render.sh` for `02_PROJECTS/01_network_applications`.
+- Added `.gitkeep` to all empty directories tracked by Git (15 lecture dirs + 2 scenario dirs).
+- Renamed `S6Theory_NAT PAT,...` to remove spaces from the filename.
+- Renamed lecture markdowns c8.md–c13.md to descriptive names (c8-transport-layer.md and so on).
+- Updated PlantUML generation scripts from hardcoded v1.2024.8 to the `latest` release URL.
+- Rewrote `PlantUML(optional)/README.md` with correct diagram counts (118, not 72).
+- Inserted 34 missing `[FIG]` references across 9 lecture markdowns.
+- Replaced Unicode mathematical symbols with ASCII equivalents in 7 `.puml` files.
+- Fixed broken internal markdown links in `00_APPENDIX/`.
+- Created section-level `README.md` files for `00_TOOLS/`, `01_GHID_MININET-SDN/`, `03_LECTURES/` and `04_SEMINARS/`.
+- Created per-seminar `README.md` for S01–S13.
+
+## v12 — Phase 1 cleanup (2026-02-23)
+
+- Removed all `__pycache__/` directories and `.pyc` files (63 directories, 120 files).
+- Removed `00_TOOLS/plantuml.jar` (15.2 MB binary; auto-downloadable via generation scripts).
+- Removed 90 stale Romanian-era PNG renders from `03_LECTURES/*/assets/images/`.
+- Removed orphan PNG `fig-transmission-media.png` (content covered by `fig-media.puml`).
+- Removed `00_APPENDIX/b)optional_LECTURES/roVERSIONS.zip` (Romanian legacy archive).
+- Net reduction: approximately 17.5 MB and 276 files removed.
 
 ## Directory Structure Overhaul
 

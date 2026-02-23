@@ -1,0 +1,15 @@
+{
+  "name": "compnet-course-kit",
+  "version": "13.5.0",
+  "private": true,
+  "description": "Computer Networks course kit — formatting tools",
+  "scripts": {
+    "format:check": "prettier --check \"**/*.{md,html}\"",
+    "format:write": "prettier --write \"**/*.{md,html}\"",
+    "format:check:offline": "node format-offline.js --check",
+    "format:write:offline": "node format-offline.js --write"
+  },
+  "devDependencies": {
+    "prettier": "^3.5.3"
+  }
+}
