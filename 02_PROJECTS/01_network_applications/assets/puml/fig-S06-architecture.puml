@@ -1,0 +1,42 @@
+@startuml fig-S06-architecture
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title S06 — TCP Pub/Sub Broker: System Architecture
+
+package "Docker Network" as net #F5F5F5 {
+
+    rectangle "broker\n:5006/TCP" as broker #C8E6C9 {
+        rectangle "Client Registry\n(ID, connection)" as reg #BBDEFB
+        rectangle "Topic Registry\n(topic → subscribers)" as topics #90CAF9
+        rectangle "Message Queue\n(per-topic, ordered)" as queue #FFF9C4
+        rectangle "Protocol Parser\n(framing, ACK)" as parser #ECEFF1
+    }
+
+    rectangle "Publisher" as pub #FFE0B2
+    rectangle "Subscriber A" as subA #FFE0B2
+    rectangle "Subscriber B" as subB #FFE0B2
+    rectangle "Flex Client\n(other language)" as flex #E1BEE7
+
+    rectangle "tester\n(pytest -m e2)" as tester #FFF9C4
+}
+
+pub --> broker : "PUBLISH topic payload"
+subA --> broker : "SUBSCRIBE topic"
+subB --> broker : "SUBSCRIBE topic"
+broker -[#1565C0]-> subA : "DELIVER topic payload"
+broker -[#1565C0]-> subB : "DELIVER topic payload"
+flex --> broker : "(interoperable)"
+tester -up-> broker : dual role: pub + sub\n+ PCAP
+
+legend right
+  Deterministic routing: all subscribers
+  receive messages in broker-arrival order.
+  Delivery semantics defined in E1.
+  Framing: delimiter or length prefix.
+  Port: 5006/TCP
+endlegend
+@enduml

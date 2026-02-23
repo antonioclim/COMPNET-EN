@@ -1,0 +1,52 @@
+@startuml fig-S10-e3-states
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+
+title S10 — Conflict Resolution Decision Flow
+
+start
+
+:Compare manifests\n(per-file diff);
+
+if (File only on Replica A?) then (yes)
+    #C8E6C9:Action: PUSH A → B;
+    stop
+elseif (File only on Replica B?) then (yes)
+    #C8E6C9:Action: PULL B → A;
+    stop
+endif
+
+:File exists on both replicas;
+
+if (SHA-256 hashes match?) then (yes)
+    #ECEFF1:Action: SKIP (identical);
+    stop
+else (different)
+endif
+
+:CONFLICT detected\n(same name, different content);
+
+if (Conflict policy?) then (last-writer-wins)
+    :Compare mtime timestamps;
+    if (A newer?) then (yes)
+        #FFF9C4:Action: PUSH A → B\n(overwrite B);
+    else (B newer)
+        #FFF9C4:Action: PULL B → A\n(overwrite A);
+    endif
+else (rename)
+    #FFF9C4:Action: keep both\nrename one as .conflict;
+endif
+
+:Log conflict resolution\n(file, policy, outcome);
+
+stop
+
+legend right
+  Deterministic: same input → same output
+  Three outcomes: PUSH, PULL, SKIP
+  Conflict policy chosen in E1 specification
+  Both replicas reach identical state after sync
+endlegend
+@enduml

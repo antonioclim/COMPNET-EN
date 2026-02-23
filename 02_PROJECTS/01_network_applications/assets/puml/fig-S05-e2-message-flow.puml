@@ -1,0 +1,49 @@
+@startuml fig-S05-e2-message-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title S05 — E2 Path: Load Distribution and Backend Failure
+
+participant "tester" as C #FFE0B2
+participant "lb\n:8080" as LB #E1BEE7
+participant "backend_a\n:8081" as A #C8E6C9
+participant "backend_b\n:8082" as B #C8E6C9
+
+== ROUND-ROBIN DISTRIBUTION ==
+C -> LB : GET /work HTTP/1.1
+LB -> A : GET /work HTTP/1.1\nHost: backend_a
+A -[#43A047]-> LB : 200 OK (instance: a)
+LB -[#43A047]-> C : 200 OK\nX-Backend: a
+
+C -> LB : GET /work HTTP/1.1
+LB -> B : GET /work HTTP/1.1\nHost: backend_b
+B -[#43A047]-> LB : 200 OK (instance: b)
+LB -[#43A047]-> C : 200 OK\nX-Backend: b
+
+== HEALTH CHECK ==
+LB -> A : GET /health
+A --> LB : 200 OK
+LB -> B : GET /health
+B --> LB : 200 OK
+
+== BACKEND FAILURE ==
+note over B #FFCDD2 : backend_b stopped
+
+LB -[#E53935]-> B : GET /health → timeout
+note right of LB : backend_b marked unhealthy
+
+C -> LB : GET /work HTTP/1.1
+LB -> A : GET /work (all traffic to a)
+A -[#43A047]-> LB : 200 OK
+LB -[#43A047]-> C : 200 OK\nX-Backend: a
+
+legend right
+  PCAP shows: LB→backend connections
+  X-Backend identifies serving instance
+  Health check on /health endpoint
+  Validates R1–R5 in S05.json
+endlegend
+@enduml

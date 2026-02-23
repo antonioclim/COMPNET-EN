@@ -1,0 +1,44 @@
+@startuml fig-S02-architecture
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title S02 — File Transfer Server (Passive FTP Style): System Architecture
+
+package "Docker Network" as net #F5F5F5 {
+
+    rectangle "ftp_server" as srv #C8E6C9 {
+        rectangle "Control Channel\n:5021/TCP" as ctrl #BBDEFB
+        rectangle "Data Channel\n:60000–60100/TCP\n(passive range)" as data #90CAF9
+        rectangle "Storage\n(chroot, per-user)" as store #FFF9C4
+    }
+
+    rectangle "Client A" as cA #FFE0B2
+    rectangle "Client B" as cB #FFE0B2
+    rectangle "Flex Client\n(other language)" as flex #E1BEE7
+
+    rectangle "tester\n(pytest -m e2)" as tester #FFF9C4
+}
+
+cA --> ctrl : "TCP :5021\nUSER, PASV, RETR, STOR"
+cA --> data : "TCP :60000+\n(file payload)"
+
+cB --> ctrl : "TCP :5021\n(parallel session)"
+cB --> data : "TCP :60000+\n(parallel transfer)"
+
+flex --> ctrl : "(interoperable)"
+tester -up-> ctrl : smoke tests\n+ PCAP
+
+ctrl -right-> store : path validation\nchroot isolation
+data -right-> store : streaming\nread/write
+
+legend right
+  Control channel: commands and responses
+  Data channel: passive mode (server announces port)
+  Integrity: SHA-256 checksum after transfer
+  Ports: 5021/TCP (control), 60000–60100/TCP (data)
+  Path traversal (..) blocked by server
+endlegend
+@enduml

@@ -1,0 +1,43 @@
+@startuml fig-S15-architecture
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title S15 — IoT Gateway: UDP Telemetry Ingestion and HTTP API
+
+package "Docker Network" as net #F5F5F5 {
+
+    rectangle "iot_gateway" as gw #C8E6C9 {
+        rectangle "UDP Ingestion\n:5515/UDP" as ingest #BBDEFB
+        rectangle "Validator\n(fields, ranges, dedup)" as valid #FFF9C4
+        rectangle "Ring Buffer\n(last N per sensor)" as ring #90CAF9
+        rectangle "HTTP API\n:8080/TCP" as api #E1BEE7
+    }
+
+    rectangle "Sensor A\n(UDP)" as sA #FFE0B2
+    rectangle "Sensor B\n(UDP)" as sB #FFE0B2
+    rectangle "Dashboard\n(HTTP client)" as dash #FFE0B2
+    rectangle "tester\n(pytest -m e2)" as tester #FFF9C4
+}
+
+sA -right-> ingest : "UDP :5515\nIOT1 telemetry\n(JSON or binary)"
+sB -right-> ingest : "UDP :5515\nIOT1 telemetry"
+ingest --> valid : raw datagram
+valid --> ring : accepted\nmeasurement
+
+dash --> api : "GET /latest\n(per sensor)"
+api --> ring : query\nrecent values
+
+tester -up-> ingest : simulates sensors
+tester -up-> api : queries API\n+ PCAP
+
+legend right
+  Ingestion: UDP (IOT1 magic), predominantly
+  unidirectional (rare ACKs for config only)
+  Storage: per-sensor ring buffer (bounded)
+  Query: HTTP REST API (GET /latest, GET /sensor/{id})
+  Ports: 5515/UDP (ingest), 8080/TCP (API)
+endlegend
+@enduml

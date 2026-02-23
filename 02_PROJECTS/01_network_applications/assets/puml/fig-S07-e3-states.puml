@@ -1,0 +1,59 @@
+@startuml fig-S07-e3-states
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+
+title S07 — DNS Query Resolution Decision Flow
+
+start
+
+:Receive UDP datagram\non :5300;
+
+:Parse DNS header\n(ID, flags, qdcount);
+
+if (Valid DNS query format?) then (yes)
+    :Extract question\n(name, type, class);
+else (no)
+    #FFCDD2:Send FORMERR response;
+    stop
+endif
+
+if (Opcode supported?\n(QUERY only)) then (yes)
+else (no)
+    #FFCDD2:Send NOTIMP response;
+    stop
+endif
+
+if (Name in local zone?) then (yes)
+    #C8E6C9:Build authoritative response\nfrom zone file;
+    :Send response to client;
+    stop
+else (no)
+endif
+
+if (Name in TTL cache\nand not expired?) then (hit)
+    #C8E6C9:Build response from cache;
+    :Send response to client;
+    stop
+else (miss)
+endif
+
+:Forward query to upstream\n(:53/UDP);
+
+if (Upstream responds\nwithin timeout?) then (yes)
+    :Cache response with TTL;
+    :Send response to client;
+else (timeout)
+    #FFCDD2:Send SERVFAIL response;
+endif
+
+stop
+
+legend right
+  Resolution chain: zone → cache → upstream
+  FORMERR for malformed, NOTIMP for bad opcode
+  SERVFAIL on upstream timeout
+  Negative cache for NXDOMAIN (simplified)
+endlegend
+@enduml

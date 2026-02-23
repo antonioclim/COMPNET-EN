@@ -1,0 +1,51 @@
+@startuml fig-S06-e3-states
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+
+title S06 — Pub/Sub Client Session States
+
+[*] --> CONNECTED : TCP handshake\ncompleted
+
+state CONNECTED #E3F2FD {
+    CONNECTED : Awaiting HELLO / AUTH
+}
+
+CONNECTED --> IDENTIFIED : HELLO valid\n(OK HELLO)
+CONNECTED -[#E53935]-> CLOSED : invalid HELLO\nor timeout
+
+state IDENTIFIED #BBDEFB {
+    IDENTIFIED : Can SUBSCRIBE, PUBLISH, UNSUBSCRIBE
+    IDENTIFIED : No active subscriptions yet
+}
+
+IDENTIFIED --> SUBSCRIBED : SUBSCRIBE topic\n(OK SUBSCRIBE)
+IDENTIFIED --> IDENTIFIED : PUBLISH topic\n(OK PUBLISH, no self-delivery)
+
+state SUBSCRIBED #C8E6C9 {
+    SUBSCRIBED : Receives DELIVER for subscribed topics
+    SUBSCRIBED : Can PUBLISH and SUBSCRIBE more
+}
+
+SUBSCRIBED --> SUBSCRIBED : SUBSCRIBE another\ntopic
+SUBSCRIBED --> SUBSCRIBED : PUBLISH\n(OK + deliver to others)
+SUBSCRIBED --> IDENTIFIED : UNSUBSCRIBE all\n(no remaining subscriptions)
+SUBSCRIBED --> CLOSED : QUIT or disconnect
+
+IDENTIFIED --> CLOSED : QUIT or disconnect
+
+state CLOSED #FFCDD2 {
+    CLOSED : All subscriptions removed
+    CLOSED : Connection cleaned up
+}
+
+CLOSED --> [*]
+
+legend right
+  States: CONNECTED → IDENTIFIED → SUBSCRIBED
+  PUBLISH works in IDENTIFIED and SUBSCRIBED
+  DELIVER only when SUBSCRIBED to the topic
+  Disconnect cleans all subscriptions
+endlegend
+@enduml

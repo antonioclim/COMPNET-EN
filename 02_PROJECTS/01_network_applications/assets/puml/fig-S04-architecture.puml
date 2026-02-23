@@ -1,0 +1,39 @@
+@startuml fig-S04-architecture
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title S04 — Forward HTTP Proxy: System Architecture
+
+package "Docker Network" as net #F5F5F5 {
+
+    rectangle "http_proxy\n:3128/TCP" as proxy #E1BEE7 {
+        rectangle "Request Parser\n(absolute-form URI)" as rparser #BBDEFB
+        rectangle "Filter Engine\n(blacklist, content-type)" as filter #FFCDD2
+        rectangle "Traffic Logger\n(timestamp, status, size)" as logger #FFF9C4
+    }
+
+    rectangle "origin_server\n:8080/TCP" as origin #C8E6C9
+    rectangle "Client A" as cA #FFE0B2
+    rectangle "Client B" as cB #FFE0B2
+    rectangle "tester\n(pytest -m e2)" as tester #FFF9C4
+}
+
+cA -right-> proxy : "GET http://origin:8080/page\n(proxy request)"
+cB -right-> proxy : "CONNECT origin:443\n(tunnel for HTTPS)"
+
+proxy -right-> origin : "GET /page HTTP/1.1\nHost: origin\n(reconstructed)"
+proxy -[#E53935]-> cA : "403 Forbidden\n(blacklisted URL)"
+
+tester -up-> proxy : validates allow + block\n+ PCAP capture
+
+legend right
+  Two conversations visible in PCAP:
+  client → proxy and proxy → origin
+  HTTP: rewrite absolute-form to origin
+  HTTPS: CONNECT tunnel (no decryption)
+  Ports: 3128/TCP (proxy), 8080/TCP (origin)
+endlegend
+@enduml

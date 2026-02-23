@@ -1,0 +1,46 @@
+@startuml fig-S10-e2-message-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title S10 — E2 Path: Manifest Exchange, Diff and File Transfer
+
+participant "Replica A" as A #E3F2FD
+participant "Replica B\n:5010" as B #C8E6C9
+
+== TCP HANDSHAKE ==
+A -> B : SYN
+B --> A : SYN-ACK
+A -> B : ACK
+
+== MANIFEST EXCHANGE ==
+A -> B : MANIFEST\n[ {name: "a.txt", sha256: "abc1", size: 100} \n  {name: "b.txt", sha256: "def2", size: 200} ]
+B -[#1565C0]-> A : MANIFEST\n[ {name: "a.txt", sha256: "abc1", size: 100} \n  {name: "c.txt", sha256: "ghi3", size: 150} ]
+
+note right of B
+  Diff result:
+  b.txt → only on A (PUSH A→B)
+  c.txt → only on B (PULL B→A)
+  a.txt → same hash (skip)
+end note
+
+== FILE TRANSFER ==
+A -> B : PUSH b.txt (200 bytes)\n(file payload)
+B -[#43A047]-> A : OK SHA256 verified
+
+B -> A : PULL c.txt (150 bytes)\n(file payload)
+A -[#43A047]-> B : OK SHA256 verified
+
+== SESSION CLOSURE ==
+A -> B : DONE
+B --> A : DONE
+A -> B : FIN
+
+legend right
+  PCAP shows: MANIFEST, SHA256 hash
+  PUSH/PULL operations, controlled closure
+  Validates R1–R5 in S10.json
+endlegend
+@enduml

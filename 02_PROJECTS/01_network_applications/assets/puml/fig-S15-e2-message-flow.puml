@@ -1,0 +1,49 @@
+@startuml fig-S15-e2-message-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title S15 — E2 Path: Sensor Telemetry and HTTP Query
+
+participant "Sensor A" as SA #FFE0B2
+participant "Sensor B" as SB #FFE0B2
+participant "iot_gateway\nUDP :5515\nHTTP :8080" as GW #C8E6C9
+participant "tester\n(dashboard)" as D #FFF9C4
+
+== UDP TELEMETRY INGESTION ==
+SA -> GW : IOT1 {sensor_id: "A", seq: 1, temp: 22.5, ts: T1}
+SA -> GW : IOT1 {sensor_id: "A", seq: 2, temp: 22.7, ts: T2}
+SB -> GW : IOT1 {sensor_id: "B", seq: 1, humidity: 65, ts: T1}
+
+note right of GW
+  Validate: mandatory fields present
+  Check: value in valid range
+  Dedup: seq not already seen
+  Store in ring buffer
+end note
+
+SA -> GW : IOT1 {sensor_id: "A", seq: 2, temp: 22.7, ts: T2}
+note right of GW #FFF9C4 : Duplicate seq=2 → discard
+
+== HTTP API QUERY ==
+D -> GW : SYN (:8080)
+GW --> D : SYN-ACK
+D -> GW : ACK
+
+D -> GW : GET /latest HTTP/1.1
+GW -[#43A047]-> D : HTTP/1.1 200 OK\n{sensors: [{id: "A", last: 22.7}, {id: "B", last: 65}]}
+
+D -> GW : GET /sensor/A HTTP/1.1
+GW -[#43A047]-> D : HTTP/1.1 200 OK\n{id: "A", readings: [{seq:1, v:22.5}, {seq:2, v:22.7}]}
+
+D -> GW : FIN
+
+legend right
+  PCAP shows both: UDP datagrams (IOT1)
+  and HTTP request/response pairs
+  seq field enables deduplication
+  Validates R1–R5 in S15.json
+endlegend
+@enduml

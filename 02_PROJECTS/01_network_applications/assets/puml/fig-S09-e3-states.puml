@@ -1,0 +1,42 @@
+@startuml fig-S09-e3-states
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 10
+skinparam shadowing false
+skinparam roundcorner 12
+left to right direction
+
+title S09 — Tunnel Frame Structure (Binary Protocol)
+
+rectangle "TNL1 Frame" as frame #F5F5F5 {
+    together {
+        rectangle "Magic\n4 bytes\nTNL1" as magic #E1BEE7
+        rectangle "Type\n1 byte\nO / D / C / E" as type #90CAF9
+        rectangle "Session ID\n2 bytes\nuint16" as sid #BBDEFB
+        rectangle "Service ID\n1 byte\nuint8" as svcid #BBDEFB
+        rectangle "Payload Length\n4 bytes\nuint32" as plen #FFF9C4
+        rectangle "Payload\n0–MAX bytes" as payload #FFF9C4
+    }
+}
+
+magic -right[hidden]-> type
+type -right[hidden]-> sid
+sid -right[hidden]-> svcid
+svcid -right[hidden]-> plen
+plen -right[hidden]-> payload
+
+rectangle "Frame Types" as ftypes #E8F5E9 {
+    rectangle "O — OPEN\nnew session" as ft_o #C8E6C9
+    rectangle "D — DATA\nsession payload" as ft_d #BBDEFB
+    rectangle "C — CLOSE\nend session" as ft_c #ECEFF1
+    rectangle "E — ERROR\nprotocol error" as ft_e #FFCDD2
+}
+
+legend bottom
+  Every frame begins with ASCII magic TNL1
+  Length-prefixed: receiver reads header then payload
+  Max payload configurable (reject oversized frames)
+  Session ID allows interleaved multiplexing
+  Service ID maps to internal backend via YAML config
+endlegend
+@enduml

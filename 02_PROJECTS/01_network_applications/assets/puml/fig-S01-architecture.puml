@@ -1,0 +1,42 @@
+@startuml fig-S01-architecture
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title S01 — Multi-client TCP Chat: System Architecture
+
+package "Docker Network" as net #F5F5F5 {
+
+    rectangle "chat_server\n:5000/TCP" as srv #C8E6C9 {
+        rectangle "Protocol Parser\n(incremental buffer)" as parser #BBDEFB
+        rectangle "Session Manager\n(auth, presence)" as session #BBDEFB
+        rectangle "Message Router\n(broadcast, private)" as router #BBDEFB
+        rectangle "config.yaml" as cfg #ECEFF1
+    }
+
+    rectangle "Client A\n(Python)" as cA #FFE0B2
+    rectangle "Client B\n(Python)" as cB #FFE0B2
+    rectangle "Client C\n(Flex — other language)" as cC #E1BEE7
+
+    rectangle "tester\n(pytest -m e2)" as tester #FFF9C4
+}
+
+cA -down-> srv : "TCP :5000\nLOGIN, MSG, LIST, QUIT"
+cB -down-> srv : "TCP :5000\nLOGIN, MSG, LIST, QUIT"
+cC -down-> srv : "TCP :5000\n(interoperable)"
+
+parser -right-> session : validated\ncommand
+session -right-> router : authenticated\nuser
+
+tester -up-> srv : smoke tests\n+ PCAP capture
+
+legend right
+  E1: protocol spec, framing, state diagram
+  E2: Docker prototype, pytest, PCAP validation
+  E3: full implementation, Flex client, Mininet demo
+  Port: 5000/TCP (configurable)
+  Framing: newline or length-prefix delimiter
+endlegend
+@enduml

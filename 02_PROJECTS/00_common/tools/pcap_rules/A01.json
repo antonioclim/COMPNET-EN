@@ -1,0 +1,25 @@
+{
+  "project": "A01",
+  "pcap_relpath": "artifacts/pcap/traffic_e2.pcap",
+  "decode_as": [],
+  "rules": [
+    {
+      "id": "R1",
+      "filter": "tcp.port==6653",
+      "condition": ">= 1",
+      "description": "OpenFlow control-plane traffic (TCP/6653) is present."
+    },
+    {
+      "id": "R2",
+      "filter": "tcp.port==6653 && tcp.len>0",
+      "condition": ">= 5",
+      "description": "At least 5 OpenFlow segments with payload (negotiation plus rule installation)."
+    },
+    {
+      "id": "R3",
+      "filter": "ip && (tcp || udp || icmp)",
+      "condition": ">= 5",
+      "description": "Sufficient data-plane traffic to demonstrate filtering."
+    }
+  ]
+}

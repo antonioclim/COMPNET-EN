@@ -1,0 +1,63 @@
+@startuml fig-student-repo-structure
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Standard Student Repository Structure (RC2026)
+
+rectangle "Student Repository Root" as root #F5F5F5 {
+
+  rectangle "README.md" as readme #ECEFF1
+
+  package "docs/" #E8F5E9 {
+    rectangle "E1_specification.md" as e1spec #C8E6C9
+    rectangle "E1_phase0_observations.md" as e1obs #C8E6C9
+    rectangle "E2_pcap_analysis.md" as e2doc #C8E6C9
+    rectangle "E3_final_documentation.md" as e3doc #C8E6C9
+  }
+
+  package "src/" #E3F2FD {
+    rectangle "Application code\n(Python scripts)" as src #BBDEFB
+  }
+
+  package "scripts/" #FFF3E0 {
+    rectangle "Bash automation\n(A-projects only)" as scripts #FFE0B2
+  }
+
+  package "tests/" #E8F5E9 {
+    rectangle "pytest\n(-m e2 minimum)" as tests #C8E6C9
+  }
+
+  package "docker/" #E3F2FD {
+    rectangle "docker-compose.yml" as compose #BBDEFB
+  }
+
+  package "tools/" #FFF3E0 {
+    rectangle "validate_pcap.py" as validator #FFE0B2
+    package "pcap_rules/" #FFF9C4 {
+      rectangle "<CODE>.json" as rules #FFF9C4
+    }
+  }
+
+  package "artifacts/" #FCE4EC {
+    package "pcap/" #FFEBEE {
+      rectangle "traffic_e2.pcap" as pcap #FFCDD2
+    }
+  }
+
+  rectangle "Makefile" as makefile #ECEFF1
+  rectangle "MANIFEST.txt" as manifest #ECEFF1
+}
+
+compose -[hidden]right-> tests
+src -[hidden]right-> scripts
+
+legend bottom
+Minimum structure assumed by the automatic assessment.
+Makefile targets: e2, pcap-validate and clean.
+MANIFEST.txt lists all delivered artefacts for E3.
+docs/ contains one file per assessment milestone.
+endlegend
+@enduml

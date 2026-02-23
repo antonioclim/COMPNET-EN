@@ -1,0 +1,53 @@
+@startuml fig-tester-container-lifecycle
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title Tester Container Lifecycle (entrypoint.sh)
+
+participant "Docker Compose" as DC #E3F2FD
+participant "entrypoint.sh" as EP #90CAF9
+participant "tcpdump" as TD #C8E6C9
+participant "Application\nServices" as APP #BBDEFB
+participant "pytest" as PT #FFE0B2
+participant "validate_pcap.py" as VP #E1BEE7
+
+DC -> EP : start tester container\n(PROJECT_CODE set)
+
+== PHASE 1 — CAPTURE ==
+
+EP -> TD : tcpdump -i any -w traffic_e2.pcap &
+activate TD #C8E6C9
+EP -> EP : sleep 1\n(wait for capture readiness)
+
+== PHASE 2 — SMOKE TESTS ==
+
+EP -> PT : pytest -m e2
+activate PT #FFE0B2
+PT -> APP : HTTP / TCP / UDP requests
+APP --> PT : responses
+PT --> EP : exit code (TEST_RC)
+deactivate PT
+
+== PHASE 3 — STOP AND VALIDATE ==
+
+EP -> TD : kill -2 (SIGINT flush)
+deactivate TD
+
+EP -> VP : validate_pcap.py\n--project $PROJECT_CODE\n--pcap traffic_e2.pcap
+activate VP #E1BEE7
+VP --> EP : rule results (OK / FAIL)
+deactivate VP
+
+EP --> DC : exit $TEST_RC
+
+legend right
+entrypoint.sh uses set -euo pipefail
+for strict error handling.
+SIGINT ensures tcpdump flushes
+all buffered packets before exit.
+Final exit code reflects pytest result.
+endlegend
+@enduml

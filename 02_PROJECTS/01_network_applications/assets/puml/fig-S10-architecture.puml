@@ -1,0 +1,42 @@
+@startuml fig-S10-architecture
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title S10 — Network File Synchronisation: System Architecture
+
+package "Docker Network" as net #F5F5F5 {
+
+    rectangle "Replica A\n(sync_node)" as rA #E3F2FD {
+        rectangle "Scanner\n(build manifest)" as scanA #BBDEFB
+        rectangle "Local Files\n/sync/dir" as filesA #FFF9C4
+    }
+
+    rectangle "Replica B\n(sync_node)\n:5010/TCP" as rB #C8E6C9 {
+        rectangle "Scanner\n(build manifest)" as scanB #BBDEFB
+        rectangle "Comparator\n(diff manifests)" as comp #90CAF9
+        rectangle "Conflict Resolver\n(policy engine)" as conflict #FFCDD2
+        rectangle "Local Files\n/sync/dir" as filesB #FFF9C4
+    }
+
+    rectangle "tester\n(pytest -m e2)" as tester #FFF9C4
+}
+
+rA --> rB : "TCP :5010\nControl: MANIFEST exchange\nTransfer: file payload"
+
+scanA --> rA : manifest\n(name, size, SHA-256, mtime)
+scanB --> comp : local manifest
+comp --> conflict : both sides modified
+
+tester -up-> rB : prepares files\nruns sync + PCAP
+
+legend right
+  Phase 1 (control): exchange manifests, compute diff
+  Phase 2 (transfer): send missing/updated files
+  Conflict: same file modified on both sides
+  Policy: last-writer-wins or rename (E1 decision)
+  Port: 5010/TCP
+endlegend
+@enduml

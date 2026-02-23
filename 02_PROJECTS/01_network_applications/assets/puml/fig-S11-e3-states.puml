@@ -1,0 +1,49 @@
+@startuml fig-S11-e3-states
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+
+title S11 — Service Instance Lifecycle in the Registry
+
+[*] --> REGISTERING : POST /register
+
+state REGISTERING #BBDEFB {
+    REGISTERING : Validate payload
+    REGISTERING : Assign instance ID
+}
+
+REGISTERING --> ACTIVE : registration accepted\n(200 OK)
+REGISTERING -[#E53935]-> [*] : invalid payload\n(400)
+
+state ACTIVE #C8E6C9 {
+    ACTIVE : In routing table
+    ACTIVE : Receives gateway traffic
+    ACTIVE : Heartbeat timer running
+}
+
+ACTIVE --> ACTIVE : heartbeat received\n(timer reset)
+ACTIVE --> STALE : heartbeat timeout\n(1 missed interval)
+
+state STALE #FFF9C4 {
+    STALE : Still in routing table
+    STALE : Grace period counting
+}
+
+STALE --> ACTIVE : heartbeat received\n(recovered)
+STALE --> EXPIRED : N missed heartbeats
+
+state EXPIRED #FFCDD2 {
+    EXPIRED : Removed from routing table
+    EXPIRED : Gateway returns 503 if sole instance
+}
+
+EXPIRED --> REGISTERING : re-registration\n(POST /register)
+
+legend right
+  ACTIVE: healthy, receives traffic
+  STALE: missed one heartbeat (grace period)
+  EXPIRED: removed from routing
+  Re-registration restores the instance
+endlegend
+@enduml

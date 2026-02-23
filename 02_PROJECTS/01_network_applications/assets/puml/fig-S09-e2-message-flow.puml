@@ -1,0 +1,53 @@
+@startuml fig-S09-e2-message-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title S09 — E2 Path: Two Interleaved Sessions over One TCP Connection
+
+participant "tunnel_client" as C #FFE0B2
+participant "tunnel_server\n:9000" as T #C8E6C9
+participant "service_a\n(echo)" as A #E3F2FD
+participant "service_b\n(HTTP)" as B #E3F2FD
+
+== SINGLE TCP CONNECTION ==
+C -> T : SYN
+T --> C : SYN-ACK
+C -> T : ACK
+
+== OPEN SESSION 1 (echo) ==
+C -> T : [TNL1][O] sid=1 svc=echo
+T -> A : connect to echo service
+T -[#43A047]-> C : [TNL1][O] sid=1 OK
+
+== OPEN SESSION 2 (HTTP) ==
+C -> T : [TNL1][O] sid=2 svc=http
+T -> B : connect to HTTP service
+T -[#43A047]-> C : [TNL1][O] sid=2 OK
+
+== INTERLEAVED DATA ==
+C -> T : [TNL1][D] sid=1 "ping"
+C -> T : [TNL1][D] sid=2 "GET /"
+T -> A : "ping"
+T -> B : "GET /"
+A -[#1565C0]-> T : "pong"
+T -[#1565C0]-> C : [TNL1][D] sid=1 "pong"
+B -[#1565C0]-> T : "200 OK (body)"
+T -[#1565C0]-> C : [TNL1][D] sid=2 "200 OK"
+
+== CLOSE SESSIONS ==
+C -> T : [TNL1][C] sid=1
+C -> T : [TNL1][C] sid=2
+T --> C : [TNL1][C] sid=1 ACK
+T --> C : [TNL1][C] sid=2 ACK
+C -> T : FIN
+
+legend right
+  PCAP: single TCP stream, payload contains
+  frames with different session_id values.
+  Magic: TNL1, types: O(pen), D(ata), C(lose)
+  Validates R1–R5 in S09.json
+endlegend
+@enduml

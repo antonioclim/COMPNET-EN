@@ -1,0 +1,41 @@
+@startuml fig-S04-e2-message-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title S04 — E2 Primary Path: Allowed and Blocked Proxy Requests
+
+participant "tester" as C #FFE0B2
+participant "http_proxy\n:3128" as P #E1BEE7
+participant "origin_server\n:8080" as O #C8E6C9
+
+== ALLOWED REQUEST ==
+C -> P : GET http://origin:8080/allowed.html HTTP/1.1
+P -> O : SYN (proxy → origin)
+O --> P : SYN-ACK
+P -> O : GET /allowed.html HTTP/1.1\nHost: origin
+O -[#43A047]-> P : HTTP/1.1 200 OK\n(body)
+P -[#43A047]-> C : HTTP/1.1 200 OK\n(forwarded body)
+
+note right of P : Log: 200 | origin:8080/allowed.html | 1.2ms
+
+== BLOCKED REQUEST ==
+C -> P : GET http://origin:8080/blocked.html HTTP/1.1
+P -[#E53935]-> C : HTTP/1.1 403 Forbidden\n(blacklist match)
+
+note right of P #FFCDD2 : Log: 403 | BLOCKED | rule: URL blacklist
+
+== CONNECT (HTTPS TUNNEL — E3) ==
+C -> P : CONNECT secure.example:443 HTTP/1.1
+P -[#1565C0]-> C : HTTP/1.1 200 Connection Established
+C <-> P : (opaque TLS tunnel)
+
+legend right
+  PCAP shows two hops: client–proxy, proxy–origin
+  Blocked requests never reach origin
+  CONNECT creates a bidirectional tunnel
+  Validates R1–R4 in S04.json
+endlegend
+@enduml

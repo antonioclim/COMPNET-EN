@@ -1,0 +1,56 @@
+@startuml fig-S12-e2-message-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title S12 — E2 Path: TLS Handshake and Authenticated Messaging
+
+participant "tester\n(TLS client)" as C #FFE0B2
+participant "tls_server\n:5443" as S #C8E6C9
+
+== TCP HANDSHAKE ==
+C -> S : SYN
+S --> C : SYN-ACK
+C -> S : ACK
+
+== TLS HANDSHAKE ==
+C -> S : ClientHello\n(supported ciphers, SNI)
+S --> C : ServerHello\n(selected cipher)
+S --> C : Certificate\n(server.crt signed by CA)
+S --> C : ServerHelloDone
+
+C -> C : Verify certificate\n(CA trust chain, hostname, expiry)
+
+C -> S : ClientKeyExchange
+C -> S : ChangeCipherSpec
+C -> S : Finished
+S --> C : ChangeCipherSpec
+S --> C : Finished
+
+== ENCRYPTED CHANNEL ESTABLISHED ==
+note over C, S #E1BEE7 : All subsequent data encrypted\n(opaque in PCAP without SSLKEYLOGFILE)
+
+== APPLICATION PROTOCOL (encrypted) ==
+C -[#1565C0]-> S : AUTH alice password123
+S -[#43A047]-> C : OK AUTH
+
+C -[#1565C0]-> S : SEND bob "Hello secure"
+S -[#43A047]-> C : OK SEND
+
+C -[#1565C0]-> S : QUIT
+S --> C : OK QUIT
+
+== TLS CLOSURE ==
+C -> S : close_notify
+S --> C : close_notify
+C -> S : FIN
+
+legend right
+  PCAP visible: ClientHello, ServerHello
+  Certificate, cipher negotiation (metadata)
+  PCAP opaque: application commands (encrypted)
+  Validates R1–R5 in S12.json
+endlegend
+@enduml

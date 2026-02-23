@@ -1,0 +1,52 @@
+@startuml fig-S01-e2-message-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title S01 — E2 Primary Success Path: Login, Broadcast and Quit
+
+participant "Client A" as A #FFE0B2
+participant "chat_server\n:5000/TCP" as S #C8E6C9
+participant "Client B" as B #FFE0B2
+
+== TCP HANDSHAKE (Client A) ==
+A -> S : SYN
+S --> A : SYN-ACK
+A -> S : ACK
+
+== TCP HANDSHAKE (Client B) ==
+B -> S : SYN
+S --> B : SYN-ACK
+B -> S : ACK
+
+== AUTHENTICATION ==
+A -> S : PROTO 1\nLOGIN alice
+S --> A : OK LOGIN alice
+S -[#43A047]-> B : EVENT user_joined alice
+
+B -> S : PROTO 1\nLOGIN bob
+S --> B : OK LOGIN bob
+S -[#43A047]-> A : EVENT user_joined bob
+
+== BROADCAST MESSAGE ==
+A -> S : MSG * Hello everyone
+S --> A : OK MSG
+S -[#1565C0]-> B : MSG alice * Hello everyone
+
+== SESSION CLOSURE ==
+A -> S : QUIT
+S --> A : OK QUIT
+S -[#43A047]-> B : EVENT user_left alice
+A -> S : FIN
+S --> A : FIN-ACK
+
+legend right
+  PCAP must contain: SYN, LOGIN, MSG
+  EVENT (presence) and FIN/RST.
+  Framing: each command delimited
+  by newline or length prefix.
+  Validates R1–R6 in S01.json.
+endlegend
+@enduml

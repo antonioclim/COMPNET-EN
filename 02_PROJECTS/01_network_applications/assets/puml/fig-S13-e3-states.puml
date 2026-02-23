@@ -1,0 +1,43 @@
+@startuml fig-S13-e3-states
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 10
+skinparam shadowing false
+skinparam roundcorner 12
+
+title S13 — gRPC over HTTP/2: Frame Encapsulation
+
+rectangle "HTTP/2 Connection" as h2conn #F5F5F5 {
+
+    rectangle "Stream 1 (Unary RPC)" as s1 #E8F5E9 {
+        rectangle "HEADERS\n:method POST\n:path /svc/Method\ncontent-type:\napplication/grpc" as h1 #C8E6C9
+        rectangle "DATA\n[grpc len-prefix]\n[protobuf bytes]" as d1 #FFF9C4
+        rectangle "HEADERS (trailers)\ngrpc-status: 0" as t1 #C8E6C9
+    }
+
+    rectangle "Stream 3 (Server Streaming)" as s3 #E8F5E9 {
+        rectangle "HEADERS\n:path /svc/Stream" as h3 #BBDEFB
+        rectangle "DATA msg #1" as d3a #FFF9C4
+        rectangle "DATA msg #2" as d3b #FFF9C4
+        rectangle "DATA msg #3" as d3c #FFF9C4
+        rectangle "HEADERS (trailers)\ngrpc-status: 0" as t3 #BBDEFB
+    }
+}
+
+rectangle "gRPC DATA Frame Anatomy" as anatomy #FFF3E0 {
+    rectangle "Compressed\n1 byte\n(0 or 1)" as comp #FFE0B2
+    rectangle "Message Length\n4 bytes\n(big-endian)" as mlen #FFE0B2
+    rectangle "Protobuf Message\nN bytes\n(serialised)" as pbuf #FFF9C4
+}
+
+comp -right[hidden]-> mlen
+mlen -right[hidden]-> pbuf
+
+legend bottom
+  gRPC maps each RPC to an HTTP/2 stream
+  Unary: one DATA frame each direction
+  Streaming: multiple DATA frames on same stream
+  Protobuf payload is binary (not human-readable)
+  Wireshark: headers visible, payload requires dissector
+endlegend
+@enduml

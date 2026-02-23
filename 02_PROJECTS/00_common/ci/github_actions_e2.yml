@@ -1,0 +1,27 @@
+# .github/workflows/e2.yml (template)
+# RC2026 — minimum workflow to run E2 (docker compose plus PCAP validation)
+# NOTE: in the student repository adjust paths, service names and PROJECT_CODE.
+
+name: E2 - smoke + PCAP
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  e2:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build and run E2
+        run: |
+          docker compose up --build --exit-code-from tester
+
+      - name: Upload artefacts (PCAP, reports)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifacts
+          path: artifacts/

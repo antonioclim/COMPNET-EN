@@ -1,0 +1,42 @@
+@startuml fig-S07-e2-message-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title S07 — E2 Path: Local Hit, Forwarded Query and Cache Hit
+
+participant "tester" as C #FFE0B2
+participant "dns_resolver\n:5300/UDP" as R #C8E6C9
+participant "upstream_dns\n:53/UDP" as U #E3F2FD
+
+== LOCAL ZONE HIT ==
+C -> R : Query A: host1.lab.local (ID=0x01)
+note right of R : Found in local zone
+R -[#43A047]-> C : Response: 10.0.0.1 (NOERROR)
+
+== FORWARDED QUERY ==
+C -> R : Query A: example.com (ID=0x02)
+note right of R : Not in zone, not in cache
+R -> U : Forward query A: example.com (ID=0x02)
+U -[#43A047]-> R : Response: 93.184.216.34 (TTL=300)
+R -[#43A047]-> C : Response: 93.184.216.34
+
+note right of R : Cached with TTL=300s
+
+== CACHE HIT ==
+C -> R : Query A: example.com (ID=0x03)
+note right of R #C8E6C9 : Served from cache\n(no upstream query)
+R -[#43A047]-> C : Response: 93.184.216.34
+
+note over U : No packet sent\nto upstream
+
+legend right
+  Three scenarios demonstrable in PCAP:
+  1. Local zone answer (no upstream)
+  2. Forwarded to upstream (two UDP pairs)
+  3. Cache hit (single UDP pair, no upstream)
+  Validates R1–R5 in S07.json
+endlegend
+@enduml

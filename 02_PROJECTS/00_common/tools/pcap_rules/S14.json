@@ -1,0 +1,31 @@
+{
+  "project": "S14",
+  "pcap_relpath": "artifacts/pcap/traffic_e2.pcap",
+  "decode_as": [],
+  "rules": [
+    {
+      "id": "R1",
+      "filter": "udp.port==5014 && frame contains \"DV1\"",
+      "condition": ">= 3",
+      "description": "At least 3 DV messages (magic DV1), periodic updates."
+    },
+    {
+      "id": "R2",
+      "filter": "udp.port==5015 && frame contains \"DATA1\"",
+      "condition": ">= 1",
+      "description": "At least one forwarded overlay data packet (magic DATA1)."
+    },
+    {
+      "id": "R3",
+      "filter": "udp.port==5014 && (frame contains \"POISON\" || frame contains \"SPLITH\")",
+      "condition": ">= 1",
+      "description": "Anti-loop evidence (poison reverse/split horizon) in the payload or logs."
+    },
+    {
+      "id": "R4",
+      "filter": "icmp || udp.port==5015",
+      "condition": ">= 1",
+      "description": "Demonstrative end-to-end traffic (data/ping) in the topology."
+    }
+  ]
+}

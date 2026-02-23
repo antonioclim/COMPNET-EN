@@ -1,0 +1,42 @@
+@startuml fig-S08-architecture
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title S08 — Minimal Email System: SMTP and POP3 Architecture
+
+package "Docker Network" as net #F5F5F5 {
+
+    rectangle "smtp_server\n:2525/TCP" as smtp #C8E6C9 {
+        rectangle "SMTP State Machine\n(HELO → MAIL → RCPT → DATA)" as smtpfsm #BBDEFB
+        rectangle "Body Parser\n(dot-stuffing, terminator)" as body #FFF9C4
+    }
+
+    database "Maildir\n(per-user storage)" as mdir #FFF9C4
+
+    rectangle "pop3_server\n:2110/TCP (E3)" as pop3 #E1BEE7 {
+        rectangle "POP3 State Machine\n(USER → PASS → LIST → RETR)" as pop3fsm #BBDEFB
+    }
+
+    rectangle "Sender\n(mail client)" as sender #FFE0B2
+    rectangle "Reader\n(mail client)" as reader #FFE0B2
+    rectangle "tester\n(pytest -m e2)" as tester #FFF9C4
+}
+
+sender --> smtp : "HELO, MAIL FROM\nRCPT TO, DATA"
+smtp --> mdir : store message\n(unique filename)
+mdir --> pop3 : read mailbox
+pop3 --> reader : "LIST, RETR, DELE"
+
+tester -up-> smtp : E2: SMTP session\n+ PCAP
+tester -up-> pop3 : E3: POP3 retrieval
+
+legend right
+  E2: SMTP delivery and on-disk storage
+  E3: POP3 retrieval completes the chain
+  Maildir layout avoids concurrency issues
+  Ports: 2525/TCP (SMTP), 2110/TCP (POP3)
+endlegend
+@enduml

@@ -1,0 +1,42 @@
+@startuml fig-ci-github-actions
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+left to right direction
+
+title GitHub Actions — E2 Smoke and PCAP Workflow
+
+card "Trigger\npush / pull_request" as trigger #FFE0B2
+
+package "Job: e2 (ubuntu-latest)" as job #F5F5F5 {
+
+  card "Step 1\nCheckout\n(actions/checkout@v4)" as checkout #E3F2FD
+
+  card "Step 2\nBuild and Run E2\ndocker compose up\n--build\n--exit-code-from tester" as build #BBDEFB
+
+  card "Step 3\nUpload Artefacts\n(actions/upload-artifact@v4)\npath: artifacts/" as upload #C8E6C9
+}
+
+card "Result\nPASS / FAIL" as result #FFF9C4
+
+trigger --> checkout : on event
+checkout --> build : repository ready
+build --> upload : always\n(if: always())
+upload --> result : artefacts archived
+
+note right of build
+  docker compose starts all services
+  and the tester container.
+  The tester exit code determines
+  the job outcome.
+end note
+
+legend bottom
+The workflow runs on every push and pull request.
+Step 3 uploads artifacts/ regardless of outcome
+so that PCAP files are available for debugging.
+The --exit-code-from flag propagates tester status.
+endlegend
+@enduml

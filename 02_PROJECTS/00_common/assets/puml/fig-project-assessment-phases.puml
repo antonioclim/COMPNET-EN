@@ -1,0 +1,48 @@
+@startuml fig-project-assessment-phases
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Project Assessment Phases — E1, E2 and E3
+
+rectangle "E1 — Specification and Observation" as e1phase #FFF3E0 {
+  rectangle "E1_specification.md\n(requirements analysis)" as e1spec #FFE0B2
+  rectangle "E1_phase0_observations.md\n(initial traffic study)" as e1obs #FFE0B2
+}
+
+rectangle "E2 — Implementation and Automated Verification" as e2phase #E3F2FD {
+  rectangle "src/\n(application code)" as e2src #BBDEFB
+  rectangle "docker/\n(docker-compose.yml)" as e2docker #BBDEFB
+  rectangle "tests/\n(pytest -m e2)" as e2tests #90CAF9
+  rectangle "E2_pcap_analysis.md\n(capture interpretation)" as e2doc #BBDEFB
+  rectangle "artifacts/pcap/\ntraffic_e2.pcap" as e2pcap #E1BEE7
+}
+
+rectangle "E3 — Final Documentation and Evidence" as e3phase #E8F5E9 {
+  rectangle "E3_final_documentation.md\n(evidence table: ID → artefact)" as e3doc #C8E6C9
+  rectangle "MANIFEST.txt\n(delivered artefacts list)" as e3man #C8E6C9
+}
+
+rectangle "Assessment Outcome" as outcome #FFF9C4 {
+  rectangle "RC2026_VERIFICATION_INDEX.xlsx\n(per-ID checklist: M01, NF01, ...)" as checklist #FFF9C4
+}
+
+e1spec -down-> e2src : requirements\ndrive implementation
+e1obs -down-> e2doc : observations\ninform analysis
+e2src -down-> e2docker : containerised
+e2docker -down-> e2tests : orchestrated by\ntester container
+e2tests -down-> e2pcap : generates
+e2pcap -down-> e3doc : evidence\nreferenced
+e2doc -down-> e3doc : analysis\nincorporated
+e3doc -right-> checklist : every ID mapped\nto exact proof
+e3man -right-> checklist : artefact\ncompleteness
+
+legend bottom
+E1: understand the problem and capture baseline traffic.
+E2: build, test and validate automatically (Docker + tshark).
+E3: prove every requirement with reproducible evidence.
+If an ID is missing or not reproducible, it is marked NO.
+endlegend
+@enduml

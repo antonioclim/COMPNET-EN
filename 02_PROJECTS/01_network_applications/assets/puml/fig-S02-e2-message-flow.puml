@@ -1,0 +1,64 @@
+@startuml fig-S02-e2-message-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title S02 — E2 Primary Path: Authentication, Passive Transfer and Checksum
+
+participant "Client\n(tester)" as C #FFE0B2
+participant "ftp_server\nControl :5021" as CTRL #C8E6C9
+participant "ftp_server\nData :60000+" as DATA #90CAF9
+
+== CONTROL CHANNEL — TCP HANDSHAKE ==
+C -> CTRL : SYN
+CTRL --> C : SYN-ACK
+C -> CTRL : ACK
+
+== AUTHENTICATION ==
+C -> CTRL : USER alice
+CTRL --> C : 331 Password required
+C -> CTRL : PASS ****
+CTRL --> C : 230 Login successful
+
+== DIRECTORY LISTING ==
+C -> CTRL : PWD
+CTRL --> C : 257 "/" is current directory
+C -> CTRL : PASV
+CTRL -[#1565C0]-> C : 227 Entering Passive Mode (port 60001)
+
+== DATA CHANNEL — HANDSHAKE ==
+C -> DATA : SYN (to :60001)
+DATA --> C : SYN-ACK
+C -> DATA : ACK
+
+C -> CTRL : LIST
+DATA -[#1565C0]-> C : (directory listing payload)
+DATA -> C : FIN (data channel closed)
+CTRL --> C : 226 Transfer complete
+
+== FILE RETRIEVAL ==
+C -> CTRL : PASV
+CTRL --> C : 227 (port 60002)
+C -> DATA : SYN (to :60002)
+DATA --> C : SYN-ACK
+
+C -> CTRL : RETR test.txt
+DATA -[#1565C0]-> C : (file content streamed)
+DATA -> C : FIN
+CTRL --> C : 226 Transfer complete
+CTRL --> C : SHA-256 a1b2c3...
+
+== SESSION CLOSURE ==
+C -> CTRL : QUIT
+CTRL --> C : 221 Goodbye
+C -> CTRL : FIN
+
+legend right
+  Two distinct TCP connections visible in PCAP.
+  Control: commands and status codes.
+  Data: payload only (passive port range).
+  Validates R1–R6 in S02.json.
+endlegend
+@enduml

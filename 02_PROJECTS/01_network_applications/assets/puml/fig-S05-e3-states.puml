@@ -1,0 +1,49 @@
+@startuml fig-S05-e3-states
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+
+title S05 — Backend Instance Lifecycle
+
+[*] --> HEALTHY : registered\nin pool
+
+state HEALTHY #C8E6C9 {
+    HEALTHY : In rotation
+    HEALTHY : Receives client traffic
+    HEALTHY : Health checks pass
+}
+
+HEALTHY --> SUSPECT : health check fails\n(1st failure)
+
+state SUSPECT #FFF9C4 {
+    SUSPECT : Still in rotation
+    SUSPECT : Consecutive failures counted
+}
+
+SUSPECT --> HEALTHY : health check passes\n(reset counter)
+SUSPECT --> UNHEALTHY : N consecutive\nfailures reached
+
+state UNHEALTHY #FFCDD2 {
+    UNHEALTHY : Removed from rotation
+    UNHEALTHY : No client traffic
+    UNHEALTHY : Checks continue
+}
+
+UNHEALTHY --> RECOVERING : health check passes\n(1st success)
+
+state RECOVERING #BBDEFB {
+    RECOVERING : Not yet in rotation
+    RECOVERING : Consecutive successes counted
+}
+
+RECOVERING --> HEALTHY : M consecutive\nsuccesses reached
+RECOVERING -[#E53935]-> UNHEALTHY : health check fails\n(reset counter)
+
+legend right
+  Degradation: HEALTHY → SUSPECT → UNHEALTHY
+  Recovery: UNHEALTHY → RECOVERING → HEALTHY
+  N failures to remove, M successes to restore
+  Both thresholds configurable
+endlegend
+@enduml

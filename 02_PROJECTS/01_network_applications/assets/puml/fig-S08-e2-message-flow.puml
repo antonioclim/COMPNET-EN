@@ -1,0 +1,48 @@
+@startuml fig-S08-e2-message-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title S08 — E2 Primary Path: SMTP Message Delivery
+
+participant "tester\n(sender)" as C #FFE0B2
+participant "smtp_server\n:2525" as S #C8E6C9
+participant "Maildir" as M #FFF9C4
+
+== TCP HANDSHAKE ==
+C -> S : SYN
+S --> C : SYN-ACK
+C -> S : ACK
+
+== SMTP SESSION ==
+S -[#43A047]-> C : 220 mail.local SMTP ready
+
+C -> S : EHLO client.local
+S --> C : 250 mail.local greetings
+
+C -> S : MAIL FROM:<alice@lab.local>
+S --> C : 250 OK
+
+C -> S : RCPT TO:<bob@lab.local>
+S --> C : 250 OK
+
+C -> S : DATA
+S --> C : 354 Start mail input; end with <CR><LF>.<CR><LF>
+
+C -> S : Subject: Test E2\n\nHello Bob.\n.
+S --> M : store message\n(bob/new/unique-id)
+S -[#43A047]-> C : 250 OK message accepted
+
+C -> S : QUIT
+S --> C : 221 Bye
+C -> S : FIN
+
+legend right
+  PCAP must contain: EHLO/HELO
+  MAIL FROM, RCPT TO, DATA
+  Dot terminator in payload
+  Validates R1–R6 in S08.json
+endlegend
+@enduml

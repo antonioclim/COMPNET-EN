@@ -1,0 +1,43 @@
+@startuml fig-S05-architecture
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title S05 — HTTP Load Balancer: System Architecture
+
+package "Docker Network" as net #F5F5F5 {
+
+    rectangle "lb (Load Balancer)\n:8080/TCP" as lb #E1BEE7 {
+        rectangle "Algorithm\n(round-robin / least-conn)" as algo #BBDEFB
+        rectangle "Health Checker\n(periodic GET /health)" as hc #FFF9C4
+        rectangle "Backend Pool\n(active / inactive)" as pool #ECEFF1
+    }
+
+    rectangle "backend_a\n:8081/TCP" as bA #C8E6C9
+    rectangle "backend_b\n:8082/TCP" as bB #C8E6C9
+    rectangle "backend_c\n:8083/TCP" as bC #FFCDD2
+
+    rectangle "Client" as client #FFE0B2
+    rectangle "tester\n(pytest -m e2)" as tester #FFF9C4
+}
+
+client --> lb : "GET /work HTTP/1.1"
+lb --> bA : forward\n(X-Backend: a)
+lb --> bB : forward\n(X-Backend: b)
+lb -[#E53935]-> bC : removed from\nrotation (unhealthy)
+
+hc .down.> bA : GET /health\n(periodic)
+hc .down.> bB : GET /health
+hc .down[#E53935].> bC : GET /health → timeout
+
+tester -up-> lb : validates routing\n+ failover + PCAP
+
+legend right
+  Algorithms: round-robin, least connections
+  Health: periodic check, N successes to recover
+  X-Backend header for PCAP correlation
+  Ports: 8080 (LB), 8081–8083 (backends)
+endlegend
+@enduml

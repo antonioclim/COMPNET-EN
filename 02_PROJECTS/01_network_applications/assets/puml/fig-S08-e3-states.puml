@@ -1,0 +1,76 @@
+@startuml fig-S08-e3-states
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 10
+skinparam shadowing false
+
+title S08 — Dual State Machines: SMTP and POP3
+
+state "SMTP State Machine" as smtpgroup #E8F5E9 {
+    [*] --> S_GREETING : connection\nestablished
+
+    state S_GREETING #E3F2FD {
+        S_GREETING : 220 banner sent
+    }
+
+    S_GREETING --> S_EHLO : EHLO/HELO\n(250)
+
+    state S_EHLO #BBDEFB {
+        S_EHLO : Client identified
+    }
+
+    S_EHLO --> S_MAIL : MAIL FROM\n(250)
+
+    state S_MAIL #BBDEFB {
+        S_MAIL : Sender recorded
+    }
+
+    S_MAIL --> S_RCPT : RCPT TO\n(250)
+
+    state S_RCPT #C8E6C9 {
+        S_RCPT : Recipient(s) recorded
+    }
+
+    S_RCPT --> S_RCPT : additional RCPT TO
+    S_RCPT --> S_DATA : DATA\n(354)
+
+    state S_DATA #FFF9C4 {
+        S_DATA : Reading body
+        S_DATA : Ends with CRLF.CRLF
+    }
+
+    S_DATA --> S_EHLO : message stored\n(250 OK)
+}
+
+state "POP3 State Machine (E3)" as pop3group #FCE4EC {
+    [*] --> P_AUTH : connection\nestablished
+
+    state P_AUTH #E3F2FD {
+        P_AUTH : +OK banner sent
+        P_AUTH : Awaiting USER/PASS
+    }
+
+    P_AUTH --> P_TRANSACTION : USER + PASS valid\n(+OK)
+    P_AUTH -[#E53935]-> P_AUTH : invalid credentials\n(-ERR)
+
+    state P_TRANSACTION #C8E6C9 {
+        P_TRANSACTION : LIST, RETR, DELE, NOOP
+    }
+
+    P_TRANSACTION --> P_UPDATE : QUIT
+
+    state P_UPDATE #FFF9C4 {
+        P_UPDATE : Apply deletions
+        P_UPDATE : Release mailbox lock
+    }
+
+    P_UPDATE --> [*] : +OK Bye
+}
+
+legend bottom
+  SMTP: sequential command chain, strict order
+  POP3: authenticate then operate on mailbox
+  Both use text response codes (+OK / -ERR / 2xx / 5xx)
+  E2 covers SMTP; E3 adds POP3
+endlegend
+@enduml

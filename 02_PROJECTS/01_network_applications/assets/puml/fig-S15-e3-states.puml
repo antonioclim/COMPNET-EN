@@ -1,0 +1,70 @@
+@startuml fig-S15-e3-states
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+
+title S15 — Telemetry Validation and Ingestion Pipeline
+
+start
+
+:Receive UDP datagram\non :5515;
+
+:Check IOT1 magic prefix;
+
+if (Valid IOT1 magic?) then (yes)
+    :Parse payload\n(sensor_id, seq, value, timestamp);
+else (no)
+    #FFCDD2:Discard (invalid format);
+    :Log: DROPPED (bad magic);
+    stop
+endif
+
+if (All mandatory fields\npresent?) then (yes)
+else (no)
+    #FFCDD2:Discard (missing fields);
+    :Log: DROPPED (incomplete);
+    stop
+endif
+
+if (Value in valid range?\n(per-sensor config)) then (yes)
+else (out of range)
+    #FFCDD2:Discard (out of range);
+    :Log: DROPPED (range);
+    stop
+endif
+
+if (Datagram size ≤ limit?) then (yes)
+else (too large)
+    #FFCDD2:Discard (oversized);
+    stop
+endif
+
+:Check deduplication\n(sensor_id + seq);
+
+if (Duplicate?) then (yes)
+    #FFF9C4:Discard (already seen);
+    stop
+else (new)
+endif
+
+#C8E6C9:Store in ring buffer\n(sensor_id → latest N readings);
+
+if (Buffer full?) then (yes)
+    :Evict oldest reading;
+else (no)
+endif
+
+:Log: ACCEPTED\n(sensor_id, seq, value);
+
+stop
+
+legend right
+  Five validation gates before acceptance:
+  1. Magic prefix (IOT1)
+  2. Mandatory fields (sensor_id, seq, value)
+  3. Value range (configurable per sensor)
+  4. Size limit (anti-amplification)
+  5. Deduplication (seq already processed)
+endlegend
+@enduml

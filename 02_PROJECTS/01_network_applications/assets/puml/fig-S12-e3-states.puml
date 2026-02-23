@@ -1,0 +1,41 @@
+@startuml fig-S12-e3-states
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 10
+skinparam shadowing false
+skinparam roundcorner 12
+
+title S12 — TLS vs Plaintext: PCAP Visibility Comparison
+
+together {
+    rectangle "Plaintext Session\n(:5002/TCP — Phase 0)" as plain #FFEBEE {
+        rectangle "TCP Handshake\n(SYN, SYN-ACK, ACK)" as pTcp #FFE0B2
+        rectangle "LOGIN alice pass123\n**VISIBLE** in PCAP" as pLogin #FFCDD2
+        rectangle "MSG bob 'secret'\n**VISIBLE** in PCAP" as pMsg #FFCDD2
+        rectangle "FIN / FIN-ACK" as pFin #FFE0B2
+    }
+
+    rectangle "TLS Session\n(:5443/TCP — E2/E3)" as tls #E8F5E9 {
+        rectangle "TCP Handshake\n(SYN, SYN-ACK, ACK)" as tTcp #FFE0B2
+        rectangle "TLS Handshake\n(ClientHello, cert, cipher)\n**VISIBLE** metadata" as tHs #E1BEE7
+        rectangle "Application Data\n**OPAQUE** (encrypted)" as tApp #C8E6C9
+        rectangle "close_notify + FIN" as tFin #FFE0B2
+    }
+}
+
+rectangle "Deducible from TLS metadata" as meta #FFF9C4 {
+    rectangle "SNI (hostname)" as m1 #ECEFF1
+    rectangle "Cipher suite" as m2 #ECEFF1
+    rectangle "Record sizes\n(message lengths)" as m3 #ECEFF1
+    rectangle "Timing\n(request/response pattern)" as m4 #ECEFF1
+}
+
+tHs -down-> meta : observable\nwithout decryption
+
+legend bottom
+  Left: plaintext — all commands readable in PCAP
+  Right: TLS — only metadata visible (SNI, cipher, sizes)
+  SSLKEYLOGFILE allows lab decryption in Wireshark
+  Key insight: TLS protects content, not traffic patterns
+endlegend
+@enduml

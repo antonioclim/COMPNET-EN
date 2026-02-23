@@ -1,0 +1,45 @@
+@startuml fig-S13-e2-message-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title S13 — E2 Path: Unary Call, Server Streaming and Deadline
+
+participant "tester" as C #FFE0B2
+participant "grpc_server\n:50051 (HTTP/2)" as S #C8E6C9
+
+== HTTP/2 CONNECTION ==
+C -> S : HTTP/2 Preface\n(PRI * HTTP/2.0)
+C <-> S : SETTINGS frames
+
+== UNARY RPC ==
+C -> S : HEADERS (stream 1)\n:path /service/UnaryMethod\ncontent-type: application/grpc
+C -> S : DATA (stream 1)\n(protobuf request)
+S -[#43A047]-> C : HEADERS (stream 1) :status 200
+S -[#43A047]-> C : DATA (stream 1)\n(protobuf response)
+S -> C : HEADERS (trailers)\ngrpc-status: 0 (OK)
+
+== SERVER-STREAMING RPC ==
+C -> S : HEADERS (stream 3)\n:path /service/StreamMethod
+C -> S : DATA (stream 3)\n(protobuf request)
+S -[#1565C0]-> C : DATA (stream 3) msg #1
+S -[#1565C0]-> C : DATA (stream 3) msg #2
+S -[#1565C0]-> C : DATA (stream 3) msg #3
+S -> C : HEADERS (trailers)\ngrpc-status: 0
+
+== DEADLINE EXCEEDED ==
+C -> S : HEADERS (stream 5)\n:path /service/SlowMethod\ngrpc-timeout: 100ms
+C -> S : DATA (stream 5)
+...
+note right of S : Processing exceeds deadline
+S -[#E53935]-> C : HEADERS (trailers)\ngrpc-status: 4 (DEADLINE_EXCEEDED)
+
+legend right
+  HTTP/2 frames visible in PCAP:
+  HEADERS (:path, content-type), DATA (binary)
+  grpc-status in trailers (0=OK, 4=DEADLINE)
+  Validates R1–R5 in S13.json
+endlegend
+@enduml

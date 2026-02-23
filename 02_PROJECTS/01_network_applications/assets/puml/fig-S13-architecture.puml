@@ -1,0 +1,38 @@
+@startuml fig-S13-architecture
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title S13 — gRPC Service: System Architecture
+
+package "Docker Network" as net #F5F5F5 {
+
+    rectangle "grpc_server" as srv #C8E6C9 {
+        rectangle "gRPC endpoint\n:50051/TCP (HTTP/2)" as grpc #90CAF9
+        rectangle ".proto contract\n(messages + services)" as proto #FFF9C4
+        rectangle "Raw Protobuf\n:50052/TCP" as raw #BBDEFB
+    }
+
+    rectangle "Python Client\n(grpc stub)" as pyc #FFE0B2
+    rectangle "Flex Client\n(other language, grpc stub)" as flex #E1BEE7
+    rectangle "tester\n(pytest -m e2)" as tester #FFF9C4
+}
+
+pyc --> grpc : "HTTP/2 gRPC\nunary + streaming"
+flex --> grpc : "(interoperable via .proto)"
+tester --> raw : "raw protobuf\n(PB1 magic, :50052)"
+tester -up-> grpc : validates unary\nstreaming + deadline\n+ PCAP
+
+proto -left-> grpc : generated\nserver stubs
+proto -left-> raw : shared\nmessage types
+
+legend right
+  gRPC: HTTP/2 transport, protobuf serialisation
+  .proto defines contract (types, methods)
+  Unary: single request → single response
+  Streaming: server-side or bidirectional
+  Ports: 50051 (gRPC), 50052 (raw protobuf)
+endlegend
+@enduml

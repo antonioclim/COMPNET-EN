@@ -1,0 +1,40 @@
+@startuml fig-S03-e2-message-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title S03 — E2 Primary Path: GET 200, GET 404 and HEAD
+
+participant "tester" as C #FFE0B2
+participant "http_raw_server\n:8080/TCP" as S #C8E6C9
+
+== TCP HANDSHAKE ==
+C -> S : SYN
+S --> C : SYN-ACK
+C -> S : ACK
+
+== SUCCESSFUL GET ==
+C -> S : GET /index.html HTTP/1.1\nHost: server\nConnection: keep-alive
+S -[#43A047]-> C : HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: 142\n\n(body)
+
+== MISSING RESOURCE ==
+C -> S : GET /nonexistent.txt HTTP/1.1\nHost: server
+S -[#E53935]-> C : HTTP/1.1 404 Not Found\nContent-Length: 0
+
+== HEAD REQUEST ==
+C -> S : HEAD /index.html HTTP/1.1\nHost: server
+S -[#43A047]-> C : HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: 142\n(no body)
+
+== CONNECTION CLOSE ==
+C -> S : FIN
+S --> C : FIN-ACK
+
+legend right
+  PCAP validates: at least 2 GETs
+  200 OK, 404, Content-Type header
+  Keep-alive reuses the TCP connection
+  Validates R1–R5 in S03.json
+endlegend
+@enduml

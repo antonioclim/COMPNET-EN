@@ -1,0 +1,41 @@
+@startuml fig-S12-architecture
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title S12 — TLS Messaging: System Architecture
+
+package "Docker Network" as net #F5F5F5 {
+
+    rectangle "tls_server\n:5443/TCP (TLS)" as srv #C8E6C9 {
+        rectangle "TLS Layer\n(ssl module, cert + key)" as tls #E1BEE7
+        rectangle "App Protocol\n(framing, commands)" as app #BBDEFB
+        rectangle "Auth Module\n(credential check)" as auth #FFF9C4
+    }
+
+    rectangle "CA\n(self-signed or local)" as ca #FCE4EC
+
+    rectangle "Valid Client" as c1 #FFE0B2
+    rectangle "Invalid Client\n(wrong cert / expired)" as c2 #FFCDD2
+    rectangle "Flex Client\n(other language)" as flex #E1BEE7
+    rectangle "tester\n(pytest -m e2)" as tester #FFF9C4
+}
+
+ca .down.> srv : "server.crt + server.key\n(signed by CA)"
+ca .down.> c1 : "ca.crt\n(trust anchor)"
+
+c1 --> srv : "TLS :5443\n(verify server cert)"
+c2 -[#E53935]-> srv : "TLS handshake fails\n(cert validation error)"
+flex --> srv : "(interoperable TLS)"
+tester -up-> srv : validates handshake\n+ app message + PCAP
+
+legend right
+  TLS: server cert verified by client via CA
+  Optional mutual TLS (client cert) in E3
+  App payload opaque in PCAP after handshake
+  SSLKEYLOGFILE enables decryption in lab
+  Ports: 5443/TCP (TLS), 5002/TCP (plain, Phase 0)
+endlegend
+@enduml

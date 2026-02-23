@@ -1,0 +1,37 @@
+{
+  "project": "S15",
+  "pcap_relpath": "artifacts/pcap/traffic_e2.pcap",
+  "decode_as": [],
+  "rules": [
+    {
+      "id": "R1",
+      "filter": "udp.dstport==5515 && frame contains \"IOT1\"",
+      "condition": ">= 3",
+      "description": "At least 3 telemetry datagrams (magic IOT1)."
+    },
+    {
+      "id": "R2",
+      "filter": "tcp.dstport==8080 && tcp.flags.syn==1 && tcp.flags.ack==0",
+      "condition": ">= 1",
+      "description": "Handshake to the HTTP API."
+    },
+    {
+      "id": "R3",
+      "filter": "tcp.port==8080 && frame contains \"GET /\"",
+      "condition": ">= 1",
+      "description": "At least one HTTP query for metrics (GET)."
+    },
+    {
+      "id": "R4",
+      "filter": "tcp.port==8080 && frame contains \"HTTP/1.1 200\"",
+      "condition": ">= 1",
+      "description": "200 response for the API query."
+    },
+    {
+      "id": "R5",
+      "filter": "udp.dstport==5515 && frame contains \"seq\"",
+      "condition": ">= 1",
+      "description": "Telemetry contains a sequence field (deduplication/out-of-order handling)."
+    }
+  ]
+}

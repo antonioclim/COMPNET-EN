@@ -1,0 +1,42 @@
+@startuml fig-S09-architecture
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title S09 — TCP Tunnel with Session Multiplexing: System Architecture
+
+package "Docker Network" as net #F5F5F5 {
+
+    rectangle "tunnel_server\n:9000/TCP" as tsrv #C8E6C9 {
+        rectangle "Frame Parser\nTNL1 + type + len" as parser #BBDEFB
+        rectangle "Demultiplexer\n(session_id → service)" as demux #90CAF9
+        rectangle "Per-session Buffers\n(flow control)" as bufs #FFF9C4
+    }
+
+    rectangle "service_a\n(echo)" as svcA #E3F2FD
+    rectangle "service_b\n(HTTP static)" as svcB #E3F2FD
+
+    rectangle "tunnel_client" as tclient #FFE0B2 {
+        rectangle "Multiplexer\n(interleave frames)" as mux #BBDEFB
+    }
+
+    rectangle "tester\n(pytest -m e2)" as tester #FFF9C4
+}
+
+tclient --> tsrv : "single TCP :9000\n(multiplexed frames)"
+tsrv --> svcA : "session 1 → echo"
+tsrv --> svcB : "session 2 → HTTP"
+svcA --> tsrv : "response (session 1)"
+svcB --> tsrv : "response (session 2)"
+
+tester -up-> tsrv : validates 2 parallel\nsessions + PCAP
+
+legend right
+  Single TCP connection carries N logical sessions
+  Frame: TNL1 + type(O/D/C) + session_id + len + payload
+  Services mapped via config: service_id → host:port
+  Per-session buffer limits for flow control
+endlegend
+@enduml

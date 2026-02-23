@@ -1,0 +1,45 @@
+@startuml fig-S01-e3-states
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+
+title S01 — Client Session State Machine
+
+[*] --> CONNECTED : TCP handshake\ncompleted
+
+state CONNECTED #E3F2FD {
+    CONNECTED : Awaiting PROTO + LOGIN
+    CONNECTED : Timeout if idle > T seconds
+}
+
+CONNECTED --> AUTHENTICATED : LOGIN valid\n(OK LOGIN)
+CONNECTED --> CLOSED : invalid LOGIN\n(ERR + disconnect after N retries)
+CONNECTED --> CLOSED : idle timeout
+
+state AUTHENTICATED #C8E6C9 {
+    AUTHENTICATED : Can send MSG, LIST, QUIT
+    AUTHENTICATED : Receives EVENTs
+    AUTHENTICATED : Rate limit enforced
+}
+
+AUTHENTICATED --> AUTHENTICATED : MSG, LIST\n(OK response)
+AUTHENTICATED -[#E53935]-> AUTHENTICATED : invalid command\n(ERR response)
+AUTHENTICATED --> CLOSED : QUIT received\n(OK QUIT + EVENT user_left)
+AUTHENTICATED --> CLOSED : TCP RST / timeout\n(EVENT user_left)
+
+state CLOSED #FFCDD2 {
+    CLOSED : Session cleaned up
+    CLOSED : Presence notification sent
+}
+
+CLOSED --> [*]
+
+legend right
+  States: CONNECTED, AUTHENTICATED, CLOSED
+  Transitions driven by protocol commands.
+  Server sends EVENT on join/leave.
+  Idle timeout configurable in config.yaml.
+  Username: 1–16 chars [A-Za-z0-9_-]
+endlegend
+@enduml

@@ -1,0 +1,49 @@
+@startuml fig-S11-architecture
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title S11 — REST Microservices with Service Registry and API Gateway
+
+package "Docker Network" as net #F5F5F5 {
+
+    rectangle "registry\n:8500/TCP" as reg #FFF9C4 {
+        rectangle "Service Table\n(name → instances)" as tbl #BBDEFB
+        rectangle "Heartbeat Monitor\n(expiry policy)" as hb #ECEFF1
+    }
+
+    rectangle "gateway\n:8080/TCP" as gw #E1BEE7 {
+        rectangle "Dynamic Router\n(registry lookup)" as router #BBDEFB
+    }
+
+    rectangle "service_a\n:5101/TCP" as sA #C8E6C9
+    rectangle "service_b\n:5102/TCP" as sB #C8E6C9
+    rectangle "service_c\n:5103/TCP" as sC #C8E6C9
+
+    rectangle "Client" as client #FFE0B2
+    rectangle "tester\n(pytest -m e2)" as tester #FFF9C4
+}
+
+sA --> reg : "POST /register\n+ periodic heartbeat"
+sB --> reg : "POST /register\n+ periodic heartbeat"
+sC --> reg : "POST /register\n+ periodic heartbeat"
+
+client --> gw : "GET /api/service_a/resource"
+gw --> reg : "GET /lookup?name=service_a"
+reg --> gw : "{host, port, instance_id}"
+gw --> sA : "GET /resource\n(proxied)"
+sA --> gw : "200 OK"
+gw --> client : "200 OK"
+
+tester -up-> gw : validates routing\nfailover + PCAP
+
+legend right
+  Registration: POST /register with heartbeat
+  Gateway: routes based on registry, not config
+  Expiry: service removed after missed heartbeats
+  Ports: 8080 (gw), 8500 (reg), 5101–5103 (svc)
+  Discovery: 239.10.11.12:5111/UDP (optional)
+endlegend
+@enduml

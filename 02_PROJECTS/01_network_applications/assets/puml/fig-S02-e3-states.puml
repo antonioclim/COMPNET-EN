@@ -1,0 +1,53 @@
+@startuml fig-S02-e3-states
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+
+title S02 — FTP Session State Machine (Control and Data)
+
+[*] --> GREETING : TCP connected\nto :5021
+
+state GREETING #E3F2FD {
+    GREETING : Server sends welcome banner
+}
+
+GREETING --> AUTH_PENDING : USER received
+
+state AUTH_PENDING #FFF9C4 {
+    AUTH_PENDING : Awaiting PASS
+}
+
+AUTH_PENDING --> AUTHENTICATED : PASS valid\n(230)
+AUTH_PENDING -[#E53935]-> GREETING : PASS invalid\n(530)
+
+state AUTHENTICATED #C8E6C9 {
+    AUTHENTICATED : PWD, CWD, LIST, RETR, STOR, QUIT
+    AUTHENTICATED : chroot enforced
+
+    state "IDLE" as idle
+    state "DATA_PENDING" as dp #90CAF9
+    state "TRANSFERRING" as xfer #90CAF9
+
+    idle --> dp : PASV\n(227 + port announced)
+    dp --> xfer : LIST / RETR / STOR\n(data connection opened)
+    xfer --> idle : transfer complete\n(226, data channel closed)
+    dp -[#E53935]-> idle : timeout\n(no data connection)
+}
+
+AUTHENTICATED --> CLOSED : QUIT\n(221)
+AUTHENTICATED -[#E53935]-> CLOSED : timeout / RST
+
+state CLOSED #FFCDD2 {
+    CLOSED : Both channels closed
+}
+
+CLOSED --> [*]
+
+legend right
+  Control session: GREETING → AUTH → AUTHENTICATED
+  Data sub-states: IDLE → DATA_PENDING → TRANSFERRING
+  Passive mode: server announces ephemeral port
+  Path traversal blocked at CWD/RETR/STOR
+endlegend
+@enduml

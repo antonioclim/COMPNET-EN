@@ -1,0 +1,25 @@
+{
+  "project": "A02",
+  "pcap_relpath": "artifacts/pcap/traffic_e2.pcap",
+  "decode_as": [],
+  "rules": [
+    {
+      "id": "R1",
+      "filter": "tcp.flags.syn==1 && tcp.flags.ack==0",
+      "condition": ">= 10",
+      "description": "At least 10 SYN packets (scan) within the test window."
+    },
+    {
+      "id": "R2",
+      "filter": "tcp.flags.reset==1",
+      "condition": ">= 1",
+      "description": "Observable RST (closed port) to distinguish it from filtering."
+    },
+    {
+      "id": "R3",
+      "filter": "tcp.len>0 && frame contains \"GET \"",
+      "condition": ">= 1",
+      "description": "Payload containing a pattern (e.g. HTTP GET) for a signature rule."
+    }
+  ]
+}

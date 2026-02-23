@@ -1,0 +1,56 @@
+@startuml fig-S14-e3-states
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+
+title S14 — Route Entry Lifecycle in the DV Routing Table
+
+[*] --> LEARNING : DV update received\nwith new destination
+
+state LEARNING #BBDEFB {
+    LEARNING : First advertisement
+    LEARNING : Distance and next-hop recorded
+}
+
+LEARNING --> VALID : consistent update\nfrom neighbour
+
+state VALID #C8E6C9 {
+    VALID : Used for forwarding
+    VALID : Refreshed by periodic updates
+}
+
+VALID --> VALID : update with\nsame or better cost
+VALID --> POSSIBLY_DOWN : neighbour timeout\nor cost = INF
+
+state POSSIBLY_DOWN #FFF9C4 {
+    POSSIBLY_DOWN : Hold-down timer started
+    POSSIBLY_DOWN : Forwarding suspended
+}
+
+POSSIBLY_DOWN --> VALID : alternative route\nfrom another neighbour
+POSSIBLY_DOWN --> INVALID : hold-down expires\nno alternative
+
+state INVALID #FFCDD2 {
+    INVALID : Route removed
+    INVALID : Advertise INF (poison)
+}
+
+INVALID --> LEARNING : new advertisement\nfrom recovered neighbour
+INVALID --> [*] : destination unreachable\n(no recovery)
+
+state "RECONVERGED" as reconv #E8F5E9 {
+    reconv : New optimal path installed
+    reconv : Split horizon or poison reverse active
+}
+
+POSSIBLY_DOWN --> reconv : better path\nvia backup link
+reconv --> VALID : stable updates\nconfirm new path
+
+legend right
+  Split horizon: do not advertise route
+  back to the neighbour it was learned from.
+  Poison reverse: advertise INF to that neighbour.
+  Hold-down prevents oscillation during convergence.
+endlegend
+@enduml

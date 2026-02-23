@@ -1,0 +1,63 @@
+@startuml fig-S03-e3-states
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+
+title S03 — HTTP Request Processing Pipeline
+
+start
+
+:Receive raw bytes from socket;
+
+:Parse request line\n(method, path, version);
+
+if (Valid HTTP/1.1 request line?) then (yes)
+    :Parse headers\n(Host, Connection, Content-Length);
+else (no)
+    :Send 400 Bad Request;
+    stop
+endif
+
+if (Method supported?\n(GET or HEAD)) then (yes)
+    :Normalise path\n(resolve %, block ..);
+else (no)
+    :Send 405 Method Not Allowed;
+    stop
+endif
+
+if (Path traversal attempt?) then (yes)
+    #FFCDD2:Send 403 Forbidden;
+    stop
+else (no)
+endif
+
+:Resolve file in docroot;
+
+if (File exists?) then (yes)
+    :Determine MIME type\nfrom extension;
+    if (Method == HEAD?) then (yes)
+        #C8E6C9:Send 200 OK\n(headers only, no body);
+    else (no)
+        #C8E6C9:Send 200 OK\n(headers + file body);
+    endif
+else (no)
+    #FFCDD2:Send 404 Not Found;
+endif
+
+if (Connection: keep-alive\nand limit not reached?) then (yes)
+    :Return to receive;
+    detach
+else (close)
+    :Close TCP connection;
+endif
+
+stop
+
+legend right
+  Pipeline: parse → validate → route → serve
+  Path normalisation prevents traversal
+  MIME types mapped from file extension
+  Keep-alive with configurable request limit
+endlegend
+@enduml

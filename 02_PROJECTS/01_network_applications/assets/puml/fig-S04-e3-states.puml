@@ -1,0 +1,63 @@
+@startuml fig-S04-e3-states
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+
+title S04 — Proxy Filtering Decision Flow
+
+start
+
+:Receive client request\n(absolute-form URI or CONNECT);
+
+if (Method == CONNECT?) then (yes)
+    :Extract target host:port;
+    if (Host on blacklist?) then (yes)
+        #FFCDD2:Return 403 Forbidden;
+        :Log: BLOCKED (CONNECT);
+        stop
+    else (no)
+        #C8E6C9:Return 200 Connection Established;
+        :Bidirectional tunnel\n(no inspection);
+        stop
+    endif
+else (no — HTTP)
+    :Parse absolute-form URI\n(extract host, path);
+endif
+
+if (URL on blacklist?) then (yes)
+    #FFCDD2:Return 403 Forbidden;
+    :Log: BLOCKED;
+    stop
+else (no)
+endif
+
+:Open connection to origin;
+
+if (Origin reachable?) then (yes)
+    :Reconstruct request\n(relative path, Host header);
+    :Forward to origin;
+    :Receive origin response;
+
+    if (Content-Type blocked?) then (yes)
+        #FFCDD2:Return 403 Forbidden;
+        :Log: BLOCKED (content-type);
+    else (no)
+        #C8E6C9:Forward response to client;
+        :Log: status, duration, size;
+    endif
+else (no)
+    #FFCDD2:Return 502 Bad Gateway;
+    :Log: upstream unreachable;
+endif
+
+stop
+
+legend right
+  Three filter checkpoints:
+  1. URL blacklist (before upstream)
+  2. Content-type filter (after response)
+  3. CONNECT host check (tunnel mode)
+  All decisions logged with timestamp
+endlegend
+@enduml

@@ -1,0 +1,41 @@
+@startuml fig-S07-architecture
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title S07 — UDP DNS Resolver: System Architecture
+
+package "Docker Network" as net #F5F5F5 {
+
+    rectangle "dns_resolver\n:5300/UDP" as resolver #C8E6C9 {
+        rectangle "DNS Parser\n(header, question, RR)" as parser #BBDEFB
+        rectangle "Local Zone\nlab.local (A records)" as zone #90CAF9
+        rectangle "TTL Cache\n(name → RR, expiry)" as cache #FFF9C4
+        rectangle "Forwarder\n(upstream query)" as fwd #ECEFF1
+    }
+
+    rectangle "upstream_dns\n:53/UDP" as upstream #E3F2FD
+    rectangle "Client\n(dig / nslookup)" as client #FFE0B2
+    rectangle "tester\n(pytest -m e2)" as tester #FFF9C4
+}
+
+client --> resolver : "UDP query\n(A record)"
+resolver --> upstream : "forwarded query\n(not in zone or cache)"
+upstream --> resolver : "upstream response"
+resolver --> client : "DNS response"
+
+parser -right-> zone : check local\nzone first
+zone -right-> cache : miss → check\ncache
+cache -right-> fwd : miss → forward\nto upstream
+
+tester -up-> resolver : validates local, forward\ncache hit + PCAP
+
+legend right
+  Resolution order: local zone → cache → upstream
+  TTL-based cache expiry
+  Negative caching for NXDOMAIN
+  Ports: 5300/UDP (resolver), 53/UDP (upstream)
+endlegend
+@enduml

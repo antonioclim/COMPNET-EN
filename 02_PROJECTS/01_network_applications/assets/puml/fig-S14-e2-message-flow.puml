@@ -1,0 +1,50 @@
+@startuml fig-S14-e2-message-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title S14 — E2 Path: DV Update Exchange and Convergence After Link Failure
+
+participant "r1" as R1 #C8E6C9
+participant "r2" as R2 #C8E6C9
+participant "r3" as R3 #C8E6C9
+
+== INITIAL DV EXCHANGE (convergence) ==
+R1 -[#1565C0]-> R2 : DV1 {hA:0, r2:1, r3:2, hB:3}
+R1 -[#1565C0]-> R3 : DV1 {hA:0, r2:1, r3:2, hB:3}
+R2 -[#1565C0]-> R1 : DV1 {hA:1, r2:0, r3:1, hB:2}
+R2 -[#1565C0]-> R3 : DV1 {hA:1, r2:0, r3:1, hB:2}
+R3 -[#1565C0]-> R1 : DV1 {hA:2, r2:1, r3:0, hB:1}
+R3 -[#1565C0]-> R2 : DV1 {hA:2, r2:1, r3:0, hB:1}
+
+note over R1, R3 : Routing tables converged\nhA→r1→r2→r3→hB (cost 3)
+
+== DATA FORWARDING (overlay) ==
+R1 -> R2 : DATA1 src=hA dst=hB payload
+R2 -> R3 : DATA1 src=hA dst=hB payload
+note right of R3 : Delivered to hB
+
+== LINK FAILURE: r1—r2 DOWN ==
+note over R1, R2 #FFCDD2 : Link r1↔r2 fails
+
+|||
+
+== TRIGGERED UPDATE (anti-loop) ==
+R1 -[#E53935]-> R3 : DV1 {r2:INF}\n(POISON reverse)
+R3 -[#1565C0]-> R1 : DV1 {r2:1, hB:1}
+
+note over R1, R3 : Reconverged\nhA→r1→r3→hB (cost via backup)
+
+== DATA FORWARDING (new path) ==
+R1 -> R3 : DATA1 src=hA dst=hB payload
+note right of R3 : Delivered to hB via backup
+
+legend right
+  DV1: periodic updates with distance vectors
+  POISON/SPLITH: anti-loop evidence in PCAP
+  DATA1: overlay forwarding hop-by-hop
+  Validates R1–R4 in S14.json
+endlegend
+@enduml

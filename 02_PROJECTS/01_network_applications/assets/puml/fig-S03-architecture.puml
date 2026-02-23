@@ -1,0 +1,40 @@
+@startuml fig-S03-architecture
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title S03 — HTTP/1.1 Raw Socket Server: System Architecture
+
+package "Docker Network" as net #F5F5F5 {
+
+    rectangle "http_raw_server\n:8080/TCP" as srv #C8E6C9 {
+        rectangle "HTTP Parser\n(request line, headers)" as parser #BBDEFB
+        rectangle "Router\n(GET, HEAD → handler)" as router #BBDEFB
+        rectangle "File Server\n(docroot, MIME types)" as fserv #FFF9C4
+        rectangle "Concurrency\n(threads / select)" as conc #ECEFF1
+    }
+
+    rectangle "Client (curl)\nHost h2" as c1 #FFE0B2
+    rectangle "Client (browser)\nHost h3" as c2 #FFE0B2
+    rectangle "Flex Client\n(other language)" as flex #E1BEE7
+    rectangle "tester\n(pytest -m e2)" as tester #FFF9C4
+}
+
+c1 --> srv : "GET /index.html HTTP/1.1"
+c2 --> srv : "GET /missing.txt HTTP/1.1"
+flex --> srv : "(interoperable)"
+tester -up-> srv : validates 200, 404, 405\n+ PCAP capture
+
+parser -right-> router : parsed request
+router -right-> fserv : resolved path
+
+legend right
+  No framework: socket-level parsing
+  Methods: GET, HEAD (405 for others)
+  Responses: 200, 304, 404, 405
+  Content-Type from extension map
+  Connection: keep-alive with limit
+endlegend
+@enduml

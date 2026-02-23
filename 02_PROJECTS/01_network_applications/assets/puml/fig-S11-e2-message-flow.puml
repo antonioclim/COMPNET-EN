@@ -1,0 +1,49 @@
+@startuml fig-S11-e2-message-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title S11 — E2 Path: Registration, Gateway Routing and Failover
+
+participant "tester" as C #FFE0B2
+participant "gateway\n:8080" as GW #E1BEE7
+participant "registry\n:8500" as REG #FFF9C4
+participant "service_a\n:5101" as A #C8E6C9
+participant "service_b\n:5102" as B #C8E6C9
+
+== SERVICE REGISTRATION ==
+A -> REG : POST /register\n{name: "svc", port: 5101, id: "a"}
+REG -[#43A047]-> A : 200 OK
+B -> REG : POST /register\n{name: "svc", port: 5102, id: "b"}
+REG -[#43A047]-> B : 200 OK
+
+== CLIENT REQUEST — ROUTED TO A ==
+C -> GW : GET /api/svc/data HTTP/1.1
+GW -> REG : GET /lookup?name=svc
+REG --> GW : [{id: "a", port: 5101}, {id: "b", port: 5102}]
+GW -> A : GET /data HTTP/1.1
+A -[#43A047]-> GW : 200 OK {result: "from a"}
+GW -[#43A047]-> C : 200 OK\nX-Request-ID: req-001
+
+== SERVICE A GOES DOWN ==
+note over A #FFCDD2 : service_a stopped\nheartbeat expires
+
+REG -> REG : expire instance "a"
+
+== CLIENT REQUEST — REROUTED TO B ==
+C -> GW : GET /api/svc/data HTTP/1.1
+GW -> REG : GET /lookup?name=svc
+REG --> GW : [{id: "b", port: 5102}]
+GW -> B : GET /data HTTP/1.1
+B -[#43A047]-> GW : 200 OK {result: "from b"}
+GW -[#43A047]-> C : 200 OK
+
+legend right
+  Two HTTP hops visible per request in PCAP
+  Routing change after instance expires
+  X-Request-ID for correlation
+  Validates R1–R5 in S11.json
+endlegend
+@enduml

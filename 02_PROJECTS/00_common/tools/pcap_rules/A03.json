@@ -1,0 +1,25 @@
+{
+  "project": "A03",
+  "pcap_relpath": "artifacts/pcap/traffic_e2.pcap",
+  "decode_as": [],
+  "rules": [
+    {
+      "id": "R1",
+      "filter": "tcp",
+      "condition": ">= 50",
+      "description": "At least 50 TCP packets for statistics (flows, retransmissions)."
+    },
+    {
+      "id": "R2",
+      "filter": "tcp.analysis.retransmission",
+      "condition": ">= 1",
+      "description": "At least one retransmission (TCP indicator)."
+    },
+    {
+      "id": "R3",
+      "filter": "ip",
+      "condition": ">= 50",
+      "description": "At least 50 IP packets (top talkers)."
+    }
+  ]
+}

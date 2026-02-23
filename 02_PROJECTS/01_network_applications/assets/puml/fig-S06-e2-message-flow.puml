@@ -1,0 +1,51 @@
+@startuml fig-S06-e2-message-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title S06 — E2 Primary Path: Subscribe, Publish and Delivery
+
+participant "Publisher" as P #FFE0B2
+participant "Broker\n:5006" as B #C8E6C9
+participant "Subscriber A" as SA #FFE0B2
+participant "Subscriber B" as SB #FFE0B2
+
+== CLIENT REGISTRATION ==
+P -> B : HELLO pub-01
+B -[#43A047]-> P : OK HELLO
+SA -> B : HELLO sub-01
+B -[#43A047]-> SA : OK HELLO
+SB -> B : HELLO sub-02
+B -[#43A047]-> SB : OK HELLO
+
+== SUBSCRIPTION ==
+SA -> B : SUBSCRIBE sensors/temp
+B --> SA : OK SUBSCRIBE
+SB -> B : SUBSCRIBE sensors/temp
+B --> SB : OK SUBSCRIBE
+
+== PUBLISH AND DELIVERY ==
+P -> B : PUBLISH sensors/temp 22.5C
+B --> P : OK PUBLISH
+
+B -[#1565C0]-> SA : DELIVER sensors/temp 22.5C
+B -[#1565C0]-> SB : DELIVER sensors/temp 22.5C
+
+== UNSUBSCRIBE ==
+SA -> B : UNSUBSCRIBE sensors/temp
+B --> SA : OK UNSUBSCRIBE
+
+P -> B : PUBLISH sensors/temp 23.1C
+B --> P : OK PUBLISH
+B -[#1565C0]-> SB : DELIVER sensors/temp 23.1C
+note right of SA : SA does NOT receive\nthis message
+
+legend right
+  PCAP must contain: HELLO/AUTH
+  SUBSCRIBE, PUBLISH, DELIVER
+  Delivery stops after UNSUBSCRIBE
+  Validates R1–R5 in S06.json
+endlegend
+@enduml

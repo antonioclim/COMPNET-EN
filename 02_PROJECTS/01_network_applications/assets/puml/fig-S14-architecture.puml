@@ -1,0 +1,45 @@
+@startuml fig-S14-architecture
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title S14 — Didactic Distance-Vector Routing in Mininet
+
+package "Mininet Topology" as topo #F5F5F5 {
+
+    rectangle "hA\n(source host)" as hA #FFE0B2
+    rectangle "hB\n(destination host)" as hB #FFE0B2
+
+    rectangle "r1\n(DV agent)" as r1 #C8E6C9 {
+        rectangle "Routing Table" as rt1 #BBDEFB
+    }
+    rectangle "r2\n(DV agent)" as r2 #C8E6C9 {
+        rectangle "Routing Table" as rt2 #BBDEFB
+    }
+    rectangle "r3\n(DV agent)" as r3 #C8E6C9 {
+        rectangle "Routing Table" as rt3 #BBDEFB
+    }
+
+    hA --> r1 : link
+    r1 --> r2 : link (primary)
+    r2 --> r3 : link (primary)
+    r3 --> hB : link
+    r1 --> r3 : link (backup)\n(longer cost)
+}
+
+r1 <-[#1565C0]-> r2 : "UDP :5014\nDV1 updates\n(periodic)"
+r2 <-[#1565C0]-> r3 : "UDP :5014\nDV1 updates"
+r1 <-[#1565C0]-> r3 : "UDP :5014\nDV1 updates"
+
+hA -[#43A047]-> hB : "UDP :5015\nDATA1 overlay packets\n(hop-by-hop forwarding)"
+
+legend right
+  DV agents exchange routing vectors (DV1 magic)
+  Overlay data forwarded hop-by-hop (DATA1 magic)
+  Anti-loop: split horizon or poison reverse
+  Link failure triggers reconvergence
+  Ports: 5014/UDP (updates), 5015/UDP (data)
+endlegend
+@enduml

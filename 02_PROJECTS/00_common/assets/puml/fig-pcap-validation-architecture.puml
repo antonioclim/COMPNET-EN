@@ -1,0 +1,68 @@
+@startuml fig-pcap-validation-architecture
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+
+title PCAP Validation Architecture (validate_pcap.py)
+
+start
+
+:Parse CLI arguments\n--project CODE\n--pcap PATH\n--rules-dir DIR;
+
+:Resolve paths\n(expanduser + resolve);
+
+if (PCAP file exists?) then (no)
+  #FFCDD2:Print "[FAIL] PCAP not found";
+  stop
+else (yes)
+endif
+
+:load_rules()\nRead pcap_rules/<CODE>.json;
+
+if (Rules file found?) then (no)
+  #FFCDD2:Print "[FAIL] Unable to load rules";
+  stop
+else (yes)
+endif
+
+partition "validate() — iterate over rules" #E8F5E9 {
+  while (more rules?) is (yes)
+    :Extract rule:\nid, filter, condition, description;
+
+    :_parse_condition()\nParse operator and threshold\n(==, >=, <=, >, <) N;
+
+    partition "tshark invocation" #E3F2FD {
+      :_run_tshark_count()\ntshark -r PCAP\n-Y "display_filter"\n-T fields -e frame.number;
+
+      :Count output lines\n→ observed packet count;
+    }
+
+    :_eval_condition()\nCompare observed vs threshold;
+
+    if (condition met?) then (yes)
+      #C8E6C9:Record [OK] for rule;
+    else (no)
+      #FFCDD2:Record [FAIL] for rule;
+    endif
+  endwhile (no)
+}
+
+:Print results per rule\n(status, expected, observed, filter);
+
+if (all rules passed?) then (yes)
+  #C8E6C9:Print "[OK] All rules passed"\nexit 0;
+else (no)
+  #FFCDD2:Print "[FAIL] Some rules failed"\nexit 1;
+endif
+
+stop
+
+legend right
+Each rule in the JSON file defines:
+- id: unique rule identifier (R1, R2, ...)
+- filter: tshark display filter expression
+- condition: comparison operator + threshold
+- description: human-readable purpose
+endlegend
+@enduml

@@ -1,0 +1,25 @@
+{
+  "project": "A07",
+  "pcap_relpath": "artifacts/pcap/traffic_e2.pcap",
+  "decode_as": [],
+  "rules": [
+    {
+      "id": "R1",
+      "filter": "tcp.port==6653",
+      "condition": ">= 1",
+      "description": "OpenFlow traffic (TCP/6653) is present."
+    },
+    {
+      "id": "R2",
+      "filter": "tcp.port==6653 && tcp.len>0",
+      "condition": ">= 5",
+      "description": "At least 5 OpenFlow segments with payload (learning plus flow installation)."
+    },
+    {
+      "id": "R3",
+      "filter": "arp || icmp || ip",
+      "condition": ">= 5",
+      "description": "L2/L3 traffic in the network (to trigger learning)."
+    }
+  ]
+}

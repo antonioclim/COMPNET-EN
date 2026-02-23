@@ -1,0 +1,52 @@
+@startuml fig-e2-pipeline-overview
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title E2 Automated Assessment Pipeline — End-to-End Flow
+
+rectangle "Student Repository" as repo #FFF3E0 {
+  rectangle "docker-compose.yml" as compose #FFE0B2
+  rectangle "src/" as src #FFE0B2
+  rectangle "tests/ (pytest -m e2)" as pytests #FFE0B2
+  rectangle "tools/pcap_rules/<CODE>.json" as rulesjson #FFF9C4
+}
+
+rectangle "Docker Compose Orchestration" as orch #E3F2FD {
+  rectangle "Application Services\n(server, client, etc.)" as appsvc #BBDEFB
+  rectangle "Tester Container\n(tester_base image)" as tester #90CAF9
+}
+
+rectangle "Validation Stage" as val #E8F5E9 {
+  rectangle "tcpdump\n(packet capture)" as tcpdump #C8E6C9
+  rectangle "pytest -m e2\n(smoke tests)" as pytest #C8E6C9
+  rectangle "validate_pcap.py\n(tshark rule check)" as vpcap #C8E6C9
+}
+
+rectangle "Artefacts" as arts #FCE4EC {
+  rectangle "traffic_e2.pcap" as pcap #FFCDD2
+  rectangle "Test report\n(PASS / FAIL)" as report #FFCDD2
+}
+
+compose --> orch : docker compose\nup --build
+src --> appsvc : builds into
+pytests --> tester : copied into
+rulesjson --> tester : copied into
+tester --> tcpdump : step 1: start capture
+tester --> pytest : step 2: run tests
+tester --> vpcap : step 3: validate PCAP
+tcpdump --> pcap : writes
+appsvc -right-> tcpdump : network traffic
+pytest --> report : produces
+vpcap --> report : appends result
+
+legend bottom
+The tester container orchestrates the entire E2 flow:
+1. Start tcpdump on all interfaces
+2. Execute pytest smoke tests against running services
+3. Stop capture and validate the PCAP with tshark rules
+Exit code determines overall PASS or FAIL.
+endlegend
+@enduml
