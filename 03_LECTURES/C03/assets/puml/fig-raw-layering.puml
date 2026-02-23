@@ -1,0 +1,45 @@
+@startuml fig-raw-layering
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam roundcorner 12
+
+title RAW sockets — operating below the transport layer
+
+rectangle "Application" as app #FFE0B2
+rectangle "Transport (TCP / UDP)" as l4 #C8E6C9
+rectangle "Network (IP)" as l3 #BBDEFB
+rectangle "Data Link (Ethernet)" as l2 #E3F2FD
+rectangle "Physical" as l1 #F5F5F5
+
+app -[#1565C0]-> l4 : normal\nsocket()
+l4 -[#1565C0]-> l3
+l3 -[#1565C0]-> l2
+l2 -[#1565C0]-> l1
+
+rectangle "RAW Socket\n(SOCK_RAW)" as raw #FFF9C4
+
+raw -[#E53935]-> l3 : bypasses L4\ndirect IP access
+raw -[#E53935]-> l2 : or even L2\n(AF_PACKET on Linux)
+
+note right of raw #FFEBEE
+  Requires root / CAP_NET_RAW.
+  Used for diagnostics (ping)
+  and packet crafting (Scapy).
+end note
+
+note right of l4 #E8F5E9
+  Normal path: application
+  uses TCP or UDP via the
+  standard socket API.
+end note
+
+legend right
+  Normal sockets traverse L4 (TCP/UDP).
+  RAW sockets bypass the transport layer
+  to craft or inspect packets at L3 (IP)
+  or L2 (Ethernet frames on Linux).
+  Elevated privileges are always required.
+endlegend
+@enduml

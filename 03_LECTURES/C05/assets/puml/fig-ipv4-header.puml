@@ -1,0 +1,46 @@
+@startuml fig-ipv4-header
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 10
+skinparam shadowing false
+skinparam roundcorner 12
+
+title IPv4 Packet Header — Key Fields
+
+rectangle "**Row 1** (32 bits)" as row1 #E3F2FD {
+    rectangle "Version\n4 b" as ver #BBDEFB
+    rectangle "IHL\n4 b" as ihl #BBDEFB
+    rectangle "DSCP\n6 b" as dscp #ECEFF1
+    rectangle "ECN\n2 b" as ecn #ECEFF1
+    rectangle "Total Length\n16 b" as tl #BBDEFB
+}
+
+rectangle "**Row 2** (32 bits)" as row2 #E3F2FD {
+    rectangle "Identification\n16 b" as ident #FFF9C4
+    rectangle "Flags\n3 b" as flags #FFF9C4
+    rectangle "Fragment Offset\n13 b" as foff #FFF9C4
+}
+
+rectangle "**Row 3** (32 bits)" as row3 #E3F2FD {
+    rectangle "TTL\n8 b" as ttl #FFCDD2
+    rectangle "Protocol\n8 b" as proto #E1BEE7
+    rectangle "Header Checksum\n16 b" as csum #ECEFF1
+}
+
+rectangle "Source Address — 32 bits" as src #C8E6C9
+rectangle "Destination Address — 32 bits" as dst #FFE0B2
+rectangle "Options (variable, rarely used)" as opt #F5F5F5
+
+row1 -[hidden]down-> row2
+row2 -[hidden]down-> row3
+row3 -[hidden]down-> src
+src -[hidden]down-> dst
+dst -[hidden]down-> opt
+
+legend right
+  TTL decreases at each hop (prevents loops).
+  Protocol identifies the payload (TCP=6, UDP=17, ICMP=1).
+  Flags + Fragment Offset control fragmentation.
+  Header Checksum covers the header only.
+endlegend
+@enduml

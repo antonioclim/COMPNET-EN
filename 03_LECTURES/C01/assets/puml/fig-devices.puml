@@ -1,0 +1,35 @@
+@startuml fig-devices
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Communication devices — from NIC to router
+
+package "End devices" as enddev #FFF3E0 {
+    rectangle "PC / Server" as host #FFE0B2
+    rectangle "NIC\n(Network Interface Card)" as nic #FFE0B2
+    host --> nic : internal bus
+}
+
+package "Intermediary devices" as interdev #E3F2FD {
+    rectangle "Repeater\n(L1 — signal amplification)" as rep #ECEFF1
+    rectangle "Hub\n(L1 — multiport repeater)" as hub #ECEFF1
+    rectangle "Switch\n(L2 — MAC-based forwarding)" as sw #BBDEFB
+    rectangle "Router\n(L3 — IP-based routing)" as rtr #90CAF9
+}
+
+nic --> rep : physical signal
+rep --> hub : amplified signal
+hub --> sw : all frames flooded
+sw --> rtr : selected frames
+
+legend right
+  NIC: interface between host and network.
+  Repeater/Hub: physical layer, no intelligence.
+  Switch: learns MAC addresses, forwards selectively.
+  Router: connects distinct IP networks,
+  makes forwarding decisions at Layer 3.
+endlegend
+@enduml

@@ -1,0 +1,53 @@
+@startuml fig-osi-vs-tcpip
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title OSI vs TCP/IP — Layer Equivalences
+
+package "OSI Model (7 layers)" as OSI #F5F5F5 {
+  rectangle "7 — Application" as O7 #E1BEE7
+  rectangle "6 — Presentation" as O6 #E1BEE7
+  rectangle "5 — Session" as O5 #E1BEE7
+  rectangle "4 — Transport" as O4 #C8E6C9
+  rectangle "3 — Network" as O3 #BBDEFB
+  rectangle "2 — Data Link" as O2 #E3F2FD
+  rectangle "1 — Physical" as O1 #ECEFF1
+
+  O7 -down-> O6
+  O6 -down-> O5
+  O5 -down-> O4
+  O4 -down-> O3
+  O3 -down-> O2
+  O2 -down-> O1
+}
+
+package "TCP/IP Model (4 layers)" as TCPIP #F5F5F5 {
+  rectangle "Application\n(HTTP, DNS, SMTP, FTP, SSH)" as TApp #E1BEE7
+  rectangle "Transport\n(TCP, UDP)" as TTr #C8E6C9
+  rectangle "Internet\n(IP, ICMP)" as TInt #BBDEFB
+  rectangle "Network Access\n(Ethernet, Wi-Fi)" as TNet #E3F2FD
+
+  TApp -down-> TTr
+  TTr -down-> TInt
+  TInt -down-> TNet
+}
+
+O7 ..right..> TApp
+O6 ..right..> TApp
+O5 ..right..> TApp
+O4 ..right..> TTr
+O3 ..right..> TInt
+O2 ..right..> TNet
+O1 ..right..> TNet
+
+legend bottom
+  OSI layers 5–7 collapse into the
+  TCP/IP Application layer.
+  OSI layers 1–2 merge into
+  TCP/IP Network Access.
+  OSI is theoretical; TCP/IP is practical.
+endlegend
+@enduml

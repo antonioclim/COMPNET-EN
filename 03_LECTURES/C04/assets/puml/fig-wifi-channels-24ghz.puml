@@ -1,0 +1,42 @@
+@startuml fig-wifi-channels-24ghz
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Wi-Fi 2.4 GHz Band — Channel Overlap
+
+package "2.4 GHz Spectrum (2400–2483.5 MHz)" as spectrum #F5F5F5 {
+    rectangle "Ch 1\n2412 MHz" as c1 #C8E6C9
+    rectangle "Ch 2" as c2 #FFCDD2
+    rectangle "Ch 3" as c3 #FFCDD2
+    rectangle "Ch 4" as c4 #FFCDD2
+    rectangle "Ch 5" as c5 #FFCDD2
+    rectangle "Ch 6\n2437 MHz" as c6 #C8E6C9
+    rectangle "Ch 7" as c7 #FFCDD2
+    rectangle "Ch 8" as c8 #FFCDD2
+    rectangle "Ch 9" as c9 #FFCDD2
+    rectangle "Ch 10" as c10 #FFCDD2
+    rectangle "Ch 11\n2462 MHz" as c11 #C8E6C9
+}
+
+c1 -[hidden]right-> c2
+c2 -[hidden]right-> c3
+c3 -[hidden]right-> c4
+c4 -[hidden]right-> c5
+c5 -[hidden]right-> c6
+c6 -[hidden]right-> c7
+c7 -[hidden]right-> c8
+c8 -[hidden]right-> c9
+c9 -[hidden]right-> c10
+c10 -[hidden]right-> c11
+
+legend bottom
+  Each channel spans ~22 MHz; adjacent channels overlap.
+  Channels 1, 6 and 11 (green) are the three
+  non-overlapping choices in most regions.
+  Red channels overlap with their neighbours
+  and cause co-channel interference.
+endlegend
+@enduml

@@ -1,0 +1,43 @@
+@startuml fig-ipv6-header
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 10
+skinparam shadowing false
+skinparam roundcorner 12
+
+title IPv6 Fixed Header and Extension Chain
+
+rectangle "**Row 1** (32 bits)" as row1 #E3F2FD {
+    rectangle "Version\n4 b" as ver #BBDEFB
+    rectangle "Traffic Class\n8 b" as tc #ECEFF1
+    rectangle "Flow Label\n20 b" as fl #ECEFF1
+}
+
+rectangle "**Row 2** (32 bits)" as row2 #E3F2FD {
+    rectangle "Payload Length\n16 b" as pl #BBDEFB
+    rectangle "Next Header\n8 b" as nh #E1BEE7
+    rectangle "Hop Limit\n8 b" as hl #FFCDD2
+}
+
+rectangle "Source Address — 128 bits" as src #C8E6C9
+rectangle "Destination Address — 128 bits" as dst #FFE0B2
+
+rectangle "Extension Headers (0 … n)" as ext1 #F5F5F5
+rectangle "Upper-Layer Payload (TCP / UDP / ICMPv6)" as payload #FFF9C4
+
+row1 -[hidden]down-> row2
+row2 -[hidden]down-> src
+src -[hidden]down-> dst
+dst -[hidden]down-> ext1
+ext1 -[hidden]down-> payload
+
+nh -[#1565C0]-> ext1 : Next Header\npoints to first\nextension or payload
+ext1 -[#1565C0]-> payload : chained via\nNext Header field
+
+legend right
+  IPv6 has a fixed 40-byte base header.
+  No header checksum — handled by upper layers.
+  Fragmentation only at source (via extension header).
+  Next Header replaces IPv4 Protocol field.
+endlegend
+@enduml

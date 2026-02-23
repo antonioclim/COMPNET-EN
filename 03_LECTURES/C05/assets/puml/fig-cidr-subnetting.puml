@@ -1,0 +1,34 @@
+@startuml fig-cidr-subnetting
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+left to right direction
+
+title CIDR Notation and Subnet Derivation
+
+card "Address\n192.168.23.233" as addr #E3F2FD
+card "Prefix\n/24" as prefix #BBDEFB
+
+package "Derived Values" as derived #E8F5E9 {
+    card "Mask\n255.255.255.0" as mask #C8E6C9
+    card "Network\n192.168.23.0" as net #C8E6C9
+    card "Broadcast\n192.168.23.255" as bcast #C8E6C9
+    card "Hosts\n.1 … .254\n(254 usable)" as hosts #C8E6C9
+}
+
+addr -[#1565C0]-> mask : determines
+prefix -[#1565C0]-> mask : /24 = 24 ones
+mask -[#43A047]-> net : AND with address
+mask -[#43A047]-> bcast : OR host bits to 1
+net -[#43A047]-> hosts : network + 1
+bcast -[#43A047]-> hosts : broadcast − 1
+
+legend bottom
+  CIDR replaces the legacy classful model.
+  /n indicates the number of network bits.
+  Smaller /n → larger block; larger /n → fewer hosts.
+  Example: /24 = 256 addresses, 254 usable hosts.
+endlegend
+@enduml

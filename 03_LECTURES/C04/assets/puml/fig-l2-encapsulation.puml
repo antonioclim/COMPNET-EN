@@ -1,0 +1,29 @@
+@startuml fig-l2-encapsulation
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Layer 2 Encapsulation: Wrapping a Packet into a Frame
+
+rectangle "L3 IP Packet\n(source IP, dest IP, payload)" as pkt #F5F5F5
+
+rectangle "L2 Frame" as frame #E3F2FD {
+    rectangle "L2 Header\n(dest MAC, src MAC\ntype/length)" as hdr #BBDEFB
+    rectangle "L3 Packet\n(payload)" as pay #FFF9C4
+    rectangle "FCS\n(CRC-32)" as fcs #C8E6C9
+}
+
+rectangle "L1 Bit Stream\n(serialised onto medium)" as bits #FFE0B2
+
+pkt -down-> frame : encapsulation
+frame -down-> bits : serialisation
+
+legend right
+  The data link layer wraps each L3 packet
+  in a header (addressing) and trailer (CRC).
+  The receiver uses the FCS to detect errors
+  and the MAC addresses to identify endpoints.
+endlegend
+@enduml

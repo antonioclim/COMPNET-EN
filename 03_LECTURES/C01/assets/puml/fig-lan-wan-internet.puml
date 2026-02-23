@@ -1,0 +1,35 @@
+@startuml fig-lan-wan-internet
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title LAN, WAN and the Internet — network scale
+
+package "LAN (room / building / campus)" as lan #E8F5E9 {
+    rectangle "PC" as pc #C8E6C9
+    rectangle "Switch" as sw #BBDEFB
+    rectangle "Server" as srv #C8E6C9
+    pc --> sw : Ethernet
+    sw --> srv : Ethernet
+}
+
+package "WAN (region / country / continent)" as wan #E3F2FD {
+    rectangle "Router R1" as r1 #BBDEFB
+    rectangle "Router R2" as r2 #BBDEFB
+    r1 <--> r2 : leased line /\nfibre link
+}
+
+cloud "Internet\n(global interconnection)" as inet #F5F5F5
+
+sw --> r1 : gateway
+r2 --> inet : ISP uplink
+
+legend bottom
+  LAN: low latency, high bandwidth, single site.
+  WAN: interconnects LANs across long distances.
+  Internet: worldwide mesh of WANs, ISPs
+  and autonomous systems (ASes).
+endlegend
+@enduml

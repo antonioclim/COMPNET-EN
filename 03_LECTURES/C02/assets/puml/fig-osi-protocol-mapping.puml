@@ -1,0 +1,60 @@
+@startuml fig-osi-protocol-mapping
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+left to right direction
+
+title Protocols Mapped to OSI and TCP/IP Layers
+
+package "OSI Layer" as osi #F5F5F5 {
+  card "7 Application" as O7 #E1BEE7
+  card "6 Presentation" as O6 #E1BEE7
+  card "5 Session" as O5 #E1BEE7
+  card "4 Transport" as O4 #C8E6C9
+  card "3 Network" as O3 #BBDEFB
+  card "2 Data Link" as O2 #E3F2FD
+  card "1 Physical" as O1 #ECEFF1
+}
+
+package "Example Protocols" as proto #FFF3E0 {
+  card "HTTP, FTP, SMTP\nDNS, SSH" as P7 #FFE0B2
+  card "TLS/SSL, MIME\nUTF-8, JSON, ASN.1" as P6 #FFE0B2
+  card "NetBIOS, RPC\n(often implicit)" as P5 #FFE0B2
+  card "TCP, UDP\nSCTP" as P4 #C8E6C9
+  card "IP (v4/v6)\nICMP, ARP" as P3 #BBDEFB
+  card "Ethernet, Wi-Fi\nPPP" as P2 #E3F2FD
+  card "Copper, fibre\nradio signals" as P1 #ECEFF1
+}
+
+package "TCP/IP Layer" as tcpip #F5F5F5 {
+  card "Application" as T4 #E1BEE7
+  card "Transport" as T3 #C8E6C9
+  card "Internet" as T2 #BBDEFB
+  card "Network Access" as T1 #E3F2FD
+}
+
+O7 -right-> P7
+O6 -right-> P6
+O5 -right-> P5
+O4 -right-> P4
+O3 -right-> P3
+O2 -right-> P2
+O1 -right-> P1
+
+P7 -right-> T4
+P6 -right-> T4
+P5 -right-> T4
+P4 -right-> T3
+P3 -right-> T2
+P2 -right-> T1
+P1 -right-> T1
+
+legend bottom
+  OSI provides fine-grained classification.
+  TCP/IP groups upper layers into Application
+  and lower layers into Network Access.
+  Protocols like TLS span conceptual boundaries.
+endlegend
+@enduml

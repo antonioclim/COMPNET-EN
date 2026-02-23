@@ -1,0 +1,56 @@
+@startuml fig-osi-communication
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Communication Between OSI Layers — Vertical and Horizontal
+
+package "Host A" as HA #E8F5E9 {
+  rectangle "Application" as A7 #E1BEE7
+  rectangle "Presentation" as A6 #E1BEE7
+  rectangle "Session" as A5 #E1BEE7
+  rectangle "Transport" as A4 #C8E6C9
+  rectangle "Network" as A3 #BBDEFB
+  rectangle "Data Link" as A2 #E3F2FD
+  rectangle "Physical" as A1 #F5F5F5
+
+  A7 -down-> A6 : vertical
+  A6 -down-> A5 : vertical
+  A5 -down-> A4 : vertical
+  A4 -down-> A3 : vertical
+  A3 -down-> A2 : vertical
+  A2 -down-> A1 : vertical
+}
+
+package "Host B" as HB #FFF3E0 {
+  rectangle "Application" as B7 #E1BEE7
+  rectangle "Presentation" as B6 #E1BEE7
+  rectangle "Session" as B5 #E1BEE7
+  rectangle "Transport" as B4 #C8E6C9
+  rectangle "Network" as B3 #BBDEFB
+  rectangle "Data Link" as B2 #E3F2FD
+  rectangle "Physical" as B1 #F5F5F5
+
+  B7 -down-> B6 : vertical
+  B6 -down-> B5 : vertical
+  B5 -down-> B4 : vertical
+  B4 -down-> B3 : vertical
+  B3 -down-> B2 : vertical
+  B2 -down-> B1 : vertical
+}
+
+A7 ..right..> B7 : peer (logical)
+A4 ..right..> B4 : peer (logical)
+A3 ..right..> B3 : peer (logical)
+A1 -right-> B1 : physical medium
+
+legend bottom
+  Vertical communication flows within a host
+  (each layer passes data to its neighbour).
+  Horizontal (peer) communication is logical —
+  only the Physical layer exchanges real signals.
+  Peer layers interpret matching headers.
+endlegend
+@enduml

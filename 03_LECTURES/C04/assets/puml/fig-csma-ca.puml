@@ -1,0 +1,48 @@
+@startuml fig-csma-ca
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title CSMA/CA — Wi-Fi Medium Access
+
+start
+
+:Frame ready to send;
+
+:Carrier Sense\n— listen to medium;
+
+if (Medium idle for DIFS?) then (yes)
+  :Select random backoff\n(contention window);
+  :Decrement backoff while\nmedium remains idle;
+  if (Backoff reached zero?) then (yes)
+    :Transmit frame;
+    if (ACK received\nwithin timeout?) then (yes)
+      #C8E6C9:Success — frame delivered;
+      stop
+    else (no)
+      #FFCDD2:No ACK — assume collision;
+      :Double contention window\n(exponential backoff);
+      -> retry from carrier sense;
+      :Carrier Sense\n— listen to medium;
+    endif
+  else (medium busy)
+    :Freeze backoff counter;
+    :Wait until medium idle + DIFS;
+  endif
+else (no)
+  :Defer — wait until\nmedium idle + DIFS;
+endif
+
+stop
+
+legend right
+  Unlike CSMA/CD, Wi-Fi cannot detect
+  collisions during transmission.
+  CSMA/CA avoids collisions by deferring
+  and using random backoff before sending.
+  Optional RTS/CTS further reduces the
+  hidden-node problem.
+endlegend
+@enduml

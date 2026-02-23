@@ -1,0 +1,45 @@
+@startuml fig-osi-encapsulation
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Encapsulation in the OSI Model
+
+rectangle "**Application**\nMessage (user data)" as app #E1BEE7
+
+rectangle "**Transport**\n| L4 Header | Message |" as l4 #C8E6C9
+note right of l4
+  Transfer unit:
+  segment (TCP)
+  or datagram (UDP)
+end note
+
+rectangle "**Network**\n| L3 Header | L4 Header | Message |" as l3 #BBDEFB
+note right of l3
+  Transfer unit:
+  packet
+end note
+
+rectangle "**Data Link**\n| L2 Header | L3 Header | L4 Header | Message | FCS |" as l2 #E3F2FD
+note right of l2
+  Transfer unit:
+  frame
+end note
+
+rectangle "**Physical**\nBits / electrical signal" as l1 #F5F5F5
+
+app -down-> l4 : add transport header
+l4 -down-> l3 : add network header
+l3 -down-> l2 : add frame header + FCS
+l2 -down-> l1 : transmit as bits
+
+legend right
+  Sending: each layer wraps the payload
+  from above with its own header.
+  Receiving: headers are stripped in
+  reverse order (decapsulation).
+  FCS = Frame Check Sequence (error detection).
+endlegend
+@enduml

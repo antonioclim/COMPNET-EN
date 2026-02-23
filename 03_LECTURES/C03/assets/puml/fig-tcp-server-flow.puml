@@ -1,0 +1,45 @@
+@startuml fig-tcp-server-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam activityDiamondFontSize 11
+
+title TCP server flow (listen / accept / recv / send)
+
+start
+
+#E3F2FD:socket(AF_INET, SOCK_STREAM);
+#E3F2FD:bind((host, port));
+#E3F2FD:listen(backlog);
+
+repeat
+  #C8E6C9:conn, addr = accept();
+  note right: blocks until a\nclient connects
+
+  repeat
+    #BBDEFB:data = recv(buffer_size);
+    if (data == b"") then (yes — client closed)
+      #FFCDD2:close(conn);
+      break
+    else (no)
+      #FFF9C4:process(data);
+      #C8E6C9:send(response);
+    endif
+  repeat while (connection alive?)
+
+repeat while (server running?)
+
+#FFCDD2:close(server_socket);
+
+stop
+
+legend right
+  1. Create a TCP socket and bind to host:port
+  2. Enter the accept loop (blocks on each call)
+  3. For each client: recv in a loop until empty
+  4. Process data and send response
+  5. Close when the client disconnects
+endlegend
+@enduml

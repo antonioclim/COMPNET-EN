@@ -1,0 +1,33 @@
+@startuml fig-prefix-mask
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam roundcorner 12
+
+title IPv4 Prefix and Mask: Network vs Host Decomposition
+
+rectangle "IPv4 Address\n192.168.50.25" as ip #E3F2FD
+rectangle "Subnet Mask\n255.255.255.192 (/26)" as mask #BBDEFB
+
+rectangle "Network Address\n= IP AND Mask\n192.168.50.0" as net #C8E6C9
+rectangle "Host Part\n= IP AND (NOT Mask)\n0.0.0.25" as host #FFE0B2
+
+ip -[#1565C0]down-> net : AND
+mask -[#1565C0]down-> net : AND
+ip -[#FF9800]down-> host : AND NOT
+mask -[#FF9800]down-> host : NOT
+
+rectangle "Binary view (26 network bits + 6 host bits)" as bin #FFF9C4 {
+    rectangle "11000000.10101000.00110010.00|011001" as bits #FFF9C4
+}
+
+net -[hidden]down-> bin
+
+legend bottom
+  Prefix /n = the number of leading 1-bits in the mask.
+  Network address: all host bits set to 0.
+  Broadcast address: all host bits set to 1 (192.168.50.63).
+  Usable hosts: network + 1 … broadcast − 1.
+endlegend
+@enduml

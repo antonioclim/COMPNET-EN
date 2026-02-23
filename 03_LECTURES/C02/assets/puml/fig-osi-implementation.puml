@@ -1,0 +1,40 @@
+@startuml fig-osi-implementation
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Where OSI Layers Are Implemented
+
+package "User-space applications" as uspace #FFF3E0 {
+  rectangle "L7 — Application\n(HTTP, FTP, SMTP)" as L7 #FFE0B2
+  rectangle "L6 — Presentation\n(TLS, encoding, compression)" as L6 #FFE0B2
+  rectangle "L5 — Session\n(session management)" as L5 #FFE0B2
+}
+
+package "Operating system kernel" as kspace #E8F5E9 {
+  rectangle "L4 — Transport\n(TCP, UDP — sockets API)" as L4 #C8E6C9
+  rectangle "L3 — Network\n(IP — routing, addressing)" as L3 #BBDEFB
+}
+
+package "NIC driver and hardware" as hw #F5F5F5 {
+  rectangle "L2 — Data Link\n(Ethernet, Wi-Fi — MAC, LLC)" as L2 #E3F2FD
+  rectangle "L1 — Physical\n(cable, fibre, radio)" as L1 #ECEFF1
+}
+
+L7 -down-> L6
+L6 -down-> L5
+L5 -down-> L4
+L4 -down-> L3
+L3 -down-> L2
+L2 -down-> L1
+
+legend right
+  Upper layers live in application code.
+  Transport and Network run in the OS kernel.
+  Data Link and Physical are handled by
+  the network interface card and its driver.
+  The sockets API bridges user space and kernel.
+endlegend
+@enduml

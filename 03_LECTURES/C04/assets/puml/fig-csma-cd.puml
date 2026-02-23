@@ -1,0 +1,46 @@
+@startuml fig-csma-cd
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title CSMA/CD — Ethernet Half-Duplex Collision Handling
+
+start
+
+:Frame ready to send;
+
+:Carrier Sense\n— listen to medium;
+
+if (Medium idle?) then (yes)
+  :Begin transmitting frame;
+  if (Collision detected\nduring transmission?) then (yes)
+    #FFCDD2:Send jam signal\n(32-bit pattern);
+    :Increment attempt counter;
+    if (Attempts < 16?) then (yes)
+      #FFE0B2:Wait random backoff\n(exponential: 0..2^k -1 slot times);
+      -> retry;
+      :Carrier Sense\n— listen to medium;
+    else (no)
+      #FFCDD2:Abort — report failure\nto upper layer;
+      stop
+    endif
+  else (no)
+    #C8E6C9:Transmission successful;
+    stop
+  endif
+else (no)
+  :Defer — wait until\nmedium becomes idle;
+endif
+
+stop
+
+legend right
+  CSMA/CD applies to shared half-duplex Ethernet.
+  Modern full-duplex switched networks
+  eliminate collisions entirely.
+  The exponential backoff reduces the probability
+  of repeated collisions.
+endlegend
+@enduml

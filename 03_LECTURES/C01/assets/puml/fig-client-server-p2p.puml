@@ -1,0 +1,37 @@
+@startuml fig-client-server-p2p
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Logical communication models — client-server vs peer-to-peer
+
+package "Client-server model" as cs_pkg #E3F2FD {
+    rectangle "Client A" as ca #FFE0B2
+    rectangle "Client B" as cb #FFE0B2
+    rectangle "Server" as srv #C8E6C9
+    ca --> srv : request
+    srv --> ca : response
+    cb --> srv : request
+    srv --> cb : response
+}
+
+package "Peer-to-peer model" as p2p_pkg #E8F5E9 {
+    rectangle "Peer 1" as p1 #C8E6C9
+    rectangle "Peer 2" as p2 #C8E6C9
+    rectangle "Peer 3" as p3 #C8E6C9
+    p1 <--> p2 : share data
+    p2 <--> p3 : share data
+    p1 <--> p3 : share data
+}
+
+legend bottom
+  Client-server: centralised authority, clients
+  request services from a dedicated server.
+  Peer-to-peer: every node acts as both client
+  and server, sharing resources directly.
+  In programming terms, communication always
+  follows the client-server socket pattern.
+endlegend
+@enduml

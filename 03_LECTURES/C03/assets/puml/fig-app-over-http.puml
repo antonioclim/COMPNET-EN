@@ -1,0 +1,38 @@
+@startuml fig-app-over-http
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Application built on top of HTTP
+
+rectangle "Custom Application\n(REST client / RPC stub)" as app #FFE0B2
+rectangle "HTTP\n(requests and responses)" as http #C8E6C9
+rectangle "TCP\n(reliable byte stream)" as tcp #BBDEFB
+rectangle "IP\n(routing and addressing)" as ip #E3F2FD
+rectangle "Link + Physical" as link #F5F5F5
+
+app -[#1565C0]-> http : uses HTTP as\napplication channel
+http -[#1565C0]-> tcp : reliable delivery
+tcp -[#1565C0]-> ip : packet routing
+ip -[#1565C0]-> link : frame transmission
+
+note right of app #FFF9C4
+  The programmer ignores
+  all layers below HTTP.
+end note
+
+note right of http #FFF9C4
+  Standard methods:
+  GET, POST, PUT, DELETE
+end note
+
+legend right
+  Programming above the application layer
+  means treating HTTP as the transport.
+  Examples: REST APIs, JSON-RPC over HTTP
+  and GraphQL endpoints.
+  The developer works only with HTTP semantics.
+endlegend
+@enduml

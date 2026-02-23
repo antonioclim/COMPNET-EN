@@ -1,0 +1,55 @@
+@startuml fig-tcp-concurrency
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title TCP concurrency models
+
+rectangle "Main Thread\n(accept loop)" as main #E3F2FD
+
+package "Thread per Client" as tpc #E8F5E9 {
+  rectangle "Thread 1\nhandle(client_1)" as t1 #C8E6C9
+  rectangle "Thread 2\nhandle(client_2)" as t2 #C8E6C9
+  rectangle "Thread N\nhandle(client_N)" as tn #C8E6C9
+}
+
+package "Process per Client" as ppc #FFF3E0 {
+  rectangle "Process 1\nfork → handle" as p1 #FFE0B2
+  rectangle "Process 2\nfork → handle" as p2 #FFE0B2
+}
+
+package "Async / Event Loop" as async #FCE4EC {
+  rectangle "select / epoll\nsingle thread\nmultiplexed I/O" as sel #E1BEE7
+}
+
+main -[#43A047]-> t1 : spawn thread
+main -[#43A047]-> t2 : spawn thread
+main -[#43A047]-> tn : spawn thread
+
+main -[#FF9800]-> p1 : fork process
+main -[#FF9800]-> p2 : fork process
+
+main -[#1565C0]-> sel : register fd
+
+note bottom of tpc
+  Simple model but thread
+  overhead grows linearly
+  with client count
+end note
+
+note bottom of async
+  Highly scalable but
+  requires non-blocking
+  programming discipline
+end note
+
+legend right
+  The accept loop dispatches each client
+  to one of three concurrency strategies.
+  Threads: easiest, moderate scalability.
+  Processes: isolation, higher overhead.
+  Async I/O: best scalability, complex code.
+endlegend
+@enduml

@@ -1,0 +1,40 @@
+@startuml fig-udp-server-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam activityDiamondFontSize 11
+
+title UDP server flow (recvfrom / sendto)
+
+start
+
+#E3F2FD:socket(AF_INET, SOCK_DGRAM);
+#E3F2FD:bind((host, port));
+
+note right
+  No listen() or accept() —
+  UDP is connectionless.
+  Each datagram is independent.
+end note
+
+repeat
+  #BBDEFB:data, addr = recvfrom(buffer_size);
+  note right: blocks until a\ndatagram arrives
+  #FFF9C4:process(data);
+  #C8E6C9:sendto(response, addr);
+repeat while (server running?)
+
+#FFCDD2:close(socket);
+
+stop
+
+legend right
+  1. Create a UDP socket and bind to host:port
+  2. Enter the recvfrom loop (no connection state)
+  3. Each datagram carries the sender address
+  4. Reply with sendto using the sender address
+  5. No teardown handshake needed
+endlegend
+@enduml

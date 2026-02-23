@@ -1,0 +1,45 @@
+@startuml fig-hub-switch-router
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Hub vs switch vs router — forwarding behaviour
+
+package "Hub (L1 — broadcast)" as hub_pkg #FFEBEE {
+    rectangle "Host A" as ha #FFE0B2
+    rectangle "Host B" as hb #FFE0B2
+    rectangle "Host C" as hc #FFE0B2
+    rectangle "Hub" as hub #FFCDD2
+    ha -- hub
+    hb -- hub
+    hc -- hub
+}
+
+package "Switch (L2 — selective)" as sw_pkg #E8F5E9 {
+    rectangle "Host A" as sa #FFE0B2
+    rectangle "Host B" as sb #FFE0B2
+    rectangle "Host C" as sc #FFE0B2
+    rectangle "Switch" as sw #C8E6C9
+    sa -- sw
+    sb -- sw
+    sc -- sw
+}
+
+package "Router (L3 — inter-network)" as rtr_pkg #E3F2FD {
+    rectangle "LAN 1\n192.168.1.0/24" as lan1 #BBDEFB
+    rectangle "Router" as rtr #90CAF9
+    rectangle "LAN 2\n10.0.0.0/8" as lan2 #BBDEFB
+    lan1 --> rtr : default gateway
+    rtr --> lan2 : routed packet
+}
+
+legend bottom
+  Hub: floods frames to all ports (collision domain).
+  Switch: forwards only to the port matching the
+  destination MAC address (L2, MAC table).
+  Router: interconnects distinct IP networks,
+  forwards based on destination IP (L3, routing table).
+endlegend
+@enduml
