@@ -1,0 +1,1546 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="CSIE Faculty-ASE" name="author"/>
+<meta content="Revolvix" name="generator"/>
+<title>Week 10 – Application Layer Protocols: HTTP, REST and SOAP | ASE-CSIE</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&amp;family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<style>
+    :root {
+      --primary: #0f172a;
+      --primary-light: #1e293b;
+      --secondary: #0ea5e9;
+      --secondary-dark: #0284c7;
+      --accent: #f59e0b;
+      --accent-warm: #ea580c;
+      --success: #10b981;
+      --success-dark: #059669;
+      --danger: #ef4444;
+      --purple: #8b5cf6;
+      --purple-dark: #7c3aed;
+      --bg-light: #f8fafc;
+      --bg-cool: #f0f9ff;
+      --bg-warm: #fffbeb;
+      --text-dark: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --text-on-dark: #f1f5f9;
+      --text-on-dark-muted: #cbd5e1;
+      --text-on-dark-heading: #ffffff;
+      --gradient-primary: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      --gradient-accent: linear-gradient(135deg, #0ea5e9 0%, #8b5cf6 100%);
+      --font-heading: 'Source Serif 4', Georgia, serif;
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; overflow: hidden; }
+    body { font-family: var(--font-body); background: var(--bg-light); color: var(--text-dark); line-height: 1.7; }
+    .presentation { width: 100vw; height: 100vh; position: relative; overflow: hidden; }
+    .progress-bar { position: fixed; top: 0; left: 0; width: 100%; height: 4px; background: var(--border); z-index: 1000; }
+    .progress-fill { height: 100%; background: var(--gradient-accent); width: 0%; transition: width 0.4s; }
+    .course-id { position: fixed; top: 20px; left: 40px; font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-muted); z-index: 100; }
+    .slide-counter { position: fixed; top: 20px; right: 40px; font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-muted); z-index: 100; }
+    .slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; padding: 4rem; display: none; flex-direction: column; background: var(--bg-light); overflow-y: auto; }
+    .slide.active { display: flex; animation: slideIn 0.45s ease; }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .slide-title-page { background: var(--gradient-primary); justify-content: center; align-items: center; text-align: center; }
+    .slide-title-page h1 { font-family: var(--font-heading); font-size: 3.5rem; font-weight: 700; color: var(--text-on-dark-heading); margin-bottom: 1rem; }
+    .slide-title-page .subtitle { font-size: 1.4rem; color: var(--text-on-dark); margin-bottom: 2rem; }
+    .slide-title-page .meta { font-size: 1rem; color: var(--text-on-dark-muted); }
+    .slide-section { background: var(--gradient-primary); justify-content: center; padding-left: 8rem; }
+    .slide-section .section-number { font-family: var(--font-mono); font-size: 1rem; color: var(--secondary); margin-bottom: 1rem; }
+    .slide-section h2 { font-family: var(--font-heading); font-size: 3rem; font-weight: 700; color: var(--text-on-dark-heading); margin-bottom: 1rem; }
+    .slide-section .section-desc { font-size: 1.2rem; color: var(--text-on-dark-muted); max-width: 600px; }
+    h1 { font-family: var(--font-heading); font-size: 2.5rem; font-weight: 700; color: var(--primary); margin-bottom: 1.5rem; }
+    h2 { font-family: var(--font-heading); font-size: 1.8rem; font-weight: 600; color: var(--primary); margin-bottom: 1rem; }
+    h3 { font-family: var(--font-heading); font-size: 1.4rem; font-weight: 600; color: var(--primary-light); margin-bottom: 0.75rem; }
+    p { margin-bottom: 1rem; font-size: 1.15rem; }
+    .lead { font-size: 1.2rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+    strong { font-weight: 600; color: var(--primary); }
+    code { font-family: var(--font-mono); font-size: 0.9em; background: #e2e8f0; padding: 0.15em 0.4em; border-radius: 4px; }
+    .content { flex: 1; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin: 1rem 0; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin: 1rem 0; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin: 1rem 0; }
+    ul, ol { margin-left: 1.5rem; margin-bottom: 1rem; }
+    li { margin-bottom: 0.5rem; font-size: 1.1rem; }
+    .card { background: white; border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow-md); border-left: 4px solid var(--border); transition: transform 0.3s, box-shadow 0.3s; }
+    .card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+    .card-accent { border-left-color: var(--accent); }
+    .card-success { border-left-color: var(--success); }
+    .card-danger { border-left-color: var(--danger); }
+    .card-purple { border-left-color: var(--purple); }
+    .card-secondary { border-left-color: var(--secondary); }
+    .card-title { font-family: var(--font-heading); font-size: 1.1rem; font-weight: 600; color: var(--primary); margin-bottom: 0.75rem; }
+    .card-content { color: var(--text-dark); font-size: 1.05rem; }
+    .card-content ul { margin-left: 1.25rem; margin-top: 0.5rem; }
+    .highlight-box { background: var(--gradient-accent); color: white; padding: 1.5rem; border-radius: var(--radius-lg); margin: 1rem 0; }
+    .highlight-box h3 { color: white; margin-bottom: 0.5rem; }
+    .highlight-box p { color: rgba(255,255,255,0.95); }
+    .definition-box { background: linear-gradient(135deg, #ecfdf5, #d1fae5); border-left: 4px solid var(--success); padding: 1.5rem; border-radius: var(--radius-md); margin: 1rem 0; }
+    .definition-box .term { font-weight: 700; color: var(--success-dark); margin-bottom: 0.5rem; font-size: 1.15rem; }
+    .story-box { background: linear-gradient(135deg, #f5f3ff, #ede9fe); border-left: 4px solid var(--purple); padding: 1.5rem; border-radius: var(--radius-md); margin: 1rem 0; }
+    .story-box .story-title { font-weight: 600; color: var(--purple-dark); margin-bottom: 0.5rem; }
+    .warning-box { background: linear-gradient(135deg, #fffbeb, #fef3c7); border-left: 4px solid var(--accent); padding: 1.5rem; border-radius: var(--radius-md); margin: 1rem 0; }
+    .warning-box .warning-title { font-weight: 600; color: var(--accent-warm); margin-bottom: 0.5rem; }
+    .insight-box { background: linear-gradient(135deg, #fef2f2, #fee2e2); border-left: 4px solid var(--danger); padding: 1.5rem; border-radius: var(--radius-md); margin: 1rem 0; }
+    .insight-box .insight-title { font-weight: 600; color: var(--danger); margin-bottom: 0.5rem; }
+    pre, .code-block { background: linear-gradient(135deg, #0f172a, #1e293b); color: #e2e8f0; padding: 1.25rem; border-radius: var(--radius-md); font-family: var(--font-mono); font-size: 1.0rem; line-height: 1.7; overflow-x: auto; margin: 1rem 0; white-space: pre; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #86efac; }
+    .code-block .number { color: #fdba74; }
+    .code-block .comment { color: #94a3b8; font-style: italic; }
+    .code-block .function { color: #7dd3fc; }
+    .code-block .builtin { color: #fbbf24; }
+    .table-container { overflow-x: auto; margin: 1rem 0; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); }
+    table { width: 100%; border-collapse: collapse; background: white; }
+    thead { background: var(--gradient-primary); }
+    th { padding: 1rem; text-align: left; color: var(--text-on-dark-heading); font-weight: 600; text-transform: uppercase; font-size: 0.85rem; }
+    th:first-child { border-radius: var(--radius-lg) 0 0 0; }
+    th:last-child { border-radius: 0 var(--radius-lg) 0 0; }
+    td { padding: 0.9rem 1rem; border-bottom: 1px solid var(--border); font-size: 1.05rem; }
+    tr:hover td { background: var(--bg-cool); }
+    .diagram-container { margin: 1.5rem 0; text-align: center; }
+    .diagram-container svg { max-width: 100%; min-height: 180px; }
+    .quiz-container { background: white; border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow-md); margin: 1rem 0; }
+    .quiz-question { font-weight: 600; color: var(--primary); margin-bottom: 1rem; font-size: 1.15rem; }
+    .quiz-options { display: flex; flex-direction: column; gap: 0.5rem; }
+    .quiz-option { padding: 0.9rem 1.25rem; background: var(--bg-light); border: 2px solid var(--border); border-radius: var(--radius-md); cursor: pointer; transition: all 0.2s; font-size: 1.05rem; }
+    .quiz-option:hover { border-color: var(--secondary); background: var(--bg-cool); }
+    .quiz-option.correct { background: linear-gradient(135deg, #ecfdf5, #d1fae5); border-color: var(--success); color: var(--success-dark); }
+    .quiz-option.incorrect { background: linear-gradient(135deg, #fef2f2, #fee2e2); border-color: var(--danger); color: var(--danger); }
+    .quiz-feedback { margin-top: 1rem; padding: 1rem; border-radius: var(--radius-md); display: none; font-size: 1.05rem; }
+    .quiz-feedback.correct { background: linear-gradient(135deg, #ecfdf5, #d1fae5); color: var(--success-dark); }
+    .quiz-feedback.incorrect { background: linear-gradient(135deg, #fef2f2, #fee2e2); color: #991b1b; }
+    .quiz-feedback.show { display: block; animation: fadeUp 0.3s ease; }
+    .reveal-btn { background: var(--gradient-accent); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: var(--radius-md); font-family: var(--font-body); font-size: 1.0rem; cursor: pointer; transition: transform 0.2s; }
+    .reveal-btn:hover { transform: scale(1.05); }
+    .reveal-content { display: none; margin-top: 1rem; padding: 1.25rem; background: var(--bg-cool); border-radius: var(--radius-md); border-left: 4px solid var(--secondary); }
+    .reveal-content.show { display: block; animation: fadeUp 0.3s ease; }
+    .interactive-panel { background: white; border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow-lg); margin: 1rem 0; }
+    .slider-group { margin-bottom: 1rem; }
+    .slider-group label { display: block; font-weight: 500; margin-bottom: 0.5rem; color: var(--primary); font-size: 1.05rem; }
+    .slider-group input[type="range"] { width: 100%; height: 8px; border-radius: 4px; background: var(--border); outline: none; -webkit-appearance: none; }
+    .slider-group input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: var(--secondary); cursor: pointer; }
+    .slider-value { font-family: var(--font-mono); font-weight: 600; color: var(--secondary); margin-left: 0.5rem; }
+    .result-display { background: var(--gradient-primary); color: #f1f5f9; padding: 1.25rem; border-radius: var(--radius-md); margin-top: 1rem; font-family: var(--font-mono); }
+    .result-display p, .result-display span, .result-display strong { color: #f1f5f9; }
+    .result-display .result-label { font-size: 0.85rem; color: #cbd5e1; margin-bottom: 0.25rem; }
+    .result-display .result-value { font-size: 1.5rem; font-weight: 600; color: #ffffff; }
+    .navigation { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%); display: flex; gap: 1rem; z-index: 100; background: white; padding: 0.75rem 1.5rem; border-radius: 50px; box-shadow: var(--shadow-lg); }
+    .nav-btn { background: var(--bg-light); border: 1px solid var(--border); color: var(--text-dark); padding: 0.6rem 1.25rem; border-radius: 25px; font-family: var(--font-body); font-size: 0.9rem; cursor: pointer; transition: all 0.2s; }
+    .nav-btn:hover:not(:disabled) { background: var(--secondary); color: white; border-color: var(--secondary); }
+    .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .nav-btn.primary { background: var(--gradient-accent); color: white; border: none; }
+    .toc-modal { position: fixed; inset: 0; background: rgba(15,23,42,0.8); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 2000; }
+    .toc-modal.show { display: flex; }
+    .toc-content { background: white; border-radius: var(--radius-lg); padding: 2rem; max-width: 700px; width: 90%; max-height: 80vh; overflow-y: auto; }
+    .toc-content h2 { margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid var(--border); }
+    .toc-section { margin-bottom: 1.5rem; }
+    .toc-section-title { font-weight: 600; color: var(--secondary); font-size: 0.9rem; text-transform: uppercase; margin-bottom: 0.75rem; }
+    .toc-items { display: flex; flex-direction: column; gap: 0.25rem; }
+    .toc-item { padding: 0.6rem 1rem; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s; font-size: 1.0rem; }
+    .toc-item:hover { background: var(--bg-cool); color: var(--secondary); }
+    .toc-item span { color: var(--text-muted); font-family: var(--font-mono); font-size: 0.85rem; margin-right: 0.75rem; }
+    .toc-close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; }
+    .footer-credit { position: fixed; bottom: 20px; left: 40px; font-size: 0.85rem; color: var(--text-muted); z-index: 50; }
+    .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; }
+    .badge-success { background: #dcfce7; color: var(--success-dark); }
+    .badge-warning { background: #fef3c7; color: var(--accent-warm); }
+    .badge-danger { background: #fee2e2; color: var(--danger); }
+    .badge-info { background: #e0f2fe; color: var(--secondary-dark); }
+    .mt-1 { margin-top: 0.5rem; }
+    .mt-2 { margin-top: 1rem; }
+    .mt-3 { margin-top: 1.5rem; }
+    .protocol-header { display: flex; flex-wrap: wrap; border: 2px solid var(--primary); border-radius: var(--radius-md); overflow: hidden; margin: 1rem 0; }
+    .header-row { display: flex; width: 100%; }
+    .header-field { padding: 0.5rem; text-align: center; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); flex: 1; min-width: 60px; }
+    .field-name { font-size: 0.85rem; font-weight: 600; color: var(--primary); }
+    .field-value { font-size: 0.95rem; font-weight: 700; color: var(--secondary); font-family: var(--font-mono); }
+    .field-bits { font-size: 0.85rem; color: var(--text-muted); }
+    .animate-in { opacity: 0; transform: translateY(20px); animation: fadeUp 0.5s ease forwards; }
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+    .delay-4 { animation-delay: 0.4s; }
+    .delay-5 { animation-delay: 0.5s; }
+    .delay-6 { animation-delay: 0.6s; }
+    .timeline { position: relative; padding-left: 2rem; margin: 1rem 0; }
+    .timeline::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--gradient-accent); border-radius: 2px; }
+    .timeline-item { position: relative; padding: 1rem 0 1rem 1.5rem; }
+    .timeline-item::before { content: ''; position: absolute; left: -2.35rem; top: 1.2rem; width: 12px; height: 12px; border-radius: 50%; background: var(--secondary); border: 3px solid white; box-shadow: var(--shadow-sm); }
+    .timeline-item h3 { font-size: 1.1rem; margin-bottom: 0.25rem; }
+    .timeline-item p { font-size: 1.0rem; color: var(--text-muted); margin-bottom: 0; }
+    @media (max-width: 1200px) {
+      .slide { padding: 3rem; }
+      h1 { font-size: 2rem; }
+      .grid-3 { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .slide { padding: 2rem; }
+      h1 { font-size: 1.75rem; }
+      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+      .slide-title-page h1 { font-size: 2.5rem; }
+      .course-id, .slide-counter { display: none; }
+    }
+  </style>
+</head>
+<body>
+<div class="presentation">
+<div aria-valuemax="42" aria-valuemin="1" class="progress-bar" role="progressbar"><div class="progress-fill" id="progressBar"></div></div>
+<div class="course-id">ASE-CSIE &bull; Computer Networks</div>
+<div aria-live="polite" class="slide-counter" id="slideCounter">1 / 42</div>
+<div class="footer-credit">by Revolvix</div>
+<!-- ═══════════════════════════════════════════════════════════════════
+     SLIDES 1-5: OPENING — Hook, Prior Knowledge, Conflict
+     ═══════════════════════════════════════════════════════════════════ -->
+
+<!-- SLIDE 1: Title -->
+<div class="slide slide-title-page active">
+<h1>Application Layer Protocols</h1>
+<p class="subtitle">HTTP, REST and SOAP — The Language of the Web</p>
+<p class="meta">Computer Networks &bull; Week 10<br/>Bachelor in Economic Informatics, Year 3, Semester 2<br/>Bucharest University of Economic Studies &ndash; Faculty CSIE</p>
+</div>
+
+<!-- SLIDE 2: Hook — "It works in Postman but not in the browser" -->
+<div class="slide">
+<h1>&ldquo;It Works in Postman but Not in the Browser&rdquo;</h1>
+<div class="content">
+<div class="story-box">
+<div class="story-title">A developer&rsquo;s worst Friday afternoon</div>
+<p>A junior developer at a fintech startup in Bucharest has built a REST API. Every endpoint returns the correct JSON when tested with Postman or <code>curl</code>. The frontend team integrates the API into their React application. They deploy on Friday at 16:00.</p>
+<p style="margin-top:0.75rem;">Within minutes, the dashboard shows nothing. The browser console is filled with red errors: <code style="color:var(--danger);background:#fee2e2;">Access to fetch at 'https://api.example.com' has been blocked by CORS policy</code>. The API is running perfectly &mdash; yet the browser refuses to use it.</p>
+</div>
+<div class="grid-2 mt-2">
+<div class="card card-danger">
+<div class="card-title">The Symptom</div>
+<div class="card-content">The API responds correctly to every tool <em>except</em> the browser. The HTTP response is identical. Something outside HTTP is blocking the request.</div>
+</div>
+<div class="card card-purple">
+<div class="card-title">The Question</div>
+<div class="card-content">Why would a browser reject a perfectly valid HTTP response? What mechanism exists <em>above</em> HTTP that decides whether your code may use a response?</div>
+</div>
+</div>
+<p class="lead mt-2" style="font-weight:600;color:var(--secondary);">By the end of this lecture, you will understand exactly why this happens &mdash; and how to prevent it.</p>
+</div>
+</div>
+
+<!-- SLIDE 3: Hook Part 2 — HTTP is everywhere but misunderstood -->
+<div class="slide">
+<h1>The Protocol Hiding in Plain Sight</h1>
+<div class="content">
+<p>You have already built applications with HTTP &mdash; React frontends, Express backends, REST APIs with an ORM. But have you ever stopped to ask what the protocol <em>actually does</em> when your <code>fetch()</code> call fires?</p>
+<div class="grid-3 mt-2">
+<div class="card card-success">
+<div class="card-title">What You Know</div>
+<div class="card-content">HTTP has methods (GET, POST), returns status codes (200, 404) and carries JSON. You have used it many times in your Web Technologies course.</div>
+</div>
+<div class="card card-accent">
+<div class="card-title">What You Assume</div>
+<div class="card-content">HTTP &ldquo;just works&rdquo; over the Internet. Sending a request is like calling a function &mdash; you send input and get output.</div>
+</div>
+<div class="card card-danger">
+<div class="card-title">What Actually Happens</div>
+<div class="card-content">DNS resolution, TCP handshake, TLS negotiation, header parsing, content negotiation, caching validation, cookie management and browser security policies &mdash; all before your code sees the response.</div>
+</div>
+</div>
+<div class="warning-box mt-2">
+<div class="warning-title">Today&rsquo;s shift in perspective</div>
+<p>This lecture does not teach you how to build an API &mdash; you already know that. It teaches you what the <strong>protocol</strong> does beneath the framework, so that when things break, you can diagnose them.</p>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 4: Activate Prior Knowledge — Where we are in the stack -->
+<div class="slide">
+<h1>Where We Are &mdash; The Journey So Far</h1>
+<div class="content">
+<div class="diagram-container">
+<svg viewBox="0 0 900 200" style="max-width:100%">
+<rect x="10" y="30" width="190" height="150" rx="10" fill="#f0f9ff" stroke="#0ea5e9" stroke-width="1" stroke-dasharray="4"/>
+<rect x="210" y="30" width="190" height="150" rx="10" fill="#f0f9ff" stroke="#0ea5e9" stroke-width="1" stroke-dasharray="4"/>
+<rect x="410" y="30" width="80" height="150" rx="10" fill="#ecfdf5" stroke="#10b981" stroke-width="1" stroke-dasharray="4"/>
+<rect x="500" y="30" width="100" height="150" rx="10" fill="#dcfce7" stroke="#10b981" stroke-width="3"/>
+<rect x="610" y="30" width="80" height="150" rx="10" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="1" stroke-dasharray="4"/>
+<rect x="700" y="30" width="90" height="150" rx="10" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="1" stroke-dasharray="4"/>
+<text x="105" y="55" text-anchor="middle" font-size="13" font-weight="700" fill="#0284c7">Weeks 1&ndash;4</text>
+<text x="305" y="55" text-anchor="middle" font-size="13" font-weight="700" fill="#0284c7">Weeks 5&ndash;7</text>
+<text x="450" y="55" text-anchor="middle" font-size="13" font-weight="700" fill="#059669">Weeks 8&ndash;9</text>
+<text x="550" y="55" text-anchor="middle" font-size="13" font-weight="700" fill="#059669">Week 10</text>
+<text x="650" y="55" text-anchor="middle" font-size="13" font-weight="700" fill="#7c3aed">Weeks 11&ndash;12</text>
+<text x="745" y="55" text-anchor="middle" font-size="13" font-weight="700" fill="#7c3aed">Weeks 13&ndash;14</text>
+<text x="105" y="80" text-anchor="middle" font-size="13" font-weight="600" fill="#1e293b">Foundations</text>
+<text x="305" y="80" text-anchor="middle" font-size="13" font-weight="600" fill="#1e293b">Network Layer</text>
+<text x="450" y="80" text-anchor="middle" font-size="13" font-weight="600" fill="#1e293b">Transport</text>
+<text x="550" y="80" text-anchor="middle" font-size="14" font-weight="700" fill="#059669">HTTP, REST</text>
+<text x="650" y="80" text-anchor="middle" font-size="13" font-weight="600" fill="#1e293b">DNS, FTP</text>
+<text x="745" y="80" text-anchor="middle" font-size="13" font-weight="600" fill="#1e293b">IoT, Security</text>
+<text x="105" y="110" text-anchor="middle" font-size="12" fill="#64748b">OSI, sockets</text>
+<text x="105" y="128" text-anchor="middle" font-size="12" fill="#64748b">Ethernet, IP</text>
+<text x="305" y="110" text-anchor="middle" font-size="12" fill="#64748b">IPv4/IPv6, routing</text>
+<text x="305" y="128" text-anchor="middle" font-size="12" fill="#64748b">NAT, DHCP, ICMP</text>
+<text x="450" y="110" text-anchor="middle" font-size="12" fill="#64748b">TCP, UDP</text>
+<text x="450" y="128" text-anchor="middle" font-size="12" fill="#64748b">TLS, sessions</text>
+<text x="550" y="100" text-anchor="middle" font-size="13" font-weight="600" fill="#059669">SOAP</text>
+<text x="550" y="118" text-anchor="middle" font-size="13" font-weight="600" fill="#059669">WebSocket</text>
+</svg>
+</div>
+<div class="highlight-box">
+<h3>Recall from Weeks 8&ndash;9</h3>
+<p>TCP provides <strong>reliable, ordered byte streams</strong> between two endpoints. TLS adds confidentiality and authentication on top. The session layer manages long-lived dialogues. Today we build on all three: HTTP runs over TCP (or QUIC), may use TLS for security and maintains application-level sessions via cookies and tokens.</p>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 5: Quiz 1 — Prerequisite check -->
+<div class="slide">
+<h1>Quick Check &mdash; Are We Ready?</h1>
+<div class="content">
+<p class="lead">Before we proceed, let us verify that the prerequisite concepts are solid.</p>
+<div class="quiz-container" id="quiz1">
+<p class="quiz-question">An HTTP request to <code>https://example.com</code> must complete several steps before the first byte of the response arrives. Which sequence is correct?</p>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkQuizDetailed('quiz1',this,false,'q1fb-wrong1')">A) HTTP request &rarr; TCP handshake &rarr; DNS lookup &rarr; TLS handshake</div>
+<div class="quiz-option" onclick="checkQuizDetailed('quiz1',this,true,'q1fb-correct')">B) DNS lookup &rarr; TCP handshake &rarr; TLS handshake &rarr; HTTP request</div>
+<div class="quiz-option" onclick="checkQuizDetailed('quiz1',this,false,'q1fb-wrong2')">C) TLS handshake &rarr; DNS lookup &rarr; HTTP request &rarr; TCP handshake</div>
+<div class="quiz-option" onclick="checkQuizDetailed('quiz1',this,false,'q1fb-wrong3')">D) DNS lookup &rarr; HTTP request &rarr; TCP handshake &rarr; TLS handshake</div>
+</div>
+<div class="quiz-feedback correct" id="q1fb-correct">Correct. The browser must first resolve the hostname (DNS), then establish a TCP connection (SYN-ACK), negotiate encryption (TLS) and only then send the HTTP request. Each step depends on the previous one &mdash; you cannot encrypt a connection that does not yet exist.</div>
+<div class="quiz-feedback incorrect" id="q1fb-wrong1">Not quite. HTTP cannot be sent before a TCP connection exists, and TCP requires knowing the server&rsquo;s IP address, which comes from DNS. The dependencies form a strict chain: DNS &rarr; TCP &rarr; TLS &rarr; HTTP.</div>
+<div class="quiz-feedback incorrect" id="q1fb-wrong2">TLS requires a TCP connection underneath it, and TCP requires an IP address from DNS. You cannot negotiate encryption on a connection that has not been established yet.</div>
+<div class="quiz-feedback incorrect" id="q1fb-wrong3">HTTP cannot be sent before the TCP and TLS layers are established. The HTTP request is the <em>last</em> step, not an intermediate one. Think of it as building upwards through the stack: each layer depends on the one below.</div>
+</div>
+</div>
+</div>
+<!-- ═══════════════════════════════════════════════════════════════════
+     SLIDES 6-7: CONFLICT — Why raw sockets aren't enough
+     ═══════════════════════════════════════════════════════════════════ -->
+
+<!-- SLIDE 6: Conflict — The gap -->
+<div class="slide">
+<h1>The Problem: TCP Works, but the Web Doesn&rsquo;t</h1>
+<div class="content">
+<p>You built a TCP server in Seminar 2. You can send any bytes to any port. Why, then, do browsers refuse to simply connect and exchange data?</p>
+<div class="grid-2 mt-2">
+<div class="card card-success">
+<div class="card-title">What TCP gives you</div>
+<div class="card-content">A reliable byte stream between two endpoints. You send bytes; they arrive in order. TCP knows nothing about &ldquo;requests&rdquo;, &ldquo;headers&rdquo; or &ldquo;status codes&rdquo;.</div>
+</div>
+<div class="card card-danger">
+<div class="card-title">What the web requires</div>
+<div class="card-content">Structured messages with metadata. Authentication. Content negotiation. Caching. Security policies. Connection reuse. Compression. State management. None of this exists at the transport layer.</div>
+</div>
+</div>
+<div class="insight-box mt-2">
+<div class="insight-title">The gap that HTTP fills</div>
+<p>HTTP defines a <strong>contract</strong> between clients and servers: a shared language for requesting resources, describing content, managing state and handling errors. Without it, every web application would need to invent its own protocol from scratch &mdash; and none of them would interoperate.</p>
+</div>
+<p>The application layer is where <em>meaning</em> enters the network stack. TCP delivers bytes; HTTP gives them purpose.</p>
+</div>
+</div>
+
+<!-- SLIDE 7: What makes application protocols different -->
+<div class="slide">
+<h1>What Makes Application Protocols Special?</h1>
+<div class="content">
+<p class="lead">Application-layer protocols operate closest to the user. They define the semantics &mdash; the <em>meaning</em> &mdash; of communication.</p>
+<div class="grid-2">
+<div>
+<div class="definition-box">
+<div class="term">Application-Layer Protocol (OSI Layer 7)</div>
+<p>A set of rules governing how processes on different hosts exchange structured messages to accomplish a task. Unlike transport protocols (which move bytes), application protocols interpret those bytes as requests, responses, commands or notifications.</p>
+</div>
+</div>
+<div>
+<div class="table-container">
+<table>
+<thead><tr><th>Concern</th><th>Transport (L4)</th><th>Application (L7)</th></tr></thead>
+<tbody>
+<tr><td>Unit of data</td><td>Segment / datagram</td><td>Message / request</td></tr>
+<tr><td>Addressing</td><td>Port numbers</td><td>URLs, hostnames</td></tr>
+<tr><td>Reliability</td><td>TCP guarantees</td><td>Retries, idempotency</td></tr>
+<tr><td>State</td><td>Connection state</td><td>Session, cookies, tokens</td></tr>
+<tr><td>Security</td><td>TLS encryption</td><td>Auth, CORS, CSP</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     SLIDES 8-18: EXPLORATION — HTTP Fundamentals
+     ═══════════════════════════════════════════════════════════════════ -->
+
+<!-- SLIDE 8: Section divider -->
+<div class="slide slide-section">
+<div class="section-number">SECTION 01</div>
+<h2>HTTP Fundamentals</h2>
+<p class="section-desc">The request-response protocol that powers the modern web &mdash; from header structure to the hidden cost of every byte.</p>
+</div>
+
+<!-- SLIDE 9: HTTP in the stack -->
+<div class="slide">
+<h1>HTTP in the Network Architecture</h1>
+<div class="content">
+<p>HTTP (Hypertext Transfer Protocol) is an application-layer, request&ndash;response protocol that runs over TCP (or, since HTTP/3, over QUIC). It was specified originally in RFC 1945 (HTTP/1.0, 1996) and subsequently refined in RFCs 7230&ndash;7235 (HTTP/1.1, 2014) and RFC 7540 (HTTP/2, 2015).</p>
+<div class="grid-2 mt-2">
+<div>
+<div class="table-container">
+<table>
+<thead><tr><th>Layer</th><th>Protocol</th><th>Role for HTTP</th></tr></thead>
+<tbody>
+<tr><td><strong>7 &ndash; Application</strong></td><td>HTTP / HTTPS</td><td>Request-response semantics</td></tr>
+<tr><td>6 &ndash; Presentation</td><td>TLS 1.2 / 1.3</td><td>Encryption for HTTPS</td></tr>
+<tr><td>5 &ndash; Session</td><td>Cookies, tokens</td><td>Application-level state</td></tr>
+<tr><td><strong>4 &ndash; Transport</strong></td><td>TCP (or QUIC)</td><td>Reliable delivery</td></tr>
+<tr><td>3 &ndash; Network</td><td>IP</td><td>Routing to destination</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<div>
+<div class="warning-box">
+<div class="warning-title">Common misconception</div>
+<p>HTTP does not &ldquo;just work over the Internet&rdquo;. A single HTTP request involves DNS resolution, one or more TCP handshakes, possibly a TLS negotiation and routing through multiple autonomous systems. Most web performance problems are <strong>protocol problems</strong>, not framework problems.</p>
+</div>
+<p style="font-size:1.0rem;color:var(--text-muted);">HTTP is <strong>stateless by design</strong>: each request is independent. The protocol carries no memory of previous exchanges. Applications layer state on top via cookies and tokens &mdash; a direct link to the session-layer concepts from Week 9.</p>
+</div>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 10: Cost of HTTPS — Interactive calculator -->
+<div class="slide">
+<h1>The True Cost of an HTTPS Request</h1>
+<div class="content">
+<p>Before a browser displays a single pixel, multiple round trips must complete. Bandwidth is rarely the bottleneck &mdash; <strong>latency</strong> is.</p>
+<div class="grid-2">
+<div>
+<div class="table-container">
+<table>
+<thead><tr><th>Step</th><th>Round Trips</th><th>At 50 ms RTT</th></tr></thead>
+<tbody>
+<tr><td>DNS lookup</td><td>1 RTT</td><td>50 ms</td></tr>
+<tr><td>TCP handshake</td><td>1 RTT</td><td>50 ms</td></tr>
+<tr><td>TLS 1.3 handshake</td><td>1 RTT</td><td>50 ms</td></tr>
+<tr><td>HTTP request + response</td><td>1 RTT</td><td>50 ms</td></tr>
+<tr style="background:#ecfdf5;"><td><strong>Total (cold start)</strong></td><td><strong>4 RTT</strong></td><td><strong>200 ms</strong></td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<div>
+<div class="interactive-panel">
+<h3>Latency Calculator</h3>
+<p style="font-size:0.95rem;color:var(--text-muted);">Adjust the RTT to see how latency compounds across protocol layers.</p>
+<div class="slider-group">
+<label>Round-Trip Time: <span class="slider-value" id="rttValue">50</span> ms</label>
+<input id="rttSlider" max="300" min="5" oninput="calcLatency()" type="range" value="50"/>
+</div>
+<div class="slider-group">
+<label>TLS version: <select id="tlsSelect" onchange="calcLatency()" style="font-family:var(--font-mono);padding:0.3rem;border-radius:4px;border:1px solid var(--border);">
+<option value="1">TLS 1.3 (1 RTT)</option>
+<option value="2">TLS 1.2 (2 RTT)</option>
+</select></label>
+</div>
+<div class="result-display">
+<div class="result-label">Cold-Start First-Byte Latency</div>
+<div class="result-value" id="latencyResult">200 ms</div>
+<p style="font-size:0.85rem;margin-top:0.5rem;" id="latencyBreakdown">DNS 50 + TCP 50 + TLS 50 + HTTP 50</p>
+</div>
+</div>
+</div>
+</div>
+<div class="insight-box mt-1">
+<div class="insight-title">Why this matters commercially</div>
+<p>Research by Google (2017) found that a 100 ms increase in mobile page load time reduced conversion rates by up to 20%. For transatlantic requests (RTT &asymp; 80 ms), cold-start latency can exceed 400 ms with TLS 1.2.</p>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 11: Request anatomy -->
+<div class="slide">
+<h1>Anatomy of an HTTP Request</h1>
+<div class="content">
+<p>Every HTTP request consists of three sections: the request line, a set of headers and an optional body.</p>
+<div class="code-block" data-lang="http"><span class="keyword">GET</span> /api/users/42 <span class="string">HTTP/1.1</span>
+<span class="function">Host</span>: api.example.com
+<span class="function">User-Agent</span>: Mozilla/5.0 (Windows NT 10.0)
+<span class="function">Accept</span>: application/json
+<span class="function">Authorization</span>: Bearer eyJhbGciOiJIUzI1NiIs...
+<span class="function">Cache-Control</span>: no-cache</div>
+<div class="grid-3 mt-2">
+<div class="card card-secondary">
+<div class="card-title">Request Line</div>
+<div class="card-content"><code>METHOD path HTTP/version</code><br/>Specifies the action and the target resource. The path is relative to the host.</div>
+</div>
+<div class="card card-accent">
+<div class="card-title">Headers</div>
+<div class="card-content"><code>Name: value</code> pairs conveying metadata &mdash; authentication, content type, caching directives, accepted encodings.</div>
+</div>
+<div class="card card-purple">
+<div class="card-title">Body</div>
+<div class="card-content">Optional payload, typically present in POST, PUT and PATCH requests. Interpreted <em>only</em> through the <code>Content-Type</code> header.</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 12: Response anatomy — Predict-Observe-Explain -->
+<div class="slide">
+<h1>Anatomy of an HTTP Response</h1>
+<div class="content">
+<p>The response mirrors the request structure: a status line, headers and an optional body.</p>
+<div class="code-block" data-lang="http"><span class="string">HTTP/1.1</span> <span class="number">200</span> <span class="keyword">OK</span>
+<span class="function">Content-Type</span>: application/json; charset=utf-8
+<span class="function">Content-Length</span>: 128
+<span class="function">Cache-Control</span>: max-age=3600
+<span class="function">X-Request-Id</span>: a3f8c2d1-e9b7-4f2a
+
+<span class="string">{"id": 42, "name": "Ada Lovelace", "role": "engineer"}</span></div>
+<div class="mt-2">
+<button class="reveal-btn" onclick="toggleReveal('resp-reveal')">What does each header control? &darr;</button>
+<div class="reveal-content" id="resp-reveal">
+<p><strong>Content-Type</strong> tells the client how to interpret the body (JSON, HTML, binary). <strong>Content-Length</strong> declares the body size in bytes &mdash; essential for TCP framing. <strong>Cache-Control</strong> instructs the browser (and any intermediate proxies) to store this response for 3600 seconds. <strong>X-Request-Id</strong> is a custom header for correlating logs across distributed systems.</p>
+<p style="margin-top:0.5rem;">Headers are not decoration &mdash; they are <em>instructions</em> that control caching, security, encoding and routing behaviour across every component in the request path.</p>
+</div>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 13: HTTP Methods — Semantics -->
+<div class="slide">
+<h1>HTTP Methods: Semantics, Not Convention</h1>
+<div class="content">
+<p>HTTP methods carry formal semantic guarantees defined in RFC 7231. These guarantees are not suggestions &mdash; proxies, caches and load balancers <em>rely</em> on them.</p>
+<div class="table-container mt-2">
+<table>
+<thead><tr><th>Method</th><th>Purpose</th><th>Safe?</th><th>Idempotent?</th><th>Cacheable?</th></tr></thead>
+<tbody>
+<tr><td><strong>GET</strong></td><td>Retrieve a resource</td><td><span class="badge badge-success">Yes</span></td><td><span class="badge badge-success">Yes</span></td><td><span class="badge badge-success">Yes</span></td></tr>
+<tr><td><strong>HEAD</strong></td><td>GET without body</td><td><span class="badge badge-success">Yes</span></td><td><span class="badge badge-success">Yes</span></td><td><span class="badge badge-success">Yes</span></td></tr>
+<tr><td><strong>POST</strong></td><td>Create / process</td><td><span class="badge badge-danger">No</span></td><td><span class="badge badge-danger">No</span></td><td><span class="badge badge-warning">Rarely</span></td></tr>
+<tr><td><strong>PUT</strong></td><td>Replace entire resource</td><td><span class="badge badge-danger">No</span></td><td><span class="badge badge-success">Yes</span></td><td><span class="badge badge-danger">No</span></td></tr>
+<tr><td><strong>PATCH</strong></td><td>Partial modification</td><td><span class="badge badge-danger">No</span></td><td><span class="badge badge-danger">No</span></td><td><span class="badge badge-danger">No</span></td></tr>
+<tr><td><strong>DELETE</strong></td><td>Remove a resource</td><td><span class="badge badge-danger">No</span></td><td><span class="badge badge-success">Yes</span></td><td><span class="badge badge-danger">No</span></td></tr>
+</tbody>
+</table>
+</div>
+<div class="definition-box mt-2">
+<div class="term">Why does this table matter?</div>
+<p><strong>Safe</strong> means the method does not alter server state &mdash; a proxy may pre-fetch safe resources. <strong>Idempotent</strong> means repeating the request produces the same final state &mdash; load balancers and retry logic depend on this. <strong>Cacheable</strong> means intermediaries may store and reuse the response without contacting the server.</p>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 14: Why idempotency matters — reveal pattern -->
+<div class="slide">
+<h1>Why Idempotency Matters in Practice</h1>
+<div class="content">
+<div class="story-box">
+<div class="story-title">Scenario: The duplicate payment</div>
+<p>A user clicks &ldquo;Pay Now&rdquo;. The request times out after 10 seconds. The client retries automatically. The server processes the payment <em>twice</em>. The customer is charged double.</p>
+</div>
+<p class="mt-2">What went wrong? The payment endpoint used <code>POST /pay</code> &mdash; a non-idempotent method. The retry created a second transaction.</p>
+<button class="reveal-btn mt-1" onclick="toggleReveal('idempotent-fix')">How would you fix this? &darr;</button>
+<div class="reveal-content" id="idempotent-fix">
+<p><strong>Option 1 &mdash; Idempotency key:</strong> The client generates a unique token (e.g. UUID) and sends it with the request: <code>Idempotency-Key: 550e8400-...</code>. The server stores it and rejects duplicates.</p>
+<p><strong>Option 2 &mdash; PUT semantics:</strong> Design the endpoint as <code>PUT /payments/{id}</code> where the client chooses the resource identifier. Repeating the same PUT with the same body produces the same result.</p>
+<p style="margin-top:0.75rem;">Idempotency is not a theoretical nicety &mdash; it is the foundation of reliable distributed systems. Network timeouts, load balancer retries and browser refresh all generate duplicate requests. Your API must handle them.</p>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 15: Status codes -->
+<div class="slide">
+<h1>Status Codes: Fine-Grained Semantics</h1>
+<div class="content">
+<p>Status codes are grouped into five classes. Each class carries a specific meaning that clients, proxies and browsers interpret automatically.</p>
+<div class="grid-2">
+<div>
+<div class="card card-secondary" style="margin-bottom:1rem;">
+<div class="card-title">1xx &mdash; Informational</div>
+<div class="card-content"><code>100 Continue</code>, <code>101 Switching Protocols</code> (used in WebSocket upgrade)</div>
+</div>
+<div class="card card-success" style="margin-bottom:1rem;">
+<div class="card-title">2xx &mdash; Success</div>
+<div class="card-content"><code>200 OK</code>, <code>201 Created</code>, <code>204 No Content</code></div>
+</div>
+<div class="card card-accent" style="margin-bottom:1rem;">
+<div class="card-title">3xx &mdash; Redirection</div>
+<div class="card-content"><code>301 Moved Permanently</code>, <code>304 Not Modified</code> (caching)</div>
+</div>
+</div>
+<div>
+<div class="card card-danger" style="margin-bottom:1rem;">
+<div class="card-title">4xx &mdash; Client Error</div>
+<div class="card-content"><code>400 Bad Request</code>, <code>401 Unauthorized</code>, <code>403 Forbidden</code>, <code>404 Not Found</code>, <code>405 Method Not Allowed</code>, <code>422 Unprocessable Entity</code></div>
+</div>
+<div class="card card-purple" style="margin-bottom:1rem;">
+<div class="card-title">5xx &mdash; Server Error</div>
+<div class="card-content"><code>500 Internal Server Error</code>, <code>502 Bad Gateway</code>, <code>503 Service Unavailable</code>, <code>504 Gateway Timeout</code></div>
+</div>
+<div class="warning-box" style="margin:0;">
+<div class="warning-title">304 Not Modified</div>
+<p>A response <em>without a body</em> that tells the browser: &ldquo;Use the copy you already have.&rdquo; This single status code can eliminate 90% of redundant traffic for static assets.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 16: Quiz 2 — Misconception trap: 401 vs 403 -->
+<div class="slide">
+<h1>Checkpoint &mdash; Status Code Diagnostics</h1>
+<div class="content">
+<div class="quiz-container" id="quiz2">
+<p class="quiz-question">A developer sends a request with a valid JWT token to <code>DELETE /api/users/99</code>. The server returns <code>403 Forbidden</code>. What is the most likely explanation?</p>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkQuizDetailed('quiz2',this,false,'q2fb-wrong1')">A) The JWT token has expired or is malformed.</div>
+<div class="quiz-option" onclick="checkQuizDetailed('quiz2',this,false,'q2fb-wrong2')">B) The resource <code>/api/users/99</code> does not exist.</div>
+<div class="quiz-option" onclick="checkQuizDetailed('quiz2',this,true,'q2fb-correct')">C) The user is authenticated but lacks permission to delete this resource.</div>
+<div class="quiz-option" onclick="checkQuizDetailed('quiz2',this,false,'q2fb-wrong3')">D) The server does not support the DELETE method.</div>
+</div>
+<div class="quiz-feedback correct" id="q2fb-correct">Correct. <code>403 Forbidden</code> means the server understood the request and recognised the caller, but the caller does not have authorisation for this specific action. The distinction: <strong>401 = who are you?</strong> (authentication missing), <strong>403 = I know who you are, but you may not do this</strong> (authorisation denied).</div>
+<div class="quiz-feedback incorrect" id="q2fb-wrong1">An expired or malformed token would produce <code>401 Unauthorized</code>, not 403. The 401 code signals that authentication is missing or invalid. A 403 presupposes that authentication succeeded but the caller lacks permission.</div>
+<div class="quiz-feedback incorrect" id="q2fb-wrong2">A non-existent resource would produce <code>404 Not Found</code>. The server returns 403 specifically to say &ldquo;the resource exists, you are authenticated, but you lack permission.&rdquo;</div>
+<div class="quiz-feedback incorrect" id="q2fb-wrong3">If the server did not support DELETE on this endpoint, it would return <code>405 Method Not Allowed</code>, typically with an <code>Allow</code> header listing the permitted methods.</div>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 17: Content negotiation -->
+<div class="slide">
+<h1>Content Negotiation: Content-Type vs Accept</h1>
+<div class="content">
+<p>HTTP enables clients and servers to agree on the format and encoding of exchanged data through header-based negotiation.</p>
+<div class="grid-2 mt-2">
+<div class="card card-secondary">
+<div class="card-title">Content-Type &mdash; &ldquo;What I am sending&rdquo;</div>
+<div class="card-content">
+<p>The sender declares the format of the body:</p>
+<div class="code-block" data-lang="http" style="font-size:0.95rem;"><span class="function">Content-Type</span>: application/json; charset=utf-8</div>
+<p>Without this header, the receiver has no reliable way to interpret the bytes in the body.</p>
+</div>
+</div>
+<div class="card card-accent">
+<div class="card-title">Accept &mdash; &ldquo;What I can receive&rdquo;</div>
+<div class="card-content">
+<p>The client requests a preferred format:</p>
+<div class="code-block" data-lang="http" style="font-size:0.95rem;"><span class="function">Accept</span>: application/json, text/html;q=0.9</div>
+<p>The <code>q</code> parameter (quality) expresses preference: 1.0 is highest, 0 means &ldquo;not acceptable&rdquo;.</p>
+</div>
+</div>
+</div>
+<div class="insight-box mt-2">
+<div class="insight-title">A prolific source of bugs</div>
+<p>Sending a JSON body with <code>Content-Type: text/plain</code> (or omitting the header entirely) is one of the most common API integration errors. The server will either reject the request (<code>415 Unsupported Media Type</code>) or misparse the body. Similarly, sending <code>Accept: text/xml</code> when the server only produces JSON yields <code>406 Not Acceptable</code>.</p>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 18: HTTP caching -->
+<div class="slide">
+<h1>HTTP Caching: A Mechanism, Not Magic</h1>
+<div class="content">
+<p>Caching reduces latency and bandwidth by storing responses at multiple points: the browser, intermediate proxies and CDN (Content Delivery Network) edge nodes.</p>
+<div class="grid-2">
+<div>
+<div class="card card-success" style="margin-bottom:1rem;">
+<div class="card-title">Freshness &mdash; &ldquo;Is this still valid?&rdquo;</div>
+<div class="card-content"><code>Cache-Control: max-age=3600</code> tells the browser this response is fresh for one hour. During that window, no request is sent to the server at all.</div>
+</div>
+<div class="card card-secondary" style="margin-bottom:1rem;">
+<div class="card-title">Validation &mdash; &ldquo;Has it changed?&rdquo;</div>
+<div class="card-content">When the cached copy expires, the browser sends a conditional request: <code>If-Modified-Since: Thu, 20 Feb 2026 10:00:00 GMT</code>. The server responds either with a fresh copy (<code>200</code>) or a bodyless <code>304 Not Modified</code>.</div>
+</div>
+</div>
+<div>
+<div class="diagram-container">
+<svg viewBox="0 0 400 280" style="max-width:90%;">
+<rect x="10" y="10" width="120" height="50" rx="8" fill="#e0f2fe" stroke="#0ea5e9" stroke-width="2"/>
+<text x="70" y="40" text-anchor="middle" font-size="14" font-weight="700" fill="#1e293b">Browser</text>
+<rect x="150" y="10" width="100" height="50" rx="8" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+<text x="200" y="40" text-anchor="middle" font-size="14" font-weight="700" fill="#1e293b">CDN</text>
+<rect x="270" y="10" width="120" height="50" rx="8" fill="#ecfdf5" stroke="#10b981" stroke-width="2"/>
+<text x="330" y="40" text-anchor="middle" font-size="14" font-weight="700" fill="#1e293b">Origin Server</text>
+<line x1="130" y1="35" x2="150" y2="35" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="250" y1="35" x2="270" y2="35" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="10" y="80" width="380" height="40" rx="6" fill="#dcfce7"/>
+<text x="200" y="105" text-anchor="middle" font-size="13" font-weight="600" fill="#059669">Cache HIT &mdash; browser serves from local store (0 ms)</text>
+<rect x="10" y="130" width="380" height="40" rx="6" fill="#fef3c7"/>
+<text x="200" y="155" text-anchor="middle" font-size="13" font-weight="600" fill="#92400e">CDN HIT &mdash; CDN serves cached copy (20&ndash;50 ms)</text>
+<rect x="10" y="180" width="380" height="40" rx="6" fill="#fee2e2"/>
+<text x="200" y="205" text-anchor="middle" font-size="13" font-weight="600" fill="#991b1b">MISS &mdash; origin server generates response (200+ ms)</text>
+<rect x="10" y="235" width="380" height="35" rx="6" fill="#e0f2fe"/>
+<text x="200" y="257" text-anchor="middle" font-size="13" font-weight="600" fill="#0c4a6e">304 Not Modified &mdash; body omitted, browser uses cache</text>
+<defs><marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#64748b"/></marker></defs>
+</svg>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ═══════════════════════════════════════════════════════════════════
+     SLIDES 19-21: State, Cookies, CORS
+     ═══════════════════════════════════════════════════════════════════ -->
+
+<!-- SLIDE 19: Cookies -->
+<div class="slide">
+<h1>Cookies: Application State over a Stateless Protocol</h1>
+<div class="content">
+<p>HTTP is stateless by design &mdash; each request is independent. Applications need state (sessions, preferences, shopping carts), so the protocol provides a mechanism: <strong>cookies</strong>, defined in RFC 6265.</p>
+<div class="grid-2 mt-2">
+<div>
+<div class="code-block" data-lang="http" style="font-size:0.95rem;"><span class="comment"># Server sets a cookie</span>
+<span class="function">Set-Cookie</span>: session_id=abc123;
+    Path=/;
+    Secure;
+    HttpOnly;
+    SameSite=Strict;
+    Max-Age=3600</div>
+<div class="code-block" data-lang="http" style="font-size:0.95rem;"><span class="comment"># Browser sends it back automatically</span>
+<span class="function">Cookie</span>: session_id=abc123</div>
+</div>
+<div>
+<div class="card card-danger" style="margin-bottom:1rem;">
+<div class="card-title">Security Flags</div>
+<div class="card-content">
+<p><strong>Secure</strong> &mdash; transmit only over HTTPS.</p>
+<p><strong>HttpOnly</strong> &mdash; invisible to JavaScript (prevents XSS theft).</p>
+<p><strong>SameSite</strong> &mdash; controls cross-site sending (CSRF defence).</p>
+</div>
+</div>
+<div class="warning-box">
+<div class="warning-title">Session layer connection</div>
+<p>Cookies implement at the application level what the session layer (L5) models abstractly: persistent identity across multiple exchanges. This is the bridge between the stateless protocol and the stateful application.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 20: CORS — connecting back to the hook -->
+<div class="slide">
+<h1>CORS: The Browser Security Model</h1>
+<div class="content">
+<p class="lead">Remember the Friday afternoon disaster from Slide 2? CORS is the mechanism behind it.</p>
+<div class="definition-box">
+<div class="term">Cross-Origin Resource Sharing (CORS)</div>
+<p>A browser-enforced policy that restricts web pages from making requests to a different origin (scheme + host + port) than the one that served the page. It is <strong>not</strong> an HTTP limitation &mdash; it is a <em>browser</em> security decision.</p>
+</div>
+<div class="grid-2 mt-2">
+<div class="card card-success">
+<div class="card-title">Same-origin (allowed)</div>
+<div class="card-content"><code>https://app.example.com</code> requests <code>https://app.example.com/api</code> &mdash; same scheme, host and port. The browser sends the request normally.</div>
+</div>
+<div class="card card-danger">
+<div class="card-title">Cross-origin (blocked unless server opts in)</div>
+<div class="card-content"><code>https://app.example.com</code> requests <code>https://api.example.com</code> &mdash; different host. The browser sends a <strong>preflight</strong> <code>OPTIONS</code> request to ask permission.</div>
+</div>
+</div>
+<div class="highlight-box mt-2">
+<h3>Why Postman works and browsers do not</h3>
+<p>Postman, <code>curl</code> and Python&rsquo;s <code>requests</code> library are not browsers. They do not enforce the same-origin policy. CORS is a browser feature, not a server feature. The HTTP response is identical in both cases &mdash; the browser simply <em>refuses to let your JavaScript read it</em> unless the server explicitly grants permission via <code>Access-Control-Allow-Origin</code> headers.</p>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 21: Quiz 3 — CORS misconception -->
+<div class="slide">
+<h1>Checkpoint &mdash; CORS Understanding</h1>
+<div class="content">
+<div class="quiz-container" id="quiz3">
+<p class="quiz-question">A React application at <code>https://frontend.io</code> calls <code>https://api.backend.io/data</code>. The server does not include any <code>Access-Control-*</code> headers. The browser shows a CORS error. What actually happened at the network level?</p>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkQuizDetailed('quiz3',this,false,'q3fb-wrong1')">A) The browser did not send the request. The server never received it.</div>
+<div class="quiz-option" onclick="checkQuizDetailed('quiz3',this,false,'q3fb-wrong2')">B) The server rejected the request because it came from a different origin.</div>
+<div class="quiz-option" onclick="checkQuizDetailed('quiz3',this,true,'q3fb-correct')">C) The server received and processed the request. The browser received the response but refused to expose it to JavaScript.</div>
+<div class="quiz-option" onclick="checkQuizDetailed('quiz3',this,false,'q3fb-wrong3')">D) The firewall between the two servers blocked the cross-origin traffic.</div>
+</div>
+<div class="quiz-feedback correct" id="q3fb-correct">Correct. For simple requests (GET without custom headers), the browser sends the request normally. The server processes it and returns a response. The browser then checks the response headers for <code>Access-Control-Allow-Origin</code>. If the header is missing or does not match, the browser <em>hides the response from JavaScript</em> &mdash; but the server already did the work. This is a critical distinction: CORS is client-side enforcement, not server-side rejection.</div>
+<div class="quiz-feedback incorrect" id="q3fb-wrong1">For simple GET requests, the browser <em>does</em> send the request. It only blocks <em>before</em> sending for non-simple requests that trigger a preflight OPTIONS. In this case, the request reaches the server.</div>
+<div class="quiz-feedback incorrect" id="q3fb-wrong2">The server knows nothing about CORS unless it has been explicitly programmed to check the <code>Origin</code> header. CORS is enforced by the browser, not the server. The server happily processes the request and sends a response.</div>
+<div class="quiz-feedback incorrect" id="q3fb-wrong3">CORS is not a network-level mechanism. Firewalls operate at layers 3&ndash;4 (IP, TCP); they know nothing about HTTP origin headers. This error occurs entirely within the browser.</div>
+</div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     SLIDES 22-26: HTTP Evolution + WebSocket
+     ═══════════════════════════════════════════════════════════════════ -->
+
+<!-- SLIDE 22: Section divider -->
+<div class="slide slide-section">
+<div class="section-number">SECTION 02</div>
+<h2>HTTP Evolution and WebSocket</h2>
+<p class="section-desc">From sequential requests to multiplexed streams &mdash; and what happens when request-response is no longer enough.</p>
+</div>
+
+<!-- SLIDE 23: HTTP/1.1 limitations + HTTP/2 — Progressive diagram -->
+<div class="slide">
+<h1>From HTTP/1.1 to HTTP/2</h1>
+<div class="content">
+<p>HTTP/1.1 (RFC 7230, 1997) introduced persistent connections but retained a fundamental constraint: <strong>head-of-line blocking</strong>. HTTP/2 (RFC 7540, 2015) resolved this with multiplexing.</p>
+<div class="diagram-container">
+<svg viewBox="0 0 850 260" style="max-width:100%;">
+<!-- HTTP/1.1 side -->
+<rect x="10" y="10" width="390" height="240" rx="10" fill="#fef2f2" stroke="#ef4444" stroke-width="1"/>
+<text x="205" y="35" text-anchor="middle" font-size="16" font-weight="700" fill="#991b1b">HTTP/1.1 &mdash; Sequential</text>
+<rect x="30" y="55" width="350" height="30" rx="5" fill="#fca5a5"/><text x="205" y="75" text-anchor="middle" font-size="13" font-weight="600" fill="#1e293b">Request 1 &rarr; Response 1</text>
+<rect x="30" y="95" width="350" height="30" rx="5" fill="#fca5a5"/><text x="205" y="115" text-anchor="middle" font-size="13" font-weight="600" fill="#1e293b">Request 2 &rarr; Response 2 (waits for R1)</text>
+<rect x="30" y="135" width="350" height="30" rx="5" fill="#fca5a5"/><text x="205" y="155" text-anchor="middle" font-size="13" font-weight="600" fill="#1e293b">Request 3 &rarr; Response 3 (waits for R2)</text>
+<text x="205" y="195" text-anchor="middle" font-size="13" font-weight="600" fill="#991b1b">Head-of-line blocking:</text>
+<text x="205" y="215" text-anchor="middle" font-size="13" fill="#991b1b">a slow response blocks everything behind it</text>
+<!-- HTTP/2 side -->
+<rect x="450" y="10" width="390" height="240" rx="10" fill="#ecfdf5" stroke="#10b981" stroke-width="1"/>
+<text x="645" y="35" text-anchor="middle" font-size="16" font-weight="700" fill="#059669">HTTP/2 &mdash; Multiplexed</text>
+<rect x="470" y="55" width="160" height="30" rx="5" fill="#6ee7b7"/><text x="550" y="75" text-anchor="middle" font-size="13" font-weight="600" fill="#1e293b">Stream 1 (frames)</text>
+<rect x="650" y="55" width="170" height="30" rx="5" fill="#6ee7b7"/><text x="735" y="75" text-anchor="middle" font-size="13" font-weight="600" fill="#1e293b">Stream 2 (frames)</text>
+<rect x="470" y="95" width="350" height="30" rx="5" fill="#a7f3d0"/><text x="645" y="115" text-anchor="middle" font-size="13" font-weight="600" fill="#1e293b">Stream 3 (interleaved with 1 and 2)</text>
+<text x="645" y="155" text-anchor="middle" font-size="13" font-weight="600" fill="#059669">Single TCP connection, multiple streams</text>
+<text x="645" y="175" text-anchor="middle" font-size="13" fill="#059669">Header compression (HPACK)</text>
+<text x="645" y="195" text-anchor="middle" font-size="13" fill="#059669">Server push (optional)</text>
+<text x="645" y="225" text-anchor="middle" font-size="14" font-weight="700" fill="#059669">No change to HTTP semantics</text>
+</svg>
+</div>
+<div class="highlight-box mt-1">
+<h3>The key insight</h3>
+<p>HTTP/2 changes the <em>transport framing</em> (how bytes flow on the wire) without changing <em>HTTP semantics</em> (methods, headers, status codes). Your application code does not change &mdash; only the underlying connection behaviour improves.</p>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 24: HTTP/3 and QUIC -->
+<div class="slide">
+<h1>HTTP/3 and QUIC: The UDP Revolution</h1>
+<div class="content">
+<p>HTTP/2 solved HTTP-level head-of-line blocking but exposed a TCP-level problem: if a single TCP packet is lost, <em>all</em> streams on that connection stall until retransmission completes. HTTP/3 (RFC 9114, 2022) replaces TCP with <strong>QUIC</strong>, a UDP-based transport with built-in TLS 1.3.</p>
+<div class="grid-2 mt-2">
+<div>
+<div class="table-container">
+<table>
+<thead><tr><th>Feature</th><th>HTTP/2 over TCP</th><th>HTTP/3 over QUIC</th></tr></thead>
+<tbody>
+<tr><td>Transport</td><td>TCP</td><td>QUIC (UDP-based)</td></tr>
+<tr><td>Encryption</td><td>Separate TLS</td><td>TLS 1.3 integrated</td></tr>
+<tr><td>Handshake</td><td>TCP + TLS (2&ndash;3 RTT)</td><td>1 RTT (0-RTT resumption)</td></tr>
+<tr><td>HoL blocking</td><td>At TCP level</td><td>Per-stream only</td></tr>
+<tr><td>Connection migration</td><td>Breaks on IP change</td><td>Survives Wi-Fi &harr; mobile</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<div>
+<div class="story-box">
+<div class="story-title">Real-world impact</div>
+<p>Google reported that QUIC reduced search latency by 8% globally and video rebuffering by 18% on YouTube. The largest gains appear on high-latency, lossy networks &mdash; precisely the conditions mobile users face.</p>
+</div>
+<button class="reveal-btn mt-2" onclick="toggleReveal('quic-reveal')">Why not replace TCP everywhere? &darr;</button>
+<div class="reveal-content" id="quic-reveal">
+<p>QUIC runs over UDP, and many corporate firewalls and middleboxes block or deprioritise UDP traffic. Additionally, QUIC&rsquo;s encryption makes deep packet inspection impossible, which conflicts with some enterprise security policies. Adoption is growing but not universal.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 25: Quiz 3b — HTTP evolution -->
+<div class="slide">
+<h1>Checkpoint &mdash; HTTP Versions</h1>
+<div class="content">
+<p class="lead">Consider the following scenario.</p>
+<div class="quiz-container" id="quiz3b">
+<p class="quiz-question">A web page loads 30 small images. Under HTTP/1.1 with a single connection, the browser must wait for each response before sending the next request. Under HTTP/2, all 30 requests can be sent immediately over the same connection. Why?</p>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkQuizDetailed('quiz3b',this,false,'q3b-wrong1')">A) HTTP/2 uses UDP instead of TCP, which allows parallel delivery.</div>
+<div class="quiz-option" onclick="checkQuizDetailed('quiz3b',this,true,'q3b-correct')">B) HTTP/2 introduces multiplexed streams within a single TCP connection, eliminating HTTP-level head-of-line blocking.</div>
+<div class="quiz-option" onclick="checkQuizDetailed('quiz3b',this,false,'q3b-wrong2')">C) HTTP/2 opens 30 separate TCP connections in parallel.</div>
+<div class="quiz-option" onclick="checkQuizDetailed('quiz3b',this,false,'q3b-wrong3')">D) HTTP/2 compresses images before sending, so they arrive faster.</div>
+</div>
+<div class="quiz-feedback correct" id="q3b-correct">Correct. HTTP/2 divides communication into numbered streams. Frames from different streams can be interleaved on a single TCP connection, so the browser does not need to wait for one response to finish before sending the next request. The underlying TCP connection is shared.</div>
+<div class="quiz-feedback incorrect" id="q3b-wrong1">HTTP/2 still uses TCP. It is HTTP/3 that uses QUIC (which runs over UDP). The multiplexing in HTTP/2 is achieved through a binary framing layer, not a transport change.</div>
+<div class="quiz-feedback incorrect" id="q3b-wrong2">Opening 30 TCP connections is actually the HTTP/1.1 workaround (browsers typically open 6 connections per host). HTTP/2 explicitly reduces this to one or two connections by multiplexing streams within them.</div>
+<div class="quiz-feedback incorrect" id="q3b-wrong3">HTTP/2 compresses <em>headers</em> (via HPACK), not bodies. Image compression is unrelated to the protocol version and is handled by the image format itself (JPEG, PNG, WebP).</div>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 26: WebSocket -->
+<div class="slide">
+<h1>WebSocket: When HTTP Is No Longer Enough</h1>
+<div class="content">
+<p>HTTP follows a strict request&ndash;response pattern: the client initiates, the server responds. The server cannot push data to the client unprompted. For real-time applications (chat, live dashboards, gaming), this limitation is fundamental.</p>
+<div class="grid-2 mt-2">
+<div>
+<div class="definition-box">
+<div class="term">WebSocket Protocol (RFC 6455)</div>
+<p>A persistent, full-duplex communication channel established via an HTTP upgrade handshake. After the handshake, both sides can send frames at any time without waiting for a request.</p>
+</div>
+<div class="code-block" data-lang="http" style="font-size:0.95rem;"><span class="comment"># Client sends upgrade request</span>
+<span class="keyword">GET</span> /chat <span class="string">HTTP/1.1</span>
+<span class="function">Upgrade</span>: websocket
+<span class="function">Connection</span>: Upgrade
+<span class="function">Sec-WebSocket-Key</span>: dGhlIHNh...
+
+<span class="comment"># Server confirms</span>
+<span class="string">HTTP/1.1</span> <span class="number">101</span> <span class="keyword">Switching Protocols</span>
+<span class="function">Upgrade</span>: websocket
+<span class="function">Connection</span>: Upgrade</div>
+</div>
+<div>
+<div class="card card-accent" style="margin-bottom:1rem;">
+<div class="card-title">After the handshake</div>
+<div class="card-content">The connection is no longer HTTP. It becomes a bidirectional, frame-based protocol over the same TCP connection. Both client and server may send data at any moment.</div>
+</div>
+<div class="card card-danger" style="margin-bottom:1rem;">
+<div class="card-title">Polling vs WebSocket</div>
+<div class="card-content">
+<p><strong>Polling:</strong> Client asks &ldquo;any updates?&rdquo; every N seconds &mdash; wasteful, high latency.</p>
+<p><strong>WebSocket:</strong> Server sends updates as they happen &mdash; no wasted requests, real-time delivery.</p>
+<p>Trade-off: WebSocket keeps a TCP connection open permanently, consuming server resources per connected client.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ═══════════════════════════════════════════════════════════════════
+     SLIDES 27-34: FORMALISATION — REST and SOAP
+     ═══════════════════════════════════════════════════════════════════ -->
+
+<!-- SLIDE 27: Section divider -->
+<div class="slide slide-section">
+<div class="section-number">SECTION 03</div>
+<h2>REST Architecture</h2>
+<p class="section-desc">An architectural style, not a technology &mdash; modelling a domain as resources with HTTP semantics.</p>
+</div>
+
+<!-- SLIDE 28: REST formal definition -->
+<div class="slide">
+<h1>REST: An Architectural Style, Not a Technology</h1>
+<div class="content">
+<p>REST (Representational State Transfer) was introduced by Roy Fielding in his doctoral dissertation at UC Irvine (2000). It is a set of <em>architectural constraints</em> for distributed hypermedia systems &mdash; not a protocol, not a standard and not a library.</p>
+<div class="definition-box mt-2">
+<div class="term">The six constraints of REST</div>
+<p><strong>1. Client&ndash;server separation</strong> &mdash; concerns are divided; the UI and data storage evolve independently. <strong>2. Statelessness</strong> &mdash; each request contains all information needed to process it; the server stores no client context. <strong>3. Cacheability</strong> &mdash; responses must declare whether they are cacheable. <strong>4. Layered system</strong> &mdash; intermediaries (proxies, gateways, CDNs) may exist transparently. <strong>5. Uniform interface</strong> &mdash; resources are identified by URIs; manipulation happens through representations with standard methods. <strong>6. Code on demand (optional)</strong> &mdash; servers may send executable code (e.g. JavaScript) to extend client functionality.</p>
+</div>
+<div class="warning-box mt-2">
+<div class="warning-title">The most common misconception in the industry</div>
+<p>REST is <strong>not</strong> &ldquo;a JSON API over HTTP&rdquo;. An API that uses JSON and HTTP but violates statelessness or ignores cacheability is not RESTful, regardless of its URL structure. Conversely, a perfectly RESTful API could serve XML, HTML or even plain text.</p>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 29: Richardson Maturity Model -->
+<div class="slide">
+<h1>The Richardson Maturity Model</h1>
+<div class="content">
+<p>Leonard Richardson proposed a model with four levels to classify how well an API uses HTTP semantics. Most production APIs reach Level 2; Level 3 remains rare.</p>
+<div class="diagram-container mt-2">
+<svg viewBox="0 0 800 220" style="max-width:100%;">
+<rect x="10" y="160" width="780" height="50" rx="8" fill="#fee2e2" stroke="#ef4444" stroke-width="2"/>
+<text x="400" y="185" text-anchor="middle" font-size="15" font-weight="700" fill="#991b1b">Level 0 &mdash; The Swamp of POX (plain old XML / JSON over HTTP)</text>
+<text x="400" y="202" text-anchor="middle" font-size="12" fill="#991b1b">Single endpoint, single method (POST), HTTP as transport tunnel</text>
+<rect x="10" y="105" width="580" height="50" rx="8" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+<text x="300" y="130" text-anchor="middle" font-size="15" font-weight="700" fill="#92400e">Level 1 &mdash; Resources</text>
+<text x="300" y="147" text-anchor="middle" font-size="12" fill="#92400e">Individual URIs per resource (/users, /users/42) but still POST for everything</text>
+<rect x="10" y="50" width="380" height="50" rx="8" fill="#dcfce7" stroke="#10b981" stroke-width="2"/>
+<text x="200" y="75" text-anchor="middle" font-size="15" font-weight="700" fill="#059669">Level 2 &mdash; HTTP Verbs</text>
+<text x="200" y="92" text-anchor="middle" font-size="12" fill="#059669">GET, POST, PUT, DELETE + correct status codes</text>
+<rect x="10" y="0" width="200" height="45" rx="8" fill="#e0f2fe" stroke="#0ea5e9" stroke-width="2"/>
+<text x="110" y="20" text-anchor="middle" font-size="14" font-weight="700" fill="#0c4a6e">Level 3 &mdash; HATEOAS</text>
+<text x="110" y="37" text-anchor="middle" font-size="12" fill="#0c4a6e">Hypermedia links in responses</text>
+</svg>
+</div>
+<p class="mt-1" style="font-size:1.05rem;color:var(--text-muted);">Each level adds a new dimension of HTTP usage. The jump from Level 0 to Level 2 is where the most practical benefit lies: correct use of methods enables caching, makes load balancing safer and reduces debugging time.</p>
+</div>
+</div>
+
+<!-- SLIDE 30: Level 0-1 code examples -->
+<div class="slide">
+<h1>Levels 0 and 1 in Practice</h1>
+<div class="content">
+<div class="grid-2">
+<div>
+<h3 style="color:var(--danger);">Level 0 &mdash; RPC over HTTP</h3>
+<div class="code-block" data-lang="http" style="font-size:0.95rem;"><span class="comment"># Everything goes to one endpoint</span>
+<span class="keyword">POST</span> /api <span class="string">HTTP/1.1</span>
+<span class="function">Content-Type</span>: application/json
+
+{
+  <span class="string">"action"</span>: <span class="string">"getUser"</span>,
+  <span class="string">"userId"</span>: <span class="number">42</span>
+}
+
+<span class="keyword">POST</span> /api <span class="string">HTTP/1.1</span>
+{
+  <span class="string">"action"</span>: <span class="string">"deleteUser"</span>,
+  <span class="string">"userId"</span>: <span class="number">42</span>
+}</div>
+<p style="font-size:0.95rem;color:var(--text-muted);">HTTP is merely a transport tunnel. The &ldquo;action&rdquo; field inside the body replaces HTTP methods. Caching is impossible because every request is POST to the same URL.</p>
+</div>
+<div>
+<h3 style="color:var(--accent);">Level 1 &mdash; Resources with URIs</h3>
+<div class="code-block" data-lang="http" style="font-size:0.95rem;"><span class="comment"># Each resource has its own URI</span>
+<span class="keyword">POST</span> /api/users/42 <span class="string">HTTP/1.1</span>
+{
+  <span class="string">"action"</span>: <span class="string">"get"</span>
+}
+
+<span class="keyword">POST</span> /api/users/42 <span class="string">HTTP/1.1</span>
+{
+  <span class="string">"action"</span>: <span class="string">"delete"</span>
+}</div>
+<p style="font-size:0.95rem;color:var(--text-muted);">Resources are addressable, but POST is still used for everything. The &ldquo;action&rdquo; field encodes what should be an HTTP method. Still not cacheable.</p>
+</div>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 31: Level 2-3 -->
+<div class="slide">
+<h1>Levels 2 and 3 &mdash; Proper REST</h1>
+<div class="content">
+<div class="grid-2">
+<div>
+<h3 style="color:var(--success);">Level 2 &mdash; HTTP verbs + status codes</h3>
+<div class="code-block" data-lang="http" style="font-size:0.95rem;"><span class="keyword">GET</span> /api/users/42 <span class="string">HTTP/1.1</span>
+<span class="comment"># 200 OK + JSON body (cacheable!)</span>
+
+<span class="keyword">DELETE</span> /api/users/42 <span class="string">HTTP/1.1</span>
+<span class="comment"># 204 No Content (idempotent)</span>
+
+<span class="keyword">POST</span> /api/users <span class="string">HTTP/1.1</span>
+{<span class="string">"name"</span>: <span class="string">"Ada"</span>}
+<span class="comment"># 201 Created + Location header</span></div>
+<p style="font-size:0.95rem;">GET responses can be cached by browsers and CDNs. DELETE is idempotent &mdash; safe for automatic retries. POST returns 201 with the URL of the new resource.</p>
+</div>
+<div>
+<h3 style="color:var(--secondary);">Level 3 &mdash; HATEOAS</h3>
+<div class="code-block" data-lang="json" style="font-size:0.95rem;">{
+  <span class="string">"id"</span>: <span class="number">42</span>,
+  <span class="string">"name"</span>: <span class="string">"Ada Lovelace"</span>,
+  <span class="string">"_links"</span>: {
+    <span class="string">"self"</span>: {
+      <span class="string">"href"</span>: <span class="string">"/api/users/42"</span>
+    },
+    <span class="string">"projects"</span>: {
+      <span class="string">"href"</span>: <span class="string">"/api/users/42/projects"</span>
+    },
+    <span class="string">"delete"</span>: {
+      <span class="string">"href"</span>: <span class="string">"/api/users/42"</span>,
+      <span class="string">"method"</span>: <span class="string">"DELETE"</span>
+    }
+  }
+}</div>
+<p style="font-size:0.95rem;">The response tells the client what it can do next. The client navigates the API by following links, not by hardcoding URLs. This is the principle behind the web itself: hypertext.</p>
+</div>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 32: Quiz 4 — REST misconception -->
+<div class="slide">
+<h1>Checkpoint &mdash; REST in Practice</h1>
+<div class="content">
+<div class="quiz-container" id="quiz4">
+<p class="quiz-question">An API endpoint <code>POST /api/users/42/activate</code> changes the user&rsquo;s status to &ldquo;active&rdquo;. At which Richardson maturity level does this endpoint operate?</p>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkQuizDetailed('quiz4',this,false,'q4fb-wrong1')">A) Level 2 &mdash; because it uses a URI for the resource and POST for the action.</div>
+<div class="quiz-option" onclick="checkQuizDetailed('quiz4',this,true,'q4fb-correct')">B) Level 1 &mdash; it has a resource URI but encodes the action in the URL path instead of using HTTP methods.</div>
+<div class="quiz-option" onclick="checkQuizDetailed('quiz4',this,false,'q4fb-wrong2')">C) Level 3 &mdash; because it targets a specific sub-resource of the user.</div>
+<div class="quiz-option" onclick="checkQuizDetailed('quiz4',this,false,'q4fb-wrong3')">D) Level 0 &mdash; because POST is used instead of GET.</div>
+</div>
+<div class="quiz-feedback correct" id="q4fb-correct">Correct. The verb &ldquo;activate&rdquo; in the URL is a strong indicator of RPC-style thinking encoded in a resource path. At Level 2, you would model this as <code>PATCH /api/users/42</code> with a body like <code>{"status": "active"}</code>, using the HTTP method (PATCH) to express the action and the body to express the change. The URL <code>/activate</code> is an action, not a resource.</div>
+<div class="quiz-feedback incorrect" id="q4fb-wrong1">Level 2 requires using HTTP methods to express operations. Here, the action &ldquo;activate&rdquo; is baked into the URL path, which means the API is using the URL as a verb rather than letting the HTTP method carry that information. This is characteristic of Level 1.</div>
+<div class="quiz-feedback incorrect" id="q4fb-wrong2">Level 3 (HATEOAS) requires the server to include hypermedia links in responses, guiding the client to available actions. The URL structure alone does not determine Level 3.</div>
+<div class="quiz-feedback incorrect" id="q4fb-wrong3">Level 0 uses a single endpoint for all operations (e.g. <code>POST /api</code>). Here, the API does address a specific resource URI, placing it above Level 0.</div>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 33: SOAP -->
+<div class="slide">
+<h1>SOAP: The Enterprise Alternative</h1>
+<div class="content">
+<p>SOAP (Simple Object Access Protocol) predates REST and follows a fundamentally different philosophy: a <strong>strict, contract-driven</strong> protocol with XML messaging and formal service descriptions.</p>
+<div class="grid-2 mt-2">
+<div>
+<div class="code-block" data-lang="xml" style="font-size:0.9rem;"><span class="comment">&lt;!-- A SOAP request envelope --&gt;</span>
+<span class="keyword">&lt;soap:Envelope</span>
+  <span class="function">xmlns:soap</span>=<span class="string">"...xmlsoap.org/..."</span>&gt;
+  <span class="keyword">&lt;soap:Header&gt;</span>
+    <span class="comment">&lt;!-- Auth, routing metadata --&gt;</span>
+  <span class="keyword">&lt;/soap:Header&gt;</span>
+  <span class="keyword">&lt;soap:Body&gt;</span>
+    <span class="keyword">&lt;GetUser&gt;</span>
+      <span class="keyword">&lt;UserId&gt;</span><span class="number">42</span><span class="keyword">&lt;/UserId&gt;</span>
+    <span class="keyword">&lt;/GetUser&gt;</span>
+  <span class="keyword">&lt;/soap:Body&gt;</span>
+<span class="keyword">&lt;/soap:Envelope&gt;</span></div>
+</div>
+<div>
+<div class="card card-purple" style="margin-bottom:1rem;">
+<div class="card-title">Key characteristics</div>
+<div class="card-content">
+<p><strong>WSDL</strong> &mdash; a machine-readable contract (Web Services Description Language) describing every operation, its parameters and return types.</p>
+<p><strong>WS-* extensions</strong> &mdash; enterprise features: WS-Security, WS-Transaction, WS-ReliableMessaging.</p>
+<p><strong>Transport-independent</strong> &mdash; can run over HTTP, SMTP or even JMS.</p>
+</div>
+</div>
+<div class="insight-box">
+<div class="insight-title">When SOAP makes sense</div>
+<p>Banking systems, healthcare (HL7 FHIR interfaces) and government services often require formal contracts, digital signatures and guaranteed delivery &mdash; features that SOAP provides natively and REST must implement manually.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 34: REST vs SOAP comparison -->
+<div class="slide">
+<h1>REST vs SOAP &mdash; Different Problems, Different Tools</h1>
+<div class="content">
+<div class="table-container">
+<table>
+<thead><tr><th>Dimension</th><th>REST</th><th>SOAP</th></tr></thead>
+<tbody>
+<tr><td><strong>Philosophy</strong></td><td>Architectural style (constraints)</td><td>Protocol (formal specification)</td></tr>
+<tr><td><strong>Data format</strong></td><td>JSON, XML, HTML &mdash; flexible</td><td>XML only</td></tr>
+<tr><td><strong>Contract</strong></td><td>Informal (OpenAPI / Swagger)</td><td>Formal (WSDL, machine-readable)</td></tr>
+<tr><td><strong>State</strong></td><td>Stateless</td><td>Can be stateful (WS-*)</td></tr>
+<tr><td><strong>Transport</strong></td><td>HTTP only</td><td>HTTP, SMTP, JMS and others</td></tr>
+<tr><td><strong>Caching</strong></td><td>Native (HTTP cache headers)</td><td>Not built-in</td></tr>
+<tr><td><strong>Security</strong></td><td>HTTPS + OAuth 2.0</td><td>WS-Security (XML signatures)</td></tr>
+<tr><td><strong>Typical use</strong></td><td>Web APIs, mobile backends, SPA</td><td>Enterprise integration, banking</td></tr>
+</tbody>
+</table>
+</div>
+<div class="highlight-box mt-2">
+<h3>The pragmatic view</h3>
+<p>REST dominates modern web development because it aligns with HTTP&rsquo;s native semantics and works well with browsers, CDNs and JavaScript. SOAP persists where formal contracts and enterprise-grade security are non-negotiable. They solve different problems; neither is universally superior.</p>
+</div>
+</div>
+</div>
+<!-- ═══════════════════════════════════════════════════════════════════
+     SLIDES 35-42: APPLICATION, TRANSFER, REFLECTION
+     ═══════════════════════════════════════════════════════════════════ -->
+
+<!-- SLIDE 35: Section divider — Practical application -->
+<div class="slide slide-section">
+<div class="section-number">SECTION 04</div>
+<h2>Putting It All Together</h2>
+<p class="section-desc">Debugging HTTP in practice, resolving our opening scenario and connecting theory to next week&rsquo;s seminar.</p>
+</div>
+
+<!-- SLIDE 36: Debugging with curl -->
+<div class="slide">
+<h1>Debugging HTTP with <code>curl</code></h1>
+<div class="content">
+<p><code>curl</code> is the universal HTTP debugging tool &mdash; available on every operating system and inside every Docker container. Unlike a browser, it shows you <em>exactly</em> what the protocol does.</p>
+<div class="code-block" data-lang="bash"><span class="comment"># See the full request and response headers</span>
+<span class="keyword">curl</span> -v https://httpbin.org/get
+
+<span class="comment"># Send a POST with JSON body</span>
+<span class="keyword">curl</span> -X POST \
+    -H <span class="string">"Content-Type: application/json"</span> \
+    -d <span class="string">'{"name": "Ada"}'</span> \
+    https://httpbin.org/post
+
+<span class="comment"># Follow redirects and show timing</span>
+<span class="keyword">curl</span> -L -w <span class="string">"DNS: %{time_namelookup}s\nTCP: %{time_connect}s\nTLS: %{time_appconnect}s\nTotal: %{time_total}s\n"</span> \
+    -o /dev/null -s \
+    https://example.com</div>
+<!-- LIVE CODING: see instructor guide -->
+<div class="warning-box mt-1">
+<div class="warning-title">Instructor note</div>
+<p>The timing flags (<code>-w</code>) directly visualise the latency breakdown from Slide 10. Run this live against several domains and compare DNS, TCP and TLS times.</p>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 37: Interactive HTTP Status Diagnostic -->
+<div class="slide">
+<h1>HTTP Status Code Diagnostic</h1>
+<div class="content">
+<p class="lead">Given the symptoms, select the most likely status code. This is the reasoning you apply when debugging API issues.</p>
+<div class="interactive-panel">
+<h3>Scenario Diagnostic</h3>
+<p style="font-size:0.95rem;color:var(--text-muted);margin-bottom:1rem;">Select a symptom to see the corresponding status code and explanation.</p>
+<div style="display:flex;flex-direction:column;gap:0.5rem;">
+<button class="reveal-btn" style="text-align:left;background:var(--bg-light);color:var(--text-dark);border:2px solid var(--border);" onclick="showDiag('diag-result','The token is missing or expired &rarr; <strong>401 Unauthorized</strong>. The server cannot identify the caller. Include a valid <code>Authorization</code> header.')">Symptom: API returns an error when no token is sent</button>
+<button class="reveal-btn" style="text-align:left;background:var(--bg-light);color:var(--text-dark);border:2px solid var(--border);" onclick="showDiag('diag-result','Authenticated but forbidden &rarr; <strong>403 Forbidden</strong>. The server knows who you are but your role does not permit this action.')">Symptom: Token is valid but the endpoint rejects the request</button>
+<button class="reveal-btn" style="text-align:left;background:var(--bg-light);color:var(--text-dark);border:2px solid var(--border);" onclick="showDiag('diag-result','Resource not found &rarr; <strong>404 Not Found</strong>. Check the URL path and resource identifier. The server has no resource at this address.')">Symptom: The URL looks correct but the server says the resource does not exist</button>
+<button class="reveal-btn" style="text-align:left;background:var(--bg-light);color:var(--text-dark);border:2px solid var(--border);" onclick="showDiag('diag-result','Wrong Content-Type &rarr; <strong>415 Unsupported Media Type</strong>. The server cannot parse the body because the declared Content-Type does not match what the endpoint expects.')">Symptom: JSON body is correct but the server says it cannot parse the request</button>
+<button class="reveal-btn" style="text-align:left;background:var(--bg-light);color:var(--text-dark);border:2px solid var(--border);" onclick="showDiag('diag-result','CORS preflight failure &rarr; the browser blocks the response. Check the server for <code>Access-Control-Allow-Origin</code>, <code>Access-Control-Allow-Methods</code> and <code>Access-Control-Allow-Headers</code> in the response to the OPTIONS request.')">Symptom: Works in Postman but fails in the browser with a network error</button>
+</div>
+<div class="result-display mt-2" id="diag-result" style="display:none;">
+<p id="diag-text" style="font-size:1.05rem;line-height:1.6;"></p>
+</div>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 38: Hook revisited — narrative closure -->
+<div class="slide">
+<h1>Returning to Friday Afternoon</h1>
+<div class="content">
+<div class="story-box">
+<div class="story-title">The mystery, resolved</div>
+<p>Remember the fintech developer from Slide 2? The React frontend at <code>https://dashboard.fintech.ro</code> called the API at <code>https://api.fintech.ro</code>. Different subdomain &rarr; different origin &rarr; cross-origin request. The server was missing three headers:</p>
+</div>
+<div class="code-block mt-2" data-lang="http" style="font-size:0.95rem;"><span class="comment"># The fix: add these headers to every response</span>
+<span class="function">Access-Control-Allow-Origin</span>: https://dashboard.fintech.ro
+<span class="function">Access-Control-Allow-Methods</span>: GET, POST, PUT, DELETE, OPTIONS
+<span class="function">Access-Control-Allow-Headers</span>: Authorization, Content-Type</div>
+<div class="grid-2 mt-2">
+<div class="card card-success">
+<div class="card-title">What you now understand</div>
+<div class="card-content">
+<p>CORS is a browser policy, not an HTTP feature. The server must explicitly opt in to cross-origin access. Postman bypasses this because it is not a browser.</p>
+<p style="margin-top:0.5rem;">The fix took three lines of configuration. The diagnosis required understanding how HTTP, browsers and security policies interact &mdash; precisely the knowledge this lecture provides.</p>
+</div>
+</div>
+<div class="card card-purple">
+<div class="card-title">The broader lesson</div>
+<div class="card-content">
+<p>HTTP is not a black box. It is a precisely defined protocol with documented semantics. When your framework hides these details, everything works. When something breaks, you need to see through the abstraction to the protocol underneath.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 39: Quiz 5 — Synthesis -->
+<div class="slide">
+<h1>Synthesis Challenge</h1>
+<div class="content">
+<div class="quiz-container" id="quiz5">
+<p class="quiz-question">A mobile banking application uses HTTP/2 to communicate with its backend API via HTTPS. The server returns <code>Cache-Control: no-store</code> on all responses. A user submits a payment using <code>POST /api/payments</code>. The network connection drops mid-request. The client retries automatically. Which combination of HTTP features prevents a double payment?</p>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkQuizDetailed('quiz5',this,false,'q5fb-wrong1')">A) HTTP/2 multiplexing ensures the retry reaches the same stream.</div>
+<div class="quiz-option" onclick="checkQuizDetailed('quiz5',this,false,'q5fb-wrong2')">B) The <code>Cache-Control: no-store</code> header prevents the response from being reused.</div>
+<div class="quiz-option" onclick="checkQuizDetailed('quiz5',this,true,'q5fb-correct')">C) An <code>Idempotency-Key</code> header sent by the client allows the server to detect and reject the duplicate.</div>
+<div class="quiz-option" onclick="checkQuizDetailed('quiz5',this,false,'q5fb-wrong3')">D) HTTPS encryption ensures that retransmitted packets are identical and the server can deduplicate them.</div>
+</div>
+<div class="quiz-feedback correct" id="q5fb-correct">Correct. Since POST is not idempotent, an automatic retry can create a second payment. The solution is an application-level idempotency mechanism: the client generates a unique key (UUID) and includes it with each request. The server stores the key after processing and rejects any subsequent request bearing the same key. This combines transport-layer understanding (retries happen), HTTP semantics (POST is non-idempotent) and application-level design (idempotency keys).</div>
+<div class="quiz-feedback incorrect" id="q5fb-wrong1">HTTP/2 multiplexing organises multiple requests within a connection, but a dropped connection destroys all streams. The retry starts a new TCP + TLS connection; the server has no memory of the previous stream.</div>
+<div class="quiz-feedback incorrect" id="q5fb-wrong2"><code>Cache-Control: no-store</code> prevents caching but has no effect on duplicate request handling. It tells intermediaries not to store the response &mdash; it says nothing about duplicate submissions.</div>
+<div class="quiz-feedback incorrect" id="q5fb-wrong3">HTTPS encrypts the transport channel but does not provide application-level deduplication. TCP retransmission handles lost segments within a connection, but a new connection (after the original drops) is a completely independent request from the server&rsquo;s perspective.</div>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 40: Transfer — Seminar preview + project connections -->
+<div class="slide">
+<h1>What Comes Next</h1>
+<div class="content">
+<div class="grid-2">
+<div>
+<h3 style="color:var(--secondary);">Seminar 10 &mdash; This Week</h3>
+<p>You will work with DNS, SSH and FTP services running in Docker containers. These are application-layer protocols that complement HTTP &mdash; each solving a different problem (name resolution, secure remote access, file transfer).</p>
+<div class="card card-secondary mt-1">
+<div class="card-title">What you will do</div>
+<div class="card-content">
+<p>Build a minimal DNS server in Python. Connect to an SSH server via Paramiko. Configure SSH port forwarding to reach a web service through a bastion host. All orchestrated with <code>docker-compose</code>.</p>
+</div>
+</div>
+</div>
+<div>
+<h3 style="color:var(--purple);">Week 11 &mdash; Next Lecture</h3>
+<p>We shall examine three more application-layer protocols in depth: <strong>FTP</strong> (dual-channel architecture, active vs passive mode), <strong>DNS</strong> (hierarchical resolution, record types, DNSSEC) and <strong>SSH</strong> (channels, key exchange, port forwarding).</p>
+<div class="card card-accent mt-1">
+<div class="card-title">Semester projects</div>
+<div class="card-content">
+<p>Many project topics (HTTP load balancer, REST microservices, DNS resolver) directly apply today&rsquo;s concepts. Review the project specifications in <code>02_PROJECTS/</code> and start mapping your design to the principles discussed today.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 41: Resources -->
+<div class="slide">
+<h1>References and Further Reading</h1>
+<div class="content">
+<div class="grid-2">
+<div>
+<h3>Core References</h3>
+<ul>
+<li><strong>Kurose &amp; Ross</strong> &mdash; Computer Networking: A Top-Down Approach, 8th ed., Ch. 2</li>
+<li><strong>Fielding, R.</strong> &mdash; <em>Architectural Styles and the Design of Network-Based Software Architectures</em>, doctoral dissertation, UC Irvine, 2000</li>
+<li><strong>Rhodes &amp; Goerzen</strong> &mdash; Foundations of Python Network Programming</li>
+</ul>
+<h3 class="mt-2">RFCs (Standards)</h3>
+<ul>
+<li><strong>RFC 7230&ndash;7235</strong> &mdash; HTTP/1.1 semantics and architecture</li>
+<li><strong>RFC 7540</strong> &mdash; HTTP/2</li>
+<li><strong>RFC 9114</strong> &mdash; HTTP/3</li>
+<li><strong>RFC 6455</strong> &mdash; The WebSocket Protocol</li>
+<li><strong>RFC 6265</strong> &mdash; HTTP State Management (Cookies)</li>
+</ul>
+</div>
+<div>
+<h3>Online Resources</h3>
+<ul>
+<li><strong>MDN Web Docs</strong> &mdash; developer.mozilla.org/en-US/docs/Web/HTTP</li>
+<li><strong>httpbin.org</strong> &mdash; HTTP request and response testing service</li>
+<li><strong>restfulapi.net</strong> &mdash; REST principles and examples</li>
+<li><strong>curl.se</strong> &mdash; Official curl documentation</li>
+</ul>
+<h3 class="mt-2">Tools for the Seminar</h3>
+<ul>
+<li><code>curl</code> and <code>httpie</code> &mdash; command-line HTTP clients</li>
+<li><code>Wireshark</code> &mdash; protocol analyser (HTTP, TLS dissectors)</li>
+<li><code>Postman</code> &mdash; graphical API testing</li>
+<li><code>docker compose</code> &mdash; container orchestration</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 42: Closing -->
+<div class="slide slide-title-page">
+<h1>Thank You</h1>
+<p class="subtitle">Questions &amp; Discussion</p>
+<p class="meta">Week 10: Application Layer Protocols &mdash; HTTP, REST and SOAP<br/><br/>Computer Networks &bull; Bachelor in Economic Informatics<br/>Bucharest University of Economic Studies &ndash; Faculty CSIE<br/><br/><span style="font-size:0.9rem;opacity:0.8;">Next week: FTP, DNS and SSH &mdash; Network Services in Depth</span></p>
+</div>
+
+</div><!-- End presentation container -->
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     TABLE OF CONTENTS MODAL
+     ═══════════════════════════════════════════════════════════════════ -->
+<div class="toc-modal" id="tocModal">
+<div class="toc-content">
+<button class="toc-close" onclick="closeToc()">&times;</button>
+<h2>Contents</h2>
+
+<div class="toc-section">
+<div class="toc-section-title">Opening &mdash; Why This Matters</div>
+<div class="toc-items">
+<div class="toc-item" onclick="goToSlide(1)"><span>01</span> Title</div>
+<div class="toc-item" onclick="goToSlide(2)"><span>02</span> Hook: &ldquo;Postman vs Browser&rdquo;</div>
+<div class="toc-item" onclick="goToSlide(3)"><span>03</span> The Protocol Hiding in Plain Sight</div>
+</div>
+</div>
+
+<div class="toc-section">
+<div class="toc-section-title">Prior Knowledge &amp; Conflict</div>
+<div class="toc-items">
+<div class="toc-item" onclick="goToSlide(4)"><span>04</span> Course Roadmap &mdash; Where We Are</div>
+<div class="toc-item" onclick="goToSlide(5)"><span>05</span> Quick Check: Prerequisites</div>
+<div class="toc-item" onclick="goToSlide(6)"><span>06</span> TCP Works, but the Web Doesn&rsquo;t</div>
+<div class="toc-item" onclick="goToSlide(7)"><span>07</span> What Makes Application Protocols Special</div>
+</div>
+</div>
+
+<div class="toc-section">
+<div class="toc-section-title">HTTP Fundamentals</div>
+<div class="toc-items">
+<div class="toc-item" onclick="goToSlide(8)"><span>08</span> Section: HTTP Fundamentals</div>
+<div class="toc-item" onclick="goToSlide(9)"><span>09</span> HTTP in the Network Architecture</div>
+<div class="toc-item" onclick="goToSlide(10)"><span>10</span> The True Cost of an HTTPS Request</div>
+<div class="toc-item" onclick="goToSlide(11)"><span>11</span> Request Anatomy</div>
+<div class="toc-item" onclick="goToSlide(12)"><span>12</span> Response Anatomy</div>
+<div class="toc-item" onclick="goToSlide(13)"><span>13</span> HTTP Methods: Semantics</div>
+<div class="toc-item" onclick="goToSlide(14)"><span>14</span> Why Idempotency Matters</div>
+<div class="toc-item" onclick="goToSlide(15)"><span>15</span> Status Codes</div>
+<div class="toc-item" onclick="goToSlide(16)"><span>16</span> Checkpoint: 401 vs 403</div>
+<div class="toc-item" onclick="goToSlide(17)"><span>17</span> Content Negotiation</div>
+<div class="toc-item" onclick="goToSlide(18)"><span>18</span> HTTP Caching</div>
+</div>
+</div>
+
+<div class="toc-section">
+<div class="toc-section-title">State, Security &amp; Evolution</div>
+<div class="toc-items">
+<div class="toc-item" onclick="goToSlide(19)"><span>19</span> Cookies</div>
+<div class="toc-item" onclick="goToSlide(20)"><span>20</span> CORS: The Browser Security Model</div>
+<div class="toc-item" onclick="goToSlide(21)"><span>21</span> Checkpoint: CORS Understanding</div>
+<div class="toc-item" onclick="goToSlide(22)"><span>22</span> Section: HTTP Evolution</div>
+<div class="toc-item" onclick="goToSlide(23)"><span>23</span> HTTP/1.1 to HTTP/2</div>
+<div class="toc-item" onclick="goToSlide(24)"><span>24</span> HTTP/3 and QUIC</div>
+<div class="toc-item" onclick="goToSlide(25)"><span>25</span> Checkpoint: HTTP Versions</div>
+<div class="toc-item" onclick="goToSlide(26)"><span>26</span> WebSocket Protocol</div>
+</div>
+</div>
+
+<div class="toc-section">
+<div class="toc-section-title">REST Architecture &amp; SOAP</div>
+<div class="toc-items">
+<div class="toc-item" onclick="goToSlide(27)"><span>27</span> Section: REST Architecture</div>
+<div class="toc-item" onclick="goToSlide(28)"><span>28</span> REST: Architectural Style</div>
+<div class="toc-item" onclick="goToSlide(29)"><span>29</span> Richardson Maturity Model</div>
+<div class="toc-item" onclick="goToSlide(30)"><span>30</span> Levels 0&ndash;1 in Practice</div>
+<div class="toc-item" onclick="goToSlide(31)"><span>31</span> Levels 2&ndash;3: Proper REST</div>
+<div class="toc-item" onclick="goToSlide(32)"><span>32</span> Checkpoint: REST in Practice</div>
+<div class="toc-item" onclick="goToSlide(33)"><span>33</span> SOAP: Enterprise Alternative</div>
+<div class="toc-item" onclick="goToSlide(34)"><span>34</span> REST vs SOAP Comparison</div>
+</div>
+</div>
+
+<div class="toc-section">
+<div class="toc-section-title">Application &amp; Reflection</div>
+<div class="toc-items">
+<div class="toc-item" onclick="goToSlide(35)"><span>35</span> Section: Putting It All Together</div>
+<div class="toc-item" onclick="goToSlide(36)"><span>36</span> Debugging with curl</div>
+<div class="toc-item" onclick="goToSlide(37)"><span>37</span> Status Code Diagnostic</div>
+<div class="toc-item" onclick="goToSlide(38)"><span>38</span> Hook Revisited: Friday Afternoon Resolved</div>
+<div class="toc-item" onclick="goToSlide(39)"><span>39</span> Synthesis Challenge</div>
+<div class="toc-item" onclick="goToSlide(40)"><span>40</span> What Comes Next</div>
+<div class="toc-item" onclick="goToSlide(41)"><span>41</span> References</div>
+<div class="toc-item" onclick="goToSlide(42)"><span>42</span> Thank You</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<!-- NAVIGATION -->
+<div class="navigation">
+<button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)" title="Previous slide">&#8592; Previous</button>
+<button class="nav-btn" onclick="openToc()" title="Table of Contents">&#9776; Contents</button>
+<button class="nav-btn" onclick="toggleFullscreen()" title="Fullscreen">&#9974; Fullscreen</button>
+<button class="nav-btn primary" id="nextBtn" onclick="changeSlide(1)" title="Next slide">Next &#8594;</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     JAVASCRIPT — Navigation + Interactives
+     ═══════════════════════════════════════════════════════════════════ -->
+<script>
+  // ── Core Navigation ──────────────────────────────────
+  let currentSlide = 1;
+  const slides = document.querySelectorAll('.slide');
+  const totalSlides = slides.length;
+
+  function updateSlide() {
+    slides.forEach((slide, index) => {
+      slide.classList.remove('active');
+      if (index + 1 === currentSlide) slide.classList.add('active');
+    });
+    document.getElementById('slideCounter').textContent = currentSlide + ' / ' + totalSlides;
+    document.getElementById('progressBar').style.width = (currentSlide / totalSlides * 100) + '%';
+    document.getElementById('prevBtn').disabled = currentSlide === 1;
+    document.getElementById('nextBtn').disabled = currentSlide === totalSlides;
+  }
+
+  function changeSlide(delta) {
+    const n = currentSlide + delta;
+    if (n >= 1 && n <= totalSlides) { currentSlide = n; updateSlide(); }
+  }
+
+  function goToSlide(n) {
+    if (n >= 1 && n <= totalSlides) { currentSlide = n; updateSlide(); closeToc(); }
+  }
+
+  function openToc() { document.getElementById('tocModal').classList.add('show'); }
+  function closeToc() { document.getElementById('tocModal').classList.remove('show'); }
+
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(function(){});
+    } else {
+      document.exitFullscreen();
+    }
+  }
+
+  // ── Keyboard Navigation ──────────────────────────────
+  document.addEventListener('keydown', function(e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+    switch(e.key) {
+      case 'ArrowRight': case ' ': e.preventDefault(); changeSlide(1); break;
+      case 'ArrowLeft': e.preventDefault(); changeSlide(-1); break;
+      case 'Home': e.preventDefault(); goToSlide(1); break;
+      case 'End': e.preventDefault(); goToSlide(totalSlides); break;
+      case 'f': case 'F': e.preventDefault(); toggleFullscreen(); break;
+      case 't': case 'T': e.preventDefault();
+        document.getElementById('tocModal').classList.contains('show') ? closeToc() : openToc();
+        break;
+      case 'Escape': closeToc(); break;
+    }
+  });
+
+  document.getElementById('tocModal').addEventListener('click', function(e) {
+    if (e.target === this) closeToc();
+  });
+
+  // ── Quiz Functions ───────────────────────────────────
+  function checkQuiz(element, isCorrect) {
+    var container = element.closest('.quiz-container');
+    container.querySelectorAll('.quiz-option').forEach(function(opt) {
+      opt.classList.remove('correct', 'incorrect');
+    });
+    element.classList.add(isCorrect ? 'correct' : 'incorrect');
+    if (isCorrect) {
+      var fb = container.querySelector('.quiz-feedback');
+      if (fb) fb.classList.add('show');
+    }
+  }
+
+  function checkQuizDetailed(quizId, element, isCorrect, feedbackId) {
+    var container = document.getElementById(quizId);
+    // Reset all options and hide all feedback
+    container.querySelectorAll('.quiz-option').forEach(function(opt) {
+      opt.classList.remove('correct', 'incorrect');
+      opt.style.pointerEvents = '';
+    });
+    container.querySelectorAll('.quiz-feedback').forEach(function(fb) {
+      fb.classList.remove('show');
+    });
+    // Mark selected
+    element.classList.add(isCorrect ? 'correct' : 'incorrect');
+    // Show appropriate feedback
+    var fb = document.getElementById(feedbackId);
+    if (fb) fb.classList.add('show');
+    // Disable further clicks after answering
+    container.querySelectorAll('.quiz-option').forEach(function(opt) {
+      opt.style.pointerEvents = 'none';
+    });
+  }
+
+  // ── Reveal/Hide ──────────────────────────────────────
+  function toggleReveal(id) {
+    document.getElementById(id).classList.toggle('show');
+  }
+
+  // ── Latency Calculator (Slide 10) ───────────────────
+  function calcLatency() {
+    var rtt = parseInt(document.getElementById('rttSlider').value);
+    var tlsRtt = parseInt(document.getElementById('tlsSelect').value);
+    document.getElementById('rttValue').textContent = rtt;
+    var total = rtt * (2 + tlsRtt + 1); // DNS + TCP + TLS + HTTP
+    document.getElementById('latencyResult').textContent = total + ' ms';
+    document.getElementById('latencyBreakdown').textContent =
+      'DNS ' + rtt + ' + TCP ' + rtt + ' + TLS ' + (rtt * tlsRtt) + ' + HTTP ' + rtt;
+  }
+
+  // ── HTTP Diagnostic (Slide 37) ──────────────────────
+  function showDiag(containerId, html) {
+    var el = document.getElementById(containerId);
+    el.style.display = 'block';
+    document.getElementById('diag-text').innerHTML = html;
+  }
+
+  // ── Initialise ──────────────────────────────────────
+  updateSlide();
+</script>
+</body>
+</html>

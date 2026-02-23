@@ -1,0 +1,1703 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="CSIE Faculty-ASE" name="author"/>
+<meta content="Revolvix" name="generator"/>
+<meta content="Week 8 – Transport Layer: TCP, UDP, TLS and QUIC" name="description"/>
+<title>Week 8 – The Transport Layer: TCP, UDP, TLS and QUIC | ASE-CSIE</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;family=Source+Serif+4:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+    :root {
+      --primary: #0f172a;
+      --primary-light: #1e293b;
+      --secondary: #0ea5e9;
+      --secondary-dark: #0284c7;
+      --accent: #f59e0b;
+      --accent-warm: #ea580c;
+      --success: #10b981;
+      --success-dark: #059669;
+      --danger: #ef4444;
+      --purple: #8b5cf6;
+      --purple-dark: #7c3aed;
+      --bg-light: #f8fafc;
+      --bg-cool: #f0f9ff;
+      --bg-warm: #fffbeb;
+      --text-dark: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --text-on-dark: #f1f5f9;
+      --text-on-dark-muted: #cbd5e1;
+      --text-on-dark-heading: #ffffff;
+      --gradient-primary: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      --gradient-hero: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0f172a 100%);
+      --gradient-blue: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+      --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      --gradient-accent: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+      --gradient-purple: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { font-size: 16px; scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-light);
+      color: var(--text-dark);
+      line-height: 1.6;
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Source Serif 4', Georgia, serif;
+      color: var(--primary);
+      line-height: 1.3;
+    }
+    h1 { font-size: 3rem; font-weight: 700; margin-bottom: 1.5rem; }
+    h2 { font-size: 2.25rem; font-weight: 600; margin-bottom: 1.25rem; }
+    h3 { font-size: 1.75rem; font-weight: 600; margin-bottom: 1rem; }
+    h4 { font-size: 1.35rem; font-weight: 600; margin-bottom: 0.75rem; }
+
+    .slide {
+      display: none;
+      min-height: 100vh;
+      padding: 2rem;
+      animation: slideIn 0.4s ease;
+    }
+    .slide.active { display: flex; align-items: flex-start; justify-content: center; }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(30px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .slide-content {
+      max-width: 1200px;
+      width: 100%;
+      padding: 1.5rem 2rem 4rem 2rem;
+    }
+
+    .highlight-box {
+      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+      border-left: 4px solid var(--secondary);
+      padding: 1.25rem 1.5rem;
+      border-radius: 0 12px 12px 0;
+      margin: 1rem 0;
+    }
+
+    .definition-box {
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+      border-left: 4px solid var(--success);
+      padding: 1.25rem 1.5rem;
+      border-radius: 0 12px 12px 0;
+      margin: 1rem 0;
+    }
+
+    .story-box {
+      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+      border-left: 4px solid var(--accent);
+      padding: 1.25rem 1.5rem;
+      border-radius: 0 12px 12px 0;
+      margin: 1rem 0;
+    }
+
+    .warning-box {
+      background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%);
+      border-left: 4px solid var(--danger);
+      padding: 1.25rem 1.5rem;
+      border-radius: 0 12px 12px 0;
+      margin: 1rem 0;
+    }
+
+    .insight-box {
+      background: linear-gradient(135deg, #faf5ff 0%, #ede9fe 100%);
+      border-left: 4px solid var(--purple);
+      padding: 1.25rem 1.5rem;
+      border-radius: 0 12px 12px 0;
+      margin: 1rem 0;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      border: 1px solid var(--border);
+    }
+    .card p { font-size: 1.1rem; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin: 1rem 0; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.25rem; margin: 1rem 0; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin: 1rem 0; }
+
+    .diagram-container {
+      max-width: 1200px;
+      margin: 1rem auto;
+      text-align: center;
+    }
+
+    .code-block {
+      background: #1e293b;
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      margin: 1rem 0;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: #e2e8f0;
+      max-width: 950px;
+    }
+    .code-block .comment { color: #94a3b8; font-style: italic; }
+    .code-block .keyword { color: #c084fc; font-weight: 600; }
+    .code-block .string { color: #86efac; }
+    .code-block .number { color: #fcd34d; }
+    .code-block .function { color: #82aaff; }
+    .code-block .builtin { color: #67e8f9; }
+
+    .quiz-container {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1rem 0;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      border: 1px solid var(--border);
+    }
+    .quiz-option {
+      padding: 0.85rem 1.25rem;
+      margin: 0.5rem 0;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 1.05rem;
+    }
+    .quiz-option:hover { border-color: var(--secondary); background: var(--bg-cool); transform: translateX(4px); }
+    .quiz-option.correct { border-color: var(--success); background: #f0fdf4; }
+    .quiz-option.incorrect { border-color: var(--danger); background: #fef2f2; }
+    .quiz-feedback {
+      display: none; padding: 1rem 1.25rem; margin-top: 0.75rem; border-radius: 8px;
+      background: linear-gradient(135deg, #f0fdf4, #dcfce7); border-left: 4px solid var(--success); font-size: 1.05rem;
+    }
+    .quiz-feedback.show { display: block; }
+
+    .reveal-btn {
+      display: inline-block; padding: 0.7rem 1.5rem; background: var(--gradient-blue); color: white;
+      border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 600;
+      transition: all 0.3s ease; margin: 0.75rem 0;
+    }
+    .reveal-btn:hover { transform: scale(1.05); box-shadow: 0 8px 20px rgba(14, 165, 233, 0.3); }
+    .reveal-content {
+      display: none; padding: 1rem 1.25rem; margin-top: 0.5rem; border-radius: 8px;
+      background: var(--bg-cool); border: 1px solid var(--secondary); font-size: 1.05rem;
+    }
+    .reveal-content.show { display: block; }
+
+    .interactive-panel {
+      background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+      border: 2px solid var(--secondary);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1rem 0;
+    }
+    .interactive-panel label { display: block; font-weight: 500; margin-bottom: 0.5rem; }
+    .interactive-panel input[type="range"] { width: 100%; margin-bottom: 1rem; }
+
+    .table-container { margin: 1rem 0; overflow-x: auto; }
+    .table-container table { width: 100%; border-collapse: collapse; font-size: 1.1rem; }
+    .table-container th { background: var(--primary); color: white; padding: 0.85rem 1rem; text-align: left; font-weight: 600; }
+    .table-container td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); }
+    .table-container tr:nth-child(even) { background: var(--bg-cool); }
+
+    .protocol-header { display: flex; flex-wrap: wrap; border: 2px solid var(--primary); border-radius: 8px; overflow: hidden; margin: 1rem 0; }
+    .header-row { display: flex; width: 100%; }
+    .field { text-align: center; padding: 0.5rem; border: 1px solid var(--border); }
+    .field-name { font-size: 0.85rem; font-weight: 700; color: var(--primary); }
+    .field-value { font-size: 0.95rem; font-weight: 700; color: var(--secondary-dark); }
+    .field-bits { font-size: 0.65rem; color: var(--text-muted); }
+
+    .timeline { position: relative; padding-left: 2rem; margin: 1rem 0; }
+    .timeline::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--gradient-blue); }
+    .timeline-item { position: relative; padding: 0.75rem 0 0.75rem 1.5rem; }
+    .timeline-item::before { content: ''; position: absolute; left: -2.35rem; top: 1.1rem; width: 12px; height: 12px; background: var(--secondary); border-radius: 50%; border: 2px solid white; }
+
+    .animate-in { opacity: 0; animation: fadeUp 0.5s ease forwards; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    .delay-1 { animation-delay: 0.15s; }
+    .delay-2 { animation-delay: 0.3s; }
+    .delay-3 { animation-delay: 0.45s; }
+    .delay-4 { animation-delay: 0.6s; }
+    .delay-5 { animation-delay: 0.75s; }
+    .delay-6 { animation-delay: 0.9s; }
+
+    .nav-container {
+      position: fixed; bottom: 0; left: 0; right: 0; background: rgba(15,23,42,0.95);
+      backdrop-filter: blur(10px); padding: 0.6rem 1rem; display: flex;
+      justify-content: center; align-items: center; gap: 0.75rem; z-index: 1000;
+    }
+    .nav-container button {
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+      color: white; padding: 0.5rem 1.25rem; border-radius: 6px; cursor: pointer;
+      font-size: 0.9rem; transition: all 0.2s; font-family: 'Inter', sans-serif;
+    }
+    .nav-container button:hover { background: var(--secondary); border-color: var(--secondary); }
+    .nav-container button:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    .toc-modal {
+      display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.85);
+      z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(5px);
+    }
+    .toc-modal.show { display: flex; }
+    .toc-content {
+      background: white; border-radius: 16px; padding: 2rem; max-width: 700px; width: 90%;
+      max-height: 85vh; overflow-y: auto; box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+    }
+    .toc-section { margin-bottom: 1.25rem; }
+    .toc-section-title { font-weight: 700; color: var(--secondary-dark); font-size: 1.1rem; margin-bottom: 0.4rem; border-bottom: 2px solid var(--bg-cool); padding-bottom: 0.3rem; }
+    .toc-item { padding: 0.3rem 0.75rem; cursor: pointer; border-radius: 6px; font-size: 0.95rem; transition: background 0.15s; }
+    .toc-item:hover { background: var(--bg-cool); }
+  </style>
+</head>
+<body>
+
+<!-- Progress Bar -->
+<div style="position:fixed;top:0;left:0;width:100%;height:4px;background:var(--border);z-index:1000;">
+  <div id="progressBar" role="progressbar" aria-valuenow="1" aria-valuemin="1" aria-valuemax="44" style="height:100%;background:var(--gradient-blue);width:0%;transition:width 0.4s ease;"></div>
+</div>
+
+<!-- Slide Counter -->
+<div id="slideCounter" style="position:fixed;top:12px;right:20px;font-size:0.95rem;color:var(--text-muted);z-index:1000;font-family:'JetBrains Mono',monospace;">1 / 44</div>
+
+<!-- Logo Corner -->
+<div style="position:fixed;top:12px;left:20px;font-size:0.85rem;color:var(--text-muted);z-index:1000;font-weight:500;">ASE-CSIE &bull; Computer Networks</div>
+
+<!-- Footer -->
+<div style="position:fixed;bottom:55px;left:50%;transform:translateX(-50%);font-size:0.75rem;color:var(--text-muted);z-index:999;">by Revolvix</div>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 1 — Title -->
+<section class="slide active" data-slide="1">
+  <div class="slide-content" style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;background:var(--gradient-hero);color:var(--text-on-dark);min-height:100%;border-radius:16px;">
+    <div style="font-size:1rem;text-transform:uppercase;letter-spacing:3px;margin-bottom:1.5rem;color:var(--secondary);">Week 8 &middot; Computer Networks</div>
+    <h1 style="color:var(--text-on-dark-heading);font-size:3.2rem;margin-bottom:1rem;">The Transport Layer</h1>
+    <p style="font-size:1.6rem;color:var(--text-on-dark-muted);margin-bottom:0.5rem;">TCP, UDP, TLS and QUIC</p>
+    <p style="font-size:1.1rem;color:var(--text-on-dark-muted);margin-top:2rem;">ASE Bucharest &middot; CSIE Faculty &middot; 2025&ndash;2026</p>
+    <p style="font-size:1rem;color:var(--text-on-dark-muted);margin-top:0.5rem;">ing. dr. Antonio Clim</p>
+  </div>
+</section>
+
+<!-- SLIDE 2 — Hook: The Streaming Paradox -->
+<section class="slide" data-slide="2">
+  <div class="slide-content">
+    <h2>The Streaming Paradox</h2>
+    <div class="story-box animate-in">
+      <p>It is Friday evening. You are watching a live Champions League match online. In minute 87, the score is 1&ndash;1. The striker receives the ball in the penalty area&hellip; and your stream freezes for three seconds. When it resumes, the ball is in the net&mdash;but you missed the goal.</p>
+      <p style="margin-top:1rem;">Meanwhile, your flatmate is downloading a 2 GB dataset for a machine-learning project. Not a single byte is lost, not a single byte arrives out of order&mdash;but the transfer takes far longer than expected.</p>
+    </div>
+    <div class="highlight-box animate-in delay-1">
+      <p><strong>Two applications, same network, same wires&mdash;yet radically different behaviour.</strong> One sacrifices reliability for speed; the other sacrifices speed for reliability. Who makes this choice? And how?</p>
+    </div>
+    <p class="animate-in delay-2" style="margin-top:1rem;color:var(--text-muted);font-style:italic;">We shall answer this precisely by the end of today&rsquo;s lecture&mdash;and you will be able to predict which transport protocol any given application should use.</p>
+  </div>
+</section>
+
+<!-- SLIDE 3 — Why Transport Matters -->
+<section class="slide" data-slide="3">
+  <div class="slide-content">
+    <h2>Why the Transport Layer Matters</h2>
+    <p class="animate-in">In Week 7 we saw how routing protocols deliver packets across networks. But routing only gets a packet to a <em>machine</em>. Your laptop runs dozens of processes simultaneously&mdash;a browser, an email client, a chat application, a file download. The transport layer answers a question that IP cannot:</p>
+    <div class="definition-box animate-in delay-1">
+      <strong>Which process on this machine should receive this particular data?</strong>
+    </div>
+    <div class="grid-2 animate-in delay-2">
+      <div class="card">
+        <h4>What IP provides</h4>
+        <p>Host-to-host delivery&mdash;getting a packet from source machine to destination machine across arbitrary network topologies.</p>
+      </div>
+      <div class="card">
+        <h4>What transport adds</h4>
+        <p>Process-to-process delivery&mdash;directing data to the correct application, optionally with reliability, ordering and flow control.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 4 — Course Map -->
+<section class="slide" data-slide="4">
+  <div class="slide-content">
+    <h2>Where We Are in the Course</h2>
+    <div class="diagram-container animate-in">
+      <svg viewBox="0 0 900 200" style="max-width:100%;" role="img" aria-label="Course progress map showing weeks 1 through 14">
+        <rect x="10" y="60" width="55" height="50" rx="6" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="37" y="82" text-anchor="middle" font-size="12" font-weight="600" fill="#475569">W1</text>
+        <text x="37" y="98" text-anchor="middle" font-size="10" font-weight="600" fill="#64748b">Fund.</text>
+        <rect x="75" y="60" width="55" height="50" rx="6" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="102" y="82" text-anchor="middle" font-size="12" font-weight="600" fill="#475569">W2</text>
+        <text x="102" y="98" text-anchor="middle" font-size="10" font-weight="600" fill="#64748b">Models</text>
+        <rect x="140" y="60" width="55" height="50" rx="6" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="167" y="82" text-anchor="middle" font-size="12" font-weight="600" fill="#475569">W3</text>
+        <text x="167" y="98" text-anchor="middle" font-size="10" font-weight="600" fill="#64748b">Sockets</text>
+        <rect x="205" y="60" width="55" height="50" rx="6" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="232" y="82" text-anchor="middle" font-size="12" font-weight="600" fill="#475569">W4</text>
+        <text x="232" y="98" text-anchor="middle" font-size="10" font-weight="600" fill="#64748b">L1-L2</text>
+        <rect x="270" y="60" width="55" height="50" rx="6" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="297" y="82" text-anchor="middle" font-size="12" font-weight="600" fill="#475569">W5</text>
+        <text x="297" y="98" text-anchor="middle" font-size="10" font-weight="600" fill="#64748b">IPv4/6</text>
+        <rect x="335" y="60" width="55" height="50" rx="6" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="362" y="82" text-anchor="middle" font-size="12" font-weight="600" fill="#475569">W6</text>
+        <text x="362" y="98" text-anchor="middle" font-size="10" font-weight="600" fill="#64748b">NAT</text>
+        <rect x="400" y="60" width="55" height="50" rx="6" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="427" y="82" text-anchor="middle" font-size="12" font-weight="600" fill="#475569">W7</text>
+        <text x="427" y="98" text-anchor="middle" font-size="10" font-weight="600" fill="#64748b">Routing</text>
+        <!-- Current week -->
+        <rect x="465" y="50" width="65" height="60" rx="8" fill="#0ea5e9" stroke="#0284c7" stroke-width="2.5"/>
+        <text x="497" y="76" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">W8</text>
+        <text x="497" y="96" text-anchor="middle" font-size="12" font-weight="700" fill="#e0f2fe">Transport</text>
+        <!-- Future -->
+        <rect x="540" y="60" width="55" height="50" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="567" y="82" text-anchor="middle" font-size="12" font-weight="600" fill="#94a3b8">W9</text>
+        <rect x="605" y="60" width="55" height="50" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="632" y="82" text-anchor="middle" font-size="12" font-weight="600" fill="#94a3b8">W10</text>
+        <text x="700" y="90" font-size="16" font-weight="600" fill="#94a3b8">...</text>
+        <rect x="730" y="60" width="55" height="50" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="757" y="82" text-anchor="middle" font-size="12" font-weight="600" fill="#94a3b8">W13</text>
+        <rect x="795" y="60" width="55" height="50" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="822" y="82" text-anchor="middle" font-size="12" font-weight="600" fill="#94a3b8">W14</text>
+        <!-- Labels -->
+        <text x="250" y="145" text-anchor="middle" font-size="13" font-weight="600" fill="#475569">Physical &#x2192; Data Link &#x2192; Network</text>
+        <text x="497" y="145" text-anchor="middle" font-size="14" font-weight="700" fill="#0284c7">Transport &#x2190; YOU ARE HERE</text>
+        <text x="700" y="145" text-anchor="middle" font-size="13" font-weight="600" fill="#94a3b8">Application layers ahead</text>
+      </svg>
+    </div>
+    <div class="highlight-box animate-in delay-1">
+      <p>We have climbed from physical signals (W4) through IP addressing (W5&ndash;W6) and routing (W7). Today we reach the <strong>transport layer</strong>&mdash;the boundary where the network begins serving individual applications.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 5 — Prior Knowledge Checkpoint -->
+<section class="slide" data-slide="5">
+  <div class="slide-content">
+    <h2>Quick Recall: What Happens After Routing?</h2>
+    <p class="animate-in">Recall from Week 7: a router examines the destination IP address, consults its routing table and forwards the packet towards the next hop. Eventually the packet arrives at the destination host. But then what?</p>
+    <div class="quiz-container animate-in delay-1">
+      <p><strong>Checkpoint:</strong> A packet arrives at host 192.168.1.50. Three applications are running: a web browser, an SSH client and a DNS resolver. How does the OS know which application should receive this packet?</p>
+      <div class="quiz-option" onclick="checkQuiz(this, false)">The OS reads the application name from the IP header</div>
+      <div class="quiz-option" onclick="checkQuiz(this, true)">The OS uses the destination port number in the transport-layer header</div>
+      <div class="quiz-option" onclick="checkQuiz(this, false)">The OS delivers the packet to all three applications simultaneously</div>
+      <div class="quiz-option" onclick="checkQuiz(this, false)">The application that sent the request keeps polling the network interface</div>
+      <div class="quiz-feedback">
+        <strong>Correct.</strong> The transport layer introduces <em>port numbers</em>&mdash;16-bit identifiers that the OS uses to demultiplex incoming data to the correct process. The IP header carries only source and destination addresses; it has no concept of which application is communicating. This is the problem the transport layer solves.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 6 — Conflict: The Multiplexing Problem -->
+<section class="slide" data-slide="6">
+  <div class="slide-content">
+    <h2>The Problem IP Cannot Solve</h2>
+    <div class="diagram-container animate-in">
+      <svg viewBox="0 0 800 280" style="max-width:100%;" role="img" aria-label="One IP address, multiple processes needing data">
+        <rect x="30" y="60" width="170" height="160" rx="10" fill="#f0f9ff" stroke="#0ea5e9" stroke-width="2"/>
+        <text x="115" y="90" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a">Remote Server</text>
+        <text x="115" y="115" text-anchor="middle" font-size="13" font-weight="600" fill="#0ea5e9">Web page</text>
+        <text x="115" y="140" text-anchor="middle" font-size="13" font-weight="600" fill="#10b981">Email</text>
+        <text x="115" y="165" text-anchor="middle" font-size="13" font-weight="600" fill="#8b5cf6">DNS reply</text>
+        <text x="115" y="200" text-anchor="middle" font-size="12" font-weight="600" fill="#64748b">93.184.216.34</text>
+        <line x1="210" y1="140" x2="380" y2="140" stroke="#0f172a" stroke-width="2.5" marker-end="url(#a1)"/>
+        <text x="295" y="130" text-anchor="middle" font-size="13" font-weight="600" fill="#0f172a">IP packet to</text>
+        <text x="295" y="152" text-anchor="middle" font-size="12" font-weight="600" fill="#64748b">192.168.1.50</text>
+        <rect x="390" y="20" width="380" height="240" rx="12" fill="#fffbeb" stroke="#f59e0b" stroke-width="2"/>
+        <text x="580" y="50" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">Your Laptop &mdash; 192.168.1.50</text>
+        <rect x="420" y="65" width="150" height="42" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+        <text x="495" y="91" text-anchor="middle" font-size="13" font-weight="600" fill="#1e40af">Browser (PID 1042)</text>
+        <rect x="420" y="117" width="150" height="42" rx="6" fill="#d1fae5" stroke="#10b981" stroke-width="1.5"/>
+        <text x="495" y="143" text-anchor="middle" font-size="13" font-weight="600" fill="#065f46">Email (PID 2087)</text>
+        <rect x="420" y="169" width="150" height="42" rx="6" fill="#ede9fe" stroke="#8b5cf6" stroke-width="1.5"/>
+        <text x="495" y="195" text-anchor="middle" font-size="13" font-weight="600" fill="#5b21b6">DNS (PID 998)</text>
+        <text x="660" y="130" font-size="52" font-weight="700" fill="#ef4444">?</text>
+        <text x="710" y="120" font-size="14" font-weight="700" fill="#ef4444">Which</text>
+        <text x="710" y="140" font-size="14" font-weight="700" fill="#ef4444">process</text>
+        <text x="710" y="160" font-size="14" font-weight="700" fill="#ef4444">gets it?</text>
+        <defs><marker id="a1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0f172a"/></marker></defs>
+      </svg>
+    </div>
+    <div class="warning-box animate-in delay-1">
+      <p><strong>IP addresses identify machines, not applications.</strong> Without an additional mechanism, the OS cannot distinguish data destined for the browser from data destined for the email client. The transport layer introduces exactly this mechanism: the <em>port</em>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 7 — Learning Objectives -->
+<section class="slide" data-slide="7">
+  <div class="slide-content">
+    <h2>Learning Objectives</h2>
+    <p class="animate-in">By the end of this lecture you will be able to:</p>
+    <div class="grid-2 animate-in delay-1">
+      <div class="card">
+        <h4>Understand &amp; Describe</h4>
+        <p>Explain the role of the transport layer and describe how port-based multiplexing identifies communicating processes.</p>
+      </div>
+      <div class="card">
+        <h4>Analyse TCP</h4>
+        <p>Describe TCP mechanisms in detail: header fields, flags, three-way handshake, four-way termination, flow control, socket states and options (MSS, SACK, window scaling).</p>
+      </div>
+      <div class="card">
+        <h4>Compare TCP and UDP</h4>
+        <p>Contrast both protocols in terms of overhead, reliability, ordering and suitability for different application profiles.</p>
+      </div>
+      <div class="card">
+        <h4>Evaluate TLS and QUIC</h4>
+        <p>Explain why TLS/DTLS are needed, how they fit into the protocol stack, and what motivates QUIC as a modern evolution of TCP+TLS.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 8 — Transport in TCP/IP Stack -->
+<section class="slide" data-slide="8">
+  <div class="slide-content">
+    <h2>The Transport Layer in the TCP/IP Stack</h2>
+    <div class="diagram-container animate-in">
+      <svg viewBox="0 0 700 290" style="max-width:90%;" role="img" aria-label="TCP/IP stack with transport layer highlighted">
+        <rect x="150" y="15" width="400" height="52" rx="8" fill="#f0f9ff" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="350" y="42" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">Application</text>
+        <text x="350" y="60" text-anchor="middle" font-size="12" font-weight="600" fill="#64748b">HTTP, FTP, SMTP, DNS, SSH...</text>
+        <rect x="150" y="80" width="400" height="58" rx="8" fill="#0ea5e9" stroke="#0284c7" stroke-width="2.5"/>
+        <text x="350" y="107" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff">Transport</text>
+        <text x="350" y="127" text-anchor="middle" font-size="13" font-weight="600" fill="#e0f2fe">TCP &#x2022; UDP &#x2022; (TLS/DTLS) &#x2022; QUIC</text>
+        <rect x="150" y="150" width="400" height="52" rx="8" fill="#f0f9ff" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="350" y="180" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">Internet (Network)</text>
+        <rect x="150" y="215" width="400" height="52" rx="8" fill="#f0f9ff" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="350" y="245" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">Network Access</text>
+        <text x="90" y="42" text-anchor="middle" font-size="13" font-weight="600" fill="#94a3b8">L5-L7</text>
+        <text x="90" y="112" text-anchor="middle" font-size="14" font-weight="700" fill="#0284c7">L4</text>
+        <text x="90" y="180" text-anchor="middle" font-size="13" font-weight="600" fill="#94a3b8">L3</text>
+        <text x="90" y="245" text-anchor="middle" font-size="13" font-weight="600" fill="#94a3b8">L1-L2</text>
+      </svg>
+    </div>
+    <div class="insight-box animate-in delay-1">
+      <p>The transport layer bridges &ldquo;get a packet to that machine&rdquo; (IP&rsquo;s job) and &ldquo;deliver data to my application&rdquo; (what the programmer needs). Note that TLS sits <em>between</em> transport and application, but we discuss it here because it is intimately tied to TCP and UDP semantics.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 9 — Port Mechanism -->
+<section class="slide" data-slide="9">
+  <div class="slide-content">
+    <h2>Ports: The Transport-Layer Identifier</h2>
+    <div class="definition-box animate-in">
+      <p>A <strong>port</strong> is a 16-bit unsigned integer (0&ndash;65 535) that identifies a communication endpoint on a host. Combined with an IP address, it uniquely addresses a process sending or receiving data.</p>
+    </div>
+    <div class="grid-2 animate-in delay-1">
+      <div class="card">
+        <h4>Server side</h4>
+        <p>The server binds to a <strong>fixed, well-known port</strong> that identifies the service: port 80 = HTTP, port 22 = SSH, port 443 = HTTPS. Clients must know this port in advance.</p>
+      </div>
+      <div class="card">
+        <h4>Client side</h4>
+        <p>The OS assigns a free <strong>ephemeral port</strong> from a high range (typically 49 152&ndash;65 535). This port is temporary, used only for the duration of the connection.</p>
+      </div>
+    </div>
+    <div class="highlight-box animate-in delay-2">
+      <p><strong>Classification:</strong> ports 0&ndash;1 023 are <em>well-known</em> (reserved, require elevated privileges); ports 1 024&ndash;49 151 are <em>registered</em>; ports 49 152&ndash;65 535 are <em>dynamic/ephemeral</em>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 10 — Well-Known Ports + Quiz -->
+<section class="slide" data-slide="10">
+  <div class="slide-content">
+    <h2>Well-Known Ports</h2>
+    <div class="table-container animate-in">
+      <table>
+        <thead><tr><th>Port</th><th>Protocol</th><th>Transport</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><strong>20/21</strong></td><td>FTP</td><td>TCP</td><td>File transfer (data/control)</td></tr>
+          <tr><td><strong>22</strong></td><td>SSH</td><td>TCP</td><td>Secure remote shell</td></tr>
+          <tr><td><strong>25</strong></td><td>SMTP</td><td>TCP</td><td>Email sending</td></tr>
+          <tr><td><strong>53</strong></td><td>DNS</td><td>UDP/TCP</td><td>Domain name resolution</td></tr>
+          <tr><td><strong>80</strong></td><td>HTTP</td><td>TCP</td><td>Web (unencrypted)</td></tr>
+          <tr><td><strong>443</strong></td><td>HTTPS</td><td>TCP</td><td>Web (encrypted via TLS)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="quiz-container animate-in delay-1">
+      <p><strong>Quick check:</strong> DNS primarily uses port 53 over UDP. Why might DNS sometimes switch to TCP on the same port?</p>
+      <div class="quiz-option" onclick="checkQuiz(this, false)">TCP is faster for short queries</div>
+      <div class="quiz-option" onclick="checkQuiz(this, false)">UDP cannot carry DNS packets</div>
+      <div class="quiz-option" onclick="checkQuiz(this, true)">When the response exceeds 512 bytes (e.g. zone transfers or DNSSEC), TCP handles the larger payload reliably</div>
+      <div class="quiz-option" onclick="checkQuiz(this, false)">The DNS standard requires TCP for all queries since 2020</div>
+      <div class="quiz-feedback">
+        <strong>Correct.</strong> Standard DNS responses fit within a single UDP datagram (historically capped at 512 bytes). Zone transfers (AXFR) and large DNSSEC-signed responses exceed this limit, so TCP is used for segmentation and reliable reassembly. The server listens on port 53 for both protocols.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 11 — 5-Tuple -->
+<section class="slide" data-slide="11">
+  <div class="slide-content">
+    <h2>The 5-Tuple: Uniquely Identifying a Connection</h2>
+    <p class="animate-in">A host may sustain hundreds of simultaneous connections. The OS distinguishes them using a <strong>5-tuple</strong>:</p>
+    <div class="diagram-container animate-in delay-1">
+      <svg viewBox="0 0 750 160" style="max-width:95%;" role="img" aria-label="Five components of the connection 5-tuple">
+        <rect x="10" y="40" width="130" height="70" rx="8" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
+        <text x="75" y="72" text-anchor="middle" font-size="14" font-weight="700" fill="#1e40af">Source IP</text>
+        <text x="75" y="92" text-anchor="middle" font-size="12" font-weight="600" fill="#3b82f6">192.168.1.50</text>
+        <rect x="155" y="40" width="130" height="70" rx="8" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
+        <text x="220" y="72" text-anchor="middle" font-size="14" font-weight="700" fill="#1e40af">Source Port</text>
+        <text x="220" y="92" text-anchor="middle" font-size="12" font-weight="600" fill="#3b82f6">51234</text>
+        <rect x="300" y="40" width="130" height="70" rx="8" fill="#d1fae5" stroke="#10b981" stroke-width="2"/>
+        <text x="365" y="72" text-anchor="middle" font-size="14" font-weight="700" fill="#065f46">Dest. IP</text>
+        <text x="365" y="92" text-anchor="middle" font-size="12" font-weight="600" fill="#10b981">93.184.216.34</text>
+        <rect x="445" y="40" width="130" height="70" rx="8" fill="#d1fae5" stroke="#10b981" stroke-width="2"/>
+        <text x="510" y="72" text-anchor="middle" font-size="14" font-weight="700" fill="#065f46">Dest. Port</text>
+        <text x="510" y="92" text-anchor="middle" font-size="12" font-weight="600" fill="#10b981">443</text>
+        <rect x="590" y="40" width="140" height="70" rx="8" fill="#ede9fe" stroke="#8b5cf6" stroke-width="2"/>
+        <text x="660" y="72" text-anchor="middle" font-size="14" font-weight="700" fill="#5b21b6">Protocol</text>
+        <text x="660" y="92" text-anchor="middle" font-size="12" font-weight="600" fill="#8b5cf6">TCP (6)</text>
+        <text x="375" y="25" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">{ Src IP, Src Port, Dst IP, Dst Port, Protocol }</text>
+        <text x="375" y="140" text-anchor="middle" font-size="13" font-weight="600" fill="#64748b">Any change in any of these five values = a different connection</text>
+      </svg>
+    </div>
+    <div class="insight-box animate-in delay-2">
+      <p>This is why a server on port 443 can handle thousands of clients simultaneously: each client uses a different ephemeral source port, creating a unique 5-tuple. The kernel uses this tuple as a lookup key to route each packet to the correct socket.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 12 — Two Protocols, Two Philosophies -->
+<section class="slide" data-slide="12">
+  <div class="slide-content">
+    <h2>Two Protocols, Two Philosophies</h2>
+    <p class="animate-in">The transport layer offers two fundamental protocols&mdash;think of them as two postal services for your data:</p>
+    <div class="grid-2 animate-in delay-1">
+      <div class="card" style="border-left:4px solid #0ea5e9;">
+        <h4 style="color:#0284c7;">TCP &mdash; Transmission Control Protocol</h4>
+        <p><strong>Connection-oriented.</strong> Before any data flows, TCP establishes a connection via a handshake. It guarantees delivery, preserves ordering, detects duplication and manages flow control. The price: higher overhead and latency.</p>
+        <p style="margin-top:0.5rem;color:var(--text-muted);">RFC 793 (1981), updated by RFC 9293 (2022).</p>
+      </div>
+      <div class="card" style="border-left:4px solid #f59e0b;">
+        <h4 style="color:#ea580c;">UDP &mdash; User Datagram Protocol</h4>
+        <p><strong>Connectionless.</strong> No handshake, no connection state, no delivery guarantees. Each datagram is independent. The reward: minimal overhead, low latency, simplicity.</p>
+        <p style="margin-top:0.5rem;color:var(--text-muted);">RFC 768 (1980)&mdash;one of the shortest RFCs ever published.</p>
+      </div>
+    </div>
+    <div class="highlight-box animate-in delay-2">
+      <p>Neither protocol is universally &ldquo;better.&rdquo; The choice depends entirely on the application&rsquo;s requirements. We examine each in depth, starting with TCP.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 13 — TCP Characteristics -->
+<section class="slide" data-slide="13">
+  <div class="slide-content">
+    <h2>TCP: Characteristics</h2>
+    <p class="animate-in">TCP treats data as a continuous <strong>byte stream</strong>, not as discrete messages. The sending TCP divides this stream into <em>segments</em>, numbers each one, and the receiving TCP reassembles them in order.</p>
+    <div class="grid-2 animate-in delay-1">
+      <div class="card">
+        <h4>What TCP provides</h4>
+        <p><strong>Reliable delivery</strong> &mdash; every byte is acknowledged; lost segments are retransmitted.</p>
+        <p style="margin-top:0.5rem;"><strong>Ordered delivery</strong> &mdash; out-of-order segments are reassembled using sequence numbers.</p>
+        <p style="margin-top:0.5rem;"><strong>Flow control</strong> &mdash; the receiver advertises available buffer space.</p>
+        <p style="margin-top:0.5rem;"><strong>Congestion control</strong> &mdash; TCP detects network congestion and throttles.</p>
+      </div>
+      <div class="card">
+        <h4>What TCP costs</h4>
+        <p><strong>Setup latency</strong> &mdash; one round-trip for the three-way handshake.</p>
+        <p style="margin-top:0.5rem;"><strong>Header overhead</strong> &mdash; minimum 20 bytes per segment.</p>
+        <p style="margin-top:0.5rem;"><strong>Head-of-line blocking</strong> &mdash; a lost segment stalls delivery of all subsequent data.</p>
+        <p style="margin-top:0.5rem;"><strong>Complexity</strong> &mdash; TCP is among the most complex kernel subsystems.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 14 — TCP Header SVG -->
+<section class="slide" data-slide="14">
+  <div class="slide-content">
+    <h2>The TCP Header (Minimum 20 Bytes)</h2>
+    <div class="diagram-container animate-in">
+      <svg viewBox="0 0 800 310" style="max-width:100%;" role="img" aria-label="TCP header field layout">
+        <text x="100" y="20" font-size="12" font-weight="600" fill="#64748b">0</text>
+        <text x="300" y="20" font-size="12" font-weight="600" fill="#64748b">15 16</text>
+        <text x="700" y="20" font-size="12" font-weight="600" fill="#64748b">31</text>
+        <!-- Row 1 -->
+        <rect x="100" y="28" width="300" height="38" rx="4" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+        <text x="250" y="52" text-anchor="middle" font-size="14" font-weight="700" fill="#1e40af">Source Port (16)</text>
+        <rect x="400" y="28" width="300" height="38" rx="4" fill="#d1fae5" stroke="#10b981" stroke-width="1.5"/>
+        <text x="550" y="52" text-anchor="middle" font-size="14" font-weight="700" fill="#065f46">Destination Port (16)</text>
+        <!-- Row 2 -->
+        <rect x="100" y="70" width="600" height="38" rx="4" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="400" y="94" text-anchor="middle" font-size="14" font-weight="700" fill="#92400e">Sequence Number (32 bits)</text>
+        <!-- Row 3 -->
+        <rect x="100" y="112" width="600" height="38" rx="4" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="400" y="136" text-anchor="middle" font-size="14" font-weight="700" fill="#92400e">Acknowledgement Number (32 bits)</text>
+        <!-- Row 4 -->
+        <rect x="100" y="154" width="90" height="38" rx="4" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="145" y="177" text-anchor="middle" font-size="12" font-weight="700" fill="#475569">Offset(4)</text>
+        <rect x="190" y="154" width="50" height="38" rx="4" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1"/>
+        <text x="215" y="177" text-anchor="middle" font-size="12" font-weight="600" fill="#94a3b8">Res</text>
+        <rect x="240" y="154" width="210" height="38" rx="4" fill="#fce7f3" stroke="#ec4899" stroke-width="1.5"/>
+        <text x="345" y="177" text-anchor="middle" font-size="13" font-weight="700" fill="#9d174d">Flags (9 bits)</text>
+        <rect x="450" y="154" width="250" height="38" rx="4" fill="#ede9fe" stroke="#8b5cf6" stroke-width="1.5"/>
+        <text x="575" y="177" text-anchor="middle" font-size="13" font-weight="700" fill="#5b21b6">Window Size (16)</text>
+        <!-- Row 5 -->
+        <rect x="100" y="196" width="300" height="38" rx="4" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="250" y="220" text-anchor="middle" font-size="13" font-weight="700" fill="#475569">Checksum (16)</text>
+        <rect x="400" y="196" width="300" height="38" rx="4" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="550" y="220" text-anchor="middle" font-size="13" font-weight="700" fill="#475569">Urgent Pointer (16)</text>
+        <!-- Row 6 -->
+        <rect x="100" y="238" width="600" height="30" rx="4" fill="#f0f9ff" stroke="#0ea5e9" stroke-width="1.5" stroke-dasharray="5,3"/>
+        <text x="400" y="258" text-anchor="middle" font-size="13" font-weight="700" fill="#0284c7">Options (variable, 0&#x2013;40 bytes, padded to 32-bit boundary)</text>
+        <!-- Row 7 -->
+        <rect x="100" y="272" width="600" height="28" rx="4" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="5,3"/>
+        <text x="400" y="291" text-anchor="middle" font-size="12" font-weight="600" fill="#94a3b8">Data (payload)</text>
+      </svg>
+    </div>
+    <p class="animate-in delay-1" style="color:var(--text-muted);">The <em>sequence number</em> tracks which byte in the stream this segment begins at. The <em>acknowledgement number</em> tells the sender which byte the receiver expects next. Together they enable loss detection, reordering and retransmission.</p>
+  </div>
+</section>
+
+<!-- SLIDE 15 — TCP Flags -->
+<section class="slide" data-slide="15">
+  <div class="slide-content">
+    <h2>TCP Flags: Controlling the Connection</h2>
+    <p class="animate-in">The TCP header contains nine single-bit flags, each signalling a specific control action:</p>
+    <div class="grid-3 animate-in delay-1">
+      <div class="card" style="border-top:3px solid #0ea5e9;">
+        <h4>Connection lifecycle</h4>
+        <p><strong>SYN</strong> &mdash; initiate (synchronise sequence numbers).</p>
+        <p><strong>FIN</strong> &mdash; graceful close (&ldquo;no more data&rdquo;).</p>
+        <p><strong>RST</strong> &mdash; force abort (error/rejection).</p>
+      </div>
+      <div class="card" style="border-top:3px solid #10b981;">
+        <h4>Data control</h4>
+        <p><strong>ACK</strong> &mdash; acknowledgement field is valid.</p>
+        <p><strong>PSH</strong> &mdash; push to application immediately.</p>
+        <p><strong>URG</strong> &mdash; urgent data present (rare).</p>
+      </div>
+      <div class="card" style="border-top:3px solid #f59e0b;">
+        <h4>Congestion signals</h4>
+        <p><strong>ECE</strong> &mdash; congestion echo.</p>
+        <p><strong>CWR</strong> &mdash; congestion window reduced.</p>
+        <p><strong>NS</strong> &mdash; nonce concealment (experimental).</p>
+      </div>
+    </div>
+    <div class="insight-box animate-in delay-2">
+      <p>The three flags you will encounter most often are <strong>SYN</strong>, <strong>ACK</strong> and <strong>FIN</strong>. We see them in action next.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 16 — Three-Way Handshake -->
+<section class="slide" data-slide="16">
+  <div class="slide-content">
+    <h2>The Three-Way Handshake</h2>
+    <p class="animate-in">Before any data can flow, TCP must establish a connection. Both sides synchronise their initial sequence numbers (ISNs) so that subsequent segments can be tracked:</p>
+    <div class="diagram-container animate-in delay-1">
+      <svg viewBox="0 0 700 280" style="max-width:95%;" role="img" aria-label="TCP three-way handshake sequence diagram">
+        <!-- Client and Server labels -->
+        <text x="120" y="30" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">Client</text>
+        <text x="580" y="30" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">Server</text>
+        <line x1="120" y1="45" x2="120" y2="270" stroke="#94a3b8" stroke-width="2"/>
+        <line x1="580" y1="45" x2="580" y2="270" stroke="#94a3b8" stroke-width="2"/>
+        <!-- Step 1: SYN -->
+        <line x1="125" y1="80" x2="575" y2="110" stroke="#0ea5e9" stroke-width="2.5" marker-end="url(#hs1)"/>
+        <rect x="240" y="72" width="230" height="28" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+        <text x="355" y="91" text-anchor="middle" font-size="14" font-weight="700" fill="#1e40af">1. SYN (seq=x)</text>
+        <!-- Step 2: SYN-ACK -->
+        <line x1="575" y1="140" x2="125" y2="170" stroke="#10b981" stroke-width="2.5" marker-end="url(#hs2)"/>
+        <rect x="220" y="132" width="270" height="28" rx="6" fill="#d1fae5" stroke="#10b981" stroke-width="1.5"/>
+        <text x="355" y="151" text-anchor="middle" font-size="14" font-weight="700" fill="#065f46">2. SYN+ACK (seq=y, ack=x+1)</text>
+        <!-- Step 3: ACK -->
+        <line x1="125" y1="200" x2="575" y2="230" stroke="#f59e0b" stroke-width="2.5" marker-end="url(#hs3)"/>
+        <rect x="250" y="192" width="210" height="28" rx="6" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="355" y="211" text-anchor="middle" font-size="14" font-weight="700" fill="#92400e">3. ACK (ack=y+1)</text>
+        <!-- State labels -->
+        <text x="120" y="260" text-anchor="middle" font-size="13" font-weight="600" fill="#0284c7">ESTABLISHED</text>
+        <text x="580" y="260" text-anchor="middle" font-size="13" font-weight="600" fill="#0284c7">ESTABLISHED</text>
+        <defs>
+          <marker id="hs1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0ea5e9"/></marker>
+          <marker id="hs2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#10b981"/></marker>
+          <marker id="hs3" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#f59e0b"/></marker>
+        </defs>
+      </svg>
+    </div>
+    <p class="animate-in delay-2">Each side proposes a random ISN. The handshake ensures that both client and server agree on their starting sequence numbers before data begins. TCP options (MSS, SACK, window scale) are also negotiated during the SYN segments.</p>
+  </div>
+</section>
+
+<!-- SLIDE 17 — Why Three Steps? (POE Quiz) -->
+<section class="slide" data-slide="17">
+  <div class="slide-content">
+    <h2>Why Three Steps? Why Not Two?</h2>
+    <p class="animate-in">A common intuition is that two messages should suffice: &ldquo;I want to connect&rdquo; and &ldquo;Connection accepted.&rdquo; Consider what could go wrong:</p>
+    <div class="story-box animate-in delay-1">
+      <p>Suppose a SYN packet from an earlier, abandoned connection attempt is delayed in the network. It arrives at the server <em>minutes later</em>. With only a two-way handshake, the server would immediately establish a connection that the client never intended. Resources are wasted, and the server waits for data that will never arrive.</p>
+    </div>
+    <div class="quiz-container animate-in delay-2">
+      <p><strong>Predict:</strong> What would happen if TCP used only a two-step handshake (SYN &#x2192; SYN+ACK)?</p>
+      <div class="quiz-option" onclick="checkQuiz(this, false)">Nothing&mdash;it would function identically</div>
+      <div class="quiz-option" onclick="checkQuiz(this, true)">Old, delayed SYN packets could create ghost connections that waste server resources</div>
+      <div class="quiz-option" onclick="checkQuiz(this, false)">Connections would be established twice as fast</div>
+      <div class="quiz-option" onclick="checkQuiz(this, false)">Only the server would know the connection exists</div>
+      <div class="quiz-feedback">
+        <strong>Correct.</strong> The third step (the client&rsquo;s ACK) confirms that the client is truly active <em>right now</em> and that the SYN it sent is current, not a ghost from an old session. Without this confirmation, the server would allocate resources for phantom connections. This is the fundamental reason TCP requires three messages: both sides must prove they are alive and synchronised in real time.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 18 — TCP Connection Termination -->
+<section class="slide" data-slide="18">
+  <div class="slide-content">
+    <h2>TCP Connection Termination</h2>
+    <p class="animate-in">Closing a TCP connection is a four-segment exchange, because each direction is closed independently (TCP connections are full-duplex):</p>
+    <div class="diagram-container animate-in delay-1">
+      <svg viewBox="0 0 700 300" style="max-width:95%;" role="img" aria-label="TCP four-way connection termination">
+        <text x="120" y="30" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">Initiator</text>
+        <text x="580" y="30" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">Responder</text>
+        <line x1="120" y1="45" x2="120" y2="290" stroke="#94a3b8" stroke-width="2"/>
+        <line x1="580" y1="45" x2="580" y2="290" stroke="#94a3b8" stroke-width="2"/>
+        <!-- Step 1 -->
+        <line x1="125" y1="75" x2="575" y2="100" stroke="#ef4444" stroke-width="2" marker-end="url(#ft1)"/>
+        <text x="350" y="78" text-anchor="middle" font-size="14" font-weight="700" fill="#ef4444">1. FIN</text>
+        <!-- Step 2 -->
+        <line x1="575" y1="125" x2="125" y2="150" stroke="#64748b" stroke-width="2" marker-end="url(#ft2)"/>
+        <text x="350" y="128" text-anchor="middle" font-size="14" font-weight="700" fill="#64748b">2. ACK</text>
+        <!-- Step 3 -->
+        <line x1="575" y1="185" x2="125" y2="210" stroke="#ef4444" stroke-width="2" marker-end="url(#ft3)"/>
+        <text x="350" y="188" text-anchor="middle" font-size="14" font-weight="700" fill="#ef4444">3. FIN</text>
+        <!-- Step 4 -->
+        <line x1="125" y1="235" x2="575" y2="260" stroke="#64748b" stroke-width="2" marker-end="url(#ft4)"/>
+        <text x="350" y="238" text-anchor="middle" font-size="14" font-weight="700" fill="#64748b">4. ACK</text>
+        <!-- States -->
+        <text x="40" y="115" font-size="12" font-weight="600" fill="#0284c7">FIN-WAIT-1</text>
+        <text x="40" y="175" font-size="12" font-weight="600" fill="#0284c7">FIN-WAIT-2</text>
+        <text x="40" y="250" font-size="12" font-weight="600" fill="#f59e0b">TIME-WAIT</text>
+        <text x="660" y="140" font-size="12" font-weight="600" fill="#0284c7">CLOSE-WAIT</text>
+        <text x="660" y="225" font-size="12" font-weight="600" fill="#0284c7">LAST-ACK</text>
+        <defs>
+          <marker id="ft1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#ef4444"/></marker>
+          <marker id="ft2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#64748b"/></marker>
+          <marker id="ft3" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#ef4444"/></marker>
+          <marker id="ft4" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#64748b"/></marker>
+        </defs>
+      </svg>
+    </div>
+    <div class="highlight-box animate-in delay-2">
+      <p>An alternative to this graceful four-way closure is a <strong>RST</strong> (reset), which abruptly tears down the connection. RST is used when an error occurs, when a connection attempt is rejected, or when an application crashes without closing its socket cleanly.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 19 — Reliability and Flow Control -->
+<section class="slide" data-slide="19">
+  <div class="slide-content">
+    <h2>Reliability and Flow Control</h2>
+    <div class="grid-2 animate-in">
+      <div class="card">
+        <h4>Reliability mechanism</h4>
+        <p>Every segment sent must be acknowledged. If the sender does not receive an ACK within a calculated timeout (the Retransmission Timeout, or RTO), it retransmits the segment. Sequence numbers enable the receiver to detect duplicates and reorder segments that arrive out of sequence.</p>
+        <p style="margin-top:0.75rem;">This is the mechanism that ensures your file download receives <em>every</em> byte, even when packets are dropped by congested routers.</p>
+      </div>
+      <div class="card">
+        <h4>Flow control (sliding window)</h4>
+        <p>The receiver advertises a <strong>window size</strong> in every ACK: the number of bytes it is willing to accept before the sender must pause. This prevents a fast sender from overwhelming a slow receiver.</p>
+        <p style="margin-top:0.75rem;">The window field is 16 bits (max 65 535 bytes). On modern high-speed links, this is far too small&mdash;which is why the <em>Window Scaling</em> option exists (we cover it shortly).</p>
+      </div>
+    </div>
+    <div class="warning-box animate-in delay-1">
+      <p><strong>Do not confuse flow control with congestion control.</strong> Flow control protects the <em>receiver</em> from being overwhelmed. Congestion control protects the <em>network</em> from being overwhelmed. TCP performs both, but they are independent mechanisms.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 20 — TCP Checksum -->
+<section class="slide" data-slide="20">
+  <div class="slide-content">
+    <h2>TCP Checksum and Data Integrity</h2>
+    <p class="animate-in">The 16-bit checksum in the TCP header verifies the integrity of the entire segment: header and data. But it does not compute over the TCP segment alone.</p>
+    <div class="definition-box animate-in delay-1">
+      <p>TCP prepends a <strong>pseudo-header</strong> to the checksum calculation. This pseudo-header includes the source IP, destination IP, protocol number (6 for TCP) and segment length&mdash;all drawn from the IP header. The pseudo-header is never transmitted; it exists only for checksum computation.</p>
+    </div>
+    <button class="reveal-btn animate-in delay-2" onclick="toggleReveal(this)">Why include IP fields?</button>
+    <div class="reveal-content">
+      <p>Including IP addresses in the TCP checksum provides cross-layer integrity: if a router corrupts the destination IP (misrouting the packet), the TCP checksum will fail at the receiver, and the segment will be discarded rather than silently delivered to the wrong host. This is a deliberate violation of strict layer independence&mdash;a pragmatic design choice from the early days of TCP/IP (RFC 793).</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 21 — TCP Socket States -->
+<section class="slide" data-slide="21">
+  <div class="slide-content">
+    <h2>TCP Socket States</h2>
+    <p class="animate-in">A TCP socket transitions through a set of well-defined states that reflect the connection lifecycle. These states are visible at the OS level (via <code>netstat</code> or <code>ss</code>) and are essential for debugging:</p>
+    <div class="diagram-container animate-in delay-1">
+      <svg viewBox="0 0 800 250" style="max-width:100%;" role="img" aria-label="TCP socket state machine simplified">
+        <!-- States as boxes -->
+        <rect x="10" y="100" width="100" height="40" rx="6" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="60" y="125" text-anchor="middle" font-size="13" font-weight="700" fill="#475569">CLOSED</text>
+        <rect x="130" y="100" width="100" height="40" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+        <text x="180" y="125" text-anchor="middle" font-size="13" font-weight="700" fill="#1e40af">LISTEN</text>
+        <rect x="130" y="30" width="100" height="40" rx="6" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="180" y="52" text-anchor="middle" font-size="12" font-weight="700" fill="#92400e">SYN-SENT</text>
+        <rect x="260" y="30" width="110" height="40" rx="6" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="315" y="52" text-anchor="middle" font-size="12" font-weight="700" fill="#92400e">SYN-RCVD</text>
+        <rect x="400" y="100" width="130" height="40" rx="6" fill="#d1fae5" stroke="#10b981" stroke-width="2"/>
+        <text x="465" y="125" text-anchor="middle" font-size="14" font-weight="700" fill="#065f46">ESTABLISHED</text>
+        <rect x="560" y="30" width="110" height="40" rx="6" fill="#fce7f3" stroke="#ec4899" stroke-width="1.5"/>
+        <text x="615" y="52" text-anchor="middle" font-size="12" font-weight="700" fill="#9d174d">FIN-WAIT-1</text>
+        <rect x="560" y="100" width="110" height="40" rx="6" fill="#fce7f3" stroke="#ec4899" stroke-width="1.5"/>
+        <text x="615" y="125" text-anchor="middle" font-size="12" font-weight="700" fill="#9d174d">FIN-WAIT-2</text>
+        <rect x="560" y="170" width="110" height="40" rx="6" fill="#fce7f3" stroke="#ec4899" stroke-width="1.5"/>
+        <text x="615" y="195" text-anchor="middle" font-size="12" font-weight="700" fill="#9d174d">TIME-WAIT</text>
+        <rect x="700" y="30" width="90" height="40" rx="6" fill="#ede9fe" stroke="#8b5cf6" stroke-width="1.5"/>
+        <text x="745" y="52" text-anchor="middle" font-size="11" font-weight="700" fill="#5b21b6">CLOSE-WAIT</text>
+        <rect x="700" y="100" width="90" height="40" rx="6" fill="#ede9fe" stroke="#8b5cf6" stroke-width="1.5"/>
+        <text x="745" y="125" text-anchor="middle" font-size="12" font-weight="700" fill="#5b21b6">LAST-ACK</text>
+        <!-- Arrows (simplified) -->
+        <line x1="110" y1="115" x2="128" y2="115" stroke="#64748b" stroke-width="1.5" marker-end="url(#sa)"/>
+        <line x1="230" y1="120" x2="398" y2="120" stroke="#10b981" stroke-width="1.5" marker-end="url(#sa)"/>
+        <line x1="530" y1="115" x2="558" y2="50" stroke="#ec4899" stroke-width="1.5" marker-end="url(#sa)"/>
+        <defs><marker id="sa" markerWidth="6" markerHeight="5" refX="6" refY="2.5" orient="auto"><polygon points="0 0,6 2.5,0 5" fill="#64748b"/></marker></defs>
+        <text x="400" y="230" text-anchor="middle" font-size="13" font-weight="600" fill="#64748b">TIME-WAIT lasts 2&#xd7;MSL (typically 60 s) to ensure delayed segments expire</text>
+      </svg>
+    </div>
+    <div class="insight-box animate-in delay-2">
+      <p>The <strong>TIME-WAIT</strong> state is frequently misunderstood. After closing, the initiator waits for twice the Maximum Segment Lifetime (2 &times; MSL, typically 60 seconds) to ensure that any delayed segments from this connection have expired before the same 5-tuple can be reused. This prevents ghost data from a previous connection from polluting a new one.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 22 — TCP Options: Why They Exist -->
+<section class="slide" data-slide="22">
+  <div class="slide-content">
+    <h2>TCP Options: Extensibility by Design</h2>
+    <p class="animate-in">TCP was designed in 1981 for networks that were orders of magnitude slower than today. Rather than redesigning the protocol, the original authors included an <em>options</em> field that allows negotiation of new features. Options are carried only in the TCP header and are negotiated during the handshake (SYN segments).</p>
+    <div class="definition-box animate-in delay-1">
+      <p>Each TCP option has the structure: <strong>Kind</strong> (1 byte) &mdash; <strong>Length</strong> (1 byte) &mdash; <strong>Data</strong> (variable). Two special single-byte options exist: <em>End of Option List</em> (Kind 0) and <em>NOP</em> (Kind 1, used for alignment/padding).</p>
+    </div>
+    <p class="animate-in delay-2">The most important options for modern networks are MSS, SACK, Window Scaling and Timestamps. We examine each next.</p>
+  </div>
+</section>
+
+<!-- SLIDE 23 — MSS -->
+<section class="slide" data-slide="23">
+  <div class="slide-content">
+    <h2>MSS &mdash; Maximum Segment Size</h2>
+    <div class="definition-box animate-in">
+      <p><strong>MSS</strong> declares the largest payload (in bytes) that a TCP endpoint is willing to receive in a single segment. It is sent <em>only in SYN packets</em> during the handshake&mdash;it is not negotiated during data transfer.</p>
+    </div>
+    <div class="grid-2 animate-in delay-1">
+      <div class="card">
+        <h4>Relationship to MTU</h4>
+        <p>MSS = MTU &minus; IP header (20 bytes) &minus; TCP header (20 bytes). For standard Ethernet (MTU = 1500), the default MSS is <strong>1460 bytes</strong>.</p>
+      </div>
+      <div class="card">
+        <h4>Why it matters</h4>
+        <p>Setting MSS correctly prevents <strong>IP fragmentation</strong>. If a TCP segment exceeds the path MTU, routers must fragment it&mdash;which is inefficient and can cause retransmission problems if any fragment is lost.</p>
+      </div>
+    </div>
+    <button class="reveal-btn animate-in delay-2" onclick="toggleReveal(this)">What happens if MSS is not negotiated?</button>
+    <div class="reveal-content">
+      <p>If no MSS option is present in the SYN, TCP falls back to the default MSS of <strong>536 bytes</strong> (the minimum guaranteed MTU of 576 bytes, minus 40 bytes for IP+TCP headers). This is extremely conservative and wastes bandwidth on modern networks.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 24 — SACK -->
+<section class="slide" data-slide="24">
+  <div class="slide-content">
+    <h2>SACK &mdash; Selective Acknowledgement</h2>
+    <p class="animate-in">Without SACK, TCP acknowledgements are <em>cumulative</em>: an ACK for byte 5000 means &ldquo;I have received all bytes up to 5000.&rdquo; If bytes 5001&ndash;6000 are lost but 6001&ndash;8000 arrive, the sender must retransmit <em>everything</em> from 5001 onwards&mdash;even the data that arrived safely.</p>
+    <div class="diagram-container animate-in delay-1">
+      <svg viewBox="0 0 750 150" style="max-width:95%;" role="img" aria-label="SACK vs cumulative ACK comparison">
+        <text x="375" y="20" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">Data stream with a gap (bytes 5001&#x2013;6000 lost)</text>
+        <!-- Received blocks -->
+        <rect x="50" y="45" width="250" height="35" rx="4" fill="#d1fae5" stroke="#10b981" stroke-width="1.5"/>
+        <text x="175" y="67" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46">1&#x2013;5000 &#x2714;</text>
+        <rect x="300" y="45" width="100" height="35" rx="4" fill="#fecaca" stroke="#ef4444" stroke-width="2" stroke-dasharray="5,3"/>
+        <text x="350" y="67" text-anchor="middle" font-size="13" font-weight="700" fill="#ef4444">5001&#x2013;6000 &#x2718;</text>
+        <rect x="400" y="45" width="150" height="35" rx="4" fill="#d1fae5" stroke="#10b981" stroke-width="1.5"/>
+        <text x="475" y="67" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46">6001&#x2013;8000 &#x2714;</text>
+        <!-- Cumulative -->
+        <text x="50" y="110" font-size="13" font-weight="600" fill="#64748b">Cumulative ACK:</text>
+        <text x="250" y="110" font-size="13" font-weight="700" fill="#ef4444">&ldquo;ACK 5001&rdquo; &#x2192; retransmit 5001&#x2013;8000</text>
+        <!-- SACK -->
+        <text x="50" y="135" font-size="13" font-weight="600" fill="#64748b">With SACK:</text>
+        <text x="250" y="135" font-size="13" font-weight="700" fill="#10b981">&ldquo;ACK 5001, SACK 6001&#x2013;8000&rdquo; &#x2192; retransmit only 5001&#x2013;6000</text>
+      </svg>
+    </div>
+    <div class="highlight-box animate-in delay-2">
+      <p>SACK requires negotiation: the sender includes a <em>SACK Permitted</em> option in its SYN; the receiver then uses <em>SACK blocks</em> in its ACKs to report exactly which byte ranges have been received. This dramatically reduces unnecessary retransmissions on lossy links.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 25 — Window Scaling + Timestamps + Fast Open -->
+<section class="slide" data-slide="25">
+  <div class="slide-content">
+    <h2>More TCP Options: Window Scaling, Timestamps, Fast Open</h2>
+    <div class="grid-3 animate-in">
+      <div class="card">
+        <h4>Window Scaling</h4>
+        <p>The 16-bit window field caps the advertised window at 65 535 bytes&mdash;far too small for modern high-bandwidth, high-latency links. Window scaling (RFC 7323) introduces a <strong>shift count</strong> (0&ndash;14) negotiated in SYN. The effective window becomes: <code>window &times; 2<sup>shift</sup></code>.</p>
+        <p style="margin-top:0.5rem;color:var(--text-muted);">With shift=14, the maximum window is ~1 GB.</p>
+      </div>
+      <div class="card">
+        <h4>Timestamps</h4>
+        <p>Two fields: <strong>TSval</strong> (sender&rsquo;s timestamp) and <strong>TSecr</strong> (echo of the peer&rsquo;s timestamp). Used for accurate RTT estimation and for <strong>PAWS</strong> (Protection Against Wrapped Sequence numbers) to detect very old segments.</p>
+      </div>
+      <div class="card">
+        <h4>TCP Fast Open</h4>
+        <p>Allows data to be piggybacked on the SYN packet itself, eliminating one round-trip for repeat connections. The server issues a <em>cookie</em> on the first connection; subsequent connections include this cookie in the SYN, permitting data to flow immediately.</p>
+        <p style="margin-top:0.5rem;color:var(--text-muted);">Requires support on both ends (RFC 7413).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 26 — Interactive: Window Scaling Calculator -->
+<section class="slide" data-slide="26">
+  <div class="slide-content">
+    <h2>Exploring Window Scaling</h2>
+    <p class="animate-in">Adjust the sliders to explore how Round-Trip Time (RTT) and the window scaling factor affect the maximum achievable throughput of a TCP connection:</p>
+    <div class="interactive-panel animate-in delay-1">
+      <label>RTT (milliseconds): <strong id="rttValue">50</strong> ms</label>
+      <input type="range" id="rttSlider" min="1" max="500" value="50" oninput="calculateThroughput()"/>
+      <label>Window Scale Factor: <strong id="scaleValue">7</strong></label>
+      <input type="range" id="scaleSlider" min="0" max="14" value="7" oninput="calculateThroughput()"/>
+      <div class="grid-2" style="margin-top:1rem;">
+        <div class="card" style="text-align:center;">
+          <h4>Effective Window</h4>
+          <p style="font-size:1.5rem;font-weight:700;color:var(--secondary);" id="windowSize">8,388,480</p>
+          <p style="color:var(--text-muted);">bytes</p>
+        </div>
+        <div class="card" style="text-align:center;">
+          <h4>Max Throughput</h4>
+          <p style="font-size:1.5rem;font-weight:700;color:var(--success);" id="maxThroughput">1342.18</p>
+          <p style="color:var(--text-muted);">Mbps</p>
+        </div>
+      </div>
+      <p style="margin-top:0.75rem;color:var(--text-muted);font-size:0.95rem;">Formula: throughput = (window &times; 8) / RTT. Without scaling (shift=0), the max window is 65 535 bytes&mdash;try setting the scale factor to 0 and observe the throughput ceiling.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 27 — Protocols Built on TCP -->
+<section class="slide" data-slide="27">
+  <div class="slide-content">
+    <h2>Protocols Built on TCP</h2>
+    <p class="animate-in">TCP&rsquo;s reliability guarantees make it the foundation for the majority of application-layer protocols. Every protocol below depends on TCP&rsquo;s ordered, loss-free byte stream:</p>
+    <div class="grid-4 animate-in delay-1">
+      <div class="card" style="text-align:center;">
+        <h4 style="color:#0284c7;">HTTP 1.1 &amp; 2</h4>
+        <p>Web browsing and APIs</p>
+      </div>
+      <div class="card" style="text-align:center;">
+        <h4 style="color:#059669;">FTP</h4>
+        <p>File transfer</p>
+      </div>
+      <div class="card" style="text-align:center;">
+        <h4 style="color:#7c3aed;">SMTP</h4>
+        <p>Email delivery</p>
+      </div>
+      <div class="card" style="text-align:center;">
+        <h4 style="color:#ea580c;">SSH</h4>
+        <p>Secure remote access</p>
+      </div>
+    </div>
+    <div class="insight-box animate-in delay-2">
+      <p>In the coming weeks we shall examine several of these protocols in detail: HTTP/HTTPS in Week 10, FTP/DNS/SSH in Week 11, and SMTP/POP3/IMAP in Week 12. Understanding TCP&rsquo;s transport guarantees is a prerequisite for understanding how these application protocols function.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 28 — UDP Characteristics -->
+<section class="slide" data-slide="28">
+  <div class="slide-content">
+    <h2>UDP: The Minimalist Protocol</h2>
+    <p class="animate-in">UDP is the antithesis of TCP. Where TCP provides guarantees, UDP provides speed. Where TCP manages state, UDP is stateless. The fundamental design principle: <em>do as little as possible at the transport layer and let the application decide what it needs.</em></p>
+    <div class="grid-2 animate-in delay-1">
+      <div class="card">
+        <h4>What UDP provides</h4>
+        <p><strong>Multiplexing via ports</strong> &mdash; the same port mechanism as TCP.</p>
+        <p style="margin-top:0.5rem;"><strong>Optional checksum</strong> &mdash; data integrity verification (mandatory in IPv6).</p>
+        <p style="margin-top:0.5rem;"><strong>Message boundaries</strong> &mdash; each datagram is a discrete message; the application receives exactly what was sent, with boundaries preserved.</p>
+      </div>
+      <div class="card">
+        <h4>What UDP does NOT provide</h4>
+        <p>No connection setup. No delivery guarantees. No ordering. No flow control. No congestion control. No retransmission.</p>
+        <p style="margin-top:0.5rem;">If a datagram is lost, duplicated or arrives out of order, the application must handle it&mdash;or accept the loss.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 29 — UDP Header -->
+<section class="slide" data-slide="29">
+  <div class="slide-content">
+    <h2>The UDP Header: 8 Bytes of Simplicity</h2>
+    <div class="diagram-container animate-in">
+      <svg viewBox="0 0 700 160" style="max-width:90%;" role="img" aria-label="UDP datagram header structure">
+        <text x="100" y="22" font-size="12" font-weight="600" fill="#64748b">0</text>
+        <text x="300" y="22" font-size="12" font-weight="600" fill="#64748b">15 16</text>
+        <text x="600" y="22" font-size="12" font-weight="600" fill="#64748b">31</text>
+        <rect x="100" y="30" width="250" height="45" rx="4" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+        <text x="225" y="58" text-anchor="middle" font-size="15" font-weight="700" fill="#1e40af">Source Port (16)</text>
+        <rect x="350" y="30" width="250" height="45" rx="4" fill="#d1fae5" stroke="#10b981" stroke-width="1.5"/>
+        <text x="475" y="58" text-anchor="middle" font-size="15" font-weight="700" fill="#065f46">Dest. Port (16)</text>
+        <rect x="100" y="80" width="250" height="45" rx="4" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="225" y="108" text-anchor="middle" font-size="15" font-weight="700" fill="#92400e">Length (16)</text>
+        <rect x="350" y="80" width="250" height="45" rx="4" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="475" y="108" text-anchor="middle" font-size="15" font-weight="700" fill="#475569">Checksum (16)</text>
+        <rect x="100" y="130" width="500" height="25" rx="4" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="5,3"/>
+        <text x="350" y="148" text-anchor="middle" font-size="13" font-weight="600" fill="#94a3b8">Data (payload)</text>
+        <text x="50" y="85" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a" transform="rotate(-90, 50, 85)">8 bytes</text>
+      </svg>
+    </div>
+    <div class="grid-2 animate-in delay-1">
+      <div class="card">
+        <h4>Length field</h4>
+        <p>Covers the entire datagram: header (8 bytes) + payload. Minimum value is 8 (empty datagram). Maximum theoretical value is 65 535 bytes (limited by the 16-bit field).</p>
+      </div>
+      <div class="card">
+        <h4>Checksum</h4>
+        <p>In <strong>IPv4</strong>, the UDP checksum is <em>optional</em> (set to 0 if not used). In <strong>IPv6</strong>, it is <em>mandatory</em>&mdash;because IPv6 removed the IP-level checksum, so transport-layer integrity checking is essential.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 30 — TCP vs UDP Comparison -->
+<section class="slide" data-slide="30">
+  <div class="slide-content">
+    <h2>TCP vs UDP: Head-to-Head</h2>
+    <div class="table-container animate-in">
+      <table>
+        <thead><tr><th>Property</th><th style="color:#0ea5e9;">TCP</th><th style="color:#f59e0b;">UDP</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Connection</strong></td><td>Connection-oriented (handshake)</td><td>Connectionless</td></tr>
+          <tr><td><strong>Delivery</strong></td><td>Reliable (ACK + retransmit)</td><td>Best-effort (no guarantees)</td></tr>
+          <tr><td><strong>Ordering</strong></td><td>Ordered (sequence numbers)</td><td>Unordered</td></tr>
+          <tr><td><strong>Data model</strong></td><td>Byte stream</td><td>Discrete datagrams</td></tr>
+          <tr><td><strong>Header size</strong></td><td>20&ndash;60 bytes</td><td>8 bytes</td></tr>
+          <tr><td><strong>Flow control</strong></td><td>Yes (sliding window)</td><td>No</td></tr>
+          <tr><td><strong>Congestion control</strong></td><td>Yes</td><td>No</td></tr>
+          <tr><td><strong>Typical use</strong></td><td>HTTP, FTP, SMTP, SSH</td><td>DNS, DHCP, streaming, gaming</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="highlight-box animate-in delay-1">
+      <p>The choice is always application-driven. A file transfer <em>must</em> be complete&mdash;use TCP. A live video stream can tolerate occasional frame drops but cannot tolerate delay&mdash;use UDP. A DNS query is tiny and must be fast&mdash;use UDP (with TCP as fallback for large responses).</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 31 — Why TLS? -->
+<section class="slide" data-slide="31">
+  <div class="slide-content">
+    <h2>Why TLS Is Needed</h2>
+    <p class="animate-in">TCP and UDP transmit data in <strong>clear text</strong>. Any device along the network path&mdash;a router, a Wi-Fi access point, an ISP&rsquo;s equipment&mdash;can read and even modify the data in transit.</p>
+    <div class="story-box animate-in delay-1">
+      <p>Imagine sending your bank credentials over HTTP (TCP port 80). Every router between your browser and the bank&rsquo;s server can see your username and password in plain ASCII. In 2014, researchers demonstrated that some public Wi-Fi hotspots actively injected advertisements into unencrypted HTTP responses&mdash;modifying content in transit.</p>
+    </div>
+    <div class="definition-box animate-in delay-2">
+      <p><strong>TLS</strong> (Transport Layer Security) sits between the transport layer and the application layer. It provides three guarantees: <em>confidentiality</em> (encryption), <em>integrity</em> (tamper detection) and <em>authentication</em> (verifying the server&rsquo;s identity via certificates). Its datagram-oriented counterpart is <strong>DTLS</strong> (Datagram TLS), used over UDP.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 32 — TLS in the Stack -->
+<section class="slide" data-slide="32">
+  <div class="slide-content">
+    <h2>TLS in the Protocol Stack</h2>
+    <div class="diagram-container animate-in">
+      <svg viewBox="0 0 700 250" style="max-width:85%;" role="img" aria-label="TLS positioned between transport and application layers">
+        <rect x="150" y="10" width="400" height="48" rx="8" fill="#f0f9ff" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="350" y="40" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">Application (HTTP, FTP, SMTP...)</text>
+        <rect x="150" y="68" width="400" height="48" rx="8" fill="#fef3c7" stroke="#f59e0b" stroke-width="2.5"/>
+        <text x="350" y="97" text-anchor="middle" font-size="15" font-weight="700" fill="#92400e">TLS / DTLS</text>
+        <rect x="150" y="126" width="400" height="48" rx="8" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+        <text x="350" y="155" text-anchor="middle" font-size="15" font-weight="700" fill="#1e40af">Transport (TCP / UDP)</text>
+        <rect x="150" y="184" width="400" height="48" rx="8" fill="#f0f9ff" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="350" y="213" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">IP</text>
+        <!-- Labels -->
+        <text x="90" y="97" text-anchor="middle" font-size="13" font-weight="700" fill="#f59e0b">&#x2190; Not a</text>
+        <text x="90" y="115" text-anchor="middle" font-size="13" font-weight="700" fill="#f59e0b">true L4</text>
+        <text x="610" y="97" text-anchor="middle" font-size="13" font-weight="600" fill="#64748b">Encryption</text>
+        <text x="610" y="115" text-anchor="middle" font-size="13" font-weight="600" fill="#64748b">+ integrity</text>
+      </svg>
+    </div>
+    <div class="insight-box animate-in delay-1">
+      <p>TLS is strictly speaking not a transport-layer protocol&mdash;it operates <em>above</em> TCP (or UDP, in the case of DTLS). However, it is tightly coupled to transport semantics. HTTPS is simply HTTP running through a TLS tunnel over TCP port 443.</p>
+    </div>
+    <p class="animate-in delay-2">TLS consists of several sub-protocols: the <strong>Handshake Protocol</strong> (key exchange, authentication), the <strong>Record Protocol</strong> (encryption of application data), the <strong>Alert Protocol</strong> (error signalling) and the <strong>Change Cipher Spec</strong> protocol (TLS 1.2 only; removed in TLS 1.3).</p>
+  </div>
+</section>
+
+<!-- SLIDE 33 — TLS 1.3 Handshake -->
+<section class="slide" data-slide="33">
+  <div class="slide-content">
+    <h2>TLS 1.3 Handshake (Simplified)</h2>
+    <p class="animate-in">TLS 1.3 (RFC 8446, 2018) dramatically simplified the handshake compared to TLS 1.2, reducing it from two round-trips to one:</p>
+    <div class="diagram-container animate-in delay-1">
+      <svg viewBox="0 0 700 240" style="max-width:95%;" role="img" aria-label="TLS 1.3 handshake sequence">
+        <text x="120" y="25" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">Client</text>
+        <text x="580" y="25" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">Server</text>
+        <line x1="120" y1="38" x2="120" y2="230" stroke="#94a3b8" stroke-width="2"/>
+        <line x1="580" y1="38" x2="580" y2="230" stroke="#94a3b8" stroke-width="2"/>
+        <!-- ClientHello -->
+        <line x1="125" y1="65" x2="575" y2="85" stroke="#0ea5e9" stroke-width="2" marker-end="url(#tls1)"/>
+        <text x="350" y="62" text-anchor="middle" font-size="13" font-weight="700" fill="#0284c7">ClientHello + key share</text>
+        <!-- ServerHello + finished -->
+        <line x1="575" y1="115" x2="125" y2="135" stroke="#10b981" stroke-width="2" marker-end="url(#tls2)"/>
+        <text x="350" y="112" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46">ServerHello + key share + cert + Finished</text>
+        <!-- Encrypted data -->
+        <line x1="125" y1="165" x2="575" y2="185" stroke="#f59e0b" stroke-width="2" marker-end="url(#tls3)"/>
+        <text x="350" y="162" text-anchor="middle" font-size="13" font-weight="700" fill="#92400e">Client Finished + encrypted app data</text>
+        <!-- Labels -->
+        <rect x="20" y="90" width="70" height="25" rx="4" fill="#d1fae5"/>
+        <text x="55" y="107" text-anchor="middle" font-size="12" font-weight="700" fill="#065f46">1-RTT</text>
+        <text x="350" y="215" text-anchor="middle" font-size="13" font-weight="600" fill="#64748b">All data after this point is encrypted</text>
+        <defs>
+          <marker id="tls1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0ea5e9"/></marker>
+          <marker id="tls2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#10b981"/></marker>
+          <marker id="tls3" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#f59e0b"/></marker>
+        </defs>
+      </svg>
+    </div>
+    <div class="highlight-box animate-in delay-2">
+      <p>The key exchange typically uses <strong>Diffie&ndash;Hellman</strong> over elliptic curves (ECDHE). Both sides generate ephemeral key pairs; the shared secret derived from these keys is used to encrypt all subsequent communication. The server&rsquo;s certificate proves its identity.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 34 — Diffie-Hellman Idea -->
+<section class="slide" data-slide="34">
+  <div class="slide-content">
+    <h2>Diffie&ndash;Hellman: The Key Exchange Idea</h2>
+    <p class="animate-in">The fundamental challenge of encryption: how do two parties who have never met agree on a secret key, when their only channel of communication is public and observable?</p>
+    <div class="story-box animate-in delay-1">
+      <p><strong>The colour-mixing analogy:</strong> Alice and Bob publicly agree on a common colour (say, yellow). Each secretly picks a private colour&mdash;Alice picks red, Bob picks blue. They each mix their private colour with the public one and exchange the results. Alice receives Bob&rsquo;s mix (yellow+blue = green) and adds her red; Bob receives Alice&rsquo;s mix (yellow+red = orange) and adds his blue. Both arrive at the <em>same</em> final colour&mdash;but an eavesdropper who saw only the two intermediate mixes cannot reverse the mixing to discover it.</p>
+    </div>
+    <div class="insight-box animate-in delay-2">
+      <p>The mathematical equivalent uses <strong>modular exponentiation</strong>: the &ldquo;mixing&rdquo; operation is easy to compute forward but computationally infeasible to reverse (the discrete logarithm problem). This is the foundation of modern key exchange, first published by Whitfield Diffie and Martin Hellman in 1976.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 35 — Why QUIC? -->
+<section class="slide" data-slide="35">
+  <div class="slide-content">
+    <h2>QUIC: Why a New Transport Protocol?</h2>
+    <p class="animate-in">TCP has served the internet since 1981, but certain limitations have become painful in the modern web:</p>
+    <div class="grid-2 animate-in delay-1">
+      <div class="card" style="border-left:4px solid #ef4444;">
+        <h4>Head-of-line blocking</h4>
+        <p>TCP guarantees ordered delivery. If a single packet is lost in an HTTP/2 multiplexed connection, <em>all</em> streams on that connection stall&mdash;even those whose data arrived intact. This defeats the purpose of multiplexing.</p>
+      </div>
+      <div class="card" style="border-left:4px solid #ef4444;">
+        <h4>Handshake overhead</h4>
+        <p>A fresh HTTPS connection requires a TCP handshake (1 RTT) <em>plus</em> a TLS handshake (1 RTT in TLS 1.3). That is at least 2 round-trips before any application data flows. On a high-latency link (e.g. 200 ms RTT), this adds 400 ms of pure setup cost.</p>
+      </div>
+    </div>
+    <div class="highlight-box animate-in delay-2">
+      <p><strong>QUIC</strong> (originally &ldquo;Quick UDP Internet Connections,&rdquo; now a proper name) was designed by Google and standardised in RFC 9000 (2021) to solve both problems. It runs over UDP, integrates TLS 1.3 encryption natively, and achieves 0-RTT or 1-RTT connection establishment.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 36 — QUIC Architecture -->
+<section class="slide" data-slide="36">
+  <div class="slide-content">
+    <h2>QUIC Architecture</h2>
+    <div class="diagram-container animate-in">
+      <svg viewBox="0 0 750 220" style="max-width:95%;" role="img" aria-label="QUIC protocol stack compared to TCP+TLS">
+        <!-- Traditional stack -->
+        <text x="175" y="20" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">Traditional</text>
+        <rect x="50" y="30" width="250" height="35" rx="6" fill="#f0f9ff" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="175" y="52" text-anchor="middle" font-size="13" font-weight="700" fill="#334155">HTTP/2</text>
+        <rect x="50" y="68" width="250" height="35" rx="6" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="175" y="90" text-anchor="middle" font-size="13" font-weight="700" fill="#92400e">TLS 1.3</text>
+        <rect x="50" y="106" width="250" height="35" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+        <text x="175" y="128" text-anchor="middle" font-size="13" font-weight="700" fill="#1e40af">TCP</text>
+        <rect x="50" y="144" width="250" height="35" rx="6" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1"/>
+        <text x="175" y="166" text-anchor="middle" font-size="13" font-weight="600" fill="#475569">IP</text>
+        <!-- QUIC stack -->
+        <text x="575" y="20" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">QUIC-based</text>
+        <rect x="450" y="30" width="250" height="35" rx="6" fill="#f0f9ff" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="575" y="52" text-anchor="middle" font-size="13" font-weight="700" fill="#334155">HTTP/3</text>
+        <rect x="450" y="68" width="250" height="73" rx="6" fill="#d1fae5" stroke="#10b981" stroke-width="2.5"/>
+        <text x="575" y="100" text-anchor="middle" font-size="15" font-weight="700" fill="#065f46">QUIC</text>
+        <text x="575" y="120" text-anchor="middle" font-size="12" font-weight="600" fill="#065f46">(TLS 1.3 built in)</text>
+        <rect x="450" y="144" width="250" height="35" rx="6" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="575" y="166" text-anchor="middle" font-size="13" font-weight="700" fill="#92400e">UDP</text>
+        <rect x="450" y="182" width="250" height="35" rx="6" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1"/>
+        <text x="575" y="204" text-anchor="middle" font-size="13" font-weight="600" fill="#475569">IP</text>
+        <!-- Arrow -->
+        <text x="375" y="110" font-size="24" font-weight="700" fill="#64748b">&#x2192;</text>
+      </svg>
+    </div>
+    <div class="grid-2 animate-in delay-1">
+      <div class="card">
+        <h4>Independent streams</h4>
+        <p>QUIC supports multiplexed streams <em>within</em> a single connection. A lost packet on stream A does not block delivery on stream B&mdash;eliminating head-of-line blocking.</p>
+      </div>
+      <div class="card">
+        <h4>0-RTT reconnection</h4>
+        <p>For repeat connections, QUIC can send encrypted application data in the very first packet (0-RTT), achieving instant setup for returning visitors.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 37 — QUIC vs TCP+TLS Quiz -->
+<section class="slide" data-slide="37">
+  <div class="slide-content">
+    <h2>QUIC vs TCP+TLS</h2>
+    <div class="table-container animate-in">
+      <table>
+        <thead><tr><th>Feature</th><th style="color:#3b82f6;">TCP + TLS 1.3</th><th style="color:#10b981;">QUIC</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Transport</strong></td><td>TCP</td><td>UDP</td></tr>
+          <tr><td><strong>Encryption</strong></td><td>Separate TLS layer</td><td>Built-in (mandatory)</td></tr>
+          <tr><td><strong>Handshake</strong></td><td>1 RTT (TCP) + 1 RTT (TLS) = 2 RTT</td><td>1 RTT (new) / 0 RTT (repeat)</td></tr>
+          <tr><td><strong>Head-of-line blocking</strong></td><td>Yes (across all streams)</td><td>No (per-stream only)</td></tr>
+          <tr><td><strong>HTTP version</strong></td><td>HTTP/1.1, HTTP/2</td><td>HTTP/3</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="quiz-container animate-in delay-1">
+      <p><strong>Knowledge check:</strong> What is the primary TCP limitation that motivated the creation of QUIC?</p>
+      <div class="quiz-option" onclick="checkQuiz(this, false)">TCP lacks encryption support</div>
+      <div class="quiz-option" onclick="checkQuiz(this, true)">Head-of-line blocking across multiplexed streams combined with handshake overhead</div>
+      <div class="quiz-option" onclick="checkQuiz(this, false)">TCP cannot carry HTTP traffic efficiently</div>
+      <div class="quiz-option" onclick="checkQuiz(this, false)">UDP is inherently faster than TCP in all scenarios</div>
+      <div class="quiz-feedback">
+        <strong>Correct.</strong> TCP&rsquo;s ordered-delivery guarantee means that when a single packet is lost on a multiplexed HTTP/2 connection, all streams are blocked until that packet is retransmitted. Combined with the two-RTT setup cost (TCP + TLS handshakes), this creates measurable latency on the modern web. QUIC solves both: it handles streams independently (no cross-stream blocking) and merges the transport and TLS handshakes into a single round-trip.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 38 — Python TCP Server -->
+<section class="slide" data-slide="38">
+  <div class="slide-content">
+    <h2>Python: A Minimal TCP Server</h2>
+    <p class="animate-in">This is the pattern you will use in Seminar 8 to build an HTTP server from raw sockets. Every line maps to a concept we covered today:</p>
+    <!-- LIVE CODING: see instructor guide -->
+    <div class="code-block animate-in delay-1" data-lang="python">
+<span class="keyword">import</span> socket
+
+<span class="comment"># Configuration</span>
+HOST = <span class="string">"0.0.0.0"</span>
+PORT = <span class="number">8080</span>
+BACKLOG = <span class="number">5</span>
+
+<span class="comment"># Create a TCP socket (AF_INET = IPv4, SOCK_STREAM = TCP)</span>
+server = socket.socket(
+    socket.AF_INET,
+    socket.SOCK_STREAM
+)
+
+<span class="comment"># Allow port reuse (avoids TIME-WAIT issues)</span>
+server.setsockopt(
+    socket.SOL_SOCKET,
+    socket.SO_REUSEADDR,
+    <span class="number">1</span>
+)
+
+<span class="comment"># Bind to address + port, then listen</span>
+server.bind((HOST, PORT))
+server.listen(BACKLOG)
+<span class="builtin">print</span>(<span class="string">f"Listening on </span>{HOST}<span class="string">:</span>{PORT}<span class="string">"</span>)
+
+<span class="comment"># Accept one client connection</span>
+conn, addr = server.accept()
+<span class="builtin">print</span>(<span class="string">f"Connected: </span>{addr}<span class="string">"</span>)
+
+<span class="comment"># Receive up to 4096 bytes</span>
+data = conn.recv(<span class="number">4096</span>)
+<span class="builtin">print</span>(data.decode(<span class="string">"utf-8"</span>))
+
+conn.close()
+server.close()
+    </div>
+    <p class="animate-in delay-2" style="color:var(--text-muted);">Note <code>SO_REUSEADDR</code>: it tells the kernel to allow binding to a port that is in TIME-WAIT state&mdash;exactly the state we discussed on slide 21.</p>
+  </div>
+</section>
+
+<!-- SLIDE 39 — Hook Resolution -->
+<section class="slide" data-slide="39">
+  <div class="slide-content">
+    <h2>Returning to the Streaming Paradox</h2>
+    <div class="story-box animate-in">
+      <p>Remember our opening scenario? Your live football stream froze, but your flatmate&rsquo;s download was complete. Now you can explain exactly what happened:</p>
+    </div>
+    <div class="grid-2 animate-in delay-1">
+      <div class="card" style="border-left:4px solid #f59e0b;">
+        <h4>The live stream (UDP/RTP)</h4>
+        <p>Live video typically uses <strong>UDP</strong> (often via RTP/RTSP). When packets are lost, there is no retransmission&mdash;the player skips the missing frames. The freeze was likely caused by a burst of packet loss exceeding the player&rsquo;s buffer. UDP accepted the loss; the application coped as best it could.</p>
+      </div>
+      <div class="card" style="border-left:4px solid #0ea5e9;">
+        <h4>The dataset download (TCP)</h4>
+        <p>The download used <strong>TCP</strong>. When packets were lost, TCP retransmitted them automatically. The application saw a perfect, ordered byte stream&mdash;but the retransmissions added latency. TCP&rsquo;s flow and congestion control further throttled the transfer rate to avoid overwhelming the network.</p>
+      </div>
+    </div>
+    <div class="highlight-box animate-in delay-2">
+      <p>The transport layer made the choice: the streaming application <em>chose</em> UDP because real-time media prioritises low latency over completeness. The download tool <em>chose</em> TCP because data integrity is non-negotiable for a dataset. The protocol selection is an architectural decision made at design time by the application developer.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 40 — Quiz: TCP Deep Check -->
+<section class="slide" data-slide="40">
+  <div class="slide-content">
+    <h2>Knowledge Check: TCP Mechanics</h2>
+    <div class="quiz-container animate-in">
+      <p><strong>Question 1:</strong> What is the purpose of the three-way handshake?</p>
+      <div class="quiz-option" onclick="checkQuiz(this, false)">To transfer data faster</div>
+      <div class="quiz-option" onclick="checkQuiz(this, true)">To synchronise initial sequence numbers and confirm bidirectional reachability</div>
+      <div class="quiz-option" onclick="checkQuiz(this, false)">To encrypt the connection</div>
+      <div class="quiz-option" onclick="checkQuiz(this, false)">To assign port numbers to both endpoints</div>
+      <div class="quiz-feedback">
+        <strong>Correct.</strong> The handshake achieves two things: both sides agree on their ISNs (enabling loss detection and reordering) and both prove they are alive and reachable right now (preventing ghost connections from delayed SYN packets).
+      </div>
+    </div>
+    <div class="quiz-container animate-in delay-1">
+      <p><strong>Question 2:</strong> Why does the TIME-WAIT state exist?</p>
+      <div class="quiz-option" onclick="checkQuiz(this, false)">To speed up future connections to the same server</div>
+      <div class="quiz-option" onclick="checkQuiz(this, false)">To save bandwidth by caching connection parameters</div>
+      <div class="quiz-option" onclick="checkQuiz(this, true)">To ensure delayed segments from this connection expire before the 5-tuple is reused</div>
+      <div class="quiz-option" onclick="checkQuiz(this, false)">It serves no practical purpose; it is a legacy artefact</div>
+      <div class="quiz-feedback">
+        <strong>Correct.</strong> TIME-WAIT lasts 2 &times; MSL (typically 60 seconds). During this period, any lingering segments from the old connection will expire. Without TIME-WAIT, a new connection using the same 5-tuple could receive stale data from the old one&mdash;a silent corruption that would be extremely difficult to diagnose.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 41 — Quiz: UDP and TLS -->
+<section class="slide" data-slide="41">
+  <div class="slide-content">
+    <h2>Knowledge Check: UDP, TLS and QUIC</h2>
+    <div class="quiz-container animate-in">
+      <p><strong>Question 3:</strong> When is UDP preferable to TCP?</p>
+      <div class="quiz-option" onclick="checkQuiz(this, false)">When transferring files that must arrive completely</div>
+      <div class="quiz-option" onclick="checkQuiz(this, true)">When low latency matters more than guaranteed delivery (e.g. live streaming, gaming, DNS)</div>
+      <div class="quiz-option" onclick="checkQuiz(this, false)">When encryption is required</div>
+      <div class="quiz-option" onclick="checkQuiz(this, false)">Always&mdash;UDP is the superior protocol</div>
+      <div class="quiz-feedback">
+        <strong>Correct.</strong> UDP is the right choice when the application can tolerate some data loss but cannot tolerate the overhead of connection establishment, retransmission delays or head-of-line blocking. DNS queries, real-time audio/video and online games are classic UDP use cases.
+      </div>
+    </div>
+    <div class="quiz-container animate-in delay-1">
+      <p><strong>Question 4:</strong> What security service does TLS provide that neither TCP nor UDP offers?</p>
+      <div class="quiz-option" onclick="checkQuiz(this, false)">Reliable delivery</div>
+      <div class="quiz-option" onclick="checkQuiz(this, false)">Flow control</div>
+      <div class="quiz-option" onclick="checkQuiz(this, true)">Encryption and server authentication</div>
+      <div class="quiz-option" onclick="checkQuiz(this, false)">Faster data transfer</div>
+      <div class="quiz-feedback">
+        <strong>Correct.</strong> TCP provides reliability and ordering; UDP provides simplicity and low overhead. Neither encrypts data or verifies the identity of the remote peer. TLS adds confidentiality (encryption), integrity (tamper detection via MACs) and authentication (certificates). These are complementary services, not replacements for transport-layer functions.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 42 — Key Conclusions -->
+<section class="slide" data-slide="42">
+  <div class="slide-content">
+    <h2>Key Conclusions</h2>
+    <div class="grid-2 animate-in">
+      <div class="card" style="border-top:3px solid #0ea5e9;">
+        <h4>The transport layer&rsquo;s role</h4>
+        <p>Bridges the network and the application. Provides process identification via ports, and optionally reliability, flow control and congestion control.</p>
+      </div>
+      <div class="card" style="border-top:3px solid #10b981;">
+        <h4>TCP: the reliable workhorse</h4>
+        <p>Connection-oriented, byte-stream, reliable, ordered. Three-way handshake, four-way termination, sliding window flow control. Extended by options: MSS, SACK, window scaling, timestamps, Fast Open.</p>
+      </div>
+      <div class="card" style="border-top:3px solid #f59e0b;">
+        <h4>UDP: the minimalist</h4>
+        <p>Connectionless, datagram-based, best-effort. 8-byte header. Application decides what (if anything) to guarantee. Ideal for latency-sensitive and query-response protocols.</p>
+      </div>
+      <div class="card" style="border-top:3px solid #8b5cf6;">
+        <h4>TLS and QUIC</h4>
+        <p>TLS adds encryption and authentication above TCP. QUIC combines transport + TLS over UDP, eliminating head-of-line blocking and reducing handshake latency. Foundation of HTTP/3.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 43 — Next Week + Seminar Reference -->
+<section class="slide" data-slide="43">
+  <div class="slide-content">
+    <h2>What Comes Next</h2>
+    <div class="grid-2 animate-in">
+      <div class="card" style="border-left:4px solid #0ea5e9;">
+        <h4>Seminar 8 (this week)</h4>
+        <p>You will build an HTTP server using Python sockets&mdash;applying the TCP server pattern from slide 38. You will then configure Nginx as a reverse proxy and observe traffic with curl and tcpdump. The transport-layer concepts from today are the foundation for understanding how HTTP operates over TCP.</p>
+      </div>
+      <div class="card" style="border-left:4px solid #8b5cf6;">
+        <h4>Week 9 &mdash; Session and Presentation Layers</h4>
+        <p>We move up the OSI model to layers 5 and 6: dialogue management, authentication state, checkpointing, data compression, serialisation and character encoding. These layers bridge the transport guarantees we covered today with the application-specific logic of higher layers.</p>
+      </div>
+    </div>
+    <div class="highlight-box animate-in delay-1">
+      <p><strong>Recommended preparation:</strong> Review the TCP handshake and socket states; try running <code>ss -tnp</code> or <code>netstat -tnp</code> on a Linux machine to see real TCP connections and their states. In the seminar, you will observe these states in action.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 44 — Final Synthesis + Resources -->
+<section class="slide" data-slide="44">
+  <div class="slide-content">
+    <h2>Final Challenge and Resources</h2>
+    <div class="quiz-container animate-in">
+      <p><strong>Synthesis question:</strong> A video-conferencing application uses UDP for audio/video streams but TCP for the text chat. Why does the same application use <em>both</em> transport protocols simultaneously?</p>
+      <div class="quiz-option" onclick="checkQuiz(this, false)">It is a programming error&mdash;they should both use TCP</div>
+      <div class="quiz-option" onclick="checkQuiz(this, false)">UDP is used for chat because chat messages are small</div>
+      <div class="quiz-option" onclick="checkQuiz(this, true)">Audio/video prioritises low latency (tolerating loss), while chat requires guaranteed delivery (every message must arrive)</div>
+      <div class="quiz-option" onclick="checkQuiz(this, false)">TCP is faster for small messages, UDP is faster for large streams</div>
+      <div class="quiz-feedback">
+        <strong>Correct.</strong> This is the transport layer&rsquo;s essence: the <em>application</em> chooses the protocol that matches its requirements. Losing a few audio frames is acceptable (the listener barely notices), but losing a chat message is not. A single application can&mdash;and often does&mdash;use multiple transport protocols for different data flows, each optimised for its specific needs.
+      </div>
+    </div>
+    <div class="highlight-box animate-in delay-1">
+      <p><strong>References:</strong> RFC 793 / RFC 9293 (TCP), RFC 768 (UDP), RFC 8446 (TLS 1.3), RFC 9000 (QUIC), RFC 7323 (Window Scaling &amp; Timestamps), RFC 2018 (SACK), RFC 7413 (TCP Fast Open).</p>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<!-- Navigation Bar -->
+<div class="nav-container">
+  <button id="prevBtn" onclick="changeSlide(-1)" title="Previous slide">&#x2190; Prev</button>
+  <button onclick="openTOC()" title="Table of Contents (T)">&#x2630; Contents</button>
+  <button onclick="toggleFullscreen()" title="Fullscreen (F)">&#x26F6; Fullscreen</button>
+  <button id="nextBtn" onclick="changeSlide(1)" title="Next slide">Next &#x2192;</button>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<!-- Table of Contents Modal -->
+<div class="toc-modal" id="tocModal">
+  <div class="toc-content">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+      <h3>Contents</h3>
+      <button onclick="closeTOC()" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--text-muted);">&times;</button>
+    </div>
+
+    <div class="toc-section">
+      <div class="toc-section-title">Opening &mdash; Why This Matters</div>
+      <div class="toc-item" onclick="goToSlide(1)">1. Title</div>
+      <div class="toc-item" onclick="goToSlide(2)">2. The Streaming Paradox (Hook)</div>
+      <div class="toc-item" onclick="goToSlide(3)">3. Why the Transport Layer Matters</div>
+    </div>
+
+    <div class="toc-section">
+      <div class="toc-section-title">Foundations &mdash; Ports and Multiplexing</div>
+      <div class="toc-item" onclick="goToSlide(4)">4. Where We Are in the Course</div>
+      <div class="toc-item" onclick="goToSlide(5)">5. Prior Knowledge Checkpoint</div>
+      <div class="toc-item" onclick="goToSlide(6)">6. The Problem IP Cannot Solve</div>
+      <div class="toc-item" onclick="goToSlide(7)">7. Learning Objectives</div>
+      <div class="toc-item" onclick="goToSlide(8)">8. Transport in the TCP/IP Stack</div>
+      <div class="toc-item" onclick="goToSlide(9)">9. Ports: The Transport Identifier</div>
+      <div class="toc-item" onclick="goToSlide(10)">10. Well-Known Ports</div>
+      <div class="toc-item" onclick="goToSlide(11)">11. The 5-Tuple</div>
+      <div class="toc-item" onclick="goToSlide(12)">12. Two Protocols, Two Philosophies</div>
+    </div>
+
+    <div class="toc-section">
+      <div class="toc-section-title">TCP &mdash; The Reliable Workhorse</div>
+      <div class="toc-item" onclick="goToSlide(13)">13. TCP Characteristics</div>
+      <div class="toc-item" onclick="goToSlide(14)">14. TCP Header Structure</div>
+      <div class="toc-item" onclick="goToSlide(15)">15. TCP Flags</div>
+      <div class="toc-item" onclick="goToSlide(16)">16. Three-Way Handshake</div>
+      <div class="toc-item" onclick="goToSlide(17)">17. Why Three Steps?</div>
+      <div class="toc-item" onclick="goToSlide(18)">18. Connection Termination</div>
+      <div class="toc-item" onclick="goToSlide(19)">19. Reliability and Flow Control</div>
+      <div class="toc-item" onclick="goToSlide(20)">20. TCP Checksum</div>
+      <div class="toc-item" onclick="goToSlide(21)">21. TCP Socket States</div>
+      <div class="toc-item" onclick="goToSlide(22)">22. TCP Options: Extensibility</div>
+      <div class="toc-item" onclick="goToSlide(23)">23. MSS</div>
+      <div class="toc-item" onclick="goToSlide(24)">24. SACK</div>
+      <div class="toc-item" onclick="goToSlide(25)">25. Window Scaling, Timestamps, Fast Open</div>
+      <div class="toc-item" onclick="goToSlide(26)">26. Interactive: Window Scaling Calculator</div>
+      <div class="toc-item" onclick="goToSlide(27)">27. Protocols Built on TCP</div>
+    </div>
+
+    <div class="toc-section">
+      <div class="toc-section-title">UDP &mdash; The Minimalist</div>
+      <div class="toc-item" onclick="goToSlide(28)">28. UDP Characteristics</div>
+      <div class="toc-item" onclick="goToSlide(29)">29. UDP Header</div>
+      <div class="toc-item" onclick="goToSlide(30)">30. TCP vs UDP Comparison</div>
+    </div>
+
+    <div class="toc-section">
+      <div class="toc-section-title">Security and Evolution &mdash; TLS and QUIC</div>
+      <div class="toc-item" onclick="goToSlide(31)">31. Why TLS Is Needed</div>
+      <div class="toc-item" onclick="goToSlide(32)">32. TLS in the Protocol Stack</div>
+      <div class="toc-item" onclick="goToSlide(33)">33. TLS 1.3 Handshake</div>
+      <div class="toc-item" onclick="goToSlide(34)">34. Diffie&ndash;Hellman Key Exchange</div>
+      <div class="toc-item" onclick="goToSlide(35)">35. Why QUIC?</div>
+      <div class="toc-item" onclick="goToSlide(36)">36. QUIC Architecture</div>
+      <div class="toc-item" onclick="goToSlide(37)">37. QUIC vs TCP+TLS</div>
+    </div>
+
+    <div class="toc-section">
+      <div class="toc-section-title">Application and Synthesis</div>
+      <div class="toc-item" onclick="goToSlide(38)">38. Python TCP Server</div>
+      <div class="toc-item" onclick="goToSlide(39)">39. Hook Resolution: The Streaming Paradox</div>
+      <div class="toc-item" onclick="goToSlide(40)">40. Quiz: TCP Mechanics</div>
+      <div class="toc-item" onclick="goToSlide(41)">41. Quiz: UDP, TLS and QUIC</div>
+    </div>
+
+    <div class="toc-section">
+      <div class="toc-section-title">Reflection and Next Steps</div>
+      <div class="toc-item" onclick="goToSlide(42)">42. Key Conclusions</div>
+      <div class="toc-item" onclick="goToSlide(43)">43. Next Week and Seminar Preview</div>
+      <div class="toc-item" onclick="goToSlide(44)">44. Final Challenge and Resources</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<script>
+    let currentSlide = 1;
+    const totalSlides = 44;
+
+    function showSlide(n) {
+      const slides = document.querySelectorAll('.slide');
+      if (n > totalSlides) currentSlide = 1;
+      if (n < 1) currentSlide = totalSlides;
+
+      slides.forEach(slide => slide.classList.remove('active'));
+      if (slides[currentSlide - 1]) {
+        slides[currentSlide - 1].classList.add('active');
+      }
+
+      document.getElementById('slideCounter').textContent = `${currentSlide} / ${totalSlides}`;
+      document.getElementById('progressBar').style.width = `${(currentSlide / totalSlides) * 100}%`;
+
+      document.getElementById('prevBtn').disabled = currentSlide === 1;
+      document.getElementById('nextBtn').disabled = currentSlide === totalSlides;
+    }
+
+    function changeSlide(n) {
+      currentSlide += n;
+      showSlide(currentSlide);
+    }
+
+    function goToSlide(n) {
+      currentSlide = n;
+      showSlide(currentSlide);
+      closeTOC();
+    }
+
+    function openTOC() {
+      document.getElementById('tocModal').classList.add('show');
+    }
+
+    function closeTOC() {
+      document.getElementById('tocModal').classList.remove('show');
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    function checkQuiz(element, isCorrect) {
+      const container = element.closest('.quiz-container');
+      const options = container.querySelectorAll('.quiz-option');
+      const feedback = container.querySelector('.quiz-feedback');
+
+      options.forEach(opt => {
+        opt.style.pointerEvents = 'none';
+        if (opt === element) {
+          opt.classList.add(isCorrect ? 'correct' : 'incorrect');
+        }
+      });
+
+      if (isCorrect && feedback) {
+        feedback.classList.add('show');
+      }
+    }
+
+    function toggleReveal(btn) {
+      const content = btn.nextElementSibling;
+      content.classList.toggle('show');
+      btn.textContent = content.classList.contains('show') ? 'Hide Explanation' : 'Show Explanation';
+    }
+
+    function calculateThroughput() {
+      const rtt = parseInt(document.getElementById('rttSlider').value);
+      const scale = parseInt(document.getElementById('scaleSlider').value);
+
+      document.getElementById('rttValue').textContent = rtt;
+      document.getElementById('scaleValue').textContent = scale;
+
+      const effectiveWindow = 65535 * Math.pow(2, scale);
+      const throughputBps = (effectiveWindow * 8) / (rtt / 1000);
+      const throughputMbps = throughputBps / 1000000;
+
+      document.getElementById('windowSize').textContent = effectiveWindow.toLocaleString();
+      document.getElementById('maxThroughput').textContent = throughputMbps.toFixed(2);
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') {
+        e.preventDefault();
+        changeSlide(1);
+      }
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        changeSlide(-1);
+      }
+      if (e.key === 'Home') {
+        e.preventDefault();
+        goToSlide(1);
+      }
+      if (e.key === 'End') {
+        e.preventDefault();
+        goToSlide(totalSlides);
+      }
+      if (e.key === 'f' || e.key === 'F') {
+        e.preventDefault();
+        toggleFullscreen();
+      }
+      if (e.key === 't' || e.key === 'T') {
+        e.preventDefault();
+        openTOC();
+      }
+      if (e.key === 'Escape') {
+        closeTOC();
+      }
+    });
+
+    // Click modal background to close
+    document.getElementById('tocModal').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('tocModal')) {
+        closeTOC();
+      }
+    });
+
+    // Initialise
+    showSlide(currentSlide);
+    calculateThroughput();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="CSIE Faculty-ASE" name="author"/>
+<meta content="Revolvix" name="generator"/>
+<title>Week 13 – IoT and Security in Computer Networks | ASE-CSIE</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;family=Source+Serif+4:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+
+:root{--primary:#0f172a;--primary-light:#1e293b;--secondary:#0ea5e9;--secondary-dark:#0284c7;--accent:#f59e0b;--accent-warm:#ea580c;--success:#10b981;--success-dark:#059669;--danger:#ef4444;--danger-dark:#dc2626;--purple:#8b5cf6;--purple-dark:#7c3aed;--bg-light:#f8fafc;--bg-cool:#f0f9ff;--bg-warm:#fffbeb;--text-dark:#1e293b;--text-muted:#64748b;--border:#e2e8f0;--text-on-dark:#f1f5f9;--text-on-dark-muted:#cbd5e1;--text-on-dark-heading:#ffffff;--gradient-primary:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);--gradient-secondary:linear-gradient(135deg,#0ea5e9 0%,#0284c7 100%);--gradient-accent:linear-gradient(135deg,#f59e0b 0%,#ea580c 100%);--gradient-success:linear-gradient(135deg,#10b981 0%,#059669 100%);--gradient-purple:linear-gradient(135deg,#8b5cf6 0%,#7c3aed 100%);--shadow-sm:0 1px 2px 0 rgba(0,0,0,0.05);--shadow-md:0 4px 6px -1px rgba(0,0,0,0.1),0 2px 4px -1px rgba(0,0,0,0.06);--shadow-lg:0 10px 15px -3px rgba(0,0,0,0.1),0 4px 6px -2px rgba(0,0,0,0.05);--shadow-xl:0 20px 25px -5px rgba(0,0,0,0.1),0 10px 10px -5px rgba(0,0,0,0.04)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Inter',sans-serif;font-size:18px;line-height:1.7;color:var(--text-dark);background:var(--bg-light)}
+h1,h2,h3,h4,h5,h6{font-family:'Source Serif 4',serif;color:var(--primary);line-height:1.3}
+h1{font-size:2.75rem;font-weight:700}h2{font-size:2.25rem;font-weight:600}h3{font-size:1.75rem;font-weight:600}h4{font-size:1.35rem;font-weight:600}
+p{margin-bottom:1rem}
+a{color:var(--secondary);text-decoration:none;transition:color 0.2s ease}a:hover{color:var(--secondary-dark)}
+.presentation{width:100vw;height:100vh;position:relative;overflow:hidden}
+.slide{position:absolute;top:0;left:0;width:100%;height:100%;padding:4rem 4rem 5rem;display:none;flex-direction:column;background:var(--bg-light);overflow-y:auto}
+.slide.active{display:flex;animation:slideIn 0.45s cubic-bezier(0.4,0,0.2,1)}
+.slide.section-title{background:var(--gradient-primary);justify-content:center;align-items:center;text-align:center}
+.slide.section-title h1,.slide.section-title h2{color:var(--text-on-dark-heading)}
+.slide.section-title p{color:#e2e8f0;font-size:1.35rem;max-width:700px}
+.slide.section-title .section-number{color:var(--accent);font-size:1.1rem;font-weight:600;text-transform:uppercase;letter-spacing:3px;margin-bottom:1.5rem}
+@keyframes slideIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.fade-up{animation:fadeUp 0.6s cubic-bezier(0.4,0,0.2,1) forwards;opacity:0}
+.delay-1{animation-delay:0.1s}.delay-2{animation-delay:0.2s}.delay-3{animation-delay:0.3s}.delay-4{animation-delay:0.4s}.delay-5{animation-delay:0.5s}.delay-6{animation-delay:0.6s}
+#progressBar{position:fixed;top:0;left:0;height:4px;background:var(--gradient-secondary);z-index:1000;transition:width 0.3s ease}
+#slideCounter{position:fixed;top:1rem;right:1.5rem;font-family:'JetBrains Mono',monospace;font-size:0.9rem;color:var(--text-muted);z-index:1000;background:rgba(255,255,255,0.9);padding:0.35rem 0.75rem;border-radius:8px;box-shadow:var(--shadow-sm)}
+.course-id{position:fixed;top:1rem;left:1.5rem;font-size:0.85rem;font-weight:600;color:var(--primary);z-index:1000;background:rgba(255,255,255,0.9);padding:0.35rem 0.75rem;border-radius:8px;box-shadow:var(--shadow-sm)}
+.nav-buttons{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);display:flex;gap:0.75rem;z-index:1000}
+.nav-btn{width:48px;height:48px;border-radius:12px;border:none;background:var(--primary);color:white;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s ease;box-shadow:var(--shadow-md)}
+.nav-btn:hover{transform: scale(1.12);background:var(--primary-light)}.nav-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none}.nav-btn svg{width:20px;height:20px}
+.footer-attribution{position:fixed;bottom:1.5rem;left:1.5rem;font-size:0.8rem;color:var(--text-muted);z-index:999}
+.highlight-box{background:var(--gradient-secondary);color:white;padding:1.5rem;border-radius:16px;margin:1.25rem 0;box-shadow:var(--shadow-lg)}
+.highlight-box h4,.highlight-box p,.highlight-box strong,.highlight-box span,.highlight-box li{color:white}
+.definition-box{background:linear-gradient(135deg,#ecfdf5 0%,#d1fae5 100%);border-left:4px solid var(--success);padding:1.5rem;border-radius:0 16px 16px 0;margin:1.25rem 0}
+.definition-box h4{color:var(--success-dark);margin-bottom:0.5rem}
+.story-box{background:linear-gradient(135deg,#f5f3ff 0%,#ede9fe 100%);border-left:4px solid var(--purple);padding:1.5rem;border-radius:0 16px 16px 0;margin:1.25rem 0}
+.story-box h4{color:var(--purple-dark);margin-bottom:0.5rem}
+.warning-box{background:linear-gradient(135deg,#fffbeb 0%,#fef3c7 100%);border-left:4px solid var(--accent);padding:1.5rem;border-radius:0 16px 16px 0;margin:1.25rem 0}
+.warning-box h4{color:var(--accent-warm);margin-bottom:0.5rem}
+.insight-box{background:linear-gradient(135deg,#fef2f2 0%,#fee2e2 100%);border-left:4px solid var(--danger);padding:1.5rem;border-radius:0 16px 16px 0;margin:1.25rem 0}
+.insight-box h4{color:var(--danger-dark);margin-bottom:0.5rem}
+pre,.code-block{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#e2e8f0;padding:1.25rem;border-radius:12px;font-family:'JetBrains Mono',monospace;font-size:0.9rem;line-height:1.6;overflow-x:auto;margin:1rem 0;position:relative;white-space:pre;word-wrap:normal}
+.code-block[data-lang]::before{content:attr(data-lang);position:absolute;top:0.5rem;right:0.75rem;font-size:0.7rem;color:var(--text-on-dark-muted);text-transform:uppercase;letter-spacing:1px}
+.code-block .keyword{color:#f472b6}.code-block .string{color:#a5f3fc}.code-block .number{color:#fcd34d}.code-block .function{color:#93c5fd}.code-block .comment{color:#94a3b8;font-style:italic}.code-block .class{color:#c4b5fd}.code-block .dectimetor{color:#fcd34d}.code-block .builtin{color:#67e8f9}
+code{font-family:'JetBrains Mono',monospace;background:#e2e8f0;padding:0.15rem 0.4rem;border-radius:4px;font-size:0.9em;color:var(--primary)}
+.table-container{overflow-x:auto;margin:1.5rem 0;border-radius:16px;box-shadow:var(--shadow-lg)}
+table{width:100%;border-collapse:collapse;background:white}
+thead{background:var(--gradient-primary)}
+th{color:white;font-weight:600;text-transform:uppercase;font-size:0.8rem;letter-spacing:0.5px;padding:1rem 1.25rem;text-align:left}
+th:first-child{border-radius:16px 0 0 0}th:last-child{border-radius:0 16px 0 0}
+td{padding:1rem 1.25rem;border-bottom:1px solid var(--border)}
+tr:hover{background:var(--bg-cool)}
+tr:last-child td:first-child{border-radius:0 0 0 16px}tr:last-child td:last-child{border-radius:0 0 16px 0}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;margin:1.5rem 0}
+.card{background:white;border-radius:16px;padding:1.5rem;box-shadow:var(--shadow-md);border-left:4px solid var(--secondary);transition:all 0.3s ease}
+.card:hover{transform:translateY(-4px);box-shadow:var(--shadow-xl)}
+.card.accent{border-left-color:var(--accent)}.card.success{border-left-color:var(--success)}.card.danger{border-left-color:var(--danger)}.card.purple{border-left-color:var(--purple)}
+.card h4{margin-bottom:0.75rem}
+.card-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:1rem;font-size:1.5rem}
+.card-icon.blue{background:var(--bg-cool);color:var(--secondary)}.card-icon.amber{background:var(--bg-warm);color:var(--accent)}.card-icon.green{background:#ecfdf5;color:var(--success)}.card-icon.red{background:#fef2f2;color:var(--danger)}.card-icon.purple{background:#f5f3ff;color:var(--purple)}
+.two-columns{display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:start}
+.three-columns{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.diagram-container{margin:1.5rem 0;text-align:center}
+.diagram-container svg{max-width:100%;min-height:180px}
+.quiz-container{background:white;border-radius:16px;padding:1.5rem;box-shadow:var(--shadow-md);margin:1.5rem 0}
+.quiz-question{font-weight:600;margin-bottom:1rem;color:var(--primary)}
+.quiz-options{display:flex;flex-direction:column;gap:0.75rem}
+.quiz-option{padding:1rem 1.25rem;border:2px solid var(--border);border-radius:12px;cursor:pointer;transition:all 0.2s ease;display:flex;align-items:center;gap:0.75rem}
+.quiz-option:hover{border-color:var(--secondary);background:var(--bg-cool)}
+.quiz-option.correct{border-color:var(--success);background:#ecfdf5}
+.quiz-option.incorrect{border-color:var(--danger);background:#fef2f2}
+.quiz-option .option-marker{width:28px;height:28px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:0.85rem;flex-shrink:0}
+.quiz-feedback{margin-top:1rem;padding:1rem;border-radius:12px;display:none}
+.quiz-feedback.show{display:block}
+.quiz-feedback.correct{background:#ecfdf5;color:var(--success-dark);border:1px solid var(--success)}
+.quiz-feedback.incorrect{background:#fef2f2;color:var(--danger-dark);border:1px solid var(--danger)}
+.badge{display:inline-flex;align-items:center;padding:0.25rem 0.75rem;border-radius:20px;font-size:0.8rem;font-weight:600}
+.badge.blue{background:var(--bg-cool);color:var(--secondary)}.badge.green{background:#ecfdf5;color:var(--success-dark)}.badge.amber{background:var(--bg-warm);color:var(--accent-warm)}.badge.red{background:#fef2f2;color:var(--danger)}.badge.purple{background:#f5f3ff;color:var(--purple)}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1.5rem;margin:1.5rem 0}
+.stat-item{text-align:center;padding:1.5rem;background:white;border-radius:16px;box-shadow:var(--shadow-md)}
+.stat-value{font-family:'Source Serif 4',serif;font-size:2.5rem;font-weight:700;color:var(--secondary);line-height:1}
+.stat-label{font-size:0.9rem;color:var(--text-muted);margin-top:0.5rem}
+ul.check-list{list-style:none;margin-left:0}
+ul.check-list li{display:flex;align-items:flex-start;gap:0.75rem;margin-bottom:0.75rem}
+ul.check-list li::before{content:"✓";color:var(--success);font-weight:bold;flex-shrink:0}
+.toc-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(15,23,42,0.7);backdrop-filter:blur(8px);z-index:2000;display:none;align-items:center;justify-content:center}
+.toc-modal.show{display:flex}
+.toc-content{background:white;border-radius:20px;padding:2rem;max-width:800px;width:90%;max-height:85vh;overflow-y:auto;box-shadow:var(--shadow-xl);position:relative}
+.toc-content h2{margin-bottom:1.5rem}
+.toc-columns{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+.toc-section{margin-bottom:1.25rem}
+.toc-section-title{font-weight:600;color:var(--primary);margin-bottom:0.5rem;padding-bottom:0.5rem;border-bottom:2px solid var(--border);font-size:0.95rem}
+.toc-item{padding:0.4rem 0.75rem;cursor:pointer;border-radius:6px;transition:all 0.2s ease;display:flex;align-items:center;gap:0.5rem;font-size:0.9rem}
+.toc-item:hover{background:var(--bg-cool);color:var(--secondary)}
+.toc-item .slide-num{font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:var(--text-muted);width:28px}
+.close-toc{position:absolute;top:1rem;right:1rem;width:36px;height:36px;border-radius:50%;border:none;background:var(--bg-light);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s ease}
+.close-toc:hover{background:var(--danger);color:white}
+.timeline{display:flex;flex-direction:column;gap:1rem;margin:1rem 0}
+.timeline-item{display:flex;gap:1rem;align-items:flex-start}
+.timeline-year{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--secondary);min-width:60px}
+.timeline-content{flex:1;padding-left:1rem;border-left:3px solid var(--border)}
+@media(max-width:1200px){.slide{padding:3rem 3rem 4.5rem}h1{font-size:2.25rem}h2{font-size:1.85rem}.toc-columns{grid-template-columns:1fr}}
+@media(max-width:768px){.slide{padding:2.5rem 1.5rem 4.5rem}h1{font-size:1.85rem}h2{font-size:1.5rem}.two-columns,.three-columns{grid-template-columns:1fr}.card-grid{grid-template-columns:1fr}.nav-buttons{gap:0.5rem}.nav-btn{width:40px;height:40px}}
+@media print{.slide{position:relative!important;display:flex!important;page-break-after:always;height:auto;min-height:100vh}.nav-buttons,.toc-modal,#progressBar,#slideCounter,.course-id,.footer-attribution{display:none!important}}
+
+.reveal-btn{background:var(--gradient-secondary);color:white;border:none;padding:0.75rem 1.5rem;border-radius:12px;cursor:pointer;font-weight:600;font-size:1rem;transition:all 0.2s ease;margin:0.75rem 0}
+.reveal-btn:hover{transform:scale(1.05);box-shadow:var(--shadow-md)}
+.reveal-content{display:none;margin-top:1rem;padding:1rem;border-radius:12px;background:var(--bg-cool);border:1px solid var(--border)}
+.reveal-content.show{display:block}
+.interactive-panel{background:white;border-radius:16px;padding:1.5rem;box-shadow:var(--shadow-md);margin:1.5rem 0;border:2px solid var(--secondary)}
+.interactive-panel h4{color:var(--secondary-dark);margin-bottom:1rem}
+.interactive-panel input[type="range"]{width:100%;margin:0.5rem 0;accent-color:var(--secondary)}
+.interactive-panel input[type="text"]{border:2px solid var(--border);border-radius:8px;padding:0.6rem;font-family:'JetBrains Mono',monospace;font-size:0.95rem;width:100%}
+.interactive-panel .slider-row{display:flex;align-items:center;gap:1rem;margin-bottom:0.75rem}
+.interactive-panel .slider-label{min-width:180px;font-weight:600;font-size:1.05rem}
+.interactive-panel .slider-value{font-family:'JetBrains Mono',monospace;font-weight:700;min-width:50px;text-align:right;font-size:1.1rem;color:var(--secondary)}
+.interactive-panel .result-box{background:var(--bg-cool);padding:1rem;border-radius:12px;margin-top:1rem;font-size:1.1rem;line-height:1.6}
+
+</style>
+</head>
+<body>
+<div class="presentation">
+<div id="progressBar" role="progressbar" aria-valuemin="0" aria-valuemax="42"></div>
+<div id="slideCounter">1 / 42</div>
+<div class="course-id">ASE-CSIE &bull; Computer Networks</div>
+
+<div class="slide section-title active" data-slide="1">
+<div class="section-number">Week 13 of 14</div>
+<h1 class="fade-up">IoT and Security in Computer Networks</h1>
+<p class="fade-up delay-2">From smart thermometers to botnet armies &mdash; how the smallest devices create the largest attack surfaces</p>
+<p class="fade-up delay-4" style="font-size:1rem;color:var(--text-on-dark-muted);margin-top:2rem;">Computer Networks &bull; BSc Economic Informatics &bull; ASE Bucharest</p>
+</div>
+
+<div class="slide" data-slide="2">
+<h2 class="fade-up">The Casino Aquarium Hack</h2>
+<div class="story-box fade-up delay-1">
+<h4>A documented incident (2017)</h4>
+<p>A North American casino installed a smart fish-tank thermometer in its lobby. The device monitored water temperature, pH levels and feeding schedules &mdash; all transmitted to the cloud via the casino's corporate network.</p>
+<p>Attackers compromised the thermometer, used it as a pivot point and exfiltrated <strong>10 GB of high-roller data</strong> from the casino's internal database. The breach was detected only when anomalous outbound traffic was flagged by an external threat-intelligence firm.</p>
+</div>
+<div class="warning-box fade-up delay-3">
+<h4>The question we shall answer today</h4>
+<p>How did a <em>thermometer</em> provide a pathway into a secured financial database? And what architectural decisions would have prevented it? We shall return to this on slide 34.</p>
+</div>
+</div>
+
+<div class="slide" data-slide="3">
+<h2 class="fade-up">When IoT Becomes a Weapon: The Mirai Botnet</h2>
+<p class="fade-up delay-1">One compromised thermometer is unfortunate. What about <strong>600,000 compromised devices</strong>?</p>
+<div class="two-columns fade-up delay-2">
+<div>
+<div class="insight-box">
+<h4>Mirai (October 2016)</h4>
+<p>The Mirai malware scanned the internet for IoT devices using factory-default credentials (admin/admin, root/root). It infected cameras, routers and DVRs to build a botnet that launched a <strong>1.2 Tbps DDoS attack</strong> against Dyn DNS.</p>
+<p>The result: Twitter, Netflix, Reddit, GitHub and Spotify became unreachable across the eastern United States for most of a day.</p>
+</div>
+</div>
+<div>
+<div class="stat-grid">
+<div class="stat-item"><div class="stat-value">600K</div><div class="stat-label">infected devices</div></div>
+<div class="stat-item"><div class="stat-value">1.2</div><div class="stat-label">Tbps peak traffic</div></div>
+<div class="stat-item"><div class="stat-value">61</div><div class="stat-label">default credentials</div></div>
+<div class="stat-item"><div class="stat-value">$110M</div><div class="stat-label">estimated damage</div></div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="slide" data-slide="4">
+<h2 class="fade-up">What We Have Built So Far</h2>
+<p class="fade-up delay-1">Over twelve weeks we have assembled a complete networking toolkit. Today we apply it to a new domain.</p>
+<div class="highlight-box fade-up delay-2">
+<h4>Your knowledge stack entering Week 13</h4>
+<p><strong>Layers 1&ndash;4:</strong> Physical signalling, Ethernet framing, IP addressing, subnetting, NAT, routing (RIP, OSPF), TCP reliability, UDP speed, TLS encryption.</p>
+<p><strong>Layers 5&ndash;7:</strong> Session management, data serialisation, HTTP/REST, FTP, DNS resolution, SSH tunnels, email protocols (SMTP, POP3, IMAP).</p>
+<p><strong>Practical tools:</strong> Python sockets, Docker networking, Wireshark captures, Nginx reverse proxies, Docker Compose orchestration.</p>
+</div>
+<div class="story-box fade-up delay-3">
+<h4>The missing piece</h4>
+<p>Every protocol we have studied follows a <strong>request&ndash;response</strong> or <strong>client&ndash;server</strong> pattern. But what happens when 10,000 sensors must push data continuously to consumers who may join or leave at any moment &mdash; without knowing who those consumers are?</p>
+</div>
+</div>
+
+<div class="slide" data-slide="5">
+<h2 class="fade-up">Checkpoint: Before We Begin</h2>
+<div class="quiz-container fade-up delay-1">
+<div class="quiz-question">Which transport-layer protocol would you choose for a temperature sensor that sends a 20-byte reading every second?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkQuiz(this, false)"><span class="option-marker">A</span><span>TCP with a new connection per message &mdash; reliability is always the priority</span></div>
+<div class="quiz-option" onclick="checkQuiz(this, true)"><span class="option-marker">B</span><span>TCP with a persistent connection &mdash; amortise the handshake over thousands of messages</span></div>
+<div class="quiz-option" onclick="checkQuiz(this, false)"><span class="option-marker">C</span><span>UDP &mdash; sensor data is best treated as fire-and-forget</span></div>
+<div class="quiz-option" onclick="checkQuiz(this, false)"><span class="option-marker">D</span><span>TLS over UDP (DTLS) &mdash; encryption is the primary concern</span></div>
+</div>
+<div class="quiz-feedback correct">Correct. MQTT, the protocol we study today, runs over a <strong>persistent TCP connection</strong>. The three-way handshake cost (recall Week 8: SYN &rarr; SYN-ACK &rarr; ACK) is paid once; subsequent messages travel with minimal overhead. For tiny, frequent payloads, this amortisation is essential.</div>
+<div class="quiz-feedback incorrect">Not quite. Consider the overhead ratio: a 20-byte payload with a fresh TCP handshake every second wastes bandwidth. Pure UDP avoids the handshake but sacrifices delivery guarantees that matter for actuator commands. The practical solution &mdash; and the approach MQTT takes &mdash; is a <strong>persistent TCP connection</strong> established once and reused indefinitely.</div>
+</div>
+</div>
+
+<div class="slide" data-slide="6">
+<h2 class="fade-up">The Problem: Why HTTP Polling Fails for IoT</h2>
+<p class="fade-up delay-1">Suppose you manage 500 temperature sensors in a factory. With HTTP, you face two unappealing options:</p>
+<div class="card-grid fade-up delay-2">
+<div class="card danger">
+<div class="card-icon red">&#x23F1;</div>
+<h4>Option A: Polling</h4>
+<p>The server asks each sensor "any new data?" every second. That is <strong>500 HTTP requests/s</strong> &mdash; each with headers, TCP overhead and wasted roundtrips when nothing has changed.</p>
+</div>
+<div class="card danger">
+<div class="card-icon red">&#x1F517;</div>
+<h4>Option B: WebSockets</h4>
+<p>Better, but HTTP was designed for document retrieval, not for routing messages between thousands of producers and consumers. There is no native concept of <em>topics</em> or <em>quality of service levels</em>.</p>
+</div>
+</div>
+<div class="warning-box fade-up delay-3">
+<h4>What we need</h4>
+<p>A protocol that is <strong>lightweight</strong> (minimal header overhead), <strong>push-based</strong> (sensors publish when data arrives), and <strong>decoupled</strong> (publishers and subscribers need not know about each other). This cannot be solved with our existing toolkit.</p>
+</div>
+</div>
+
+<div class="slide" data-slide="7">
+<h2 class="fade-up">From Request&ndash;Response to Publish&ndash;Subscribe</h2>
+<div class="two-columns fade-up delay-1">
+<div>
+<h3>What we know</h3>
+<div class="diagram-container">
+<svg viewBox="0 0 380 180" style="max-width:100%">
+<rect x="20" y="60" width="120" height="55" rx="12" fill="#e2e8f0" stroke="#0f172a" stroke-width="2"/>
+<text x="80" y="92" text-anchor="middle" font-size="14" font-weight="600" fill="#0f172a">Client</text>
+<rect x="240" y="60" width="120" height="55" rx="12" fill="#e2e8f0" stroke="#0f172a" stroke-width="2"/>
+<text x="300" y="92" text-anchor="middle" font-size="14" font-weight="600" fill="#0f172a">Server</text>
+<line x1="140" y1="78" x2="240" y2="78" stroke="#0ea5e9" stroke-width="2" marker-end="url(#a1)"/>
+<text x="190" y="72" text-anchor="middle" font-size="12" font-weight="600" fill="#0284c7">REQUEST</text>
+<line x1="240" y1="100" x2="140" y2="100" stroke="#10b981" stroke-width="2" marker-end="url(#a2)"/>
+<text x="190" y="118" text-anchor="middle" font-size="12" font-weight="600" fill="#059669">RESPONSE</text>
+<defs><marker id="a1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6Z" fill="#0ea5e9"/></marker>
+<marker id="a2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6Z" fill="#10b981"/></marker></defs>
+</svg>
+</div>
+<p>Client initiates. Server responds. One-to-one. Tightly coupled.</p>
+</div>
+<div>
+<h3>What we need</h3>
+<div class="diagram-container">
+<svg viewBox="0 0 400 230" style="max-width:100%">
+<rect x="10" y="15" width="100" height="40" rx="10" fill="#dbeafe" stroke="#0ea5e9" stroke-width="2"/>
+<text x="60" y="40" text-anchor="middle" font-size="13" font-weight="600" fill="#0f172a">Sensor A</text>
+<rect x="10" y="90" width="100" height="40" rx="10" fill="#dbeafe" stroke="#0ea5e9" stroke-width="2"/>
+<text x="60" y="115" text-anchor="middle" font-size="13" font-weight="600" fill="#0f172a">Sensor B</text>
+<rect x="150" y="48" width="100" height="55" rx="14" fill="#0f172a" stroke="#0ea5e9" stroke-width="2"/>
+<text x="200" y="80" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">Broker</text>
+<rect x="290" y="15" width="100" height="40" rx="10" fill="#ecfdf5" stroke="#10b981" stroke-width="2"/>
+<text x="340" y="40" text-anchor="middle" font-size="13" font-weight="600" fill="#0f172a">Dashboard</text>
+<rect x="290" y="90" width="100" height="40" rx="10" fill="#ecfdf5" stroke="#10b981" stroke-width="2"/>
+<text x="340" y="115" text-anchor="middle" font-size="13" font-weight="600" fill="#0f172a">Actuator</text>
+<rect x="290" y="165" width="100" height="40" rx="10" fill="#ecfdf5" stroke="#10b981" stroke-width="2"/>
+<text x="340" y="190" text-anchor="middle" font-size="13" font-weight="600" fill="#0f172a">Logger</text>
+<line x1="110" y1="35" x2="150" y2="65" stroke="#0ea5e9" stroke-width="2" marker-end="url(#a1)"/>
+<line x1="110" y1="110" x2="150" y2="85" stroke="#0ea5e9" stroke-width="2" marker-end="url(#a1)"/>
+<line x1="250" y1="65" x2="290" y2="35" stroke="#10b981" stroke-width="2" marker-end="url(#a2)"/>
+<line x1="250" y1="80" x2="290" y2="110" stroke="#10b981" stroke-width="2" marker-end="url(#a2)"/>
+<line x1="250" y1="90" x2="290" y2="185" stroke="#10b981" stroke-width="2" marker-end="url(#a2)"/>
+</svg>
+</div>
+<p>Publishers push. Subscribers receive. Many-to-many. Fully decoupled.</p>
+</div>
+</div>
+</div>
+
+<div class="slide section-title" data-slide="8">
+<div class="section-number">Part I</div>
+<h2>IoT Fundamentals</h2>
+<p>Architecture, the publish/subscribe model and the MQTT protocol</p>
+</div>
+
+<div class="slide" data-slide="9">
+<h2 class="fade-up">What Is an IoT System?</h2>
+<div class="definition-box fade-up delay-1">
+<h4>Definition</h4>
+<p>An <strong>Internet of Things (IoT)</strong> system is a distributed system composed of resource-constrained devices that communicate via event-driven messaging, enabling remote observation, control and automation of physical processes.</p>
+</div>
+<p class="fade-up delay-2">The defining characteristics go beyond "things with internet access":</p>
+<div class="card-grid fade-up delay-3">
+<div class="card"><div class="card-icon blue">&#x1F4E1;</div>
+<h4>Event-driven communication</h4>
+<p>Data flows when events occur (temperature changes, motion detected) &mdash; not on a fixed polling schedule.</p></div>
+<div class="card accent"><div class="card-icon amber">&#x1F50C;</div>
+<h4>Decoupled components</h4>
+<p>Producers and consumers operate independently. A sensor need not know who reads its values.</p></div>
+<div class="card success"><div class="card-icon green">&#x2699;</div>
+<h4>Automation loops</h4>
+<p>Sensor data triggers actuator responses (e.g. temperature exceeds 28&deg;C &rarr; fan activates) without human intervention.</p></div>
+</div>
+</div>
+
+<div class="slide" data-slide="10">
+<h2 class="fade-up">Generic IoT Architecture</h2>
+<p class="fade-up delay-1">A typical IoT deployment contains four functional components. No component communicates directly with another &mdash; all messages flow through the broker.</p>
+<div class="diagram-container fade-up delay-2">
+<svg viewBox="0 0 800 280" style="max-width:100%">
+<rect x="20" y="90" width="150" height="75" rx="14" fill="#dbeafe" stroke="#0ea5e9" stroke-width="2"/>
+<text x="95" y="120" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">Sensor</text>
+<text x="95" y="145" text-anchor="middle" font-size="12" font-weight="600" fill="#64748b">publishes telemetry</text>
+<rect x="280" y="60" width="180" height="110" rx="16" fill="#0f172a" stroke="#0ea5e9" stroke-width="3"/>
+<text x="370" y="100" text-anchor="middle" font-size="18" font-weight="700" fill="#ffffff">MQTT Broker</text>
+<text x="370" y="125" text-anchor="middle" font-size="13" font-weight="600" fill="#94a3b8">routes by topic</text>
+<text x="370" y="148" text-anchor="middle" font-size="13" font-weight="600" fill="#94a3b8">no business logic</text>
+<rect x="580" y="25" width="180" height="65" rx="14" fill="#ecfdf5" stroke="#10b981" stroke-width="2"/>
+<text x="670" y="55" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">Actuator</text>
+<text x="670" y="75" text-anchor="middle" font-size="12" font-weight="600" fill="#64748b">reacts to thresholds</text>
+<rect x="580" y="120" width="180" height="65" rx="14" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="2"/>
+<text x="670" y="150" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">Dashboard</text>
+<text x="670" y="170" text-anchor="middle" font-size="12" font-weight="600" fill="#64748b">visualises data</text>
+<line x1="170" y1="125" x2="280" y2="110" stroke="#0ea5e9" stroke-width="2" marker-end="url(#a1)"/>
+<text x="220" y="108" text-anchor="middle" font-size="12" font-weight="600" fill="#0284c7">PUBLISH</text>
+<line x1="460" y1="95" x2="580" y2="58" stroke="#10b981" stroke-width="2" marker-end="url(#a2)"/>
+<text x="520" y="65" text-anchor="middle" font-size="12" font-weight="600" fill="#059669">DELIVER</text>
+<line x1="460" y1="130" x2="580" y2="152" stroke="#8b5cf6" stroke-width="2" marker-end="url(#a3)"/>
+<text x="520" y="152" text-anchor="middle" font-size="12" font-weight="600" fill="#7c3aed">DELIVER</text>
+<defs><marker id="a3" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6Z" fill="#8b5cf6"/></marker></defs>
+<rect x="180" y="220" width="440" height="38" rx="10" fill="#fffbeb" stroke="#f59e0b" stroke-width="1.5"/>
+<text x="400" y="244" text-anchor="middle" font-size="13" font-weight="600" fill="#92400e">A running broker does not guarantee that publishers or subscribers are connected</text>
+</svg>
+</div>
+</div>
+
+<div class="slide" data-slide="11">
+<h2 class="fade-up">The Publish/Subscribe Model</h2>
+<p class="fade-up delay-1">IoT communication is asynchronous, message-oriented and <strong>spatially and temporally decoupled</strong>. What does each form of decoupling mean?</p>
+<button class="reveal-btn fade-up delay-2" onclick="toggleReveal(this)">Reveal the three forms of decoupling</button>
+<div class="reveal-content">
+<div class="card-grid">
+<div class="card"><h4>Spatial decoupling</h4><p>The publisher does not know the network address of any subscriber. The broker handles routing. A new subscriber can appear without the publisher being reconfigured.</p></div>
+<div class="card accent"><h4>Temporal decoupling</h4><p>Publisher and subscriber need not be online simultaneously. With retained messages (covered on slide 15), a subscriber can receive the last published value even if it connects after the publisher has disconnected.</p></div>
+<div class="card success"><h4>Synchronisation decoupling</h4><p>Publishing and receiving are non-blocking operations. A publisher does not wait for subscribers to acknowledge receipt (the broker manages QoS on each link independently).</p></div>
+</div>
+</div>
+</div>
+
+<div class="slide" data-slide="12">
+<h2 class="fade-up">MQTT: Message Queuing Telemetry Transport</h2>
+<div class="two-columns fade-up delay-1">
+<div>
+<div class="definition-box">
+<h4>Protocol identity</h4>
+<p><strong>MQTT</strong> is a lightweight publish/subscribe messaging protocol designed for constrained devices and low-bandwidth, high-latency networks. It was created at IBM in 1999 and standardised as OASIS MQTT v3.1.1 (2014) and MQTT v5.0 (2019).</p>
+</div>
+<p>Key technical characteristics:</p>
+<ul class="check-list">
+<li>Runs over <strong>TCP</strong> (port 1883) or <strong>TLS</strong> (port 8883)</li>
+<li>Fixed header: only <strong>2 bytes</strong> minimum</li>
+<li>Topic-based routing with wildcards</li>
+<li>Three Quality of Service (QoS) levels</li>
+<li>Retained messages and Last Will and Testament (LWT)</li>
+</ul>
+</div>
+<div>
+<div class="warning-box">
+<h4>Security limitation</h4>
+<p>MQTT has <strong>no built-in encryption</strong>. By default, all messages &mdash; including credentials &mdash; travel in plaintext. TLS must be configured separately on the broker and all clients. We shall formalise this on slide 27.</p>
+</div>
+<div class="story-box">
+<h4>Why "Message Queuing"?</h4>
+<p>Despite the name, MQTT is not a traditional message queue. Messages are not stored for retrieval by consumers (except retained messages). The broker routes in real time; it does not persist a backlog.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="slide" data-slide="13">
+<h2 class="fade-up">MQTT Topics and Wildcards</h2>
+<p class="fade-up delay-1">Topics are hierarchical UTF-8 strings separated by <code>/</code>. Two wildcards are available for subscriptions only (never for publishing):</p>
+<div class="two-columns fade-up delay-2">
+<div>
+<div class="card"><h4><code>+</code> &mdash; single-level wildcard</h4>
+<p>Matches exactly one level. <code>factory/+/temperature</code> matches <code>factory/floor1/temperature</code> and <code>factory/floor2/temperature</code> but not <code>factory/floor1/sensor/temperature</code>.</p></div>
+<div class="card accent"><h4><code>#</code> &mdash; multi-level wildcard</h4>
+<p>Matches zero or more levels. Must be the last character. <code>factory/#</code> matches <code>factory</code>, <code>factory/floor1</code>, <code>factory/floor1/temperature</code> and anything below <code>factory/</code>.</p></div>
+</div>
+<div>
+<div class="interactive-panel">
+<h4>Topic Matcher</h4>
+<p style="font-size:0.95rem;">Type a topic and see which subscription filters match it:</p>
+<input type="text" id="mqttTopic" value="factory/floor1/sensor/temp" oninput="matchMqttTopics()" style="width:100%;padding:0.6rem;border:2px solid var(--border);border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:0.95rem;margin-bottom:0.75rem"/>
+<div id="mqttResults" style="display:grid;grid-template-columns:1fr 1fr;gap:0.4rem;font-size:0.95rem;"></div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="slide" data-slide="14">
+<h2 class="fade-up">MQTT Quality of Service Levels</h2>
+<p class="fade-up delay-1">QoS governs the delivery guarantee between a single client and the broker &mdash; not end-to-end between publisher and subscriber.</p>
+<div class="table-container fade-up delay-2">
+<table>
+<thead><tr><th>QoS</th><th>Name</th><th>Guarantee</th><th>Use case</th></tr></thead>
+<tbody>
+<tr><td><strong>0</strong></td><td>At most once</td><td>Fire and forget. No acknowledgement. Message may be lost.</td><td>Ambient telemetry (temperature, humidity) where occasional loss is acceptable</td></tr>
+<tr><td><strong>1</strong></td><td>At least once</td><td>Broker acknowledges with PUBACK. Message may be delivered more than once.</td><td>Sensor alerts, status updates &mdash; duplicates are tolerable</td></tr>
+<tr><td><strong>2</strong></td><td>Exactly once</td><td>Four-step handshake (PUBLISH &rarr; PUBREC &rarr; PUBREL &rarr; PUBCOMP). No loss, no duplication.</td><td>Financial transactions, actuator commands where duplication is dangerous</td></tr>
+</tbody>
+</table>
+</div>
+<div class="insight-box fade-up delay-3">
+<h4>Common misconception</h4>
+<p>QoS 2 does <strong>not</strong> guarantee exactly-once delivery across the entire path from publisher to subscriber. It guarantees exactly-once between <em>each</em> client and the broker independently. If the publisher uses QoS 2 but the subscriber uses QoS 0, the subscriber may still miss messages.</p>
+</div>
+</div>
+
+<div class="slide" data-slide="15">
+<h2 class="fade-up">Retained Messages and Last Will and Testament</h2>
+<div class="two-columns fade-up delay-1">
+<div>
+<div class="definition-box">
+<h4>Retained messages</h4>
+<p>When a message is published with the <strong>retain flag</strong> set, the broker stores the last message for that topic. Any new subscriber immediately receives the retained message upon subscribing &mdash; no need to wait for the next publication.</p>
+<p>This solves the "late joiner" problem: a dashboard that connects after the sensor has already published still receives the current state.</p>
+</div>
+</div>
+<div>
+<div class="definition-box">
+<h4>Last Will and Testament (LWT)</h4>
+<p>A client can register a "will" message with the broker at connection time. If the client disconnects unexpectedly (network failure, crash), the broker automatically publishes the LWT message to the specified topic.</p>
+<p>This enables presence detection: subscribers know when a device has gone offline without polling.</p>
+</div>
+</div>
+</div>
+<button class="reveal-btn fade-up delay-2" onclick="toggleReveal(this)">Predict: what happens if a sensor publishes with retain=true, then disconnects?</button>
+<div class="reveal-content">
+<p><strong>Answer:</strong> The broker stores the last retained message. New subscribers to that topic immediately receive it. The LWT message (if configured) is also published to the LWT topic, informing subscribers that the sensor is offline. Both mechanisms work independently.</p>
+</div>
+</div>
+
+<div class="slide" data-slide="16">
+<h2 class="fade-up">Checkpoint: MQTT Misconceptions</h2>
+<div class="quiz-container fade-up delay-1">
+<div class="quiz-question">A publisher sends a message with QoS 2 to topic <code>sensors/temp</code>. A subscriber is subscribed to <code>sensors/temp</code> with QoS 0. How many times will the subscriber receive the message?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkQuiz(this, false)"><span class="option-marker">A</span><span>Exactly once &mdash; QoS 2 guarantees this end-to-end</span></div>
+<div class="quiz-option" onclick="checkQuiz(this, false)"><span class="option-marker">B</span><span>Exactly once &mdash; the broker upgrades the subscriber's QoS</span></div>
+<div class="quiz-option" onclick="checkQuiz(this, true)"><span class="option-marker">C</span><span>At most once &mdash; the effective QoS is the minimum of the two</span></div>
+<div class="quiz-option" onclick="checkQuiz(this, false)"><span class="option-marker">D</span><span>Zero times &mdash; QoS mismatch causes the message to be dropped</span></div>
+</div>
+<div class="quiz-feedback correct">Correct. The broker delivers to each subscriber at the <strong>minimum of the publisher's QoS and the subscriber's QoS</strong>. Since the subscriber requested QoS 0, delivery is "at most once" regardless of what the publisher used. The four-step QoS 2 handshake occurs only between the publisher and the broker.</div>
+<div class="quiz-feedback incorrect">Not quite. QoS in MQTT is negotiated on each link independently. The broker accepts the message from the publisher with QoS 2 (four-step handshake), but then delivers to each subscriber at <strong>the subscriber's requested QoS</strong>, which in this case is 0 &mdash; "at most once", with no acknowledgement.</div>
+</div>
+</div>
+
+<div class="slide" data-slide="17">
+<h2 class="fade-up">IoT Scenario: Sensor, Actuator, Broker</h2>
+<p class="fade-up delay-1">The course starter kit includes a working IoT deployment with three Docker containers. This is the architecture you will run in the seminar.</p>
+<div class="diagram-container fade-up delay-2">
+<svg viewBox="0 0 800 240" style="max-width:100%">
+<rect x="10" y="30" width="200" height="180" rx="16" fill="#f0f9ff" stroke="#0ea5e9" stroke-width="2" stroke-dasharray="8,4"/>
+<text x="110" y="55" text-anchor="middle" font-size="13" font-weight="700" fill="#0284c7">Docker Host</text>
+<rect x="30" y="70" width="160" height="55" rx="12" fill="#dbeafe" stroke="#0ea5e9" stroke-width="2"/>
+<text x="110" y="95" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a">sensor</text>
+<text x="110" y="115" text-anchor="middle" font-size="12" font-weight="600" fill="#64748b">Python + paho-mqtt</text>
+<rect x="30" y="140" width="160" height="55" rx="12" fill="#ecfdf5" stroke="#10b981" stroke-width="2"/>
+<text x="110" y="165" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a">actuator</text>
+<text x="110" y="185" text-anchor="middle" font-size="12" font-weight="600" fill="#64748b">Python + paho-mqtt</text>
+<rect x="300" y="60" width="200" height="100" rx="16" fill="#0f172a" stroke="#0ea5e9" stroke-width="3"/>
+<text x="400" y="100" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff">Eclipse Mosquitto</text>
+<text x="400" y="125" text-anchor="middle" font-size="13" font-weight="600" fill="#94a3b8">broker &bull; port 1883</text>
+<line x1="190" y1="95" x2="300" y2="95" stroke="#0ea5e9" stroke-width="2" marker-end="url(#a1)"/>
+<text x="245" y="88" text-anchor="middle" font-size="12" font-weight="600" fill="#0284c7">sensors/temperature</text>
+<line x1="300" y1="135" x2="190" y2="165" stroke="#10b981" stroke-width="2" marker-end="url(#a2)"/>
+<text x="248" y="160" text-anchor="middle" font-size="12" font-weight="600" fill="#059669">actuators/fan</text>
+<rect x="570" y="65" width="210" height="90" rx="14" fill="#fffbeb" stroke="#f59e0b" stroke-width="2"/>
+<text x="675" y="90" text-anchor="middle" font-size="13" font-weight="700" fill="#92400e">What to observe:</text>
+<text x="675" y="112" text-anchor="middle" font-size="12" font-weight="600" fill="#0f172a">Sensor publishes periodically</text>
+<text x="675" y="130" text-anchor="middle" font-size="12" font-weight="600" fill="#0f172a">Actuator reacts to threshold</text>
+<text x="675" y="148" text-anchor="middle" font-size="12" font-weight="600" fill="#0f172a">Broker holds no business logic</text>
+</svg>
+</div>
+<div class="code-block fade-up delay-3" data-lang="bash">docker compose up -d
+<span class="comment"># Starts broker, sensor and actuator containers</span>
+<span class="comment"># Sensor publishes to sensors/temperature every 1 s</span>
+<span class="comment"># Actuator subscribes; triggers fan when temp &gt; 28.0</span></div>
+</div>
+
+<div class="slide section-title" data-slide="18">
+<div class="section-number">Part II</div>
+<h2>Security and Vulnerability Testing</h2>
+<p>Why IoT amplifies every risk factor &mdash; and what we can do about it</p>
+</div>
+
+<div class="slide" data-slide="19">
+<h2 class="fade-up">Why Security Is Not Optional</h2>
+<p class="fade-up delay-1">IoT does not introduce new vulnerability <em>types</em> &mdash; it amplifies existing ones through four multipliers:</p>
+<div class="card-grid fade-up delay-2">
+<div class="card danger"><div class="card-icon red">&#x1F4F6;</div>
+<h4>Massive attack surface</h4>
+<p>Every connected device is a potential entry point. A factory with 500 sensors has 500 attack surfaces instead of one server.</p></div>
+<div class="card accent"><div class="card-icon amber">&#x1F512;</div>
+<h4>Weak default configurations</h4>
+<p>Most IoT devices ship with default credentials and no encryption. Mirai exploited exactly this: 61 default username/password pairs covered the majority of consumer IoT devices in 2016.</p></div>
+<div class="card purple"><div class="card-icon purple">&#x1F504;</div>
+<h4>Permanent connectivity</h4>
+<p>Unlike a laptop that is occasionally offline, IoT devices are always reachable. An unpatched sensor is perpetually exposed.</p></div>
+<div class="card"><div class="card-icon blue">&#x26A0;</div>
+<h4>Difficult to update</h4>
+<p>Many IoT devices lack secure over-the-air (OTA) update mechanisms. Firmware patches require physical access or are simply never applied.</p></div>
+</div>
+</div>
+
+<div class="slide" data-slide="20">
+<h2 class="fade-up">What Is a Vulnerability?</h2>
+<div class="definition-box fade-up delay-1">
+<h4>Formal definition</h4>
+<p>A <strong>vulnerability</strong> is a weakness in an information system, system security procedure, internal control or implementation that could be exploited by a threat source (NIST SP 800-30). It may arise from an implementation error, a misconfiguration or a risky design decision.</p>
+</div>
+<p class="fade-up delay-2">Vulnerabilities can lead to four categories of impact:</p>
+<div class="stat-grid fade-up delay-3">
+<div class="stat-item"><div class="stat-value" style="font-size:1.8rem;color:var(--danger);">&#x1F6AB;</div><div class="stat-label">Unauthorised access</div></div>
+<div class="stat-item"><div class="stat-value" style="font-size:1.8rem;color:var(--accent-warm);">&#x1F4BB;</div><div class="stat-label">Arbitrary code execution</div></div>
+<div class="stat-item"><div class="stat-value" style="font-size:1.8rem;color:var(--purple);">&#x1F4E4;</div><div class="stat-label">Data exfiltration</div></div>
+<div class="stat-item"><div class="stat-value" style="font-size:1.8rem;color:var(--secondary);">&#x23F8;</div><div class="stat-label">Service unavailability</div></div>
+</div>
+<button class="reveal-btn fade-up delay-4" onclick="toggleReveal(this)">Think: is a default password a vulnerability or a misconfiguration?</button>
+<div class="reveal-content">
+<p><strong>Both.</strong> A default password is a <em>design decision</em> by the manufacturer (shipping with a known credential) that becomes a <em>misconfiguration</em> when the operator fails to change it. The Mirai botnet exploited precisely this overlap: the vulnerability existed at the design level, but the misconfiguration at the operational level made it exploitable at scale.</p>
+</div>
+</div>
+
+<div class="slide" data-slide="21">
+<h2 class="fade-up">The Vulnerability Lifecycle</h2>
+<p class="fade-up delay-1">A vulnerability is not an isolated event but a process that unfolds over time:</p>
+<div class="diagram-container fade-up delay-2">
+<svg viewBox="0 0 800 180" style="max-width:100%">
+<rect x="10" y="50" width="130" height="60" rx="12" fill="#dbeafe" stroke="#0ea5e9" stroke-width="2"/>
+<text x="75" y="75" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a">Asset exists</text>
+<text x="75" y="95" text-anchor="middle" font-size="12" font-weight="600" fill="#64748b">device deployed</text>
+<rect x="170" y="50" width="130" height="60" rx="12" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+<text x="235" y="75" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a">Vulnerability</text>
+<text x="235" y="95" text-anchor="middle" font-size="12" font-weight="600" fill="#64748b">flaw discovered</text>
+<rect x="330" y="50" width="130" height="60" rx="12" fill="#fee2e2" stroke="#ef4444" stroke-width="2"/>
+<text x="395" y="75" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a">Exploitation</text>
+<text x="395" y="95" text-anchor="middle" font-size="12" font-weight="600" fill="#64748b">attack succeeds</text>
+<rect x="490" y="50" width="130" height="60" rx="12" fill="#fef2f2" stroke="#dc2626" stroke-width="2"/>
+<text x="555" y="75" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a">Impact</text>
+<text x="555" y="95" text-anchor="middle" font-size="12" font-weight="600" fill="#64748b">damage occurs</text>
+<rect x="650" y="50" width="130" height="60" rx="12" fill="#ecfdf5" stroke="#10b981" stroke-width="2"/>
+<text x="715" y="75" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a">Mitigation</text>
+<text x="715" y="95" text-anchor="middle" font-size="12" font-weight="600" fill="#64748b">patch applied</text>
+<line x1="140" y1="80" x2="170" y2="80" stroke="#64748b" stroke-width="2" marker-end="url(#a4)"/>
+<line x1="300" y1="80" x2="330" y2="80" stroke="#64748b" stroke-width="2" marker-end="url(#a4)"/>
+<line x1="460" y1="80" x2="490" y2="80" stroke="#64748b" stroke-width="2" marker-end="url(#a4)"/>
+<line x1="620" y1="80" x2="650" y2="80" stroke="#64748b" stroke-width="2" marker-end="url(#a4)"/>
+<defs><marker id="a4" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6Z" fill="#64748b"/></marker></defs>
+<text x="400" y="160" text-anchor="middle" font-size="13" font-weight="600" fill="#dc2626">For IoT devices, the gap between &ldquo;vulnerability&rdquo; and &ldquo;mitigation&rdquo; is often measured in years</text>
+</svg>
+</div>
+<div class="story-box fade-up delay-3">
+<h4>Real example: CVE-2011-2523 (vsftpd 2.3.4 backdoor)</h4>
+<p>A malicious backdoor was inserted into the source code of vsftpd version 2.3.4. Sending a username containing <code>:)</code> opened a root shell on port 6200. The vulnerability was discovered within days, but unpatched instances remained exploitable for years. You will exploit this exact vulnerability in the S13 seminar.</p>
+</div>
+</div>
+
+<div class="slide" data-slide="22">
+<h2 class="fade-up">OWASP IoT Top 10 (2018)</h2>
+<p class="fade-up delay-1">The Open Web Application Security Project (OWASP) maintains a curated list of the ten most common IoT vulnerabilities. Five of these are directly relevant to our course:</p>
+<div class="table-container fade-up delay-2">
+<table>
+<thead><tr><th>#</th><th>Vulnerability</th><th>IoT example</th></tr></thead>
+<tbody>
+<tr><td><strong>I1</strong></td><td>Weak, guessable or hardcoded passwords</td><td>Mirai exploited 61 default credentials</td></tr>
+<tr><td><strong>I2</strong></td><td>Insecure network services</td><td>Unencrypted MQTT on port 1883</td></tr>
+<tr><td><strong>I3</strong></td><td>Insecure ecosystem interfaces</td><td>Unauthenticated REST APIs on dashboards</td></tr>
+<tr><td><strong>I4</strong></td><td>Lack of secure update mechanism</td><td>No OTA update path; firmware never patched</td></tr>
+<tr><td><strong>I7</strong></td><td>Insecure data transfer and storage</td><td>Plaintext MQTT credentials in Wireshark captures</td></tr>
+</tbody>
+</table>
+</div>
+<div class="warning-box fade-up delay-3">
+<h4>Note</h4>
+<p>The complete OWASP IoT Top 10 also includes I5 (use of insecure components), I6 (insufficient privacy protection), I8 (lack of device management), I9 (insecure default settings) and I10 (lack of physical hardening). For the full list, consult <code>owasp.org/www-project-internet-of-things</code>.</p>
+</div>
+</div>
+
+<div class="slide" data-slide="23">
+<h2 class="fade-up">Attack Surface Analysis</h2>
+<p class="fade-up delay-1">The attack surface of an IoT deployment grows with device count, open ports and poor segmentation. Adjust the sliders to explore the relationships:</p>
+<div class="interactive-panel fade-up delay-2">
+<h4>IoT Attack Surface Calculator</h4>
+<div class="slider-row"><span class="slider-label">Connected devices</span><input type="range" id="devSlider" min="1" max="500" value="50" oninput="updateAttackSurface()"/><span class="slider-value" id="devCount">50</span></div>
+<div class="slider-row"><span class="slider-label">Open ports per device</span><input type="range" id="portSlider" min="1" max="20" value="5" oninput="updateAttackSurface()"/><span class="slider-value" id="portCount">5</span></div>
+<div class="slider-row"><span class="slider-label">Network segments</span><input type="range" id="segSlider" min="1" max="20" value="1" oninput="updateAttackSurface()"/><span class="slider-value" id="segCount">1</span></div>
+<div class="slider-row"><span class="slider-label">% with default passwords</span><input type="range" id="defPwdSlider" min="0" max="100" value="70" oninput="updateAttackSurface()"/><span class="slider-value" id="defPwdPct">70</span></div>
+<div class="result-box" id="attackResult"></div>
+</div>
+</div>
+
+<div class="slide" data-slide="24">
+<h2 class="fade-up">Checkpoint: Scanning Concepts</h2>
+<div class="quiz-container fade-up delay-1">
+<div class="quiz-question">You run <code>nmap -sV -p 2121 172.20.0.12</code> against the lab's vsftpd container. Nmap reports the port as "open". What does this <em>technically</em> mean?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkQuiz(this, true)"><span class="option-marker">A</span><span>The TCP three-way handshake completed &mdash; a service is listening and accepted the connection</span></div>
+<div class="quiz-option" onclick="checkQuiz(this, false)"><span class="option-marker">B</span><span>The port responded with a SYN-ACK but no service banner was received</span></div>
+<div class="quiz-option" onclick="checkQuiz(this, false)"><span class="option-marker">C</span><span>The port is reachable but a firewall is inspecting the traffic before forwarding</span></div>
+<div class="quiz-option" onclick="checkQuiz(this, false)"><span class="option-marker">D</span><span>The service is running and does not require authentication</span></div>
+</div>
+<div class="quiz-feedback correct">Correct. In nmap terminology, "open" means the TCP handshake completed successfully: the target sent SYN-ACK and a connection was established. The <code>-sV</code> flag additionally probes for a version banner (e.g. "220 (vsFTPd 2.3.4)"). "Open" says nothing about authentication requirements &mdash; only that a process is listening.</div>
+<div class="quiz-feedback incorrect">Not quite. Nmap defines three port states: <strong>open</strong> (handshake completed, service listening), <strong>closed</strong> (target responded with RST &mdash; reachable but nothing listening) and <strong>filtered</strong> (no response at all, likely blocked by a firewall). "Open" specifically means the full TCP handshake succeeded.</div>
+</div>
+</div>
+
+<div class="slide section-title" data-slide="25">
+<div class="section-number">Part III</div>
+<h2>Formalising IoT Security</h2>
+<p>Protocol structures, TLS, vulnerability taxonomies and defence-in-depth</p>
+</div>
+
+<div class="slide" data-slide="26">
+<h2 class="fade-up">MQTT Packet Structure</h2>
+<p class="fade-up delay-1">Every MQTT packet begins with a <strong>fixed header</strong> of 2&ndash;5 bytes. Compare this with HTTP, where headers alone can exceed 500 bytes:</p>
+<div class="diagram-container fade-up delay-2">
+<svg viewBox="0 0 800 200" style="max-width:90%">
+<text x="400" y="20" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">MQTT Fixed Header (minimum 2 bytes)</text>
+<!-- Byte 1 -->
+<rect x="50" y="40" width="320" height="55" rx="8" fill="#dbeafe" stroke="#0ea5e9" stroke-width="2"/>
+<text x="210" y="60" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a">Byte 1: Control</text>
+<rect x="60" y="70" width="140" height="20" rx="4" fill="#0ea5e9"/>
+<text x="130" y="84" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">Type (4 bits)</text>
+<rect x="210" y="70" width="40" height="20" rx="4" fill="#f59e0b"/>
+<text x="230" y="84" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">DUP</text>
+<rect x="258" y="70" width="50" height="20" rx="4" fill="#8b5cf6"/>
+<text x="283" y="84" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">QoS</text>
+<rect x="316" y="70" width="44" height="20" rx="4" fill="#10b981"/>
+<text x="338" y="84" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">RET</text>
+<!-- Byte 2+ -->
+<rect x="400" y="40" width="350" height="55" rx="8" fill="#ecfdf5" stroke="#10b981" stroke-width="2"/>
+<text x="575" y="60" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a">Bytes 2&ndash;5: Remaining Length</text>
+<text x="575" y="82" text-anchor="middle" font-size="12" font-weight="600" fill="#64748b">Variable-length encoding (1&ndash;4 bytes)</text>
+<!-- Payload -->
+<rect x="50" y="115" width="700" height="50" rx="8" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="2"/>
+<text x="400" y="140" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a">Variable Header + Payload</text>
+<text x="400" y="158" text-anchor="middle" font-size="12" font-weight="600" fill="#64748b">Topic name (UTF-8) + message data &mdash; content depends on packet type</text>
+</svg>
+</div>
+<div class="highlight-box fade-up delay-3">
+<h4>Overhead comparison</h4>
+<p>MQTT fixed header: <strong>2 bytes</strong>. HTTP/1.1 GET request (headers alone): typically <strong>200&ndash;800 bytes</strong>. For a 20-byte sensor reading, MQTT's overhead is roughly 1:10; HTTP's overhead can exceed 10:1. This is why MQTT dominates constrained-device communication.</p>
+</div>
+</div>
+
+<div class="slide" data-slide="27">
+<h2 class="fade-up">Securing MQTT with TLS</h2>
+<p class="fade-up delay-1">Since MQTT has no built-in encryption (recall slide 12), transport security must be provided by TLS. The convention established by IANA assigns <strong>port 8883</strong> for MQTT over TLS &mdash; sometimes called MQTTS.</p>
+<div class="two-columns fade-up delay-2">
+<div>
+<div class="card danger"><h4>Without TLS (port 1883)</h4>
+<p>A Wireshark capture reveals the full topic name, the message payload and even the username and password in plaintext. This is exactly what OWASP I2 and I7 warn about.</p></div>
+<div class="card success"><h4>With TLS (port 8883)</h4>
+<p>Wireshark shows only the TLS handshake and encrypted application data. Topic names, payloads and credentials are invisible to an eavesdropper.</p></div>
+</div>
+<div>
+<div class="warning-box">
+<h4>Recall from Week 8</h4>
+<p>TLS (Transport Layer Security) establishes an encrypted channel via a handshake that negotiates cipher suites, exchanges certificates and derives session keys. The mechanism is identical whether the application protocol is HTTP, SMTP or MQTT &mdash; TLS operates at the transport boundary.</p>
+</div>
+<p>Mosquitto broker configuration for TLS:</p>
+<div class="code-block" data-lang="config">listener 8883
+certfile /certs/server.crt
+keyfile /certs/server.key
+cafile /certs/ca.crt
+require_certificate false</div>
+</div>
+</div>
+</div>
+
+<div class="slide" data-slide="28">
+<h2 class="fade-up">Vulnerability Testing: A Taxonomy</h2>
+<p class="fade-up delay-1">Three progressively deeper activities share similar tools but differ in scope and intent:</p>
+<div class="card-grid fade-up delay-2">
+<div class="card"><div class="card-icon blue">&#x1F50D;</div>
+<h4>Vulnerability scanning</h4>
+<p>Automated tool runs against a target to identify <em>known</em> vulnerabilities (CVEs). No exploitation attempted. Example: <code>nmap --script vuln</code>.</p></div>
+<div class="card accent"><div class="card-icon amber">&#x1F4CB;</div>
+<h4>Vulnerability assessment</h4>
+<p>Scanning plus analysis: prioritising vulnerabilities by severity, assessing business impact and recommending remediations. The output is a report, not an exploit.</p></div>
+<div class="card danger"><div class="card-icon red">&#x1F3AF;</div>
+<h4>Penetration testing</h4>
+<p>Controlled exploitation of identified vulnerabilities to demonstrate real impact. The tester follows the same workflow as an attacker: reconnaissance &rarr; scanning &rarr; enumeration &rarr; exploitation &rarr; reporting.</p></div>
+</div>
+<div class="insight-box fade-up delay-3">
+<h4>Legal constraint</h4>
+<p>Penetration testing without explicit, written authorisation from the system owner is a criminal offence in most jurisdictions, including Romania (Legea 161/2003, art. 42&ndash;46). Our seminar lab runs entirely in local Docker containers to ensure legal compliance.</p>
+</div>
+</div>
+
+<div class="slide" data-slide="29">
+<h2 class="fade-up">The Penetration Testing Workflow</h2>
+<p class="fade-up delay-1">The S13 seminar follows the classic four-phase workflow used by professional testers:</p>
+<div class="diagram-container fade-up delay-2">
+<svg viewBox="0 0 800 170" style="max-width:100%">
+<rect x="10" y="30" width="170" height="65" rx="12" fill="#dbeafe" stroke="#0ea5e9" stroke-width="2"/>
+<text x="95" y="55" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a">1. Reconnaissance</text>
+<text x="95" y="78" text-anchor="middle" font-size="12" font-weight="600" fill="#64748b">nmap -sn (host discovery)</text>
+<rect x="210" y="30" width="170" height="65" rx="12" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+<text x="295" y="55" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a">2. Scanning</text>
+<text x="295" y="78" text-anchor="middle" font-size="12" font-weight="600" fill="#64748b">nmap -sV -p- (ports)</text>
+<rect x="410" y="30" width="170" height="65" rx="12" fill="#fee2e2" stroke="#ef4444" stroke-width="2"/>
+<text x="495" y="55" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a">3. Enumeration</text>
+<text x="495" y="78" text-anchor="middle" font-size="12" font-weight="600" fill="#64748b">NSE scripts, nikto</text>
+<rect x="610" y="30" width="170" height="65" rx="12" fill="#fef2f2" stroke="#dc2626" stroke-width="2"/>
+<text x="695" y="55" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a">4. Exploitation</text>
+<text x="695" y="78" text-anchor="middle" font-size="12" font-weight="600" fill="#64748b">Python exploit script</text>
+<line x1="180" y1="62" x2="210" y2="62" stroke="#64748b" stroke-width="2" marker-end="url(#a4)"/>
+<line x1="380" y1="62" x2="410" y2="62" stroke="#64748b" stroke-width="2" marker-end="url(#a4)"/>
+<line x1="580" y1="62" x2="610" y2="62" stroke="#64748b" stroke-width="2" marker-end="url(#a4)"/>
+<rect x="10" y="115" width="770" height="40" rx="10" fill="#ecfdf5" stroke="#10b981" stroke-width="1.5"/>
+<text x="395" y="140" text-anchor="middle" font-size="13" font-weight="600" fill="#059669">Lab target: Docker containers (DVWA, WebGoat, vsftpd 2.3.4) on 172.20.0.0/24 &mdash; isolated, local, legal</text>
+</svg>
+</div>
+</div>
+
+<div class="slide" data-slide="30">
+<h2 class="fade-up">Defence-in-Depth</h2>
+<p class="fade-up delay-1">No single security measure is sufficient. Defence-in-depth applies <strong>multiple overlapping controls</strong> so that the failure of any one layer does not compromise the entire system.</p>
+<div class="diagram-container fade-up delay-2">
+<svg viewBox="0 0 600 280" style="max-width:90%">
+<ellipse cx="300" cy="140" rx="280" ry="130" fill="#fef2f2" stroke="#ef4444" stroke-width="2"/>
+<text x="300" y="30" text-anchor="middle" font-size="14" font-weight="700" fill="#dc2626">Network segmentation &amp; firewalls</text>
+<ellipse cx="300" cy="145" rx="210" ry="100" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+<text x="300" y="65" text-anchor="middle" font-size="14" font-weight="700" fill="#92400e">TLS encryption &amp; certificate pinning</text>
+<ellipse cx="300" cy="150" rx="145" ry="70" fill="#ecfdf5" stroke="#10b981" stroke-width="2"/>
+<text x="300" y="100" text-anchor="middle" font-size="14" font-weight="700" fill="#059669">Authentication &amp; ACLs</text>
+<ellipse cx="300" cy="155" rx="75" ry="38" fill="#dbeafe" stroke="#0ea5e9" stroke-width="2"/>
+<text x="300" y="150" text-anchor="middle" font-size="14" font-weight="700" fill="#0284c7">Input</text>
+<text x="300" y="168" text-anchor="middle" font-size="14" font-weight="700" fill="#0284c7">validation</text>
+</svg>
+</div>
+<p class="fade-up delay-3">Hardening means reducing the attack surface: removing unnecessary functionality, applying the principle of least privilege and ensuring that every exposed service is both authenticated and encrypted.</p>
+</div>
+
+<div class="slide section-title" data-slide="31">
+<div class="section-number">Part IV</div>
+<h2>Application: Code and Practice</h2>
+<p>Python implementations, hardening checklists and the hook resolved</p>
+</div>
+
+<div class="slide" data-slide="32">
+<!-- LIVE CODING: see instructor guide -->
+<h2 class="fade-up">Python: Publishing Sensor Data with MQTT</h2>
+<p class="fade-up delay-1">The course starter kit includes a sensor container that uses <code>paho-mqtt</code>. Here is the core logic:</p>
+<div class="code-block fade-up delay-2" data-lang="python"><span class="keyword">import</span> paho.mqtt.client <span class="keyword">as</span> mqtt
+<span class="keyword">import</span> time
+<span class="keyword">import</span> random
+
+<span class="comment"># Configuration</span>
+BROKER = <span class="string">"broker"</span>
+PORT   = <span class="number">1883</span>
+TOPIC  = <span class="string">"sensors/temperature"</span>
+
+<span class="comment"># Create the client and connect</span>
+client = mqtt.Client(
+    callback_api_version=mqtt.CallbackAPIVersion.VERSION2
+)
+client.connect(BROKER, PORT, <span class="number">60</span>)
+client.loop_start()
+
+<span class="comment"># Publish readings in an infinite loop</span>
+<span class="keyword">while</span> <span class="builtin">True</span>:
+    value = <span class="builtin">round</span>(
+        <span class="number">24.0</span> + random.uniform(-<span class="number">0.8</span>, <span class="number">0.8</span>),
+        <span class="number">2</span>
+    )
+    client.publish(TOPIC, <span class="builtin">str</span>(value))
+    time.sleep(<span class="number">1</span>)</div>
+<div class="story-box fade-up delay-3">
+<h4>What to notice</h4>
+<p>The publisher never addresses a specific consumer. It publishes to a <strong>topic</strong>; the broker handles distribution. Adding a new subscriber (a dashboard, a logger, an actuator) requires no changes to this code.</p>
+</div>
+</div>
+
+<div class="slide" data-slide="33">
+<h2 class="fade-up">Python: A Minimal Port Scanner</h2>
+<p class="fade-up delay-1">In the seminar, you will write this from scratch. It combines TCP socket knowledge from Week 2 with the security concepts from today:</p>
+<div class="code-block fade-up delay-2" data-lang="python"><span class="keyword">import</span> socket
+
+TARGET  = <span class="string">"172.20.0.10"</span>
+TIMEOUT = <span class="number">0.2</span>
+
+<span class="keyword">def</span> <span class="function">scan_port</span>(ip: <span class="builtin">str</span>, port: <span class="builtin">int</span>) -> <span class="builtin">bool</span>:
+    <span class="string">"""Attempt a TCP connect to (ip, port)."""</span>
+    s = socket.socket(
+        socket.AF_INET,
+        socket.SOCK_STREAM
+    )
+    s.settimeout(TIMEOUT)
+
+    <span class="comment"># connect_ex returns 0 on success</span>
+    result = s.connect_ex((ip, port))
+    s.close()
+
+    <span class="keyword">return</span> result == <span class="number">0</span>
+
+<span class="comment"># Scan ports 1 to 1024</span>
+<span class="keyword">for</span> port <span class="keyword">in</span> <span class="builtin">range</span>(<span class="number">1</span>, <span class="number">1025</span>):
+    <span class="keyword">if</span> scan_port(TARGET, port):
+        <span class="builtin">print</span>(<span class="string">f"[OPEN] {port}"</span>)</div>
+<div class="warning-box fade-up delay-3">
+<h4>Limitations of this approach</h4>
+<p>This scanner detects only TCP ports in the "open" state. It cannot detect UDP services, stealth-scan filtered ports or perform version fingerprinting. For those capabilities, you will use <code>nmap</code> in the seminar.</p>
+</div>
+</div>
+
+<div class="slide" data-slide="34">
+<h2 class="fade-up">The Casino Revisited: What Went Wrong</h2>
+<p class="fade-up delay-1">We now have the vocabulary to diagnose the aquarium hack from slide 2:</p>
+<div class="card-grid fade-up delay-2">
+<div class="card danger"><div class="card-icon red">&#x1F41F;</div>
+<h4>Flat network (no segmentation)</h4>
+<p>The thermometer sat on the <strong>same network segment</strong> as the high-roller database. Once the device was compromised, lateral movement required no additional barrier. Defence-in-depth Layer 1 (slide 30) was absent.</p></div>
+<div class="card accent"><div class="card-icon amber">&#x1F513;</div>
+<h4>Default credentials (OWASP I1)</h4>
+<p>The thermometer likely shipped with factory-default credentials and was never reconfigured. The exact vector Mirai exploited at scale, here exploited against a single target.</p></div>
+<div class="card purple"><div class="card-icon purple">&#x1F4E4;</div>
+<h4>No egress monitoring</h4>
+<p>10 GB of data were exfiltrated before detection. The casino had no outbound traffic analysis on its IoT segment &mdash; because there was no separate IoT segment to monitor.</p></div>
+</div>
+<div class="highlight-box fade-up delay-3">
+<h4>The fix</h4>
+<p>Network segmentation (isolate IoT devices on their own VLAN), mandatory credential rotation, TLS on all IoT communication and egress monitoring on the IoT segment. Every countermeasure maps to one of the defence-in-depth layers.</p>
+</div>
+</div>
+
+<div class="slide" data-slide="35">
+<h2 class="fade-up">Hardening Measures: A Practical Checklist</h2>
+<p class="fade-up delay-1">Hardening means reducing the attack surface systematically. For each measure below, predict <em>which</em> defence-in-depth layer it belongs to before revealing the answer.</p>
+<div class="card-grid fade-up delay-2">
+<div class="card"><h4>Change all default credentials</h4>
+<button class="reveal-btn" onclick="toggleReveal(this)" style="font-size:0.9rem;padding:0.5rem 1rem;">Reveal layer</button>
+<div class="reveal-content"><p><strong>Authentication &amp; ACLs</strong> &mdash; the innermost defensive ring. Eliminates OWASP I1.</p></div></div>
+<div class="card accent"><h4>Enable TLS on MQTT (port 8883)</h4>
+<button class="reveal-btn" onclick="toggleReveal(this)" style="font-size:0.9rem;padding:0.5rem 1rem;">Reveal layer</button>
+<div class="reveal-content"><p><strong>TLS encryption</strong> &mdash; the second ring. Prevents eavesdropping (OWASP I2, I7). Recall our Mosquitto configuration from slide 27.</p></div></div>
+<div class="card success"><h4>Place IoT devices on a separate VLAN</h4>
+<button class="reveal-btn" onclick="toggleReveal(this)" style="font-size:0.9rem;padding:0.5rem 1rem;">Reveal layer</button>
+<div class="reveal-content"><p><strong>Network segmentation</strong> &mdash; the outermost ring. Limits lateral movement even if a device is compromised. This single measure would have stopped the casino aquarium hack.</p></div></div>
+<div class="card danger"><h4>Validate all MQTT payloads</h4>
+<button class="reveal-btn" onclick="toggleReveal(this)" style="font-size:0.9rem;padding:0.5rem 1rem;">Reveal layer</button>
+<div class="reveal-content"><p><strong>Input validation</strong> &mdash; the innermost core. Prevents injection attacks via crafted MQTT messages targeting subscribers that parse payload data.</p></div></div>
+</div>
+</div>
+
+<div class="slide" data-slide="36">
+<h2 class="fade-up">Applying Security Concepts</h2>
+<div class="quiz-container fade-up delay-1">
+<div class="quiz-question">A factory's MQTT broker is configured on port 1883 (plaintext). An attacker on the same network segment runs Wireshark. Which of the following can the attacker observe?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkQuiz(this, false)"><span class="option-marker">A</span><span>Only the IP addresses and port numbers &mdash; MQTT encrypts the application payload by default</span></div>
+<div class="quiz-option" onclick="checkQuiz(this, false)"><span class="option-marker">B</span><span>Topic names only &mdash; message payloads are encrypted at the broker level</span></div>
+<div class="quiz-option" onclick="checkQuiz(this, true)"><span class="option-marker">C</span><span>Everything: topic names, message payloads, client IDs and credentials (if sent)</span></div>
+<div class="quiz-option" onclick="checkQuiz(this, false)"><span class="option-marker">D</span><span>Nothing useful &mdash; MQTT uses application-layer obfuscation even without TLS</span></div>
+</div>
+<div class="quiz-feedback correct">Correct. On port 1883 (no TLS), MQTT is entirely plaintext. A Wireshark capture reveals topic names, payload data, client identifiers, CONNECT packets with usernames and passwords &mdash; everything. This is precisely OWASP I2 (insecure network services) and I7 (insecure data transfer). The mitigation is TLS on port 8883.</div>
+<div class="quiz-feedback incorrect">Not quite. MQTT has <strong>no built-in encryption or obfuscation</strong>. Without TLS, every byte is visible in a network capture. This includes credentials in the CONNECT packet, topic names in PUBLISH packets and the full message payload. You will verify this yourself using Wireshark in the seminar.</div>
+</div>
+</div>
+
+<div class="slide section-title" data-slide="37">
+<div class="section-number">Part V</div>
+<h2>Transfer and Reflection</h2>
+<p>Connections across the course, the seminar ahead and what to remember</p>
+</div>
+
+<div class="slide" data-slide="38">
+<h2 class="fade-up">Where Does This Connect?</h2>
+<p class="fade-up delay-1">Week 13 sits at the intersection of nearly everything we have studied. Here are the direct links:</p>
+<div class="table-container fade-up delay-2">
+<table>
+<thead><tr><th>Today's concept</th><th>Built on</th><th>Week</th></tr></thead>
+<tbody>
+<tr><td>MQTT runs over TCP</td><td>TCP reliability, persistent connections</td><td>Week 8</td></tr>
+<tr><td>TLS for MQTT (port 8883)</td><td>TLS handshake, certificate exchange</td><td>Week 8</td></tr>
+<tr><td>Port scanning with Python sockets</td><td><code>socket.connect_ex()</code>, timeouts</td><td>Week 2&ndash;3</td></tr>
+<tr><td>Docker container networking</td><td>Bridge networks, port mapping, <code>-p</code></td><td>Week 0</td></tr>
+<tr><td>DNS as attack target (Mirai &rarr; Dyn)</td><td>DNS resolution, authoritative servers</td><td>Week 11</td></tr>
+</tbody>
+</table>
+</div>
+<div class="story-box fade-up delay-3">
+<h4>Looking ahead</h4>
+<p>Week 14 is the revision lecture. Every concept from today &mdash; pub/sub, MQTT QoS, attack surface, vulnerability lifecycle, defence-in-depth &mdash; is examinable. The seminar project (if IoT-themed) builds directly on the sensor/actuator/broker architecture from today's slide 17.</p>
+</div>
+</div>
+
+<div class="slide" data-slide="39">
+<h2 class="fade-up">Seminar 13: Penetration Testing Lab</h2>
+<p class="fade-up delay-1">The accompanying seminar is a five-stage hands-on exercise in a controlled Docker environment:</p>
+<div class="timeline fade-up delay-2">
+<div class="timeline-item"><div class="timeline-year">Stage 1</div><div class="timeline-content"><strong>Infrastructure setup</strong> &mdash; Start DVWA, WebGoat and vulnerable vsftpd (2.3.4) containers. Verify HTTP/FTP access.</div></div>
+<div class="timeline-item"><div class="timeline-year">Stage 2</div><div class="timeline-content"><strong>Network scanning</strong> &mdash; Use <code>nmap</code> on 172.20.0.0/24. Write a Python port scanner from scratch.</div></div>
+<div class="timeline-item"><div class="timeline-year">Stage 3</div><div class="timeline-content"><strong>Vulnerability enumeration</strong> &mdash; NSE scripts, <code>nikto</code> web scanner, manual banner grabbing with <code>curl</code> and <code>nc</code>.</div></div>
+<div class="timeline-item"><div class="timeline-year">Stage 4</div><div class="timeline-content"><strong>Controlled exploitation</strong> &mdash; Trigger the vsftpd 2.3.4 backdoor (CVE-2011-2523), SQL injection in DVWA, XSS demonstration.</div></div>
+<div class="timeline-item"><div class="timeline-year">Stage 5</div><div class="timeline-content"><strong>Exploit scripting</strong> &mdash; Write a complete Python exploit that automates the vsftpd backdoor: connect, trigger, obtain shell.</div></div>
+</div>
+<div class="warning-box fade-up delay-3">
+<h4>Ethical and legal reminder</h4>
+<p>All seminar activities run exclusively on <strong>local Docker containers</strong>. Running these techniques on networks or systems you do not own is a criminal offence (Romania: Legea 161/2003, art. 42&ndash;46).</p>
+</div>
+</div>
+
+<div class="slide" data-slide="40">
+<h2 class="fade-up">Key Takeaways</h2>
+<div class="card-grid fade-up delay-1">
+<div class="card"><div class="card-icon blue">&#x1F4E1;</div>
+<h4>IoT = distributed + decoupled</h4>
+<p>IoT systems use publish/subscribe communication through a broker. Components are spatially, temporally and synchronously decoupled.</p></div>
+<div class="card accent"><div class="card-icon amber">&#x1F4E8;</div>
+<h4>MQTT is minimal by design</h4>
+<p>2-byte minimum header, topic-based routing, three QoS levels. Runs over TCP (1883) or TLS (8883). No built-in security.</p></div>
+<div class="card danger"><div class="card-icon red">&#x26A0;</div>
+<h4>IoT amplifies risk</h4>
+<p>Massive attack surface, default credentials, permanent connectivity and difficult patching multiply every vulnerability.</p></div>
+<div class="card success"><div class="card-icon green">&#x1F6E1;</div>
+<h4>Defence-in-depth is the answer</h4>
+<p>Network segmentation, TLS encryption, authentication/ACLs and input validation &mdash; multiple overlapping layers, not a single magic solution.</p></div>
+</div>
+</div>
+
+<div class="slide" data-slide="41">
+<h2 class="fade-up">Synthesis: Bringing It Together</h2>
+<div class="quiz-container fade-up delay-1">
+<div class="quiz-question">An IoT deployment has 200 sensors on a flat network with default credentials, communicating via MQTT on port 1883. Which <em>single</em> change would produce the greatest security improvement?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkQuiz(this, false)"><span class="option-marker">A</span><span>Switch from QoS 0 to QoS 2 for all messages</span></div>
+<div class="quiz-option" onclick="checkQuiz(this, false)"><span class="option-marker">B</span><span>Add retained messages so the dashboard always has the latest state</span></div>
+<div class="quiz-option" onclick="checkQuiz(this, true)"><span class="option-marker">C</span><span>Place all IoT devices on a separate network segment with firewall rules</span></div>
+<div class="quiz-option" onclick="checkQuiz(this, false)"><span class="option-marker">D</span><span>Upgrade to MQTT v5.0 for enhanced authentication</span></div>
+</div>
+<div class="quiz-feedback correct">Correct. Network segmentation addresses the broadest category of risk: it prevents lateral movement (the casino hack), limits the blast radius of any compromise and creates a chokepoint where monitoring can be applied. QoS changes affect reliability, not security. MQTT v5.0 improves authentication but does not prevent network-level attacks. Segmentation is the most impactful single intervention.</div>
+<div class="quiz-feedback incorrect">Consider which change addresses the most attack vectors simultaneously. QoS governs delivery guarantees, not security. Retained messages are a feature, not a defence. MQTT v5.0 authentication helps but only secures the broker connection. <strong>Network segmentation</strong> limits lateral movement, creates monitoring boundaries and reduces the attack surface across all 200 devices at once &mdash; the most impactful single change.</div>
+</div>
+<div class="highlight-box fade-up delay-2">
+<h4>Resources for further study</h4>
+<p>MQTT specification: <code>mqtt.org/mqtt-specification</code> &bull; OWASP IoT: <code>owasp.org/www-project-internet-of-things</code> &bull; Mirai analysis: Antonakakis et al., <em>Understanding the Mirai Botnet</em>, USENIX Security 2017 &bull; Course starter kit: <code>assets/scenario-iot-basic/</code></p>
+</div>
+</div>
+
+<div class="slide section-title" data-slide="42">
+<div class="section-number">End of Week 13</div>
+<h1 class="fade-up">Questions?</h1>
+<p class="fade-up delay-2">Next week: <strong>Week 14 &mdash; Revision</strong></p>
+<p class="fade-up delay-3" style="font-size:1rem;color:var(--text-on-dark-muted);margin-top:2rem;">Seminar 13: Penetration testing lab &bull; Seminar 14: Team project assessment</p>
+</div>
+
+<div class="toc-modal" id="tocModal">
+<div class="toc-content">
+<button class="close-toc" onclick="toggleTOC()" title="Close">&#x2715;</button>
+<h2>&#x1F4D1; Contents</h2>
+<div class="toc-columns">
+<div>
+<div class="toc-section">
+<div class="toc-section-title">Opening &mdash; Why This Matters</div>
+<div class="toc-item" onclick="goToSlide(1)"><span class="slide-num">01</span>Title</div>
+<div class="toc-item" onclick="goToSlide(2)"><span class="slide-num">02</span>The Casino Aquarium Hack</div>
+<div class="toc-item" onclick="goToSlide(3)"><span class="slide-num">03</span>Mirai Botnet</div>
+</div>
+<div class="toc-section">
+<div class="toc-section-title">Prior Knowledge &amp; Conflict</div>
+<div class="toc-item" onclick="goToSlide(4)"><span class="slide-num">04</span>What We Have Built So Far</div>
+<div class="toc-item" onclick="goToSlide(5)"><span class="slide-num">05</span>Checkpoint Quiz</div>
+<div class="toc-item" onclick="goToSlide(6)"><span class="slide-num">06</span>Why HTTP Polling Fails</div>
+<div class="toc-item" onclick="goToSlide(7)"><span class="slide-num">07</span>Publish&ndash;Subscribe Paradigm</div>
+</div>
+<div class="toc-section">
+<div class="toc-section-title">Part I &mdash; IoT Fundamentals</div>
+<div class="toc-item" onclick="goToSlide(8)"><span class="slide-num">08</span>Section: IoT Fundamentals</div>
+<div class="toc-item" onclick="goToSlide(9)"><span class="slide-num">09</span>What Is an IoT System?</div>
+<div class="toc-item" onclick="goToSlide(10)"><span class="slide-num">10</span>Generic IoT Architecture</div>
+<div class="toc-item" onclick="goToSlide(11)"><span class="slide-num">11</span>The Publish/Subscribe Model</div>
+<div class="toc-item" onclick="goToSlide(12)"><span class="slide-num">12</span>MQTT Protocol</div>
+<div class="toc-item" onclick="goToSlide(13)"><span class="slide-num">13</span>Topics and Wildcards</div>
+<div class="toc-item" onclick="goToSlide(14)"><span class="slide-num">14</span>Quality of Service Levels</div>
+<div class="toc-item" onclick="goToSlide(15)"><span class="slide-num">15</span>Retained Messages &amp; LWT</div>
+<div class="toc-item" onclick="goToSlide(16)"><span class="slide-num">16</span>MQTT Misconceptions Quiz</div>
+<div class="toc-item" onclick="goToSlide(17)"><span class="slide-num">17</span>IoT Scenario: Docker Lab</div>
+</div>
+</div>
+<div>
+<div class="toc-section">
+<div class="toc-section-title">Part II &mdash; Security &amp; Vulnerability Testing</div>
+<div class="toc-item" onclick="goToSlide(18)"><span class="slide-num">18</span>Section: Security</div>
+<div class="toc-item" onclick="goToSlide(19)"><span class="slide-num">19</span>Why Security Is Not Optional</div>
+<div class="toc-item" onclick="goToSlide(20)"><span class="slide-num">20</span>What Is a Vulnerability?</div>
+<div class="toc-item" onclick="goToSlide(21)"><span class="slide-num">21</span>Vulnerability Lifecycle</div>
+<div class="toc-item" onclick="goToSlide(22)"><span class="slide-num">22</span>OWASP IoT Top 10</div>
+<div class="toc-item" onclick="goToSlide(23)"><span class="slide-num">23</span>Attack Surface Calculator</div>
+<div class="toc-item" onclick="goToSlide(24)"><span class="slide-num">24</span>Scanning Concepts Quiz</div>
+</div>
+<div class="toc-section">
+<div class="toc-section-title">Part III &mdash; Formalising IoT Security</div>
+<div class="toc-item" onclick="goToSlide(25)"><span class="slide-num">25</span>Section: Formalising</div>
+<div class="toc-item" onclick="goToSlide(26)"><span class="slide-num">26</span>MQTT Packet Structure</div>
+<div class="toc-item" onclick="goToSlide(27)"><span class="slide-num">27</span>Securing MQTT with TLS</div>
+<div class="toc-item" onclick="goToSlide(28)"><span class="slide-num">28</span>Vulnerability Testing Taxonomy</div>
+<div class="toc-item" onclick="goToSlide(29)"><span class="slide-num">29</span>Penetration Testing Workflow</div>
+<div class="toc-item" onclick="goToSlide(30)"><span class="slide-num">30</span>Defence-in-Depth</div>
+</div>
+<div class="toc-section">
+<div class="toc-section-title">Part IV &mdash; Code &amp; Practice</div>
+<div class="toc-item" onclick="goToSlide(31)"><span class="slide-num">31</span>Section: Application</div>
+<div class="toc-item" onclick="goToSlide(32)"><span class="slide-num">32</span>Python: MQTT Sensor</div>
+<div class="toc-item" onclick="goToSlide(33)"><span class="slide-num">33</span>Python: Port Scanner</div>
+<div class="toc-item" onclick="goToSlide(34)"><span class="slide-num">34</span>Casino Revisited (Hook Resolved)</div>
+<div class="toc-item" onclick="goToSlide(35)"><span class="slide-num">35</span>Hardening Checklist</div>
+<div class="toc-item" onclick="goToSlide(36)"><span class="slide-num">36</span>Security Application Quiz</div>
+</div>
+<div class="toc-section">
+<div class="toc-section-title">Part V &mdash; Transfer &amp; Reflection</div>
+<div class="toc-item" onclick="goToSlide(37)"><span class="slide-num">37</span>Section: Reflection</div>
+<div class="toc-item" onclick="goToSlide(38)"><span class="slide-num">38</span>Cross-Connections</div>
+<div class="toc-item" onclick="goToSlide(39)"><span class="slide-num">39</span>Seminar 13 Preview</div>
+<div class="toc-item" onclick="goToSlide(40)"><span class="slide-num">40</span>Key Takeaways</div>
+<div class="toc-item" onclick="goToSlide(41)"><span class="slide-num">41</span>Synthesis Quiz &amp; Resources</div>
+<div class="toc-item" onclick="goToSlide(42)"><span class="slide-num">42</span>Questions</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="footer-attribution">by Revolvix</div>
+<div class="nav-buttons">
+<button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)" title="Previous"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button>
+<button class="nav-btn" onclick="toggleTOC()" title="Contents"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+<button class="nav-btn" onclick="toggleFullscreen()" title="Fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg></button>
+<button class="nav-btn" id="nextBtn" onclick="changeSlide(1)" title="Next"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></button>
+</div>
+</div>
+<script>
+const totalSlides = 42;
+let currentSlide = 1;
+
+function updateSlide() {
+  document.querySelectorAll('.slide').forEach((s, i) => {
+    s.classList.remove('active');
+    if (i + 1 === currentSlide) s.classList.add('active');
+  });
+  document.getElementById('slideCounter').textContent = currentSlide + ' / ' + totalSlides;
+  document.getElementById('progressBar').style.width = (currentSlide / totalSlides * 100) + '%';
+  document.getElementById('prevBtn').disabled = currentSlide === 1;
+  document.getElementById('nextBtn').disabled = currentSlide === totalSlides;
+}
+
+function changeSlide(d) {
+  const n = currentSlide + d;
+  if (n >= 1 && n <= totalSlides) { currentSlide = n; updateSlide(); }
+}
+
+function goToSlide(n) {
+  if (n >= 1 && n <= totalSlides) { currentSlide = n; updateSlide(); toggleTOC(); }
+}
+
+function toggleTOC() {
+  document.getElementById('tocModal').classList.toggle('show');
+}
+
+function toggleFullscreen() {
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+  else if (document.exitFullscreen) document.exitFullscreen();
+}
+
+function checkQuiz(el, correct) {
+  const container = el.closest('.quiz-container');
+  container.querySelectorAll('.quiz-option').forEach(o => {
+    o.classList.remove('correct', 'incorrect');
+    o.style.pointerEvents = 'none';
+  });
+  el.classList.add(correct ? 'correct' : 'incorrect');
+  container.querySelectorAll('.quiz-feedback').forEach(f => f.classList.remove('show'));
+  container.querySelector('.quiz-feedback.' + (correct ? 'correct' : 'incorrect')).classList.add('show');
+}
+
+function toggleReveal(btn) {
+  const content = btn.nextElementSibling;
+  if (content && content.classList.contains('reveal-content')) {
+    content.classList.toggle('show');
+    btn.textContent = content.classList.contains('show') ? 'Hide' : btn.dataset.label || btn.textContent;
+    if (content.classList.contains('show')) btn.dataset.label = btn.textContent;
+  }
+}
+
+// MQTT Topic Matcher
+function matchMqttTopics() {
+  const topic = document.getElementById('mqttTopic').value.trim();
+  const filters = [
+    ['sensor/#', 'Multi-level wildcard'],
+    ['factory/floor1/sensor/+', 'Single-level wildcard'],
+    ['factory/+/sensor/#', 'Mixed wildcards'],
+    ['factory/floor1/sensor/temp', 'Exact match'],
+    ['+/+/+/+', 'Four single-levels'],
+    ['#', 'Subscribe to everything'],
+    ['factory/floor2/sensor/temp', 'Different floor']
+  ];
+  const parts = topic.split('/');
+  const results = document.getElementById('mqttResults');
+  if (!results) return;
+  results.innerHTML = '';
+  filters.forEach(([f, desc]) => {
+    const fp = f.split('/');
+    let match = true;
+    if (f === '#') { match = true; }
+    else {
+      let ti = 0, fi = 0;
+      while (fi < fp.length && ti <= parts.length) {
+        if (fp[fi] === '#') { match = true; break; }
+        if (ti >= parts.length) { match = false; break; }
+        if (fp[fi] === '+') { ti++; fi++; continue; }
+        if (fp[fi] !== parts[ti]) { match = false; break; }
+        ti++; fi++;
+      }
+      if (fi < fp.length && fp[fi] !== '#') match = false;
+      if (ti < parts.length && fi >= fp.length) match = false;
+    }
+    const color = match ? 'var(--success)' : 'var(--danger)';
+    const icon = match ? '\u2705' : '\u274C';
+    results.innerHTML += '<div style="font-weight:600;color:' + color + '">' + icon + ' ' + f + '</div><div style="color:var(--text-muted);font-size:0.85rem">' + desc + '</div>';
+  });
+}
+
+// Attack Surface Calculator
+function updateAttackSurface() {
+  const devs = parseInt(document.getElementById('devSlider').value);
+  const ports = parseInt(document.getElementById('portSlider').value);
+  const segs = parseInt(document.getElementById('segSlider').value);
+  const defPwd = parseInt(document.getElementById('defPwdSlider').value);
+  document.getElementById('devCount').textContent = devs;
+  document.getElementById('portCount').textContent = ports;
+  document.getElementById('segCount').textContent = segs;
+  document.getElementById('defPwdPct').textContent = defPwd;
+  const totalPorts = devs * ports;
+  const vulnDevices = Math.round(devs * defPwd / 100);
+  const reachFromOne = Math.ceil(devs / segs);
+  const risk = (vulnDevices * ports * (1 / segs)).toFixed(0);
+  const el = document.getElementById('attackResult');
+  el.innerHTML = '<strong>' + totalPorts + '</strong> total open ports \u00b7 <strong>' + vulnDevices + '</strong> devices with default passwords \u00b7 <strong>' + reachFromOne + '</strong> devices reachable per segment<br/>Relative risk score: <strong>' + risk + '</strong> \u2014 ' + (risk > 200 ? '\ud83d\udd34 Critical' : risk > 50 ? '\ud83d\udfe1 Elevated' : '\ud83d\udfe2 Managed');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === ' ') changeSlide(1);
+  else if (e.key === 'ArrowLeft') changeSlide(-1);
+  else if (e.key === 'Home') { currentSlide = 1; updateSlide(); }
+  else if (e.key === 'End') { currentSlide = totalSlides; updateSlide(); }
+  else if (e.key === 't' || e.key === 'T') toggleTOC();
+  else if (e.key === 'f' || e.key === 'F') toggleFullscreen();
+  else if (e.key === 'Escape') { if (document.getElementById('tocModal').classList.contains('show')) toggleTOC(); }
+});
+
+// Initialise
+updateSlide();
+if (typeof matchMqttTopics === 'function') matchMqttTopics();
+if (typeof updateAttackSurface === 'function') updateAttackSurface();
+</script>
+</body>
+</html>

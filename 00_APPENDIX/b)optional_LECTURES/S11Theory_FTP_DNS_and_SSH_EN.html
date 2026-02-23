@@ -1,0 +1,1812 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="CSIE Faculty-ASE" name="author"/>
+<meta content="Revolvix" name="generator"/>
+<title>Week 11 – FTP, DNS and SSH | ASE-CSIE</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&amp;display=swap" rel="stylesheet"/>
+<style>
+    :root {
+      --primary: #0f172a;
+      --primary-light: #1e293b;
+      --secondary: #0ea5e9;
+      --secondary-dark: #0284c7;
+      --accent: #f59e0b;
+      --accent-warm: #ea580c;
+      --success: #10b981;
+      --success-dark: #059669;
+      --danger: #ef4444;
+      --purple: #8b5cf6;
+      --purple-dark: #7c3aed;
+      --bg-light: #f8fafc;
+      --bg-cool: #f0f9ff;
+      --bg-warm: #fffbeb;
+      --text-dark: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --text-on-dark: #f1f5f9;
+      --text-on-dark-muted: #cbd5e1;
+      --text-on-dark-heading: #ffffff;
+      --gradient-primary: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      --gradient-secondary: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+      --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg-light); color: var(--text-dark); line-height: 1.7; overflow: hidden; }
+    h1, h2, h3, h4 { font-family: 'Source Serif 4', Georgia, serif; color: var(--primary); line-height: 1.3; }
+    code, pre, .code-block { font-family: 'JetBrains Mono', monospace; }
+    .progress-container { position: fixed; top: 0; left: 0; width: 100%; height: 4px; background: var(--border); z-index: 1000; }
+    .progress-bar { height: 100%; background: var(--gradient-secondary); width: 0%; transition: width 0.3s ease; }
+    .course-id { position: fixed; top: 16px; left: 24px; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); z-index: 100; letter-spacing: 0.05em; }
+    .slide-counter { position: fixed; top: 16px; right: 24px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--text-muted); z-index: 100; background: white; padding: 6px 14px; border-radius: 20px; box-shadow: var(--shadow-sm); }
+    .presentation { width: 100vw; height: 100vh; position: relative; overflow: hidden; }
+    .slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; padding: 4rem 4rem 5rem; display: none; flex-direction: column; background: var(--bg-light); overflow-y: auto; }
+    .slide.active { display: flex; animation: slideIn 0.45s cubic-bezier(0.4, 0, 0.2, 1); }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-up { animation: fadeUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards; opacity: 0; }
+    .delay-1 { animation-delay: 0.1s; } .delay-2 { animation-delay: 0.2s; } .delay-3 { animation-delay: 0.3s; }
+    .slide-title { background: var(--gradient-primary); color: var(--text-on-dark); justify-content: center; align-items: center; text-align: center; }
+    .slide-title h1 { color: var(--text-on-dark-heading); font-size: 3.2rem; margin-bottom: 1rem; }
+    .slide-title .subtitle { font-size: 1.4rem; color: var(--text-on-dark-muted); margin-bottom: 2rem; }
+    .slide-title .meta { font-size: 1rem; color: var(--text-on-dark-muted); display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; }
+    .slide-section { background: var(--gradient-primary); color: var(--text-on-dark); justify-content: center; align-items: flex-start; padding-left: 8rem; }
+    .slide-section .section-number { font-family: 'JetBrains Mono', monospace; font-size: 1rem; color: var(--secondary); margin-bottom: 1rem; letter-spacing: 0.1em; }
+    .slide-section h2 { color: var(--text-on-dark-heading); font-size: 3rem; margin-bottom: 1rem; }
+    .slide-section .section-desc { font-size: 1.2rem; color: var(--text-on-dark-muted); max-width: 600px; }
+    .slide h2 { font-size: 2rem; margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 3px solid var(--secondary); display: inline-block; }
+    .slide h3 { font-size: 1.4rem; margin: 1.5rem 0 1rem; color: var(--primary-light); }
+    .slide p { margin-bottom: 1rem; font-size: 1.1rem; }
+    .content-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem; margin-top: 1.5rem; }
+    .content-grid.three-col { grid-template-columns: repeat(3, 1fr); }
+    .highlight-box { background: var(--gradient-secondary); color: white; padding: 1.5rem; border-radius: 16px; margin: 1rem 0; box-shadow: var(--shadow-lg); }
+    .highlight-box h4, .highlight-box p, .highlight-box li { color: white; }
+    .definition-box { background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-left: 4px solid var(--success); padding: 1.25rem 1.5rem; border-radius: 0 16px 16px 0; margin: 1rem 0; }
+    .definition-box h4 { color: var(--success-dark); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+    .story-box { background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%); border-left: 4px solid var(--purple); padding: 1.25rem 1.5rem; border-radius: 0 16px 16px 0; margin: 1rem 0; }
+    .story-box h4 { color: var(--purple-dark); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+    .warning-box { background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border-left: 4px solid var(--accent); padding: 1.25rem 1.5rem; border-radius: 0 16px 16px 0; margin: 1rem 0; }
+    .warning-box h4 { color: var(--accent-warm); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+    .insight-box { background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border-left: 4px solid var(--danger); padding: 1.25rem 1.5rem; border-radius: 0 16px 16px 0; margin: 1rem 0; }
+    .insight-box h4 { color: var(--danger); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+    pre, .code-block { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #e2e8f0; padding: 1.25rem; border-radius: 12px; font-size: 0.9rem; line-height: 1.7; overflow-x: auto; margin: 1rem 0; white-space: pre; }
+    .code-block .keyword { color: #f472b6; } .code-block .string { color: #a5f3fc; } .code-block .number { color: #fcd34d; }
+    .code-block .function { color: #67e8f9; } .code-block .comment { color: #94a3b8; font-style: italic; }
+    code:not(pre code) { background: #e2e8f0; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.9em; color: var(--primary); }
+    .table-container { overflow-x: auto; margin: 1rem 0; border-radius: 16px; box-shadow: var(--shadow-lg); }
+    table { width: 100%; border-collapse: collapse; background: white; }
+    thead { background: var(--gradient-primary); }
+    thead th { color: white; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; padding: 1rem 1.25rem; text-align: left; }
+    thead th:first-child { border-radius: 16px 0 0 0; } thead th:last-child { border-radius: 0 16px 0 0; }
+    tbody td { padding: 0.875rem 1.25rem; border-bottom: 1px solid var(--border); font-size: 0.95rem; }
+    tbody tr:hover { background: var(--bg-cool); }
+    .card { background: white; border-radius: 16px; padding: 1.5rem; box-shadow: var(--shadow-md); border-left: 4px solid var(--secondary); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+    .card:hover { transform: translateY(-6px); box-shadow: var(--shadow-xl); }
+    .card.accent { border-left-color: var(--accent); } .card.success { border-left-color: var(--success); }
+    .card.danger { border-left-color: var(--danger); } .card.purple { border-left-color: var(--purple); }
+    .card h4 { font-size: 1.1rem; margin-bottom: 0.75rem; color: var(--primary); }
+    .card p { font-size: 0.95rem; color: var(--text-muted); margin-bottom: 0; }
+    .protocol-header { background: white; border-radius: 16px; padding: 1.5rem; box-shadow: var(--shadow-lg); margin: 1rem 0; }
+    .header-row { display: flex; border: 2px solid var(--primary); border-radius: 8px; overflow: hidden; margin-bottom: 0.5rem; }
+    .header-field { flex: 1; padding: 0.75rem; border-right: 2px solid #64748b; text-align: center; background: white; }
+    .header-field:last-child { border-right: none; }
+    .header-field.span-2 { flex: 2; } .header-field.span-4 { flex: 4; } .header-field.span-8 { flex: 8; }
+    .field-name { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
+    .field-value { font-weight: 700; font-size: 1.1rem; color: var(--primary); margin: 0.25rem 0; }
+    .field-bits { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--secondary); font-weight: 600; }
+    .diagram-container { margin: 1.5rem 0; text-align: center; }
+    .diagram-container svg { max-width: 100%; min-height: 180px; }
+    .quiz-container { background: white; border-radius: 16px; padding: 1.5rem; box-shadow: var(--shadow-lg); margin: 1rem 0; }
+    .quiz-question { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; color: var(--primary); }
+    .quiz-options { display: flex; flex-direction: column; gap: 0.75rem; }
+    .quiz-option { padding: 1rem 1.25rem; border: 2px solid var(--border); border-radius: 12px; cursor: pointer; transition: all 0.3s ease; }
+    .quiz-option:hover { border-color: var(--secondary); background: var(--bg-cool); }
+    .quiz-option.correct { border-color: var(--success); background: #ecfdf5; }
+    .quiz-option.incorrect { border-color: var(--danger); background: #fef2f2; }
+    .quiz-feedback { margin-top: 1rem; padding: 1rem; border-radius: 12px; display: none; }
+    .quiz-feedback.show { display: block; }
+    .quiz-feedback.correct { background: #ecfdf5; color: var(--success-dark); }
+    .quiz-feedback.incorrect { background: #fef2f2; color: var(--danger); }
+    .interactive-panel { background: white; border-radius: 16px; padding: 1.5rem; box-shadow: var(--shadow-lg); margin: 1rem 0; }
+    .interactive-panel h4 { margin-bottom: 1rem; color: var(--primary); }
+    .interactive-panel label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+    .interactive-panel input[type="range"] { width: 100%; margin: 0.5rem 0; }
+    .result-display { background: var(--gradient-primary); color: #f1f5f9; padding: 1.25rem; border-radius: 12px; margin-top: 1rem; font-family: 'JetBrains Mono', monospace; }
+    .result-display p, .result-display span, .result-display strong { color: #f1f5f9; }
+    .nav-container { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; z-index: 100; background: white; padding: 12px 20px; border-radius: 50px; box-shadow: var(--shadow-xl); }
+    .nav-btn { width: 48px; height: 48px; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; font-size: 1.2rem; }
+    .nav-btn.primary { background: var(--gradient-secondary); color: white; }
+    .nav-btn.secondary { background: var(--bg-light); color: var(--text-dark); border: 2px solid var(--border); }
+    .nav-btn:hover { transform: scale(1.12); box-shadow: var(--shadow-lg); }
+    .nav-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .footer { position: fixed; bottom: 20px; left: 24px; font-size: 0.8rem; color: var(--text-muted); z-index: 100; }
+    .toc-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(8px); z-index: 1000; display: none; justify-content: center; align-items: center; }
+    .toc-modal.show { display: flex; }
+    .toc-content { background: white; border-radius: 20px; padding: 2rem; max-width: 700px; width: 90%; max-height: 80vh; overflow-y: auto; }
+    .toc-content h3 { margin-bottom: 1.5rem; color: var(--primary); }
+    .toc-section { margin-bottom: 1.5rem; }
+    .toc-section h4 { font-size: 0.9rem; color: var(--secondary); text-transform: uppercase; margin-bottom: 0.75rem; }
+    .toc-item { padding: 0.5rem 1rem; cursor: pointer; border-radius: 8px; transition: background 0.2s ease; }
+    .toc-item:hover { background: var(--bg-cool); }
+    .toc-close { position: absolute; top: 20px; right: 20px; background: none; border: none; font-size: 2rem; cursor: pointer; color: white; }
+    ul, ol { margin: 1rem 0; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; font-size: 1.05rem; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; }
+    .badge.primary { background: var(--bg-cool); color: var(--secondary-dark); }
+    .badge.success { background: #ecfdf5; color: var(--success-dark); }
+    .badge.warning { background: #fffbeb; color: var(--accent-warm); }
+    .badge.danger { background: #fef2f2; color: var(--danger); }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start; }
+    .timeline { position: relative; padding-left: 2rem; margin: 1.5rem 0; }
+    .timeline::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--gradient-secondary); border-radius: 3px; }
+    .timeline-item { position: relative; margin-bottom: 1.5rem; padding-left: 1rem; }
+    .timeline-item::before { content: ''; position: absolute; left: -2rem; top: 0.5rem; width: 12px; height: 12px; background: var(--secondary); border-radius: 50%; border: 3px solid white; }
+    .timeline-item .year { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--secondary); font-weight: 600; }
+    .timeline-item h4 { font-size: 1rem; margin: 0.25rem 0; }
+    .timeline-item p { font-size: 0.9rem; color: var(--text-muted); margin: 0; }
+    .cli-block { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #e2e8f0; padding: 1.25rem; border-radius: 12px; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; line-height: 1.7; margin: 1rem 0; }
+    .cli-block .prompt { color: var(--success); }
+    .cli-block .command { color: #e2e8f0; }
+    .cli-block .output { color: #94a3b8; }
+    /* Reveal button - for POE patterns */
+    .reveal-btn { display: inline-block; padding: 0.6rem 1.2rem; background: var(--gradient-secondary); color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 0.95rem; font-weight: 600; transition: transform 0.2s ease, box-shadow 0.2s ease; margin: 0.75rem 0; }
+    .reveal-btn:hover { transform: scale(1.04); box-shadow: var(--shadow-md); }
+    .reveal-content { display: none; margin-top: 0.75rem; }
+    .reveal-content.show { display: block; animation: fadeUp 0.4s ease forwards; }
+    @media (max-width: 1200px) { .slide { padding: 3rem 3rem 5rem; } .content-grid, .content-grid.three-col, .two-col { grid-template-columns: 1fr; } }
+    @media (max-width: 768px) { .slide { padding: 2rem 1.5rem 5rem; } .slide-title h1 { font-size: 2rem; } .slide-section h2 { font-size: 2rem; } .slide-section { padding-left: 2rem; } }
+  </style>
+</head>
+<body>
+<div class="progress-container"><div aria-valuemax="44" aria-valuemin="1" class="progress-bar" id="progressBar" role="progressbar"></div></div>
+<div class="course-id">ASE-CSIE • Computer Networks</div>
+<div aria-live="polite" class="slide-counter" id="slideCounter">1 / 44</div>
+<div class="presentation" id="presentation">
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 1: Title                              -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide slide-title active" data-slide="1">
+<div class="fade-up">
+<div class="badge primary" style="margin-bottom: 1rem;">LECTURE 11 OF 14</div>
+<h1>Application Layer Protocols</h1>
+<p class="subtitle">FTP • DNS • SSH</p>
+<div class="meta">
+<span>Computer Networks</span>
+<span>Bachelor in Economic Informatics, Year 3</span>
+<span>ASE Bucharest – CSIE Faculty</span>
+</div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 2: Hook — The Dyn Attack              -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="2">
+<h2>The Day Half the Internet Went Dark</h2>
+<div class="two-col fade-up delay-1">
+<div>
+<div class="story-box">
+<h4>21 October 2016</h4>
+<p>At 07:10 EDT, the DNS provider <strong>Dyn</strong> began receiving an unprecedented flood of traffic — over <strong>1.2 Tbit/s</strong> from roughly 100,000 compromised IoT devices. Within minutes, DNS resolution for major websites stopped working. Twitter, Netflix, Reddit, GitHub, Spotify and dozens of other services became unreachable for millions of users across North America and Europe.</p>
+</div>
+<div class="warning-box" style="margin-top: 1rem;">
+<h4>The Paradox</h4>
+<p>None of these websites were hacked. Their servers were running perfectly. The problem was that nobody could <em>find</em> them — because the system that translates names to addresses had been overwhelmed.</p>
+</div>
+</div>
+<div>
+<div class="highlight-box">
+<h4>Three Questions for Today</h4>
+<p>By the end of this lecture, you will be able to answer:</p>
+<ul>
+<li>Why did attacking a single DNS provider disable so many unrelated services?</li>
+<li>How does the protocol that "finds" websites actually work — and where are its weaknesses?</li>
+<li>How do FTP and SSH — two protocols from the same application layer — solve entirely different problems with radically different architectures?</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 3: Prior Knowledge + Conflict          -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="3">
+<h2>What We Know — and What We Cannot Yet Explain</h2>
+<div class="two-col fade-up delay-1">
+<div>
+<div class="definition-box">
+<h4>Recall from Week 10</h4>
+<p>Last week we studied HTTP, the request–response protocol that powers the Web. HTTP lets a client fetch resources from a server using methods such as <code>GET</code> and <code>POST</code>, over TCP port 80 (or 443 with TLS).</p>
+</div>
+<p style="margin-top:1rem;">HTTP excels at document retrieval. But the application layer handles far more than web pages. Consider three scenarios that HTTP alone cannot solve:</p>
+</div>
+<div>
+<div class="card" style="margin-bottom: 0.75rem;">
+<h4>Scenario A — File Transfer</h4>
+<p>You need to upload 500 files to a server, resume interrupted transfers and list remote directories. HTTP can transfer files, but has no native directory listing or session persistence.</p>
+</div>
+<div class="card accent" style="margin-bottom: 0.75rem;">
+<h4>Scenario B — Name Resolution</h4>
+<p>Before HTTP can even <em>begin</em>, your browser must discover the server's IP address. Who provides this mapping — and what happens if they fail?</p>
+</div>
+<div class="card purple">
+<h4>Scenario C — Remote Administration</h4>
+<p>You need to execute commands on a server 3,000 km away, transfer configuration files and create a secure tunnel — all encrypted. HTTP was never designed for this.</p>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 4: Learning Objectives                 -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="4">
+<h2>Learning Objectives</h2>
+<p class="fade-up delay-1">By the end of this lecture, you will be able to:</p>
+<div class="content-grid fade-up delay-2">
+<div class="card">
+<h4>Distinguish</h4>
+<p>Differentiate between file-oriented (FTP), name-resolution (DNS) and control-oriented (SSH) application protocols by purpose, transport and architecture.</p>
+</div>
+<div class="card accent">
+<h4>Explain</h4>
+<p>Describe how FTP separates control from data, how DNS resolves names hierarchically and how SSH multiplexes channels over a single encrypted connection.</p>
+</div>
+<div class="card success">
+<h4>Analyse</h4>
+<p>Evaluate the trade-offs of TTL and caching in DNS, active vs passive FTP modes and SSH authentication methods in realistic scenarios.</p>
+</div>
+<div class="card purple">
+<h4>Apply</h4>
+<p>Use SSH for remote execution, file transfer and port forwarding. Diagnose common connectivity issues with protocol-specific tools.</p>
+</div>
+</div>
+<div class="definition-box fade-up delay-3" style="margin-top: 1.5rem;">
+<h4>Prerequisites</h4>
+<p>This lecture builds upon TCP/UDP socket programming (Weeks 3–4), IP addressing and routing (Weeks 5–7), the transport layer and TLS (Week 8) and HTTP (Week 10).</p>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 5: Course Roadmap                      -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="5">
+<h2>Course Roadmap</h2>
+<div class="diagram-container fade-up delay-1">
+<svg style="max-width:100%; min-height:220px;" viewBox="0 0 1080 240">
+<rect fill="#f0f9ff" height="144" rx="14" stroke="#e2e8f0" stroke-width="2" width="204" x="12" y="48"/>
+<rect fill="#f0f9ff" height="144" rx="14" stroke="#e2e8f0" stroke-width="2" width="204" x="228" y="48"/>
+<rect fill="#f0f9ff" height="144" rx="14" stroke="#e2e8f0" stroke-width="2" width="204" x="444" y="48"/>
+<rect fill="#ecfdf5" height="144" rx="14" stroke="#10b981" stroke-width="3" width="204" x="660" y="48"/>
+<rect fill="#f0f9ff" height="144" rx="14" stroke="#e2e8f0" stroke-width="2" width="192" x="876" y="48"/>
+<text fill="#64748b" font-size="13" font-weight="600" text-anchor="middle" x="114" y="30">FOUNDATIONS</text>
+<text fill="#64748b" font-size="13" font-weight="600" text-anchor="middle" x="330" y="30">NETWORK LAYER</text>
+<text fill="#64748b" font-size="13" font-weight="600" text-anchor="middle" x="546" y="30">TRANSPORT</text>
+<text fill="#10b981" font-size="13" font-weight="600" text-anchor="middle" x="762" y="30">APPLICATION</text>
+<text fill="#64748b" font-size="13" font-weight="600" text-anchor="middle" x="972" y="30">ADVANCED</text>
+<text fill="#64748b" font-size="13" font-weight="600" text-anchor="middle" x="114" y="84">W1–4: Models</text>
+<text fill="#64748b" font-size="13" font-weight="600" text-anchor="middle" x="114" y="108">Sockets, Link</text>
+<text fill="#64748b" font-size="13" font-weight="600" text-anchor="middle" x="330" y="84">W5–7: IP</text>
+<text fill="#64748b" font-size="13" font-weight="600" text-anchor="middle" x="330" y="108">NAT, Routing</text>
+<text fill="#64748b" font-size="13" font-weight="600" text-anchor="middle" x="546" y="84">W8–9: TCP/UDP</text>
+<text fill="#64748b" font-size="13" font-weight="600" text-anchor="middle" x="546" y="108">TLS, Session</text>
+<rect fill="#0f172a" height="36" rx="7" width="160" x="682" y="78"/>
+<text fill="white" font-size="13" font-weight="700" text-anchor="middle" x="762" y="102">W11: FTP/DNS/SSH</text>
+<text fill="#fcd34d" font-size="12" font-weight="600" text-anchor="middle" x="762" y="134">YOU ARE HERE</text>
+<text fill="#64748b" font-size="13" font-weight="600" text-anchor="middle" x="762" y="168">W10: HTTP</text>
+<text fill="#64748b" font-size="13" font-weight="600" text-anchor="middle" x="972" y="84">W12–14: Email</text>
+<text fill="#64748b" font-size="13" font-weight="600" text-anchor="middle" x="972" y="108">IoT, Security</text>
+</svg>
+</div>
+<div class="highlight-box fade-up delay-2">
+<h4>This Week's Focus</h4>
+<p>We examine three protocols that serve fundamentally different purposes at the application layer: <strong>FTP</strong> for file transfer, <strong>DNS</strong> for name resolution and <strong>SSH</strong> for secure remote access. Each illustrates a distinct architectural pattern — dual connections, hierarchical delegation and encrypted multiplexing.</p>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 6: Section — FTP                       -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide slide-section" data-slide="6">
+<span class="section-number">SECTION 01</span>
+<h2>FTP — File Transfer Protocol</h2>
+<p class="section-desc">A dual-connection architecture for file transfers between heterogeneous systems — and a cautionary tale about protocol design in the age of firewalls.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 7: What is FTP?                        -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="7">
+<h2>What is FTP?</h2>
+<div class="two-col">
+<div class="fade-up delay-1">
+<div class="definition-box">
+<h4>Definition</h4>
+<p><strong>File Transfer Protocol (FTP)</strong> is an application-layer protocol for transferring files between a client and server over TCP, using separate connections for control commands and data transfer.</p>
+</div>
+<div class="card" style="margin-top: 1rem;">
+<h4>Key Characteristics</h4>
+<ul>
+<li>Operates over <strong>TCP</strong> (reliable delivery)</li>
+<li>Uses <strong>two connections</strong>: control and data</li>
+<li>Supports authentication and anonymous access</li>
+<li>ASCII commands, binary or text file transfers</li>
+</ul>
+</div>
+</div>
+<div class="fade-up delay-2">
+<div class="story-box">
+<h4>Historical Context</h4>
+<p>FTP was first specified in <strong>RFC 114 (1971)</strong>, making it one of the oldest Internet protocols. The modern specification is <strong>RFC 959 (1985)</strong> — older than the World Wide Web itself.</p>
+</div>
+<div class="warning-box" style="margin-top: 1rem;">
+<h4>Security Warning</h4>
+<p>Classic FTP transmits credentials in <strong>plaintext</strong>. Anyone capturing traffic between client and server can read usernames and passwords directly. Modern deployments should use FTPS or SFTP.</p>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 8: FTP Architecture                    -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="8">
+<h2>FTP Dual-Connection Architecture</h2>
+<p class="fade-up delay-1">Unlike most protocols you have studied, FTP uses two separate TCP connections simultaneously:</p>
+<div class="diagram-container fade-up delay-2">
+<svg style="max-width:90%; min-height:230px;" viewBox="0 0 800 250">
+<rect fill="#f0f9ff" height="170" rx="12" stroke="#0ea5e9" stroke-width="2" width="200" x="40" y="40"/>
+<text fill="#0f172a" font-size="15" font-weight="700" text-anchor="middle" x="140" y="70">FTP CLIENT</text>
+<rect fill="white" height="35" rx="6" stroke="#e2e8f0" stroke-width="2" width="160" x="60" y="90"/>
+<text fill="#1e293b" font-size="12" font-weight="600" text-anchor="middle" x="140" y="113">Protocol Interpreter</text>
+<rect fill="white" height="35" rx="6" stroke="#e2e8f0" stroke-width="2" width="160" x="60" y="135"/>
+<text fill="#1e293b" font-size="12" font-weight="600" text-anchor="middle" x="140" y="158">Data Transfer Module</text>
+<rect fill="#ecfdf5" height="170" rx="12" stroke="#10b981" stroke-width="2" width="200" x="560" y="40"/>
+<text fill="#0f172a" font-size="15" font-weight="700" text-anchor="middle" x="660" y="70">FTP SERVER</text>
+<rect fill="white" height="35" rx="6" stroke="#e2e8f0" stroke-width="2" width="160" x="580" y="90"/>
+<text fill="#1e293b" font-size="12" font-weight="600" text-anchor="middle" x="660" y="113">Protocol Interpreter</text>
+<rect fill="white" height="35" rx="6" stroke="#e2e8f0" stroke-width="2" width="160" x="580" y="135"/>
+<text fill="#1e293b" font-size="12" font-weight="600" text-anchor="middle" x="660" y="158">Data Transfer Module</text>
+<line stroke="#0ea5e9" stroke-width="3" x1="220" x2="580" y1="107" y2="107"/>
+<rect fill="#0ea5e9" height="30" rx="6" width="140" x="330" y="92"/>
+<text fill="white" font-size="12" font-weight="700" text-anchor="middle" x="400" y="112">CONTROL :21</text>
+<line stroke="#f59e0b" stroke-dasharray="8,4" stroke-width="3" x1="220" x2="580" y1="152" y2="152"/>
+<rect fill="#f59e0b" height="30" rx="6" width="140" x="330" y="137"/>
+<text fill="white" font-size="12" font-weight="700" text-anchor="middle" x="400" y="157">DATA :20/dyn</text>
+<text fill="#64748b" font-size="13" font-weight="600" text-anchor="middle" x="400" y="230">Control: persistent, ASCII commands | Data: opened per transfer</text>
+</svg>
+</div>
+<div class="insight-box fade-up delay-3">
+<h4>Why Two Connections?</h4>
+<p>Separation enables <strong>out-of-band signalling</strong> — you can abort a large file transfer (with <code>ABOR</code>) without tearing down the session. It also allows directory listings and transfers to occur on different channels. This design, however, creates complications with firewalls and NAT.</p>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 9: FTP Commands                        -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="9">
+<h2>FTP Control Commands</h2>
+<p class="fade-up delay-1">The control connection uses ASCII text commands terminated with CR LF:</p>
+<div class="two-col fade-up delay-2">
+<div class="table-container">
+<table>
+<thead><tr><th>Command</th><th>Function</th></tr></thead>
+<tbody>
+<tr><td><code>USER</code></td><td>Specify username</td></tr>
+<tr><td><code>PASS</code></td><td>Specify password</td></tr>
+<tr><td><code>PWD</code></td><td>Print working directory</td></tr>
+<tr><td><code>LIST</code></td><td>List directory contents</td></tr>
+<tr><td><code>RETR</code></td><td>Retrieve (download) a file</td></tr>
+<tr><td><code>STOR</code></td><td>Store (upload) a file</td></tr>
+<tr><td><code>PASV</code></td><td>Enter passive mode</td></tr>
+<tr><td><code>QUIT</code></td><td>End the session</td></tr>
+</tbody>
+</table>
+</div>
+<div>
+<h3>Response Codes</h3>
+<div class="card success" style="margin-bottom: 0.75rem;">
+<h4>2xx — Success</h4>
+<p>220: Service ready • 230: Logged in</p>
+</div>
+<div class="card accent" style="margin-bottom: 0.75rem;">
+<h4>3xx — Intermediate</h4>
+<p>331: Username OK, need password</p>
+</div>
+<div class="card danger">
+<h4>4xx/5xx — Errors</h4>
+<p>530: Not logged in • 550: File unavailable</p>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 10: Active vs Passive — POE            -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="10">
+<h2>Active vs Passive Mode</h2>
+<p class="fade-up delay-1">The data connection can be established in two ways. <strong>Think first:</strong> if a client sits behind a NAT gateway, which mode will fail — and why?</p>
+<div class="content-grid fade-up delay-2">
+<div class="card danger">
+<h4>Active Mode (PORT)</h4>
+<ol>
+<li>Client opens a local port and listens</li>
+<li>Client sends <code>PORT ip,ip,ip,ip,p1,p2</code></li>
+<li><strong>Server initiates</strong> data connection from port 20 to client</li>
+</ol>
+<div class="warning-box" style="margin-top: 1rem; margin-bottom: 0;">
+<h4>The Problem</h4>
+<p>The server tries to connect <em>inbound</em> to the client — but the client's firewall blocks unsolicited incoming connections.</p>
+</div>
+</div>
+<div class="card success">
+<h4>Passive Mode (PASV)</h4>
+<ol>
+<li>Client sends <code>PASV</code></li>
+<li>Server responds with IP and an ephemeral port</li>
+<li><strong>Client initiates</strong> the data connection outbound</li>
+</ol>
+<div class="definition-box" style="margin-top: 1rem; margin-bottom: 0;">
+<h4>Advantage</h4>
+<p>Both connections are outbound from the client — firewalls and NAT gateways allow this naturally.</p>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 11: FTP Active Mode — Prediction       -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="11">
+<h2>Predict: FTP Through a NAT Gateway</h2>
+<div class="story-box fade-up delay-1">
+<h4>Scenario</h4>
+<p>A student in a university dormitory (behind a NAT gateway) connects to an FTP server at <code>ftp.example.com</code> using active mode. The control connection on port 21 is established successfully. The student issues <code>LIST</code> to see files. What happens next?</p>
+</div>
+<button class="reveal-btn fade-up delay-2" onclick="toggleReveal('ftp-nat-reveal')">Reveal What Happens</button>
+<div class="reveal-content" id="ftp-nat-reveal">
+<div class="insight-box">
+<h4>Result: The Transfer Hangs</h4>
+<p>In active mode, the server attempts to open a <strong>new inbound TCP connection</strong> to the student's machine on the port announced via the <code>PORT</code> command. The NAT gateway has no port-forwarding rule for this port. The SYN packet from the server is silently dropped. The student sees the command hang indefinitely — with no error message, because the control channel is fine.</p>
+<p style="margin-top:0.5rem;">Switching to <code>PASV</code> (passive mode) solves the problem immediately: the client initiates <em>both</em> connections outbound, which NAT handles transparently.</p>
+</div>
+<div class="warning-box" style="margin-top:0.5rem;">
+<h4>Seminar Connection</h4>
+<p>In Seminar 9, you will reproduce this exact scenario using pyftpdlib in Docker containers and observe the difference in Wireshark captures.</p>
+</div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 12: FTP Security Evolution             -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="12">
+<h2>FTP Security: The Evolution</h2>
+<div class="content-grid three-col fade-up delay-1">
+<div class="card danger">
+<h4>Classic FTP</h4>
+<p><strong>Ports 21/20</strong></p>
+<ul>
+<li>Plaintext credentials</li>
+<li>Plaintext data</li>
+<li>No integrity verification</li>
+</ul>
+<span class="badge danger" style="margin-top: 1rem;">Deprecated</span>
+</div>
+<div class="card accent">
+<h4>FTPS (Explicit TLS)</h4>
+<p><strong>Port 21 + TLS upgrade</strong></p>
+<ul>
+<li><code>AUTH TLS</code> command</li>
+<li>Encrypted control channel</li>
+<li>Encrypted data channel</li>
+</ul>
+<span class="badge warning" style="margin-top: 1rem;">Legacy Support</span>
+</div>
+<div class="card success">
+<h4>SFTP (SSH subsystem)</h4>
+<p><strong>Port 22</strong></p>
+<ul>
+<li>Entirely different protocol</li>
+<li>Single encrypted connection</li>
+<li>Binary messages, not ASCII</li>
+</ul>
+<span class="badge success" style="margin-top: 1rem;">Recommended</span>
+</div>
+</div>
+<div class="insight-box fade-up delay-2" style="margin-top: 1.5rem;">
+<h4>Common Misconception</h4>
+<p>SFTP is <strong>not</strong> "FTP running over SSH." It is a completely separate file transfer protocol defined as an SSH subsystem (draft-ietf-secsh-filexfer). It uses binary-encoded messages over a single channel — there are no ASCII commands, no PORT/PASV negotiation and no dual-connection headaches.</p>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 13: FTP Quiz                           -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="13">
+<h2>Knowledge Check: FTP</h2>
+<div class="quiz-container fade-up delay-1">
+<p class="quiz-question">A colleague tells you: "We should switch from FTP to SFTP — it's just the secure version of the same protocol." What is wrong with this statement?</p>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkQuiz(this, false)">Nothing — SFTP is indeed FTP with encryption added on top</div>
+<div class="quiz-option" onclick="checkQuiz(this, true)">SFTP is a completely different protocol (SSH subsystem), not an extension of FTP</div>
+<div class="quiz-option" onclick="checkQuiz(this, false)">SFTP and FTP use the same port (21) but with different encryption</div>
+<div class="quiz-option" onclick="checkQuiz(this, false)">The statement is correct for FTPS but wrong for SFTP — they are the same thing</div>
+</div>
+<div class="quiz-feedback correct">&#10003; Correct. SFTP is defined as an SSH subsystem and uses binary messages over a single encrypted channel on port 22. It shares no protocol machinery with FTP. FTPS, on the other hand, <em>is</em> FTP extended with TLS — but even FTPS inherits all of FTP's dual-connection complexity.</div>
+<div class="quiz-feedback incorrect">&#10007; This is a widespread misconception. The names are confusingly similar, but SFTP and FTP are architecturally unrelated. SFTP runs over SSH (port 22), uses binary messages and requires only a single connection. FTP uses ASCII commands over a persistent control channel (port 21) plus separate data connections.</div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 14: Section — DNS                      -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide slide-section" data-slide="14">
+<span class="section-number">SECTION 02</span>
+<h2>DNS — Domain Name System</h2>
+<p class="section-desc">The hierarchical, distributed naming system that makes the Internet human-readable — and the invisible single point of failure that brought down half the web in 2016.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 15: The Problem DNS Solves             -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="15">
+<h2>The Problem DNS Solves</h2>
+<div class="two-col">
+<div class="fade-up delay-1">
+<div class="story-box">
+<h4>Imagine the Alternative</h4>
+<p>Without DNS, you would need to memorise <code>142.250.180.206</code> for Google, <code>157.240.1.35</code> for Facebook, <code>140.82.121.4</code> for GitHub... and each address could change without notice.</p>
+</div>
+<div class="definition-box" style="margin-top: 1rem;">
+<h4>Definition</h4>
+<p><strong>Domain Name System (DNS)</strong> is a hierarchical, distributed database that translates human-readable domain names into IP addresses (and vice versa).</p>
+</div>
+<p style="margin-top:0.75rem;">Key properties: <strong>distributed</strong> (no single point of failure by design), <strong>hierarchical</strong> (tree structure from root to leaf) and <strong>cached</strong> (multi-level caching for performance).</p>
+</div>
+<div class="fade-up delay-2">
+<div class="highlight-box">
+<h4>Protocol Details</h4>
+<ul>
+<li>Primary transport: <strong>UDP port 53</strong></li>
+<li>TCP for zone transfers and large responses (&gt; 512 bytes)</li>
+<li>Specified in <strong>RFC 1034/1035</strong> (1987)</li>
+</ul>
+</div>
+<div class="warning-box" style="margin-top: 1rem;">
+<h4>Why UDP?</h4>
+<p>DNS queries are typically small (&lt; 512 bytes) and need low latency. A UDP round-trip completes in one request–response exchange. If the response is truncated (the TC flag is set), the client retries over TCP.</p>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 16: DNS Hierarchy                      -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="16">
+<h2>The DNS Hierarchy</h2>
+<div class="diagram-container fade-up delay-1">
+<svg style="max-width:90%; min-height:260px;" viewBox="0 0 800 280">
+<circle cx="400" cy="40" fill="#0f172a" r="28" stroke="#0ea5e9" stroke-width="3"/>
+<text fill="white" font-size="18" font-weight="700" text-anchor="middle" x="400" y="47">.</text>
+<text fill="#64748b" font-size="13" font-weight="600" text-anchor="middle" x="400" y="84">Root (13 logical server sets)</text>
+<line stroke="#e2e8f0" stroke-width="2" x1="400" x2="150" y1="68" y2="115"/>
+<line stroke="#e2e8f0" stroke-width="2" x1="400" x2="400" y1="68" y2="115"/>
+<line stroke="#e2e8f0" stroke-width="2" x1="400" x2="650" y1="68" y2="115"/>
+<rect fill="#0ea5e9" height="38" rx="8" width="110" x="95" y="115"/>
+<text fill="white" font-size="14" font-weight="700" text-anchor="middle" x="150" y="140">.com</text>
+<rect fill="#0ea5e9" height="38" rx="8" width="110" x="345" y="115"/>
+<text fill="white" font-size="14" font-weight="700" text-anchor="middle" x="400" y="140">.org</text>
+<rect fill="#0ea5e9" height="38" rx="8" width="110" x="595" y="115"/>
+<text fill="white" font-size="14" font-weight="700" text-anchor="middle" x="650" y="140">.ro</text>
+<text fill="#64748b" font-size="13" font-weight="600" text-anchor="middle" x="400" y="173">TLD Servers</text>
+<line stroke="#e2e8f0" stroke-width="2" x1="150" x2="80" y1="153" y2="195"/>
+<line stroke="#e2e8f0" stroke-width="2" x1="150" x2="220" y1="153" y2="195"/>
+<line stroke="#e2e8f0" stroke-width="2" x1="650" x2="580" y1="153" y2="195"/>
+<line stroke="#e2e8f0" stroke-width="2" x1="650" x2="720" y1="153" y2="195"/>
+<rect fill="#10b981" height="38" rx="8" width="110" x="25" y="195"/>
+<text fill="white" font-size="13" font-weight="700" text-anchor="middle" x="80" y="220">google</text>
+<rect fill="#10b981" height="38" rx="8" width="110" x="165" y="195"/>
+<text fill="white" font-size="13" font-weight="700" text-anchor="middle" x="220" y="220">github</text>
+<rect fill="#10b981" height="38" rx="8" width="110" x="525" y="195"/>
+<text fill="white" font-size="13" font-weight="700" text-anchor="middle" x="580" y="220">ase</text>
+<rect fill="#10b981" height="38" rx="8" width="110" x="665" y="195"/>
+<text fill="white" font-size="13" font-weight="700" text-anchor="middle" x="720" y="220">digi</text>
+<text fill="#64748b" font-size="13" font-weight="600" text-anchor="middle" x="400" y="256">Authoritative Servers</text>
+<line stroke="#e2e8f0" stroke-width="2" x1="80" x2="80" y1="233" y2="260"/>
+<rect fill="#f59e0b" height="28" rx="6" width="90" x="35" y="260"/>
+<text fill="white" font-size="13" font-weight="700" text-anchor="middle" x="80" y="279">www</text>
+</svg>
+</div>
+<div class="content-grid fade-up delay-2" style="margin-top: 0.5rem;">
+<div class="card">
+<h4>Root Servers</h4>
+<p>13 logical servers (a.root-servers.net through m.root-servers.net), replicated globally via anycast. They know which servers are authoritative for each TLD.</p>
+</div>
+<div class="card accent">
+<h4>TLD Servers</h4>
+<p>Managed by registries (Verisign for .com, ROTLD for .ro). They know the authoritative nameservers for each domain registered under that TLD.</p>
+</div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 17: DNS Resolution Process             -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="17">
+<h2>DNS Resolution: Step by Step</h2>
+<div class="diagram-container fade-up delay-1">
+<svg style="max-width:100%; min-height:310px;" viewBox="0 0 860 330">
+<rect fill="#f0f9ff" height="75" rx="10" stroke="#0ea5e9" stroke-width="2" width="120" x="25" y="118"/>
+<text fill="#1e293b" font-size="14" font-weight="700" text-anchor="middle" x="85" y="150">Client</text>
+<text fill="#64748b" font-size="12" font-weight="600" text-anchor="middle" x="85" y="172">Stub Resolver</text>
+<rect fill="#ecfdf5" height="125" rx="10" stroke="#10b981" stroke-width="2" width="155" x="200" y="90"/>
+<text fill="#1e293b" font-size="14" font-weight="700" text-anchor="middle" x="278" y="140">Recursive</text>
+<text fill="#1e293b" font-size="14" font-weight="700" text-anchor="middle" x="278" y="160">Resolver</text>
+<text fill="#10b981" font-size="12" font-weight="600" text-anchor="middle" x="278" y="188">+ Cache</text>
+<circle cx="490" cy="55" fill="#0f172a" r="40"/>
+<text fill="white" font-size="16" font-weight="700" text-anchor="middle" x="490" y="62">Root</text>
+<rect fill="#0ea5e9" height="55" rx="10" width="120" x="600" y="100"/>
+<text fill="white" font-size="13" font-weight="700" text-anchor="middle" x="660" y="133">.com TLD</text>
+<rect fill="#f59e0b" height="60" rx="10" width="155" x="730" y="172"/>
+<text fill="white" font-size="13" font-weight="700" text-anchor="middle" x="808" y="200">example.com</text>
+<text fill="white" font-size="12" font-weight="600" text-anchor="middle" x="808" y="220">Authoritative</text>
+<line stroke="#0ea5e9" stroke-width="3" x1="145" x2="196" y1="148" y2="148"/>
+<circle cx="170" cy="136" fill="#0ea5e9" r="14"/>
+<text fill="white" font-size="12" font-weight="700" text-anchor="middle" x="170" y="141">1</text>
+<path d="M 355 128 Q 425 72 485 93" fill="none" stroke="#64748b" stroke-width="2"/>
+<circle cx="420" cy="88" fill="#64748b" r="14"/>
+<text fill="white" font-size="12" font-weight="700" text-anchor="middle" x="420" y="93">2</text>
+<line stroke="#64748b" stroke-width="2" x1="355" x2="598" y1="140" y2="127"/>
+<circle cx="478" cy="138" fill="#64748b" r="14"/>
+<text fill="white" font-size="12" font-weight="700" text-anchor="middle" x="478" y="143">3</text>
+<line stroke="#64748b" stroke-width="2" x1="355" x2="728" y1="165" y2="200"/>
+<circle cx="542" cy="180" fill="#64748b" r="14"/>
+<text fill="white" font-size="12" font-weight="700" text-anchor="middle" x="542" y="185">4</text>
+<line stroke="#10b981" stroke-width="3" x1="200" x2="150" y1="175" y2="175"/>
+<circle cx="175" cy="185" fill="#10b981" r="14"/>
+<text fill="white" font-size="12" font-weight="700" text-anchor="middle" x="175" y="190">5</text>
+<rect fill="#f8fafc" height="50" rx="10" stroke="#e2e8f0" width="340" x="25" y="270"/>
+<text fill="#1e293b" font-size="13" font-weight="700" text-anchor="middle" x="195" y="295">Query: www.example.com</text>
+<text fill="#10b981" font-size="12" font-weight="600" text-anchor="middle" x="195" y="313">Answer: 93.184.216.34 (A record)</text>
+</svg>
+</div>
+<div class="highlight-box fade-up delay-2">
+<h4>Iterative vs Recursive</h4>
+<p>The <strong>recursive resolver</strong> does the heavy lifting — querying root, TLD and authoritative servers in sequence. The client's <strong>stub resolver</strong> simply sends one query to the recursive resolver and waits for the final answer. This is why attacking the recursive resolver (as in the Dyn incident) has such catastrophic effects.</p>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 18: DNS Record Types                   -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="18">
+<h2>DNS Record Types</h2>
+<div class="table-container fade-up delay-1">
+<table>
+<thead><tr><th>Type</th><th>Purpose</th><th>Example</th></tr></thead>
+<tbody>
+<tr><td><strong>A</strong></td><td>Maps name to IPv4 address</td><td><code>example.com → 93.184.216.34</code></td></tr>
+<tr><td><strong>AAAA</strong></td><td>Maps name to IPv6 address</td><td><code>example.com → 2606:2800:220:1::</code></td></tr>
+<tr><td><strong>MX</strong></td><td>Mail exchanger (with priority)</td><td><code>example.com → 10 mail.example.com</code></td></tr>
+<tr><td><strong>CNAME</strong></td><td>Canonical name (alias)</td><td><code>www.example.com → example.com</code></td></tr>
+<tr><td><strong>NS</strong></td><td>Nameserver for a zone</td><td><code>example.com → ns1.example.com</code></td></tr>
+<tr><td><strong>TXT</strong></td><td>Arbitrary text data</td><td><code>example.com → "v=spf1 ..."</code></td></tr>
+<tr><td><strong>PTR</strong></td><td>Reverse lookup (IP → name)</td><td><code>34.216.184.93.in-addr.arpa → example.com</code></td></tr>
+<tr><td><strong>SOA</strong></td><td>Start of Authority (zone metadata)</td><td>Serial, refresh, retry, expire, min TTL</td></tr>
+</tbody>
+</table>
+</div>
+<div class="definition-box fade-up delay-2" style="margin-top:1rem;">
+<h4>Why MX Records Matter</h4>
+<p>Next week (Week 12) we study email protocols. MX records are the mechanism by which DNS directs email to the correct mail server — connecting DNS directly to SMTP routing.</p>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 19: DNS Packet Structure               -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="19">
+<h2>DNS Packet Structure (RFC 1035)</h2>
+<div class="protocol-header fade-up delay-1">
+<h4 style="margin-bottom: 1rem; color: var(--text-muted); font-size: 0.9rem;">Header Section (12 bytes)</h4>
+<div class="header-row">
+<div class="header-field span-8">
+<span class="field-name">Transaction ID</span>
+<span class="field-value">0x1234</span>
+<span class="field-bits">16 bits</span>
+</div>
+<div class="header-field span-8">
+<span class="field-name">Flags</span>
+<span class="field-value">QR|Op|AA|TC|RD|RA|Z|RCODE</span>
+<span class="field-bits">16 bits</span>
+</div>
+</div>
+<div class="header-row">
+<div class="header-field span-4">
+<span class="field-name">QDCOUNT</span>
+<span class="field-value">1</span>
+<span class="field-bits">Questions</span>
+</div>
+<div class="header-field span-4">
+<span class="field-name">ANCOUNT</span>
+<span class="field-value">0</span>
+<span class="field-bits">Answers</span>
+</div>
+<div class="header-field span-4">
+<span class="field-name">NSCOUNT</span>
+<span class="field-value">0</span>
+<span class="field-bits">Authority</span>
+</div>
+<div class="header-field span-4">
+<span class="field-name">ARCOUNT</span>
+<span class="field-value">0</span>
+<span class="field-bits">Additional</span>
+</div>
+</div>
+</div>
+<div class="two-col fade-up delay-2" style="margin-top: 1rem;">
+<div>
+<h3>Key Flags</h3>
+<ul>
+<li><strong>QR</strong> (1 bit): 0 = query, 1 = response</li>
+<li><strong>RD</strong> (1 bit): Recursion Desired</li>
+<li><strong>RA</strong> (1 bit): Recursion Available</li>
+<li><strong>RCODE</strong> (4 bits): 0 = OK, 3 = NXDOMAIN</li>
+</ul>
+</div>
+<div class="code-block">
+<span class="comment"># QNAME encoding for "www.google.com"</span>
+03 77 77 77       <span class="comment"># length 3 + "www"</span>
+06 67 6f 6f 67 6c 65 <span class="comment"># length 6 + "google"</span>
+03 63 6f 6d       <span class="comment"># length 3 + "com"</span>
+00                <span class="comment"># null terminator</span>
+</div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 20: TTL and Caching — Interactive       -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="20">
+<h2>TTL and Caching Strategy</h2>
+<div class="two-col">
+<div class="fade-up delay-1">
+<div class="definition-box">
+<h4>Time To Live (TTL)</h4>
+<p>Every DNS response includes a TTL value (in seconds) that specifies how long the record may be cached before the resolver must query again.</p>
+</div>
+<div class="interactive-panel" style="margin-top: 1rem;">
+<h4>Explore the TTL Trade-off</h4>
+<label>Adjust TTL value (seconds):</label>
+<input id="ttlSlider" max="86400" min="60" oninput="updateTTL()" type="range" value="3600"/>
+<div class="result-display" id="ttlResult">
+<p><strong>TTL: 3600s (1 hour)</strong></p>
+<p>Queries per day per client: ~24</p>
+<p>Propagation delay after change: ~1 hour</p>
+<p>Recommendation: General-purpose websites</p>
+</div>
+</div>
+</div>
+<div class="fade-up delay-2">
+<h3>Cache Hierarchy</h3>
+<div class="timeline">
+<div class="timeline-item">
+<span class="year">Level 1</span>
+<h4>Browser Cache</h4>
+<p>Chrome: ~1 minute, Firefox: varies</p>
+</div>
+<div class="timeline-item">
+<span class="year">Level 2</span>
+<h4>OS Resolver Cache</h4>
+<p>systemd-resolved, dnsmasq</p>
+</div>
+<div class="timeline-item">
+<span class="year">Level 3</span>
+<h4>Local Router</h4>
+<p>Home gateway DNS cache</p>
+</div>
+<div class="timeline-item">
+<span class="year">Level 4</span>
+<h4>ISP Recursive Resolver</h4>
+<p>Serves thousands of clients</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 21: DNS Security                       -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="21">
+<h2>DNS Security: Threats and Defences</h2>
+<div class="content-grid fade-up delay-1">
+<div class="card danger">
+<h4>DNS Spoofing</h4>
+<p>An attacker injects false responses before the legitimate server replies. Exploits UDP's lack of built-in authentication.</p>
+</div>
+<div class="card danger">
+<h4>DNS Hijacking</h4>
+<p>A malicious resolver returns wrong IP addresses. Sometimes done by ISPs for "helpful" error pages or by governments for censorship.</p>
+</div>
+<div class="card success">
+<h4>DNSSEC (RFC 4033–4035)</h4>
+<p>Cryptographic signatures on DNS records form a chain of trust from the root zone down. Validates data integrity and authenticity.</p>
+</div>
+<div class="card success">
+<h4>DoH / DoT</h4>
+<p><strong>DNS over HTTPS</strong> (port 443) and <strong>DNS over TLS</strong> (port 853) encrypt queries to prevent eavesdropping and tampering on the wire.</p>
+</div>
+</div>
+<div class="insight-box fade-up delay-2" style="margin-top: 1rem;">
+<h4>Why is DNSSEC not universal?</h4>
+<p>Key management complexity, increased packet sizes, performance overhead and, frankly, lack of commercial incentive. Approximately 90% of TLDs support DNSSEC, but only around 30% of .com domains are actually signed.</p>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 22: DNS Quiz                           -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="22">
+<h2>Knowledge Check: DNS</h2>
+<div class="quiz-container fade-up delay-1">
+<p class="quiz-question">Your colleague changed the A record for <code>app.example.com</code> to a new server IP 10 minutes ago, but clients still reach the old server. What is the most likely explanation?</p>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkQuiz(this, false)">The DNS server crashed and is not serving the new record</div>
+<div class="quiz-option" onclick="checkQuiz(this, true)">The old record's TTL has not yet expired in resolver caches</div>
+<div class="quiz-option" onclick="checkQuiz(this, false)">DNSSEC is blocking the change from propagating</div>
+<div class="quiz-option" onclick="checkQuiz(this, false)">The client's <code>/etc/hosts</code> file overrides DNS</div>
+</div>
+<div class="quiz-feedback correct">&#10003; Correct. DNS changes are not instantaneous. Every resolver that cached the old record will continue serving it until the TTL expires. If the previous TTL was set to, say, 3600 seconds (1 hour), it may take up to an hour before all resolvers fetch the new record. Use <code>dig +trace</code> to bypass caches and verify the authoritative answer directly.</div>
+<div class="quiz-feedback incorrect">&#10007; While <code>/etc/hosts</code> can override DNS and DNSSEC can cause validation failures, the overwhelmingly common reason for delayed DNS propagation is <strong>TTL-based caching</strong>. Resolvers that already have the old answer cached will not query again until the TTL expires. This is exactly the trade-off we explored with the TTL slider.</div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 23: Section — SSH                      -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide slide-section" data-slide="23">
+<span class="section-number">SECTION 03</span>
+<h2>SSH — Secure Shell</h2>
+<p class="section-desc">Encrypted remote access, cryptographic authentication and secure tunnelling — all multiplexed over a single TCP connection.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 24: What is SSH?                       -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="24">
+<h2>What is SSH?</h2>
+<div class="two-col">
+<div class="fade-up delay-1">
+<div class="definition-box">
+<h4>Definition</h4>
+<p><strong>Secure Shell (SSH)</strong> is a cryptographic network protocol for secure data communication, remote command execution and network services between computers, running over TCP port 22.</p>
+</div>
+<div class="story-box" style="margin-top: 1rem;">
+<h4>Origin Story</h4>
+<p>In 1995, a password-sniffing attack on the University of Helsinki network compromised thousands of credentials. Researcher <strong>Tatu Ylönen</strong> created SSH as a direct response — a drop-in replacement for Telnet, rsh and rlogin that encrypted everything by default. The current standard is <strong>SSH-2</strong> (RFC 4251–4254).</p>
+</div>
+</div>
+<div class="fade-up delay-2">
+<div class="highlight-box">
+<h4>What SSH Provides</h4>
+<ul>
+<li><strong>Authentication</strong>: password, public key, certificates</li>
+<li><strong>Confidentiality</strong>: AES-256, ChaCha20 encryption</li>
+<li><strong>Integrity</strong>: HMAC verification on every packet</li>
+<li><strong>Port forwarding</strong>: secure tunnels for arbitrary traffic</li>
+</ul>
+</div>
+<div class="card" style="margin-top: 1rem;">
+<h4>Protocol Details</h4>
+<ul>
+<li>Default port: <strong>TCP 22</strong></li>
+<li>Specification: RFC 4251–4254</li>
+<li>Current version: SSH-2 (SSH-1 is deprecated)</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 25: SSH Architecture                   -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="25">
+<h2>SSH Protocol Architecture</h2>
+<div class="diagram-container fade-up delay-1">
+<svg style="max-width:100%; min-height:270px;" viewBox="0 0 900 290">
+<rect fill="#e2e8f0" height="55" rx="10" stroke="#94a3b8" stroke-width="2" width="700" x="80" y="210"/>
+<text fill="#1e293b" font-size="15" font-weight="700" text-anchor="middle" x="430" y="244">TCP (Transmission Control Protocol)</text>
+<rect fill="#0f172a" height="55" rx="10" width="700" x="80" y="140"/>
+<text fill="white" font-size="15" font-weight="700" text-anchor="middle" x="430" y="166">SSH Transport Layer (RFC 4253)</text>
+<text fill="#cbd5e1" font-size="12" font-weight="600" text-anchor="middle" x="430" y="186">Key Exchange • Encryption • Integrity • Compression</text>
+<rect fill="#0ea5e9" height="55" rx="10" width="700" x="80" y="70"/>
+<text fill="white" font-size="15" font-weight="700" text-anchor="middle" x="430" y="96">SSH User Authentication (RFC 4252)</text>
+<text fill="white" font-size="12" font-weight="600" text-anchor="middle" x="430" y="116">Password • Public Key • Keyboard-Interactive • GSSAPI</text>
+<rect fill="#10b981" height="55" rx="10" width="700" x="80" y="0"/>
+<text fill="white" font-size="15" font-weight="700" text-anchor="middle" x="430" y="26">SSH Connection Layer (RFC 4254)</text>
+<text fill="white" font-size="12" font-weight="600" text-anchor="middle" x="430" y="46">Multiplexed Channels: Shell • Exec • SFTP • Port Forwarding</text>
+</svg>
+</div>
+<div class="content-grid fade-up delay-2" style="margin-top: 0.75rem;">
+<div class="card">
+<h4>Transport Layer</h4>
+<p>Negotiates encryption algorithms, performs Diffie-Hellman key exchange and verifies the server's identity via its host key. All subsequent traffic is encrypted.</p>
+</div>
+<div class="card accent">
+<h4>Connection Layer</h4>
+<p>Multiplexes multiple independent logical <strong>channels</strong> over the encrypted transport — enabling simultaneous shell sessions, file transfers and port forwarding.</p>
+</div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 26: SSH Key Exchange                   -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="26">
+<h2>SSH Key Exchange</h2>
+<div class="diagram-container fade-up delay-1">
+<svg style="max-width:100%; min-height:300px;" viewBox="0 0 900 320">
+<rect fill="#f0f9ff" height="220" rx="12" stroke="#0ea5e9" stroke-width="2" width="155" x="45" y="40"/>
+<text fill="#1e293b" font-size="15" font-weight="700" text-anchor="middle" x="123" y="75">SSH Client</text>
+<rect fill="#ecfdf5" height="220" rx="12" stroke="#10b981" stroke-width="2" width="155" x="700" y="40"/>
+<text fill="#1e293b" font-size="15" font-weight="700" text-anchor="middle" x="778" y="75">SSH Server</text>
+<line stroke="#64748b" stroke-width="2" x1="200" x2="700" y1="105" y2="105"/>
+<text fill="#64748b" font-size="12" font-weight="600" text-anchor="middle" x="450" y="98">SSH-2.0-OpenSSH_9.6 (version string)</text>
+<line stroke="#64748b" stroke-width="2" x1="700" x2="200" y1="128" y2="128"/>
+<line stroke="#0ea5e9" stroke-width="2" x1="200" x2="700" y1="160" y2="160"/>
+<text fill="#0ea5e9" font-size="12" font-weight="600" text-anchor="middle" x="450" y="153">KEXINIT (supported algorithms)</text>
+<line stroke="#0ea5e9" stroke-width="2" x1="700" x2="200" y1="180" y2="180"/>
+<rect fill="#f59e0b" height="38" rx="8" width="310" x="295" y="198"/>
+<text fill="white" font-size="13" font-weight="700" text-anchor="middle" x="450" y="222">Diffie-Hellman Key Exchange</text>
+<line stroke="#10b981" stroke-width="3" x1="700" x2="200" y1="252" y2="252"/>
+<text fill="#10b981" font-size="12" font-weight="600" text-anchor="middle" x="450" y="247">Server Host Key + Signature</text>
+<rect fill="#0f172a" height="32" rx="6" width="540" x="180" y="278"/>
+<text fill="#fcd34d" font-size="13" font-weight="700" text-anchor="middle" x="450" y="299">Encrypted Channel Established</text>
+</svg>
+</div>
+<div class="warning-box fade-up delay-2">
+<h4>First Connection Warning</h4>
+<p>The message "The authenticity of host can't be established" appears when connecting for the first time. The client stores the server's host key in <code>~/.ssh/known_hosts</code>. If the key changes on a subsequent connection, SSH warns of a potential man-in-the-middle attack — verify with the administrator before updating.</p>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 27: SSH Auth Methods                   -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="27">
+<h2>SSH Authentication Methods</h2>
+<div class="content-grid fade-up delay-1">
+<div class="card">
+<h4>Public Key Authentication</h4>
+<p>Client proves ownership of a private key by signing a challenge. Most secure method; recommended for all production use.</p>
+<div class="cli-block" style="margin-top: 0.75rem; padding: 0.75rem;">
+<span class="prompt">$</span> <span class="command">ssh-keygen -t ed25519</span>
+</div>
+</div>
+<div class="card accent">
+<h4>Password Authentication</h4>
+<p>Traditional password transmitted over the encrypted channel. Vulnerable to brute-force attacks; often disabled on production servers.</p>
+</div>
+<div class="card purple">
+<h4>Keyboard-Interactive</h4>
+<p>Server sends arbitrary prompts to the client. Enables two-factor authentication, TOTP codes and challenge-response schemes.</p>
+</div>
+<div class="card success">
+<h4>Certificate Authentication</h4>
+<p>SSH certificates signed by a trusted CA eliminate the need for managing <code>known_hosts</code> and <code>authorized_keys</code> at scale.</p>
+</div>
+</div>
+<div class="highlight-box fade-up delay-2" style="margin-top: 1rem;">
+<h4>Distributing Your Public Key</h4>
+<p>Copy your public key to a server: <code>ssh-copy-id user@server</code> — this appends <code>~/.ssh/id_ed25519.pub</code> to the server's <code>~/.ssh/authorized_keys</code> file.</p>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 28: SSH Channel Multiplexing           -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="28">
+<h2>SSH Channel Multiplexing</h2>
+<p class="fade-up delay-1">A single SSH connection can carry multiple independent channels simultaneously:</p>
+<div class="diagram-container fade-up delay-2">
+<svg style="max-width:100%; min-height:230px;" viewBox="0 0 900 250">
+<rect fill="#0f172a" height="60" rx="10" width="700" x="100" y="100"/>
+<text fill="white" font-size="15" font-weight="700" text-anchor="middle" x="450" y="138">SSH Connection (TCP:22) — Single Encrypted Pipe</text>
+<rect fill="#0ea5e9" height="55" rx="8" width="120" x="120" y="22"/>
+<text fill="white" font-size="12" font-weight="700" text-anchor="middle" x="180" y="46">Channel 0</text>
+<text fill="white" font-size="12" font-weight="600" text-anchor="middle" x="180" y="66">Shell (PTY)</text>
+<rect fill="#10b981" height="55" rx="8" width="120" x="255" y="22"/>
+<text fill="white" font-size="12" font-weight="700" text-anchor="middle" x="315" y="46">Channel 1</text>
+<text fill="white" font-size="12" font-weight="600" text-anchor="middle" x="315" y="66">SFTP</text>
+<rect fill="#f59e0b" height="55" rx="8" width="120" x="390" y="22"/>
+<text fill="white" font-size="12" font-weight="700" text-anchor="middle" x="450" y="46">Channel 2</text>
+<text fill="white" font-size="12" font-weight="600" text-anchor="middle" x="450" y="66">Local Fwd -L</text>
+<rect fill="#8b5cf6" height="55" rx="8" width="120" x="525" y="22"/>
+<text fill="white" font-size="12" font-weight="700" text-anchor="middle" x="585" y="46">Channel 3</text>
+<text fill="white" font-size="12" font-weight="600" text-anchor="middle" x="585" y="66">Remote Fwd -R</text>
+<rect fill="#ef4444" height="55" rx="8" width="120" x="660" y="22"/>
+<text fill="white" font-size="12" font-weight="700" text-anchor="middle" x="720" y="46">Channel 4</text>
+<text fill="white" font-size="12" font-weight="600" text-anchor="middle" x="720" y="66">X11 Fwd</text>
+<line stroke="#0ea5e9" stroke-width="2" x1="180" x2="180" y1="77" y2="100"/>
+<line stroke="#10b981" stroke-width="2" x1="315" x2="315" y1="77" y2="100"/>
+<line stroke="#f59e0b" stroke-width="2" x1="450" x2="450" y1="77" y2="100"/>
+<line stroke="#8b5cf6" stroke-width="2" x1="585" x2="585" y1="77" y2="100"/>
+<line stroke="#ef4444" stroke-width="2" x1="720" x2="720" y1="77" y2="100"/>
+<text fill="#64748b" font-size="13" font-weight="600" text-anchor="middle" x="450" y="195">All channels share a single TCP connection and a single set of encryption keys.</text>
+<text fill="#64748b" font-size="13" font-weight="600" text-anchor="middle" x="450" y="215">Compare this with FTP, which requires a new TCP connection for every data transfer.</text>
+</svg>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 29: Local Port Forwarding              -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="29">
+<h2>Port Forwarding: Local (-L)</h2>
+<p class="fade-up delay-1">Access a remote service as if it were running locally:</p>
+<div class="diagram-container fade-up delay-2">
+<svg style="max-width:100%; min-height:200px;" viewBox="0 0 1060 210">
+<rect fill="#f0f9ff" height="90" rx="12" stroke="#0ea5e9" stroke-width="2" width="180" x="30" y="55"/>
+<text fill="#1e293b" font-size="14" font-weight="700" text-anchor="middle" x="120" y="90">Your Machine</text>
+<text fill="#0ea5e9" font-size="12" font-weight="600" text-anchor="middle" x="120" y="115">localhost:5432</text>
+<rect fill="#0f172a" height="90" rx="12" width="180" x="420" y="55"/>
+<text fill="white" font-size="14" font-weight="700" text-anchor="middle" x="510" y="90">Bastion Host</text>
+<text fill="#cbd5e1" font-size="12" font-weight="600" text-anchor="middle" x="510" y="115">SSH accessible</text>
+<rect fill="#ecfdf5" height="90" rx="12" stroke="#10b981" stroke-width="2" width="180" x="810" y="55"/>
+<text fill="#1e293b" font-size="14" font-weight="700" text-anchor="middle" x="900" y="90">Database Server</text>
+<text fill="#10b981" font-size="12" font-weight="600" text-anchor="middle" x="900" y="115">db-host:5432</text>
+<line stroke="#0ea5e9" stroke-width="4" x1="210" x2="420" y1="100" y2="100"/>
+<rect fill="#0ea5e9" height="34" rx="6" width="130" x="250" y="82"/>
+<text fill="white" font-size="12" font-weight="700" text-anchor="middle" x="315" y="104">SSH Tunnel</text>
+<line stroke="#10b981" stroke-width="2" stroke-dasharray="6,3" x1="600" x2="810" y1="100" y2="100"/>
+<text fill="#64748b" font-size="12" font-weight="600" text-anchor="middle" x="705" y="88">Internal Network</text>
+<rect fill="#1e293b" height="34" rx="8" width="620" x="220" y="168"/>
+<text fill="#e2e8f0" font-family="JetBrains Mono" font-size="13" font-weight="600" text-anchor="middle" x="530" y="190">ssh -L 5432:db-host:5432 user@bastion</text>
+</svg>
+</div>
+<div class="content-grid fade-up delay-3" style="margin-top:0.5rem;">
+<div class="highlight-box">
+<h4>Use Case</h4>
+<p>Access a PostgreSQL database that only the bastion host can reach. After the tunnel is active, connect with <code>psql -h localhost</code> on your machine.</p>
+</div>
+<div class="definition-box">
+<h4>Syntax</h4>
+<p><code>-L [bind:]local_port:dest_host:dest_port</code></p>
+<p>Traffic to local <em>port</em> is forwarded through SSH to <em>dest_host:dest_port</em> from the server's perspective.</p>
+</div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 30: Remote Port Forwarding             -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="30">
+<h2>Port Forwarding: Remote (-R)</h2>
+<p class="fade-up delay-1">Expose a local service to the remote network:</p>
+<div class="diagram-container fade-up delay-2">
+<svg style="max-width:100%; min-height:200px;" viewBox="0 0 1060 210">
+<rect fill="#f0f9ff" height="90" rx="12" stroke="#0ea5e9" stroke-width="2" width="180" x="30" y="55"/>
+<text fill="#1e293b" font-size="14" font-weight="700" text-anchor="middle" x="120" y="90">Your Machine</text>
+<text fill="#0ea5e9" font-size="12" font-weight="600" text-anchor="middle" x="120" y="115">localhost:3000</text>
+<rect fill="#0f172a" height="90" rx="12" width="180" x="420" y="55"/>
+<text fill="white" font-size="14" font-weight="700" text-anchor="middle" x="510" y="90">Public Server</text>
+<text fill="#fcd34d" font-size="12" font-weight="600" text-anchor="middle" x="510" y="115">:8080 (listening)</text>
+<rect fill="#fffbeb" height="90" rx="12" stroke="#f59e0b" stroke-width="2" width="180" x="810" y="55"/>
+<text fill="#1e293b" font-size="14" font-weight="700" text-anchor="middle" x="900" y="90">External Users</text>
+<text fill="#f59e0b" font-size="12" font-weight="600" text-anchor="middle" x="900" y="115">Clients, Webhooks</text>
+<line stroke="#0ea5e9" stroke-width="4" x1="210" x2="420" y1="100" y2="100"/>
+<rect fill="#0ea5e9" height="34" rx="6" width="130" x="250" y="82"/>
+<text fill="white" font-size="12" font-weight="700" text-anchor="middle" x="315" y="104">SSH Tunnel</text>
+<line stroke="#f59e0b" stroke-width="2" x1="600" x2="810" y1="100" y2="100"/>
+<text fill="#f59e0b" font-size="12" font-weight="600" text-anchor="middle" x="705" y="88">Internet</text>
+<rect fill="#1e293b" height="34" rx="8" width="620" x="220" y="168"/>
+<text fill="#e2e8f0" font-family="JetBrains Mono" font-size="13" font-weight="600" text-anchor="middle" x="530" y="190">ssh -R 8080:localhost:3000 user@public-server</text>
+</svg>
+</div>
+<div class="content-grid fade-up delay-3" style="margin-top:0.5rem;">
+<div class="highlight-box">
+<h4>Use Case</h4>
+<p>Share your local development server with external testers or receive webhooks without deploying. Functions similarly to tools like ngrok.</p>
+</div>
+<div class="warning-box">
+<h4>Security Note</h4>
+<p>Requires <code>GatewayPorts yes</code> in the server's <code>sshd_config</code> to bind on public interfaces rather than just loopback.</p>
+</div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 31: Dynamic Port Forwarding            -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="31">
+<h2>Port Forwarding: Dynamic (-D) SOCKS Proxy</h2>
+<div class="two-col">
+<div class="fade-up delay-1">
+<p>Creates a local SOCKS5 proxy that routes <strong>all</strong> traffic through the SSH server:</p>
+<div class="cli-block">
+<span class="prompt">$</span> <span class="command">ssh -D 1080 user@proxy-server</span>
+<span class="output"># Configure browser SOCKS5 proxy:</span>
+<span class="output"># Host: localhost  Port: 1080</span>
+</div>
+<div class="highlight-box" style="margin-top: 1rem;">
+<h4>Applications</h4>
+<ul>
+<li>Access internal corporate networks remotely</li>
+<li>Privacy on untrusted Wi-Fi networks</li>
+<li>Bypass geo-restrictions (the exit point is the server)</li>
+</ul>
+</div>
+</div>
+<div class="fade-up delay-2">
+<div class="diagram-container">
+<svg style="max-width:340px; min-height:380px;" viewBox="0 0 340 400">
+<rect fill="#f0f9ff" height="60" rx="12" stroke="#0ea5e9" stroke-width="3" width="140" x="100" y="15"/>
+<text fill="#1e293b" font-size="15" font-weight="700" text-anchor="middle" x="170" y="50">Browser</text>
+<rect fill="#0ea5e9" height="55" rx="10" width="140" x="100" y="105"/>
+<text fill="white" font-size="14" font-weight="700" text-anchor="middle" x="170" y="138">SSH Tunnel</text>
+<rect fill="#0f172a" height="65" rx="12" width="140" x="100" y="190"/>
+<text fill="white" font-size="15" font-weight="700" text-anchor="middle" x="170" y="220">Proxy</text>
+<text fill="#cbd5e1" font-size="12" font-weight="600" text-anchor="middle" x="170" y="243">Exit Point</text>
+<ellipse cx="170" cy="328" fill="#ecfdf5" rx="90" ry="35" stroke="#10b981" stroke-width="3"/>
+<text fill="#1e293b" font-size="15" font-weight="700" text-anchor="middle" x="170" y="335">Internet</text>
+<line stroke="#0ea5e9" stroke-width="3" x1="170" x2="170" y1="75" y2="105"/>
+<line stroke="#0ea5e9" stroke-width="3" x1="170" x2="170" y1="160" y2="190"/>
+<line stroke="#10b981" stroke-width="3" x1="170" x2="170" y1="255" y2="293"/>
+<polygon fill="#10b981" points="170,293 163,280 177,280"/>
+</svg>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 32: SSH as Control Plane               -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="32">
+<h2>SSH as a Control Plane</h2>
+<div class="two-col">
+<div class="fade-up delay-1">
+<p>SSH is not merely a tool for typing commands on a remote terminal. In modern infrastructure, it functions as a <strong>general-purpose control protocol</strong> — the secure transport layer over which automation systems operate.</p>
+<div class="card" style="margin-top:1rem;">
+<h4>Tools Built on SSH</h4>
+<ul>
+<li><strong>Ansible</strong> — agentless configuration management; executes modules over SSH</li>
+<li><strong>Fabric / Invoke</strong> — Python libraries for remote command execution via Paramiko</li>
+<li><strong>scp / rsync</strong> — file synchronisation using SSH as transport</li>
+<li><strong>Git (over SSH)</strong> — <code>git push</code> to GitHub uses SSH authentication</li>
+</ul>
+</div>
+</div>
+<div class="fade-up delay-2">
+<div class="story-box">
+<h4>The Pattern</h4>
+<p>SSH + JSON (or YAML) has become a de facto standard for lightweight infrastructure control: read a configuration file, iterate over hosts, SSH into each one, execute commands, collect output. This is essentially what Ansible does.</p>
+</div>
+<div class="insight-box" style="margin-top:1rem;">
+<h4>Seminar Connection</h4>
+<p>In Seminar 10, you will use <strong>Paramiko</strong> (a Python SSH library) to connect to SSH servers in Docker containers, execute remote commands and transfer files via SFTP — replicating the pattern that tools like Ansible use internally.</p>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 33: SSH Quiz                           -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="33">
+<h2>Knowledge Check: SSH</h2>
+<div class="quiz-container fade-up delay-1">
+<p class="quiz-question">You need to access a PostgreSQL database (port 5432) that is only reachable from a bastion host. Which SSH command creates the correct tunnel?</p>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkQuiz(this, true)"><code>ssh -L 5432:db-server:5432 user@bastion</code></div>
+<div class="quiz-option" onclick="checkQuiz(this, false)"><code>ssh -R 5432:db-server:5432 user@bastion</code></div>
+<div class="quiz-option" onclick="checkQuiz(this, false)"><code>ssh -D 5432 user@bastion</code></div>
+<div class="quiz-option" onclick="checkQuiz(this, false)"><code>ssh -p 5432 user@db-server</code></div>
+</div>
+<div class="quiz-feedback correct">&#10003; Correct. <code>-L</code> creates a <strong>local</strong> forward: traffic sent to localhost:5432 on your machine is tunnelled through the bastion and forwarded to db-server:5432 on the internal network. You then connect with <code>psql -h localhost</code>.</div>
+<div class="quiz-feedback incorrect">&#10007; Remember the mnemonic: <code>-L</code> = <strong>L</strong>ocal port listens (access a remote service locally), <code>-R</code> = <strong>R</strong>emote port listens (expose a local service remotely), <code>-D</code> = <strong>D</strong>ynamic SOCKS proxy (route all traffic). The <code>-p</code> flag merely sets the SSH port, not a tunnel.</div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 34: Protocol Comparison                -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="34">
+<h2>Protocol Comparison Summary</h2>
+<div class="table-container fade-up delay-1">
+<table>
+<thead><tr><th>Aspect</th><th>FTP</th><th>DNS</th><th>SSH</th></tr></thead>
+<tbody>
+<tr><td><strong>Purpose</strong></td><td>File transfer</td><td>Name resolution</td><td>Secure remote access</td></tr>
+<tr><td><strong>Transport</strong></td><td>TCP (two connections)</td><td>UDP (primary)</td><td>TCP (single connection)</td></tr>
+<tr><td><strong>Port(s)</strong></td><td>21 (ctrl), 20/dyn (data)</td><td>53</td><td>22</td></tr>
+<tr><td><strong>Security</strong></td><td>None (use FTPS/SFTP)</td><td>None (use DNSSEC/DoH)</td><td>Built-in encryption</td></tr>
+<tr><td><strong>Multiplexing</strong></td><td>No (separate connections)</td><td>No</td><td>Yes (channels)</td></tr>
+</tbody>
+</table>
+</div>
+<div class="insight-box fade-up delay-2" style="margin-top:1.5rem;">
+<h4>Architectural Lesson</h4>
+<p>These three protocols illustrate three fundamentally different design approaches at the same layer: FTP's <strong>dual-connection</strong> model (clean separation, but fragile with NAT), DNS's <strong>hierarchical delegation</strong> (scalable, but dependent on caching) and SSH's <strong>layered encrypted multiplexing</strong> (versatile, but heavier). Understanding these trade-offs prepares you to evaluate the design of any application-layer protocol.</p>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 35: Hook Resolution — Dyn Attack       -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="35">
+<h2>Returning to the Dyn Attack</h2>
+<div class="two-col">
+<div class="fade-up delay-1">
+<div class="story-box">
+<h4>Now We Can Explain It</h4>
+<p>The Mirai botnet directed 1.2 Tbit/s of traffic at Dyn, a major <strong>recursive DNS resolver</strong> provider. Because millions of clients depended on Dyn to translate domain names into IP addresses, the attack did not need to touch Twitter, Netflix or GitHub at all.</p>
+<p style="margin-top:0.5rem;">With the resolver overwhelmed, stub resolvers received no answers. Browsers displayed "DNS_PROBE_FINISHED_NXDOMAIN" — the sites appeared to not exist, even though their servers were fully operational.</p>
+</div>
+</div>
+<div class="fade-up delay-2">
+<div class="warning-box">
+<h4>The Structural Weakness</h4>
+<p>DNS is distributed <em>by design</em>, but operational concentration re-introduced a single point of failure. When one provider handles resolution for thousands of domains, it becomes an attractive target.</p>
+</div>
+<div class="definition-box" style="margin-top:1rem;">
+<h4>Mitigation Strategies</h4>
+<ul>
+<li>Use <strong>multiple DNS providers</strong> (e.g. both Cloudflare and Route 53)</li>
+<li>Employ <strong>anycast</strong> to distribute load geographically</li>
+<li>Set appropriate <strong>TTL values</strong> so cached records survive short outages</li>
+<li>Deploy <strong>DNSSEC</strong> to prevent spoofing during recovery</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 36: Common Pitfalls                    -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="36">
+<h2>Common Pitfalls and Debugging</h2>
+<div class="content-grid fade-up delay-1">
+<div class="insight-box">
+<h4>FTP: Passive Port Range Blocked</h4>
+<p>Server's PASV port range blocked by firewall. Configure both the FTP server's passive port range <strong>and</strong> the corresponding firewall rules.</p>
+</div>
+<div class="insight-box">
+<h4>DNS: Stale Cache</h4>
+<p>Changed a record but clients see the old IP? The previous TTL has not expired. Use <code>dig +trace</code> to bypass all caches and query the authoritative server directly.</p>
+</div>
+<div class="insight-box">
+<h4>SSH: Host Key Changed</h4>
+<p>The warning "REMOTE HOST IDENTIFICATION HAS CHANGED" could indicate a server reinstall — or a man-in-the-middle attack. Verify with the administrator before updating <code>known_hosts</code>.</p>
+</div>
+<div class="insight-box">
+<h4>SSH: Permission Denied</h4>
+<p>Check: <code>~/.ssh</code> permissions (700), key file (600), <code>authorized_keys</code> (644) and that the user is listed in <code>AllowUsers</code> in <code>sshd_config</code>.</p>
+</div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 37: Debugging Tools                    -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="37">
+<h2>Essential Debugging Tools</h2>
+<div class="content-grid three-col fade-up delay-1">
+<div class="card">
+<h4>FTP Debugging</h4>
+<div class="cli-block" style="font-size: 0.85rem;">
+<span class="comment"># Verbose FTP client</span>
+<span class="prompt">$</span> <span class="command">ftp -d host</span>
+
+<span class="comment"># Wireshark filter</span>
+ftp || ftp-data
+</div>
+</div>
+<div class="card accent">
+<h4>DNS Debugging</h4>
+<div class="cli-block" style="font-size: 0.85rem;">
+<span class="comment"># Full resolution trace</span>
+<span class="prompt">$</span> <span class="command">dig +trace example.com</span>
+
+<span class="comment"># Query a specific server</span>
+<span class="prompt">$</span> <span class="command">dig @8.8.8.8 example.com A</span>
+</div>
+</div>
+<div class="card success">
+<h4>SSH Debugging</h4>
+<div class="cli-block" style="font-size: 0.85rem;">
+<span class="comment"># Maximum verbosity</span>
+<span class="prompt">$</span> <span class="command">ssh -vvv user@host</span>
+
+<span class="comment"># Test authentication only</span>
+<span class="prompt">$</span> <span class="command">ssh -T git@github.com</span>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 38: Interactive — FTP Mode Simulator   -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="38">
+<h2>Interactive: FTP Mode Comparison</h2>
+<div class="interactive-panel fade-up delay-1">
+<h4>Explore: What Happens in Each FTP Mode?</h4>
+<p>Select a network topology and FTP mode to see the connection flow and whether the transfer succeeds:</p>
+<div style="display:flex; gap:1rem; flex-wrap:wrap; margin:1rem 0;">
+<div>
+<label><strong>Topology:</strong></label><br/>
+<select id="ftpTopology" onchange="updateFTPSim()" style="padding:0.5rem; border-radius:8px; border:2px solid var(--border); font-size:1rem;">
+<option value="direct">Direct (no NAT)</option>
+<option value="client-nat" selected>Client behind NAT</option>
+<option value="both-nat">Both behind NAT</option>
+</select>
+</div>
+<div>
+<label><strong>FTP Mode:</strong></label><br/>
+<select id="ftpMode" onchange="updateFTPSim()" style="padding:0.5rem; border-radius:8px; border:2px solid var(--border); font-size:1rem;">
+<option value="active">Active (PORT)</option>
+<option value="passive" selected>Passive (PASV)</option>
+</select>
+</div>
+</div>
+<div class="result-display" id="ftpSimResult">
+<p><strong>Client behind NAT + Passive Mode</strong></p>
+<p>Control: Client → Server:21 (outbound) ✓</p>
+<p>Data: Client → Server:dyn (outbound) ✓</p>
+<p style="color:#4ade80;"><strong>Result: Transfer succeeds</strong></p>
+</div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 39: Interactive — DNS Resolver          -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="39">
+<h2>Interactive: Trace a DNS Resolution</h2>
+<div class="interactive-panel fade-up delay-1">
+<h4>Simulate a DNS Lookup</h4>
+<p>Enter a domain name and step through the resolution process:</p>
+<div style="display:flex; gap:1rem; align-items:center; margin:1rem 0;">
+<input id="dnsInput" onkeydown="if(event.key==='Enter')simulateDNS()" placeholder="e.g. www.ase.ro" style="padding:0.6rem 1rem; border-radius:8px; border:2px solid var(--border); font-size:1rem; flex:1; max-width:300px;" type="text" value="www.ase.ro"/>
+<button class="reveal-btn" onclick="simulateDNS()" style="margin:0;">Resolve</button>
+</div>
+<div class="result-display" id="dnsSimResult">
+<p style="color:#94a3b8;">Enter a domain name and click "Resolve" to trace the resolution steps.</p>
+</div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 40: Next Week + Seminar Connection     -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="40">
+<h2>Looking Ahead</h2>
+<div class="two-col fade-up delay-1">
+<div>
+<div class="highlight-box">
+<h4>Week 12 — Email Protocols</h4>
+<ul>
+<li><strong>SMTP</strong> — Simple Mail Transfer Protocol</li>
+<li><strong>POP3</strong> — Post Office Protocol</li>
+<li><strong>IMAP</strong> — Internet Message Access Protocol</li>
+<li><strong>WebMail</strong> architectures</li>
+</ul>
+<p style="margin-top:0.5rem;">Connection: email uses <strong>DNS MX records</strong> for routing, TLS for encryption and ASCII command protocols similar to FTP.</p>
+</div>
+</div>
+<div>
+<div class="card purple">
+<h4>Seminars 9 and 10 — Practical Work</h4>
+<ul>
+<li><strong>S09:</strong> FTP with pyftpdlib, custom pseudo-FTP protocol, multi-client containers</li>
+<li><strong>S10:</strong> DNS in Docker containers, SSH with Paramiko, SSH port forwarding through a bastion</li>
+</ul>
+</div>
+<div class="story-box" style="margin-top: 1rem;">
+<h4>Project Connection</h4>
+<p>The SSH tunnelling and DNS concepts from today directly apply to the course projects — particularly container orchestration and secure service access patterns.</p>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 41: Key Takeaways                      -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="41">
+<h2>Key Takeaways</h2>
+<div class="content-grid three-col fade-up delay-1">
+<div class="highlight-box" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
+<h4>FTP</h4>
+<ul>
+<li>Dual connections: control (21) + data</li>
+<li>Passive mode for NAT traversal</li>
+<li>Use SFTP (not FTP) in practice</li>
+<li>Design lesson: separation of concerns</li>
+</ul>
+</div>
+<div class="highlight-box" style="background: var(--gradient-secondary);">
+<h4>DNS</h4>
+<ul>
+<li>Hierarchical: root → TLD → authoritative</li>
+<li>UDP port 53 (TCP for large responses)</li>
+<li>TTL balances freshness vs performance</li>
+<li>DNSSEC and DoH/DoT for security</li>
+</ul>
+</div>
+<div class="highlight-box" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+<h4>SSH</h4>
+<ul>
+<li>Three layers: transport, auth, connection</li>
+<li>Public key auth over password</li>
+<li>-L (local), -R (remote), -D (SOCKS)</li>
+<li>Also a control plane (Ansible, Git)</li>
+</ul>
+</div>
+</div>
+<div class="definition-box fade-up delay-2" style="margin-top: 1.5rem;">
+<h4>The Unifying Perspective</h4>
+<p>These three protocols demonstrate different architectural responses to the same layer's challenges: FTP separates concerns via dual connections, DNS delegates authority through a tree and SSH multiplexes everything through a single encrypted pipe. Each design reflects the constraints and priorities of its era — and each has lessons for modern system design.</p>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 42: Final Synthesis Quiz               -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="42">
+<h2>Synthesis Question</h2>
+<div class="quiz-container fade-up delay-1">
+<p class="quiz-question">A company's website became unreachable for 45 minutes, but their server logs show zero downtime during this period. The engineering team discovered that their DNS provider experienced an outage. Why did the outage persist for exactly 45 minutes after the provider recovered?</p>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkQuiz(this, false)">DNS servers take 45 minutes to restart after a crash</div>
+<div class="quiz-option" onclick="checkQuiz(this, false)">TCP connections to DNS servers have a 45-minute timeout</div>
+<div class="quiz-option" onclick="checkQuiz(this, true)">Negative responses (NXDOMAIN/SERVFAIL) were cached by resolvers with a TTL that had not yet expired</div>
+<div class="quiz-option" onclick="checkQuiz(this, false)">The company's firewall blocked DNS traffic for 45 minutes</div>
+</div>
+<div class="quiz-feedback correct">&#10003; Correct. During the outage, resolvers received error responses (SERVFAIL or NXDOMAIN) and cached them according to the SOA record's minimum TTL or the resolver's negative caching policy. Even after the DNS provider recovered, these cached negative answers continued to be served until the negative cache TTL expired. This is why DNS TTL configuration matters for both positive <em>and</em> negative responses.</div>
+<div class="quiz-feedback incorrect">&#10007; The key is <strong>negative caching</strong>. When DNS resolution fails, resolvers do not simply forget — they cache the failure for a period defined by the SOA minimum TTL. After recovery, these stale "this domain does not exist" answers persist in caches until the negative TTL expires.</div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 43: References                         -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide" data-slide="43">
+<h2>References and Further Reading</h2>
+<div class="content-grid fade-up delay-1">
+<div class="card">
+<h4>Textbooks</h4>
+<ul>
+<li>Kurose &amp; Ross, <em>Computer Networking: A Top-Down Approach</em>, 8th Ed.</li>
+<li>Rhodes &amp; Goerzen, <em>Foundations of Python Network Programming</em>, 3rd Ed.</li>
+</ul>
+</div>
+<div class="card accent">
+<h4>RFCs</h4>
+<ul>
+<li>RFC 959 — FTP Specification</li>
+<li>RFC 1034/1035 — DNS</li>
+<li>RFC 4251–4254 — SSH Protocol</li>
+<li>RFC 4033–4035 — DNSSEC</li>
+</ul>
+</div>
+</div>
+<div class="highlight-box fade-up delay-2" style="margin-top: 1.5rem;">
+<h4>Starterkit Resources</h4>
+<p>The course repository contains four Docker-based scenarios for hands-on exploration: <strong>FTP baseline</strong> (control vs data), <strong>FTP with NAT</strong> (active vs passive failure), <strong>DNS TTL and caching</strong> (authoritative + resolver) and <strong>SSH provisioning</strong> (remote execution with Paramiko). Run each with <code>docker compose up --build</code>.</p>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 44: Closing                            -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide slide-title" data-slide="44">
+<div class="fade-up">
+<h1>Questions?</h1>
+<p class="subtitle">Week 11 — Application Layer: FTP, DNS and SSH</p>
+<div class="meta" style="margin-top: 2rem;">
+<span>Contact your seminar instructor</span>
+<span>Next: Week 12 — Email Protocols</span>
+</div>
+<p style="margin-top: 3rem; font-size: 0.9rem; color: var(--text-on-dark-muted);">
+  Bucharest University of Economic Studies – Faculty of CSIE<br/>
+  Computer Networks • Bachelor in Economic Informatics, Year 3
+</p>
+</div>
+</div>
+
+</div><!-- end presentation -->
+
+<!-- Navigation -->
+<div class="nav-container">
+<button class="nav-btn secondary" id="prevBtn" onclick="prevSlide()" title="Previous (←)">&#8592;</button>
+<button class="nav-btn secondary" onclick="openTOC()" title="Table of Contents (T)">&#9776;</button>
+<button class="nav-btn secondary" onclick="toggleFullscreen()" title="Fullscreen (F)">&#9974;</button>
+<button class="nav-btn primary" id="nextBtn" onclick="nextSlide()" title="Next (→)">&#8594;</button>
+</div>
+
+<!-- Footer -->
+<div class="footer">by Revolvix</div>
+
+<!-- TOC Modal -->
+<div class="toc-modal" id="tocModal">
+<button class="toc-close" onclick="closeTOC()">&times;</button>
+<div class="toc-content">
+<h3>Table of Contents</h3>
+<div class="toc-section">
+<h4>Opening — Why This Matters</h4>
+<div class="toc-item" onclick="goToSlide(1)">1. Title</div>
+<div class="toc-item" onclick="goToSlide(2)">2. The Day Half the Internet Went Dark</div>
+<div class="toc-item" onclick="goToSlide(3)">3. What We Know — and Cannot Yet Explain</div>
+<div class="toc-item" onclick="goToSlide(4)">4. Learning Objectives</div>
+<div class="toc-item" onclick="goToSlide(5)">5. Course Roadmap</div>
+</div>
+<div class="toc-section">
+<h4>Section 1 — FTP: File Transfer Protocol</h4>
+<div class="toc-item" onclick="goToSlide(6)">6. FTP Section</div>
+<div class="toc-item" onclick="goToSlide(7)">7. What is FTP?</div>
+<div class="toc-item" onclick="goToSlide(8)">8. Dual-Connection Architecture</div>
+<div class="toc-item" onclick="goToSlide(9)">9. FTP Commands</div>
+<div class="toc-item" onclick="goToSlide(10)">10. Active vs Passive Mode</div>
+<div class="toc-item" onclick="goToSlide(11)">11. Predict: FTP Through NAT</div>
+<div class="toc-item" onclick="goToSlide(12)">12. FTP Security Evolution</div>
+<div class="toc-item" onclick="goToSlide(13)">13. Knowledge Check: FTP</div>
+</div>
+<div class="toc-section">
+<h4>Section 2 — DNS: Domain Name System</h4>
+<div class="toc-item" onclick="goToSlide(14)">14. DNS Section</div>
+<div class="toc-item" onclick="goToSlide(15)">15. The Problem DNS Solves</div>
+<div class="toc-item" onclick="goToSlide(16)">16. The DNS Hierarchy</div>
+<div class="toc-item" onclick="goToSlide(17)">17. DNS Resolution Step by Step</div>
+<div class="toc-item" onclick="goToSlide(18)">18. DNS Record Types</div>
+<div class="toc-item" onclick="goToSlide(19)">19. DNS Packet Structure</div>
+<div class="toc-item" onclick="goToSlide(20)">20. TTL and Caching (Interactive)</div>
+<div class="toc-item" onclick="goToSlide(21)">21. DNS Security</div>
+<div class="toc-item" onclick="goToSlide(22)">22. Knowledge Check: DNS</div>
+</div>
+<div class="toc-section">
+<h4>Section 3 — SSH: Secure Shell</h4>
+<div class="toc-item" onclick="goToSlide(23)">23. SSH Section</div>
+<div class="toc-item" onclick="goToSlide(24)">24. What is SSH?</div>
+<div class="toc-item" onclick="goToSlide(25)">25. SSH Architecture</div>
+<div class="toc-item" onclick="goToSlide(26)">26. SSH Key Exchange</div>
+<div class="toc-item" onclick="goToSlide(27)">27. Authentication Methods</div>
+<div class="toc-item" onclick="goToSlide(28)">28. Channel Multiplexing</div>
+<div class="toc-item" onclick="goToSlide(29)">29. Local Port Forwarding (-L)</div>
+<div class="toc-item" onclick="goToSlide(30)">30. Remote Port Forwarding (-R)</div>
+<div class="toc-item" onclick="goToSlide(31)">31. Dynamic Port Forwarding (-D)</div>
+<div class="toc-item" onclick="goToSlide(32)">32. SSH as Control Plane</div>
+<div class="toc-item" onclick="goToSlide(33)">33. Knowledge Check: SSH</div>
+</div>
+<div class="toc-section">
+<h4>Synthesis and Application</h4>
+<div class="toc-item" onclick="goToSlide(34)">34. Protocol Comparison</div>
+<div class="toc-item" onclick="goToSlide(35)">35. The Dyn Attack — Explained</div>
+<div class="toc-item" onclick="goToSlide(36)">36. Common Pitfalls</div>
+<div class="toc-item" onclick="goToSlide(37)">37. Debugging Tools</div>
+<div class="toc-item" onclick="goToSlide(38)">38. Interactive: FTP Mode Comparison</div>
+<div class="toc-item" onclick="goToSlide(39)">39. Interactive: DNS Resolution Trace</div>
+</div>
+<div class="toc-section">
+<h4>Reflection and Closing</h4>
+<div class="toc-item" onclick="goToSlide(40)">40. Looking Ahead</div>
+<div class="toc-item" onclick="goToSlide(41)">41. Key Takeaways</div>
+<div class="toc-item" onclick="goToSlide(42)">42. Synthesis Question</div>
+<div class="toc-item" onclick="goToSlide(43)">43. References</div>
+<div class="toc-item" onclick="goToSlide(44)">44. Questions?</div>
+</div>
+</div>
+</div>
+
+<script>
+    // ═══════════════════════════════════════════
+    // Presentation Navigation
+    // ═══════════════════════════════════════════
+    let currentSlide = 1;
+    const totalSlides = 44;
+
+    const slides = document.querySelectorAll('.slide');
+    const progressBar = document.getElementById('progressBar');
+    const slideCounter = document.getElementById('slideCounter');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const tocModal = document.getElementById('tocModal');
+
+    updateUI();
+
+    function updateUI() {
+      const progress = (currentSlide / totalSlides) * 100;
+      progressBar.style.width = progress + '%';
+      slideCounter.textContent = currentSlide + ' / ' + totalSlides;
+      prevBtn.disabled = currentSlide === 1;
+      nextBtn.disabled = currentSlide === totalSlides;
+      slides.forEach(function(slide, index) {
+        slide.classList.remove('active');
+        if (index + 1 === currentSlide) {
+          slide.classList.add('active');
+        }
+      });
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides) { currentSlide++; updateUI(); }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) { currentSlide--; updateUI(); }
+    }
+
+    function goToSlide(n) {
+      if (n >= 1 && n <= totalSlides) { currentSlide = n; updateUI(); closeTOC(); }
+    }
+
+    function openTOC() { tocModal.classList.add('show'); }
+    function closeTOC() { tocModal.classList.remove('show'); }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    document.addEventListener('keydown', function(e) {
+      switch(e.key) {
+        case 'ArrowRight': case ' ': nextSlide(); e.preventDefault(); break;
+        case 'ArrowLeft': prevSlide(); e.preventDefault(); break;
+        case 'Home': goToSlide(1); e.preventDefault(); break;
+        case 'End': goToSlide(totalSlides); e.preventDefault(); break;
+        case 'f': case 'F': toggleFullscreen(); e.preventDefault(); break;
+        case 't': case 'T': openTOC(); e.preventDefault(); break;
+        case 'Escape': closeTOC(); break;
+      }
+    });
+
+    // ═══════════════════════════════════════════
+    // Quiz System
+    // ═══════════════════════════════════════════
+    function checkQuiz(element, isCorrect) {
+      var container = element.closest('.quiz-container');
+      var options = container.querySelectorAll('.quiz-option');
+      var feedbackCorrect = container.querySelector('.quiz-feedback.correct');
+      var feedbackIncorrect = container.querySelector('.quiz-feedback.incorrect');
+      options.forEach(function(opt) {
+        opt.classList.remove('selected', 'correct', 'incorrect');
+      });
+      element.classList.add('selected');
+      if (isCorrect) {
+        element.classList.add('correct');
+        feedbackCorrect.classList.add('show');
+        feedbackIncorrect.classList.remove('show');
+      } else {
+        element.classList.add('incorrect');
+        feedbackIncorrect.classList.add('show');
+        feedbackCorrect.classList.remove('show');
+      }
+    }
+
+    // ═══════════════════════════════════════════
+    // Reveal Button (POE Patterns)
+    // ═══════════════════════════════════════════
+    function toggleReveal(id) {
+      var el = document.getElementById(id);
+      if (el) { el.classList.toggle('show'); }
+    }
+
+    // ═══════════════════════════════════════════
+    // Interactive: TTL Slider
+    // ═══════════════════════════════════════════
+    function updateTTL() {
+      var slider = document.getElementById('ttlSlider');
+      var result = document.getElementById('ttlResult');
+      if (!slider || !result) return;
+      var ttl = parseInt(slider.value);
+      var hours = Math.floor(ttl / 3600);
+      var minutes = Math.floor((ttl % 3600) / 60);
+      var queriesPerDay = Math.ceil(86400 / ttl);
+      var timeStr = '';
+      if (hours > 0) timeStr += hours + ' hour' + (hours > 1 ? 's' : '');
+      if (minutes > 0) timeStr += (hours > 0 ? ' ' : '') + minutes + ' min';
+      if (ttl < 60) timeStr = ttl + ' seconds';
+      var rec = '';
+      if (ttl <= 300) rec = 'Failover / CDN (rapid changes expected)';
+      else if (ttl <= 900) rec = 'Dynamic services (moderate change frequency)';
+      else if (ttl <= 3600) rec = 'General-purpose websites';
+      else if (ttl <= 14400) rec = 'Stable services (infrequent changes)';
+      else rec = 'Static infrastructure (rarely changes)';
+      result.innerHTML =
+        '<p><strong>TTL: ' + ttl + 's (' + timeStr + ')</strong></p>' +
+        '<p>Queries per day per client: ~' + queriesPerDay + '</p>' +
+        '<p>Propagation delay after change: ~' + timeStr + '</p>' +
+        '<p>Recommendation: ' + rec + '</p>';
+    }
+
+    // ═══════════════════════════════════════════
+    // Interactive: FTP Mode Simulator
+    // ═══════════════════════════════════════════
+    function updateFTPSim() {
+      var topo = document.getElementById('ftpTopology').value;
+      var mode = document.getElementById('ftpMode').value;
+      var result = document.getElementById('ftpSimResult');
+      if (!result) return;
+
+      var scenarios = {
+        'direct-active':   { ctrl: '✓', data: '✓ (server→client:port)', ok: true },
+        'direct-passive':  { ctrl: '✓', data: '✓ (client→server:dyn)', ok: true },
+        'client-nat-active':  { ctrl: '✓', data: '✗ (server→client blocked by NAT)', ok: false },
+        'client-nat-passive': { ctrl: '✓', data: '✓ (client→server:dyn outbound)', ok: true },
+        'both-nat-active':  { ctrl: '✓', data: '✗ (server→client blocked by NAT)', ok: false },
+        'both-nat-passive': { ctrl: '✓', data: '✗ (client→server:dyn blocked by server NAT)', ok: false }
+      };
+
+      var key = topo + '-' + mode;
+      var s = scenarios[key];
+      var topoLabel = { 'direct': 'Direct', 'client-nat': 'Client behind NAT', 'both-nat': 'Both behind NAT' };
+      var modeLabel = { 'active': 'Active (PORT)', 'passive': 'Passive (PASV)' };
+
+      result.innerHTML =
+        '<p><strong>' + topoLabel[topo] + ' + ' + modeLabel[mode] + '</strong></p>' +
+        '<p>Control: Client → Server:21 (outbound) ' + s.ctrl + '</p>' +
+        '<p>Data: ' + s.data + '</p>' +
+        '<p style="color:' + (s.ok ? '#4ade80' : '#f87171') + ';"><strong>Result: ' +
+        (s.ok ? 'Transfer succeeds' : 'Transfer fails — connection times out') + '</strong></p>';
+    }
+
+    // ═══════════════════════════════════════════
+    // Interactive: DNS Resolution Simulator
+    // ═══════════════════════════════════════════
+    function simulateDNS() {
+      var input = document.getElementById('dnsInput');
+      var result = document.getElementById('dnsSimResult');
+      if (!input || !result) return;
+
+      var domain = input.value.trim().toLowerCase();
+      if (!domain || domain.indexOf('.') === -1) {
+        result.innerHTML = '<p style="color:#f87171;">Please enter a valid domain name (e.g. www.ase.ro)</p>';
+        return;
+      }
+
+      var parts = domain.split('.');
+      var tld = '.' + parts[parts.length - 1];
+      var sld = parts.length >= 2 ? parts[parts.length - 2] : '';
+      var sub = parts.length >= 3 ? parts.slice(0, parts.length - 2).join('.') : '';
+      var fakeIP = (Math.floor(Math.random() * 200) + 10) + '.' +
+                   (Math.floor(Math.random() * 255)) + '.' +
+                   (Math.floor(Math.random() * 255)) + '.' +
+                   (Math.floor(Math.random() * 254) + 1);
+
+      var steps = [
+        '1. Stub resolver queries recursive resolver: "What is the A record for <strong>' + domain + '</strong>?"',
+        '2. Recursive resolver queries <strong>root server</strong>: "Who handles <strong>' + tld + '</strong>?"',
+        '   → Root responds: "Ask <strong>' + tld.slice(1) + '.ns.example</strong> (TLD server)"',
+        '3. Recursive resolver queries <strong>' + tld + ' TLD server</strong>: "Who handles <strong>' + sld + tld + '</strong>?"',
+        '   → TLD responds: "Ask <strong>ns1.' + sld + tld + '</strong> (authoritative)"',
+        '4. Recursive resolver queries <strong>authoritative server</strong>: "What is <strong>' + domain + '</strong>?"',
+        '   → Authoritative responds: "<strong>' + domain + ' = ' + fakeIP + '</strong>" (TTL: 3600)',
+        '5. Recursive resolver returns answer to client and <strong>caches</strong> the result.'
+      ];
+
+      result.innerHTML = '<p style="margin-bottom:0.5rem;"><strong>Resolving: ' + domain + '</strong></p>' +
+        steps.map(function(s) { return '<p style="margin:0.2rem 0; font-size:0.85rem;">' + s + '</p>'; }).join('');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,164 @@
+# Parsons Problems: Socket Programming
+# Version: 5.0 — January 2026
+# Usage: python formative/parsons_runner.py --file parsons/parsons_socket.yaml
+
+metadata:
+  topic: "TCP/UDP Socket Programming"
+  difficulty: basic_to_intermediate
+  estimated_time: "15 minutes"
+  lo_refs: [LO3, LO5]
+  description: "Practise ordering socket operations correctly"
+
+problems:
+  # ─────────────────────────────────────────────────────────────────────────────
+  - id: parsons_socket_01
+    title: "Create a TCP Server"
+    instructions: "Order the lines to create a TCP server that listens on port 8080 and accepts one connection."
+    difficulty: basic
+    
+    blocks:
+      - {id: 1, code: "import socket", indent: 0}
+      - {id: 2, code: "server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)", indent: 0}
+      - {id: 3, code: "server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)", indent: 0}
+      - {id: 4, code: "server.bind(('0.0.0.0', 8080))", indent: 0}
+      - {id: 5, code: "server.listen(5)", indent: 0}
+      - {id: 6, code: "client, addr = server.accept()", indent: 0}
+      - {id: 7, code: "print(f'Connected by {addr}')", indent: 0}
+    
+    distractors:
+      - {id: D1, code: "server.connect(('0.0.0.0', 8080))", indent: 0, hint: "connect() is for clients, not servers"}
+      - {id: D2, code: "import sockets", indent: 0, hint: "Typo: module is 'socket' not 'sockets'"}
+    
+    correct_order: [1, 2, 3, 4, 5, 6, 7]
+    
+    explanation: |
+      The correct order for a TCP server:
+      1. Import the socket module
+      2. Create the socket object (AF_INET = IPv4, SOCK_STREAM = TCP)
+      3. Set SO_REUSEADDR to avoid "Address already in use" errors
+      4. Bind to address and port
+      5. Start listening for connections
+      6. Accept a connection (blocks until client connects)
+      7. Use the connection
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  - id: parsons_socket_02
+    title: "Create a TCP Client"
+    instructions: "Order the lines to create a TCP client that connects to localhost:8080 and sends a message."
+    difficulty: basic
+    
+    blocks:
+      - {id: 1, code: "import socket", indent: 0}
+      - {id: 2, code: "with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:", indent: 0}
+      - {id: 3, code: "sock.connect(('localhost', 8080))", indent: 1}
+      - {id: 4, code: "sock.sendall(b'Hello, Server!')", indent: 1}
+      - {id: 5, code: "response = sock.recv(1024)", indent: 1}
+      - {id: 6, code: "print(response.decode())", indent: 1}
+    
+    distractors:
+      - {id: D1, code: "sock.bind(('localhost', 8080))", indent: 1, hint: "bind() is for servers, not clients"}
+      - {id: D2, code: "sock.send('Hello, Server!')", indent: 1, hint: "Missing b prefix — must send bytes, not str"}
+    
+    correct_order: [1, 2, 3, 4, 5, 6]
+    
+    explanation: |
+      The correct order for a TCP client:
+      1. Import the socket module
+      2. Create socket with context manager (auto-closes)
+      3. Connect to the server
+      4. Send data (must be bytes, hence b'...')
+      5. Receive response
+      6. Decode and print (bytes → str)
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  - id: parsons_socket_03
+    title: "UDP Echo Server"
+    instructions: "Order the lines to create a UDP server that echoes back whatever it receives."
+    difficulty: intermediate
+    
+    blocks:
+      - {id: 1, code: "import socket", indent: 0}
+      - {id: 2, code: "server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)", indent: 0}
+      - {id: 3, code: "server.bind(('0.0.0.0', 8080))", indent: 0}
+      - {id: 4, code: "while True:", indent: 0}
+      - {id: 5, code: "data, addr = server.recvfrom(1024)", indent: 1}
+      - {id: 6, code: "server.sendto(data, addr)", indent: 1}
+    
+    distractors:
+      - {id: D1, code: "server.listen(5)", indent: 0, hint: "UDP does not use listen() — that is TCP only"}
+      - {id: D2, code: "server.accept()", indent: 0, hint: "UDP does not use accept() — that is TCP only"}
+      - {id: D3, code: "socket.socket(socket.AF_INET, socket.SOCK_STREAM)", indent: 0, hint: "SOCK_STREAM is TCP; UDP uses SOCK_DGRAM"}
+    
+    correct_order: [1, 2, 3, 4, 5, 6]
+    
+    explanation: |
+      UDP differences from TCP:
+      - Use SOCK_DGRAM instead of SOCK_STREAM
+      - No listen() or accept() — UDP is connectionless
+      - Use recvfrom() to get data AND sender address
+      - Use sendto() to send response to specific address
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  - id: parsons_socket_04
+    title: "Receive Exactly N Bytes"
+    instructions: "Order the lines to create a function that receives exactly the specified number of bytes."
+    difficulty: intermediate
+    
+    blocks:
+      - {id: 1, code: "def recv_exactly(sock, length):", indent: 0}
+      - {id: 2, code: "data = b''", indent: 1}
+      - {id: 3, code: "while len(data) < length:", indent: 1}
+      - {id: 4, code: "chunk = sock.recv(length - len(data))", indent: 2}
+      - {id: 5, code: "if not chunk:", indent: 2}
+      - {id: 6, code: "raise ConnectionError('Connection closed')", indent: 3}
+      - {id: 7, code: "data += chunk", indent: 2}
+      - {id: 8, code: "return data", indent: 1}
+    
+    distractors:
+      - {id: D1, code: "data = ''", indent: 1, hint: "Must use bytes (b''), not string ('')"}
+      - {id: D2, code: "return chunk", indent: 1, hint: "Return all accumulated data, not just last chunk"}
+    
+    correct_order: [1, 2, 3, 4, 5, 6, 7, 8]
+    
+    explanation: |
+      TCP is a stream protocol — recv() may return less than requested.
+      This function loops until exactly `length` bytes are received.
+      Key points:
+      - Start with empty bytes (b'')
+      - Loop while we have less than needed
+      - Request only the remaining amount
+      - Check for empty chunk (connection closed)
+      - Accumulate chunks
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  - id: parsons_socket_05
+    title: "Handle Connection with Timeout"
+    instructions: "Order the lines to connect with a timeout and handle the timeout error."
+    difficulty: intermediate
+    
+    blocks:
+      - {id: 1, code: "import socket", indent: 0}
+      - {id: 2, code: "sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)", indent: 0}
+      - {id: 3, code: "sock.settimeout(5.0)", indent: 0}
+      - {id: 4, code: "try:", indent: 0}
+      - {id: 5, code: "sock.connect(('example.com', 80))", indent: 1}
+      - {id: 6, code: "sock.sendall(b'GET / HTTP/1.0\\r\\n\\r\\n')", indent: 1}
+      - {id: 7, code: "except socket.timeout:", indent: 0}
+      - {id: 8, code: "print('Connection timed out')", indent: 1}
+      - {id: 9, code: "finally:", indent: 0}
+      - {id: 10, code: "sock.close()", indent: 1}
+    
+    distractors:
+      - {id: D1, code: "sock.timeout = 5.0", indent: 0, hint: "Use settimeout() method, not attribute assignment"}
+      - {id: D2, code: "except TimeoutError:", indent: 0, hint: "Socket timeouts raise socket.timeout, not TimeoutError"}
+    
+    correct_order: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    
+    explanation: |
+      Timeout handling pattern:
+      1. Create socket
+      2. Set timeout BEFORE operations
+      3. Use try/except to catch socket.timeout
+      4. Use finally to ensure socket is closed
+      
+      Note: settimeout(None) = blocking forever (default)

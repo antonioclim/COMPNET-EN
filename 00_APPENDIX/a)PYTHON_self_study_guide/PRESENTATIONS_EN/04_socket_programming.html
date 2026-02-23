@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python for Networks | 4. Socket Programming</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e17; --bg-secondary: #121a2b; --bg-tertiary: #1a2438;
+            --accent-primary: #00d4aa; --accent-secondary: #7c3aed; --accent-warning: #f59e0b;
+            --accent-error: #ef4444; --accent-success: #10b981;
+            --text-primary: #f1f5f9; --text-secondary: #94a3b8; --text-muted: #64748b;
+            --border-color: #2d3a4f; --code-bg: #0d1117;
+            --font-display: 'Plus Jakarta Sans', sans-serif; --font-mono: 'JetBrains Mono', monospace;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: var(--font-display); background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; overflow: hidden; }
+        .progress-container { position: fixed; top: 0; left: 0; right: 0; height: 4px; background: var(--bg-tertiary); z-index: 1000; }
+        .progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary)); transition: width 0.3s ease; }
+        .nav-header { position: fixed; top: 4px; left: 0; right: 0; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(180deg, var(--bg-primary) 0%, transparent 100%); z-index: 100; }
+        .nav-title { font-size: 0.9rem; color: var(--text-secondary); display: flex; align-items: center; gap: 0.5rem; }
+        .nav-title .module-label { color: var(--accent-primary); font-weight: 600; }
+        .slide-counter { font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-muted); background: var(--bg-tertiary); padding: 0.4rem 0.8rem; border-radius: 20px; }
+        .slides-container { height: 100vh; overflow: hidden; position: relative; }
+        .slide { position: absolute; top: 0; left: 0; right: 0; bottom: 0; padding: 5rem 2rem 6rem; display: flex; flex-direction: column; opacity: 0; visibility: hidden; transform: translateX(100px); transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); overflow-y: auto; }
+        .slide.active { opacity: 1; visibility: visible; transform: translateX(0); }
+        .slide.exit { transform: translateX(-100px); }
+        .slide-content { max-width: 1200px; margin: 0 auto; width: 100%; }
+        h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; line-height: 1.1; margin-bottom: 1.5rem; background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-primary) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        h2 { font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 700; margin-bottom: 1rem; color: var(--text-primary); }
+        h3 { font-size: 1.3rem; font-weight: 600; margin-bottom: 0.75rem; color: var(--accent-primary); }
+        h4 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary); }
+        p { font-size: 1.1rem; line-height: 1.7; color: var(--text-secondary); margin-bottom: 1rem; }
+        .lead { font-size: 1.3rem; color: var(--text-primary); font-weight: 500; }
+        code { font-family: var(--font-mono); background: var(--bg-tertiary); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.9em; color: var(--accent-primary); }
+        .badge { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
+        .badge-time { background: rgba(0, 212, 170, 0.15); color: var(--accent-primary); }
+        .badge-week { background: rgba(124, 58, 237, 0.15); color: var(--accent-secondary); }
+        .badge-core { background: rgba(239, 68, 68, 0.15); color: var(--accent-error); }
+        .card { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 16px; padding: 1.5rem; margin-bottom: 1rem; }
+        .card-highlight { border-left: 4px solid var(--accent-primary); }
+        .card-warning { border-left: 4px solid var(--accent-warning); background: rgba(245, 158, 11, 0.05); }
+        .card-tcp { border-left: 4px solid #3b82f6; background: rgba(59, 130, 246, 0.05); }
+        .card-udp { border-left: 4px solid #f59e0b; background: rgba(245, 158, 11, 0.05); }
+        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin: 1.5rem 0; }
+        .objectives-box { background: linear-gradient(135deg, rgba(0, 212, 170, 0.1) 0%, rgba(124, 58, 237, 0.1) 100%); border: 1px solid var(--border-color); border-radius: 16px; padding: 2rem; margin: 1.5rem 0; }
+        .objective-item { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1rem; }
+        .objective-icon { width: 32px; height: 32px; background: var(--accent-primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+        .objective-text { flex: 1; }
+        .objective-text strong { display: block; color: var(--text-primary); margin-bottom: 0.25rem; }
+        .objective-text span { font-size: 0.95rem; color: var(--text-secondary); }
+        .code-container { background: var(--code-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; margin: 1.5rem 0; }
+        .code-header { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; background: var(--bg-tertiary); border-bottom: 1px solid var(--border-color); }
+        .code-filename { font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-secondary); }
+        .code-actions { display: flex; gap: 0.5rem; }
+        .btn-code { padding: 0.4rem 0.8rem; border-radius: 6px; border: none; font-family: var(--font-mono); font-size: 0.8rem; cursor: pointer; transition: all 0.2s; }
+        .btn-run { background: var(--accent-primary); color: var(--bg-primary); }
+        .btn-run:hover { background: #00e6b8; }
+        .btn-copy { background: var(--bg-secondary); color: var(--text-secondary); border: 1px solid var(--border-color); }
+        .code-body { padding: 1rem; overflow-x: auto; }
+        .code-body pre { font-family: var(--font-mono); font-size: 0.9rem; line-height: 1.6; color: var(--text-primary); margin: 0; }
+        .code-output { padding: 1rem; background: rgba(0, 212, 170, 0.05); border-top: 1px solid var(--border-color); display: none; }
+        .code-output.visible { display: block; }
+        .code-output-header { font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent-primary); margin-bottom: 0.5rem; text-transform: uppercase; }
+        .code-output pre { font-family: var(--font-mono); font-size: 0.85rem; color: var(--accent-primary); }
+        .kw { color: #ff79c6; } .fn { color: #50fa7b; } .str { color: #f1fa8c; } .num { color: #bd93f9; }
+        .cmt { color: #6272a4; font-style: italic; } .cls { color: #8be9fd; }
+        .type { color: #8be9fd; font-style: italic; } .const { color: #ffb86c; }
+        .visual-diagram { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 16px; padding: 2rem; margin: 1.5rem 0; text-align: center; }
+        .diagram-row { display: flex; justify-content: center; align-items: center; gap: 1rem; margin: 1rem 0; flex-wrap: wrap; }
+        .diagram-box { padding: 1rem 1.5rem; border-radius: 12px; font-family: var(--font-mono); font-weight: 600; min-width: 120px; }
+        .diagram-server { background: rgba(59, 130, 246, 0.2); border: 2px solid #3b82f6; color: #3b82f6; }
+        .diagram-client { background: rgba(16, 185, 129, 0.2); border: 2px solid var(--accent-success); color: var(--accent-success); }
+        .diagram-arrow { font-size: 1.5rem; color: var(--text-muted); }
+        .diagram-label { font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem; }
+        .quiz-container { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 16px; padding: 2rem; margin: 1.5rem 0; }
+        .quiz-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+        .quiz-icon { width: 48px; height: 48px; background: linear-gradient(135deg, var(--accent-secondary), var(--accent-primary)); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+        .quiz-question { font-size: 1.15rem; color: var(--text-primary); margin-bottom: 1.5rem; line-height: 1.6; }
+        .quiz-options { display: flex; flex-direction: column; gap: 0.75rem; }
+        .quiz-option { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.25rem; background: var(--bg-tertiary); border: 2px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: all 0.2s; }
+        .quiz-option:hover { border-color: var(--accent-primary); }
+        .quiz-option.selected { border-color: var(--accent-secondary); background: rgba(124, 58, 237, 0.1); }
+        .quiz-option.correct { border-color: var(--accent-success); background: rgba(16, 185, 129, 0.1); }
+        .quiz-option.incorrect { border-color: var(--accent-error); background: rgba(239, 68, 68, 0.1); }
+        .option-marker { width: 28px; height: 28px; border-radius: 50%; background: var(--bg-secondary); border: 2px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.85rem; }
+        .quiz-option.selected .option-marker { background: var(--accent-secondary); border-color: var(--accent-secondary); color: white; }
+        .quiz-option.correct .option-marker { background: var(--accent-success); border-color: var(--accent-success); }
+        .quiz-option.incorrect .option-marker { background: var(--accent-error); border-color: var(--accent-error); }
+        .quiz-actions { display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap; }
+        .btn-quiz { padding: 0.75rem 1.5rem; border-radius: 8px; border: none; font-family: var(--font-display); font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn-check { background: var(--accent-primary); color: var(--bg-primary); }
+        .btn-hint { background: transparent; color: var(--accent-warning); border: 1px solid var(--accent-warning); }
+        .hint-box { margin-top: 1rem; padding: 1rem 1.25rem; background: rgba(245, 158, 11, 0.1); border-left: 4px solid var(--accent-warning); border-radius: 0 8px 8px 0; display: none; }
+        .hint-box.visible { display: block; animation: fadeIn 0.3s ease; }
+        .hint-level { font-size: 0.8rem; color: var(--accent-warning); text-transform: uppercase; margin-bottom: 0.5rem; }
+        .feedback-box { margin-top: 1rem; padding: 1rem 1.25rem; border-radius: 8px; display: none; }
+        .feedback-box.visible { display: block; }
+        .feedback-box.success { background: rgba(16, 185, 129, 0.1); border-left: 4px solid var(--accent-success); }
+        .feedback-box.error { background: rgba(239, 68, 68, 0.1); border-left: 4px solid var(--accent-error); }
+        .experiment-box { background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(0, 212, 170, 0.1) 100%); border: 2px dashed var(--accent-secondary); border-radius: 16px; padding: 2rem; margin: 1.5rem 0; }
+        .experiment-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+        .experiment-icon { font-size: 2rem; }
+        .experiment-title { font-size: 1.3rem; font-weight: 700; color: var(--accent-secondary); }
+        .experiment-steps { margin-top: 1rem; }
+        .experiment-step { display: flex; gap: 1rem; margin-bottom: 1rem; padding: 1rem; background: var(--bg-secondary); border-radius: 12px; }
+        .step-number { width: 32px; height: 32px; background: var(--accent-secondary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
+        .step-content h4 { color: var(--text-primary); margin-bottom: 0.5rem; }
+        .step-content p { font-size: 0.95rem; margin-bottom: 0.5rem; }
+        .step-why { font-size: 0.85rem; color: var(--accent-primary); font-style: italic; }
+        .callout { display: flex; gap: 1rem; padding: 1.25rem; border-radius: 12px; margin: 1rem 0; }
+        .callout-networking { background: rgba(0, 212, 170, 0.1); border: 1px solid rgba(0, 212, 170, 0.3); }
+        .callout-icon { font-size: 1.5rem; }
+        .callout-content h4 { color: var(--accent-primary); margin-bottom: 0.5rem; }
+        .callout-content p { margin: 0; font-size: 0.95rem; }
+        .nav-buttons { position: fixed; bottom: 0; left: 0; right: 0; padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(0deg, var(--bg-primary) 0%, transparent 100%); z-index: 100; }
+        .btn-nav { display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem; border-radius: 8px; border: none; font-family: var(--font-display); font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn-prev { background: var(--bg-tertiary); color: var(--text-secondary); border: 1px solid var(--border-color); }
+        .btn-prev:hover:not(:disabled) { background: var(--bg-secondary); color: var(--text-primary); }
+        .btn-next { background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: white; }
+        .btn-next:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0, 212, 170, 0.3); }
+        .btn-nav:disabled { opacity: 0.5; cursor: not-allowed; }
+        .page-dots { display: flex; gap: 0.5rem; }
+        .page-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border-color); cursor: pointer; transition: all 0.3s; }
+        .page-dot.active { background: var(--accent-primary); transform: scale(1.3); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @media (max-width: 768px) { .slide { padding: 4rem 1rem 5rem; } .grid-2 { grid-template-columns: 1fr; } .diagram-row { flex-direction: column; } }
+        .title-slide { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        .title-meta { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; margin: 2rem 0; }
+        .python-logo { font-size: 4rem; margin-bottom: 1rem; }
+        .flow-chart { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
+        .flow-step { background: var(--bg-tertiary); padding: 0.75rem 1.5rem; border-radius: 8px; font-family: var(--font-mono); font-size: 0.9rem; border: 1px solid var(--border-color); }
+        .flow-step.highlight { background: rgba(0, 212, 170, 0.2); border-color: var(--accent-primary); color: var(--accent-primary); }
+        .flow-arrow { color: var(--text-muted); }
+    </style>
+</head>
+<body>
+    <div class="progress-container"><div class="progress-bar" role="progressbar" id="progressBar"></div></div>
+    <nav class="nav-header">
+        <div class="nav-title"><span class="module-label">Module 4/10</span><span>•</span><span>Socket Programming</span></div>
+        <div class="slide-counter" aria-live="polite" id="slideCounter">1 / 16</div>
+    </nav>
+
+    <div class="slides-container" id="slidesContainer">
+
+        <!-- Slide 1: Title -->
+        <div class="slide active title-slide" data-slide="1">
+            <div class="slide-content">
+                <div class="python-logo">🔌</div>
+                <h1>Socket Programming</h1>
+                <p class="lead">TCP and UDP — The Foundation of Network Communication</p>
+                <div class="title-meta">
+                    <span class="badge badge-time">⏱️ ~30 minutes</span>
+                    <span class="badge badge-week">📅 Weeks 2-4</span>
+                    <span class="badge badge-core">🔥 Core Module</span>
+                </div>
+                <div class="callout callout-networking" style="max-width: 600px; margin: 2rem auto; text-align: left;">
+                    <span class="callout-icon">🌐</span>
+                    <div class="callout-content">
+                        <h4>Networking Correlation</h4>
+                        <p>This is the most important module! Weeks 2-4 cover <strong>TCP and UDP sockets</strong>, the foundation of all network communication.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Objectives -->
+        <div class="slide" data-slide="2">
+            <div class="slide-content">
+                <h2>🎯 What will we learn in this module?</h2>
+                <div class="objectives-box">
+                    <div class="objective-item">
+                        <div class="objective-icon">🔌</div>
+                        <div class="objective-text">
+                            <strong>What is a Socket?</strong>
+                            <span>The communication endpoint — the interface between the application and the network stack</span>
+                        </div>
+                    </div>
+                    <div class="objective-item">
+                        <div class="objective-icon">📦</div>
+                        <div class="objective-text">
+                            <strong>TCP vs UDP</strong>
+                            <span>When to use each protocol and how their code patterns differ</span>
+                        </div>
+                    </div>
+                    <div class="objective-item">
+                        <div class="objective-icon">🖥️</div>
+                        <div class="objective-text">
+                            <strong>Complete TCP Server</strong>
+                            <span>bind(), listen(), accept() — the lifecycle of a server</span>
+                        </div>
+                    </div>
+                    <div class="objective-item">
+                        <div class="objective-icon">💻</div>
+                        <div class="objective-text">
+                            <strong>TCP Client / UDP</strong>
+                            <span>connect(), send(), recv() — how to connect and communicate</span>
+                        </div>
+                    </div>
+                    <div class="objective-item">
+                        <div class="objective-icon">🔒</div>
+                        <div class="objective-text">
+                            <strong>Context Managers (with)</strong>
+                            <span>Automatic resource management — no sockets left open!</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: What is a Socket -->
+        <div class="slide" data-slide="3">
+            <div class="slide-content">
+                <h2>🔌 What is a Socket?</h2>
+                <p>A <strong>socket</strong> is a bidirectional communication endpoint. Think of it as a "plug" through which your application connects to the network.</p>
+
+                <div class="visual-diagram">
+                    <h3 style="margin-bottom: 1.5rem;">Socket = (IP, Port, Protocol)</h3>
+                    <div class="diagram-row">
+                        <div class="diagram-box diagram-server">
+                            <strong>Server</strong><br>
+                            192.168.1.10:8080<br>
+                            <span style="font-size: 0.8rem;">TCP Socket</span>
+                        </div>
+                        <div class="diagram-arrow">⟷</div>
+                        <div class="diagram-box diagram-client">
+                            <strong>Client</strong><br>
+                            192.168.1.20:54321<br>
+                            <span style="font-size: 0.8rem;">TCP Socket</span>
+                        </div>
+                    </div>
+                    <p style="margin-top: 1rem; color: var(--text-muted);">A unique connection = (IP_src, Port_src, IP_dst, Port_dst, Protocol)</p>
+                </div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>📍 Components of a Socket</h3>
+                        <p><strong>IP Address:</strong> Identifies the machine on the network</p>
+                        <p><strong>Port:</strong> Identifies the application on that machine (0-65535)</p>
+                        <p><strong>Protocol:</strong> TCP or UDP</p>
+                    </div>
+                    <div class="card">
+                        <h3>🎯 Common Ports</h3>
+                        <p><code>80</code> - HTTP, <code>443</code> - HTTPS</p>
+                        <p><code>22</code> - SSH, <code>53</code> - DNS</p>
+                        <p><code>8080</code>, <code>9090</code> - Development</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: TCP vs UDP -->
+        <div class="slide" data-slide="4">
+            <div class="slide-content">
+                <h2>📦 TCP vs UDP — Choosing the Protocol</h2>
+
+                <div class="grid-2">
+                    <div class="card card-tcp">
+                        <h3 style="color: #3b82f6;">🔵 TCP (Transmission Control Protocol)</h3>
+                        <p><strong>Characteristics:</strong></p>
+                        <ul style="color: var(--text-secondary); margin-left: 1.5rem;">
+                            <li>Connection-oriented (requires handshake)</li>
+                            <li>Guarantees in-order delivery</li>
+                            <li>Retransmits lost packets</li>
+                            <li>Flow control and congestion control</li>
+                        </ul>
+                        <p style="margin-top: 1rem;"><strong>Used for:</strong> HTTP, SSH, Email, FTP</p>
+                        <p><strong>Socket type:</strong> <code>SOCK_STREAM</code></p>
+                    </div>
+
+                    <div class="card card-udp">
+                        <h3 style="color: #f59e0b;">🟠 UDP (User Datagram Protocol)</h3>
+                        <p><strong>Characteristics:</strong></p>
+                        <ul style="color: var(--text-secondary); margin-left: 1.5rem;">
+                            <li>Connectionless (fire and forget)</li>
+                            <li>Does not guarantee delivery</li>
+                            <li>Does not guarantee ordering</li>
+                            <li>Minimal overhead, low latency</li>
+                        </ul>
+                        <p style="margin-top: 1rem;"><strong>Used for:</strong> DNS, Gaming, Streaming, VoIP</p>
+                        <p><strong>Socket type:</strong> <code>SOCK_DGRAM</code></p>
+                    </div>
+                </div>
+
+                <div class="card card-highlight">
+                    <h3>🔑 Simple Rule</h3>
+                    <p><strong>TCP:</strong> When you need reliability (data that MUST NOT be lost)</p>
+                    <p><strong>UDP:</strong> When you need speed and can tolerate losses (streaming, gaming)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: TCP Server Flow -->
+        <div class="slide" data-slide="5">
+            <div class="slide-content">
+                <h2>🖥️ TCP Server Flow</h2>
+
+                <div class="grid-2">
+                    <div class="flow-chart">
+                        <div class="flow-step">socket()</div>
+                        <div class="flow-arrow">↓</div>
+                        <div class="flow-step highlight">bind(ip, port)</div>
+                        <div class="flow-arrow">↓</div>
+                        <div class="flow-step highlight">listen(backlog)</div>
+                        <div class="flow-arrow">↓</div>
+                        <div class="flow-step highlight">accept() → conn</div>
+                        <div class="flow-arrow">↓</div>
+                        <div class="flow-step">recv() / send()</div>
+                        <div class="flow-arrow">↓</div>
+                        <div class="flow-step">close()</div>
+                    </div>
+
+                    <div>
+                        <div class="card">
+                            <h4>1. socket()</h4>
+                            <p>Creates the socket (the endpoint)</p>
+                        </div>
+                        <div class="card">
+                            <h4>2. bind(ip, port)</h4>
+                            <p>Associates the socket with an address and port</p>
+                        </div>
+                        <div class="card">
+                            <h4>3. listen(backlog)</h4>
+                            <p>Marks the socket as passive (listening for connections)</p>
+                        </div>
+                        <div class="card">
+                            <h4>4. accept()</h4>
+                            <p>Blocks until a client connects; returns the connection</p>
+                        </div>
+                        <div class="card">
+                            <h4>5. recv() / send()</h4>
+                            <p>Bidirectional communication over the connection</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: TCP Server Code -->
+        <div class="slide" data-slide="6">
+            <div class="slide-content">
+                <h2>💻 TCP Server — Complete Code</h2>
+
+                <div class="code-container">
+                    <div class="code-header">
+                        <span class="code-filename">🐍 server_tcp.py (from 02roWSL/src/exercises/)</span>
+                        <div class="code-actions">
+                            <button class="btn-code btn-run" onclick="simulateRun(this, 'output1')">▶ Simulate</button>
+                            <button class="btn-code btn-copy" onclick="copyCode(this)">📋 Copy</button>
+                        </div>
+                    </div>
+                    <div class="code-body">
+<pre><span class="kw">import</span> socket
+
+<span class="cmt"># Constants</span>
+<span class="const">HOST</span> = <span class="str">"127.0.0.1"</span>   <span class="cmt"># Localhost</span>
+<span class="const">PORT</span> = <span class="num">9090</span>          <span class="cmt"># Non-privileged port</span>
+
+<span class="cmt"># Context manager: socket closes automatically!</span>
+<span class="kw">with</span> socket.socket(socket.<span class="const">AF_INET</span>, socket.<span class="const">SOCK_STREAM</span>) <span class="kw">as</span> server:
+    <span class="cmt"># Allow address reuse (avoids "Address already in use")</span>
+    server.<span class="fn">setsockopt</span>(socket.<span class="const">SOL_SOCKET</span>, socket.<span class="const">SO_REUSEADDR</span>, <span class="num">1</span>)
+
+    <span class="cmt"># Step 1: Bind to address and port</span>
+    server.<span class="fn">bind</span>((<span class="const">HOST</span>, <span class="const">PORT</span>))
+
+    <span class="cmt"># Step 2: Start listening (max 5 pending connections)</span>
+    server.<span class="fn">listen</span>(<span class="num">5</span>)
+    <span class="fn">print</span>(<span class="str">f"🖥️  TCP Server listening on </span>{<span class="const">HOST</span>}<span class="str">:</span>{<span class="const">PORT</span>}<span class="str">"</span>)
+
+    <span class="cmt"># Step 3: Accept connections (infinite loop)</span>
+    <span class="kw">while</span> <span class="kw">True</span>:
+        conn, addr = server.<span class="fn">accept</span>()  <span class="cmt"># Blocks here</span>
+        <span class="kw">with</span> conn:
+            <span class="fn">print</span>(<span class="str">f"✅ Connection from </span>{addr}<span class="str">"</span>)
+
+            <span class="cmt"># Receive data</span>
+            data = conn.<span class="fn">recv</span>(<span class="num">1024</span>)
+            <span class="kw">if</span> <span class="kw">not</span> data:
+                <span class="kw">break</span>
+
+            <span class="fn">print</span>(<span class="str">f"📩 Received: </span>{data.<span class="fn">decode</span>(<span class="str">'utf-8'</span>)}<span class="str">"</span>)
+
+            <span class="cmt"># Send response</span>
+            response = <span class="str">f"Server received: </span>{data.<span class="fn">decode</span>(<span class="str">'utf-8'</span>)}<span class="str">"</span>
+            conn.<span class="fn">sendall</span>(response.<span class="fn">encode</span>(<span class="str">'utf-8'</span>))</pre>
+                    </div>
+                    <div class="code-output" id="output1">
+                        <div class="code-output-header">Server Output</div>
+<pre>🖥️  TCP Server listening on 127.0.0.1:9090
+✅ Connection from ('127.0.0.1', 54321)
+📩 Received: Hello Server!
+✅ Connection from ('127.0.0.1', 54322)
+📩 Received: Test message</pre>
+                    </div>
+                </div>
+
+                <div class="card card-warning">
+                    <h3>⚠️ SO_REUSEADDR</h3>
+                    <p>Without this option, if you stop and restart the server quickly, you will get the error "Address already in use". The socket remains in TIME_WAIT until the kernel releases it.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: TCP Client -->
+        <div class="slide" data-slide="7">
+            <div class="slide-content">
+                <h2>💻 TCP Client — Complete Code</h2>
+
+                <div class="code-container">
+                    <div class="code-header">
+                        <span class="code-filename">🐍 client_tcp.py</span>
+                        <div class="code-actions">
+                            <button class="btn-code btn-run" onclick="simulateRun(this, 'output2')">▶ Simulate</button>
+                            <button class="btn-code btn-copy" onclick="copyCode(this)">📋 Copy</button>
+                        </div>
+                    </div>
+                    <div class="code-body">
+<pre><span class="kw">import</span> socket
+
+<span class="const">HOST</span> = <span class="str">"127.0.0.1"</span>
+<span class="const">PORT</span> = <span class="num">9090</span>
+
+<span class="cmt"># Context manager handles automatic closing</span>
+<span class="kw">with</span> socket.socket(socket.<span class="const">AF_INET</span>, socket.<span class="const">SOCK_STREAM</span>) <span class="kw">as</span> client:
+    <span class="cmt"># Connect to server</span>
+    client.<span class="fn">connect</span>((<span class="const">HOST</span>, <span class="const">PORT</span>))
+    <span class="fn">print</span>(<span class="str">f"🔗 Connected to </span>{<span class="const">HOST</span>}<span class="str">:</span>{<span class="const">PORT</span>}<span class="str">"</span>)
+
+    <span class="cmt"># Send message</span>
+    message = <span class="str">"Hello Server!"</span>
+    client.<span class="fn">sendall</span>(message.<span class="fn">encode</span>(<span class="str">'utf-8'</span>))
+    <span class="fn">print</span>(<span class="str">f"📤 Sent: </span>{message}<span class="str">"</span>)
+
+    <span class="cmt"># Wait for response</span>
+    response = client.<span class="fn">recv</span>(<span class="num">1024</span>)
+    <span class="fn">print</span>(<span class="str">f"📥 Response: </span>{response.<span class="fn">decode</span>(<span class="str">'utf-8'</span>)}<span class="str">"</span>)
+
+<span class="fn">print</span>(<span class="str">"👋 Connection closed"</span>)</pre>
+                    </div>
+                    <div class="code-output" id="output2">
+                        <div class="code-output-header">Client Output</div>
+<pre>🔗 Connected to 127.0.0.1:9090
+📤 Sent: Hello Server!
+📥 Response: Server received: Hello Server!
+👋 Connection closed</pre>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <h4>send() vs sendall()</h4>
+                        <p><code>send()</code> may send fewer bytes than requested</p>
+                        <p><code>sendall()</code> guarantees complete delivery</p>
+                        <p class="step-why">→ Use <code>sendall()</code> for safety!</p>
+                    </div>
+                    <div class="card">
+                        <h4>recv(1024)</h4>
+                        <p>1024 = maximum number of bytes to read</p>
+                        <p>May return fewer bytes if less data is available</p>
+                        <p class="step-why">→ Always check the length of the received data!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: UDP -->
+        <div class="slide" data-slide="8">
+            <div class="slide-content">
+                <h2>🟠 UDP — Connectionless</h2>
+                <p>UDP has no connection — you send datagrams directly, without a handshake.</p>
+
+                <div class="grid-2">
+                    <div>
+                        <h3>UDP Server</h3>
+                        <div class="code-container">
+                            <div class="code-body">
+<pre><span class="kw">import</span> socket
+
+<span class="kw">with</span> socket.socket(socket.<span class="const">AF_INET</span>, socket.<span class="const">SOCK_DGRAM</span>) <span class="kw">as</span> s:
+    s.<span class="fn">bind</span>((<span class="str">"127.0.0.1"</span>, <span class="num">9091</span>))
+    <span class="fn">print</span>(<span class="str">"🟠 UDP Server on :9091"</span>)
+
+    <span class="kw">while</span> <span class="kw">True</span>:
+        <span class="cmt"># recvfrom also returns the sender address</span>
+        data, addr = s.<span class="fn">recvfrom</span>(<span class="num">1024</span>)
+        <span class="fn">print</span>(<span class="str">f"From </span>{addr}<span class="str">: </span>{data.<span class="fn">decode</span>()}<span class="str">"</span>)
+
+        <span class="cmt"># Reply to client</span>
+        s.<span class="fn">sendto</span>(<span class="str">b"ACK"</span>, addr)</pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3>UDP Client</h3>
+                        <div class="code-container">
+                            <div class="code-body">
+<pre><span class="kw">import</span> socket
+
+<span class="kw">with</span> socket.socket(socket.<span class="const">AF_INET</span>, socket.<span class="const">SOCK_DGRAM</span>) <span class="kw">as</span> s:
+    <span class="cmt"># No connect() — send directly!</span>
+    server = (<span class="str">"127.0.0.1"</span>, <span class="num">9091</span>)
+
+    s.<span class="fn">sendto</span>(<span class="str">b"Hello UDP!"</span>, server)
+    <span class="fn">print</span>(<span class="str">"📤 Datagram sent"</span>)
+
+    <span class="cmt"># Optional: receive a response</span>
+    data, addr = s.<span class="fn">recvfrom</span>(<span class="num">1024</span>)
+    <span class="fn">print</span>(<span class="str">f"📥 Response: </span>{data}<span class="str">"</span>)</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card card-highlight">
+                    <h3>🔑 Key Differences: TCP vs UDP</h3>
+                    <table style="width: 100%; color: var(--text-secondary);">
+                        <tr><td><strong>TCP:</strong></td><td><code>SOCK_STREAM</code>, <code>connect()</code>, <code>send()</code>/<code>recv()</code></td></tr>
+                        <tr><td><strong>UDP:</strong></td><td><code>SOCK_DGRAM</code>, <code>sendto(addr)</code>/<code>recvfrom()</code></td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Context Managers -->
+        <div class="slide" data-slide="9">
+            <div class="slide-content">
+                <h2>🔒 Context Managers — The <code>with</code> Statement</h2>
+                <p>Context managers guarantee that resources are released correctly, even if an exception occurs.</p>
+
+                <div class="grid-2">
+                    <div>
+                        <h3 style="color: var(--accent-error);">❌ Without with (risk of leak)</h3>
+                        <div class="code-container">
+                            <div class="code-body">
+<pre><span class="cmt"># If an exception occurs before close(),</span>
+<span class="cmt"># the socket stays open!</span>
+
+sock = socket.socket(...)
+sock.connect((host, port))
+sock.send(data)           <span class="cmt"># Exception here?</span>
+response = sock.recv(1024)
+sock.close()              <span class="cmt"># Never reached!</span></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 style="color: var(--accent-success);">✅ With with (safe)</h3>
+                        <div class="code-container">
+                            <div class="code-body">
+<pre><span class="cmt"># Socket closes AUTOMATICALLY</span>
+<span class="cmt"># upon exiting the block, guaranteed!</span>
+
+<span class="kw">with</span> socket.socket(...) <span class="kw">as</span> sock:
+    sock.connect((host, port))
+    sock.send(data)
+    response = sock.recv(1024)
+<span class="cmt"># Automatic close happens here</span></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card card-highlight">
+                    <h3>💡 Golden Rule</h3>
+                    <p>ALWAYS use <code>with</code> for sockets (and files)! It is the Python equivalent of try-finally in Java or RAII in C++.</p>
+                </div>
+
+                <div class="code-container">
+                    <div class="code-header">
+                        <span class="code-filename">🐍 Nested context managers (server)</span>
+                    </div>
+                    <div class="code-body">
+<pre><span class="cmt"># Both sockets close automatically</span>
+<span class="kw">with</span> socket.socket(...) <span class="kw">as</span> server:
+    server.bind((HOST, PORT))
+    server.listen()
+    conn, addr = server.accept()
+    <span class="kw">with</span> conn:  <span class="cmt"># Second context manager for the connection</span>
+        data = conn.recv(1024)
+        conn.sendall(response)</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Experiment -->
+        <div class="slide" data-slide="10">
+            <div class="slide-content">
+                <h2>🧪 Experiment: TCP Server and Client</h2>
+
+                <div class="experiment-box">
+                    <div class="experiment-header">
+                        <span class="experiment-icon">🔬</span>
+                        <span class="experiment-title">Run Server-Client in Two Terminals</span>
+                    </div>
+
+                    <div class="experiment-steps">
+                        <div class="experiment-step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h4>Open two Ubuntu terminals</h4>
+                                <p>Terminal 1 for the server, Terminal 2 for the client</p>
+                                <p class="step-why">🎯 Why: The server runs continuously; the client connects separately</p>
+                            </div>
+                        </div>
+
+                        <div class="experiment-step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h4>Terminal 1: Start the server</h4>
+                                <p><code>cd /mnt/d/NETWORKING/netROwsl/02roWSL</code></p>
+                                <p><code>python3 src/exercises/ex_2_01_tcp.py --mode server</code></p>
+                                <p class="step-why">🎯 What you will see: "TCP Server listening on..."</p>
+                            </div>
+                        </div>
+
+                        <div class="experiment-step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h4>Terminal 2: Run the client</h4>
+                                <p><code>python3 src/exercises/ex_2_01_tcp.py --mode client --message "Test"</code></p>
+                                <p class="step-why">🎯 What you will see: The sent message and the server response</p>
+                            </div>
+                        </div>
+
+                        <div class="experiment-step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h4>Observe the output in both terminals</h4>
+                                <p>Server: displays the connection and the received message</p>
+                                <p>Client: displays the server response</p>
+                                <p class="step-why">🎯 What we learn: Bidirectional TCP communication</p>
+                            </div>
+                        </div>
+
+                        <div class="experiment-step">
+                            <div class="step-number">5</div>
+                            <div class="step-content">
+                                <h4>Bonus: Use netcat for testing</h4>
+                                <p><code>nc 127.0.0.1 9090</code> (then type text and press Enter)</p>
+                                <p class="step-why">🎯 What we learn: netcat is a universal TCP client for debugging</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: Quiz 1 -->
+        <div class="slide" data-slide="11">
+            <div class="slide-content">
+                <h2>📝 Quiz: Check Your Understanding</h2>
+
+                <div class="quiz-container" id="quiz1">
+                    <div class="quiz-header">
+                        <div class="quiz-icon">🧠</div>
+                        <div><h3 style="margin: 0;">Quiz 1: TCP vs UDP</h3></div>
+                    </div>
+
+                    <div class="quiz-question">
+                        Which socket type do you use for a TCP server?
+                    </div>
+
+                    <div class="quiz-options">
+                        <div class="quiz-option" onclick="selectOption(this, 'quiz1')">
+                            <span class="option-marker">A</span>
+                            <span><code>socket.SOCK_DGRAM</code></span>
+                        </div>
+                        <div class="quiz-option" onclick="selectOption(this, 'quiz1')" data-correct="true">
+                            <span class="option-marker">B</span>
+                            <span><code>socket.SOCK_STREAM</code></span>
+                        </div>
+                        <div class="quiz-option" onclick="selectOption(this, 'quiz1')">
+                            <span class="option-marker">C</span>
+                            <span><code>socket.SOCK_RAW</code></span>
+                        </div>
+                        <div class="quiz-option" onclick="selectOption(this, 'quiz1')">
+                            <span class="option-marker">D</span>
+                            <span><code>socket.SOCK_TCP</code></span>
+                        </div>
+                    </div>
+
+                    <div class="quiz-actions">
+                        <button class="btn-quiz btn-check" onclick="checkAnswer('quiz1')">Check</button>
+                        <button class="btn-quiz btn-hint" onclick="showHint('quiz1', 1)">💡 Hint</button>
+                    </div>
+
+                    <div class="hint-box" id="quiz1-hint1"><div class="hint-level">Hint 1/3</div><p>TCP = continuous, ordered "stream" of data. UDP = discrete "datagrams".</p></div>
+                    <div class="hint-box" id="quiz1-hint2"><div class="hint-level">Hint 2/3</div><p>SOCK_STREAM = TCP, SOCK_DGRAM = UDP. There is no SOCK_TCP.</p></div>
+                    <div class="hint-box" id="quiz1-hint3"><div class="hint-level">Hint 3/3</div><p>Answer: SOCK_STREAM because TCP provides a "stream" of bytes.</p></div>
+
+                    <div class="feedback-box" id="quiz1-feedback"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: Quiz 2 -->
+        <div class="slide" data-slide="12">
+            <div class="slide-content">
+                <div class="quiz-container" id="quiz2">
+                    <div class="quiz-header">
+                        <div class="quiz-icon">🧠</div>
+                        <div><h3 style="margin: 0;">Quiz 2: Server Flow</h3></div>
+                    </div>
+
+                    <div class="quiz-question">
+                        What is the correct order of calls for a TCP server?
+                    </div>
+
+                    <div class="quiz-options">
+                        <div class="quiz-option" onclick="selectOption(this, 'quiz2')">
+                            <span class="option-marker">A</span>
+                            <span>socket → listen → bind → accept</span>
+                        </div>
+                        <div class="quiz-option" onclick="selectOption(this, 'quiz2')" data-correct="true">
+                            <span class="option-marker">B</span>
+                            <span>socket → bind → listen → accept</span>
+                        </div>
+                        <div class="quiz-option" onclick="selectOption(this, 'quiz2')">
+                            <span class="option-marker">C</span>
+                            <span>socket → accept → bind → listen</span>
+                        </div>
+                        <div class="quiz-option" onclick="selectOption(this, 'quiz2')">
+                            <span class="option-marker">D</span>
+                            <span>socket → connect → listen → accept</span>
+                        </div>
+                    </div>
+
+                    <div class="quiz-actions">
+                        <button class="btn-quiz btn-check" onclick="checkAnswer('quiz2')">Check</button>
+                        <button class="btn-quiz btn-hint" onclick="showHint('quiz2', 1)">💡 Hint</button>
+                    </div>
+
+                    <div class="hint-box" id="quiz2-hint1"><div class="hint-level">Hint 1/3</div><p>You must first bind the socket to an address before you can listen on it.</p></div>
+                    <div class="hint-box" id="quiz2-hint2"><div class="hint-level">Hint 2/3</div><p>listen() marks the socket as passive. accept() comes after listen().</p></div>
+                    <div class="hint-box" id="quiz2-hint3"><div class="hint-level">Hint 3/3</div><p>connect() is for the CLIENT, not the server. The server does bind → listen → accept.</p></div>
+
+                    <div class="feedback-box" id="quiz2-feedback"></div>
+                </div>
+
+                <div class="quiz-container" id="quiz3" style="margin-top: 1.5rem;">
+                    <div class="quiz-header">
+                        <div class="quiz-icon">🧠</div>
+                        <div><h3 style="margin: 0;">Quiz 3: Context Manager</h3></div>
+                    </div>
+
+                    <div class="quiz-question">
+                        What does the statement <code>with socket.socket(...) as s:</code> do?
+                    </div>
+
+                    <div class="quiz-options">
+                        <div class="quiz-option" onclick="selectOption(this, 'quiz3')">
+                            <span class="option-marker">A</span>
+                            <span>Creates a socket and connects it automatically</span>
+                        </div>
+                        <div class="quiz-option" onclick="selectOption(this, 'quiz3')">
+                            <span class="option-marker">B</span>
+                            <span>Creates a socket that cannot be closed</span>
+                        </div>
+                        <div class="quiz-option" onclick="selectOption(this, 'quiz3')" data-correct="true">
+                            <span class="option-marker">C</span>
+                            <span>Creates a socket and guarantees it closes when leaving the block</span>
+                        </div>
+                        <div class="quiz-option" onclick="selectOption(this, 'quiz3')">
+                            <span class="option-marker">D</span>
+                            <span>Creates a persistent socket between sessions</span>
+                        </div>
+                    </div>
+
+                    <div class="quiz-actions">
+                        <button class="btn-quiz btn-check" onclick="checkAnswer('quiz3')">Check</button>
+                        <button class="btn-quiz btn-hint" onclick="showHint('quiz3', 1)">💡 Hint</button>
+                    </div>
+
+                    <div class="hint-box" id="quiz3-hint1"><div class="hint-level">Hint 1/3</div><p>Context managers handle resources: open on entry, close on exit.</p></div>
+                    <div class="hint-box" id="quiz3-hint2"><div class="hint-level">Hint 2/3</div><p>It is equivalent to try-finally where the finally block calls close().</p></div>
+                    <div class="hint-box" id="quiz3-hint3"><div class="hint-level">Hint 3/3</div><p>Even if an exception occurs, with guarantees that socket.close() is called.</p></div>
+
+                    <div class="feedback-box" id="quiz3-feedback"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 13: Common Patterns -->
+        <div class="slide" data-slide="13">
+            <div class="slide-content">
+                <h2>🔧 Common Patterns in Exercises</h2>
+
+                <div class="code-container">
+                    <div class="code-header">
+                        <span class="code-filename">🐍 Pattern: Echo Server (returns whatever it receives)</span>
+                    </div>
+                    <div class="code-body">
+<pre><span class="kw">def</span> <span class="fn">echo_server</span>(host: <span class="type">str</span>, port: <span class="type">int</span>) -> <span class="kw">None</span>:
+    <span class="str">"""Server that returns exactly what it receives."""</span>
+    <span class="kw">with</span> socket.socket(socket.AF_INET, socket.SOCK_STREAM) <span class="kw">as</span> s:
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, <span class="num">1</span>)
+        s.bind((host, port))
+        s.listen()
+
+        <span class="kw">while</span> <span class="kw">True</span>:
+            conn, addr = s.accept()
+            <span class="kw">with</span> conn:
+                <span class="kw">while</span> <span class="kw">True</span>:
+                    data = conn.recv(<span class="num">1024</span>)
+                    <span class="kw">if not</span> data:
+                        <span class="kw">break</span>
+                    conn.sendall(data)  <span class="cmt"># Echo: send back</span></pre>
+                    </div>
+                </div>
+
+                <div class="code-container">
+                    <div class="code-header">
+                        <span class="code-filename">🐍 Pattern: Client with Timeout</span>
+                    </div>
+                    <div class="code-body">
+<pre><span class="kw">def</span> <span class="fn">client_with_timeout</span>(host: <span class="type">str</span>, port: <span class="type">int</span>, timeout: <span class="type">float</span> = <span class="num">5.0</span>):
+    <span class="str">"""Client that does not block indefinitely."""</span>
+    <span class="kw">with</span> socket.socket(socket.AF_INET, socket.SOCK_STREAM) <span class="kw">as</span> s:
+        s.settimeout(timeout)  <span class="cmt"># Set timeout</span>
+        <span class="kw">try</span>:
+            s.connect((host, port))
+            s.sendall(<span class="str">b"Hello"</span>)
+            response = s.recv(<span class="num">1024</span>)
+            <span class="kw">return</span> response
+        <span class="kw">except</span> socket.timeout:
+            <span class="fn">print</span>(<span class="str">"⏱️ Timeout — the server is not responding"</span>)
+            <span class="kw">return</span> <span class="kw">None</span></pre>
+                    </div>
+                </div>
+
+                <div class="callout callout-networking">
+                    <span class="callout-icon">🌐</span>
+                    <div class="callout-content">
+                        <h4>Where can you find these patterns?</h4>
+                        <p><code>02roWSL/src/apps/</code> contains complete examples of servers and clients that you can study.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 14: Error Handling -->
+        <div class="slide" data-slide="14">
+            <div class="slide-content">
+                <h2>⚠️ Error Handling in Socket Programming</h2>
+
+                <div class="code-container">
+                    <div class="code-header">
+                        <span class="code-filename">🐍 error_handling.py</span>
+                    </div>
+                    <div class="code-body">
+<pre><span class="kw">import</span> socket
+<span class="kw">import</span> sys
+
+<span class="kw">def</span> <span class="fn">safe_connect</span>(host: <span class="type">str</span>, port: <span class="type">int</span>) -> socket.socket | <span class="kw">None</span>:
+    <span class="str">"""Attempt to connect with comprehensive error handling."""</span>
+    <span class="kw">try</span>:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(<span class="num">10.0</span>)
+        sock.connect((host, port))
+        <span class="kw">return</span> sock
+
+    <span class="kw">except</span> socket.timeout:
+        <span class="fn">print</span>(<span class="str">f"❌ Timeout: </span>{host}<span class="str">:</span>{port}<span class="str"> is not responding"</span>)
+
+    <span class="kw">except</span> socket.gaierror <span class="kw">as</span> e:
+        <span class="fn">print</span>(<span class="str">f"❌ DNS Error: Cannot resolve '</span>{host}<span class="str">'"</span>)
+
+    <span class="kw">except</span> ConnectionRefusedError:
+        <span class="fn">print</span>(<span class="str">f"❌ Connection refused: Port </span>{port}<span class="str"> is closed"</span>)
+
+    <span class="kw">except</span> OSError <span class="kw">as</span> e:
+        <span class="fn">print</span>(<span class="str">f"❌ Network error: </span>{e}<span class="str">"</span>)
+
+    <span class="kw">return</span> <span class="kw">None</span></pre>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>🔴 Common Exceptions</h3>
+                        <p><code>ConnectionRefusedError</code> — Port is closed or blocked by firewall</p>
+                        <p><code>socket.timeout</code> — Server did not respond in time</p>
+                        <p><code>socket.gaierror</code> — DNS cannot resolve the hostname</p>
+                        <p><code>BrokenPipeError</code> — Connection was interrupted</p>
+                    </div>
+                    <div class="card card-warning">
+                        <h3>⚠️ Important Tip</h3>
+                        <p>ALWAYS set a timeout for network operations! Without a timeout, <code>recv()</code> and <code>connect()</code> can block your program indefinitely.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 15: Files Reference -->
+        <div class="slide" data-slide="15">
+            <div class="slide-content">
+                <h2>📂 Files to Study in the Lab</h2>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>📁 02roWSL — TCP/UDP Basics</h3>
+                        <p><strong>ex_2_01_tcp.py</strong></p>
+                        <ul style="color: var(--text-secondary); font-size: 0.95rem;">
+                            <li>Complete TCP server and client</li>
+                            <li>Echo server pattern</li>
+                        </ul>
+                        <p><strong>ex_2_02_udp.py</strong></p>
+                        <ul style="color: var(--text-secondary); font-size: 0.95rem;">
+                            <li>UDP server and client</li>
+                            <li>sendto() and recvfrom()</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h3>📁 03roWSL — Advanced</h3>
+                        <p><strong>ex_3_01_udp_broadcast.py</strong></p>
+                        <ul style="color: var(--text-secondary); font-size: 0.95rem;">
+                            <li>UDP Broadcast</li>
+                            <li>SO_BROADCAST option</li>
+                        </ul>
+                        <p><strong>ex_3_02_udp_multicast.py</strong></p>
+                        <ul style="color: var(--text-secondary); font-size: 0.95rem;">
+                            <li>Multicast groups</li>
+                            <li>IP_ADD_MEMBERSHIP</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h3>📁 04roWSL — Protocols</h3>
+                        <p><strong>binary_proto_server.py</strong></p>
+                        <ul style="color: var(--text-secondary); font-size: 0.95rem;">
+                            <li>Custom binary protocol</li>
+                            <li>Header + payload</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h3>📁 src/apps/ — Complete Apps</h3>
+                        <ul style="color: var(--text-secondary); font-size: 0.95rem;">
+                            <li>Fully working complete examples</li>
+                            <li>Reference code (do not modify)</li>
+                            <li>Patterns to follow</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 16: Summary -->
+        <div class="slide" data-slide="16">
+            <div class="slide-content">
+                <h2>✅ Summary & Next Steps</h2>
+
+                <div class="grid-2">
+                    <div class="card card-highlight">
+                        <h3>📌 What we covered</h3>
+                        <ul style="list-style: none; padding: 0;">
+                            <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">✓ Socket = communication endpoint (IP + Port + Protocol)</li>
+                            <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">✓ TCP (SOCK_STREAM) vs UDP (SOCK_DGRAM)</li>
+                            <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">✓ TCP Server: bind → listen → accept → recv/send</li>
+                            <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">✓ TCP Client: connect → send → recv</li>
+                            <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">✓ UDP: sendto() and recvfrom()</li>
+                            <li style="padding: 0.5rem 0;">✓ Context managers (<code>with</code>) for safety</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h3>🚀 Next Module</h3>
+                        <p style="font-size: 1.1rem; color: var(--accent-primary); font-weight: 600;">
+                            Module 5: Code Organisation
+                        </p>
+                        <p>You will learn:</p>
+                        <ul style="color: var(--text-secondary);">
+                            <li>Python functions and modules</li>
+                            <li>Imports and project structure</li>
+                            <li>Code organisation patterns</li>
+                        </ul>
+                        <span class="badge badge-week">📅 Correlated with Week 4</span>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 2rem;">
+                    <p style="color: var(--text-muted);">Module 4 complete! 🎉 You can now create TCP/UDP servers and clients.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="nav-buttons">
+        <button class="btn-nav btn-prev" id="btnPrev" onclick="prevSlide()" disabled>← Back</button>
+        <div class="page-dots" id="pageDots"></div>
+        <button class="btn-nav btn-next" id="btnNext" onclick="nextSlide()">Continue →</button>
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 16;
+        const quizHintCounts = {};
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateUI();
+            createPageDots();
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight' || e.key === ' ') {
+                    e.preventDefault();
+                    nextSlide();
+                } else if (e.key === 'ArrowLeft') {
+                    prevSlide();
+                }
+            });
+        });
+
+        function createPageDots() {
+            const container = document.getElementById('pageDots');
+            for (let i = 1; i <= totalSlides; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'page-dot' + (i === 1 ? ' active' : '');
+                dot.onclick = () => goToSlide(i);
+                container.appendChild(dot);
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('progressBar').style.width = `${(currentSlide / totalSlides) * 100}%`;
+            document.getElementById('slideCounter').textContent = `${currentSlide} / ${totalSlides}`;
+            document.getElementById('btnPrev').disabled = currentSlide === 1;
+            document.getElementById('btnNext').textContent = currentSlide === totalSlides ? 'Finish ✓' : 'Continue →';
+            document.querySelectorAll('.page-dot').forEach((dot, i) => {
+                dot.classList.toggle('active', i + 1 === currentSlide);
+            });
+        }
+
+        function goToSlide(n) {
+            if (n < 1 || n > totalSlides || n === currentSlide) return;
+            const currentEl = document.querySelector(`.slide[data-slide="${currentSlide}"]`);
+            const nextEl = document.querySelector(`.slide[data-slide="${n}"]`);
+            currentEl.classList.remove('active');
+            currentEl.classList.add('exit');
+            setTimeout(() => {
+                currentEl.classList.remove('exit');
+                nextEl.classList.add('active');
+                currentSlide = n;
+                updateUI();
+            }, 100);
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides) goToSlide(currentSlide + 1);
+        }
+
+        function prevSlide() {
+            if (currentSlide > 1) goToSlide(currentSlide - 1);
+        }
+
+        function simulateRun(btn, outputId) {
+            const output = document.getElementById(outputId);
+            btn.textContent = '⏳ Running...';
+            btn.disabled = true;
+            setTimeout(() => {
+                output.classList.add('visible');
+                btn.textContent = '▶ Simulate';
+                btn.disabled = false;
+            }, 800);
+        }
+
+        function copyCode(btn) {
+            const code = btn.closest('.code-container').querySelector('pre').textContent;
+            navigator.clipboard.writeText(code);
+            const orig = btn.textContent;
+            btn.textContent = '✓ Copied!';
+            setTimeout(() => btn.textContent = orig, 1500);
+        }
+
+        function selectOption(el, quizId) {
+            document.getElementById(quizId).querySelectorAll('.quiz-option').forEach(o => {
+                o.classList.remove('selected', 'correct', 'incorrect');
+            });
+            el.classList.add('selected');
+            document.getElementById(`${quizId}-feedback`).classList.remove('visible');
+        }
+
+        function checkAnswer(quizId) {
+            const container = document.getElementById(quizId);
+            const selected = container.querySelector('.quiz-option.selected');
+            const feedback = document.getElementById(`${quizId}-feedback`);
+
+            if (!selected) {
+                feedback.innerHTML = '<p style="color:var(--accent-warning)">⚠️ Select an answer!</p>';
+                feedback.className = 'feedback-box visible';
+                return;
+            }
+
+            container.querySelectorAll('.quiz-option').forEach(o => {
+                if (o.dataset.correct === 'true') o.classList.add('correct');
+                else if (o.classList.contains('selected')) o.classList.add('incorrect');
+            });
+
+            if (selected.dataset.correct === 'true') {
+                feedback.innerHTML = '<p style="color:var(--accent-success)">🎉 Correct!</p>';
+                feedback.className = 'feedback-box success visible';
+            } else {
+                feedback.innerHTML = '<p style="color:var(--accent-error)">❌ See the correct answer highlighted in green.</p>';
+                feedback.className = 'feedback-box error visible';
+            }
+        }
+
+        function showHint(quizId, level) {
+            if (!quizHintCounts[quizId]) quizHintCounts[quizId] = 0;
+            const cur = quizHintCounts[quizId] + 1;
+            if (cur > 3) return;
+            const hint = document.getElementById(`${quizId}-hint${cur}`);
+            if (hint) {
+                hint.classList.add('visible');
+                quizHintCounts[quizId] = cur;
+                const btn = document.querySelector(`#${quizId} .btn-hint`);
+                btn.textContent = cur >= 3 ? '✓ All hints' : `💡 Hint (${cur}/3)`;
+                if (cur >= 3) btn.disabled = true;
+            }
+        }
+    </script>
+</body>
+</html>

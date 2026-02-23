@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python for Networks | 3. Data Types for Networking</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e17;
+            --bg-secondary: #121a2b;
+            --bg-tertiary: #1a2438;
+            --accent-primary: #00d4aa;
+            --accent-secondary: #7c3aed;
+            --accent-warning: #f59e0b;
+            --accent-error: #ef4444;
+            --accent-success: #10b981;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border-color: #2d3a4f;
+            --code-bg: #0d1117;
+            --font-display: 'Plus Jakarta Sans', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: var(--font-display); background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; overflow: hidden; }
+        .progress-container { position: fixed; top: 0; left: 0; right: 0; height: 4px; background: var(--bg-tertiary); z-index: 1000; }
+        .progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary)); transition: width 0.3s ease; }
+        .nav-header { position: fixed; top: 4px; left: 0; right: 0; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(180deg, var(--bg-primary) 0%, transparent 100%); z-index: 100; }
+        .nav-title { font-size: 0.9rem; color: var(--text-secondary); display: flex; align-items: center; gap: 0.5rem; }
+        .nav-title .modulee { color: var(--accent-primary); font-weight: 600; }
+        .slide-counter { font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-muted); background: var(--bg-tertiary); padding: 0.4rem 0.8rem; border-radius: 20px; }
+        .slides-container { height: 100vh; overflow: hidden; position: relative; }
+        .slide { position: absolute; top: 0; left: 0; right: 0; bottom: 0; padding: 5rem 2rem 6rem; display: flex; flex-direction: column; opacity: 0; visibility: hidden; transform: translateX(100px); transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); overflow-y: auto; }
+        .slide.active { opacity: 1; visibility: visible; transform: translateX(0); }
+        .slide.exit { transform: translateX(-100px); }
+        .slide-content { max-width: 1200px; margin: 0 auto; width: 100%; }
+        h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; line-height: 1.1; margin-bottom: 1.5rem; background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-primary) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        h2 { font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 700; margin-bottom: 1rem; color: var(--text-primary); }
+        h3 { font-size: 1.3rem; font-weight: 600; margin-bottom: 0.75rem; color: var(--accent-primary); }
+        h4 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary); }
+        p { font-size: 1.1rem; line-height: 1.7; color: var(--text-secondary); margin-bottom: 1rem; }
+        .lead { font-size: 1.3rem; color: var(--text-primary); font-weight: 500; }
+        code { font-family: var(--font-mono); background: var(--bg-tertiary); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.9em; color: var(--accent-primary); }
+        .badge { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
+        .badge-time { background: rgba(0, 212, 170, 0.15); color: var(--accent-primary); }
+        .badge-week { background: rgba(124, 58, 237, 0.15); color: var(--accent-secondary); }
+        .badge-critical { background: rgba(239, 68, 68, 0.15); color: var(--accent-error); }
+        .card { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 16px; padding: 1.5rem; margin-bottom: 1rem; }
+        .card-highlight { border-left: 4px solid var(--accent-primary); }
+        .card-warning { border-left: 4px solid var(--accent-warning); background: rgba(245, 158, 11, 0.05); }
+        .card-danger { border-left: 4px solid var(--accent-error); background: rgba(239, 68, 68, 0.05); }
+        .card-info { border-left: 4px solid var(--accent-secondary); background: rgba(124, 58, 237, 0.05); }
+        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin: 1.5rem 0; }
+        .objectives-box { background: linear-gradient(135deg, rgba(0, 212, 170, 0.1) 0%, rgba(124, 58, 237, 0.1) 100%); border: 1px solid var(--border-color); border-radius: 16px; padding: 2rem; margin: 1.5rem 0; }
+        .objective-item { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1rem; }
+        .objective-icon { width: 32px; height: 32px; background: var(--accent-primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+        .objective-text { flex: 1; }
+        .objective-text strong { display: block; color: var(--text-primary); margin-bottom: 0.25rem; }
+        .objective-text span { font-size: 0.95rem; color: var(--text-secondary); }
+        .code-container { background: var(--code-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; margin: 1.5rem 0; }
+        .code-header { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; background: var(--bg-tertiary); border-bottom: 1px solid var(--border-color); }
+        .code-filename { font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-secondary); }
+        .code-actions { display: flex; gap: 0.5rem; }
+        .btn-code { padding: 0.4rem 0.8rem; border-radius: 6px; border: none; font-family: var(--font-mono); font-size: 0.8rem; cursor: pointer; transition: all 0.2s; }
+        .btn-run { background: var(--accent-primary); color: var(--bg-primary); }
+        .btn-run:hover { background: #00e6b8; }
+        .btn-copy { background: var(--bg-secondary); color: var(--text-secondary); border: 1px solid var(--border-color); }
+        .code-body { padding: 1rem; overflow-x: auto; }
+        .code-body pre { font-family: var(--font-mono); font-size: 0.9rem; line-height: 1.6; color: var(--text-primary); margin: 0; }
+        .code-output { padding: 1rem; background: rgba(0, 212, 170, 0.05); border-top: 1px solid var(--border-color); display: none; }
+        .code-output.visible { display: block; }
+        .code-output-header { font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent-primary); margin-bottom: 0.5rem; text-transform: uppercase; }
+        .code-output pre { font-family: var(--font-mono); font-size: 0.85rem; color: var(--accent-primary); }
+        .kw { color: #ff79c6; } .fn { color: #50fa7b; } .str { color: #f1fa8c; } .num { color: #bd93f9; } .cmt { color: #6272a4; font-style: italic; } .cls { color: #8be9fd; } .type { color: #8be9fd; font-style: italic; } .bytes { color: #ff5555; }
+        .visual-diagram { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 16px; padding: 2rem; margin: 1.5rem 0; text-align: center; }
+        .diagram-row { display: flex; justify-content: center; align-items: center; gap: 1rem; margin: 1rem 0; flex-wrap: wrap; }
+        .diagram-box { padding: 1rem 1.5rem; border-radius: 12px; font-family: var(--font-mono); font-weight: 600; }
+        .diagram-str { background: rgba(124, 58, 237, 0.2); border: 2px solid var(--accent-secondary); color: var(--accent-secondary); }
+        .diagram-bytes { background: rgba(0, 212, 170, 0.2); border: 2px solid var(--accent-primary); color: var(--accent-primary); }
+        .diagram-arrow { font-size: 1.5rem; color: var(--text-muted); }
+        .diagram-label { font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem; }
+        .quiz-container { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 16px; padding: 2rem; margin: 1.5rem 0; }
+        .quiz-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+        .quiz-icon { width: 48px; height: 48px; background: linear-gradient(135deg, var(--accent-secondary), var(--accent-primary)); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+        .quiz-question { font-size: 1.15rem; color: var(--text-primary); margin-bottom: 1.5rem; line-height: 1.6; }
+        .quiz-options { display: flex; flex-direction: column; gap: 0.75rem; }
+        .quiz-option { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.25rem; background: var(--bg-tertiary); border: 2px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: all 0.2s; }
+        .quiz-option:hover { border-color: var(--accent-primary); }
+        .quiz-option.selected { border-color: var(--accent-secondary); background: rgba(124, 58, 237, 0.1); }
+        .quiz-option.correct { border-color: var(--accent-success); background: rgba(16, 185, 129, 0.1); }
+        .quiz-option.incorrect { border-color: var(--accent-error); background: rgba(239, 68, 68, 0.1); }
+        .option-marker { width: 28px; height: 28px; border-radius: 50%; background: var(--bg-secondary); border: 2px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.85rem; }
+        .quiz-option.selected .option-marker { background: var(--accent-secondary); border-color: var(--accent-secondary); color: white; }
+        .quiz-option.correct .option-marker { background: var(--accent-success); border-color: var(--accent-success); }
+        .quiz-option.incorrect .option-marker { background: var(--accent-error); border-color: var(--accent-error); }
+        .quiz-actions { display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap; }
+        .btn-quiz { padding: 0.75rem 1.5rem; border-radius: 8px; border: none; font-family: var(--font-display); font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn-check { background: var(--accent-primary); color: var(--bg-primary); }
+        .btn-hint { background: transparent; color: var(--accent-warning); border: 1px solid var(--accent-warning); }
+        .hint-box { margin-top: 1rem; padding: 1rem 1.25rem; background: rgba(245, 158, 11, 0.1); border-left: 4px solid var(--accent-warning); border-radius: 0 8px 8px 0; display: none; }
+        .hint-box.visible { display: block; animation: fadeIn 0.3s ease; }
+        .hint-level { font-size: 0.8rem; color: var(--accent-warning); text-transform: uppercase; margin-bottom: 0.5rem; }
+        .feedback-box { margin-top: 1rem; padding: 1rem 1.25rem; border-radius: 8px; display: none; }
+        .feedback-box.visible { display: block; }
+        .feedback-box.success { background: rgba(16, 185, 129, 0.1); border-left: 4px solid var(--accent-success); }
+        .feedback-box.error { background: rgba(239, 68, 68, 0.1); border-left: 4px solid var(--accent-error); }
+        .experiment-box { background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(0, 212, 170, 0.1) 100%); border: 2px dashed var(--accent-secondary); border-radius: 16px; padding: 2rem; margin: 1.5rem 0; }
+        .experiment-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+        .experiment-icon { font-size: 2rem; }
+        .experiment-title { font-size: 1.3rem; font-weight: 700; color: var(--accent-secondary); }
+        .experiment-steps { margin-top: 1rem; }
+        .experiment-step { display: flex; gap: 1rem; margin-bottom: 1rem; padding: 1rem; background: var(--bg-secondary); border-radius: 12px; }
+        .step-number { width: 32px; height: 32px; background: var(--accent-secondary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
+        .step-content h4 { color: var(--text-primary); margin-bottom: 0.5rem; }
+        .step-content p { font-size: 0.95rem; margin-bottom: 0.5rem; }
+        .step-why { font-size: 0.85rem; color: var(--accent-primary); font-style: italic; }
+        .callout { display: flex; gap: 1rem; padding: 1.25rem; border-radius: 12px; margin: 1rem 0; }
+        .callout-networking { background: rgba(0, 212, 170, 0.1); border: 1px solid rgba(0, 212, 170, 0.3); }
+        .callout-icon { font-size: 1.5rem; }
+        .callout-content h4 { color: var(--accent-primary); margin-bottom: 0.5rem; }
+        .callout-content p { margin: 0; font-size: 0.95rem; }
+        .nav-buttons { position: fixed; bottom: 0; left: 0; right: 0; padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(0deg, var(--bg-primary) 0%, transparent 100%); z-index: 100; }
+        .btn-nav { display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem; border-radius: 8px; border: none; font-family: var(--font-display); font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn-prev { background: var(--bg-tertiary); color: var(--text-secondary); border: 1px solid var(--border-color); }
+        .btn-prev:hover:not(:disabled) { background: var(--bg-secondary); color: var(--text-primary); }
+        .btn-next { background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: white; }
+        .btn-next:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0, 212, 170, 0.3); }
+        .btn-nav:disabled { opacity: 0.5; cursor: not-allowed; }
+        .page-dots { display: flex; gap: 0.5rem; }
+        .page-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border-color); cursor: pointer; transition: all 0.3s; }
+        .page-dot.active { background: var(--accent-primary); transform: scale(1.3); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @media (max-width: 768px) { .slide { padding: 4rem 1rem 5rem; } .grid-2 { grid-template-columns: 1fr; } .diagram-row { flex-direction: column; } }
+        .title-slide { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        .title-meta { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; margin: 2rem 0; }
+        .python-logo { font-size: 4rem; margin-bottom: 1rem; }
+        .hex-display { font-family: var(--font-mono); background: var(--code-bg); padding: 0.5rem 1rem; border-radius: 8px; display: inline-block; margin: 0.5rem; }
+        .hex-byte { color: var(--accent-primary); margin: 0 2px; }
+    </style>
+</head>
+<body>
+    <div class="progress-container"><div class="progress-bar" role="progressbar" id="progressBar"></div></div>
+    <nav class="nav-header">
+        <div class="nav-title"><span class="modulee">Module 3/10</span><span>•</span><span>Data Types for Networking</span></div>
+        <div class="slide-counter" aria-live="polite" id="slideCounter">1 / 14</div>
+    </nav>
+
+    <div class="slides-container" id="slidesContainer">
+
+        <!-- Slide 1: Title -->
+        <div class="slide active title-slide" data-slide="1">
+            <div class="slide-content">
+                <div class="python-logo">🔤</div>
+                <h1>Data Types for Networking</h1>
+                <p class="lead">bytes vs str — The Critical Distinction</p>
+                <div class="title-meta">
+                    <span class="badge badge-time">⏱️ ~25 minutes</span>
+                    <span class="badge badge-week">📅 Week 2-3</span>
+                    <span class="badge badge-critical">⚠️ Essential for Sockets</span>
+                </div>
+                <div class="callout callout-networking" style="max-width: 600px; margin: 2rem auto; text-align: left;">
+                    <span class="callout-icon">🌐</span>
+                    <div class="callout-content">
+                        <h4>Networking Correlation</h4>
+                        <p>During weeks 2-3 you will work with <strong>TCP/UDP socket programming</strong>. Sockets send and receive <code>bytes</code>, not <code>str</code>. This distinction is fundamental!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Objectives -->
+        <div class="slide" data-slide="2">
+            <div class="slide-content">
+                <h2>🎯 What will we learn in this module?</h2>
+                <div class="objectives-box">
+                    <div class="objective-item">
+                        <div class="objective-icon">🔤</div>
+                        <div class="objective-text">
+                            <strong>bytes vs str — The Fundamental Difference</strong>
+                            <span>Why networks transport bytes rather than text and what that means for your code</span>
+                        </div>
+                    </div>
+                    <div class="objective-item">
+                        <div class="objective-icon">🔄</div>
+                        <div class="objective-text">
+                            <strong>encode() and decode()</strong>
+                            <span>How to convert between text (str) and binary data (bytes)</span>
+                        </div>
+                    </div>
+                    <div class="objective-item">
+                        <div class="objective-icon">📝</div>
+                        <div class="objective-text">
+                            <strong>List and Dict Comprehensions</strong>
+                            <span>Compact data processing — essential for parsing network responses</span>
+                        </div>
+                    </div>
+                    <div class="objective-item">
+                        <div class="objective-icon">🌐</div>
+                        <div class="objective-text">
+                            <strong>Applications in Networking</strong>
+                            <span>How these concepts are used in the actual exercises from 02roWSL and 03roWSL</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card card-danger">
+                    <h3>⚠️ Why is this CRITICAL?</h3>
+                    <p>The most common error in socket programming: <code>TypeError: a bytes-like object is required, not 'str'</code>. After this module, you will never encounter this error again!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: The Fundamental Problem -->
+        <div class="slide" data-slide="3">
+            <div class="slide-content">
+                <h2>🤔 Why bytes and not str?</h2>
+                <p>Networks transport <strong>sequences of bytes</strong>, not human-readable characters. The letter "A" as you see it is <code>01000001</code> as far as the network is concerned.</p>
+
+                <div class="visual-diagram">
+                    <h3 style="margin-bottom: 1.5rem;">Data Flow in Networking</h3>
+                    <div class="diagram-row">
+                        <div class="diagram-box diagram-str">
+                            "Hello"<br>
+                            <span class="diagram-label">Text (str)</span>
+                        </div>
+                        <div class="diagram-arrow">→ encode() →</div>
+                        <div class="diagram-box diagram-bytes">
+                            b'Hello'<br>
+                            <span class="diagram-label">Bytes for the network</span>
+                        </div>
+                        <div class="diagram-arrow">→ 🌐 →</div>
+                        <div class="diagram-box diagram-bytes">
+                            b'Hello'<br>
+                            <span class="diagram-label">Bytes received</span>
+                        </div>
+                        <div class="diagram-arrow">→ decode() →</div>
+                        <div class="diagram-box diagram-str">
+                            "Hello"<br>
+                            <span class="diagram-label">Text (str)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>📝 str (String)</h3>
+                        <p><strong>What it is:</strong> A sequence of Unicode characters (human-readable text)</p>
+                        <p><strong>Example:</strong> <code>"Hello"</code>, <code>"192.168.1.1"</code></p>
+                        <p><strong>Used for:</strong> Display, user input and logging</p>
+                    </div>
+                    <div class="card">
+                        <h3>🔢 bytes</h3>
+                        <p><strong>What it is:</strong> A sequence of bytes (values 0-255)</p>
+                        <p><strong>Example:</strong> <code>b"Hello"</code>, <code>b'\xc0\xa8\x01\x01'</code></p>
+                        <p><strong>Used for:</strong> Sending/receiving over sockets and binary files</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: encode() and decode() -->
+        <div class="slide" data-slide="4">
+            <div class="slide-content">
+                <h2>🔄 Conversion: encode() and decode()</h2>
+
+                <div class="code-container">
+                    <div class="code-header">
+                        <span class="code-filename">🐍 conversion_demo.py</span>
+                        <div class="code-actions">
+                            <button class="btn-code btn-run" onclick="simulateRun(this, 'output1')">▶ Run</button>
+                        </div>
+                    </div>
+                    <div class="code-body">
+<pre><span class="cmt"># ═══════════════════════════════════════════════</span>
+<span class="cmt"># str → bytes: use encode()</span>
+<span class="cmt"># ═══════════════════════════════════════════════</span>
+
+message_text = <span class="str">"GET /index.html HTTP/1.1"</span>    <span class="cmt"># str</span>
+message_bytes = message_text.<span class="fn">encode</span>(<span class="str">'utf-8'</span>)     <span class="cmt"># bytes</span>
+
+<span class="fn">print</span>(<span class="str">f"Text (str):  </span>{message_text}<span class="str">"</span>)
+<span class="fn">print</span>(<span class="str">f"Bytes:       </span>{message_bytes}<span class="str">"</span>)
+<span class="fn">print</span>(<span class="str">f"Text type:    </span>{<span class="fn">type</span>(message_text)}<span class="str">"</span>)
+<span class="fn">print</span>(<span class="str">f"Bytes type:   </span>{<span class="fn">type</span>(message_bytes)}<span class="str">"</span>)
+
+<span class="cmt"># ═══════════════════════════════════════════════</span>
+<span class="cmt"># bytes → str: use decode()</span>
+<span class="cmt"># ═══════════════════════════════════════════════</span>
+
+response_bytes = <span class="bytes">b"HTTP/1.1 200 OK"</span>             <span class="cmt"># bytes from the network</span>
+response_text = response_bytes.<span class="fn">decode</span>(<span class="str">'utf-8'</span>)   <span class="cmt"># str for processing</span>
+
+<span class="fn">print</span>(<span class="str">f"\nBytes received: </span>{response_bytes}<span class="str">"</span>)
+<span class="fn">print</span>(<span class="str">f"Decoded text:  </span>{response_text}<span class="str">"</span>)</pre>
+                    </div>
+                    <div class="code-output" id="output1">
+                        <div class="code-output-header">Output</div>
+<pre>Text (str):  GET /index.html HTTP/1.1
+Bytes:       b'GET /index.html HTTP/1.1'
+Text type:    &lt;class 'str'&gt;
+Bytes type:   &lt;class 'bytes'&gt;
+
+Bytes received: b'HTTP/1.1 200 OK'
+Decoded text:  HTTP/1.1 200 OK</pre>
+                    </div>
+                </div>
+
+                <div class="card card-highlight">
+                    <h3>🔑 The Golden Rule</h3>
+                    <p>
+                        <strong>Before socket.send():</strong> <code>text.encode('utf-8')</code><br>
+                        <strong>After socket.recv():</strong> <code>data.decode('utf-8')</code>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Bytes Literal -->
+        <div class="slide" data-slide="5">
+            <div class="slide-content">
+                <h2>📦 Bytes Literal — Writing Directly</h2>
+
+                <p>In networking, you often write bytes directly (especially for binary protocols):</p>
+
+                <div class="code-container">
+                    <div class="code-header">
+                        <span class="code-filename">🐍 bytes_literal.py</span>
+                        <div class="code-actions">
+                            <button class="btn-code btn-run" onclick="simulateRun(this, 'output2')">▶ Run</button>
+                        </div>
+                    </div>
+                    <div class="code-body">
+<pre><span class="cmt"># Bytes literal with the b"" prefix</span>
+http_request = <span class="bytes">b"GET / HTTP/1.1\r\nHost: localhost\r\n\r\n"</span>
+<span class="fn">print</span>(<span class="str">"HTTP Request:"</span>)
+<span class="fn">print</span>(http_request)
+
+<span class="cmt"># Bytes with hexadecimal values (for IPs and binary headers)</span>
+ip_bytes = <span class="bytes">b'\xC0\xA8\x01\x01'</span>   <span class="cmt"># 192.168.1.1 in binary</span>
+<span class="fn">print</span>(<span class="str">f"\nIP as bytes: </span>{ip_bytes}<span class="str">"</span>)
+<span class="fn">print</span>(<span class="str">f"IP as hex:   </span>{ip_bytes.<span class="fn">hex</span>()}<span class="str">"</span>)
+
+<span class="cmt"># Decode IP from bytes</span>
+octets = <span class="fn">list</span>(ip_bytes)
+ip_str = <span class="str">"."</span>.<span class="fn">join</span>(<span class="fn">str</span>(b) <span class="kw">for</span> b <span class="kw">in</span> octets)
+<span class="fn">print</span>(<span class="str">f"IP decoded:  </span>{ip_str}<span class="str">"</span>)
+
+<span class="cmt"># Length</span>
+<span class="fn">print</span>(<span class="str">f"\nRequest length: </span>{<span class="fn">len</span>(http_request)}<span class="str"> bytes"</span>)
+<span class="fn">print</span>(<span class="str">f"IP length:      </span>{<span class="fn">len</span>(ip_bytes)}<span class="str"> bytes"</span>)</pre>
+                    </div>
+                    <div class="code-output" id="output2">
+                        <div class="code-output-header">Output</div>
+<pre>HTTP Request:
+b'GET / HTTP/1.1\r\nHost: localhost\r\n\r\n'
+
+IP as bytes: b'\xc0\xa8\x01\x01'
+IP as hex:   c0a80101
+IP decoded:  192.168.1.1
+
+Request length: 37 bytes
+IP length:      4 bytes</pre>
+                    </div>
+                </div>
+
+                <div class="callout callout-networking">
+                    <span class="callout-icon">🌐</span>
+                    <div class="callout-content">
+                        <h4>Why does <code>\xC0\xA8\x01\x01</code> equal 192.168.1.1?</h4>
+                        <p>Each byte: <code>\xC0</code> = 192 (in hex), <code>\xA8</code> = 168, <code>\x01</code> = 1, <code>\x01</code> = 1</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Common Error -->
+        <div class="slide" data-slide="6">
+            <div class="slide-content">
+                <h2>❌ The Classic Error and How to Avoid It</h2>
+
+                <div class="card card-danger">
+                    <h3>TypeError: a bytes-like object is required, not 'str'</h3>
+                    <p>This occurs when you attempt to send a <code>str</code> over a socket that expects <code>bytes</code>.</p>
+                </div>
+
+                <div class="grid-2">
+                    <div>
+                        <h3 style="color: var(--accent-error);">❌ WRONG</h3>
+                        <div class="code-container">
+                            <div class="code-body">
+<pre><span class="kw">import</span> socket
+
+sock = socket.socket(...)
+sock.connect((<span class="str">"127.0.0.1"</span>, <span class="num">8080</span>))
+
+<span class="cmt"># ❌ ERROR! str instead of bytes</span>
+message = <span class="str">"Hello Server"</span>
+sock.<span class="fn">send</span>(message)  <span class="cmt"># TypeError!</span></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 style="color: var(--accent-success);">✅ CORRECT</h3>
+                        <div class="code-container">
+                            <div class="code-body">
+<pre><span class="kw">import</span> socket
+
+sock = socket.socket(...)
+sock.connect((<span class="str">"127.0.0.1"</span>, <span class="num">8080</span>))
+
+<span class="cmt"># ✅ Convert to bytes</span>
+message = <span class="str">"Hello Server"</span>
+sock.<span class="fn">send</span>(message.<span class="fn">encode</span>(<span class="str">'utf-8'</span>))  <span class="cmt"># OK!</span>
+
+<span class="cmt"># OR use a bytes literal directly</span>
+sock.<span class="fn">send</span>(<span class="bytes">b"Hello Server"</span>)  <span class="cmt"># OK!</span></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="code-container" style="margin-top: 1.5rem;">
+                    <div class="code-header">
+                        <span class="code-filename">🐍 complete_pattern.py (from exercises)</span>
+                    </div>
+                    <div class="code-body">
+<pre><span class="cmt"># The correct pattern for a TCP client</span>
+<span class="kw">with</span> socket.socket(socket.AF_INET, socket.SOCK_STREAM) <span class="kw">as</span> sock:
+    sock.connect((<span class="str">"127.0.0.1"</span>, <span class="num">9090</span>))
+
+    <span class="cmt"># Send: str → bytes</span>
+    message = <span class="str">"Request from client"</span>
+    sock.<span class="fn">sendall</span>(message.<span class="fn">encode</span>(<span class="str">'utf-8'</span>))
+
+    <span class="cmt"># Receive: bytes → str</span>
+    response_bytes = sock.<span class="fn">recv</span>(<span class="num">1024</span>)
+    response_text = response_bytes.<span class="fn">decode</span>(<span class="str">'utf-8'</span>)
+
+    <span class="fn">print</span>(<span class="str">f"Answer: </span>{response_text}<span class="str">"</span>)</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: List Comprehensions -->
+        <div class="slide" data-slide="7">
+            <div class="slide-content">
+                <h2>📋 List Comprehensions — Compact Processing</h2>
+
+                <p>When parsing network responses, you need to process lists efficiently. List comprehensions do this elegantly:</p>
+
+                <div class="code-container">
+                    <div class="code-header">
+                        <span class="code-filename">🐍 comprehensions_networking.py</span>
+                        <div class="code-actions">
+                            <button class="btn-code btn-run" onclick="simulateRun(this, 'output3')">▶ Run</button>
+                        </div>
+                    </div>
+                    <div class="code-body">
+<pre><span class="cmt"># ═══════════════════════════════════════════════</span>
+<span class="cmt"># Classic approach (as in C/Java)</span>
+<span class="cmt"># ═══════════════════════════════════════════════</span>
+open_ports = []
+<span class="kw">for</span> port <span class="kw">in</span> <span class="fn">range</span>(<span class="num">1</span>, <span class="num">1001</span>):
+    <span class="kw">if</span> port % <span class="num">100</span> == <span class="num">0</span>:  <span class="cmt"># simulated check</span>
+        open_ports.<span class="fn">append</span>(port)
+
+<span class="fn">print</span>(<span class="str">"Classic approach:"</span>, open_ports)
+
+<span class="cmt"># ═══════════════════════════════════════════════</span>
+<span class="cmt"># List comprehension (idiomatic Python)</span>
+<span class="cmt"># ═══════════════════════════════════════════════</span>
+open_ports = [port <span class="kw">for</span> port <span class="kw">in</span> <span class="fn">range</span>(<span class="num">1</span>, <span class="num">1001</span>) <span class="kw">if</span> port % <span class="num">100</span> == <span class="num">0</span>]
+
+<span class="fn">print</span>(<span class="str">"Comprehension:"</span>, open_ports)
+
+<span class="cmt"># ═══════════════════════════════════════════════</span>
+<span class="cmt"># Real-world application: parse IPs from response</span>
+<span class="cmt"># ═══════════════════════════════════════════════</span>
+response = <span class="str">"192.168.1.1,10.0.0.1,8.8.8.8,invalid,172.16.0.1"</span>
+
+<span class="cmt"># Extract only valid IPs (simplified: those with exactly 3 dots)</span>
+ip_addresses = [ip.<span class="fn">strip</span>() <span class="kw">for</span> ip <span class="kw">in</span> response.<span class="fn">split</span>(<span class="str">','</span>) <span class="kw">if</span> ip.<span class="fn">count</span>(<span class="str">'.'</span>) == <span class="num">3</span>]
+
+<span class="fn">print</span>(<span class="str">"Extracted IPs:"</span>, ip_addresses)</pre>
+                    </div>
+                    <div class="code-output" id="output3">
+                        <div class="code-output-header">Output</div>
+<pre>Classic approach: [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
+Comprehension: [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
+Extracted IPs: ['192.168.1.1', '10.0.0.1', '8.8.8.8', '172.16.0.1']</pre>
+                    </div>
+                </div>
+
+                <div class="card card-info">
+                    <h3>📐 Syntax</h3>
+                    <p><code>[expression <span style="color: var(--accent-secondary);">for</span> element <span style="color: var(--accent-secondary);">in</span> iterable <span style="color: var(--accent-secondary);">if</span> condition]</code></p>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">The <code>if condition</code> part is optional.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Dict Comprehensions -->
+        <div class="slide" data-slide="8">
+            <div class="slide-content">
+                <h2>📚 Dict Comprehensions — Parsing Headers</h2>
+
+                <p>Ideal for parsing HTTP headers or configurations in <code>key: value</code> format:</p>
+
+                <div class="code-container">
+                    <div class="code-header">
+                        <span class="code-filename">🐍 dict_comprehension_http.py</span>
+                        <div class="code-actions">
+                            <button class="btn-code btn-run" onclick="simulateRun(this, 'output4')">▶ Run</button>
+                        </div>
+                    </div>
+                    <div class="code-body">
+<pre><span class="cmt"># HTTP headers received as a string</span>
+headers_raw = <span class="str">"""Host: localhost
+Content-Type: text/html
+Content-Length: 1234
+Connection: keep-alive"""</span>
+
+<span class="cmt"># ═══════════════════════════════════════════════</span>
+<span class="cmt"># Classic approach</span>
+<span class="cmt"># ═══════════════════════════════════════════════</span>
+headers_dict = {}
+<span class="kw">for</span> line <span class="kw">in</span> headers_raw.<span class="fn">split</span>(<span class="str">'\n'</span>):
+    <span class="kw">if</span> <span class="str">':'</span> <span class="kw">in</span> line:
+        key, value = line.<span class="fn">split</span>(<span class="str">':'</span>, <span class="num">1</span>)
+        headers_dict[key.<span class="fn">strip</span>().<span class="fn">lower</span>()] = value.<span class="fn">strip</span>()
+
+<span class="fn">print</span>(<span class="str">"Headers (classic approach):"</span>)
+<span class="kw">for</span> k, v <span class="kw">in</span> headers_dict.<span class="fn">items</span>():
+    <span class="fn">print</span>(<span class="str">f"  </span>{k}<span class="str">: </span>{v}<span class="str">"</span>)
+
+<span class="cmt"># ═══════════════════════════════════════════════</span>
+<span class="cmt"># Dict comprehension (one line!)</span>
+<span class="cmt"># ═══════════════════════════════════════════════</span>
+headers = {
+    k.<span class="fn">strip</span>().<span class="fn">lower</span>(): v.<span class="fn">strip</span>()
+    <span class="kw">for</span> line <span class="kw">in</span> headers_raw.<span class="fn">split</span>(<span class="str">'\n'</span>)
+    <span class="kw">if</span> <span class="str">':'</span> <span class="kw">in</span> line
+    <span class="kw">for</span> k, v <span class="kw">in</span> [line.<span class="fn">split</span>(<span class="str">':'</span>, <span class="num">1</span>)]
+}
+
+<span class="fn">print</span>(<span class="str">f"\nContent-Length: </span>{headers[<span class="str">'content-length'</span>]}<span class="str">"</span>)
+<span class="fn">print</span>(<span class="str">f"Host: </span>{headers[<span class="str">'host'</span>]}<span class="str">"</span>)</pre>
+                    </div>
+                    <div class="code-output" id="output4">
+                        <div class="code-output-header">Output</div>
+<pre>Headers (classic approach):
+  host: localhost
+  content-type: text/html
+  content-length: 1234
+  connection: keep-alive
+
+Content-Length: 1234
+Host: localhost</pre>
+                    </div>
+                </div>
+
+                <div class="callout callout-networking">
+                    <span class="callout-icon">🌐</span>
+                    <div class="callout-content">
+                        <h4>Where will you use this?</h4>
+                        <p>In <code>08roWSL/src/exercises/ex_8_01_server_http.py</code> you will need to parse exactly this kind of headers!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Experiment -->
+        <div class="slide" data-slide="9">
+            <div class="slide-content">
+                <h2>🧪 Experiment: bytes in a Real Exercise</h2>
+
+                <div class="experiment-box">
+                    <div class="experiment-header">
+                        <span class="experiment-icon">🔬</span>
+                        <span class="experiment-title">Explore Conversion in ex_2_01_tcp.py</span>
+                    </div>
+
+                    <div class="experiment-steps">
+                        <div class="experiment-step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h4>Open the TCP exercise</h4>
+                                <p><code>code 02roWSL/src/exercises/ex_2_01_tcp.py</code></p>
+                                <p class="step-why">🎯 Purpose: This file implements a complete TCP server and client</p>
+                            </div>
+                        </div>
+
+                        <div class="experiment-step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h4>Search for <code>encode</code> and <code>decode</code></h4>
+                                <p>Use Ctrl+F and search for these keywords</p>
+                                <p class="step-why">🎯 What you will see: The locations where str ↔ bytes conversion takes place</p>
+                            </div>
+                        </div>
+
+                        <div class="experiment-step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h4>Identify the pattern</h4>
+                                <p>Notice that <code>sendall()</code> receives bytes and <code>recv()</code> returns bytes</p>
+                                <p class="step-why">🎯 Takeaway: Sockets work ONLY with bytes, never with str directly</p>
+                            </div>
+                        </div>
+
+                        <div class="experiment-step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h4>Experiment with the error</h4>
+                                <p>Temporarily remove <code>.encode('utf-8')</code> from a <code>sendall()</code> call and run the script</p>
+                                <p class="step-why">🎯 Takeaway: You will see the exact TypeError we discussed!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Quiz 1 -->
+        <div class="slide" data-slide="10">
+            <div class="slide-content">
+                <h2>📝 Quiz: Check Your Understanding</h2>
+
+                <div class="quiz-container" id="quiz1">
+                    <div class="quiz-header">
+                        <div class="quiz-icon">🧠</div>
+                        <div>
+                            <h3 style="margin: 0;">Quiz 1: bytes vs str</h3>
+                        </div>
+                    </div>
+
+                    <div class="quiz-question">
+                        Which method do you use to convert a string to bytes before sending it over a socket?
+                    </div>
+
+                    <div class="quiz-options">
+                        <div class="quiz-option" onclick="selectOption(this, 'quiz1')">
+                            <span class="option-marker">A</span>
+                            <span><code>str.bytes()</code></span>
+                        </div>
+                        <div class="quiz-option" onclick="selectOption(this, 'quiz1')" data-correct="true">
+                            <span class="option-marker">B</span>
+                            <span><code>str.encode('utf-8')</code></span>
+                        </div>
+                        <div class="quiz-option" onclick="selectOption(this, 'quiz1')">
+                            <span class="option-marker">C</span>
+                            <span><code>bytes(str)</code></span>
+                        </div>
+                        <div class="quiz-option" onclick="selectOption(this, 'quiz1')">
+                            <span class="option-marker">D</span>
+                            <span><code>str.tobytes()</code></span>
+                        </div>
+                    </div>
+
+                    <div class="quiz-actions">
+                        <button class="btn-quiz btn-check" onclick="checkAnswer('quiz1')">Check</button>
+                        <button class="btn-quiz btn-hint" onclick="showHint('quiz1', 1)">💡 Hint</button>
+                    </div>
+
+                    <div class="hint-box" id="quiz1-hint1">
+                        <div class="hint-level">Hint 1/3</div>
+                        <p>Think: when you send text over a network, you need to "encode" it into a binary format. Which English word describes this process?</p>
+                    </div>
+                    <div class="hint-box" id="quiz1-hint2">
+                        <div class="hint-level">Hint 2/3</div>
+                        <p>The method is called <code>encode</code> and takes the encoding as a parameter (typically 'utf-8').</p>
+                    </div>
+                    <div class="hint-box" id="quiz1-hint3">
+                        <div class="hint-level">Hint 3/3</div>
+                        <p>Option B: <code>"text".encode('utf-8')</code> returns <code>b'text'</code></p>
+                    </div>
+
+                    <div class="feedback-box" id="quiz1-feedback"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: Quiz 2 -->
+        <div class="slide" data-slide="11">
+            <div class="slide-content">
+                <div class="quiz-container" id="quiz2">
+                    <div class="quiz-header">
+                        <div class="quiz-icon">🧠</div>
+                        <div>
+                            <h3 style="margin: 0;">Quiz 2: List Comprehension</h3>
+                        </div>
+                    </div>
+
+                    <div class="quiz-question">
+                        What is the result of this code?<br><br>
+                        <code>[x * 2 for x in [1, 2, 3, 4] if x > 2]</code>
+                    </div>
+
+                    <div class="quiz-options">
+                        <div class="quiz-option" onclick="selectOption(this, 'quiz2')">
+                            <span class="option-marker">A</span>
+                            <span><code>[2, 4, 6, 8]</code></span>
+                        </div>
+                        <div class="quiz-option" onclick="selectOption(this, 'quiz2')">
+                            <span class="option-marker">B</span>
+                            <span><code>[3, 4]</code></span>
+                        </div>
+                        <div class="quiz-option" onclick="selectOption(this, 'quiz2')" data-correct="true">
+                            <span class="option-marker">C</span>
+                            <span><code>[6, 8]</code></span>
+                        </div>
+                        <div class="quiz-option" onclick="selectOption(this, 'quiz2')">
+                            <span class="option-marker">D</span>
+                            <span><code>[1, 2, 6, 8]</code></span>
+                        </div>
+                    </div>
+
+                    <div class="quiz-actions">
+                        <button class="btn-quiz btn-check" onclick="checkAnswer('quiz2')">Check</button>
+                        <button class="btn-quiz btn-hint" onclick="showHint('quiz2', 1)">💡 Hint</button>
+                    </div>
+
+                    <div class="hint-box" id="quiz2-hint1">
+                        <div class="hint-level">Hint 1/3</div>
+                        <p>First, the filter <code>if x > 2</code> is applied. Which elements from [1,2,3,4] are greater than 2?</p>
+                    </div>
+                    <div class="hint-box" id="quiz2-hint2">
+                        <div class="hint-level">Hint 2/3</div>
+                        <p>The elements that pass the filter are 3 and 4. Then the expression <code>x * 2</code> is applied to each.</p>
+                    </div>
+                    <div class="hint-box" id="quiz2-hint3">
+                        <div class="hint-level">Hint 3/3</div>
+                        <p>3 * 2 = 6, 4 * 2 = 8 → Result: [6, 8]</p>
+                    </div>
+
+                    <div class="feedback-box" id="quiz2-feedback"></div>
+                </div>
+
+                <div class="quiz-container" id="quiz3" style="margin-top: 2rem;">
+                    <div class="quiz-header">
+                        <div class="quiz-icon">🧠</div>
+                        <div>
+                            <h3 style="margin: 0;">Quiz 3: Bytes Literal</h3>
+                        </div>
+                    </div>
+
+                    <div class="quiz-question">
+                        What is the decimal value of <code>b'\xC0'</code>?
+                    </div>
+
+                    <div class="quiz-options">
+                        <div class="quiz-option" onclick="selectOption(this, 'quiz3')">
+                            <span class="option-marker">A</span>
+                            <span>12</span>
+                        </div>
+                        <div class="quiz-option" onclick="selectOption(this, 'quiz3')">
+                            <span class="option-marker">B</span>
+                            <span>160</span>
+                        </div>
+                        <div class="quiz-option" onclick="selectOption(this, 'quiz3')" data-correct="true">
+                            <span class="option-marker">C</span>
+                            <span>192</span>
+                        </div>
+                        <div class="quiz-option" onclick="selectOption(this, 'quiz3')">
+                            <span class="option-marker">D</span>
+                            <span>255</span>
+                        </div>
+                    </div>
+
+                    <div class="quiz-actions">
+                        <button class="btn-quiz btn-check" onclick="checkAnswer('quiz3')">Check</button>
+                        <button class="btn-quiz btn-hint" onclick="showHint('quiz3', 1)">💡 Hint</button>
+                    </div>
+
+                    <div class="hint-box" id="quiz3-hint1">
+                        <div class="hint-level">Hint 1/3</div>
+                        <p><code>\xC0</code> is hexadecimal notation. C in hex = 12 in decimal, 0 in hex = 0 in decimal.</p>
+                    </div>
+                    <div class="hint-box" id="quiz3-hint2">
+                        <div class="hint-level">Hint 2/3</div>
+                        <p>Formula: C0 (hex) = C×16 + 0 = 12×16 + 0</p>
+                    </div>
+                    <div class="hint-box" id="quiz3-hint3">
+                        <div class="hint-level">Hint 3/3</div>
+                        <p>12 × 16 = 192. This is the first octet of the IP address 192.168.x.x!</p>
+                    </div>
+
+                    <div class="feedback-box" id="quiz3-feedback"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: Sandbox -->
+        <div class="slide" data-slide="12">
+            <div class="slide-content">
+                <h2>💻 Sandbox: Experiment</h2>
+
+                <div class="code-container">
+                    <div class="code-header">
+                        <span class="code-filename">🐍 sandbox_bytes.py</span>
+                        <div class="code-actions">
+                            <button class="btn-code btn-run" onclick="simulateRun(this, 'sandbox-output')">▶ Run</button>
+                        </div>
+                    </div>
+                    <div class="code-body">
+<pre><span class="cmt"># Experiment 1: Convert IP to bytes and back</span>
+ip = <span class="str">"192.168.1.100"</span>
+
+<span class="cmt"># Split and convert to bytes (as the socket does internally)</span>
+octets = [<span class="fn">int</span>(x) <span class="kw">for</span> x <span class="kw">in</span> ip.<span class="fn">split</span>(<span class="str">'.'</span>)]
+ip_bytes = <span class="fn">bytes</span>(octets)
+
+<span class="fn">print</span>(<span class="str">f"Original IP:  </span>{ip}<span class="str">"</span>)
+<span class="fn">print</span>(<span class="str">f"Octets:       </span>{octets}<span class="str">"</span>)
+<span class="fn">print</span>(<span class="str">f"As bytes:     </span>{ip_bytes}<span class="str">"</span>)
+<span class="fn">print</span>(<span class="str">f"As hex:       </span>{ip_bytes.<span class="fn">hex</span>()}<span class="str">"</span>)
+
+<span class="cmt"># Reconstruction</span>
+ip_reconstructed = <span class="str">'.'</span>.<span class="fn">join</span>(<span class="fn">str</span>(b) <span class="kw">for</span> b <span class="kw">in</span> ip_bytes)
+<span class="fn">print</span>(<span class="str">f"Reconstructed:  </span>{ip_reconstructed}<span class="str">"</span>)
+
+<span class="cmt"># Experiment 2: Complete HTTP Request</span>
+<span class="fn">print</span>(<span class="str">"\n--- HTTP Request ---"</span>)
+request = <span class="str">f"GET /api/data HTTP/1.1\r\nHost: </span>{ip}<span class="str">\r\n\r\n"</span>
+request_bytes = request.<span class="fn">encode</span>(<span class="str">'utf-8'</span>)
+
+<span class="fn">print</span>(<span class="str">f"Text length:  </span>{<span class="fn">len</span>(request)}<span class="str"> characters"</span>)
+<span class="fn">print</span>(<span class="str">f"Bytes length: </span>{<span class="fn">len</span>(request_bytes)}<span class="str"> bytes"</span>)
+<span class="fn">print</span>(<span class="str">f"Request bytes: </span>{request_bytes[:50]}<span class="str">..."</span>)</pre>
+                    </div>
+                    <div class="code-output" id="sandbox-output">
+                        <div class="code-output-header">Output</div>
+<pre>Original IP:  192.168.1.100
+Octets:       [192, 168, 1, 100]
+As bytes:     b'\xc0\xa8\x01d'
+As hex:       c0a80164
+Reconstructed:  192.168.1.100
+
+--- HTTP Request ---
+Text length:  46 characters
+Bytes length: 46 bytes
+Request bytes: b'GET /api/data HTTP/1.1\r\nHost: 192.168.1.100\r\n'...</pre>
+                    </div>
+                </div>
+
+                <div class="card card-highlight">
+                    <h3>💡 Observations</h3>
+                    <ul style="margin-left: 1.5rem; color: var(--text-secondary);">
+                        <li>The IP 192.168.1.100 becomes <code>\xc0\xa8\x01d</code> (d = 100 in ASCII)</li>
+                        <li>For plain ASCII text, the length in characters equals the length in bytes</li>
+                        <li>For Unicode characters (ă, î), the lengths differ!</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 13: Real Files Reference -->
+        <div class="slide" data-slide="13">
+            <div class="slide-content">
+                <h2>📂 Where to Find These Concepts in the Lab</h2>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>📁 02roWSL</h3>
+                        <p><strong>ex_2_01_tcp.py</strong></p>
+                        <ul style="color: var(--text-secondary); font-size: 0.95rem; margin-left: 1rem;">
+                            <li><code>encode()</code> when sending messages</li>
+                            <li><code>decode()</code> when receiving responses</li>
+                            <li>TCP client-server pattern</li>
+                        </ul>
+                        <p style="margin-top: 1rem;"><strong>ex_2_02_udp.py</strong></p>
+                        <ul style="color: var(--text-secondary); font-size: 0.95rem; margin-left: 1rem;">
+                            <li>Same pattern for UDP</li>
+                            <li><code>sendto()</code> and <code>recvfrom()</code></li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h3>📁 03roWSL</h3>
+                        <p><strong>ex_3_01_udp_broadcast.py</strong></p>
+                        <ul style="color: var(--text-secondary); font-size: 0.95rem; margin-left: 1rem;">
+                            <li>Bytes for UDP broadcast</li>
+                            <li>SO_BROADCAST socket option</li>
+                        </ul>
+                        <p style="margin-top: 1rem;"><strong>ex_3_03_tcp_tunnel.py</strong></p>
+                        <ul style="color: var(--text-secondary); font-size: 0.95rem; margin-left: 1rem;">
+                            <li>Forwarding bytes between connections</li>
+                            <li>Without encode/decode (binary data!)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="callout callout-networking">
+                    <span class="callout-icon">🌐</span>
+                    <div class="callout-content">
+                        <h4>Important Rule</h4>
+                        <p>When <strong>forwarding data</strong> (proxy, tunnel), do NOT decode and re-encode! Send the bytes exactly as received to avoid corrupting binary data.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 14: Summary -->
+        <div class="slide" data-slide="14">
+            <div class="slide-content">
+                <h2>✅ Summary and Next Steps</h2>
+
+                <div class="grid-2">
+                    <div class="card card-highlight">
+                        <h3>📌 What We Covered</h3>
+                        <ul style="list-style: none; padding: 0;">
+                            <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+                                ✓ <code>str</code> = text for humans, <code>bytes</code> = data for the network
+                            </li>
+                            <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+                                ✓ <code>str.encode('utf-8')</code> → bytes (before send)
+                            </li>
+                            <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+                                ✓ <code>bytes.decode('utf-8')</code> → str (after recv)
+                            </li>
+                            <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+                                ✓ Bytes literal: <code>b"text"</code> or <code>b'\xHH'</code>
+                            </li>
+                            <li style="padding: 0.5rem 0;">
+                                ✓ List/Dict comprehensions for parsing
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h3>🚀 Next Module</h3>
+                        <p style="font-size: 1.1rem; color: var(--accent-primary); font-weight: 600;">
+                            Module 4: Socket Programming
+                        </p>
+                        <p>You will learn:</p>
+                        <ul style="color: var(--text-secondary);">
+                            <li>TCP vs UDP sockets</li>
+                            <li>Complete server and client</li>
+                            <li>Context managers (<code>with</code>)</li>
+                        </ul>
+                        <span class="badge badge-week">📅 Correlated with Weeks 2-4</span>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 2rem;">
+                    <p style="color: var(--text-muted);">
+                        Module 3 complete! 🎉<br>
+                        You now know how to work with bytes and str in networking.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="nav-buttons">
+        <button class="btn-nav btn-prev" id="btnPrev" onclick="prevSlide()" disabled>← Back</button>
+        <div class="page-dots" id="pageDots"></div>
+        <button class="btn-nav btn-next" id="btnNext" onclick="nextSlide()">Continue →</button>
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 14;
+        const quizHintCounts = {};
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updataUI();
+            createPageDots();
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+                else if (e.key === 'ArrowLeft') { prevSlide(); }
+            });
+        });
+
+        function createPageDots() {
+            const container = document.getElementById('pageDots');
+            for (let i = 1; i <= totalSlides; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'page-dot' + (i === 1 ? ' active' : '');
+                dot.onclick = () => goToSlide(i);
+                container.appendChild(dot);
+            }
+        }
+
+        function updataUI() {
+            document.getElementById('progressBar').style.width = `${(currentSlide / totalSlides) * 100}%`;
+            document.getElementById('slideCounter').textContent = `${currentSlide} / ${totalSlides}`;
+            document.getElementById('btnPrev').disabled = currentSlide === 1;
+            document.getElementById('btnNext').textContent = currentSlide === totalSlides ? 'Finish ✓' : 'Continue →';
+            document.querySelectorAll('.page-dot').forEach((dot, i) => dot.classList.toggle('active', i + 1 === currentSlide));
+        }
+
+        function goToSlide(n) {
+            if (n < 1 || n > totalSlides || n === currentSlide) return;
+            const currentEl = document.querySelector(`.slide[data-slide="${currentSlide}"]`);
+            const nextEl = document.querySelector(`.slide[data-slide="${n}"]`);
+            currentEl.classList.remove('active'); currentEl.classList.add('exit');
+            setTimeout(() => { currentEl.classList.remove('exit'); nextEl.classList.add('active'); currentSlide = n; updataUI(); }, 100);
+        }
+
+        function nextSlide() { if (currentSlide < totalSlides) goToSlide(currentSlide + 1); }
+        function prevSlide() { if (currentSlide > 1) goToSlide(currentSlide - 1); }
+
+        function simulateRun(btn, outputId) {
+            const output = document.getElementById(outputId);
+            btn.textContent = '⏳ Run...'; btn.disabled = true;
+            setTimeout(() => { output.classList.add('visible'); btn.textContent = '▶ Run'; btn.disabled = false; }, 800);
+        }
+
+        function copyCode(btn) {
+            const code = btn.closest('.code-container').querySelector('pre').textContent;
+            navigator.clipboard.writeText(code);
+            const orig = btn.textContent; btn.textContent = '✓ Copied!'; setTimeout(() => btn.textContent = orig, 1500);
+        }
+
+        function selectOption(el, quizId) {
+            document.getElementById(quizId).querySelectorAll('.quiz-option').forEach(o => o.classList.remove('selected','correct','incorrect'));
+            el.classList.add('selected');
+            document.getElementById(`${quizId}-feedback`).classList.remove('visible');
+        }
+
+        function checkAnswer(quizId) {
+            const container = document.getElementById(quizId);
+            const selected = container.querySelector('.quiz-option.selected');
+            const feedback = document.getElementById(`${quizId}-feedback`);
+            if (!selected) { feedback.innerHTML = '<p style="color:var(--accent-warning)">⚠️ Please select an answer!</p>'; feedback.className = 'feedback-box visible'; return; }
+            container.querySelectorAll('.quiz-option').forEach(o => { if (o.dataset.correct === 'true') o.classList.add('correct'); else if (o.classList.contains('selected')) o.classList.add('incorrect'); });
+            if (selected.dataset.correct === 'true') { feedback.innerHTML = '<p style="color:var(--accent-success)">🎉 Correct!</p>'; feedback.className = 'feedback-box success visible'; }
+            else { feedback.innerHTML = '<p style="color:var(--accent-error)">❌ The correct answer is marked in green.</p>'; feedback.className = 'feedback-box error visible'; }
+        }
+
+        function showHint(quizId, level) {
+            if (!quizHintCounts[quizId]) quizHintCounts[quizId] = 0;
+            const cur = quizHintCounts[quizId] + 1; if (cur > 3) return;
+            const hint = document.getElementById(`${quizId}-hint${cur}`);
+            if (hint) { hint.classList.add('visible'); quizHintCounts[quizId] = cur;
+                const btn = document.querySelector(`#${quizId} .btn-hint`);
+                btn.textContent = cur >= 3 ? '✓ All hints shown' : `💡 Hint (${cur}/3)`; if (cur >= 3) btn.disabled = true;
+            }
+        }
+    </script>
+</body>
+</html>

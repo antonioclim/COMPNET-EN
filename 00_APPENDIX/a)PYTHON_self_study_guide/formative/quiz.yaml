@@ -1,0 +1,454 @@
+# Python for Networking — Self-Assessment Quiz
+# Version: 4.0 — January 2026
+# Usage: python formative/run_quiz.py
+
+metadata:
+  title: "Python for Networking — Self-Assessment"
+  version: "4.0"
+  course: "Computer Networks"
+  estimated_time: "25-35 minutes"
+  passing_score: 70
+  total_questions: 30
+
+questions:
+  # --- Basic Syntax ---
+  - id: syn_01
+    section: basic_syntax
+    type: multiple_choice
+    difficulty: basic
+    bloom_level: remember
+    stem: "How do you declare an integer variable with value 8080 in Python?"
+    options:
+      a: "int port = 8080;"
+      b: "let port = 8080"
+      c: "port = 8080"
+      d: "var port: Int = 8080"
+    correct: c
+    explanation: "Python uses dynamic typing — no type declaration needed. Just assign: port = 8080"
+
+  - id: syn_02
+    section: basic_syntax
+    type: multiple_choice
+    difficulty: basic
+    bloom_level: remember
+    stem: "Which statement correctly defines a function in Python?"
+    options:
+      a: "function check_host(host) { ... }"
+      b: "void check_host(String host) { ... }"
+      c: "def check_host(host):"
+      d: "fun check_host(host: String)"
+    correct: c
+    explanation: "Python uses 'def' keyword for functions. Parameters don't require type annotations."
+
+  - id: syn_03
+    section: basic_syntax
+    type: multiple_choice
+    difficulty: basic
+    bloom_level: understand
+    stem: |
+      What's wrong with this code?
+      if (x > 5) {
+          print("large")
+      }
+    options:
+      a: "Missing semicolons"
+      b: "Braces {} are not used — use colon and indentation"
+      c: "print should be System.out.println"
+      d: "Parentheses around condition are wrong"
+    correct: b
+    explanation: "Python uses indentation for code blocks, not braces. Correct: if x > 5: followed by indented block."
+
+  - id: syn_04
+    section: basic_syntax
+    type: fill_blank
+    difficulty: basic
+    bloom_level: apply
+    stem: "Complete the for loop to iterate from 0 to 9: for i in ___(10):"
+    correct: ["range"]
+    explanation: "range(n) generates numbers 0, 1, 2, ..., n-1."
+
+  - id: syn_05
+    section: basic_syntax
+    type: multiple_choice
+    difficulty: intermediate
+    bloom_level: understand
+    stem: "In Python, what does '==' compare?"
+    options:
+      a: "Identity (same object in memory)"
+      b: "Value equality (like JavaScript's ===)"
+      c: "Loose equality with type coercion"
+      d: "Reference equality"
+    correct: b
+    explanation: "Python's == is value equality (no type coercion). For identity, use 'is'."
+
+  # --- Bytes and Strings ---
+  - id: bytes_01
+    section: bytes_and_strings
+    type: multiple_choice
+    difficulty: intermediate
+    bloom_level: understand
+    stem: |
+      What happens when you run: sock.send("Hello")
+    options:
+      a: "Sends 'Hello' successfully"
+      b: "TypeError: a bytes-like object is required"
+      c: "Sends 5 bytes"
+      d: "ConnectionError"
+    correct: b
+    explanation: "Python sockets require bytes, not strings. Fix: sock.send(b'Hello') or sock.send('Hello'.encode('utf-8'))"
+
+  - id: bytes_02
+    section: bytes_and_strings
+    type: multiple_choice
+    difficulty: basic
+    bloom_level: remember
+    stem: "Which prefix creates a bytes literal in Python?"
+    options:
+      a: "'Hello'"
+      b: "\"Hello\""
+      c: "b\"Hello\""
+      d: "bytes(\"Hello\")"
+    correct: c
+    explanation: "b\"...\" creates a bytes object directly."
+
+  - id: bytes_03
+    section: bytes_and_strings
+    type: fill_blank
+    difficulty: intermediate
+    bloom_level: apply
+    stem: "Convert received bytes to a string: text = data._____('utf-8')"
+    correct: ["decode"]
+    explanation: ".decode() converts bytes → string. .encode() converts string → bytes."
+
+  - id: bytes_04
+    section: bytes_and_strings
+    type: multiple_choice
+    difficulty: intermediate
+    bloom_level: analyze
+    stem: "What is Python's equivalent of C's htons(8080) for packing a port?"
+    options:
+      a: "htons(8080)"
+      b: "socket.htons(8080)"
+      c: "struct.pack('!H', 8080)"
+      d: "int.to_bytes(8080, 2, 'big')"
+    correct: c
+    explanation: "struct.pack('!H', 8080) packs as network byte order. '!' = network order, 'H' = unsigned short."
+
+  - id: bytes_05
+    section: bytes_and_strings
+    type: multiple_choice
+    difficulty: advanced
+    bloom_level: analyze
+    stem: |
+      What does struct.unpack('!HI', data) return?
+    options:
+      a: "A single integer"
+      b: "A tuple of (unsigned short, unsigned int)"
+      c: "A bytes object"
+      d: "A string"
+    correct: b
+    explanation: "!HI unpacks 6 bytes: 2-byte unsigned short + 4-byte unsigned int, returned as a tuple."
+
+  # --- Socket Programming ---
+  - id: sock_01
+    section: socket_programming
+    type: multiple_choice
+    difficulty: basic
+    bloom_level: remember
+    stem: "Which constant specifies a TCP socket?"
+    options:
+      a: "socket.SOCK_DGRAM"
+      b: "socket.SOCK_STREAM"
+      c: "socket.SOCK_RAW"
+      d: "socket.TCP_SOCKET"
+    correct: b
+    explanation: "SOCK_STREAM = TCP (reliable, ordered). SOCK_DGRAM = UDP (unreliable)."
+
+  - id: sock_02
+    section: socket_programming
+    type: multiple_choice
+    difficulty: intermediate
+    bloom_level: understand
+    stem: "What does SO_REUSEADDR do?"
+    options:
+      a: "Enables encryption"
+      b: "Allows reusing the port immediately after server stops"
+      c: "Sets non-blocking mode"
+      d: "Enables broadcasting"
+    correct: b
+    explanation: "SO_REUSEADDR allows rebinding to a port in TIME_WAIT state (no 60s wait)."
+
+  - id: sock_03
+    section: socket_programming
+    type: multiple_choice
+    difficulty: intermediate
+    bloom_level: apply
+    stem: "Correct order of TCP server operations?"
+    options:
+      a: "socket → connect → listen → accept"
+      b: "socket → bind → listen → accept"
+      c: "socket → listen → bind → accept"
+      d: "socket → accept → bind → listen"
+    correct: b
+    explanation: "TCP Server: socket() → bind() → listen() → accept(). Mnemonic: BLA = Bind, Listen, Accept"
+
+  - id: sock_04
+    section: socket_programming
+    type: multiple_choice
+    difficulty: intermediate
+    bloom_level: understand
+    stem: "Difference between send() and sendall()?"
+    options:
+      a: "send() is for TCP, sendall() is for UDP"
+      b: "send() may send partial data, sendall() sends everything"
+      c: "sendall() is faster"
+      d: "They are identical"
+    correct: b
+    explanation: "send() might send fewer bytes (returns count). sendall() keeps sending until complete."
+
+  - id: sock_05
+    section: socket_programming
+    type: fill_blank
+    difficulty: intermediate
+    bloom_level: apply
+    stem: "UDP receive with sender address: data, addr = sock._____(1024)"
+    correct: ["recvfrom"]
+    explanation: "recvfrom() returns (data, address) tuple — needed for UDP since it's connectionless."
+
+  - id: sock_06
+    section: socket_programming
+    type: multiple_choice
+    difficulty: intermediate
+    bloom_level: analyze
+    stem: |
+      What happens when this runs?
+      server = socket.socket()
+      server.bind(('0.0.0.0', 80))
+    options:
+      a: "Server starts on port 80"
+      b: "Permission denied error"
+      c: "Syntax error"
+      d: "Address already in use"
+    correct: b
+    explanation: "Ports 0-1023 require root/admin. Use ports >= 1024 for development."
+
+  - id: sock_07
+    section: socket_programming
+    type: multiple_choice
+    difficulty: advanced
+    bloom_level: evaluate
+    stem: |
+      Why might this code lose data?
+      data = sock.recv(1024)
+      process(data.decode())
+    options:
+      a: "decode() might fail"
+      b: "TCP stream may deliver partial messages"
+      c: "1024 is too small"
+      d: "Nothing wrong"
+    correct: b
+    explanation: "TCP is a byte stream — one send() doesn't guarantee one recv(). Use message framing."
+
+  # --- Error Handling ---
+  - id: err_01
+    section: error_handling
+    type: multiple_choice
+    difficulty: basic
+    bloom_level: remember
+    stem: "Exception raised when a connection is refused?"
+    options:
+      a: "socket.error"
+      b: "ConnectionRefusedError"
+      c: "IOException"
+      d: "NetworkError"
+    correct: b
+    explanation: "ConnectionRefusedError — server not listening or firewall blocked."
+
+  - id: err_02
+    section: error_handling
+    type: multiple_choice
+    difficulty: intermediate
+    bloom_level: understand
+    stem: "How does Python handle exceptions compared to Java?"
+    options:
+      a: "Has checked and unchecked like Java"
+      b: "Only unchecked exceptions — no throws clause"
+      c: "No exceptions"
+      d: "Requires catch for all"
+    correct: b
+    explanation: "Python has NO checked exceptions. All can propagate without declaration."
+
+  - id: err_03
+    section: error_handling
+    type: fill_blank
+    difficulty: basic
+    bloom_level: apply
+    stem: |
+      Complete: try:
+          sock.connect(addr)
+      _____ ConnectionRefusedError:
+          print("Server not running")
+    correct: ["except"]
+    explanation: "Python uses 'except' (not 'catch' like Java/JS)."
+
+  - id: err_04
+    section: error_handling
+    type: multiple_choice
+    difficulty: intermediate
+    bloom_level: apply
+    stem: "Python equivalent of Java's try-with-resources?"
+    options:
+      a: "try: ... finally: close()"
+      b: "with socket() as s: ..."
+      c: "using (socket) { ... }"
+      d: "socket.use { ... }"
+    correct: b
+    explanation: "The 'with' statement (context manager) guarantees cleanup."
+
+  - id: err_05
+    section: error_handling
+    type: multiple_choice
+    difficulty: intermediate
+    bloom_level: analyze
+    stem: |
+      What happens if exception occurs in 'with' block?
+      with socket.socket() as s:
+          s.connect(('bad', 80))
+    options:
+      a: "Socket leaks"
+      b: "Socket closed, then exception propagates"
+      c: "Exception suppressed"
+      d: "Program hangs"
+    correct: b
+    explanation: "'with' guarantees cleanup, THEN exception propagates. No resource leak."
+
+  # --- Python Idioms ---
+  - id: idiom_01
+    section: python_idioms
+    type: multiple_choice
+    difficulty: intermediate
+    bloom_level: apply
+    stem: "Pythonic way to create list of ports 1-100?"
+    options:
+      a: "ports = []; for i in range(1,101): ports.append(i)"
+      b: "ports = list(range(1, 101))"
+      c: "ports = [i for i in range(1, 101)]"
+      d: "Both b and c are equally Pythonic"
+    correct: d
+    explanation: "Both are valid. list(range(...)) is simpler; list comprehension is better for filtering."
+
+  - id: idiom_02
+    section: python_idioms
+    type: multiple_choice
+    difficulty: intermediate
+    bloom_level: understand
+    stem: "How to access dictionary value in Python?"
+    options:
+      a: "config.port"
+      b: "config['port']"
+      c: "config->port"
+      d: "config.get['port']"
+    correct: b
+    explanation: "Python dicts use brackets: config['key']. Dot notation is for object attributes."
+
+  - id: idiom_03
+    section: python_idioms
+    type: fill_blank
+    difficulty: intermediate
+    bloom_level: apply
+    stem: "Complete the f-string: msg = ___\"Connection from {addr}\""
+    correct: ["f"]
+    explanation: "f-strings (Python 3.6+) allow inline expressions with f\"...{var}...\" syntax."
+
+  - id: idiom_04
+    section: python_idioms
+    type: multiple_choice
+    difficulty: intermediate
+    bloom_level: understand
+    stem: "Pythonic way to check if list is empty?"
+    options:
+      a: "if len(packets) == 0:"
+      b: "if packets.isEmpty():"
+      c: "if not packets:"
+      d: "if packets == []:"
+    correct: c
+    explanation: "Empty containers are 'falsy'. 'if not packets:' is idiomatic."
+
+  - id: idiom_05
+    section: python_idioms
+    type: multiple_choice
+    difficulty: advanced
+    bloom_level: evaluate
+    stem: "Best way to read all lines from a file?"
+    options:
+      a: "f = open('f.txt'); lines = f.readlines(); f.close()"
+      b: "with open('f.txt') as f: lines = f.readlines()"
+      c: "with open('f.txt') as f: lines = list(f)"
+      d: "Both b and c are correct and safe"
+    correct: d
+    explanation: "Both use 'with' for safe handling. readlines() and list(f) are equivalent."
+
+  # --- Debugging ---
+  - id: debug_01
+    section: debugging
+    type: multiple_choice
+    difficulty: intermediate
+    bloom_level: apply
+    stem: "Preferred over print() for debugging network apps?"
+    options:
+      a: "sys.stdout"
+      b: "logging"
+      c: "debug"
+      d: "printf"
+    correct: b
+    explanation: "'logging' module provides levels (DEBUG, INFO, WARNING, ERROR) and can be disabled."
+
+  - id: debug_02
+    section: debugging
+    type: fill_blank
+    difficulty: basic
+    bloom_level: apply
+    stem: "Set socket timeout to 5 seconds: sock._____(5.0)"
+    correct: ["settimeout"]
+    explanation: "settimeout(seconds) makes blocking operations time out."
+
+  - id: debug_03
+    section: debugging
+    type: multiple_choice
+    difficulty: advanced
+    bloom_level: analyze
+    stem: |
+      Why might this hang indefinitely?
+      data = sock.recv(1024)
+    options:
+      a: "Buffer too small"
+      b: "recv() blocks forever if no data and no timeout"
+      c: "Socket not connected"
+      d: "Missing decode()"
+    correct: b
+    explanation: "recv() is blocking by default. Use settimeout() or non-blocking mode."
+
+  - id: debug_04
+    section: debugging
+    type: multiple_choice
+    difficulty: intermediate
+    bloom_level: apply
+    stem: "Command to see which process uses port 8080 on Linux?"
+    options:
+      a: "netstat -port 8080"
+      b: "ss -tlnp | grep 8080"
+      c: "ps aux | grep 8080"
+      d: "port -check 8080"
+    correct: b
+    explanation: "ss -tlnp shows TCP listening sockets with process info. Alternative: lsof -i :8080"
+
+scoring:
+  basic: { weight: 1 }
+  intermediate: { weight: 1.5 }
+  advanced: { weight: 2 }
+
+feedback_messages:
+  excellent: "🌟 Excellent! Ready for lab exercises!"
+  good: "✅ Good understanding! Review missed sections."
+  needs_work: "📚 Review comparison docs and retry."
+  beginner: "🔰 Start with Rosetta Stone for your language."

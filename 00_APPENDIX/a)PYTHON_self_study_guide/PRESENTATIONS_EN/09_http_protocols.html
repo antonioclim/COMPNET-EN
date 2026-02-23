@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python for Networks | 9. HTTP and Application Protocols</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root{--bg-primary:#0a0e17;--bg-secondary:#121a2b;--bg-tertiary:#1a2438;--accent-primary:#00d4aa;--accent-secondary:#7c3aed;--accent-warning:#f59e0b;--accent-error:#ef4444;--accent-success:#10b981;--text-primary:#f1f5f9;--text-secondary:#94a3b8;--text-muted:#64748b;--border-color:#2d3a4f;--code-bg:#0d1117;--font-display:'Plus Jakarta Sans',sans-serif;--font-mono:'JetBrains Mono',monospace}*{margin:0;padding:0;box-sizing:border-box}body{font-family:var(--font-display);background:var(--bg-primary);color:var(--text-primary);min-height:100vh;overflow:hidden}.progress-container{position:fixed;top:0;left:0;right:0;height:4px;background:var(--bg-tertiary);z-index:1000}.progress-bar{height:100%;background:linear-gradient(90deg,var(--accent-primary),var(--accent-secondary));transition:width .3s ease}.nav-header{position:fixed;top:4px;left:0;right:0;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(180deg,var(--bg-primary) 0%,transparent 100%);z-index:100}.nav-title{font-size:.9rem;color:var(--text-secondary);display:flex;align-items:center;gap:.5rem}.nav-title .modulee{color:var(--accent-primary);font-weight:600}.slide-counter{font-family:var(--font-mono);font-size:.85rem;color:var(--text-muted);background:var(--bg-tertiary);padding:.4rem .8rem;border-radius:20px}.slides-container{height:100vh;overflow:hidden;position:relative}.slide{position:absolute;top:0;left:0;right:0;bottom:0;padding:5rem 2rem 6rem;display:flex;flex-direction:column;opacity:0;visibility:hidden;transform:translateX(100px);transition:all .5s cubic-bezier(.4,0,.2,1);overflow-y:auto}.slide.active{opacity:1;visibility:visible;transform:translateX(0)}.slide.exit{transform:translateX(-100px)}.slide-content{max-width:1200px;margin:0 auto;width:100%}h1{font-size:clamp(2rem,5vw,3.5rem);font-weight:800;line-height:1.1;margin-bottom:1.5rem;background:linear-gradient(135deg,var(--text-primary) 0%,var(--accent-primary) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}h2{font-size:clamp(1.5rem,3vw,2.2rem);font-weight:700;margin-bottom:1rem;color:var(--text-primary)}h3{font-size:1.3rem;font-weight:600;margin-bottom:.75rem;color:var(--accent-primary)}p{font-size:1.1rem;line-height:1.7;color:var(--text-secondary);margin-bottom:1rem}code{font-family:var(--font-mono);background:var(--bg-tertiary);padding:.2rem .5rem;border-radius:4px;font-size:.9em;color:var(--accent-primary)}.badge{display:inline-flex;align-items:center;gap:.4rem;padding:.4rem .8rem;border-radius:20px;font-size:.85rem;font-weight:600}.badge-time{background:rgba(0,212,170,.15);color:var(--accent-primary)}.badge-week{background:rgba(124,58,237,.15);color:var(--accent-secondary)}.card{background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:16px;padding:1.5rem;margin-bottom:1rem}.card-highlight{border-left:4px solid var(--accent-primary)}.card-get{border-left:4px solid #22c55e;background:rgba(34,197,94,.05)}.card-post{border-left:4px solid #3b82f6;background:rgba(59,130,246,.05)}.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem;margin:1.5rem 0}.objectives-box{background:linear-gradient(135deg,rgba(0,212,170,.1) 0%,rgba(124,58,237,.1) 100%);border:1px solid var(--border-color);border-radius:16px;padding:2rem;margin:1.5rem 0}.objective-item{display:flex;align-items:flex-start;gap:1rem;margin-bottom:1rem}.objective-icon{width:32px;height:32px;background:var(--accent-primary);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}.objective-text{flex:1}.objective-text strong{display:block;color:var(--text-primary);margin-bottom:.25rem}.objective-text span{font-size:.95rem;color:var(--text-secondary)}.code-container{background:var(--code-bg);border:1px solid var(--border-color);border-radius:12px;overflow:hidden;margin:1.5rem 0}.code-header{display:flex;justify-content:space-between;align-items:center;padding:.75rem 1rem;background:var(--bg-tertiary);border-bottom:1px solid var(--border-color)}.code-filename{font-family:var(--font-mono);font-size:.85rem;color:var(--text-secondary)}.btn-code{padding:.4rem .8rem;border-radius:6px;border:none;font-family:var(--font-mono);font-size:.8rem;cursor:pointer}.btn-run{background:var(--accent-primary);color:var(--bg-primary)}.code-body{padding:1rem;overflow-x:auto}.code-body pre{font-family:var(--font-mono);font-size:.9rem;line-height:1.6;color:var(--text-primary);margin:0}.code-output{padding:1rem;background:rgba(0,212,170,.05);border-top:1px solid var(--border-color);display:none}.code-output.visible{display:block}.code-output-header{font-family:var(--font-mono);font-size:.75rem;color:var(--accent-primary);margin-bottom:.5rem;text-transform:uppercase}.kw{color:#ff79c6}.fn{color:#50fa7b}.str{color:#f1fa8c}.num{color:#bd93f9}.cmt{color:#6272a4;font-style:italic}.cls{color:#8be9fd}.quiz-container{background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:16px;padding:2rem;margin:1.5rem 0}.quiz-header{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem}.quiz-icon{width:48px;height:48px;background:linear-gradient(135deg,var(--accent-secondary),var(--accent-primary));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.5rem}.quiz-question{font-size:1.15rem;color:var(--text-primary);margin-bottom:1.5rem}.quiz-options{display:flex;flex-direction:column;gap:.75rem}.quiz-option{display:flex;align-items:center;gap:1rem;padding:1rem 1.25rem;background:var(--bg-tertiary);border:2px solid var(--border-color);border-radius:12px;cursor:pointer}.quiz-option:hover{border-color:var(--accent-primary)}.quiz-option.selected{border-color:var(--accent-secondary);background:rgba(124,58,237,.1)}.quiz-option.correct{border-color:var(--accent-success);background:rgba(16,185,129,.1)}.quiz-option.incorrect{border-color:var(--accent-error);background:rgba(239,68,68,.1)}.option-marker{width:28px;height:28px;border-radius:50%;background:var(--bg-secondary);border:2px solid var(--border-color);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:.85rem}.quiz-option.selected .option-marker{background:var(--accent-secondary);border-color:var(--accent-secondary);color:#fff}.quiz-option.correct .option-marker{background:var(--accent-success)}.quiz-option.incorrect .option-marker{background:var(--accent-error)}.quiz-actions{display:flex;gap:1rem;margin-top:1.5rem}.btn-quiz{padding:.75rem 1.5rem;border-radius:8px;border:none;font-family:var(--font-display);font-size:.95rem;font-weight:600;cursor:pointer}.btn-check{background:var(--accent-primary);color:var(--bg-primary)}.btn-hint{background:transparent;color:var(--accent-warning);border:1px solid var(--accent-warning)}.hint-box{margin-top:1rem;padding:1rem 1.25rem;background:rgba(245,158,11,.1);border-left:4px solid var(--accent-warning);border-radius:0 8px 8px 0;display:none}.hint-box.visible{display:block}.hint-level{font-size:.8rem;color:var(--accent-warning);text-transform:uppercase;margin-bottom:.5rem}.feedback-box{margin-top:1rem;padding:1rem 1.25rem;border-radius:8px;display:none}.feedback-box.visible{display:block}.feedback-box.success{background:rgba(16,185,129,.1);border-left:4px solid var(--accent-success)}.feedback-box.error{background:rgba(239,68,68,.1);border-left:4px solid var(--accent-error)}.callout{display:flex;gap:1rem;padding:1.25rem;border-radius:12px;margin:1rem 0}.callout-networking{background:rgba(0,212,170,.1);border:1px solid rgba(0,212,170,.3)}.callout-icon{font-size:1.5rem}.callout-content h4{color:var(--accent-primary);margin-bottom:.5rem}.callout-content p{margin:0;font-size:.95rem}.nav-buttons{position:fixed;bottom:0;left:0;right:0;padding:1.5rem 2rem;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(0deg,var(--bg-primary) 0%,transparent 100%);z-index:100}.btn-nav{display:flex;align-items:center;gap:.5rem;padding:.75rem 1.5rem;border-radius:8px;border:none;font-family:var(--font-display);font-size:1rem;font-weight:600;cursor:pointer}.btn-prev{background:var(--bg-tertiary);color:var(--text-secondary);border:1px solid var(--border-color)}.btn-next{background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:#fff}.btn-nav:disabled{opacity:.5;cursor:not-allowed}.page-dots{display:flex;gap:.5rem}.page-dot{width:8px;height:8px;border-radius:50%;background:var(--border-color);cursor:pointer}.page-dot.active{background:var(--accent-primary);transform:scale(1.3)}@media(max-width:768px){.slide{padding:4rem 1rem 5rem}.grid-2{grid-template-columns:1fr}}.title-slide{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}.title-meta{display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;margin:2rem 0}.python-logo{font-size:4rem;margin-bottom:1rem}.http-table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.9rem}.http-table th,.http-table td{padding:.75rem;border:1px solid var(--border-color);text-align:left}.http-table th{background:var(--bg-tertiary);color:var(--accent-primary)}.http-table td{background:var(--bg-secondary)}
+    </style>
+</head>
+<body>
+    <div class="progress-container"><div class="progress-bar" role="progressbar" id="progressBar"></div></div>
+    <nav class="nav-header">
+        <div class="nav-title"><span class="modulee">Module 9/10</span><span>•</span><span>HTTP and Application Protocols</span></div>
+        <div class="slide-counter" aria-live="polite" id="slideCounter">1 / 12</div>
+    </nav>
+
+    <div class="slides-container" id="slidesContainer">
+        <!-- Slide 1: Title -->
+        <div class="slide active title-slide" data-slide="1">
+            <div class="slide-content">
+                <div class="python-logo">🌐</div>
+                <h1>HTTP and Application Protocols</h1>
+                <p class="lead">From Request to Response</p>
+                <div class="title-meta">
+                    <span class="badge badge-time">⏱️ ~30 minutes</span>
+                    <span class="badge badge-week">📅 Weeks 8-12</span>
+                </div>
+                <div class="callout callout-networking" style="max-width:600px;margin:2rem auto;text-align:left">
+                    <span class="callout-icon">🌐</span>
+                    <div class="callout-content">
+                        <h4>Networking Correlation</h4>
+                        <p>Weeks 8-12: <strong>Application Layer</strong>. HTTP, DNS, Email — the protocols we use daily!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: HTTP Basics -->
+        <div class="slide" data-slide="2">
+            <div class="slide-content">
+                <h2>📡 HTTP Structure</h2>
+                <p>HTTP is a text-based request-response protocol. Each message has a start line, headers and an optional body.</p>
+                <div class="grid-2">
+                    <div class="card card-get">
+                        <h3 style="color:#22c55e">📤 Request</h3>
+                        <div class="code-container" style="margin:.5rem 0">
+                            <div class="code-body">
+<pre>GET /api/users HTTP/1.1
+Host: example.com
+User-Agent: Python/3.11
+Accept: application/json
+Connection: close
+
+</pre>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card card-post">
+                        <h3 style="color:#3b82f6">📥 Response</h3>
+                        <div class="code-container" style="margin:.5rem 0">
+                            <div class="code-body">
+<pre>HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 42
+Date: Mon, 01 Jan 2024 12:00:00 GMT
+
+{"users": ["alice", "bob"]}</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card card-highlight">
+                    <h3>🔑 Important Separators</h3>
+                    <p><code>\r\n</code> (CRLF) between lines • <code>\r\n\r\n</code> between headers and body</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: HTTP Methods -->
+        <div class="slide" data-slide="3">
+            <div class="slide-content">
+                <h2>📋 HTTP Methods</h2>
+                <table class="http-table">
+                    <thead>
+                        <tr><th>Method</th><th>Purpose</th><th>Body?</th><th>Idempotent?</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td style="color:#22c55e;font-weight:600">GET</td><td>Retrieve data</td><td>No</td><td>Yes</td></tr>
+                        <tr><td style="color:#3b82f6;font-weight:600">POST</td><td>Create resources</td><td>Yes</td><td>No</td></tr>
+                        <tr><td style="color:#f59e0b;font-weight:600">PUT</td><td>Replace completely</td><td>Yes</td><td>Yes</td></tr>
+                        <tr><td style="color:#8b5cf6;font-weight:600">PATCH</td><td>Modify partially</td><td>Yes</td><td>No</td></tr>
+                        <tr><td style="color:#ef4444;font-weight:600">DELETE</td><td>Delete resources</td><td>Optional</td><td>Yes</td></tr>
+                        <tr><td style="color:#64748b;font-weight:600">HEAD</td><td>GET without body</td><td>No</td><td>Yes</td></tr>
+                    </tbody>
+                </table>
+                <div class="callout callout-networking">
+                    <span class="callout-icon">💡</span>
+                    <div class="callout-content">
+                        <h4>Idempotent</h4>
+                        <p>If you execute the same request multiple times, the result is the same. GET, PUT and DELETE are idempotent; POST is not.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Raw HTTP with Sockets -->
+        <div class="slide" data-slide="4">
+            <div class="slide-content">
+                <h2>🔌 Manual HTTP with Sockets</h2>
+                <div class="code-container">
+                    <div class="code-header"><span class="code-filename">🐍 raw_http_client.py</span><button class="btn-code btn-run" onclick="simulateRun(this,'out1')">▶ Run</button></div>
+                    <div class="code-body">
+<pre><span class="kw">import</span> socket
+
+<span class="kw">def</span> <span class="fn">http_get</span>(host: <span class="cls">str</span>, path: <span class="cls">str</span> = <span class="str">"/"</span>, port: <span class="cls">int</span> = <span class="num">80</span>) -> <span class="cls">str</span>:
+    <span class="str">"""Execute a manual HTTP GET."""</span>
+
+    <span class="cmt"># Build the request</span>
+    request = (
+        <span class="str">f"GET </span>{path}<span class="str"> HTTP/1.1\r\n"</span>
+        <span class="str">f"Host: </span>{host}<span class="str">\r\n"</span>
+        <span class="str">f"Connection: close\r\n"</span>
+        <span class="str">f"\r\n"</span>  <span class="cmt"># Empty line = end of headers</span>
+    )
+
+    <span class="kw">with</span> socket.socket(socket.AF_INET, socket.SOCK_STREAM) <span class="kw">as</span> sock:
+        sock.connect((host, port))
+        sock.sendall(request.encode(<span class="str">'utf-8'</span>))
+
+        <span class="cmt"># Receive complete response</span>
+        response = <span class="str">b""</span>
+        <span class="kw">while</span> <span class="kw">True</span>:
+            chunk = sock.recv(<span class="num">4096</span>)
+            <span class="kw">if not</span> chunk:
+                <span class="kw">break</span>
+            response += chunk
+
+    <span class="kw">return</span> response.decode(<span class="str">'utf-8'</span>)
+
+<span class="cmt"># Test</span>
+resp = http_get(<span class="str">"example.com"</span>, <span class="str">"/"</span>)
+<span class="fn">print</span>(resp[:<span class="num">200</span>])  <span class="cmt"># First 200 characters</span></pre>
+                    </div>
+                    <div class="code-output" id="out1">
+                        <div class="code-output-header">Output</div>
+<pre>HTTP/1.1 200 OK
+Content-Type: text/html; charset=UTF-8
+Date: Mon, 09 Jan 2026 12:00:00 GMT
+...
+
+&lt;!doctype html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;Example Domain&lt;/title&gt;</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Parsing HTTP Response -->
+        <div class="slide" data-slide="5">
+            <div class="slide-content">
+                <h2>📖 Parsing HTTP Response</h2>
+                <div class="code-container">
+                    <div class="code-header"><span class="code-filename">🐍 parse_http_response.py</span></div>
+                    <div class="code-body">
+<pre><span class="kw">def</span> <span class="fn">parse_http_response</span>(raw: <span class="cls">str</span>) -> <span class="cls">dict</span>:
+    <span class="str">"""Parse a raw HTTP response."""</span>
+
+    <span class="cmt"># Separate headers from body</span>
+    header_section, body = raw.split(<span class="str">"\r\n\r\n"</span>, <span class="num">1</span>)
+    lines = header_section.split(<span class="str">"\r\n"</span>)
+
+    <span class="cmt"># First line: status</span>
+    status_line = lines[<span class="num">0</span>]
+    parts = status_line.split(<span class="str">" "</span>, <span class="num">2</span>)
+    version, status_code, reason = parts[<span class="num">0</span>], <span class="fn">int</span>(parts[<span class="num">1</span>]), parts[<span class="num">2</span>]
+
+    <span class="cmt"># Headers: key: value</span>
+    headers = {}
+    <span class="kw">for</span> line <span class="kw">in</span> lines[<span class="num">1</span>:]:
+        <span class="kw">if</span> <span class="str">":"</span> <span class="kw">in</span> line:
+            key, value = line.split(<span class="str">":"</span>, <span class="num">1</span>)
+            headers[key.strip().lower()] = value.strip()
+
+    <span class="kw">return</span> {
+        <span class="str">"version"</span>: version,
+        <span class="str">"status_code"</span>: status_code,
+        <span class="str">"reason"</span>: reason,
+        <span class="str">"headers"</span>: headers,
+        <span class="str">"body"</span>: body
+    }
+
+<span class="cmt"># Usage</span>
+result = parse_http_response(response)
+<span class="fn">print</span>(<span class="str">f"Status: </span>{result[<span class="str">'status_code'</span>]}<span class="str">"</span>)
+<span class="fn">print</span>(<span class="str">f"Content-Type: </span>{result[<span class="str">'headers'</span>].get(<span class="str">'content-type'</span>)}<span class="str">"</span>)</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: requests library -->
+        <div class="slide" data-slide="6">
+            <div class="slide-content">
+                <h2>📦 The requests Library — The Easy Way</h2>
+                <p>In practice, you use the <code>requests</code> library which handles everything automatically:</p>
+                <div class="code-container">
+                    <div class="code-header"><span class="code-filename">🐍 using_requests.py</span><button class="btn-code btn-run" onclick="simulateRun(this,'out2')">▶ Run</button></div>
+                    <div class="code-body">
+<pre><span class="kw">import</span> requests
+
+<span class="cmt"># Simple GET</span>
+response = requests.<span class="fn">get</span>(<span class="str">"https://api.github.com/users/octocat"</span>)
+
+<span class="fn">print</span>(<span class="str">f"Status: </span>{response.status_code}<span class="str">"</span>)
+<span class="fn">print</span>(<span class="str">f"Headers: </span>{response.headers[<span class="str">'content-type'</span>]}<span class="str">"</span>)
+<span class="fn">print</span>(<span class="str">f"JSON: </span>{response.json()[<span class="str">'name'</span>]}<span class="str">"</span>)
+
+<span class="cmt"># POST with data</span>
+data = {<span class="str">"username"</span>: <span class="str">"test"</span>, <span class="str">"email"</span>: <span class="str">"test@example.com"</span>}
+response = requests.<span class="fn">post</span>(
+    <span class="str">"https://httpbin.org/post"</span>,
+    json=data,
+    headers={<span class="str">"Authorization"</span>: <span class="str">"Bearer token123"</span>}
+)
+
+<span class="cmt"># Timeout and error handling</span>
+<span class="kw">try</span>:
+    r = requests.<span class="fn">get</span>(<span class="str">"https://example.com"</span>, timeout=<span class="num">5</span>)
+    r.raise_for_status()  <span class="cmt"># Raises exception for 4xx/5xx</span>
+<span class="kw">except</span> requests.exceptions.Timeout:
+    <span class="fn">print</span>(<span class="str">"Timeout!"</span>)
+<span class="kw">except</span> requests.exceptions.HTTPError <span class="kw">as</span> e:
+    <span class="fn">print</span>(<span class="str">f"HTTP Error: </span>{e}<span class="str">"</span>)</pre>
+                    </div>
+                    <div class="code-output" id="out2">
+                        <div class="code-output-header">Output</div>
+<pre>Status: 200
+Headers: application/json; charset=utf-8
+JSON: The Octocat</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: HTTP Server -->
+        <div class="slide" data-slide="7">
+            <div class="slide-content">
+                <h2>🖥️ Simple HTTP Server</h2>
+                <div class="code-container">
+                    <div class="code-header"><span class="code-filename">🐍 simple_http_server.py</span></div>
+                    <div class="code-body">
+<pre><span class="kw">import</span> socket
+
+<span class="kw">def</span> <span class="fn">handle_request</span>(request: <span class="cls">str</span>) -> <span class="cls">str</span>:
+    <span class="str">"""Process request and return response."""</span>
+    lines = request.split(<span class="str">"\r\n"</span>)
+    method, path, _ = lines[<span class="num">0</span>].split(<span class="str">" "</span>)
+
+    <span class="cmt"># Simple routing</span>
+    <span class="kw">if</span> path == <span class="str">"/"</span>:
+        body = <span class="str">"&lt;h1&gt;Welcome!&lt;/h1&gt;"</span>
+        status = <span class="str">"200 OK"</span>
+    <span class="kw">elif</span> path == <span class="str">"/api/hello"</span>:
+        body = <span class="str">'{"message": "Hello World"}'</span>
+        status = <span class="str">"200 OK"</span>
+    <span class="kw">else</span>:
+        body = <span class="str">"&lt;h1&gt;404 Not Found&lt;/h1&gt;"</span>
+        status = <span class="str">"404 Not Found"</span>
+
+    response = (
+        <span class="str">f"HTTP/1.1 </span>{status}<span class="str">\r\n"</span>
+        <span class="str">f"Content-Length: </span>{<span class="fn">len</span>(body)}<span class="str">\r\n"</span>
+        <span class="str">f"Content-Type: text/html\r\n"</span>
+        <span class="str">f"\r\n"</span>
+        <span class="str">f"</span>{body}<span class="str">"</span>
+    )
+    <span class="kw">return</span> response
+
+<span class="cmt"># Server loop</span>
+<span class="kw">with</span> socket.socket() <span class="kw">as</span> server:
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, <span class="num">1</span>)
+    server.bind((<span class="str">"0.0.0.0"</span>, <span class="num">8080</span>))
+    server.listen()
+    <span class="fn">print</span>(<span class="str">"🌐 Server at http://localhost:8080"</span>)
+
+    <span class="kw">while</span> <span class="kw">True</span>:
+        conn, addr = server.accept()
+        <span class="kw">with</span> conn:
+            request = conn.recv(<span class="num">4096</span>).decode()
+            response = handle_request(request)
+            conn.sendall(response.encode())</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Status Codes -->
+        <div class="slide" data-slide="8">
+            <div class="slide-content">
+                <h2>📊 HTTP Status Codes</h2>
+                <div class="grid-2">
+                    <div>
+                        <div class="card" style="border-left:4px solid #22c55e">
+                            <h3 style="color:#22c55e">2xx — Success</h3>
+                            <p><code>200</code> OK — Request succeeded</p>
+                            <p><code>201</code> Created — Resource created</p>
+                            <p><code>204</code> No Content — Success without body</p>
+                        </div>
+                        <div class="card" style="border-left:4px solid #3b82f6">
+                            <h3 style="color:#3b82f6">3xx — Redirection</h3>
+                            <p><code>301</code> Moved Permanently</p>
+                            <p><code>302</code> Found (temporary redirect)</p>
+                            <p><code>304</code> Not Modified (cache)</p>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="card" style="border-left:4px solid #f59e0b">
+                            <h3 style="color:#f59e0b">4xx — Client Error</h3>
+                            <p><code>400</code> Bad Request</p>
+                            <p><code>401</code> Unauthorized</p>
+                            <p><code>403</code> Forbidden</p>
+                            <p><code>404</code> Not Found</p>
+                        </div>
+                        <div class="card" style="border-left:4px solid #ef4444">
+                            <h3 style="color:#ef4444">5xx — Server Error</h3>
+                            <p><code>500</code> Internal Server Error</p>
+                            <p><code>502</code> Bad Gateway</p>
+                            <p><code>503</code> Service Unavailable</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Files Reference -->
+        <div class="slide" data-slide="9">
+            <div class="slide-content">
+                <h2>📂 HTTP Files in Lab</h2>
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>📁 08roWSL</h3>
+                        <p><strong>ex_8_01_server_http.py</strong></p>
+                        <ul style="color:var(--text-secondary);font-size:.95rem">
+                            <li>Basic HTTP server</li>
+                            <li>Request parsing</li>
+                            <li>Routing and response</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h3>📁 10-12roWSL</h3>
+                        <p><strong>ex_10_01_email_client.py</strong></p>
+                        <ul style="color:var(--text-secondary);font-size:.95rem">
+                            <li>SMTP protocol</li>
+                            <li>POP3/IMAP</li>
+                        </ul>
+                        <p><strong>ex_11_01_dns_lookup.py</strong></p>
+                        <ul style="color:var(--text-secondary);font-size:.95rem">
+                            <li>DNS queries</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Quiz -->
+        <div class="slide" data-slide="10">
+            <div class="slide-content">
+                <h2>📝 Quiz</h2>
+                <div class="quiz-container" id="quiz1">
+                    <div class="quiz-header">
+                        <div class="quiz-icon">🧠</div>
+                        <div><h3 style="margin:0">What separates headers from body in HTTP?</h3></div>
+                    </div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" onclick="selectOption(this,'quiz1')"><span class="option-marker">A</span><span><code>\n\n</code></span></div>
+                        <div class="quiz-option" onclick="selectOption(this,'quiz1')" data-correct="true"><span class="option-marker">B</span><span><code>\r\n\r\n</code> (blank CRLF line)</span></div>
+                        <div class="quiz-option" onclick="selectOption(this,'quiz1')"><span class="option-marker">C</span><span><code>---</code></span></div>
+                        <div class="quiz-option" onclick="selectOption(this,'quiz1')"><span class="option-marker">D</span><span>Content-Length header</span></div>
+                    </div>
+                    <div class="quiz-actions">
+                        <button class="btn-quiz btn-check" onclick="checkAnswer('quiz1')">Check</button>
+                        <button class="btn-quiz btn-hint" onclick="showHint('quiz1')">💡 Hint</button>
+                    </div>
+                    <div class="hint-box" id="quiz1-hint1"><div class="hint-level">Hint 1/3</div><p>HTTP uses CRLF (\r\n) as line ending.</p></div>
+                    <div class="hint-box" id="quiz1-hint2"><div class="hint-level">Hint 2/3</div><p>A blank line means two consecutive CRLFs.</p></div>
+                    <div class="hint-box" id="quiz1-hint3"><div class="hint-level">Hint 3/3</div><p>\r\n\r\n = end of headers, start of body.</p></div>
+                    <div class="feedback-box" id="quiz1-feedback"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: Quiz 2 -->
+        <div class="slide" data-slide="11">
+            <div class="slide-content">
+                <div class="quiz-container" id="quiz2">
+                    <div class="quiz-header">
+                        <div class="quiz-icon">🧠</div>
+                        <div><h3 style="margin:0">Which HTTP method is idempotent?</h3></div>
+                    </div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" onclick="selectOption(this,'quiz2')"><span class="option-marker">A</span><span>POST</span></div>
+                        <div class="quiz-option" onclick="selectOption(this,'quiz2')" data-correct="true"><span class="option-marker">B</span><span>GET</span></div>
+                        <div class="quiz-option" onclick="selectOption(this,'quiz2')"><span class="option-marker">C</span><span>PATCH</span></div>
+                        <div class="quiz-option" onclick="selectOption(this,'quiz2')"><span class="option-marker">D</span><span>None</span></div>
+                    </div>
+                    <div class="quiz-actions">
+                        <button class="btn-quiz btn-check" onclick="checkAnswer('quiz2')">Check</button>
+                        <button class="btn-quiz btn-hint" onclick="showHint('quiz2')">💡 Hint</button>
+                    </div>
+                    <div class="hint-box" id="quiz2-hint1"><div class="hint-level">Hint 1/3</div><p>Idempotent = same operation multiple times produces same result.</p></div>
+                    <div class="hint-box" id="quiz2-hint2"><div class="hint-level">Hint 2/3</div><p>GET only reads data; it does not modify anything.</p></div>
+                    <div class="hint-box" id="quiz2-hint3"><div class="hint-level">Hint 3/3</div><p>GET, PUT and DELETE are idempotent. POST is not (it creates new resources).</p></div>
+                    <div class="feedback-box" id="quiz2-feedback"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: Summary -->
+        <div class="slide" data-slide="12">
+            <div class="slide-content">
+                <h2>✅ Summary</h2>
+                <div class="grid-2">
+                    <div class="card card-highlight">
+                        <h3>📌 What We Covered</h3>
+                        <ul style="list-style:none;padding:0">
+                            <li style="padding:.5rem 0;border-bottom:1px solid var(--border-color)">✓ HTTP structure: request line, headers and body</li>
+                            <li style="padding:.5rem 0;border-bottom:1px solid var(--border-color)">✓ Methods: GET, POST, PUT and DELETE</li>
+                            <li style="padding:.5rem 0;border-bottom:1px solid var(--border-color)">✓ Manual HTTP with sockets vs requests</li>
+                            <li style="padding:.5rem 0">✓ Status codes: 2xx, 3xx, 4xx and 5xx</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h3>🚀 Next Module</h3>
+                        <p style="color:var(--accent-primary);font-weight:600">Module 10: Practices & Debugging</p>
+                        <p>Best practices and debugging in networking</p>
+                        <span class="badge badge-week">📅 Correlated with Weeks 11-14</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-buttons">
+        <button class="btn-nav btn-prev" id="btnPrev" onclick="prevSlide()" disabled>← Back</button>
+        <div class="page-dots" id="pageDots"></div>
+        <button class="btn-nav btn-next" id="btnNext" onclick="nextSlide()">Continue →</button>
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 12;
+        const quizHintCounts = {};
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateUI();
+            createPageDots();
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight' || e.key === ' ') {
+                    e.preventDefault();
+                    nextSlide();
+                } else if (e.key === 'ArrowLeft') {
+                    prevSlide();
+                }
+            });
+        });
+
+        function createPageDots() {
+            const container = document.getElementById('pageDots');
+            for (let i = 1; i <= totalSlides; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'page-dot' + (i === 1 ? ' active' : '');
+                dot.onclick = () => goToSlide(i);
+                container.appendChild(dot);
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('progressBar').style.width =
+                `${(currentSlide / totalSlides) * 100}%`;
+            document.getElementById('slideCounter').textContent =
+                `${currentSlide} / ${totalSlides}`;
+            document.getElementById('btnPrev').disabled = currentSlide === 1;
+            document.getElementById('btnNext').textContent =
+                currentSlide === totalSlides ? 'Finish ✓' : 'Continue →';
+            document.querySelectorAll('.page-dot').forEach((dot, i) =>
+                dot.classList.toggle('active', i + 1 === currentSlide)
+            );
+        }
+
+        function goToSlide(n) {
+            if (n < 1 || n > totalSlides || n === currentSlide) return;
+            const cur = document.querySelector(`.slide[data-slide="${currentSlide}"]`);
+            const nxt = document.querySelector(`.slide[data-slide="${n}"]`);
+            cur.classList.remove('active');
+            cur.classList.add('exit');
+            setTimeout(() => {
+                cur.classList.remove('exit');
+                nxt.classList.add('active');
+                currentSlide = n;
+                updateUI();
+            }, 100);
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides) goToSlide(currentSlide + 1);
+        }
+
+        function prevSlide() {
+            if (currentSlide > 1) goToSlide(currentSlide - 1);
+        }
+
+        function simulateRun(btn, id) {
+            const output = document.getElementById(id);
+            btn.textContent = '⏳...';
+            setTimeout(() => {
+                output.classList.add('visible');
+                btn.textContent = '▶ Run';
+            }, 500);
+        }
+
+        function selectOption(el, qid) {
+            document.getElementById(qid)
+                .querySelectorAll('.quiz-option')
+                .forEach((o) => o.classList.remove('selected', 'correct', 'incorrect'));
+            el.classList.add('selected');
+            document.getElementById(`${qid}-feedback`).classList.remove('visible');
+        }
+
+        function checkAnswer(qid) {
+            const container = document.getElementById(qid);
+            const selected = container.querySelector('.quiz-option.selected');
+            const feedback = document.getElementById(`${qid}-feedback`);
+
+            if (!selected) {
+                feedback.innerHTML =
+                    '<p style="color:var(--accent-warning)">⚠️ Select an option!</p>';
+                feedback.className = 'feedback-box visible';
+                return;
+            }
+
+            container.querySelectorAll('.quiz-option').forEach((o) => {
+                if (o.dataset.correct === 'true') o.classList.add('correct');
+                else if (o.classList.contains('selected')) o.classList.add('incorrect');
+            });
+
+            if (selected.dataset.correct === 'true') {
+                feedback.innerHTML =
+                    '<p style="color:var(--accent-success)">🎉 Correct!</p>';
+                feedback.className = 'feedback-box success visible';
+            } else {
+                feedback.innerHTML =
+                    '<p style="color:var(--accent-error)">❌ See the correct answer.</p>';
+                feedback.className = 'feedback-box error visible';
+            }
+        }
+
+        function showHint(qid) {
+            if (!quizHintCounts[qid]) quizHintCounts[qid] = 0;
+            const cur = quizHintCounts[qid] + 1;
+            if (cur > 3) return;
+            const hint = document.getElementById(`${qid}-hint${cur}`);
+            if (hint) {
+                hint.classList.add('visible');
+                quizHintCounts[qid] = cur;
+                const btn = document.querySelector(`#${qid} .btn-hint`);
+                btn.textContent = cur >= 3 ? '✓ Hints' : `💡 (${cur}/3)`;
+                if (cur >= 3) btn.disabled = true;
+            }
+        }
+    </script>
+</body>
+</html>

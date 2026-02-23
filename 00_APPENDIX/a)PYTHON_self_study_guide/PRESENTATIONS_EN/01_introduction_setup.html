@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python for Networks | 1. Introduction and Setup</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e17;
+            --bg-secondary: #121a2b;
+            --bg-tertiary: #1a2438;
+            --accent-primary: #00d4aa;
+            --accent-secondary: #7c3aed;
+            --accent-warning: #f59e0b;
+            --accent-error: #ef4444;
+            --accent-success: #10b981;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border-color: #2d3a4f;
+            --code-bg: #0d1117;
+            --font-display: 'Plus Jakarta Sans', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-display);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--bg-tertiary);
+            z-index: 1000;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+            transition: width 0.3s ease;
+        }
+
+        /* Navigation */
+        .nav-header {
+            position: fixed;
+            top: 4px;
+            left: 0;
+            right: 0;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(180deg, var(--bg-primary) 0%, transparent 100%);
+            z-index: 100;
+        }
+
+        .nav-title {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-title .module {
+            color: var(--accent-primary);
+            font-weight: 600;
+        }
+
+        .slide-counter {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            background: var(--bg-tertiary);
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+        }
+
+        /* Slides Container */
+        .slides-container {
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 5rem 2rem 6rem;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateX(100px);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(0);
+        }
+
+        .slide.exit {
+            transform: translateX(-100px);
+        }
+
+        .slide-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Typography */
+        h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        h2 {
+            font-size: clamp(1.5rem, 3vw, 2.2rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--accent-primary);
+        }
+
+        p {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .lead {
+            font-size: 1.3rem;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .badge-time {
+            background: rgba(0, 212, 170, 0.15);
+            color: var(--accent-primary);
+        }
+
+        .badge-week {
+            background: rgba(124, 58, 237, 0.15);
+            color: var(--accent-secondary);
+        }
+
+        .badge-optional {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--accent-warning);
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .card-highlight {
+            border-left: 4px solid var(--accent-primary);
+        }
+
+        .card-warning {
+            border-left: 4px solid var(--accent-warning);
+            background: rgba(245, 158, 11, 0.05);
+        }
+
+        /* Grid layouts */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        /* Objective Box */
+        .objectives-box {
+            background: linear-gradient(135deg, rgba(0, 212, 170, 0.1) 0%, rgba(124, 58, 237, 0.1) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .objective-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .objective-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--accent-primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .objective-text {
+            flex: 1;
+        }
+
+        .objective-text strong {
+            display: block;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .objective-text span {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+
+        /* Code Block */
+        .code-container {
+            background: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 1.5rem 0;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            background: var(--bg-tertiary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .code-filename {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .code-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-code {
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            border: none;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-run {
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+        }
+
+        .btn-run:hover {
+            background: #00e6b8;
+            transform: translateY(-1px);
+        }
+
+        .btn-copy {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-copy:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .code-body {
+            padding: 1rem;
+            overflow-x: auto;
+        }
+
+        .code-body pre {
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .code-output {
+            padding: 1rem;
+            background: rgba(0, 212, 170, 0.05);
+            border-top: 1px solid var(--border-color);
+            display: none;
+        }
+
+        .code-output.visible {
+            display: block;
+        }
+
+        .code-output-header {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--accent-primary);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .code-output pre {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--accent-primary);
+        }
+
+        /* Syntax highlighting */
+        .kw { color: #ff79c6; }
+        .fn { color: #50fa7b; }
+        .str { color: #f1fa8c; }
+        .num { color: #bd93f9; }
+        .cmt { color: #6272a4; font-style: italic; }
+        .op { color: #ff79c6; }
+        .var { color: #f8f8f2; }
+
+        /* Quiz Section */
+        .quiz-container {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .quiz-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .quiz-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--accent-secondary), var(--accent-primary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .quiz-question {
+            font-size: 1.15rem;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.25rem;
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quiz-option:hover {
+            border-color: var(--accent-primary);
+            background: rgba(0, 212, 170, 0.05);
+        }
+
+        .quiz-option.selected {
+            border-color: var(--accent-secondary);
+            background: rgba(124, 58, 237, 0.1);
+        }
+
+        .quiz-option.correct {
+            border-color: var(--accent-success);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .quiz-option.incorrect {
+            border-color: var(--accent-error);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .option-marker {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .quiz-option.selected .option-marker {
+            background: var(--accent-secondary);
+            border-color: var(--accent-secondary);
+            color: white;
+        }
+
+        .quiz-option.correct .option-marker {
+            background: var(--accent-success);
+            border-color: var(--accent-success);
+        }
+
+        .quiz-option.incorrect .option-marker {
+            background: var(--accent-error);
+            border-color: var(--accent-error);
+        }
+
+        .quiz-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn-quiz {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            font-family: var(--font-display);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-check {
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+        }
+
+        .btn-check:hover {
+            background: #00e6b8;
+        }
+
+        .btn-hint {
+            background: transparent;
+            color: var(--accent-warning);
+            border: 1px solid var(--accent-warning);
+        }
+
+        .btn-hint:hover {
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        .hint-box {
+            margin-top: 1rem;
+            padding: 1rem 1.25rem;
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 4px solid var(--accent-warning);
+            border-radius: 0 8px 8px 0;
+            display: none;
+        }
+
+        .hint-box.visible {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .hint-level {
+            font-size: 0.8rem;
+            color: var(--accent-warning);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .feedback-box {
+            margin-top: 1rem;
+            padding: 1rem 1.25rem;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .feedback-box.visible {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .feedback-box.success {
+            background: rgba(16, 185, 129, 0.1);
+            border-left: 4px solid var(--accent-success);
+        }
+
+        .feedback-box.error {
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 4px solid var(--accent-error);
+        }
+
+        /* Experiment Box */
+        .experiment-box {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(0, 212, 170, 0.1) 100%);
+            border: 2px dashed var(--accent-secondary);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .experiment-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .experiment-icon {
+            font-size: 2rem;
+        }
+
+        .experiment-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--accent-secondary);
+        }
+
+        .experiment-steps {
+            margin-top: 1rem;
+        }
+
+        .experiment-step {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+        }
+
+        .step-number {
+            width: 32px;
+            height: 32px;
+            background: var(--accent-secondary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .step-content h4 {
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .step-content p {
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-why {
+            font-size: 0.85rem;
+            color: var(--accent-primary);
+            font-style: italic;
+        }
+
+        /* File Tree */
+        .file-tree {
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            background: var(--code-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin: 1rem 0;
+        }
+
+        .file-tree-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.3rem 0;
+        }
+
+        .file-tree-item.indent-1 { padding-left: 1.5rem; }
+        .file-tree-item.indent-2 { padding-left: 3rem; }
+        .file-tree-item.indent-3 { padding-left: 4.5rem; }
+
+        .file-icon { font-size: 1rem; }
+        .folder-icon { color: var(--accent-warning); }
+        .python-icon { color: var(--accent-primary); }
+        .md-icon { color: #61afef; }
+
+        .file-name { color: var(--text-secondary); }
+        .file-name.highlight { color: var(--accent-primary); font-weight: 600; }
+
+        /* Navigation Buttons */
+        .nav-buttons {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(0deg, var(--bg-primary) 0%, transparent 100%);
+            z-index: 100;
+        }
+
+        .btn-nav {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            font-family: var(--font-display);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-prev {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-prev:hover:not(:disabled) {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .btn-next {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+        }
+
+        .btn-next:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 212, 170, 0.3);
+        }
+
+        .btn-nav:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .page-dots {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .page-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--border-color);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .page-dot.active {
+            background: var(--accent-primary);
+            transform: scale(1.3);
+        }
+
+        .page-dot:hover {
+            background: var(--accent-secondary);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .slide {
+                padding: 4rem 1rem 5rem;
+            }
+
+            .nav-header {
+                padding: 0.75rem 1rem;
+            }
+
+            .nav-buttons {
+                padding: 1rem;
+            }
+
+            .btn-nav {
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .grid-2, .grid-3 {
+                grid-template-columns: 1fr;
+            }
+
+            .experiment-step {
+                flex-direction: column;
+            }
+        }
+
+        /* Title Slide Special */
+        .title-slide {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .title-slide h1 {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+        }
+
+        .title-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+
+        .module-badge {
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-secondary);
+        }
+
+        .python-logo {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <!-- Progress Bar -->
+    <div class="progress-container">
+        <div class="progress-bar" role="progressbar" id="progressBar"></div>
+    </div>
+
+    <!-- Navigation Header -->
+    <nav class="nav-header">
+        <div class="nav-title">
+            <span class="module">Module 1/10</span>
+            <span>•</span>
+            <span>Introduction and Setup</span>
+        </div>
+        <div class="slide-counter" aria-live="polite" id="slideCounter">1 / 8</div>
+    </nav>
+
+    <!-- Slides -->
+    <div class="slides-container" id="slidesContainer">
+
+        <!-- Slide 1: Title -->
+        <div class="slide active title-slide" data-slide="1">
+            <div class="slide-content">
+                <div class="python-logo">🐍</div>
+                <h1>Python for Networks </h1>
+                <p class="lead">Interactive Self-Study Guide</p>
+
+                <div class="title-meta">
+                    <span class="badge badge-time">⏱️ ~15 minutes</span>
+                    <span class="badge badge-week">📅 Week 0</span>
+                    <span class="badge badge-optional">📌 Optional</span>
+                </div>
+
+                <div class="module-badge">
+                    Module 1: Introduction and Working Environment Setup
+                </div>
+
+                <p style="margin-top: 2rem; max-width: 600px;">
+                    This module will prepare you to efficiently complete the lab sessions
+                    in Computer Networks using Python as the main tool.
+                </p>
+            </div>
+        </div>
+
+        <!-- Slide 2: What we will learn -->
+        <div class="slide" data-slide="2">
+            <div class="slide-content">
+                <h2>🎯 What will we learn in this module?</h2>
+
+                <div class="objectives-box">
+                    <div class="objective-item">
+                        <div class="objective-icon">📁</div>
+                        <div class="objective-text">
+                            <strong>Repository Structure</strong>
+                            <span>How the course materials are organised on GitHub and where to find each file type</span>
+                        </div>
+                    </div>
+
+                    <div class="objective-item">
+                        <div class="objective-icon">🔗</div>
+                        <div class="objective-text">
+                            <strong>Weeks ↔ Python Steps Correlation</strong>
+                            <span>Which Python concepts correspond to each lab week</span>
+                        </div>
+                    </div>
+
+                    <div class="objective-item">
+                        <div class="objective-icon">💻</div>
+                        <div class="objective-text">
+                            <strong>WSL2 Working Environment</strong>
+                            <span>How WSL2 + Ubuntu + Docker + Portainer work together and why we use them</span>
+                        </div>
+                    </div>
+
+                    <div class="objective-item">
+                        <div class="objective-icon">🚀</div>
+                        <div class="objective-text">
+                            <strong>First Python Script</strong>
+                            <span>We will run the first exercise together to verify that everything works correctly</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card card-highlight">
+                    <h3>💡 Why it matters?</h3>
+                    <p>Understanding the repository structure and the working environment will save you hours of debugging and confusion throughout the semester. This foundation allows you to focus on learning networking concepts rather than troubleshooting setup issues.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Repository Structure -->
+        <div class="slide" data-slide="3">
+            <div class="slide-content">
+                <h2>📂 Repository Structure netROwsl</h2>
+
+                <p>The repository at <code>github.com/antonioclim/netROwsl</code> contains all lab materials. Each week has its own folder following a consistent structure:</p>
+
+                <div class="grid-2">
+                    <div class="file-tree">
+                        <div class="file-tree-item">
+                            <span class="file-icon folder-icon">📁</span>
+                            <span class="file-name">netROwsl/</span>
+                        </div>
+                        <div class="file-tree-item indent-1">
+                            <span class="file-icon folder-icon">📁</span>
+                            <span class="file-name highlight">01roWSL/</span>
+                            <span style="color: var(--text-muted); font-size: 0.8rem;">← Wk 1</span>
+                        </div>
+                        <div class="file-tree-item indent-2">
+                            <span class="file-icon folder-icon">📁</span>
+                            <span class="file-name">src/exercises/</span>
+                        </div>
+                        <div class="file-tree-item indent-3">
+                            <span class="file-icon python-icon">🐍</span>
+                            <span class="file-name">ex_1_01_latency_ping.py</span>
+                        </div>
+                        <div class="file-tree-item indent-2">
+                            <span class="file-icon folder-icon">📁</span>
+                            <span class="file-name">docker/</span>
+                        </div>
+                        <div class="file-tree-item indent-2">
+                            <span class="file-icon folder-icon">📁</span>
+                            <span class="file-name">docs/</span>
+                        </div>
+                        <div class="file-tree-item indent-1">
+                            <span class="file-icon folder-icon">📁</span>
+                            <span class="file-name">02roWSL/</span>
+                            <span style="color: var(--text-muted); font-size: 0.8rem;">← Wk 2</span>
+                        </div>
+                        <div class="file-tree-item indent-1">
+                            <span class="file-icon">...</span>
+                        </div>
+                        <div class="file-tree-item indent-1">
+                            <span class="file-icon folder-icon">📁</span>
+                            <span class="file-name">14roWSL/</span>
+                            <span style="color: var(--text-muted); font-size: 0.8rem;">← Wk 14</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="card">
+                            <h3>📍 Key Folders</h3>
+                            <p><strong>src/exercises/</strong> - Main exercises with TODOs</p>
+                            <p><strong>src/apps/</strong> - Complete demonstration applications</p>
+                            <p><strong>src/utils/</strong> - Reusable helper functions</p>
+                            <p><strong>docker/</strong> - Container configurations</p>
+                            <p><strong>tests/</strong> - Automated tests</p>
+                        </div>
+
+                        <div class="card card-warning">
+                            <h3>⚠️ Warning</h3>
+                            <p>Files in <code>exercises/</code> contain <code>TODO</code> sections for you to complete. Do not modify files in <code>apps/</code> — those are reference examples!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Week Correlation -->
+        <div class="slide" data-slide="4">
+            <div class="slide-content">
+                <h2>🗓️ Weeks ↔ Python Modules Correlation</h2>
+
+                <p>Each module of this guide correlates with lab weeks. Study the corresponding Python module before or in parallel with each lab session:</p>
+
+                <div style="overflow-x: auto; margin: 1.5rem 0;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.95rem;">
+                        <thead>
+                            <tr style="background: var(--bg-tertiary);">
+                                <th style="padding: 1rem; text-align: left; border-bottom: 2px solid var(--accent-primary);">Module</th>
+                                <th style="padding: 1rem; text-align: left; border-bottom: 2px solid var(--accent-primary);">Weeks</th>
+                                <th style="padding: 1rem; text-align: left; border-bottom: 2px solid var(--accent-primary);">Networking Topic</th>
+                                <th style="padding: 1rem; text-align: left; border-bottom: 2px solid var(--accent-primary);">Python Concept</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="background: rgba(0, 212, 170, 0.1);">
+                                <td style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color);">1 ←</td>
+                                <td style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color);">S0</td>
+                                <td style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color);">Preparation</td>
+                                <td style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color);">Setup Setup & Structur Structure</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color);">2</td>
+                                <td style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color);">S1-2</td>
+                                <td style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color);">Network fundamentals</td>
+                                <td style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color);">Reading Python code</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color);">3</td>
+                                <td style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color);">S2-3</td>
+                                <td style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color);">TCP/UDP basics</td>
+                                <td style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color);">Networking data types</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color);">4</td>
+                                <td style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color);">S2-4</td>
+                                <td style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color);">Socket programming</td>
+                                <td style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color);">TCP/UDP Sockets</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color);">5-6</td>
+                                <td style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color);">S4-5</td>
+                                <td style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color);">Network Layer, IP</td>
+                                <td style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color);">Code Organisation, CLI</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color);">7</td>
+                                <td style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color);">S6-7</td>
+                                <td style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color);">NAT, Firewall</td>
+                                <td style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color);">Packet analysis (struct)</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color);">8</td>
+                                <td style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color);">S7-9</td>
+                                <td style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color);">Transport Layer</td>
+                                <td style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color);">Concurrency (threading)</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color);">9</td>
+                                <td style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color);">S8-12</td>
+                                <td style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color);">Application Layer</td>
+                                <td style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color);">HTTP HTTP & Protocoof Protocols</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 0.75rem 1rem;">10</td>
+                                <td style="padding: 0.75rem 1rem;">S11-14</td>
+                                <td style="padding: 0.75rem 1rem;">Integration, IoT</td>
+                                <td style="padding: 0.75rem 1rem;">Debugging Debugging & Best practices Best practices</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card card-highlight">
+                    <h3>💡 Tip</h3>
+                    <p>You do not need to study the modules in sequential order. Jump directly to the module corresponding to your current lab week.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Environment -->
+        <div class="slide" data-slide="5">
+            <div class="slide-content">
+                <h2>🖥️ Working Environment: WSL2 + Docker</h2>
+
+                <p>The lab sessions employ a modern technology stack for network simulation:</p>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>🪟 WSL2 (Windows Subsystem for Linux)</h3>
+                        <p><strong>What it is:</strong> A real Linux kernel running in Windows</p>
+                        <p><strong>Why:</strong> Networking tools (Wireshark, tcpdump) work natively</p>
+                        <p><strong>Access:</strong> Open "Ubuntu" from Start Menu or type <code>wsl</code> in PowerShell</p>
+                    </div>
+
+                    <div class="card">
+                        <h3>🐳 Docker</h3>
+                        <p><strong>What it is:</strong> Isolated containers for simulating network servers and services</p>
+                        <p><strong>Why:</strong> You can run DNS, HTTP, FTP servers without installing them on the system</p>
+                        <p><strong>Start:</strong> <code>sudo service docker start</code></p>
+                    </div>
+
+                    <div class="card">
+                        <h3>🎛️ Portainer</h3>
+                        <p><strong>What it is:</strong> Web interface for managing Docker containers</p>
+                        <p><strong>Why:</strong> Easily visualise running containers and inspect their logs</p>
+                        <p><strong>Access:</strong> <code>http://localhost:9000</code></p>
+                    </div>
+
+                    <div class="card">
+                        <h3>🐍 Python 3</h3>
+                        <p><strong>What it is:</strong> The programming language in which all exercises are written</p>
+                        <p><strong>Why:</strong> Clear syntax, powerful networking libraries</p>
+                        <p><strong>Check:</strong> <code>python3 --version</code></p>
+                    </div>
+                </div>
+
+                <div class="code-container">
+                    <div class="code-header">
+                        <span class="code-filename">verify_environment.sh</span>
+                        <div class="code-actions">
+                            <button class="btn-code btn-copy" onclick="copyCode(this)">📋 Copy</button>
+                        </div>
+                    </div>
+                    <div class="code-body">
+<pre><span class="cmt"># Verify that all components are working</span>
+python3 --version          <span class="cmt"># Python 3.10+</span>
+docker --version           <span class="cmt"># Docker 20+</span>
+docker ps                  <span class="cmt"># Portainer should be listed</span></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: First Run Experiment -->
+        <div class="slide" data-slide="6">
+            <div class="slide-content">
+                <h2>🧪 Experiment: First Python Script</h2>
+
+                <div class="experiment-box">
+                    <div class="experiment-header">
+                        <span class="experiment-icon">🔬</span>
+                        <span class="experiment-title">Verifying the Working Environment</span>
+                    </div>
+                    <p>We will run the first exercise to verify that everything is configured correctly. This experiment takes approximately 5 minutes.</p>
+
+                    <div class="experiment-steps">
+                        <div class="experiment-step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h4>Open Ubuntu Terminal</h4>
+                                <p>Click on "Ubuntu" in the Start Menu or type <code>wsl</code> in PowerShell</p>
+                                <p class="step-why">🎯 Purpose: All tools are installed within this Linux environment</p>
+                            </div>
+                        </div>
+
+                        <div class="experiment-step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h4>Navigate to the lab folder</h4>
+                                <p><code>cd /mnt/d/NETWORKING/netROwsl/01roWSL</code></p>
+                                <p class="step-why">🎯 Purpose: Windows files are accessible through the /mnt/ mount point</p>
+                            </div>
+                        </div>
+
+                        <div class="experiment-step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h4>Run the ping exercise</h4>
+                                <p><code>python3 src/exercises/ex_1_01_latency_ping.py --host 127.0.0.1 --count 3</code></p>
+                                <p class="step-why">🎯 Purpose: Verify that Python and the networking modules work correctly</p>
+                            </div>
+                        </div>
+
+                        <div class="experiment-step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h4>Observe the result</h4>
+                                <p>You should see latency statistics (RTT)</p>
+                                <p class="step-why">🎯 Takeaway: The script sends ICMP packets and measures the response time</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="code-container">
+                    <div class="code-header">
+                        <span class="code-filename">ex_1_01_latency_ping.py (expected output)</span>
+                        <div class="code-actions">
+                            <button class="btn-code btn-run" onclick="simulateRun(this)">▶ Simulate</button>
+                        </div>
+                    </div>
+                    <div class="code-body">
+<pre><span class="cmt"># Command:</span>
+python3 src/exercises/ex_1_01_latency_ping.py --host 127.0.0.1 --count 3</pre>
+                    </div>
+                    <div class="code-output" id="output1">
+                        <div class="code-output-header">Output</div>
+<pre>🏓 Measuring latency to 127.0.0.1
+────────────────────────────────────
+Sequence 1: RTT = 0.042 ms ✓
+Sequence 2: RTT = 0.038 ms ✓
+Sequence 3: RTT = 0.041 ms ✓
+────────────────────────────────────
+📊 Statistics:
+   Packets: 3 sent, 3 received (0% loss)
+   RTT: min=0.038ms, avg=0.040ms, max=0.042ms</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Quiz -->
+        <div class="slide" data-slide="7">
+            <div class="slide-content">
+                <h2>📝 Check Your Understanding</h2>
+
+                <div class="quiz-container" id="quiz1">
+                    <div class="quiz-header">
+                        <div class="quiz-icon">🧠</div>
+                        <div>
+                            <h3 style="margin: 0;">Quiz 1: Repository Structure</h3>
+                            <p style="margin: 0; font-size: 0.9rem; color: var(--text-muted);">Question 1 of 2</p>
+                        </div>
+                    </div>
+
+                    <div class="quiz-question">
+                        In which folder do you find the main exercises to complete for week 5?
+                    </div>
+
+                    <div class="quiz-options">
+                        <div class="quiz-option" onclick="selectOption(this, 'quiz1')">
+                            <span class="option-marker">A</span>
+                            <span>05roWSL/src/apps/</span>
+                        </div>
+                        <div class="quiz-option" onclick="selectOption(this, 'quiz1')" data-correct="true">
+                            <span class="option-marker">B</span>
+                            <span>05roWSL/src/exercises/</span>
+                        </div>
+                        <div class="quiz-option" onclick="selectOption(this, 'quiz1')">
+                            <span class="option-marker">C</span>
+                            <span>05roWSL/homework/</span>
+                        </div>
+                        <div class="quiz-option" onclick="selectOption(this, 'quiz1')">
+                            <span class="option-marker">D</span>
+                            <span>05roWSL/tests/</span>
+                        </div>
+                    </div>
+
+                    <div class="quiz-actions">
+                        <button class="btn-quiz btn-check" onclick="checkAnswer('quiz1')">Check Answer</button>
+                        <button class="btn-quiz btn-hint" onclick="showHint('quiz1', 1)">💡 Hint</button>
+                    </div>
+
+                    <div class="hint-box" id="quiz1-hint1">
+                        <div class="hint-level">Hint 1/3</div>
+                        <p>Think about the folder names. Which folder suggests it contains tasks to complete (exercises)?</p>
+                    </div>
+                    <div class="hint-box" id="quiz1-hint2">
+                        <div class="hint-level">Hint 2/3</div>
+                        <p>The folder <code>apps/</code> contains complete reference applications, not exercises to complete.</p>
+                    </div>
+                    <div class="hint-box" id="quiz1-hint3">
+                        <div class="hint-level">Hint 3/3</div>
+                        <p>The correct answer is <strong>exercises/</strong> - here you find files with TODOs that you complete during the lab.</p>
+                    </div>
+
+                    <div class="feedback-box" id="quiz1-feedback"></div>
+                </div>
+
+                <div class="quiz-container" id="quiz2" style="margin-top: 2rem;">
+                    <div class="quiz-header">
+                        <div class="quiz-icon">🧠</div>
+                        <div>
+                            <h3 style="margin: 0;">Quiz 2: Working Environment</h3>
+                            <p style="margin: 0; font-size: 0.9rem; color: var(--text-muted);">Question 2 of 2</p>
+                        </div>
+                    </div>
+
+                    <div class="quiz-question">
+                        What is the main purpose of using Docker in networking labs?
+                    </div>
+
+                    <div class="quiz-options">
+                        <div class="quiz-option" onclick="selectOption(this, 'quiz2')">
+                            <span class="option-marker">A</span>
+                            <span>Faster Python code execution</span>
+                        </div>
+                        <div class="quiz-option" onclick="selectOption(this, 'quiz2')">
+                            <span class="option-marker">B</span>
+                            <span>Editing Python files</span>
+                        </div>
+                        <div class="quiz-option" onclick="selectOption(this, 'quiz2')" data-correct="true">
+                            <span class="option-marker">C</span>
+                            <span>Simulating network servers and services in isolated containers</span>
+                        </div>
+                        <div class="quiz-option" onclick="selectOption(this, 'quiz2')">
+                            <span class="option-marker">D</span>
+                            <span>Automatic Python installation</span>
+                        </div>
+                    </div>
+
+                    <div class="quiz-actions">
+                        <button class="btn-quiz btn-check" onclick="checkAnswer('quiz2')">Check Answer</button>
+                        <button class="btn-quiz btn-hint" onclick="showHint('quiz2', 1)">💡 Hint</button>
+                    </div>
+
+                    <div class="hint-box" id="quiz2-hint1">
+                        <div class="hint-level">Hint 1/3</div>
+                        <p>Docker is a containerisation technology. What does containerisation enable in the context of computer networks?</p>
+                    </div>
+                    <div class="hint-box" id="quiz2-hint2">
+                        <div class="hint-level">Hint 2/3</div>
+                        <p>In our labs we run DNS, HTTP and FTP servers. How could we run them without installing these services directly on our machine?</p>
+                    </div>
+                    <div class="hint-box" id="quiz2-hint3">
+                        <div class="hint-level">Hint 3/3</div>
+                        <p>Docker enables <strong>service isolation</strong> through containers. This allows us to simulate an entire network with different servers, each running in its own container.</p>
+                    </div>
+
+                    <div class="feedback-box" id="quiz2-feedback"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Summary & Next -->
+        <div class="slide" data-slide="8">
+            <div class="slide-content">
+                <h2>✅ Summary and Next Steps</h2>
+
+                <div class="grid-2">
+                    <div class="card card-highlight">
+                        <h3>📌 What We Covered</h3>
+                        <ul style="list-style: none; padding: 0;">
+                            <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+                                ✓ The netROwsl repository structure
+                            </li>
+                            <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+                                ✓ The correlation between Python modules and lab weeks
+                            </li>
+                            <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+                                ✓ The WSL2 + Docker + Portainer stack
+                            </li>
+                            <li style="padding: 0.5rem 0;">
+                                ✓ How to run the first Python networking script
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h3>🚀 Next Module</h3>
+                        <p style="font-size: 1.1rem; color: var(--accent-primary); font-weight: 600;">
+                            Module 2: Reading Python Code
+                        </p>
+                        <p>You will learn to read and understand the code used in exercises:</p>
+                        <ul style="color: var(--text-secondary); margin-top: 0.5rem;">
+                            <li>Dataclasses and type hints</li>
+                            <li>Python syntax compared to C/JavaScript</li>
+                            <li>Standard exercise structure</li>
+                        </ul>
+                        <p style="margin-top: 1rem;">
+                            <span class="badge badge-week">📅 Correlated with Weeks 1-2</span>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="experiment-box" style="margin-top: 2rem;">
+                    <div class="experiment-header">
+                        <span class="experiment-icon">📚</span>
+                        <span class="experiment-title">Additional Resources</span>
+                    </div>
+                    <div class="grid-3" style="margin-top: 1rem;">
+                        <a href="https://github.com/antonioclim/netROwsl" target="_blank" style="text-decoration: none;">
+                            <div class="card" style="text-align: center; cursor: pointer; transition: transform 0.2s;">
+                                <span style="font-size: 2rem;">📁</span>
+                                <p style="margin: 0.5rem 0 0; color: var(--accent-primary);">GitHub Repository</p>
+                            </div>
+                        </a>
+                        <a href="https://docs.python.org/3/" target="_blank" style="text-decoration: none;">
+                            <div class="card" style="text-align: center; cursor: pointer;">
+                                <span style="font-size: 2rem;">📖</span>
+                                <p style="margin: 0.5rem 0 0; color: var(--accent-primary);">Python Documentation</p>
+                            </div>
+                        </a>
+                        <div class="card" style="text-align: center;">
+                            <span style="font-size: 2rem;">💬</span>
+                            <p style="margin: 0.5rem 0 0; color: var(--text-secondary);">Ask in the lab!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 2rem;">
+                    <p style="color: var(--text-muted);">
+                        You have completed Module 1! 🎉<br>
+                        When you are ready, continue with Module 2.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="nav-buttons">
+        <button class="btn-nav btn-prev" id="btnPrev" onclick="prevSlide()" disabled>
+            ← Back
+        </button>
+
+        <div class="page-dots" id="pageDots"></div>
+
+        <button class="btn-nav btn-next" id="btnNext" onclick="nextSlide()">
+            Continue →
+        </button>
+    </div>
+
+    <script>
+        // State
+        let currentSlide = 1;
+        const totalSlides = 8;
+        const quizHintCounts = {};
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            updataUI();
+            createPageDots();
+
+            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight' || e.key === ' ') {
+                    e.preventDefault();
+                    nextSlide();
+                } else if (e.key === 'ArrowLeft') {
+                    prevSlide();
+                }
+            });
+        });
+
+        function createPageDots() {
+            const container = document.getElementById('pageDots');
+            for (let i = 1; i <= totalSlides; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'page-dot' + (i === 1 ? ' active' : '');
+                dot.onclick = () => goToSlide(i);
+                container.appendChild(dot);
+            }
+        }
+
+        function updataUI() {
+            // Updata progress bar
+            document.getElementById('progressBar').style.width =
+                `${(currentSlide / totalSlides) * 100}%`;
+
+            // Updata counter
+            document.getElementById('slideCounter').textContent =
+                `${currentSlide} / ${totalSlides}`;
+
+            // Updata buttons
+            document.getElementById('btnPrev').disabled = currentSlide === 1;
+            document.getElementById('btnNext').textContent =
+                currentSlide === totalSlides ? 'Finish ✓' : 'Continue →';
+
+            // Updata dots
+            document.querySelectorAll('.page-dot').forEach((dot, i) => {
+                dot.classList.toggle('active', i + 1 === currentSlide);
+            });
+        }
+
+        function goToSlide(n) {
+            if (n < 1 || n > totalSlides || n === currentSlide) return;
+
+            const currentEl = document.querySelector(`.slide[data-slide="${currentSlide}"]`);
+            const nextEl = document.querySelector(`.slide[data-slide="${n}"]`);
+
+            currentEl.classList.remove('active');
+            currentEl.classList.add('exit');
+
+            setTimeout(() => {
+                currentEl.classList.remove('exit');
+                nextEl.classList.add('active');
+                currentSlide = n;
+                updataUI();
+            }, 100);
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                goToSlide(currentSlide + 1);
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 1) {
+                goToSlide(currentSlide - 1);
+            }
+        }
+
+        // Code sandbox
+        function simulateRun(btn) {
+            const container = btn.closest('.code-container');
+            const output = container.querySelector('.code-output');
+
+            btn.textContent = '⏳ Running...';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                output.classList.add('visible');
+                btn.textContent = '▶ Simulate';
+                btn.disabled = false;
+            }, 1000);
+        }
+
+        function copyCode(btn) {
+            const container = btn.closest('.code-container');
+            const code = container.querySelector('pre').textContent;
+            navigator.clipboard.writeText(code);
+
+            const originalText = btn.textContent;
+            btn.textContent = '✓ Copied!';
+            setTimeout(() => btn.textContent = originalText, 1500);
+        }
+
+        // Quiz functions
+        function selectOption(el, quizId) {
+            const container = document.getElementById(quizId);
+            container.querySelectorAll('.quiz-option').forEach(opt => {
+                opt.classList.remove('selected', 'correct', 'incorrect');
+            });
+            el.classList.add('selected');
+
+            // Hide feedback when selecting new option
+            document.getElementById(`${quizId}-feedback`).classList.remove('visible');
+        }
+
+        function checkAnswer(quizId) {
+            const container = document.getElementById(quizId);
+            const selected = container.querySelector('.quiz-option.selected');
+            const feedback = document.getElementById(`${quizId}-feedback`);
+
+            if (!selected) {
+                feedback.innerHTML = '<p style="color: var(--accent-warning);">⚠️ Please select an answer first!</p>';
+                feedback.className = 'feedback-box visible';
+                return;
+            }
+
+            const isCorrect = selected.dataset.correct === 'true';
+
+            container.querySelectorAll('.quiz-option').forEach(opt => {
+                if (opt.dataset.correct === 'true') {
+                    opt.classList.add('correct');
+                } else if (opt.classList.contains('selected')) {
+                    opt.classList.add('incorrect');
+                }
+            });
+
+            if (isCorrect) {
+                feedback.innerHTML = '<p style="color: var(--accent-success);">🎉 Correct! Well done!</p>';
+                feedback.className = 'feedback-box success visible';
+            } else {
+                feedback.innerHTML = '<p style="color: var(--accent-error);">❌ Incorrect. The correct answer is highlighted in green. Review the relevant section.</p>';
+                feedback.className = 'feedback-box error visible';
+            }
+        }
+
+        function showHint(quizId, level) {
+            if (!quizHintCounts[quizId]) quizHintCounts[quizId] = 0;
+
+            const currentHint = quizHintCounts[quizId] + 1;
+            if (currentHint > 3) return;
+
+            const hintEl = document.getElementById(`${quizId}-hint${currentHint}`);
+            if (hintEl) {
+                hintEl.classList.add('visible');
+                quizHintCounts[quizId] = currentHint;
+
+                // Updata hint button
+                const btn = document.querySelector(`#${quizId} .btn-hint`);
+                if (currentHint >= 3) {
+                    btn.textContent = '✓ All hints shown';
+                    btn.disabled = true;
+                } else {
+                    btn.textContent = `💡 Hint (${currentHint}/3)`;
+                }
+            }
+        }
+    </script>
+</body>
+</html>

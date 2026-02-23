@@ -1,0 +1,1789 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="CSIE Faculty-ASE" name="author"/>
+<meta content="Revolvix" name="generator"/>
+<meta content="Week 3 Theory — UDP broadcast, multicast and TCP tunnels — Computer Networks seminar support" name="description"/>
+<title>Week 3 — UDP Broadcast, Multicast &amp; TCP Tunnels | ASE-CSIE</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+    :root {
+      --primary: #0f172a;
+      --primary-light: #1e293b;
+      --secondary: #0ea5e9;
+      --secondary-dark: #0284c7;
+      --accent: #f59e0b;
+      --accent-warm: #ea580c;
+      --success: #10b981;
+      --success-dark: #059669;
+      --danger: #ef4444;
+      --purple: #8b5cf6;
+      --purple-dark: #7c3aed;
+      --bg-light: #f8fafc;
+      --bg-cool: #f0f9ff;
+      --bg-warm: #fffbeb;
+      --text-dark: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --code-bg: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-light);
+      color: var(--text-dark);
+      overflow: hidden;
+      height: 100vh;
+      line-height: 1.6;
+    }
+
+    .progress-bar {
+      position: fixed; top: 0; left: 0; height: 5px;
+      background: linear-gradient(90deg, var(--secondary) 0%, var(--success) 50%, var(--accent) 100%);
+      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 1001;
+      box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
+    }
+
+    .course-badge {
+      position: fixed; top: 20px; left: 25px;
+      background: var(--primary); color: white;
+      padding: 8px 16px; border-radius: 10px;
+      font-size: 0.85rem; font-weight: 600; z-index: 1000;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+    }
+
+    .slide-indicator {
+      position: fixed; top: 20px; right: 25px;
+      background: white; padding: 8px 16px; border-radius: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem; font-weight: 500; color: var(--primary);
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      border: 1px solid var(--border);
+    }
+
+    .nav-container {
+      position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
+      display: flex; gap: 12px; z-index: 1000;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 14px 28px; border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+      backdrop-filter: blur(10px); border: 1px solid var(--border);
+    }
+
+    .nav-btn {
+      padding: 12px 24px; border: none; background: var(--primary);
+      color: white; border-radius: 12px; cursor: pointer;
+      font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 600;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .nav-btn:hover { background: var(--secondary); transform: translateY(-3px); box-shadow: 0 6px 20px rgba(14, 165, 233, 0.3); }
+    .nav-btn:disabled { background: var(--border); color: var(--text-muted); cursor: not-allowed; transform: none; box-shadow: none; }
+    .nav-btn.toc-btn { background: var(--purple); }
+    .nav-btn.toc-btn:hover { background: var(--purple-dark); }
+    .nav-btn.fullscreen-btn { background: var(--success); }
+    .nav-btn.fullscreen-btn:hover { background: var(--success-dark); }
+
+    .footer-attr { position: fixed; bottom: 25px; left: 25px; font-size: 0.8rem; color: var(--text-muted); z-index: 999; }
+
+    .slides-container { height: 100vh; width: 100%; position: relative; }
+
+    .slide {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      padding: 70px 80px 120px; display: none; opacity: 0;
+      transform: translateX(30px);
+      transition: opacity 0.45s ease-out, transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow-y: auto;
+    }
+    .slide.active { display: flex; flex-direction: column; opacity: 1; transform: translateX(0); }
+
+    .slide-title {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 50%, #334155 100%);
+      color: white; justify-content: center; align-items: center; text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .slide-title::before {
+      content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+      background: radial-gradient(circle at 30% 70%, rgba(14, 165, 233, 0.15) 0%, transparent 50%),
+            radial-gradient(circle at 70% 30%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
+      animation: subtleFloat 20s ease-in-out infinite;
+    }
+    @keyframes subtleFloat { 0%, 100% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(2%, 2%) rotate(1deg); } }
+    .slide-title h1 { font-family: 'Source Serif 4', Georgia, serif; font-size: 3.5rem; font-weight: 700; margin-bottom: 20px; text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); position: relative; z-index: 1; }
+    .slide-title .subtitle { font-size: 1.5rem; font-weight: 400; opacity: 0.95; position: relative; z-index: 1; }
+    .slide-title .meta { font-size: 1rem; opacity: 0.8; margin-top: 35px; position: relative; z-index: 1; }
+
+    .slide-content h2 { font-family: 'Source Serif 4', Georgia, serif; color: var(--primary); font-size: 2.2rem; font-weight: 700; margin-bottom: 28px; padding-bottom: 12px; border-bottom: 4px solid var(--secondary); display: inline-block; }
+    .slide-content h3 { font-family: 'Source Serif 4', Georgia, serif; color: var(--primary-light); font-size: 1.3rem; font-weight: 600; margin-bottom: 15px; }
+
+    .section-intro { font-size: 1.15rem; line-height: 1.8; color: var(--text-dark); margin-bottom: 28px; max-width: 900px; }
+
+    .content-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 28px; margin-top: 24px; }
+    .content-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 24px; }
+    .two-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 35px; align-items: start; }
+
+    .card { background: white; border-radius: 18px; padding: 28px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06); transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.35s ease; border: 1px solid var(--border); }
+    .card:hover { transform: translateY(-6px); box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1); }
+    .card h3 { color: var(--secondary-dark); margin-bottom: 18px; font-size: 1.2rem; }
+    .card ul { padding-left: 22px; }
+    .card li { margin: 12px 0; line-height: 1.7; font-size: 1.05rem; }
+    .card-accent { border-left: 5px solid var(--accent); }
+    .card-success { border-left: 5px solid var(--success); }
+    .card-warning { border-left: 5px solid var(--accent-warm); }
+    .card-danger { border-left: 5px solid var(--danger); }
+    .card-purple { border-left: 5px solid var(--purple); }
+
+    .highlight-box { background: linear-gradient(135deg, var(--bg-cool) 0%, #e0f2fe 100%); border-left: 5px solid var(--secondary); padding: 24px 28px; border-radius: 0 16px 16px 0; margin: 24px 0; font-size: 1.08rem; line-height: 1.7; }
+    .definition-box { background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-left: 5px solid var(--success); padding: 24px 28px; border-radius: 0 16px 16px 0; margin: 24px 0; font-size: 1.08rem; }
+    .story-box { background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%); border-left: 5px solid var(--purple); padding: 24px 28px; border-radius: 0 16px 16px 0; margin: 24px 0; font-size: 1.08rem; }
+    .warning-box { background: linear-gradient(135deg, var(--bg-warm) 0%, #fef3c7 100%); border-left: 5px solid var(--accent); padding: 24px 28px; border-radius: 0 16px 16px 0; margin: 24px 0; font-size: 1.08rem; }
+    .insight-box { background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border-left: 5px solid var(--danger); padding: 24px 28px; border-radius: 0 16px 16px 0; margin: 24px 0; font-size: 1.08rem; }
+
+    .code-block { background: var(--code-bg); color: #e2e8f0; padding: 24px 28px; border-radius: 14px; font-family: 'JetBrains Mono', 'Consolas', monospace; font-size: 1rem; overflow-x: auto; margin: 18px 0; line-height: 1.7; position: relative; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.2); }
+    .code-block::before { content: attr(data-lang); position: absolute; top: 12px; right: 16px; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+    .code-block .comment { color: #64748b; font-style: italic; }
+    .code-block .keyword { color: #f472b6; }
+    .code-block .string { color: #4ade80; }
+    .code-block .number { color: #fb923c; }
+    .code-block .function { color: #60a5fa; }
+    .code-block .builtin { color: #c084fc; }
+    .code-block .decorator { color: #fbbf24; }
+
+    .pseudocode { background: linear-gradient(135deg, #1e3a5f 0%, #1e293b 100%); color: #bae6fd; padding: 22px 26px; border-radius: 12px; font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; line-height: 1.8; }
+    .pseudocode .step { color: #38bdf8; font-weight: 600; }
+    .pseudocode .note { color: #94a3b8; font-style: italic; font-size: 0.88rem; }
+
+    .ascii-diagram { font-family: 'JetBrains Mono', monospace; background: var(--code-bg); color: #4ade80; padding: 28px; border-radius: 14px; white-space: pre; overflow-x: auto; font-size: 0.9rem; line-height: 1.5; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.2); }
+
+    .diagram-container { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06); margin: 20px 0; overflow: hidden; }
+    .diagram-container svg { width: 100%; height: auto; max-height: 520px; }
+
+    .table-container { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08); margin: 24px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 1.02rem; }
+    th, td { padding: 18px 22px; text-align: left; border-bottom: 1px solid var(--border); }
+    th { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); color: white; font-weight: 600; text-transform: uppercase; font-size: 0.9rem; letter-spacing: 0.5px; }
+    th:first-child { border-radius: 16px 0 0 0; }
+    th:last-child { border-radius: 0 16px 0 0; }
+    tr:hover { background: var(--bg-cool); }
+    tr:last-child td { border-bottom: none; }
+
+    .quiz-container { background: white; border-radius: 18px; padding: 32px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08); max-width: 850px; margin: 0 auto; }
+    .quiz-question { font-size: 1.25rem; color: var(--primary); margin-bottom: 28px; line-height: 1.6; font-weight: 500; }
+    .quiz-option { display: block; padding: 18px 24px; margin: 14px 0; background: var(--bg-light); border: 2px solid var(--border); border-radius: 12px; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); font-size: 1.05rem; }
+    .quiz-option:hover { border-color: var(--secondary); background: var(--bg-cool); transform: translateX(8px); }
+    .quiz-option.correct { border-color: var(--success); background: #ecfdf5; }
+    .quiz-option.incorrect { border-color: var(--danger); background: #fef2f2; }
+    .quiz-feedback { margin-top: 24px; padding: 20px 24px; border-radius: 12px; display: none; font-size: 1.05rem; line-height: 1.6; }
+    .quiz-feedback.show { display: block; }
+    .quiz-feedback.correct { background: #ecfdf5; color: #166534; border: 2px solid var(--success); }
+    .quiz-feedback.incorrect { background: #fef2f2; color: #991b1b; border: 2px solid var(--danger); }
+
+    .reveal-container { background: white; border-radius: 18px; padding: 32px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08); text-align: center; }
+    .reveal-question { font-size: 1.2rem; color: var(--primary); margin-bottom: 24px; line-height: 1.6; }
+    .reveal-btn { padding: 14px 32px; background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-dark) 100%); color: white; border: none; border-radius: 12px; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 1rem; font-weight: 600; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    .reveal-btn:hover { transform: scale(1.08); box-shadow: 0 8px 24px rgba(14, 165, 233, 0.35); }
+    .reveal-content { margin-top: 28px; padding: 28px; background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-radius: 14px; display: none; text-align: left; font-size: 1.05rem; line-height: 1.7; }
+    .reveal-content.show { display: block; animation: fadeUp 0.5s ease-out; }
+
+    .icon-box { display: flex; align-items: flex-start; gap: 18px; margin: 18px 0; }
+    .icon-box .icon { font-size: 2.2rem; flex-shrink: 0; }
+    .icon-box-content { flex: 1; }
+
+    .protocol-header { display: flex; flex-wrap: wrap; background: white; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); margin: 20px 0; }
+    .header-field { flex: 1; min-width: 80px; padding: 16px; border: 1px solid var(--border); text-align: center; }
+    .header-field .field-name { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .header-field .field-value { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--primary); font-size: 1rem; }
+    .header-field .field-bits { font-size: 0.7rem; color: var(--secondary); margin-top: 4px; }
+    .span-2 { flex: 2; } .span-4 { flex: 4; } .span-8 { flex: 8; }
+
+    .interactive-panel { background: white; border-radius: 18px; padding: 28px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08); margin: 20px 0; }
+    .interactive-panel label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--primary); }
+    .interactive-panel input[type="range"] { width: 100%; margin: 12px 0; accent-color: var(--secondary); }
+    .result-display { background: linear-gradient(135deg, var(--bg-cool) 0%, #e0f2fe 100%); padding: 20px 24px; border-radius: 12px; margin-top: 16px; font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; text-align: center; }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .delay-1 { animation-delay: 0.1s; } .delay-2 { animation-delay: 0.2s; } .delay-3 { animation-delay: 0.3s; }
+    .delay-4 { animation-delay: 0.4s; } .delay-5 { animation-delay: 0.5s; } .delay-6 { animation-delay: 0.6s; }
+
+    .toc-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 2000; }
+    .toc-modal.show { display: flex; }
+    .toc-content { background: white; border-radius: 20px; padding: 40px; max-width: 700px; max-height: 80vh; overflow-y: auto; box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3); }
+    .toc-content h2 { font-family: 'Source Serif 4', Georgia, serif; color: var(--primary); margin-bottom: 28px; padding-bottom: 14px; border-bottom: 3px solid var(--secondary); }
+    .toc-section { margin-bottom: 24px; }
+    .toc-section-title { font-weight: 600; color: var(--secondary-dark); margin-bottom: 12px; font-size: 1.1rem; }
+    .toc-item { padding: 10px 16px; margin: 6px 0; background: var(--bg-light); border-radius: 8px; cursor: pointer; transition: all 0.25s ease; font-size: 0.95rem; }
+    .toc-item:hover { background: var(--bg-cool); transform: translateX(8px); color: var(--secondary-dark); }
+    .toc-close { position: absolute; top: 20px; right: 20px; background: var(--primary); color: white; border: none; border-radius: 50%; width: 44px; height: 44px; cursor: pointer; font-size: 1.2rem; transition: all 0.3s ease; }
+    .toc-close:hover { background: var(--danger); transform: rotate(90deg); }
+
+    @media (max-width: 1200px) { .content-grid-3 { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 1024px) { .two-columns { grid-template-columns: 1fr; } .slide { padding: 60px 50px 110px; } .content-grid-3 { grid-template-columns: 1fr; } }
+    @media (max-width: 768px) { .slide { padding: 50px 30px 100px; } .slide-title h1 { font-size: 2.4rem; } .slide-content h2 { font-size: 1.8rem; } .nav-container { padding: 10px 16px; } .nav-btn { padding: 10px 16px; font-size: 0.85rem; } }
+
+    code { font-family: 'JetBrains Mono', monospace; background: #f1f5f9; padding: 3px 8px; border-radius: 6px; font-size: 0.92em; color: var(--danger); }
+    .slide-content ul, .slide-content ol { padding-left: 24px; }
+    .slide-content li { margin: 10px 0; line-height: 1.7; }
+    strong { color: var(--primary); }
+</style>
+</head>
+<body>
+<div aria-valuemax="44" aria-valuemin="1" class="progress-bar" id="progressBar" role="progressbar"></div>
+<div class="course-badge">ASE-CSIE • Computer Networks</div>
+<div class="slide-indicator"><span id="currentSlide">1</span> / <span id="totalSlides">44</span></div>
+<div class="footer-attr">by Revolvix</div>
+
+<div class="slides-container" id="slidesContainer">
+<!-- ═══════════════════════════════════════════════════════════════════
+  SECTION 1: OPENING — WHY THIS MATTERS (Slides 1-3)
+  ═══════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 1: Title -->
+<div class="slide slide-title active" id="slide1">
+<h1>🌐 UDP Broadcast, Multicast &amp; TCP Tunnels</h1>
+<div class="subtitle">Week 3 — Computer Networks</div>
+<div class="meta">
+  Bachelor in Economic Informatics, Year 3, Semester 2<br/>
+  Bucharest University of Economic Studies — CSIE Faculty
+</div>
+</div>
+
+<!-- SLIDE 2: Hook — The Broadcast Storm -->
+<div class="slide slide-content" id="slide2">
+<h2>📡 One Line of Code, One Crashed Network</h2>
+<div class="story-box">
+<strong>A real-world pattern:</strong> In 2020, a junior engineer at a logistics startup deployed a warehouse inventory tracker that sent UDP status updates to <code>255.255.255.255</code> every 200 milliseconds. Each of the 340 devices on the LAN segment — printers, VoIP phones, barcode scanners — received and processed every single packet, even though only 50 of them ran the inventory application. Within hours, the wireless access points buckled under the broadcast flood, VoIP calls began dropping, and the warehouse ground to a halt.
+</div>
+<div class="highlight-box">
+<strong>The fix?</strong> Replacing one address and adding two lines of code — switching from broadcast to multicast. Only the 50 interested devices received the traffic; the other 290 were left in peace. By the end of this session, you will understand exactly <em>why</em> that change worked, <em>how</em> to implement it, and <em>when</em> each approach is appropriate.
+</div>
+</div>
+
+<!-- SLIDE 3: Hook Question + Context -->
+<div class="slide slide-content" id="slide3">
+<h2>🤔 The Question We Shall Answer</h2>
+<div class="story-box">
+<strong>Three modes of delivery:</strong> You already know how to send data from one host to another (unicast). But what if you need to reach <em>many</em> hosts at once — for service discovery, live streaming or real-time coordination? You have three choices, each with fundamentally different trade-offs:
+</div>
+<div class="content-grid-3">
+<div class="card card-accent">
+<h3>📡 Broadcast</h3>
+<p style="font-size:1.05rem;">Send to <em>every</em> host on the network segment. Simple, but expensive — everyone must process the packet.</p>
+</div>
+<div class="card card-success">
+<h3>🎯 Multicast</h3>
+<p style="font-size:1.05rem;">Send only to hosts that have <em>subscribed</em> to a group. Efficient, but requires explicit membership management.</p>
+</div>
+<div class="card card-purple">
+<h3>🚇 Tunnel</h3>
+<p style="font-size:1.05rem;">Forward a TCP connection through an intermediary. Enables port forwarding, NAT traversal and traffic inspection.</p>
+</div>
+</div>
+<div class="warning-box">
+<strong>Today's goal:</strong> By slide 39, we shall return to the warehouse scenario and reconstruct — step by step — the exact code change that fixed the problem. First, we need to build the foundations.
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+  SECTION 2: FOUNDATIONS — WHAT WE KNOW (Slides 4-6)
+  ═══════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 4: Prior Knowledge Activation -->
+<div class="slide slide-content" id="slide4">
+<h2>🗺️ Where We Are in the Course</h2>
+<div class="diagram-container">
+<svg viewBox="0 0 900 180" xmlns="http://www.w3.org/2000/svg" style="max-width:100%">
+<line stroke="#e2e8f0" stroke-width="4" x1="50" x2="850" y1="90" y2="90"/>
+<circle cx="100" cy="90" fill="#10b981" r="22"/><text fill="white" font-size="14" font-weight="700" text-anchor="middle" x="100" y="95">1</text>
+<text fill="#1e293b" font-size="13" font-weight="600" text-anchor="middle" x="100" y="135">Fundamentals</text>
+<circle cx="280" cy="90" fill="#10b981" r="22"/><text fill="white" font-size="14" font-weight="700" text-anchor="middle" x="280" y="95">2</text>
+<text fill="#1e293b" font-size="13" font-weight="600" text-anchor="middle" x="280" y="135">OSI / TCP-IP</text>
+<circle cx="460" cy="90" fill="#0ea5e9" r="30" stroke="#0284c7" stroke-width="4"/><text fill="white" font-size="16" font-weight="700" text-anchor="middle" x="460" y="96">3</text>
+<text fill="#0ea5e9" font-size="14" font-weight="700" text-anchor="middle" x="460" y="135">Sockets</text>
+<text fill="#f59e0b" font-size="12" font-weight="700" text-anchor="middle" x="460" y="155">YOU ARE HERE</text>
+<circle cx="640" cy="90" fill="#e2e8f0" r="22"/><text fill="#64748b" font-size="14" font-weight="700" text-anchor="middle" x="640" y="95">4</text>
+<text fill="#64748b" font-size="13" font-weight="600" text-anchor="middle" x="640" y="135">Physical / Link</text>
+<circle cx="820" cy="90" fill="#e2e8f0" r="22"/><text fill="#64748b" font-size="14" font-weight="700" text-anchor="middle" x="820" y="95">5…</text>
+<text fill="#64748b" font-size="13" font-weight="600" text-anchor="middle" x="820" y="135">IP Addressing</text>
+<polygon fill="#f59e0b" points="460,42 450,57 470,57"/>
+</svg>
+</div>
+<div class="highlight-box">
+<strong>What you already know</strong> (from Weeks 1–2 and the Python self-study guide): the layered architecture of TCP/IP, the distinction between connection-oriented (TCP) and connectionless (UDP) transport, and the basic Python <code>socket</code> module — creating sockets, binding, connecting, sending and receiving. This session extends that knowledge to <em>one-to-many</em> communication patterns and port forwarding.
+</div>
+</div>
+
+<!-- SLIDE 5: Prerequisite Quick Check -->
+<div class="slide slide-content" id="slide5">
+<h2>🧠 Quick Check: Do You Remember?</h2>
+<div class="quiz-container">
+<div class="quiz-question">A TCP server calls <code>bind()</code>, <code>listen()</code> and <code>accept()</code>. A client sends 1 000 bytes in a single <code>send()</code> call. On the server side, <code>recv(1024)</code> is called once. Which statement is correct?</div>
+<div class="quiz-option" onclick="checkQuiz(this, false, 'quiz1')">A) <code>recv(1024)</code> will always return exactly 1 000 bytes</div>
+<div class="quiz-option" onclick="checkQuiz(this, true, 'quiz1')">B) <code>recv(1024)</code> may return fewer than 1 000 bytes — TCP is a byte stream, not a message stream</div>
+<div class="quiz-option" onclick="checkQuiz(this, false, 'quiz1')">C) <code>recv()</code> on UDP works identically — both protocols may return partial data</div>
+<div class="quiz-feedback correct" id="quiz1-correct">✅ <strong>Correct.</strong> TCP provides a continuous byte stream with no built-in message boundaries. A single <code>recv()</code> call may return anywhere from 1 byte to the buffer size, regardless of how the sender grouped the data. This is the framing problem from Lecture 3 — and it is one of the most common sources of bugs in socket programming.</div>
+<div class="quiz-feedback incorrect" id="quiz1-incorrect">❌ <strong>Not quite.</strong> The correct answer is B. TCP is a <em>byte stream</em> — it does not preserve the boundaries of individual <code>send()</code> calls. <code>recv(1024)</code> returns <em>up to</em> 1 024 bytes, but may return fewer. This is fundamentally different from UDP, which preserves datagram boundaries: a single <code>recvfrom()</code> always returns one complete datagram. Confusing these two behaviours (misconception #12) is one of the most frequent errors in network programming.</div>
+</div>
+</div>
+
+<!-- SLIDE 6: Conflict — The Problem We Cannot Solve Yet -->
+<div class="slide slide-content" id="slide6">
+<h2>❓ The Problem We Cannot Solve Yet</h2>
+<div class="story-box">
+<strong>Scenario:</strong> You are building a service discovery system for a Docker cluster. When a new container starts, it must announce itself to every other container on the network — but you do not know their IP addresses in advance. Containers join and leave dynamically. How do you reach <em>all</em> of them simultaneously?
+</div>
+<div class="content-grid">
+<div class="card card-danger">
+<h3>❌ Unicast won't work</h3>
+<p style="font-size:1.05rem;">You would need to maintain a list of every host and send individual packets to each one. That list changes constantly, and maintaining it requires the very discovery mechanism you are trying to build — a circular dependency.</p>
+</div>
+<div class="card card-success">
+<h3>✅ We need one-to-many</h3>
+<p style="font-size:1.05rem;">A mechanism that delivers a single packet to multiple recipients without knowing their addresses in advance. The transport layer offers two such mechanisms: <strong>broadcast</strong> and <strong>multicast</strong>. Understanding when and how to use each is the core of today's session.</p>
+</div>
+</div>
+</div>
+<!-- ═══════════════════════════════════════════════════════════════════
+  SECTION 3: SOCKET ESSENTIALS RECAP (Slides 7-10)
+  ═══════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 7: What Is a Socket? -->
+<div class="slide slide-content" id="slide7">
+<h2>🔌 Recap: What Is a Socket?</h2>
+<div class="definition-box">
+<strong>Socket</strong> — an endpoint for network communication, provided by the operating system kernel. On Unix-like systems a socket behaves much like a file descriptor: you open it, read from it, write to it and close it. Python's <code>socket</code> module (a thin wrapper around the BSD C API introduced in 1983) exposes this interface directly.
+</div>
+<div class="ascii-diagram">
+ YOUR APPLICATION (Python)
+       │
+   socket()  ←── creates endpoint
+       │
+ ┌─────┴──────────────────┐
+ │                        │
+SOCK_STREAM (TCP)    SOCK_DGRAM (UDP)
+ │                        │
+connect / accept     sendto / recvfrom
+send / recv
+ │                        │
+ └─────┬──────────────────┘
+       │
+  ┌────┴─────┐
+  │  KERNEL  │  ←── TCP/IP stack
+  └────┬─────┘
+       │
+  ┌────┴─────┐
+  │   NIC    │  ←── network interface card
+  └──────────┘</div>
+</div>
+
+<!-- SLIDE 8: Socket Addressing -->
+<div class="slide slide-content" id="slide8">
+<h2>📍 Socket Addressing: The 5-Tuple</h2>
+<p class="section-intro">Every active socket connection is uniquely identified by five values. Together, they form the <strong>5-tuple</strong> that the kernel uses to route incoming data to the correct application.</p>
+<div class="protocol-header" style="max-width: 850px; margin: 30px auto;">
+<div class="header-field span-2">
+<div class="field-name">Protocol</div>
+<div class="field-value">TCP / UDP</div>
+<div class="field-bits">Layer 4</div>
+</div>
+<div class="header-field span-2">
+<div class="field-name">Source IP</div>
+<div class="field-value">192.168.1.10</div>
+<div class="field-bits">Local address</div>
+</div>
+<div class="header-field">
+<div class="field-name">Source Port</div>
+<div class="field-value">54321</div>
+<div class="field-bits">Ephemeral</div>
+</div>
+<div class="header-field span-2">
+<div class="field-name">Dest IP</div>
+<div class="field-value">10.0.0.5</div>
+<div class="field-bits">Remote address</div>
+</div>
+<div class="header-field">
+<div class="field-name">Dest Port</div>
+<div class="field-value">80</div>
+<div class="field-bits">Well-known</div>
+</div>
+</div>
+<div class="highlight-box">
+<strong>Port ranges:</strong> 0–1 023 (well-known, require root privileges), 1 024–49 151 (registered), 49 152–65 535 (dynamic/ephemeral — the OS assigns these automatically to outgoing connections). The Seminar 3 exercises use ports in the <code>5001–5007</code> range.
+</div>
+</div>
+
+<!-- SLIDE 9: TCP vs UDP -->
+<div class="slide slide-content" id="slide9">
+<h2>⚖️ TCP vs UDP — The Fundamental Trade-off</h2>
+<div class="two-columns">
+<div class="card" style="border-top: 5px solid var(--secondary);">
+<h3>📞 TCP (Transmission Control Protocol)</h3>
+<div class="ascii-diagram" style="font-size: 0.85rem; padding: 18px;">
+Client           Server
+  │                 │
+  │── SYN ─────────►│
+  │◄─ SYN+ACK ─────│
+  │── ACK ─────────►│
+  │                 │
+  │══ DATA STREAM ══│
+  │                 │
+  │── FIN ─────────►│
+  │◄─ FIN+ACK ─────│</div>
+<ul style="margin-top: 15px;">
+<li>Connection-oriented (three-way handshake)</li>
+<li>Guaranteed, ordered delivery</li>
+<li>Flow control and congestion control</li>
+<li>Higher latency, more overhead</li>
+</ul>
+</div>
+<div class="card" style="border-top: 5px solid var(--success);">
+<h3>📨 UDP (User Datagram Protocol)</h3>
+<div class="ascii-diagram" style="font-size: 0.85rem; padding: 18px;">
+Sender           Receiver
+  │                 │
+  │── DATAGRAM ────►│
+  │── DATAGRAM ────►│
+  │── DATAGRAM ────►│
+  │                 │
+  │  (no ACK!)      │
+  │  (no ordering!) │
+  │  (may be lost!) │</div>
+<ul style="margin-top: 15px;">
+<li>Connectionless (fire-and-forget)</li>
+<li>No delivery guarantees</li>
+<li>Minimal overhead (8-byte header)</li>
+<li><strong>Supports broadcast and multicast</strong></li>
+</ul>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 10: Socket API Lifecycle -->
+<div class="slide slide-content" id="slide10">
+<h2>🐍 Socket API Lifecycle Patterns</h2>
+<div class="two-columns">
+<div>
+<h3 style="color: var(--secondary-dark); margin-bottom: 15px;">TCP Server Pattern</h3>
+<div class="pseudocode">
+<span class="step">1.</span> socket()       <span class="note">// create TCP socket</span>
+<span class="step">2.</span> setsockopt()   <span class="note">// configure options</span>
+<span class="step">3.</span> bind()         <span class="note">// attach to address:port</span>
+<span class="step">4.</span> listen()       <span class="note">// mark as server</span>
+<span class="step">5.</span> accept()       <span class="note">// wait for client (BLOCKS)</span>
+<span class="step">6.</span> recv / send    <span class="note">// exchange data</span>
+<span class="step">7.</span> close()        <span class="note">// release resources</span>
+</div>
+<h3 style="color: var(--success-dark); margin-bottom: 15px; margin-top: 25px;">UDP Sender Pattern</h3>
+<div class="pseudocode">
+<span class="step">1.</span> socket(SOCK_DGRAM)  <span class="note">// UDP!</span>
+<span class="step">2.</span> sendto(data, addr)  <span class="note">// send and forget</span>
+<span class="step">3.</span> close()
+</div>
+</div>
+<div>
+<h3 style="color: var(--secondary-dark); margin-bottom: 15px;">TCP Client Pattern</h3>
+<div class="pseudocode">
+<span class="step">1.</span> socket()       <span class="note">// create TCP socket</span>
+<span class="step">2.</span> connect()      <span class="note">// three-way handshake</span>
+<span class="step">3.</span> send / recv    <span class="note">// exchange data</span>
+<span class="step">4.</span> close()        <span class="note">// release resources</span>
+</div>
+<h3 style="color: var(--success-dark); margin-bottom: 15px; margin-top: 25px;">UDP Receiver Pattern</h3>
+<div class="pseudocode">
+<span class="step">1.</span> socket(SOCK_DGRAM)  <span class="note">// UDP!</span>
+<span class="step">2.</span> bind("", port)      <span class="note">// listen on all interfaces</span>
+<span class="step">3.</span> recvfrom(bufsize)   <span class="note">// receive + sender address</span>
+<span class="step">4.</span> close()
+</div>
+</div>
+</div>
+</div>
+<!-- ═══════════════════════════════════════════════════════════════════
+  SECTION 4: UDP BROADCAST (Slides 11-20)
+  ═══════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 11: Broadcast Concept -->
+<div class="slide slide-content" id="slide11">
+<h2>📡 UDP Broadcast — One-to-All Communication</h2>
+<div class="definition-box">
+<strong>Broadcast</strong> — a network transmission that delivers a single packet to <em>every</em> host within a Layer 2 broadcast domain (typically a LAN segment or VLAN). Every device on the segment receives the Ethernet frame, regardless of whether any application is listening on the destination port.
+</div>
+<div class="ascii-diagram">
+   ┌──────┐
+   │  h1  │  SENDER
+   │  .1  │────────┐
+   └──────┘        │
+                   ▼
+             ┌───────────┐
+             │  SWITCH   │  forwards to ALL ports
+             └─────┬─────┘
+          ┌────────┼────────┐
+          ▼        ▼        ▼
+       ┌──────┐ ┌──────┐ ┌──────┐
+       │  h2  │ │  h3  │ │  h4  │
+       │  .2  │ │  .3  │ │  .4  │
+       └──────┘ └──────┘ └──────┘
+       receives  receives  receives
+       (app      (sleeping (no app
+        running)  host)     at all)
+
+  IP dest:  255.255.255.255  (limited broadcast)
+  MAC dest: ff:ff:ff:ff:ff:ff (L2 broadcast)</div>
+</div>
+
+<!-- SLIDE 12: Broadcast Addresses -->
+<div class="slide slide-content" id="slide12">
+<h2>🎯 Types of Broadcast Address</h2>
+<div class="content-grid">
+<div class="card card-accent">
+<h3>255.255.255.255</h3>
+<p style="font-weight: 600; color: var(--accent);">Limited Broadcast</p>
+<ul>
+<li>Never forwarded by routers</li>
+<li>Stays within the local L2 segment</li>
+<li>Used when the sender does not know its own subnet</li>
+<li>Typical use: DHCP discovery (RFC 2131)</li>
+</ul>
+</div>
+<div class="card card-success">
+<h3>10.0.3.255</h3>
+<p style="font-weight: 600; color: var(--success);">Directed Broadcast</p>
+<ul>
+<li>Targets a specific subnet (10.0.3.0/24)</li>
+<li>Can be routed (if the router permits it)</li>
+<li>All host bits set to 1</li>
+<li>Typically disabled on modern routers (Smurf attack vector)</li>
+</ul>
+</div>
+</div>
+<div class="warning-box">
+<strong>Security note:</strong> Directed broadcasts are disabled on most modern routers because they enable <em>amplification attacks</em>. A single forged packet sent to a directed broadcast address can trigger responses from hundreds of hosts, overwhelming a victim (the Smurf attack, first documented in 1998).
+</div>
+</div>
+
+<!-- SLIDE 13: SO_BROADCAST — Predict-Observe-Explain -->
+<div class="slide slide-content" id="slide13">
+<h2>🔑 SO_BROADCAST — Why Does This Exist?</h2>
+<div class="reveal-container" style="max-width: 850px; margin: 0 auto;">
+<div class="reveal-question">
+<strong>Prediction:</strong> You create a UDP socket and immediately try to <code>sendto()</code> to <code>255.255.255.255</code>, without calling <code>setsockopt()</code>. What do you think happens?
+</div>
+<button class="reveal-btn" onclick="toggleReveal('reveal-broadcast')">Reveal the Answer</button>
+<div class="reveal-content" id="reveal-broadcast">
+<p><strong>Result:</strong> <code>PermissionError: [Errno 13] Permission denied</code> on most systems, or <code>OSError: [Errno 101] Network is unreachable</code> on some Linux configurations.</p>
+<p style="margin-top:15px;"><strong>Why?</strong> Operating systems disable broadcast by default as a safety measure. Since broadcast floods every device on the segment — forcing each NIC and kernel to process the frame — accidental broadcasts can degrade network performance significantly. The <code>SO_BROADCAST</code> socket option is an explicit opt-in: it forces the programmer to acknowledge that they <em>intend</em> to broadcast.</p>
+<div class="code-block" data-lang="python" style="margin-top:15px;">
+<span class="comment"># The required opt-in</span>
+sock.setsockopt(
+    socket.<span class="builtin">SOL_SOCKET</span>,
+    socket.<span class="builtin">SO_BROADCAST</span>,
+    <span class="number">1</span>
+)</div>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 14: Broadcast Sender Code -->
+<div class="slide slide-content" id="slide14">
+<h2>💻 Broadcast Sender — Complete Pattern</h2>
+<div class="code-block" data-lang="python">
+<span class="keyword">import</span> socket
+<span class="keyword">import</span> time
+
+<span class="comment"># Configuration</span>
+BROADCAST_ADDR = <span class="string">"255.255.255.255"</span>
+PORT = <span class="number">5007</span>
+
+<span class="comment"># Step 1: Create a UDP socket</span>
+sock = socket.socket(
+    socket.<span class="builtin">AF_INET</span>,
+    socket.<span class="builtin">SOCK_DGRAM</span>
+)
+
+<span class="comment"># Step 2: Enable broadcast (mandatory!)</span>
+sock.setsockopt(
+    socket.<span class="builtin">SOL_SOCKET</span>,
+    socket.<span class="builtin">SO_BROADCAST</span>,
+    <span class="number">1</span>
+)
+
+<span class="comment"># Step 3: Send broadcast messages</span>
+<span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(<span class="number">5</span>):
+    message = <span class="string">f"HELLO_BCAST #{i}"</span>
+    sock.sendto(
+        message.encode(<span class="string">"utf-8"</span>),
+        (BROADCAST_ADDR, PORT)
+    )
+    <span class="function">print</span>(<span class="string">f"Sent: {message}"</span>)
+    time.sleep(<span class="number">1</span>)
+
+sock.close()</div>
+</div>
+
+<!-- SLIDE 15: Broadcast Receiver Code -->
+<div class="slide slide-content" id="slide15">
+<h2>💻 Broadcast Receiver — Complete Pattern</h2>
+<div class="code-block" data-lang="python">
+<span class="keyword">import</span> socket
+
+PORT = <span class="number">5007</span>
+BUFFER = <span class="number">65535</span>
+
+<span class="comment"># Step 1: Create a UDP socket</span>
+sock = socket.socket(
+    socket.<span class="builtin">AF_INET</span>,
+    socket.<span class="builtin">SOCK_DGRAM</span>
+)
+
+<span class="comment"># Step 2: Allow port reuse (useful for testing)</span>
+sock.setsockopt(
+    socket.<span class="builtin">SOL_SOCKET</span>,
+    socket.<span class="builtin">SO_REUSEADDR</span>,
+    <span class="number">1</span>
+)
+
+<span class="comment"># Step 3: Bind on all interfaces</span>
+<span class="comment"># "" = INADDR_ANY = 0.0.0.0</span>
+sock.bind((<span class="string">""</span>, PORT))
+<span class="function">print</span>(<span class="string">f"Listening on port {PORT}..."</span>)
+
+<span class="comment"># Step 4: Receive datagrams</span>
+<span class="keyword">while</span> <span class="builtin">True</span>:
+    data, (ip, port) = sock.recvfrom(BUFFER)
+    <span class="function">print</span>(<span class="string">f"From {ip}:{port} → {data.decode()}"</span>)</div>
+<div class="highlight-box">
+<strong>Key point:</strong> The receiver does <em>not</em> need <code>SO_BROADCAST</code> — that option is only required on the sending side. Binding to <code>""</code> (empty string, equivalent to <code>0.0.0.0</code>) means the socket will accept packets arriving on any network interface.
+</div>
+</div>
+
+<!-- SLIDE 16: Quiz — Broadcast Traffic -->
+<div class="slide slide-content" id="slide16">
+<h2>🧠 Prediction: What Happens on h3?</h2>
+<div class="quiz-container">
+<div class="quiz-question">You run a broadcast sender on host h1 and a receiver application on host h2. Host h3 is powered on but has <em>no application</em> listening on the broadcast port. You run <code>tcpdump -ni h3-eth0 udp port 5007</code> on h3. What do you observe?</div>
+<div class="quiz-option" onclick="checkQuiz(this, false, 'quiz2')">A) Nothing — h3 is not participating in the communication</div>
+<div class="quiz-option" onclick="checkQuiz(this, true, 'quiz2')">B) The packets appear in tcpdump — broadcast frames arrive at Layer 2 regardless of whether an application is listening</div>
+<div class="quiz-option" onclick="checkQuiz(this, false, 'quiz2')">C) h3 sends an ICMP "port unreachable" error back to h1</div>
+<div class="quiz-feedback correct" id="quiz2-correct">✅ <strong>Correct.</strong> Broadcast operates at Layer 2: the switch copies the frame to <em>every</em> port, and every NIC on the segment accepts frames addressed to <code>ff:ff:ff:ff:ff:ff</code>. The kernel processes the packet up through the IP and UDP layers. Only then, finding no application bound to port 5007, does it silently discard the data. But the NIC, kernel and protocol stack all did work — which is precisely why excessive broadcast degrades the entire segment.</div>
+<div class="quiz-feedback incorrect" id="quiz2-incorrect">❌ <strong>Not quite.</strong> The correct answer is B. Broadcast frames are delivered to <em>all</em> hosts on the Layer 2 segment, unconditionally. The switch does not check whether a host has an application listening — it simply floods the frame on every port. Host h3's NIC accepts the frame (destination MAC <code>ff:ff:ff:ff:ff:ff</code> matches the broadcast filter), the kernel processes it through IP and UDP, and only then discards it because no socket is bound. This processing overhead on every host is the fundamental cost of broadcast — and why our warehouse scenario caused problems.</div>
+</div>
+</div>
+
+<!-- SLIDE 17: Traffic Capture -->
+<div class="slide slide-content" id="slide17">
+<h2>🔍 Capturing Broadcast Traffic</h2>
+<div class="code-block" data-lang="bash">
+<span class="comment"># Capture UDP broadcast on port 5007</span>
+$ sudo tcpdump -ni eth0 'udp port 5007'
+
+14:32:15.123 IP 10.0.3.1.54321 > 255.255.255.255.5007:
+    UDP, length 15
+14:32:16.125 IP 10.0.3.1.54321 > 255.255.255.255.5007:
+    UDP, length 15
+
+<span class="comment"># More detail with tshark</span>
+$ sudo tshark -ni eth0 -f 'udp port 5007' \
+    -T fields \
+    -e ip.src \
+    -e ip.dst \
+    -e udp.srcport \
+    -e udp.dstport \
+    -e data.text</div>
+<div class="content-grid" style="margin-top: 20px;">
+<div class="card card-accent">
+<h3>tcpdump Flags</h3>
+<ul>
+<li><code>-n</code> — do not resolve hostnames</li>
+<li><code>-i eth0</code> — capture on a specific interface</li>
+<li><code>-w file.pcap</code> — write to file</li>
+<li><code>-X</code> — show hex and ASCII payload</li>
+</ul>
+</div>
+<div class="card card-success">
+<h3>What You Will See</h3>
+<ul>
+<li>Source IP: the sender's address</li>
+<li>Destination IP: 255.255.255.255</li>
+<li>All hosts on the LAN receive the frame</li>
+<li>Destination MAC: <code>ff:ff:ff:ff:ff:ff</code></li>
+</ul>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 18: Broadcast Limitations -->
+<div class="slide slide-content" id="slide18">
+<h2>⚠️ Broadcast Limitations and Dangers</h2>
+<div class="content-grid-3">
+<div class="card card-danger">
+<h3>🌊 Network Saturation</h3>
+<p>Every host processes every broadcast frame, even when uninterested. In large LANs, excessive broadcasts create "broadcast storms" that degrade performance for the entire segment.</p>
+</div>
+<div class="card card-warning">
+<h3>🧱 No Router Crossing</h3>
+<p>Limited broadcasts (<code>255.255.255.255</code>) never cross router boundaries. This is by design — imagine if every broadcast reached the entire internet.</p>
+</div>
+<div class="card card-purple">
+<h3>🔒 Security Exposure</h3>
+<p>Broadcast traffic is visible to every host on the segment. Sensitive data must never be broadcast. Any host can passively capture broadcast packets.</p>
+</div>
+</div>
+<div class="insight-box">
+<strong>The warehouse problem revisited:</strong> Remember the scenario from slide 2? With 340 devices and broadcasts every 200 ms, each device processed 5 packets per second of irrelevant traffic. That is 1 450 unnecessary packet-processing events per second across the segment — enough to overwhelm resource-constrained devices like wireless access points and VoIP phones.
+</div>
+</div>
+
+<!-- SLIDE 19: Broadcast Use Cases -->
+<div class="slide slide-content" id="slide19">
+<h2>✅ When Broadcast Is Appropriate</h2>
+<div class="content-grid">
+<div class="card card-success">
+<h3>Good uses</h3>
+<ul>
+<li><strong>DHCP discovery</strong> — the client has no IP address yet, so it cannot target a specific server</li>
+<li><strong>ARP</strong> — "Who has IP 10.0.3.1? Tell me your MAC address" (Layer 2 broadcast)</li>
+<li><strong>Wake-on-LAN</strong> — sending a magic packet to wake a sleeping machine</li>
+<li>Small LANs (&lt; 50 hosts) where overhead is negligible</li>
+</ul>
+</div>
+<div class="card card-danger">
+<h3>Poor uses</h3>
+<ul>
+<li>Periodic status updates to a subset of hosts (use multicast)</li>
+<li>Any high-frequency messaging (&gt; 1 packet/second)</li>
+<li>Large segments (100+ hosts)</li>
+<li>Anything carrying sensitive data</li>
+</ul>
+</div>
+</div>
+<div class="warning-box">
+<strong>Rule of thumb:</strong> If only a subset of hosts needs the data, broadcast is the wrong tool. Multicast exists precisely for this case — and we shall explore it next.
+</div>
+</div>
+
+<!-- SLIDE 20: Broadcast Summary -->
+<div class="slide slide-content" id="slide20">
+<h2>📝 Broadcast — Key Takeaways</h2>
+<div class="highlight-box">
+<strong>Summary:</strong>
+<ul style="margin-top: 10px;">
+<li>Broadcast = one-to-all within the Layer 2 broadcast domain</li>
+<li><code>255.255.255.255</code> = limited broadcast (stays local, never routed)</li>
+<li><code>SO_BROADCAST</code> socket option is mandatory for the sender</li>
+<li>Receivers bind to <code>""</code> (INADDR_ANY) — no special option required</li>
+<li>Use sparingly — broadcast generates significant overhead on every host</li>
+</ul>
+</div>
+<div class="code-block" data-lang="python">
+<span class="comment"># The essential broadcast pattern</span>
+sock.setsockopt(
+    socket.<span class="builtin">SOL_SOCKET</span>,
+    socket.<span class="builtin">SO_BROADCAST</span>,
+    <span class="number">1</span>
+)
+sock.sendto(data, (<span class="string">"255.255.255.255"</span>, port))</div>
+</div>
+<!-- ═══════════════════════════════════════════════════════════════════
+  SECTION 5: UDP MULTICAST (Slides 21-31)
+  ═══════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 21: Transition from Broadcast to Multicast -->
+<div class="slide slide-content" id="slide21">
+<h2>🔄 From Broadcast to Multicast</h2>
+<div class="story-box">
+<strong>The core problem with broadcast:</strong> It has no notion of "interest". Every host on the segment pays the processing cost, even if only a handful actually want the data. Multicast solves this by introducing an explicit subscription model — hosts opt in to receive traffic for a specific group, and the network delivers packets only to those subscribers.
+</div>
+<div class="content-grid">
+<div class="card card-danger">
+<h3>📡 Broadcast</h3>
+<p style="font-size:1.05rem;">A megaphone in a crowded square. Everyone hears your message — whether they want to or not. Effective for announcements, but disruptive if overused.</p>
+</div>
+<div class="card card-success">
+<h3>🎯 Multicast</h3>
+<p style="font-size:1.05rem;">A group chat. Only people who have joined the group receive messages. Others are not disturbed. Efficient, but requires an explicit "join" step.</p>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 22: Multicast Concept -->
+<div class="slide slide-content" id="slide22">
+<h2>🎯 UDP Multicast — Selective Group Communication</h2>
+<div class="definition-box">
+<strong>Multicast</strong> — a network transmission that delivers packets only to hosts that have <em>explicitly subscribed</em> (joined) a multicast group. The subscription is managed by <strong>IGMP</strong> (Internet Group Management Protocol, RFC 2236). Unlike broadcast, hosts that have not joined the group do not receive — or process — the traffic.
+</div>
+<div class="ascii-diagram">
+   ┌──────┐
+   │  h1  │  SENDER → group 239.1.1.1
+   └──┬───┘
+      │
+      ▼
+   ┌──────────┐
+   │  SWITCH  │  forwards ONLY to group members
+   └────┬─────┘
+   ┌────┼────────────┐
+   ▼    ▼            ▼
+┌──────┐ ┌──────┐ ┌──────┐
+│  h2  │ │  h3  │ │  h4  │
+│ JOIN │ │ JOIN │ │  --  │
+└──────┘ └──────┘ └──────┘
+receives  receives  nothing
+(member)  (member)  (not a member)</div>
+</div>
+
+<!-- SLIDE 23: Multicast Addressing -->
+<div class="slide slide-content" id="slide23">
+<h2>📍 Multicast Address Ranges (Class D)</h2>
+<p class="section-intro">Multicast uses the Class D address block: <code>224.0.0.0</code> – <code>239.255.255.255</code>. The first four bits are always <code>1110</code>. Different ranges serve different scopes:</p>
+<div class="content-grid-3">
+<div class="card card-accent">
+<h3>224.0.0.x</h3>
+<p style="font-weight: 600; color: var(--accent);">Link-Local (TTL = 1)</p>
+<ul>
+<li>Never forwarded by routers</li>
+<li>224.0.0.1 = all hosts on segment</li>
+<li>224.0.0.2 = all routers</li>
+<li>224.0.0.5 = OSPF routers</li>
+</ul>
+</div>
+<div class="card card-success">
+<h3>224.0.1.x – 238.x.x.x</h3>
+<p style="font-weight: 600; color: var(--success);">Globally Scoped</p>
+<ul>
+<li>Can be routed across the internet</li>
+<li>Requires multicast routing (PIM)</li>
+<li>Used for public services</li>
+<li>IANA-registered groups</li>
+</ul>
+</div>
+<div class="card card-purple">
+<h3>239.x.x.x</h3>
+<p style="font-weight: 600; color: var(--purple);">Administratively Scoped</p>
+<ul>
+<li>Private use (like 10.x.x.x for unicast)</li>
+<li>Internal to an organisation</li>
+<li><strong>Use this range for experiments!</strong></li>
+<li>Our starterkit uses 239.1.1.1</li>
+</ul>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 24: Broadcast vs Multicast Comparison -->
+<div class="slide slide-content" id="slide24">
+<h2>⚖️ Broadcast vs Multicast — Side by Side</h2>
+<div class="table-container">
+<table>
+<thead><tr><th>Aspect</th><th>Broadcast</th><th>Multicast</th></tr></thead>
+<tbody>
+<tr><td><strong>Recipients</strong></td><td>All hosts in the L2 domain</td><td>Only subscribed members</td></tr>
+<tr><td><strong>Explicit join</strong></td><td>No</td><td>Yes (<code>IP_ADD_MEMBERSHIP</code>)</td></tr>
+<tr><td><strong>Crosses routers</strong></td><td>No (limited broadcast)</td><td>Yes (if multicast routing is enabled)</td></tr>
+<tr><td><strong>Network overhead</strong></td><td>High (everyone processes)</td><td>Optimised (members only)</td></tr>
+<tr><td><strong>Dest address</strong></td><td>255.255.255.255</td><td>224.x.x.x – 239.x.x.x</td></tr>
+</tbody>
+</table>
+</div>
+<div class="highlight-box">
+<strong>Multicast MAC mapping:</strong> A multicast IP is mapped to a special Ethernet MAC address in the range <code>01:00:5e:xx:xx:xx</code>. The lower 23 bits of the IP are copied into the MAC. This means a multicast-aware switch can use IGMP snooping to forward frames only to ports where a group member exists — further reducing unnecessary traffic.
+</div>
+</div>
+
+<!-- SLIDE 25: IGMP Protocol -->
+<div class="slide slide-content" id="slide25">
+<h2>🤝 IGMP: How Multicast Membership Works</h2>
+<div class="story-box">
+<strong>IGMP</strong> (Internet Group Management Protocol, RFC 2236) is the mechanism that hosts use to inform routers about their multicast group subscriptions. Think of it as raising your hand and saying: "I want to receive messages for group 239.1.1.1."
+</div>
+<div class="ascii-diagram" style="font-size: 0.85rem;">
+Host wants to join group 239.1.1.1:
+
+  ┌────────┐                       ┌──────────┐
+  │  HOST  │── IGMP Member Report ►│  ROUTER  │
+  │        │   (Join 239.1.1.1)    │          │
+  └────────┘                       └────┬─────┘
+                                        │
+  Router updates its multicast          │
+  forwarding table: "forward            ▼
+  239.1.1.1 to this segment"     Table updated
+
+Later, the router periodically asks "who is still interested?":
+
+  ┌────────┐                       ┌──────────┐
+  │  HOST  │◄── IGMP Query ────────│  ROUTER  │
+  │        │── IGMP Report ───────►│          │
+  └────────┘  (if still member)    └──────────┘</div>
+</div>
+
+<!-- SLIDE 26: Multicast Sender Code -->
+<div class="slide slide-content" id="slide26">
+<h2>💻 Multicast Sender — Implementation</h2>
+<div class="code-block" data-lang="python">
+<span class="keyword">import</span> socket
+
+<span class="comment"># Configuration</span>
+MCAST_GROUP = <span class="string">"239.1.1.1"</span>
+PORT = <span class="number">5001</span>
+
+<span class="comment"># TTL = 1 means link-local only</span>
+TTL = <span class="number">1</span>
+
+<span class="comment"># Step 1: Create a UDP socket</span>
+sock = socket.socket(
+    socket.<span class="builtin">AF_INET</span>,
+    socket.<span class="builtin">SOCK_DGRAM</span>,
+    socket.<span class="builtin">IPPROTO_UDP</span>
+)
+
+<span class="comment"># Step 2: Set multicast TTL</span>
+<span class="comment"># Controls how far the packet travels</span>
+sock.setsockopt(
+    socket.<span class="builtin">IPPROTO_IP</span>,
+    socket.<span class="builtin">IP_MULTICAST_TTL</span>,
+    TTL
+)
+
+<span class="comment"># Step 3: Send to the multicast group</span>
+<span class="comment"># No special permission needed (unlike broadcast!)</span>
+message = <span class="string">b"Hello multicast group!"</span>
+sock.sendto(message, (MCAST_GROUP, PORT))</div>
+<div class="highlight-box">
+<strong>No SO_BROADCAST needed!</strong> Unlike broadcast, multicast senders do not require a special socket option. The TTL controls how far the packet propagates, and receivers opt in via IGMP.
+</div>
+</div>
+
+<!-- SLIDE 27: Multicast Receiver Code -->
+<div class="slide slide-content" id="slide27">
+<h2>💻 Multicast Receiver — The JOIN Process</h2>
+<div class="code-block" data-lang="python">
+<span class="keyword">import</span> socket
+<span class="keyword">import</span> struct
+
+MCAST_GROUP = <span class="string">"239.1.1.1"</span>
+PORT = <span class="number">5001</span>
+
+<span class="comment"># Step 1: Create a UDP socket</span>
+sock = socket.socket(
+    socket.<span class="builtin">AF_INET</span>,
+    socket.<span class="builtin">SOCK_DGRAM</span>,
+    socket.<span class="builtin">IPPROTO_UDP</span>
+)
+sock.setsockopt(
+    socket.<span class="builtin">SOL_SOCKET</span>,
+    socket.<span class="builtin">SO_REUSEADDR</span>,
+    <span class="number">1</span>
+)
+
+<span class="comment"># Step 2: Bind to the port</span>
+sock.bind((<span class="string">""</span>, PORT))
+
+<span class="comment"># Step 3: JOIN the multicast group</span>
+mreq = socket.inet_aton(MCAST_GROUP)
+mreq += struct.pack(<span class="string">"=I"</span>, socket.<span class="builtin">INADDR_ANY</span>)
+sock.setsockopt(
+    socket.<span class="builtin">IPPROTO_IP</span>,
+    socket.<span class="builtin">IP_ADD_MEMBERSHIP</span>,
+    mreq
+)
+
+<span class="comment"># Step 4: Receive multicast datagrams</span>
+<span class="keyword">while</span> <span class="builtin">True</span>:
+    data, sender = sock.recvfrom(<span class="number">65535</span>)
+    <span class="function">print</span>(<span class="string">f"From {sender}: {data.decode()}"</span>)</div>
+</div>
+
+<!-- SLIDE 28: IP_ADD_MEMBERSHIP Deep Dive -->
+<div class="slide slide-content" id="slide28">
+<h2>🔍 Inside IP_ADD_MEMBERSHIP</h2>
+<div class="two-columns">
+<div>
+<div class="protocol-header" style="flex-direction: column;">
+<div class="header-field" style="width: 100%;"><div class="field-name">mreq Structure (8 bytes total)</div></div>
+</div>
+<div class="protocol-header">
+<div class="header-field span-4">
+<div class="field-name">Multicast Group IP</div>
+<div class="field-value">239.1.1.1</div>
+<div class="field-bits">4 bytes — inet_aton()</div>
+</div>
+<div class="header-field span-4">
+<div class="field-name">Interface IP</div>
+<div class="field-value">INADDR_ANY</div>
+<div class="field-bits">4 bytes — 0 = any interface</div>
+</div>
+</div>
+<div class="code-block" data-lang="python" style="margin-top: 20px; font-size: 0.92rem;">
+<span class="comment"># Building the mreq structure</span>
+mreq = socket.inet_aton(<span class="string">"239.1.1.1"</span>)
+mreq += struct.pack(
+    <span class="string">"=I"</span>,
+    socket.<span class="builtin">INADDR_ANY</span>
+)
+
+<span class="comment"># Or for a specific interface:</span>
+mreq = socket.inet_aton(<span class="string">"239.1.1.1"</span>)
+mreq += socket.inet_aton(<span class="string">"10.0.3.2"</span>)</div>
+</div>
+<div>
+<div class="highlight-box">
+<strong>What happens when you JOIN:</strong>
+<ul style="margin-top: 10px;">
+<li>The kernel sends an IGMP Membership Report</li>
+<li>The switch/router learns to forward group traffic to this segment</li>
+<li>The NIC is configured to accept the multicast MAC</li>
+<li>The socket can now receive group datagrams</li>
+</ul>
+</div>
+<div class="warning-box">
+<strong>Common pitfall:</strong> Forgetting to call <code>IP_ADD_MEMBERSHIP</code> means you will never receive multicast packets, even if you are bound to the correct port. The bind alone is not sufficient.
+</div>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 29: TTL and Multicast Scoping -->
+<div class="slide slide-content" id="slide29">
+<h2>🔢 Multicast TTL — Controlling Scope</h2>
+<div class="table-container">
+<table>
+<thead><tr><th>TTL</th><th>Scope</th><th>Typical Use</th></tr></thead>
+<tbody>
+<tr><td><strong>0</strong></td><td>Same host only</td><td>Loopback testing</td></tr>
+<tr><td><strong>1</strong></td><td>Same subnet (link-local)</td><td>LAN discovery, lab testing</td></tr>
+<tr><td><strong>32</strong></td><td>Same site or campus</td><td>Organisation-internal services</td></tr>
+<tr><td><strong>64</strong></td><td>Same region</td><td>Regional content distribution</td></tr>
+<tr><td><strong>128</strong></td><td>Same continent</td><td>Wide-area services</td></tr>
+<tr><td><strong>255</strong></td><td>Unrestricted (global)</td><td>Internet-wide multicast</td></tr>
+</tbody>
+</table>
+</div>
+<div class="highlight-box">
+<strong>Lab default:</strong> We use <code>TTL=1</code> throughout the starterkit exercises to ensure multicast traffic stays within the Mininet virtual network. This prevents accidental traffic leakage to the host machine's physical network.
+</div>
+</div>
+
+<!-- SLIDE 30: Quiz — Multicast -->
+<div class="slide slide-content" id="slide30">
+<h2>🧠 Knowledge Check: Multicast Troubleshooting</h2>
+<div class="quiz-container">
+<div class="quiz-question">Your multicast sender is working correctly (verified with tcpdump on the sender's interface). But the receiver, running on a different host, gets no packets. The receiver binds to the correct port and calls <code>recvfrom()</code>. What is most likely missing?</div>
+<div class="quiz-option" onclick="checkQuiz(this, false, 'quiz3')">A) The sender forgot to set <code>SO_BROADCAST</code></div>
+<div class="quiz-option" onclick="checkQuiz(this, true, 'quiz3')">B) The receiver forgot to call <code>setsockopt()</code> with <code>IP_ADD_MEMBERSHIP</code> to join the group</div>
+<div class="quiz-option" onclick="checkQuiz(this, false, 'quiz3')">C) Multicast requires TCP, not UDP</div>
+<div class="quiz-option" onclick="checkQuiz(this, false, 'quiz3')">D) The TTL on the sender is too high</div>
+<div class="quiz-feedback correct" id="quiz3-correct">✅ <strong>Correct.</strong> Multicast delivery is subscription-based. Simply binding to the port is not enough — the receiver must explicitly join the multicast group by calling <code>setsockopt(IPPROTO_IP, IP_ADD_MEMBERSHIP, mreq)</code>. Without this step, the kernel does not configure the NIC to accept the multicast MAC address, and the packets never reach the socket. Verify membership with <code>ip maddr show dev eth0</code>.</div>
+<div class="quiz-feedback incorrect" id="quiz3-incorrect">❌ <strong>Not quite.</strong> The correct answer is B. Multicast does not use <code>SO_BROADCAST</code> — that option applies only to broadcast (option A confuses the two mechanisms). Multicast works exclusively over UDP (option C is wrong — TCP is point-to-point only). A high TTL would increase the packet's propagation range, not restrict it (option D is backwards). The missing piece is <code>IP_ADD_MEMBERSHIP</code>: the explicit "join" that tells the kernel and the network infrastructure to deliver group traffic to this host.</div>
+</div>
+</div>
+
+<!-- SLIDE 31: When to Use Each — Interactive -->
+<div class="slide slide-content" id="slide31">
+<h2>🎯 Choosing a Communication Pattern</h2>
+<div class="interactive-panel">
+<label>Scenario: How many hosts out of 200 on your LAN need to receive the data?</label>
+<input type="range" min="1" max="200" value="50" id="hostSlider" oninput="updateRecommendation()">
+<div class="result-display" id="recommendation">
+<strong>50 out of 200 hosts (25%)</strong> → Recommended: <span style="color: var(--success-dark);">🎯 Multicast</span>
+</div>
+</div>
+<div class="content-grid" style="margin-top:20px;">
+<div class="card card-accent">
+<h3>✅ Use Broadcast when:</h3>
+<ul>
+<li>You must reach <em>everyone</em> on the LAN</li>
+<li>Receivers cannot subscribe in advance (DHCP)</li>
+<li>The network is small (&lt; 50 hosts)</li>
+<li>Messages are infrequent</li>
+</ul>
+</div>
+<div class="card card-success">
+<h3>✅ Use Multicast when:</h3>
+<ul>
+<li>Only a subset of hosts needs the data</li>
+<li>Traffic must cross router boundaries</li>
+<li>High-frequency updates are required</li>
+<li>You want to scale without flooding</li>
+</ul>
+</div>
+</div>
+</div>
+<!-- ═══════════════════════════════════════════════════════════════════
+  SECTION 6: TCP TUNNELLING (Slides 32-38)
+  ═══════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 32: Tunnel Concept -->
+<div class="slide slide-content" id="slide32">
+<h2>🚇 TCP Tunnels — Port Forwarding</h2>
+<div class="definition-box">
+<strong>TCP tunnel</strong> (port forwarder) — a programme that accepts TCP connections on one address:port pair and forwards the traffic to a different address:port. The client connects to the tunnel, the tunnel connects to the target, and data flows bidirectionally between them. The client and target may be unaware of the intermediary.
+</div>
+<div class="ascii-diagram">
+┌────────┐         ┌──────────────┐         ┌──────────┐
+│ CLIENT │ ──TCP──►│    TUNNEL    │──TCP───►│  TARGET  │
+│        │◄──TCP── │  (forwarder) │◄──TCP── │  SERVER  │
+└────────┘         └──────────────┘         └──────────┘
+ 10.0.1.1:54321     10.0.1.254:9090          10.0.2.1:8080
+                    10.0.2.254:xxxxx
+
+  Connection 1: client → tunnel (listening port)
+  Connection 2: tunnel → target (outbound connection)
+  Data flows bidirectionally through both connections</div>
+</div>
+
+<!-- SLIDE 33: Tunnel Use Cases -->
+<div class="slide slide-content" id="slide33">
+<h2>🎯 Why Use TCP Tunnels?</h2>
+<div class="content-grid">
+<div class="card card-accent">
+<h3>🌐 NAT Traversal</h3>
+<p>Expose a service from a private network to external clients without opening firewall ports directly to the server.</p>
+</div>
+<div class="card card-success">
+<h3>⚖️ Load Distribution</h3>
+<p>Distribute incoming connections across multiple backend servers (basic round-robin or health-based selection).</p>
+</div>
+<div class="card card-purple">
+<h3>🔍 Traffic Inspection</h3>
+<p>Intercept and log traffic flowing through the tunnel for debugging, without modifying the client or server code.</p>
+</div>
+<div class="card card-warning">
+<h3>🔄 Protocol Adaptation</h3>
+<p>Bridge between network segments or terminate TLS at the proxy (as in reverse proxy patterns with Nginx).</p>
+</div>
+</div>
+<div class="story-box">
+<strong>Real-world example:</strong> SSH local forwarding (<code>ssh -L 8080:target:80 gateway</code>) uses exactly this pattern. The SSH client creates a TCP tunnel from your local port 8080 through the gateway to the target's port 80, encrypting the traffic along the way.
+</div>
+</div>
+
+<!-- SLIDE 34: Architecture — Progressive Diagram -->
+<div class="slide slide-content" id="slide34">
+<h2>🏗️ Tunnel Architecture — Bidirectional Forwarding</h2>
+<p class="section-intro">A TCP tunnel requires <strong>two threads</strong> per client connection for full-duplex communication. Each thread copies data in one direction:</p>
+<div class="ascii-diagram">
+┌────────────────────────────────────────────────────────────┐
+│               TCP TUNNEL PROCESS                           │
+│                                                            │
+│  ┌──────────────────┐    ┌──────────────────┐             │
+│  │    Thread 1      │    │    Thread 2      │             │
+│  │  client → target │    │  target → client │             │
+│  │                  │    │                  │             │
+│  │  recv(client)    │    │  recv(target)    │             │
+│  │  sendall(target) │    │  sendall(client) │             │
+│  └────────┬─────────┘    └────────┬─────────┘             │
+│           │                       │                        │
+│           └───────┬───────────────┘                        │
+│                   │                                        │
+│           threading.Event()                                │
+│           coordinates shutdown                             │
+└────────────────────────────────────────────────────────────┘</div>
+<div class="highlight-box">
+<strong>Why two threads?</strong> TCP is full-duplex — data can flow in both directions simultaneously. A single thread would block on <code>recv()</code> and be unable to forward data in the opposite direction. The <code>threading.Event</code> object coordinates shutdown: when one direction closes, it signals the other thread to stop.
+</div>
+</div>
+
+<!-- SLIDE 35: Forward Stream Code -->
+<div class="slide slide-content" id="slide35">
+<h2>💻 Core Pattern: Unidirectional Forwarding</h2>
+<div class="code-block" data-lang="python">
+<span class="keyword">def</span> <span class="function">forward_stream</span>(
+    src, dst, direction, stop_event
+):
+    <span class="string">"""Copy data from src to dst until closed."""</span>
+    total = <span class="number">0</span>
+    <span class="keyword">try</span>:
+        <span class="keyword">while</span> <span class="keyword">not</span> stop_event.is_set():
+            <span class="comment"># Read from source</span>
+            data = src.recv(<span class="number">4096</span>)
+
+            <span class="keyword">if</span> <span class="keyword">not</span> data:
+                <span class="comment"># Empty bytes = peer closed</span>
+                <span class="function">print</span>(
+                    <span class="string">f"{direction}: closed"</span>
+                )
+                <span class="keyword">break</span>
+
+            <span class="comment"># Write to destination</span>
+            dst.sendall(data)
+            total += <span class="function">len</span>(data)
+
+    <span class="keyword">except</span> (ConnectionResetError, BrokenPipeError):
+        <span class="function">print</span>(
+            <span class="string">f"{direction}: connection reset"</span>
+        )
+    <span class="keyword">finally</span>:
+        <span class="comment"># Signal the other thread to stop</span>
+        stop_event.set()</div>
+</div>
+
+<!-- SLIDE 36: Handle Client + Main Loop -->
+<div class="slide slide-content" id="slide36">
+<h2>💻 Client Handler and Accept Loop</h2>
+<div class="code-block" data-lang="python" style="font-size:0.92rem;">
+<span class="keyword">import</span> threading
+
+<span class="keyword">def</span> <span class="function">handle_client</span>(client, host, port):
+    <span class="string">"""Connect to target, forward both ways."""</span>
+
+    <span class="comment"># Connect to the actual target server</span>
+    target = socket.socket(
+        socket.<span class="builtin">AF_INET</span>,
+        socket.<span class="builtin">SOCK_STREAM</span>
+    )
+    target.settimeout(<span class="number">10.0</span>)
+    target.connect((host, port))
+    target.settimeout(<span class="builtin">None</span>)
+
+    <span class="comment"># Shared shutdown signal</span>
+    stop = threading.Event()
+
+    <span class="comment"># Two threads: one per direction</span>
+    t1 = threading.Thread(
+        target=forward_stream,
+        args=(client, target, <span class="string">"c→t"</span>, stop)
+    )
+    t2 = threading.Thread(
+        target=forward_stream,
+        args=(target, client, <span class="string">"t→c"</span>, stop)
+    )
+    t1.start()
+    t2.start()
+    t1.join()
+    t2.join()
+
+    <span class="comment"># Clean up both sockets</span>
+    client.close()
+    target.close()</div>
+</div>
+
+<!-- SLIDE 37: Running the Tunnel -->
+<div class="slide slide-content" id="slide37">
+<h2>🚀 Running the Tunnel in Mininet</h2>
+<div class="code-block" data-lang="bash">
+<span class="comment"># Terminal 1: Echo server on b1 (target)</span>
+mininet> b1 python3 ex04_echo_server.py \
+    --listen 0.0.0.0:8080
+
+<span class="comment"># Terminal 2: Tunnel on r1 (router)</span>
+mininet> r1 python3 ex03_tcp_tunnel.py \
+    --listen 0.0.0.0:9090 \
+    --target 10.0.2.1:8080
+
+<span class="comment"># Terminal 3: Client on a1</span>
+mininet> a1 echo "Hello tunnel!" \
+    | nc 10.0.1.254 9090 -w 2
+
+<span class="comment"># Traffic flow:</span>
+<span class="comment"># a1 → r1:9090 (tunnel) → b1:8080 (echo)</span>
+<span class="comment"># b1:8080 → r1 → a1 (response)</span></div>
+<div class="highlight-box">
+<strong>Topology:</strong> a1 (10.0.1.1) → r1 (10.0.1.254 / 10.0.2.254) → b1 (10.0.2.1). Notice that the target server (b1) sees traffic coming from r1, not from a1 — the tunnel masks the original client IP.
+</div>
+</div>
+
+<!-- SLIDE 38: Thread Coordination -->
+<div class="slide slide-content" id="slide38">
+<h2>🔄 Coordinating Thread Shutdown</h2>
+<div class="story-box">
+When one direction closes (e.g. the client sends FIN), the other forwarding thread must stop too. <code>threading.Event</code> provides a lightweight, thread-safe signalling mechanism — no locks required.
+</div>
+<div class="two-columns">
+<div class="code-block" data-lang="python" style="font-size: 0.92rem;">
+<span class="keyword">import</span> threading
+
+<span class="comment"># Create a shared event</span>
+stop = threading.Event()
+
+<span class="comment"># In forward_stream:</span>
+<span class="keyword">while</span> <span class="keyword">not</span> stop.is_set():
+    data = src.recv(<span class="number">4096</span>)
+    <span class="keyword">if</span> <span class="keyword">not</span> data:
+        <span class="keyword">break</span>
+    dst.sendall(data)
+
+<span class="comment"># When the loop exits:</span>
+stop.set()
+<span class="comment"># The other thread sees is_set() = True</span></div>
+<div>
+<div class="highlight-box">
+<strong>How it works:</strong>
+<ul style="margin-top: 10px;">
+<li><code>Event()</code> — creates a shared boolean flag</li>
+<li><code>is_set()</code> — returns True if signalled</li>
+<li><code>set()</code> — signals all waiting threads</li>
+<li>Thread-safe without explicit locks</li>
+</ul>
+</div>
+<div class="warning-box" style="margin-top:15px;">
+<strong>Note:</strong> <code>recv()</code> is a blocking call. When one thread calls <code>stop.set()</code>, the other thread may still be blocked in <code>recv()</code>. The connection close from the peer will cause <code>recv()</code> to return empty bytes, breaking the loop.
+</div>
+</div>
+</div>
+</div>
+<!-- ═══════════════════════════════════════════════════════════════════
+  SECTION 7: SYNTHESIS & REFLECTION (Slides 39-44)
+  ═══════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 39: Returning to the Hook — Narrative Closure -->
+<div class="slide slide-content" id="slide39">
+<h2>🔁 Back to the Warehouse: What Went Wrong?</h2>
+<div class="story-box">
+<strong>Recall slide 2:</strong> 340 devices, broadcast every 200 ms, network collapse. We now have the tools to diagnose the problem precisely and understand the fix.
+</div>
+<div class="two-columns">
+<div class="card card-danger">
+<h3>❌ The Original (Broadcast)</h3>
+<div class="code-block" data-lang="python" style="font-size:0.88rem;">
+<span class="comment"># Every host processes this</span>
+sock.setsockopt(
+    socket.<span class="builtin">SOL_SOCKET</span>,
+    socket.<span class="builtin">SO_BROADCAST</span>,
+    <span class="number">1</span>
+)
+sock.sendto(
+    status,
+    (<span class="string">"255.255.255.255"</span>, <span class="number">5007</span>)
+)</div>
+<p style="margin-top:12px;font-size:0.95rem;">All 340 devices receive and process every packet. The 290 non-inventory devices waste CPU and bandwidth on irrelevant traffic.</p>
+</div>
+<div class="card card-success">
+<h3>✅ The Fix (Multicast)</h3>
+<div class="code-block" data-lang="python" style="font-size:0.88rem;">
+<span class="comment"># Only subscribers process this</span>
+sock.setsockopt(
+    socket.<span class="builtin">IPPROTO_IP</span>,
+    socket.<span class="builtin">IP_MULTICAST_TTL</span>,
+    <span class="number">1</span>
+)
+sock.sendto(
+    status,
+    (<span class="string">"239.1.1.1"</span>, <span class="number">5007</span>)
+)</div>
+<p style="margin-top:12px;font-size:0.95rem;">Only the 50 inventory devices that joined group 239.1.1.1 receive the packets. The other 290 devices are undisturbed.</p>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 40: Common Errors Table -->
+<div class="slide slide-content" id="slide40">
+<h2>🐛 Common Errors and Solutions</h2>
+<div class="table-container">
+<table>
+<thead><tr><th>Error</th><th>Cause</th><th>Solution</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Permission denied</code> on broadcast</td>
+<td><code>SO_BROADCAST</code> not set</td>
+<td><code>setsockopt(SOL_SOCKET, SO_BROADCAST, 1)</code></td>
+</tr>
+<tr>
+<td>Multicast not received</td>
+<td>Receiver did not join group</td>
+<td>Add <code>IP_ADD_MEMBERSHIP</code>; verify with <code>ip maddr show</code></td>
+</tr>
+<tr>
+<td><code>Address already in use</code></td>
+<td>Port still in TIME_WAIT</td>
+<td>Use <code>SO_REUSEADDR</code> or wait 60 seconds</td>
+</tr>
+<tr>
+<td><code>Connection refused</code></td>
+<td>Target server not running</td>
+<td>Start the server first; check port with <code>ss -tlnp</code></td>
+</tr>
+<tr>
+<td>Tunnel timeout</td>
+<td>Missing route to target</td>
+<td>Check <code>ip route</code> on all hosts</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<!-- SLIDE 41: Reveal — Communication Analogies -->
+<div class="slide slide-content" id="slide41">
+<h2>💭 Analogy: Postal System</h2>
+<div class="reveal-container" style="max-width: 850px; margin: 0 auto;">
+<div class="reveal-question">
+How would you explain broadcast, multicast and tunnelling to a non-technical person? Think for a moment before revealing the answer.
+</div>
+<button class="reveal-btn" onclick="toggleReveal('reveal-analogy')">Reveal the Analogies</button>
+<div class="reveal-content" id="reveal-analogy">
+<div class="icon-box">
+<span class="icon">📡</span>
+<div class="icon-box-content"><strong>Broadcast = Town square megaphone</strong><br/>Everyone in the square hears your message, whether they want to or not. Effective for emergency announcements, disruptive if overused.</div>
+</div>
+<div class="icon-box">
+<span class="icon">🎯</span>
+<div class="icon-box-content"><strong>Multicast = Mailing list</strong><br/>Only people who have subscribed receive the messages. Others are not bothered. Efficient for reaching interested parties at scale.</div>
+</div>
+<div class="icon-box">
+<span class="icon">🚇</span>
+<div class="icon-box-content"><strong>Tunnel = Postal forwarding service</strong><br/>You send a letter to an intermediary address, which re-posts it to the actual destination. The recipient sees the intermediary's return address, not yours.</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 42: Synthesis Quiz — QUIC -->
+<div class="slide slide-content" id="slide42">
+<h2>🧠 Synthesis: The QUIC Protocol</h2>
+<div class="highlight-box">
+<strong>Context:</strong> Google developed QUIC (now standardised as HTTP/3 in RFC 9000) which runs over UDP but provides reliable, ordered delivery with built-in encryption. Given what you have learned about TCP and UDP trade-offs, why would engineers choose to rebuild TCP's features on top of UDP?
+</div>
+<div class="quiz-container" style="margin-top: 20px;">
+<div class="quiz-question">What is the primary advantage of QUIC over traditional TCP?</div>
+<div class="quiz-option" onclick="checkQuiz(this, false, 'quiz4')">A) UDP is inherently more secure than TCP</div>
+<div class="quiz-option" onclick="checkQuiz(this, true, 'quiz4')">B) QUIC eliminates TCP's head-of-line blocking and enables 0-RTT connection establishment</div>
+<div class="quiz-option" onclick="checkQuiz(this, false, 'quiz4')">C) UDP supports broadcast, which HTTP/3 needs for content delivery</div>
+<div class="quiz-feedback correct" id="quiz4-correct">✅ <strong>Correct.</strong> TCP's head-of-line blocking means that a single lost packet stalls the delivery of all subsequent packets on that connection — even data for independent streams. QUIC, running over UDP, implements its own reliability in user space, allowing independent streams within a single connection. Furthermore, QUIC's 0-RTT handshake combines transport and TLS setup, reducing connection latency. This is a transfer-level insight: the same TCP vs UDP trade-offs we studied today manifest at the highest levels of internet protocol design.</div>
+<div class="quiz-feedback incorrect" id="quiz4-incorrect">❌ <strong>Not quite.</strong> The correct answer is B. UDP is not inherently more secure (option A) — QUIC adds its own encryption layer. HTTP/3 does not use broadcast (option C) — it uses unicast UDP datagrams. The real motivation is eliminating TCP's head-of-line blocking (where one lost packet stalls all streams) and enabling faster connection setup. By implementing reliability in user space rather than in the kernel's TCP stack, QUIC can innovate faster and avoid operating system update cycles.</div>
+</div>
+</div>
+
+<!-- SLIDE 43: Session Summary + Next Steps -->
+<div class="slide slide-content" id="slide43">
+<h2>📋 Session Summary</h2>
+<div class="content-grid">
+<div class="card card-accent">
+<h3>📡 Broadcast</h3>
+<ul>
+<li>One-to-all in L2 domain</li>
+<li><code>255.255.255.255</code> (limited)</li>
+<li>Requires <code>SO_BROADCAST</code></li>
+<li>Never crosses routers</li>
+</ul>
+</div>
+<div class="card card-success">
+<h3>🎯 Multicast</h3>
+<ul>
+<li>One-to-subscribed-group</li>
+<li><code>224.x</code> – <code>239.x</code> addresses</li>
+<li>JOIN via <code>IP_ADD_MEMBERSHIP</code></li>
+<li>TTL controls scope</li>
+</ul>
+</div>
+<div class="card card-purple">
+<h3>🚇 TCP Tunnel</h3>
+<ul>
+<li>Port forwarding proxy</li>
+<li>Two threads for full-duplex</li>
+<li><code>threading.Event</code> for shutdown</li>
+<li>NAT traversal, debugging</li>
+</ul>
+</div>
+</div>
+<div class="two-columns" style="margin-top:25px;">
+<div class="highlight-box" style="margin:0;">
+<strong>Next lecture (Week 4):</strong> Physical and data link layers — Ethernet frames, MAC addresses, ARP and switching. Today's broadcast behaviour (<code>ff:ff:ff:ff:ff:ff</code>) will make much more sense once we explore Layer 2 addressing.
+</div>
+<div class="warning-box" style="margin:0;">
+<strong>This week's seminar:</strong> You will implement broadcast senders/receivers, multicast group communication and the TCP tunnel in the Mininet environment, capturing and analysing traffic with tcpdump and Wireshark.
+</div>
+</div>
+</div>
+
+<!-- SLIDE 44: Closing -->
+<div class="slide slide-title" id="slide44">
+<h1>🎯 Ready for the Laboratory</h1>
+<div class="subtitle">Apply these concepts with the Seminar 3 starterkit</div>
+<div class="meta" style="margin-top: 45px;">
+<code style="background: rgba(255,255,255,0.15); padding: 14px 28px; border-radius: 12px; font-size: 1.1rem;">
+  cd ~/WEEK3 &amp;&amp; make verify
+</code>
+</div>
+<div class="meta" style="margin-top: 30px; opacity: 0.7;">
+Questions? Feedback? Use the thumbs-down button or speak with your seminar instructor.
+</div>
+</div>
+
+</div><!-- end slides-container -->
+<!-- Navigation -->
+<div class="nav-container">
+<button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)" title="Previous">◀ Previous</button>
+<button class="nav-btn toc-btn" onclick="toggleTOC()" title="Table of Contents">☰ Contents</button>
+<button class="nav-btn" id="nextBtn" onclick="changeSlide(1)" title="Next">Next ▶</button>
+<button class="nav-btn fullscreen-btn" onclick="toggleFullscreen()" title="Fullscreen">⛶</button>
+</div>
+
+<!-- Table of Contents Modal -->
+<div class="toc-modal" id="tocModal">
+<div class="toc-content">
+<button class="toc-close" onclick="toggleTOC()">✕</button>
+<h2>Table of Contents</h2>
+
+<div class="toc-section">
+<div class="toc-section-title">1. Opening — Why This Matters</div>
+<div class="toc-item" onclick="goToSlide(1)">1. Title</div>
+<div class="toc-item" onclick="goToSlide(2)">2. The Broadcast Storm Scenario</div>
+<div class="toc-item" onclick="goToSlide(3)">3. Three Modes of Delivery</div>
+</div>
+
+<div class="toc-section">
+<div class="toc-section-title">2. Foundations — What We Know</div>
+<div class="toc-item" onclick="goToSlide(4)">4. Where We Are in the Course</div>
+<div class="toc-item" onclick="goToSlide(5)">5. Quick Check: Prerequisites</div>
+<div class="toc-item" onclick="goToSlide(6)">6. The Problem We Cannot Solve Yet</div>
+</div>
+
+<div class="toc-section">
+<div class="toc-section-title">3. Socket Essentials</div>
+<div class="toc-item" onclick="goToSlide(7)">7. What Is a Socket?</div>
+<div class="toc-item" onclick="goToSlide(8)">8. Socket Addressing (5-Tuple)</div>
+<div class="toc-item" onclick="goToSlide(9)">9. TCP vs UDP</div>
+<div class="toc-item" onclick="goToSlide(10)">10. Socket API Lifecycle</div>
+</div>
+
+<div class="toc-section">
+<div class="toc-section-title">4. UDP Broadcast</div>
+<div class="toc-item" onclick="goToSlide(11)">11. Broadcast Concept</div>
+<div class="toc-item" onclick="goToSlide(12)">12. Broadcast Addresses</div>
+<div class="toc-item" onclick="goToSlide(13)">13. SO_BROADCAST — Predict &amp; Reveal</div>
+<div class="toc-item" onclick="goToSlide(14)">14. Broadcast Sender Code</div>
+<div class="toc-item" onclick="goToSlide(15)">15. Broadcast Receiver Code</div>
+<div class="toc-item" onclick="goToSlide(16)">16. Quiz: Broadcast Traffic</div>
+<div class="toc-item" onclick="goToSlide(17)">17. Traffic Capture</div>
+<div class="toc-item" onclick="goToSlide(18)">18. Limitations and Dangers</div>
+<div class="toc-item" onclick="goToSlide(19)">19. When Broadcast Is Appropriate</div>
+<div class="toc-item" onclick="goToSlide(20)">20. Broadcast Summary</div>
+</div>
+
+<div class="toc-section">
+<div class="toc-section-title">5. UDP Multicast</div>
+<div class="toc-item" onclick="goToSlide(21)">21. From Broadcast to Multicast</div>
+<div class="toc-item" onclick="goToSlide(22)">22. Multicast Concept</div>
+<div class="toc-item" onclick="goToSlide(23)">23. Address Ranges (Class D)</div>
+<div class="toc-item" onclick="goToSlide(24)">24. Broadcast vs Multicast Comparison</div>
+<div class="toc-item" onclick="goToSlide(25)">25. IGMP Protocol</div>
+<div class="toc-item" onclick="goToSlide(26)">26. Multicast Sender</div>
+<div class="toc-item" onclick="goToSlide(27)">27. Multicast Receiver</div>
+<div class="toc-item" onclick="goToSlide(28)">28. IP_ADD_MEMBERSHIP</div>
+<div class="toc-item" onclick="goToSlide(29)">29. TTL Scoping</div>
+<div class="toc-item" onclick="goToSlide(30)">30. Quiz: Multicast Troubleshooting</div>
+<div class="toc-item" onclick="goToSlide(31)">31. Choosing a Pattern</div>
+</div>
+
+<div class="toc-section">
+<div class="toc-section-title">6. TCP Tunnelling</div>
+<div class="toc-item" onclick="goToSlide(32)">32. Tunnel Concept</div>
+<div class="toc-item" onclick="goToSlide(33)">33. Use Cases</div>
+<div class="toc-item" onclick="goToSlide(34)">34. Architecture</div>
+<div class="toc-item" onclick="goToSlide(35)">35. Forward Stream Code</div>
+<div class="toc-item" onclick="goToSlide(36)">36. Client Handler + Accept Loop</div>
+<div class="toc-item" onclick="goToSlide(37)">37. Running in Mininet</div>
+<div class="toc-item" onclick="goToSlide(38)">38. Thread Coordination</div>
+</div>
+
+<div class="toc-section">
+<div class="toc-section-title">7. Synthesis &amp; Reflection</div>
+<div class="toc-item" onclick="goToSlide(39)">39. Back to the Warehouse</div>
+<div class="toc-item" onclick="goToSlide(40)">40. Common Errors</div>
+<div class="toc-item" onclick="goToSlide(41)">41. Communication Analogies</div>
+<div class="toc-item" onclick="goToSlide(42)">42. Synthesis Quiz: QUIC</div>
+<div class="toc-item" onclick="goToSlide(43)">43. Summary &amp; Next Steps</div>
+<div class="toc-item" onclick="goToSlide(44)">44. Closing</div>
+</div>
+
+</div>
+</div>
+
+<script>
+    // ═══════════════════════════════════════════════════════════════════
+    // NAVIGATION
+    // ═══════════════════════════════════════════════════════════════════
+
+    let currentSlide = 1;
+    const totalSlides = 44;
+
+    function showSlide(n) {
+      const slides = document.querySelectorAll('.slide');
+      if (n < 1) n = 1;
+      if (n > totalSlides) n = totalSlides;
+      currentSlide = n;
+
+      slides.forEach((slide, index) => {
+        slide.classList.remove('active');
+        if (index === n - 1) slide.classList.add('active');
+      });
+
+      document.getElementById('currentSlide').textContent = n;
+      document.getElementById('prevBtn').disabled = (n === 1);
+      document.getElementById('nextBtn').disabled = (n === totalSlides);
+      document.getElementById('progressBar').style.width = ((n / totalSlides) * 100) + '%';
+
+      try {
+        history.replaceState(null, null, '#slide' + n);
+      } catch (e) {
+        // Ignore SecurityError in sandboxed iframes
+      }
+    }
+
+    function changeSlide(delta) {
+      showSlide(currentSlide + delta);
+    }
+
+    function goToSlide(n) {
+      showSlide(n);
+      toggleTOC();
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // KEYBOARD SHORTCUTS
+    // ═══════════════════════════════════════════════════════════════════
+
+    document.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+      switch(e.key) {
+        case 'ArrowRight':
+        case ' ':
+          e.preventDefault();
+          changeSlide(1);
+          break;
+        case 'ArrowLeft':
+          e.preventDefault();
+          changeSlide(-1);
+          break;
+        case 'Home':
+          e.preventDefault();
+          showSlide(1);
+          break;
+        case 'End':
+          e.preventDefault();
+          showSlide(totalSlides);
+          break;
+        case 'f':
+        case 'F':
+          toggleFullscreen();
+          break;
+        case 't':
+        case 'T':
+          toggleTOC();
+          break;
+        case 'Escape':
+          const tocModal = document.getElementById('tocModal');
+          if (tocModal.classList.contains('show')) {
+            toggleTOC();
+          }
+          break;
+      }
+    });
+
+    // ═══════════════════════════════════════════════════════════════════
+    // FULLSCREEN
+    // ═══════════════════════════════════════════════════════════════════
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+          console.log('Fullscreen not available:', err);
+        });
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // TABLE OF CONTENTS
+    // ═══════════════════════════════════════════════════════════════════
+
+    function toggleTOC() {
+      const tocModal = document.getElementById('tocModal');
+      tocModal.classList.toggle('show');
+    }
+
+    document.getElementById('tocModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        toggleTOC();
+      }
+    });
+
+    // ═══════════════════════════════════════════════════════════════════
+    // QUIZ FUNCTIONALITY (fixed: was 'includess', now 'includes')
+    // ═══════════════════════════════════════════════════════════════════
+
+    function checkQuiz(element, isCorrect, quizId) {
+      const container = element.closest('.quiz-container');
+      const options = container.querySelectorAll('.quiz-option');
+
+      // Disable all options
+      options.forEach(opt => {
+        opt.style.pointerEvents = 'none';
+        opt.classList.remove('correct', 'incorrect');
+      });
+
+      if (isCorrect) {
+        element.classList.add('correct');
+        const fb = document.getElementById(quizId + '-correct');
+        if (fb) fb.classList.add('show');
+      } else {
+        element.classList.add('incorrect');
+        // Highlight the correct answer
+        options.forEach(opt => {
+          const handler = opt.getAttribute('onclick');
+          if (handler && handler.includes(', true,')) {
+            opt.classList.add('correct');
+          }
+        });
+        const fb = document.getElementById(quizId + '-incorrect');
+        if (fb) fb.classList.add('show');
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // REVEAL FUNCTIONALITY
+    // ═══════════════════════════════════════════════════════════════════
+
+    function toggleReveal(id) {
+      const content = document.getElementById(id);
+      const btn = content.previousElementSibling;
+      content.classList.toggle('show');
+      if (content.classList.contains('show')) {
+        btn.textContent = 'Hide';
+      } else {
+        btn.textContent = 'Reveal the Answer';
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // INTERACTIVE: COMMUNICATION PATTERN SELECTOR (Slide 31)
+    // ═══════════════════════════════════════════════════════════════════
+
+    function updateRecommendation() {
+      const slider = document.getElementById('hostSlider');
+      const display = document.getElementById('recommendation');
+      const val = parseInt(slider.value);
+      const pct = Math.round((val / 200) * 100);
+
+      let rec, colour, icon;
+      if (val >= 190) {
+        rec = 'Broadcast'; colour = 'var(--accent)'; icon = '📡';
+      } else if (val >= 150) {
+        rec = 'Broadcast (acceptable) or Multicast (preferred)'; colour = 'var(--accent-warm)'; icon = '⚖️';
+      } else {
+        rec = 'Multicast'; colour = 'var(--success-dark)'; icon = '🎯';
+      }
+
+      display.innerHTML = '<strong>' + val + ' out of 200 hosts (' + pct + '%)</strong> → Recommended: <span style="color:' + colour + ';">' + icon + ' ' + rec + '</span>';
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // INITIALISATION
+    // ═══════════════════════════════════════════════════════════════════
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('totalSlides').textContent = totalSlides;
+
+      const hash = window.location.hash;
+      if (hash && hash.startsWith('#slide')) {
+        const slideNum = parseInt(hash.replace('#slide', ''));
+        if (slideNum >= 1 && slideNum <= totalSlides) {
+          showSlide(slideNum);
+          return;
+        }
+      }
+      showSlide(1);
+    });
+</script>
+</body>
+</html>

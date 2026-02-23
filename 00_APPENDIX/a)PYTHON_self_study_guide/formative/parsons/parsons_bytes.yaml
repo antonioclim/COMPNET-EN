@@ -1,0 +1,152 @@
+# Parsons Problems: Bytes and Encoding
+# Version: 5.0 — January 2026
+# Usage: python formative/parsons_runner.py --file parsons/parsons_bytes.yaml
+
+metadata:
+  topic: "Bytes, Strings and Binary Protocol Parsing"
+  difficulty: basic_to_intermediate
+  estimated_time: "15 minutes"
+  lo_refs: [LO2, LO4]
+  description: "Practise working with bytes, encoding and struct"
+
+problems:
+  # ─────────────────────────────────────────────────────────────────────────────
+  - id: parsons_bytes_01
+    title: "Convert String to Bytes and Back"
+    instructions: "Order the lines to convert a string to bytes, modify it and convert back to string."
+    difficulty: basic
+    
+    blocks:
+      - {id: 1, code: "text = 'Hello, Network!'", indent: 0}
+      - {id: 2, code: "data = text.encode('utf-8')", indent: 0}
+      - {id: 3, code: "print(f'Bytes: {data}')", indent: 0}
+      - {id: 4, code: "print(f'Length: {len(data)} bytes')", indent: 0}
+      - {id: 5, code: "result = data.decode('utf-8')", indent: 0}
+      - {id: 6, code: "print(f'String: {result}')", indent: 0}
+    
+    distractors:
+      - {id: D1, code: "data = bytes(text)", indent: 0, hint: "bytes() requires encoding: bytes(text, 'utf-8')"}
+      - {id: D2, code: "result = str(data)", indent: 0, hint: "str(data) gives repr, not decoded text. Use .decode()"}
+    
+    correct_order: [1, 2, 3, 4, 5, 6]
+    
+    explanation: |
+      String ↔ Bytes conversion:
+      - str.encode('utf-8') → bytes
+      - bytes.decode('utf-8') → str
+      
+      Common mistake: str(b'hello') returns "b'hello'" (the repr), not "hello"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  - id: parsons_bytes_02
+    title: "Pack and Unpack a Port Number"
+    instructions: "Order the lines to pack port 8080 into network byte order and unpack it back."
+    difficulty: basic
+    
+    blocks:
+      - {id: 1, code: "import struct", indent: 0}
+      - {id: 2, code: "port = 8080", indent: 0}
+      - {id: 3, code: "packed = struct.pack('!H', port)", indent: 0}
+      - {id: 4, code: "print(f'Packed: {packed.hex()}')", indent: 0}
+      - {id: 5, code: "unpacked, = struct.unpack('!H', packed)", indent: 0}
+      - {id: 6, code: "print(f'Unpacked: {unpacked}')", indent: 0}
+    
+    distractors:
+      - {id: D1, code: "packed = struct.pack('H', port)", indent: 0, hint: "Missing ! for network byte order"}
+      - {id: D2, code: "unpacked = struct.unpack('!H', packed)", indent: 0, hint: "unpack returns tuple; need comma: unpacked, = ..."}
+    
+    correct_order: [1, 2, 3, 4, 5, 6]
+    
+    explanation: |
+      struct format for port numbers:
+      - '!' = network byte order (big-endian)
+      - 'H' = unsigned short (2 bytes, 0-65535)
+      
+      Note the trailing comma in unpack: unpacked, = ...
+      This extracts the single value from the tuple.
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  - id: parsons_bytes_03
+    title: "Parse a Simple Binary Header"
+    instructions: "Order the lines to parse a binary header with version (1 byte), flags (1 byte) and length (2 bytes)."
+    difficulty: intermediate
+    
+    blocks:
+      - {id: 1, code: "import struct", indent: 0}
+      - {id: 2, code: "header = b'\\x01\\x03\\x00\\x64'  # version=1, flags=3, length=100", indent: 0}
+      - {id: 3, code: "fmt = '!BBH'  # 2 unsigned bytes + 1 unsigned short", indent: 0}
+      - {id: 4, code: "version, flags, length = struct.unpack(fmt, header)", indent: 0}
+      - {id: 5, code: "print(f'Version: {version}')", indent: 0}
+      - {id: 6, code: "print(f'Flags: {flags:08b}')", indent: 0}
+      - {id: 7, code: "print(f'Length: {length}')", indent: 0}
+    
+    distractors:
+      - {id: D1, code: "fmt = '!HBB'", indent: 0, hint: "Order matters: BBH means byte, byte, short — not short, byte, byte"}
+      - {id: D2, code: "header = '\\x01\\x03\\x00\\x64'", indent: 0, hint: "Missing b prefix — must be bytes literal"}
+    
+    correct_order: [1, 2, 3, 4, 5, 6, 7]
+    
+    explanation: |
+      Binary header parsing:
+      - B = unsigned byte (1 byte, 0-255)
+      - H = unsigned short (2 bytes, 0-65535)
+      - Format order matches data order
+      
+      Common formats: B (byte), H (short), I (int), Q (long long)
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  - id: parsons_bytes_04
+    title: "Build a Binary Message"
+    instructions: "Order the lines to build a binary message with a 4-byte length prefix followed by the payload."
+    difficulty: intermediate
+    
+    blocks:
+      - {id: 1, code: "import struct", indent: 0}
+      - {id: 2, code: "payload = b'Hello, World!'", indent: 0}
+      - {id: 3, code: "length = len(payload)", indent: 0}
+      - {id: 4, code: "header = struct.pack('!I', length)", indent: 0}
+      - {id: 5, code: "message = header + payload", indent: 0}
+      - {id: 6, code: "print(f'Total message: {len(message)} bytes')", indent: 0}
+      - {id: 7, code: "print(f'Header: {header.hex()}')", indent: 0}
+    
+    distractors:
+      - {id: D1, code: "message = payload + header", indent: 0, hint: "Length prefix comes BEFORE payload"}
+      - {id: D2, code: "header = struct.pack('!H', length)", indent: 0, hint: "H is 2 bytes; question asks for 4-byte (I)"}
+    
+    correct_order: [1, 2, 3, 4, 5, 6, 7]
+    
+    explanation: |
+      Length-prefixed protocol pattern:
+      1. Calculate payload length
+      2. Pack length as fixed-size header
+      3. Concatenate header + payload
+      
+      This allows receiver to know exactly how many bytes to read.
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  - id: parsons_bytes_05
+    title: "Handle Encoding Errors Gracefully"
+    instructions: "Order the lines to decode bytes that might contain invalid UTF-8 characters."
+    difficulty: intermediate
+    
+    blocks:
+      - {id: 1, code: "data = b'Hello \\x80\\x81 World'  # Contains invalid UTF-8", indent: 0}
+      - {id: 2, code: "try:", indent: 0}
+      - {id: 3, code: "text = data.decode('utf-8')", indent: 1}
+      - {id: 4, code: "except UnicodeDecodeError:", indent: 0}
+      - {id: 5, code: "text = data.decode('utf-8', errors='replace')", indent: 1}
+      - {id: 6, code: "print(f'Decoded: {text}')", indent: 0}
+    
+    distractors:
+      - {id: D1, code: "text = str(data, 'utf-8')", indent: 1, hint: "This works but does not handle errors gracefully"}
+      - {id: D2, code: "except EncodingError:", indent: 0, hint: "The exception is UnicodeDecodeError, not EncodingError"}
+    
+    correct_order: [1, 2, 3, 4, 5, 6]
+    
+    explanation: |
+      Error handling for decode:
+      - errors='replace' → invalid bytes become �
+      - errors='ignore' → invalid bytes are skipped
+      - errors='strict' → raises exception (default)
+      
+      Always handle encoding errors when working with external data.

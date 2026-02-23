@@ -1,0 +1,2625 @@
+<!DOCTYPE html>
+
+<html lang="en-GB">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="CSIE Faculty-ASE" name="author"/>
+<meta content="Revolvix" name="generator"/>
+<meta content="Week 7: Routing Protocols — RIP, OSPF and Link-State Concepts — ASE-CSIE Computer Networks" name="description"/>
+<title>Week 7 – Routing Protocols | ASE-CSIE</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&amp;display=swap" rel="stylesheet"/>
+<style>
+    /* === CSS VARIABLES === */
+    :root {
+      --primary: #0f172a;
+      --primary-light: #1e293b;
+      --secondary: #0ea5e9;
+      --secondary-dark: #0284c7;
+      --accent: #f59e0b;
+      --accent-warm: #ea580c;
+      --success: #10b981;
+      --success-dark: #059669;
+      --danger: #ef4444;
+      --purple: #8b5cf6;
+      --purple-dark: #7c3aed;
+      --bg-light: #f8fafc;
+      --bg-cool: #f0f9ff;
+      --bg-warm: #fffbeb;
+      --text-dark: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+
+      /* Text on dark backgrounds */
+      --text-on-dark: #f1f5f9;
+      --text-on-dark-muted: #cbd5e1;
+      --text-on-dark-heading: #ffffff;
+
+      /* Gradients */
+      --gradient-primary: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      --gradient-secondary: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+      --gradient-accent: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+      --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      --gradient-purple: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+
+      /* Typography */
+      --font-heading: 'Source Serif 4', Georgia, serif;
+      --font-body: 'Inter', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', 'Consolas', monospace;
+
+      /* Shadows */
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+      --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+    }
+
+    /* === RESET & BASE === */
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html {
+      font-size: 17px;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-body);
+      line-height: 1.7;
+      color: var(--text-dark);
+      background: var(--gradient-primary);
+      min-height: 100vh;
+    }
+
+    /* === PRESENTATION CONTAINER === */
+    .presentation {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* === SLIDES - CRITICAL ABSOLUTE POSITIONING === */
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      padding: 4rem 4rem 5rem;
+      display: none;
+      flex-direction: column;
+      background: var(--bg-light);
+      overflow-y: auto;
+    }
+
+    .slide.active {
+      display: flex;
+      animation: slideIn 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-up {
+      animation: fadeUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      opacity: 0;
+    }
+
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+    .delay-4 { animation-delay: 0.4s; }
+    .delay-5 { animation-delay: 0.5s; }
+    .delay-6 { animation-delay: 0.6s; }
+
+    /* === PROGRESS BAR === */
+    #progressBar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 4px;
+      background: var(--gradient-accent);
+      transition: width 0.3s ease;
+      z-index: 1001;
+      border-radius: 0 2px 2px 0;
+    }
+
+    /* === COURSE IDENTIFIER === */
+    #course-id {
+      position: fixed;
+      top: 20px;
+      left: 30px;
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--primary);
+      background: rgba(255,255,255,0.95);
+      padding: 8px 16px;
+      border-radius: 8px;
+      box-shadow: var(--shadow-md);
+      z-index: 1000;
+      letter-spacing: 0.5px;
+    }
+
+    /* === SLIDE COUNTER === */
+    #slideCounter {
+      position: fixed;
+      top: 20px;
+      right: 30px;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-on-dark);
+      background: var(--primary);
+      padding: 8px 16px;
+      border-radius: 20px;
+      z-index: 1000;
+    }
+
+    /* === TYPOGRAPHY === */
+    h1, h2, h3, h4, h5, h6 {
+      font-family: var(--font-heading);
+      margin-top: 0;
+      line-height: 1.3;
+      color: var(--primary);
+    }
+
+    h1 { font-size: 3rem; font-weight: 700; }
+    h2 { font-size: 2.2rem; font-weight: 600; }
+    h3 { font-size: 1.6rem; font-weight: 600; }
+    h4 { font-size: 1.25rem; font-weight: 600; }
+
+    p {
+      margin: 0 0 1.2em;
+      font-size: 1.1rem;
+    }
+
+    ul, ol {
+      margin: 0 0 1.2em;
+      padding-left: 1.8em;
+    }
+
+    li {
+      margin-bottom: 0.5em;
+      font-size: 1.05rem;
+    }
+
+    code {
+      background: var(--bg-cool);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.9em;
+      color: var(--secondary-dark);
+    }
+
+    /* === SLIDE TITLE === */
+    .slide-title {
+      font-size: 2rem;
+      color: var(--primary);
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 3px solid var(--secondary);
+      display: inline-block;
+    }
+
+    .slide-subtitle {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      margin-top: -1rem;
+      margin-bottom: 2rem;
+    }
+
+    /* === TITLE SLIDE === */
+    .title-slide {
+      background: var(--gradient-primary);
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 3rem;
+    }
+
+    .title-slide h1 {
+      font-size: 3.5rem;
+      color: var(--text-on-dark-heading);
+      margin-bottom: 0.5rem;
+    }
+
+    .title-slide h2 {
+      font-size: 1.8rem;
+      color: var(--text-on-dark);
+      font-weight: 400;
+      margin-bottom: 2rem;
+    }
+
+    .title-slide p {
+      color: var(--text-on-dark-muted);
+    }
+
+    /* === SECTION SLIDE === */
+    .section-slide {
+      background: var(--gradient-primary);
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    .section-slide h1 {
+      font-size: 3rem;
+      color: var(--text-on-dark-heading);
+      margin-bottom: 1rem;
+    }
+
+    .section-slide h2 {
+      font-size: 1.5rem;
+      color: var(--text-on-dark);
+      font-weight: 400;
+    }
+
+    .section-slide p {
+      color: var(--text-on-dark-muted);
+      max-width: 700px;
+    }
+
+    /* === GRIDS === */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin: 1.5rem 0;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin: 1.5rem 0;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.25rem;
+      margin: 1.5rem 0;
+    }
+
+    @media (max-width: 1200px) {
+      .grid-3, .grid-4 { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 768px) {
+      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+      .slide { padding: 2rem 1.5rem 4rem; }
+    }
+
+    /* === CARDS === */
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--border);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .card h4 {
+      margin-bottom: 0.75rem;
+      color: var(--primary);
+    }
+
+    .card-accent {
+      border-left: 4px solid var(--accent);
+    }
+
+    .card-success {
+      border-left: 4px solid var(--success);
+    }
+
+    .card-danger {
+      border-left: 4px solid var(--danger);
+    }
+
+    .card-purple {
+      border-left: 4px solid var(--purple);
+    }
+
+    .card-secondary {
+      border-left: 4px solid var(--secondary);
+    }
+
+    /* === BOX TYPES === */
+    .highlight-box {
+      background: var(--gradient-secondary);
+      color: white;
+      padding: 1.5rem;
+      border-radius: 16px;
+      margin: 1.5rem 0;
+      box-shadow: var(--shadow-md);
+    }
+
+    .highlight-box strong {
+      color: white;
+    }
+
+    .definition-box {
+      background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+      border-left: 4px solid var(--success);
+      padding: 1.25rem 1.5rem;
+      border-radius: 0 12px 12px 0;
+      margin: 1.5rem 0;
+    }
+
+    .definition-box strong {
+      color: var(--success-dark);
+    }
+
+    .story-box {
+      background: linear-gradient(135deg, #faf5ff 0%, #ede9fe 100%);
+      border-left: 4px solid var(--purple);
+      padding: 1.25rem 1.5rem;
+      border-radius: 0 12px 12px 0;
+      margin: 1.5rem 0;
+      font-style: italic;
+    }
+
+    .story-box strong {
+      color: var(--purple-dark);
+      font-style: normal;
+    }
+
+    .warning-box {
+      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+      border-left: 4px solid var(--accent);
+      padding: 1.25rem 1.5rem;
+      border-radius: 0 12px 12px 0;
+      margin: 1.5rem 0;
+    }
+
+    .warning-box strong {
+      color: var(--accent-warm);
+    }
+
+    .insight-box {
+      background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+      border-left: 4px solid var(--danger);
+      padding: 1.25rem 1.5rem;
+      border-radius: 0 12px 12px 0;
+      margin: 1.5rem 0;
+    }
+
+    .insight-box strong {
+      color: var(--danger);
+    }
+
+    /* === CODE BLOCKS === */
+    pre, .code-block {
+      background: var(--gradient-primary);
+      color: #e2e8f0;
+      padding: 1.25rem;
+      border-radius: 12px;
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      line-height: 1.7;
+      overflow-x: auto;
+      margin: 1rem 0;
+      position: relative;
+      white-space: pre;
+      word-wrap: normal;
+    }
+
+    .code-block[data-lang]::before {
+      content: attr(data-lang);
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      font-size: 0.75rem;
+      color: var(--text-on-dark-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .code-block .keyword { color: #f472b6; }
+    .code-block .function { color: #60a5fa; }
+    .code-block .string { color: #34d399; }
+    .code-block .number { color: #fbbf24; }
+    .code-block .comment { color: #6b7280; font-style: italic; }
+    .code-block .operator { color: #f472b6; }
+
+    /* === TABLES === */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 1rem;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+    }
+
+    .data-table th {
+      background: var(--gradient-primary);
+      color: var(--text-on-dark);
+      padding: 1rem 1.25rem;
+      text-align: left;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      letter-spacing: 0.5px;
+    }
+
+    .data-table th:first-child {
+      border-radius: 12px 0 0 0;
+    }
+
+    .data-table th:last-child {
+      border-radius: 0 12px 0 0;
+    }
+
+    .data-table td {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      background: white;
+    }
+
+    .data-table tr:hover td {
+      background: var(--bg-cool);
+    }
+
+    .data-table tr:last-child td:first-child {
+      border-radius: 0 0 0 12px;
+    }
+
+    .data-table tr:last-child td:last-child {
+      border-radius: 0 0 12px 0;
+    }
+
+    /* === PROTOCOL BADGES === */
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin: 2px;
+    }
+
+    .badge-ospf {
+      background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+      color: #065f46;
+    }
+
+    .badge-rip {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      color: #92400e;
+    }
+
+    .badge-bgp {
+      background: var(--gradient-secondary);
+      color: white;
+    }
+
+    .badge-tcp {
+      background: var(--gradient-purple);
+      color: white;
+    }
+
+    .badge-udp {
+      background: var(--gradient-accent);
+      color: white;
+    }
+
+    /* === DIAGRAMS === */
+    .diagram-container {
+      margin: 1.5rem 0;
+      text-align: center;
+    }
+
+    .diagram-container svg {
+      max-width: 100%;
+      min-height: 180px;
+    }
+
+    .ascii-diagram {
+      background: var(--gradient-primary);
+      color: #4ade80;
+      padding: 1.5rem 2rem;
+      border-radius: 12px;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      white-space: pre;
+      overflow-x: auto;
+      line-height: 1.5;
+      margin: 1.5rem 0;
+    }
+
+    /* === INTERACTIVE ELEMENTS === */
+    .quiz-container {
+      background: var(--bg-cool);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      margin: 1.5rem 0;
+    }
+
+    .quiz-container h4 {
+      color: var(--primary);
+      margin-bottom: 1.25rem;
+    }
+
+    .quiz-option {
+      display: block;
+      padding: 1rem 1.25rem;
+      margin: 0.5rem 0;
+      background: white;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 1rem;
+    }
+
+    .quiz-option:hover {
+      border-color: var(--secondary);
+      transform: translateX(5px);
+    }
+
+    .quiz-option.selected {
+      border-color: var(--secondary);
+      background: var(--bg-cool);
+    }
+
+    .quiz-option.correct {
+      border-color: var(--success);
+      background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+    }
+
+    .quiz-option.incorrect {
+      border-color: var(--danger);
+      background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    }
+
+    .quiz-feedback {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 10px;
+      display: none;
+      font-weight: 500;
+    }
+
+    .quiz-feedback.show {
+      display: block;
+    }
+
+    .quiz-feedback.correct {
+      background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+      color: #065f46;
+    }
+
+    .quiz-feedback.incorrect {
+      background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+      color: #991b1b;
+    }
+
+    .quiz-feedback .correct-msg,
+    .quiz-feedback .incorrect-msg {
+      display: none;
+    }
+
+    .quiz-feedback.correct .correct-msg {
+      display: block;
+    }
+
+    .quiz-feedback.incorrect .incorrect-msg {
+      display: block;
+    }
+
+    /* === REVEAL CONTENT === */
+    .reveal-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0.75rem 1.5rem;
+      background: var(--gradient-purple);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .reveal-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .reveal-content {
+      display: none;
+      margin-top: 1rem;
+      padding: 1.25rem;
+      background: white;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      animation: fadeUp 0.4s ease;
+    }
+
+    .reveal-content.show {
+      display: block;
+    }
+
+    /* === INTERACTIVE CALCULATORS === */
+    .interactive-panel {
+      background: white;
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow-lg);
+      margin: 1.5rem 0;
+    }
+
+    .interactive-panel h4 {
+      margin-bottom: 1rem;
+    }
+
+    .interactive-panel label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .interactive-panel input[type="range"] {
+      width: 100%;
+      margin: 0.5rem 0;
+    }
+
+    .interactive-panel input[type="number"],
+    .interactive-panel input[type="text"] {
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .result-display {
+      background: var(--gradient-primary);
+      color: var(--text-on-dark);
+      padding: 1.25rem;
+      border-radius: 12px;
+      margin-top: 1rem;
+      font-family: var(--font-mono);
+    }
+
+    .result-display p,
+    .result-display span,
+    .result-display strong,
+    .result-display code {
+      color: var(--text-on-dark);
+    }
+
+    /* === NAVIGATION === */
+    .nav-container {
+      position: fixed;
+      bottom: 25px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 12px;
+      z-index: 1000;
+      background: rgba(255,255,255,0.98);
+      padding: 12px 20px;
+      border-radius: 30px;
+      box-shadow: var(--shadow-xl);
+    }
+
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px 20px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: var(--font-body);
+    }
+
+    .nav-btn-primary {
+      background: var(--gradient-primary);
+      color: white;
+    }
+
+    .nav-btn-primary:hover {
+      transform: scale(1.05);
+      box-shadow: var(--shadow-md);
+    }
+
+    .nav-btn-secondary {
+      background: var(--bg-cool);
+      color: var(--primary);
+    }
+
+    .nav-btn-secondary:hover {
+      background: var(--secondary);
+      color: white;
+    }
+
+    /* === FOOTER === */
+    .footer-attribution {
+      position: fixed;
+      bottom: 30px;
+      left: 30px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      z-index: 999;
+    }
+
+    /* === TOC MODAL === */
+    .toc-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(4px);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .toc-overlay.show {
+      display: flex;
+    }
+
+    .toc-modal {
+      background: white;
+      border-radius: 20px;
+      padding: 2rem;
+      max-width: 700px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-xl);
+    }
+
+    .toc-modal h2 {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .toc-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .toc-section h4 {
+      color: var(--secondary);
+      margin-bottom: 0.75rem;
+      font-size: 1rem;
+    }
+
+    .toc-item {
+      padding: 0.5rem 1rem;
+      margin: 0.25rem 0;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.95rem;
+    }
+
+    .toc-item:hover {
+      background: var(--bg-cool);
+      color: var(--secondary);
+    }
+
+    .toc-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+
+    /* === COMPARISON CARDS === */
+    .comparison-ls {
+      background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+      border: 2px solid var(--success);
+    }
+
+    .comparison-dv {
+      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+      border: 2px solid var(--accent);
+    }
+
+    /* === STEP LIST === */
+    .step-list {
+      margin: 1.5rem 0;
+    }
+
+    .step-item {
+      display: flex;
+      align-items: flex-start;
+      padding: 1rem 1.25rem;
+      margin: 0.5rem 0;
+      background: white;
+      border-radius: 12px;
+      border-left: 4px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      transition: all 0.3s ease;
+    }
+
+    .step-item.active {
+      background: var(--bg-cool);
+      border-left-color: var(--secondary);
+    }
+
+    .step-num {
+      width: 32px;
+      height: 32px;
+      background: var(--text-muted);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 1rem;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .step-item.active .step-num {
+      background: var(--secondary);
+    }
+
+    /* === PRINT === */
+    @media print {
+      .nav-container, #course-id, #slideCounter, #progressBar, .footer-attribution { display: none !important; }
+      .slide { position: relative !important; page-break-after: always; }
+    }
+  </style>
+
+<body>
+<!-- Progress Bar -->
+<div id="progressBar" style="width: 0%;"></div>
+<!-- Course Identifier -->
+<div id="course-id">ASE-CSIE &bull; Computer Networks</div>
+<!-- Slide Counter -->
+<div id="slideCounter">1 / 45</div>
+<!-- Presentation Container -->
+<div class="presentation" id="presentation">
+
+<!-- ==================== SLIDE 1: Title ==================== -->
+<div class="slide active title-slide" data-slide="1">
+<h1>Week 7</h1>
+<h2>Routing Protocols</h2>
+<p style="color: var(--text-on-dark-muted); font-size: 1.2rem; margin-top: 1rem; max-width: 700px;">
+RIP, OSPF and the Algorithms That Guide Every Packet</p>
+<div class="grid-2" style="max-width: 800px; margin-top: 2.5rem;">
+<div class="card" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);">
+<h4 style="color: var(--text-on-dark);">Distance-Vector</h4>
+<p style="color: var(--text-on-dark-muted); text-align: left;">
+RIP, Bellman&ndash;Ford, hop-count metric, convergence challenges</p>
+</div>
+<div class="card" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);">
+<h4 style="color: var(--text-on-dark);">Link-State</h4>
+<p style="color: var(--text-on-dark-muted); text-align: left;">
+OSPF, Dijkstra&rsquo;s algorithm, LSDB, areas and DR/BDR election</p>
+</div>
+</div>
+<p style="margin-top: 3rem; font-size: 0.9rem; color: var(--text-on-dark-muted);">
+Bachelor in Economic Informatics &bull; Year 3 &bull; Semester 2</p>
+</div>
+
+<!-- ==================== SLIDE 2: Hook ==================== -->
+<div class="slide" data-slide="2">
+<h2 class="slide-title">A Single Misconfiguration, a Global Meltdown</h2>
+<div class="story-box fade-up">
+<strong>25 April 1997 &mdash; The Day the Internet Lost Its Way</strong><br/><br/>
+A small Internet service provider in Virginia, operating Autonomous System 7007,
+began advertising itself as the optimal path to nearly the entire IPv4 address space.
+Within minutes, routers across North America and Europe accepted these bogus
+announcements and redirected traffic accordingly. For roughly two hours, millions of
+packets converged on infrastructure wholly incapable of handling them. E-mail queues
+stalled, e-commerce transactions failed and network operations centres scrambled to
+identify the source of the chaos.
+</div>
+<p class="fade-up delay-2">The root cause was not a hardware failure or a cyberattack. It was a
+<strong>routing misconfiguration</strong> &mdash; a set of incorrect announcements
+propagated by the very protocols designed to keep the Internet connected.</p>
+<div class="warning-box fade-up delay-3">
+<strong>The question we shall answer today:</strong> How do routers decide where to
+send packets? What algorithms power this decision? And how can a single
+misconfigured rule cascade into a global outage?
+</div>
+</div>
+
+<!-- ==================== SLIDE 3: Where We Stand ==================== -->
+<div class="slide" data-slide="3">
+<h2 class="slide-title">Where We Stand</h2>
+<div class="highlight-box fade-up">
+<strong>Weeks 5&ndash;6 recap:</strong> We learned how devices obtain and use IP addresses
+(IPv4, IPv6, subnetting, VLSM), how NAT translates between private and public addresses,
+how DHCP assigns configurations automatically and how ICMP reports errors along a path.
+We now know <em>how to address</em> a packet &mdash; but not yet <em>how to route</em> it
+across multiple networks.
+</div>
+<p class="fade-up delay-1">Today we fill that gap. We move from the question
+&ldquo;where is this destination?&rdquo; to the question &ldquo;which path should
+this packet take to get there?&rdquo;</p>
+<div class="grid-3 fade-up delay-2">
+<div class="card card-success">
+<h4>Week 5</h4>
+<p>IP addressing, subnetting, VLSM &mdash; <em>naming</em> hosts and networks</p>
+</div>
+<div class="card card-accent">
+<h4>Week 6</h4>
+<p>NAT, DHCP, ICMP, NDP &mdash; <em>supporting</em> the network layer</p>
+</div>
+<div class="card card-secondary">
+<h4>Week 7 (today)</h4>
+<p>Routing protocols &mdash; <em>finding paths</em> across networks</p>
+</div>
+</div>
+<button class="reveal-btn fade-up delay-3" onclick="toggleReveal(this)">&#128269; Quick recall: What protocol reports &ldquo;Destination Unreachable&rdquo;?</button>
+<div class="reveal-content">
+<p><strong>ICMP</strong> (Internet Control Message Protocol, Week 6). When a router has no
+route for a destination, it drops the packet and sends an ICMP Type 3 message back to the
+sender. Today you will learn how routers acquire the information that prevents those
+&ldquo;Destination Unreachable&rdquo; messages in the first place.</p>
+</div>
+</div>
+
+<!-- ==================== SLIDE 4: Learning Objectives ==================== -->
+<div class="slide" data-slide="4">
+<h2 class="slide-title">Learning Objectives</h2>
+<p>By the end of this lecture, you will be able to:</p>
+<div class="grid-2 fade-up">
+<div class="card card-secondary">
+<h4>1. Distinguish forwarding from routing</h4>
+<p>Explain why a router&rsquo;s per-packet decision differs from the process that builds
+routing tables.</p>
+</div>
+<div class="card card-secondary">
+<h4>2. Read a routing table</h4>
+<p>Identify the prefix, next hop, metric and source for each entry.</p>
+</div>
+<div class="card card-accent">
+<h4>3. Compare static and dynamic routes</h4>
+<p>Assess when manual configuration is appropriate and when a protocol is needed.</p>
+</div>
+<div class="card card-accent">
+<h4>4. Contrast distance-vector and link-state</h4>
+<p>Explain how each family builds its view of the network.</p>
+</div>
+<div class="card card-success">
+<h4>5. Describe RIP and its limitations</h4>
+<p>Explain hop-count metrics, timers and the count-to-infinity problem.</p>
+</div>
+<div class="card card-success">
+<h4>6. Describe OSPF operation</h4>
+<p>Explain the LSDB, hello protocol, DR/BDR election, areas and SPF calculation.</p>
+</div>
+</div>
+<div class="card card-purple fade-up delay-2" style="margin-top:1rem;">
+<h4>7. Trace algorithms</h4>
+<p>Execute Bellman&ndash;Ford and Dijkstra by hand on small topologies.</p>
+</div>
+</div>
+
+<!-- ==================== SLIDE 5: Course Roadmap ==================== -->
+<div class="slide" data-slide="5">
+<h2 class="slide-title">Course Roadmap</h2>
+<div class="diagram-container fade-up">
+<svg viewBox="0 0 1100 220" style="max-width:100%;">
+  <defs>
+    <linearGradient id="gDone" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#d1fae5"/><stop offset="100%" stop-color="#a7f3d0"/>
+    </linearGradient>
+    <linearGradient id="gNow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fef3c7"/><stop offset="100%" stop-color="#fde68a"/>
+    </linearGradient>
+    <linearGradient id="gFut" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e0e7ff"/><stop offset="100%" stop-color="#c7d2fe"/>
+    </linearGradient>
+  </defs>
+  <!-- Past weeks -->
+  <rect x="10" y="30" width="140" height="80" rx="14" fill="url(#gDone)" stroke="#059669" stroke-width="2"/>
+  <text x="80" y="62" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46">Weeks 1&ndash;4</text>
+  <text x="80" y="82" text-anchor="middle" font-size="12" font-weight="600" fill="#065f46">Fundamentals,</text>
+  <text x="80" y="98" text-anchor="middle" font-size="12" font-weight="600" fill="#065f46">OSI, Sockets, L1&ndash;L2</text>
+
+  <rect x="170" y="30" width="140" height="80" rx="14" fill="url(#gDone)" stroke="#059669" stroke-width="2"/>
+  <text x="240" y="62" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46">Weeks 5&ndash;6</text>
+  <text x="240" y="82" text-anchor="middle" font-size="12" font-weight="600" fill="#065f46">L3 Addressing,</text>
+  <text x="240" y="98" text-anchor="middle" font-size="12" font-weight="600" fill="#065f46">NAT, DHCP, ICMP</text>
+
+  <!-- Current week -->
+  <rect x="330" y="20" width="160" height="100" rx="14" fill="url(#gNow)" stroke="#f59e0b" stroke-width="3"/>
+  <text x="410" y="52" text-anchor="middle" font-size="14" font-weight="700" fill="#92400e">Week 7 (today)</text>
+  <text x="410" y="74" text-anchor="middle" font-size="13" font-weight="600" fill="#92400e">Routing Protocols</text>
+  <text x="410" y="94" text-anchor="middle" font-size="12" font-weight="600" fill="#92400e">RIP, OSPF, Dijkstra</text>
+
+  <!-- Future weeks -->
+  <rect x="510" y="30" width="140" height="80" rx="14" fill="url(#gFut)" stroke="#6366f1" stroke-width="2"/>
+  <text x="580" y="62" text-anchor="middle" font-size="13" font-weight="700" fill="#3730a3">Week 8</text>
+  <text x="580" y="82" text-anchor="middle" font-size="12" font-weight="600" fill="#3730a3">Transport Layer</text>
+  <text x="580" y="98" text-anchor="middle" font-size="12" font-weight="600" fill="#3730a3">TCP, UDP, TLS</text>
+
+  <rect x="670" y="30" width="140" height="80" rx="14" fill="url(#gFut)" stroke="#6366f1" stroke-width="2"/>
+  <text x="740" y="62" text-anchor="middle" font-size="13" font-weight="700" fill="#3730a3">Weeks 9&ndash;12</text>
+  <text x="740" y="82" text-anchor="middle" font-size="12" font-weight="600" fill="#3730a3">Session, Presentation</text>
+  <text x="740" y="98" text-anchor="middle" font-size="12" font-weight="600" fill="#3730a3">&amp; Application Layers</text>
+
+  <rect x="830" y="30" width="140" height="80" rx="14" fill="url(#gFut)" stroke="#6366f1" stroke-width="2"/>
+  <text x="900" y="62" text-anchor="middle" font-size="13" font-weight="700" fill="#3730a3">Week 13</text>
+  <text x="900" y="82" text-anchor="middle" font-size="12" font-weight="600" fill="#3730a3">IoT &amp; Network</text>
+  <text x="900" y="98" text-anchor="middle" font-size="12" font-weight="600" fill="#3730a3">Security</text>
+
+  <!-- Arrows -->
+  <line x1="152" y1="70" x2="168" y2="70" stroke="#64748b" stroke-width="2" marker-end="url(#arr)"/>
+  <line x1="312" y1="70" x2="328" y2="70" stroke="#64748b" stroke-width="2"/>
+  <line x1="492" y1="70" x2="508" y2="70" stroke="#64748b" stroke-width="2"/>
+  <line x1="652" y1="70" x2="668" y2="70" stroke="#64748b" stroke-width="2"/>
+  <line x1="812" y1="70" x2="828" y2="70" stroke="#64748b" stroke-width="2"/>
+
+  <!-- Seminar link -->
+  <rect x="330" y="140" width="160" height="55" rx="10" fill="#f0f9ff" stroke="#0ea5e9" stroke-width="2"/>
+  <text x="410" y="162" text-anchor="middle" font-size="12" font-weight="700" fill="#0284c7">Seminar 7</text>
+  <text x="410" y="180" text-anchor="middle" font-size="12" font-weight="600" fill="#0284c7">Packet capture &amp; filtering</text>
+  <line x1="410" y1="122" x2="410" y2="138" stroke="#0ea5e9" stroke-width="2" stroke-dasharray="4"/>
+</svg>
+</div>
+<p class="fade-up delay-1" style="text-align:center; color:var(--text-muted);">
+Seminar 7 covers packet sniffing, filtering and port scanning &mdash; security operations
+that depend on understanding how packets traverse routed networks.</p>
+</div>
+
+<!-- ==================== SLIDE 6: Conflict ==================== -->
+<div class="slide" data-slide="6">
+<h2 class="slide-title">The Problem We Cannot Yet Solve</h2>
+<p class="fade-up">Consider this scenario. You have three networks connected by two routers:</p>
+<div class="diagram-container fade-up delay-1">
+<svg viewBox="0 0 900 200" style="max-width:100%;">
+  <rect x="30" y="60" width="180" height="80" rx="12" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+  <text x="120" y="95" text-anchor="middle" font-size="14" font-weight="700" fill="#065f46">Network A</text>
+  <text x="120" y="118" text-anchor="middle" font-size="13" font-weight="600" fill="#065f46">10.0.1.0/24</text>
+  <rect x="310" y="50" width="120" height="100" rx="16" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+  <text x="370" y="95" text-anchor="middle" font-size="14" font-weight="700" fill="#92400e">Router R1</text>
+  <text x="370" y="115" text-anchor="middle" font-size="12" font-weight="600" fill="#92400e">?</text>
+  <rect x="530" y="50" width="120" height="100" rx="16" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+  <text x="590" y="95" text-anchor="middle" font-size="14" font-weight="700" fill="#92400e">Router R2</text>
+  <text x="590" y="115" text-anchor="middle" font-size="12" font-weight="600" fill="#92400e">?</text>
+  <rect x="750" y="60" width="180" height="80" rx="12" fill="#fef2f2" stroke="#ef4444" stroke-width="2"/>
+  <text x="840" y="95" text-anchor="middle" font-size="14" font-weight="700" fill="#991b1b">Network C</text>
+  <text x="840" y="118" text-anchor="middle" font-size="13" font-weight="600" fill="#991b1b">10.0.3.0/24</text>
+  <line x1="212" y1="100" x2="308" y2="100" stroke="#64748b" stroke-width="2"/>
+  <line x1="432" y1="100" x2="528" y2="100" stroke="#64748b" stroke-width="2"/>
+  <line x1="652" y1="100" x2="748" y2="100" stroke="#64748b" stroke-width="2"/>
+  <text x="460" y="85" text-anchor="middle" font-size="13" font-weight="600" fill="#64748b">10.0.2.0/24</text>
+</svg>
+</div>
+<p class="fade-up delay-2">A host on Network A sends a packet to <code>10.0.3.5</code>.
+Router R1 receives it. <strong>How does R1 know to forward it towards R2?</strong>
+We configured addresses in Week 5 &mdash; but we never told R1 that Network C exists.</p>
+<div class="insight-box fade-up delay-3">
+<strong>This is the routing problem.</strong> Without a mechanism to populate
+routing tables &mdash; either manually or via a protocol &mdash; routers are
+blind beyond their directly connected interfaces. Today we learn how they see.
+</div>
+<button class="reveal-btn fade-up delay-4" onclick="toggleReveal(this)">&#128269; Quick thought: How many solutions can you imagine?</button>
+<div class="reveal-content">
+<p>There are fundamentally two approaches: <strong>(a) manual configuration</strong> (an
+administrator types each route into each router) or <strong>(b) dynamic discovery</strong>
+(routers exchange information automatically using a protocol). Approach (a) is static
+routing; approach (b) is dynamic routing. Both have their place, and we shall study
+both today.</p>
+</div>
+</div>
+
+<!-- ==================== SLIDE 7: What Is a Router? ==================== -->
+<div class="slide" data-slide="7">
+<h2 class="slide-title">What Is a Router?</h2>
+<div class="definition-box fade-up">
+<strong>Definition:</strong> A router is a network device that connects two or more
+IP networks and makes per-packet forwarding decisions based on a routing table.
+</div>
+<p class="fade-up delay-1">A router performs a <strong>primary function</strong> (forwarding packets
+between interfaces) and several <strong>secondary functions</strong>:</p>
+<div class="grid-2 fade-up delay-2">
+<div class="card card-secondary">
+<h4>Primary: Packet Forwarding</h4>
+<p>Receives a packet on one interface, consults its routing table and sends
+the packet out through the appropriate interface towards the next hop.</p>
+</div>
+<div class="card card-accent">
+<h4>Secondary Functions</h4>
+<p>Packet filtering (ACLs), Network Address Translation (recall Week 6),
+Quality of Service (QoS) prioritisation and tunnelling for VPNs.</p>
+</div>
+</div>
+<div class="warning-box fade-up delay-3">
+<strong>Key distinction:</strong> A router operates at <strong>Layer 3</strong>
+(network layer). A switch operates at Layer 2 (data-link). A router forwards
+based on IP addresses; a switch forwards based on MAC addresses.
+</div>
+<button class="reveal-btn fade-up delay-4" onclick="toggleReveal(this)">&#128269; Predict: Can a home Wi-Fi router also be a switch?</button>
+<div class="reveal-content">
+<p>Yes. Most consumer &ldquo;routers&rdquo; are actually <strong>multi-function devices</strong>
+that combine a router (L3 forwarding between WAN and LAN), a switch (L2 forwarding
+between LAN ports), a wireless access point and often a DHCP server. In enterprise
+networks, these functions are separated into dedicated devices for performance and
+manageability.</p>
+</div>
+</div>
+
+<!-- ==================== SLIDE 8: Routing vs Forwarding ==================== -->
+<div class="slide" data-slide="8">
+<h2 class="slide-title">Routing vs Forwarding</h2>
+<p class="fade-up">These two terms are often confused, but they describe fundamentally different processes.</p>
+<div class="grid-2 fade-up delay-1">
+<div class="card comparison-dv" style="border:2px solid var(--accent);">
+<h4 style="color:var(--accent-warm);">Forwarding (data plane)</h4>
+<p>The <strong>local, per-packet</strong> decision: &ldquo;send this packet out via
+interface eth1 towards next hop 10.0.2.1.&rdquo;</p>
+<p>Happens at wire speed, for every packet. Implemented in hardware (ASICs)
+on modern routers.</p>
+<p><em>Analogy:</em> reading a signpost at an intersection and turning right.</p>
+</div>
+<div class="card comparison-ls" style="border:2px solid var(--success);">
+<h4 style="color:var(--success-dark);">Routing (control plane)</h4>
+<p>The <strong>background process</strong> that learns network topology and
+populates the routing table: &ldquo;to reach 10.0.3.0/24, go via 10.0.2.1.&rdquo;</p>
+<p>Runs periodically or event-driven. Implemented in software.</p>
+<p><em>Analogy:</em> the cartographer who draws the map before the journey begins.</p>
+</div>
+</div>
+<button class="reveal-btn fade-up delay-2" onclick="toggleReveal(this)">&#128269; Reveal: Why does this distinction matter?</button>
+<div class="reveal-content">
+<p>Separating data plane from control plane allows routers to forward packets at
+line rate even while the routing protocol converges after a topology change.
+It also enables Software-Defined Networking (SDN), which we encounter in Seminar 6,
+where the control plane is centralised and the data plane remains distributed.</p>
+</div>
+</div>
+
+<!-- ==================== SLIDE 9: L2 vs L3 Changes ==================== -->
+<div class="slide" data-slide="9">
+<h2 class="slide-title">What Changes at Each Hop?</h2>
+<p class="fade-up">As a packet traverses multiple routers, some header fields remain constant
+and others are rewritten at every hop.</p>
+<div class="diagram-container fade-up delay-1">
+<svg viewBox="0 0 1000 260" style="max-width:100%;">
+  <!-- Hosts and Routers -->
+  <rect x="20" y="80" width="120" height="60" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+  <text x="80" y="108" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46">Host A</text>
+  <text x="80" y="128" text-anchor="middle" font-size="12" font-weight="600" fill="#065f46">10.0.1.10</text>
+  <rect x="250" y="80" width="110" height="60" rx="14" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+  <text x="305" y="115" text-anchor="middle" font-size="13" font-weight="700" fill="#92400e">Router R1</text>
+  <rect x="470" y="80" width="110" height="60" rx="14" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+  <text x="525" y="115" text-anchor="middle" font-size="13" font-weight="700" fill="#92400e">Router R2</text>
+  <rect x="700" y="80" width="120" height="60" rx="10" fill="#fef2f2" stroke="#ef4444" stroke-width="2"/>
+  <text x="760" y="108" text-anchor="middle" font-size="13" font-weight="700" fill="#991b1b">Host B</text>
+  <text x="760" y="128" text-anchor="middle" font-size="12" font-weight="600" fill="#991b1b">10.0.3.20</text>
+  <!-- Arrows -->
+  <line x1="142" y1="110" x2="248" y2="110" stroke="#64748b" stroke-width="2"/>
+  <line x1="362" y1="110" x2="468" y2="110" stroke="#64748b" stroke-width="2"/>
+  <line x1="582" y1="110" x2="698" y2="110" stroke="#64748b" stroke-width="2"/>
+  <!-- Legend -->
+  <rect x="20" y="175" width="820" height="35" rx="6" fill="#ecfdf5" stroke="#059669"/>
+  <text x="430" y="198" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46">&#x2714; Source IP and Destination IP remain constant end-to-end</text>
+  <rect x="20" y="220" width="820" height="35" rx="6" fill="#fef2f2" stroke="#ef4444"/>
+  <text x="430" y="243" text-anchor="middle" font-size="13" font-weight="700" fill="#991b1b">&#x21C4; Source MAC and Destination MAC change at EVERY hop &mdash; TTL decreases</text>
+</svg>
+</div>
+<div class="warning-box fade-up delay-2">
+<strong>Common misconception:</strong> Students often believe routers modify the source
+or destination IP address. They do not &mdash; unless NAT is configured (recall Week 6).
+The IP header identifies the <em>end-to-end conversation</em>; the MAC header
+identifies the <em>next physical hop</em>.
+</div>
+</div>
+
+<!-- ==================== SLIDE 10: The Routing Table ==================== -->
+<div class="slide" data-slide="10">
+<h2 class="slide-title">The Routing Table</h2>
+<p class="fade-up">Every router &mdash; and every host &mdash; maintains a routing table in RAM.
+It contains a set of entries, each mapping a destination prefix to a next hop.</p>
+<table class="data-table fade-up delay-1">
+<thead>
+<tr><th>Destination</th><th>Next Hop</th><th>Interface</th><th>Metric</th><th>Source</th></tr>
+</thead>
+<tbody>
+<tr><td><code>10.0.1.0/24</code></td><td>directly connected</td><td>eth0</td><td>0</td><td>Connected</td></tr>
+<tr><td><code>10.0.2.0/24</code></td><td>directly connected</td><td>eth1</td><td>0</td><td>Connected</td></tr>
+<tr><td><code>10.0.3.0/24</code></td><td><code>10.0.2.2</code></td><td>eth1</td><td>1</td><td>RIP</td></tr>
+<tr><td><code>0.0.0.0/0</code></td><td><code>10.0.1.1</code></td><td>eth0</td><td>&mdash;</td><td>Static</td></tr>
+</tbody>
+</table>
+<div class="definition-box fade-up delay-2">
+<strong>Lookup process (longest prefix match):</strong> When a packet arrives, the router
+compares the destination IP against all entries and selects the one with the
+<strong>longest matching prefix</strong>. If no specific match exists, the
+<strong>default route</strong> (<code>0.0.0.0/0</code>) catches everything.
+</div>
+</div>
+
+<!-- ==================== SLIDE 11: Quiz — Foundations ==================== -->
+<div class="slide" data-slide="11">
+<h2 class="slide-title">Knowledge Check: Foundations</h2>
+<div class="quiz-container">
+<h4>A packet with destination IP 10.0.3.5 arrives at R1.
+R1&rsquo;s routing table has entries for 10.0.3.0/24 (via 10.0.2.2) and 0.0.0.0/0 (via 10.0.1.1).
+Which next hop does R1 select?</h4>
+<div class="quiz-option" onclick="checkQuiz(this, true, 'fb11')">
+A) 10.0.2.2 &mdash; the /24 entry matches and is more specific than the default
+</div>
+<div class="quiz-option" onclick="checkQuiz(this, false, 'fb11')">
+B) 10.0.1.1 &mdash; the default route always takes priority
+</div>
+<div class="quiz-option" onclick="checkQuiz(this, false, 'fb11')">
+C) The packet is dropped because two entries match
+</div>
+<div class="quiz-option" onclick="checkQuiz(this, false, 'fb11')">
+D) R1 modifies the source IP to its own address before forwarding
+</div>
+<div class="quiz-feedback" id="fb11">
+<div class="correct-msg">
+&#10004; Correct. Longest prefix match selects the /24 entry over the /0 default.
+The default route is a catch-all for destinations with no more specific match.
+</div>
+<div class="incorrect-msg">
+&#10008; Not quite. Routers use <strong>longest prefix match</strong>: among all entries
+whose prefix contains the destination, the one with the longest mask wins.
+Here, /24 beats /0. The default route is not &ldquo;higher priority&rdquo; &mdash;
+it is the <em>least</em> specific. And routers do not rewrite IP addresses
+unless NAT is configured.
+</div>
+</div>
+</div>
+</div>
+
+<!-- ==================== SLIDE 12: Static vs Dynamic Routes ==================== -->
+<div class="slide" data-slide="12">
+<h2 class="slide-title">Static vs Dynamic Routes</h2>
+<div class="grid-2 fade-up">
+<div class="card card-accent">
+<h4>Static Routes (manual)</h4>
+<p>Configured by an administrator: <code>ip route add 10.0.3.0/24 via 10.0.2.2</code></p>
+<p><strong>Advantages:</strong> precise control, no protocol overhead, predictable
+behaviour, well suited to stub networks (single exit point).</p>
+<p><strong>Disadvantages:</strong> does not adapt to failures. If a link goes down,
+the static route keeps pointing at a black hole until a human intervenes.</p>
+</div>
+<div class="card card-success">
+<h4>Dynamic Routes (via protocols)</h4>
+<p>Learned automatically: routers exchange information and calculate paths.</p>
+<p><strong>Advantages:</strong> scales to large topologies, adapts to link failures
+and topology changes, reduces administrative burden.</p>
+<p><strong>Disadvantages:</strong> protocol overhead (bandwidth, CPU), convergence
+delay, potential for routing loops during transient states.</p>
+</div>
+</div>
+<div class="insight-box fade-up delay-1">
+<strong>In practice:</strong> Most enterprise and ISP networks use dynamic routing
+(OSPF, BGP) for the core, with static routes for stub links or default gateways.
+The two approaches complement rather than compete with each other.
+</div>
+</div>
+
+<!-- ==================== SLIDE 13: Routing Metrics ==================== -->
+<div class="slide" data-slide="13">
+<h2 class="slide-title">Routing Metrics</h2>
+<p class="fade-up">When multiple paths exist to the same destination, the routing protocol must
+choose one. It does so using a <strong>metric</strong> &mdash; a numerical cost
+assigned to each path.</p>
+<table class="data-table fade-up delay-1">
+<thead>
+<tr><th>Metric</th><th>Used By</th><th>Meaning</th></tr>
+</thead>
+<tbody>
+<tr><td>Hop count</td><td>RIP</td><td>Number of routers on the path. Simple but ignores link speed.</td></tr>
+<tr><td>Cost (inverse bandwidth)</td><td>OSPF</td><td>Reference bandwidth / link bandwidth. Prefers faster links.</td></tr>
+<tr><td>Composite</td><td>EIGRP</td><td>Combines bandwidth, delay, load and reliability (weighted formula).</td></tr>
+<tr><td>Administrative cost</td><td>Various</td><td>If multiple protocols report the same prefix, the one with the lowest administrative distance wins.</td></tr>
+</tbody>
+</table>
+<p class="fade-up delay-2">When two paths share the same metric, some protocols support
+<strong>Equal-Cost Multi-Path (ECMP)</strong> routing, distributing traffic across both.</p>
+<button class="reveal-btn fade-up delay-3" onclick="toggleReveal(this)">&#128269; Reveal: Why hop count can mislead</button>
+<div class="reveal-content">
+<p>A 2-hop path through two 100 Gbps links is faster than a 1-hop path through a
+single 10 Mbps link. But a hop-count metric picks the 1-hop path because it has
+fewer hops. This is exactly the kind of mistake RIP makes and OSPF avoids.</p>
+</div>
+</div>
+
+<!-- ==================== SLIDE 14: Network Classification ==================== -->
+<div class="slide" data-slide="14">
+<h2 class="slide-title">Networks from a Router&rsquo;s Perspective</h2>
+<p class="fade-up">A router classifies every known destination into one of three categories:</p>
+<div class="grid-3 fade-up delay-1">
+<div class="card card-success">
+<h4>Connected</h4>
+<p>Networks attached directly to the router&rsquo;s own interfaces.
+These appear automatically when an interface is configured and brought up.</p>
+</div>
+<div class="card card-secondary">
+<h4>Known (remote)</h4>
+<p>Networks learned via static configuration or a dynamic routing protocol.
+The router has a next hop for these prefixes.</p>
+</div>
+<div class="card card-danger">
+<h4>Unknown</h4>
+<p>Destinations for which no routing table entry exists. If a default route
+is configured, traffic goes there. Otherwise, the packet is <strong>dropped</strong>
+and an ICMP Destination Unreachable message is sent back (recall Week 6).</p>
+</div>
+</div>
+<div class="warning-box fade-up delay-2">
+<strong>Asymmetric routing:</strong> Each router makes its forwarding decision
+locally and independently. There is no guarantee that the outbound and return
+paths are identical. This is normal behaviour &mdash; not a fault.
+</div>
+</div>
+
+<!-- ==================== SLIDE 15: IGP vs EGP ==================== -->
+<div class="slide" data-slide="15">
+<h2 class="slide-title">IGP vs EGP</h2>
+<p class="fade-up">The Internet is divided into <strong>Autonomous Systems (ASes)</strong> &mdash;
+administrative domains operated by a single organisation (an ISP, a university,
+a large enterprise). Routing protocols are classified by scope:</p>
+<div class="grid-2 fade-up delay-1">
+<div class="card card-success">
+<h4>IGP &mdash; Interior Gateway Protocol</h4>
+<p>Routes <strong>within</strong> a single AS. Optimises for convergence speed,
+metric accuracy and operational simplicity.</p>
+<p>Examples: <span class="badge badge-rip">RIP</span>
+<span class="badge badge-ospf">OSPF</span>
+<span class="badge" style="background:#e0e7ff;color:#3730a3;">EIGRP</span>
+<span class="badge" style="background:#fce7f3;color:#9d174d;">IS-IS</span></p>
+</div>
+<div class="card card-secondary">
+<h4>EGP &mdash; Exterior Gateway Protocol</h4>
+<p>Routes <strong>between</strong> ASes. Optimises for policy control,
+scalability and path selection based on business relationships.</p>
+<p>Example: <span class="badge badge-bgp">BGP</span> (the protocol that
+holds the Internet together). We mention it today for context; it is
+typically covered in Internet operations courses.</p>
+</div>
+</div>
+<p class="fade-up delay-2">Today we focus on two IGPs: <strong>RIP</strong> (distance-vector)
+and <strong>OSPF</strong> (link-state). The AS 7007 incident from our hook? That was
+a BGP misconfiguration &mdash; an EGP problem with global consequences.</p>
+<button class="reveal-btn fade-up delay-3" onclick="toggleReveal(this)">&#128269; What about EIGRP?</button>
+<div class="reveal-content">
+<p><strong>Enhanced Interior Gateway Routing Protocol (EIGRP)</strong> is a Cisco-proprietary
+protocol (later published as RFC 7868) that blends distance-vector and link-state ideas.
+It uses a composite metric (bandwidth, delay, reliability, load) and the DUAL algorithm
+for rapid convergence. In this course we focus on the two &ldquo;pure&rdquo; families
+&mdash; RIP (distance-vector) and OSPF (link-state) &mdash; because they illustrate
+the underlying principles most clearly. You may encounter EIGRP in Cisco-centric environments.</p>
+</div>
+</div>
+
+<!-- ==================== SLIDE 16: Section — Distance-Vector ==================== -->
+<div class="slide section-slide" data-slide="16">
+<h1>Distance-Vector Protocols</h1>
+<h2>Routing by rumour: each router knows only what its neighbours tell it</h2>
+<p style="color: var(--text-on-dark-muted); max-width: 700px; margin-top: 1rem;">
+RIP, Bellman&ndash;Ford and the count-to-infinity problem</p>
+</div>
+
+<!-- ==================== SLIDE 17: DV Idea ==================== -->
+<div class="slide" data-slide="17">
+<h2 class="slide-title">The Distance-Vector Idea</h2>
+<div class="definition-box fade-up">
+<strong>Distance-vector routing:</strong> Each router maintains a vector (table) of
+distances (metrics) to every known destination. It shares this vector with its
+directly connected neighbours at regular intervals. No router knows the full topology.
+</div>
+<p class="fade-up delay-1">The process works as follows:</p>
+<div class="step-list fade-up delay-2">
+<div class="step-item active">
+<div class="step-num">1</div>
+<div>Each router initialises its table with directly connected networks (distance 0).</div>
+</div>
+<div class="step-item">
+<div class="step-num">2</div>
+<div>Periodically, each router sends its entire routing table to all neighbours.</div>
+</div>
+<div class="step-item">
+<div class="step-num">3</div>
+<div>When a router receives a neighbour&rsquo;s table, it checks: &ldquo;Can I reach
+any destination more cheaply <em>through</em> this neighbour?&rdquo; If so, update.</div>
+</div>
+<div class="step-item">
+<div class="step-num">4</div>
+<div>Repeat until no table changes &mdash; the network has <strong>converged</strong>.</div>
+</div>
+</div>
+<p class="fade-up delay-3">The underlying mathematical model is the
+<strong>Bellman&ndash;Ford equation</strong>: <code>d(x, dest) = min over neighbours y of { cost(x, y) + d(y, dest) }</code></p>
+</div>
+
+<!-- ==================== SLIDE 18: RIP ==================== -->
+<div class="slide" data-slide="18">
+<h2 class="slide-title">RIP &mdash; Routing Information Protocol</h2>
+<p class="fade-up">RIP is the oldest dynamic routing protocol still found in textbooks. It implements
+the distance-vector approach with hop count as its sole metric.</p>
+<table class="data-table fade-up delay-1">
+<thead>
+<tr><th>Property</th><th>RIPv1</th><th>RIPv2</th><th>RIPng</th></tr>
+</thead>
+<tbody>
+<tr><td>Metric</td><td>Hop count</td><td>Hop count</td><td>Hop count</td></tr>
+<tr><td>Max hops</td><td>15 (16 = &infin;)</td><td>15</td><td>15</td></tr>
+<tr><td>Transport</td><td>UDP port 520</td><td>UDP port 520</td><td>UDP port 521</td></tr>
+<tr><td>CIDR/VLSM</td><td>No (classful)</td><td>Yes (includes mask)</td><td>Yes</td></tr>
+<tr><td>Updates</td><td>Broadcast (255.255.255.255)</td><td>Multicast (224.0.0.9)</td><td>Multicast (ff02::9)</td></tr>
+<tr><td>Auth</td><td>None</td><td>Optional (MD5)</td><td>IPsec</td></tr>
+</tbody>
+</table>
+<div class="warning-box fade-up delay-2">
+<strong>The 15-hop ceiling</strong> is not a design flaw &mdash; it is a deliberate
+safety mechanism. RIP uses &ldquo;infinity&rdquo; (16) to signal unreachable destinations.
+In networks wider than 15 routers, RIP simply cannot function. This makes it
+impractical for anything larger than a small campus.
+</div>
+</div>
+
+<!-- ==================== SLIDE 19: Count-to-Infinity ==================== -->
+<div class="slide" data-slide="19">
+<h2 class="slide-title">The Count-to-Infinity Problem</h2>
+<p class="fade-up">Distance-vector protocols have a fundamental vulnerability: when a link fails,
+routers can enter a loop of mutual misinformation.</p>
+<div class="story-box fade-up delay-1">
+<strong>Scenario:</strong> Routers A, B and C form a chain: A&mdash;B&mdash;C. Network X
+is connected to C. When the C&mdash;X link fails, C sets its distance to X as &infin;.
+But before C&rsquo;s update reaches B, B sends its old table to C saying &ldquo;I can
+reach X in 2 hops (through you).&rdquo; C thinks: &ldquo;B can reach X in 2 hops, so I
+can reach it in 3!&rdquo; Now B hears C&rsquo;s update: &ldquo;3 hops&rdquo; &mdash;
+better than &infin;, so B updates to 4. The metrics keep incrementing until they reach
+16 (infinity). This is the <strong>count-to-infinity</strong> problem.
+</div>
+<button class="reveal-btn fade-up delay-2" onclick="toggleReveal(this)">&#128269; Reveal: How long does convergence take?</button>
+<div class="reveal-content">
+<p>With a 30-second update interval and infinity at 16, count-to-infinity can take
+up to <strong>16 &times; 30 = 480 seconds (8 minutes)</strong> to resolve in the
+worst case. During this period, packets to Network X are black-holed or looped.
+This is unacceptable for production networks.</p>
+</div>
+</div>
+
+<!-- ==================== SLIDE 20: Mitigating Count-to-Infinity ==================== -->
+<div class="slide" data-slide="20">
+<h2 class="slide-title">Mitigating Count-to-Infinity</h2>
+<p class="fade-up">RIP employs several mechanisms to reduce (but not eliminate) the problem:</p>
+<div class="grid-2 fade-up delay-1">
+<div class="card card-accent">
+<h4>Split Horizon</h4>
+<p>Never advertise a route back through the interface from which it was learned.
+If B learned about X through C, B does not advertise X back to C.</p>
+</div>
+<div class="card card-danger">
+<h4>Route Poisoning</h4>
+<p>When a route becomes unreachable, immediately advertise it with metric 16 (&infin;)
+rather than simply removing it. This explicitly tells neighbours to discard it.</p>
+</div>
+<div class="card card-purple">
+<h4>Holddown Timer</h4>
+<p>After a route is poisoned, ignore new information about it for a set period.
+This prevents stale updates from resurrecting a dead route.</p>
+</div>
+<div class="card card-secondary">
+<h4>Triggered Updates</h4>
+<p>Do not wait for the next periodic update. When a route changes, send an
+immediate update to accelerate convergence.</p>
+</div>
+</div>
+<p class="fade-up delay-2">Even with these mechanisms, RIP convergence remains slow compared to
+link-state protocols. This is the fundamental trade-off: simplicity at the cost of speed.</p>
+</div>
+
+<!-- ==================== SLIDE 21: RIP Timers ==================== -->
+<div class="slide" data-slide="21">
+<h2 class="slide-title">RIP Timers</h2>
+<p class="fade-up">RIP&rsquo;s behaviour is governed by four timers. Understanding them is essential
+for predicting convergence behaviour.</p>
+<div class="grid-2 fade-up delay-1">
+<div class="card card-success">
+<h4>Update Timer (30 s)</h4>
+<p>Every 30 seconds, the router broadcasts its entire routing table
+to all neighbours. This is the heartbeat of the protocol.</p>
+</div>
+<div class="card card-accent">
+<h4>Invalid Timer (180 s)</h4>
+<p>If no update mentions a route for 180 seconds, it is marked as
+potentially invalid (metric set to 16). The route is <em>not yet removed</em>.</p>
+</div>
+<div class="card card-danger">
+<h4>Flush Timer (240 s)</h4>
+<p>If the route remains invalid for an additional 60 seconds (total 240 s from
+last valid update), it is permanently removed from the table.</p>
+</div>
+<div class="card card-purple">
+<h4>Holddown Timer (180 s)</h4>
+<p>After a route is poisoned, the router ignores new information about that
+destination for 180 seconds. This prevents routing loops from stale data.</p>
+</div>
+</div>
+<div class="insight-box fade-up delay-2">
+<strong>Implication:</strong> In the worst case, RIP can take over 4 minutes
+to converge after a single link failure. For comparison, OSPF typically converges
+in under 1 second on well-tuned networks.
+</div>
+</div>
+
+<!-- ==================== SLIDE 22: Bellman-Ford Algorithm ==================== -->
+<div class="slide" data-slide="22">
+<h2 class="slide-title">Bellman&ndash;Ford Algorithm</h2>
+<p class="fade-up">The Bellman&ndash;Ford algorithm computes shortest paths from a single source
+to all other nodes in a weighted graph. It tolerates negative edge weights
+(unlike Dijkstra) and forms the mathematical basis of distance-vector routing.</p>
+<div class="definition-box fade-up delay-1">
+<strong>Core principle:</strong> Relax every edge repeatedly. After |V| &minus; 1 iterations
+(where |V| is the number of vertices), all shortest distances are guaranteed correct &mdash;
+provided there are no negative-weight cycles.
+</div>
+<div class="step-list fade-up delay-2">
+<div class="step-item active">
+<div class="step-num">1</div>
+<div>Set <code>dist[source] = 0</code> and <code>dist[v] = &infin;</code> for all other vertices.</div>
+</div>
+<div class="step-item">
+<div class="step-num">2</div>
+<div>For each iteration (1 to |V| &minus; 1): for every edge (u, v, w), if <code>dist[u] + w &lt; dist[v]</code>, update <code>dist[v]</code>.</div>
+</div>
+<div class="step-item">
+<div class="step-num">3</div>
+<div>After all iterations, check for negative cycles: if any edge can still be relaxed, a negative cycle exists.</div>
+</div>
+</div>
+<p class="fade-up delay-3"><strong>Complexity:</strong> O(|V| &times; |E|) &mdash; slower than Dijkstra
+for non-negative weights, but simpler and naturally distributed.</p>
+</div>
+
+<!-- ==================== SLIDE 23: Bellman-Ford Worked Example ==================== -->
+<div class="slide" data-slide="23">
+<h2 class="slide-title">Bellman&ndash;Ford &mdash; Worked Example</h2>
+<p class="fade-up">Consider a graph with vertices A, B, C, D and the following edges:</p>
+<div class="diagram-container fade-up delay-1">
+<svg viewBox="0 0 700 280" style="max-width:90%;">
+  <line x1="100" y1="80" x2="350" y2="80" stroke="#64748b" stroke-width="3"/>
+  <line x1="100" y1="80" x2="100" y2="220" stroke="#64748b" stroke-width="3"/>
+  <line x1="350" y1="80" x2="350" y2="220" stroke="#64748b" stroke-width="3"/>
+  <line x1="100" y1="220" x2="350" y2="220" stroke="#64748b" stroke-width="3"/>
+  <line x1="100" y1="80" x2="350" y2="220" stroke="#94a3b8" stroke-width="2" stroke-dasharray="8"/>
+  <!-- Nodes -->
+  <circle cx="100" cy="80" r="28" fill="#ecfdf5" stroke="#059669" stroke-width="3"/>
+  <text x="100" y="86" text-anchor="middle" font-size="18" font-weight="700" fill="#065f46">A</text>
+  <circle cx="350" cy="80" r="28" fill="#f0f9ff" stroke="#0ea5e9" stroke-width="3"/>
+  <text x="350" y="86" text-anchor="middle" font-size="18" font-weight="700" fill="#0284c7">B</text>
+  <circle cx="100" cy="220" r="28" fill="#f0f9ff" stroke="#0ea5e9" stroke-width="3"/>
+  <text x="100" y="226" text-anchor="middle" font-size="18" font-weight="700" fill="#0284c7">C</text>
+  <circle cx="350" cy="220" r="28" fill="#fef2f2" stroke="#ef4444" stroke-width="3"/>
+  <text x="350" y="226" text-anchor="middle" font-size="18" font-weight="700" fill="#991b1b">D</text>
+  <!-- Weights -->
+  <rect x="200" y="55" width="40" height="26" rx="6" fill="white" stroke="#e2e8f0"/>
+  <text x="220" y="74" text-anchor="middle" font-size="14" font-weight="700" fill="#1e293b">1</text>
+  <rect x="60" y="135" width="40" height="26" rx="6" fill="white" stroke="#e2e8f0"/>
+  <text x="80" y="154" text-anchor="middle" font-size="14" font-weight="700" fill="#1e293b">4</text>
+  <rect x="358" y="135" width="40" height="26" rx="6" fill="white" stroke="#e2e8f0"/>
+  <text x="378" y="154" text-anchor="middle" font-size="14" font-weight="700" fill="#1e293b">2</text>
+  <rect x="200" y="195" width="40" height="26" rx="6" fill="white" stroke="#e2e8f0"/>
+  <text x="220" y="214" text-anchor="middle" font-size="14" font-weight="700" fill="#1e293b">3</text>
+  <rect x="240" y="125" width="40" height="26" rx="6" fill="white" stroke="#e2e8f0"/>
+  <text x="260" y="144" text-anchor="middle" font-size="14" font-weight="700" fill="#94a3b8">5</text>
+  <!-- Result table -->
+  <text x="480" y="80" font-size="14" font-weight="700" fill="#1e293b">Source: A</text>
+  <text x="480" y="110" font-size="13" font-weight="600" fill="#065f46">dist[A] = 0</text>
+  <text x="480" y="135" font-size="13" font-weight="600" fill="#0284c7">dist[B] = 1 (A&rarr;B)</text>
+  <text x="480" y="160" font-size="13" font-weight="600" fill="#0284c7">dist[C] = 4 (A&rarr;C)</text>
+  <text x="480" y="185" font-size="13" font-weight="600" fill="#991b1b">dist[D] = 3 (A&rarr;B&rarr;D)</text>
+  <text x="480" y="220" font-size="12" font-weight="600" fill="#64748b">3 iterations needed</text>
+</svg>
+</div>
+<button class="reveal-btn fade-up delay-2" onclick="toggleReveal(this)">&#128269; Reveal: Step-by-step iterations</button>
+<div class="reveal-content">
+<p><strong>Init:</strong> dist = [A:0, B:&infin;, C:&infin;, D:&infin;]</p>
+<p><strong>Iteration 1:</strong> Relax A&rarr;B (1), A&rarr;C (4), A&rarr;D (5) &rArr; [A:0, B:1, C:4, D:5]</p>
+<p><strong>Iteration 2:</strong> Relax B&rarr;D (1+2=3 &lt; 5) &rArr; [A:0, B:1, C:4, D:3]</p>
+<p><strong>Iteration 3:</strong> No changes &mdash; converged.</p>
+</div>
+</div>
+
+<!-- ==================== SLIDE 24: Bellman-Ford in Python ==================== -->
+<div class="slide" data-slide="24">
+<h2 class="slide-title">Bellman&ndash;Ford in Python</h2>
+<div class="code-block" data-lang="python">
+<span class="keyword">def</span> <span class="function">bellman_ford</span>(
+    vertices: <span class="builtin">list</span>[<span class="builtin">str</span>],
+    edges: <span class="builtin">list</span>[<span class="builtin">tuple</span>[<span class="builtin">str</span>, <span class="builtin">str</span>, <span class="builtin">int</span>]],
+    source: <span class="builtin">str</span>
+) -> <span class="builtin">dict</span>[<span class="builtin">str</span>, <span class="builtin">int</span>]:
+    <span class="comment"># Initialise distances</span>
+    dist = {v: <span class="builtin">float</span>(<span class="string">"inf"</span>) <span class="keyword">for</span> v <span class="keyword">in</span> vertices}
+    dist[source] = <span class="number">0</span>
+
+    <span class="comment"># Relax all edges |V| - 1 times</span>
+    <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="builtin">range</span>(<span class="builtin">len</span>(vertices) - <span class="number">1</span>):
+        <span class="keyword">for</span> u, v, w <span class="keyword">in</span> edges:
+            <span class="keyword">if</span> dist[u] + w < dist[v]:
+                dist[v] = dist[u] + w
+
+    <span class="keyword">return</span> dist
+</div>
+<p class="fade-up delay-1">Usage with the graph from the previous slide:</p>
+<div class="code-block" data-lang="python">
+result = <span class="function">bellman_ford</span>(
+    [<span class="string">"A"</span>, <span class="string">"B"</span>, <span class="string">"C"</span>, <span class="string">"D"</span>],
+    [(<span class="string">"A"</span>, <span class="string">"B"</span>, <span class="number">1</span>), (<span class="string">"A"</span>, <span class="string">"C"</span>, <span class="number">4</span>),
+     (<span class="string">"B"</span>, <span class="string">"D"</span>, <span class="number">2</span>), (<span class="string">"C"</span>, <span class="string">"D"</span>, <span class="number">3</span>),
+     (<span class="string">"A"</span>, <span class="string">"D"</span>, <span class="number">5</span>)],
+    <span class="string">"A"</span>
+)
+<span class="builtin">print</span>(result)
+<span class="comment"># {'A': 0, 'B': 1, 'C': 4, 'D': 3}</span>
+</div>
+</div>
+
+<!-- ==================== SLIDE 25: Quiz — Distance-Vector ==================== -->
+<div class="slide" data-slide="25">
+<h2 class="slide-title">Knowledge Check: Distance-Vector</h2>
+<div class="quiz-container">
+<h4>In RIP, a router learns that Network X is reachable through Neighbour A in 3 hops,
+and through Neighbour B in 2 hops. It currently has Network X in its table with metric 4
+via Neighbour C. What happens?</h4>
+<div class="quiz-option" onclick="checkQuiz(this, false, 'fb25')">
+A) The router keeps all three entries for load balancing
+</div>
+<div class="quiz-option" onclick="checkQuiz(this, true, 'fb25')">
+B) The router installs the route via B (metric 3: B&rsquo;s 2 hops + 1 hop to reach B)
+</div>
+<div class="quiz-option" onclick="checkQuiz(this, false, 'fb25')">
+C) The router keeps the existing route via C because it was learned first
+</div>
+<div class="quiz-option" onclick="checkQuiz(this, false, 'fb25')">
+D) The router discards all routes because multiple paths indicate a loop
+</div>
+<div class="quiz-feedback" id="fb25">
+<div class="correct-msg">
+&#10004; Correct. The router adds 1 hop (cost to reach the advertising neighbour) to each
+advertised metric. B says 2 hops, so total = 3. A says 3 hops, so total = 4. The existing
+route via C costs 4. The route via B (cost 3) is best and replaces the existing entry.
+RIP does not do per-packet load balancing by default.
+</div>
+<div class="incorrect-msg">
+&#10008; Remember: RIP adds 1 to the advertised metric (B&rsquo;s 2 becomes 3, A&rsquo;s 3
+becomes 4). The lowest metric wins. RIP does not load-balance across unequal paths, and
+&ldquo;first learned&rdquo; is not a tiebreaker &mdash; the metric is. Multiple paths do
+not indicate a loop; they simply offer route selection choices.
+</div>
+</div>
+</div>
+</div>
+
+<!-- ==================== SLIDE 26: Section — Link-State ==================== -->
+<div class="slide section-slide" data-slide="26">
+<h1>Link-State Protocols</h1>
+<h2>Each router knows the full map and computes paths independently</h2>
+<p style="color: var(--text-on-dark-muted); max-width: 700px; margin-top: 1rem;">
+OSPF, Dijkstra&rsquo;s algorithm, areas and the Link-State Database</p>
+</div>
+
+<!-- ==================== SLIDE 27: LS Idea ==================== -->
+<div class="slide" data-slide="27">
+<h2 class="slide-title">The Link-State Idea</h2>
+<p class="fade-up">Link-state routing takes a fundamentally different approach from distance-vector.
+Instead of sharing <em>distances</em>, each router shares <em>its own view of its directly
+connected links</em> with <strong>every other router in the network</strong>.</p>
+<div class="grid-2 fade-up delay-1">
+<div class="card comparison-dv">
+<h4 style="color:var(--accent-warm);">Distance-Vector (recall)</h4>
+<p>&ldquo;I can reach Network X in 3 hops.&rdquo;</p>
+<p>Shares <strong>conclusions</strong>. The receiver trusts the neighbour&rsquo;s
+arithmetic without knowing the topology.</p>
+</div>
+<div class="card comparison-ls">
+<h4 style="color:var(--success-dark);">Link-State</h4>
+<p>&ldquo;I am Router R3. I have links to R1 (cost 10) and R4 (cost 5).&rdquo;</p>
+<p>Shares <strong>raw data</strong>. Every router builds the same complete
+topology map and computes routes <em>locally</em> using Dijkstra&rsquo;s algorithm.</p>
+</div>
+</div>
+<div class="definition-box fade-up delay-2">
+<strong>Link-State Database (LSDB):</strong> The complete topology map constructed from
+all routers&rsquo; link-state advertisements (LSAs). Every router in an OSPF area
+holds an identical copy of the LSDB. This is the key invariant that guarantees
+loop-free routing.
+</div>
+</div>
+
+<!-- ==================== SLIDE 28: OSPF Overview ==================== -->
+<div class="slide" data-slide="28">
+<h2 class="slide-title">OSPF &mdash; Open Shortest Path First</h2>
+<p class="fade-up">OSPF (RFC 2328 for OSPFv2, RFC 5340 for OSPFv3) is the most widely deployed
+link-state IGP. It was designed to overcome the limitations of RIP in large networks.</p>
+<div class="grid-2 fade-up delay-1">
+<div class="card card-success">
+<h4>Protocol characteristics</h4>
+<p>Uses IP protocol number 89 (not TCP or UDP). Sends hello packets via multicast
+(224.0.0.5 for AllSPFRouters, 224.0.0.6 for AllDRouters). Metric is <strong>cost</strong>,
+calculated as reference bandwidth divided by link bandwidth.</p>
+</div>
+<div class="card card-secondary">
+<h4>Why OSPF over RIP?</h4>
+<p>No hop-count limit. Converges in seconds (not minutes). Supports VLSM and CIDR natively.
+Provides authentication. Scales via area hierarchy. Uses bandwidth-aware metrics.</p>
+</div>
+</div>
+<div class="warning-box fade-up delay-2">
+<strong>OSPF cost formula:</strong>
+<code>cost = reference_bandwidth / interface_bandwidth</code>.
+The default reference is 100 Mbps, meaning a 100 Mbps link has cost 1 and a 10 Mbps link
+has cost 10. Modern networks often increase the reference to 10 Gbps or 100 Gbps to
+differentiate between fast links.
+</div>
+</div>
+
+<!-- ==================== SLIDE 29: OSPF Operation ==================== -->
+<div class="slide" data-slide="29">
+<h2 class="slide-title">OSPF Operation</h2>
+<p class="fade-up">OSPF establishes adjacencies, synchronises databases and computes routes
+through a well-defined sequence:</p>
+<div class="step-list fade-up delay-1">
+<div class="step-item active">
+<div class="step-num">1</div>
+<div><strong>Hello:</strong> Routers discover neighbours by sending hello packets every
+10 seconds (on broadcast networks). The hello contains the router ID, area ID,
+hello/dead timers and the list of known neighbours.</div>
+</div>
+<div class="step-item">
+<div class="step-num">2</div>
+<div><strong>Database synchronisation:</strong> Once neighbours form an adjacency, they
+exchange Database Description (DBD) packets, request missing LSAs and synchronise
+their LSDBs to become identical.</div>
+</div>
+<div class="step-item">
+<div class="step-num">3</div>
+<div><strong>DR/BDR election:</strong> On multi-access segments (e.g. Ethernet), a
+Designated Router (DR) and Backup DR are elected to reduce the number of adjacencies
+from O(n&sup2;) to O(n). All routers synchronise with the DR, not with each other.</div>
+</div>
+<div class="step-item">
+<div class="step-num">4</div>
+<div><strong>SPF calculation:</strong> Each router runs Dijkstra&rsquo;s algorithm on
+its LSDB to compute the shortest-path tree rooted at itself. This produces the
+routing table entries.</div>
+</div>
+</div>
+<button class="reveal-btn fade-up delay-2" onclick="toggleReveal(this)">&#128269; Predict: What happens when a new router joins an OSPF network?</button>
+<div class="reveal-content">
+<p>The new router sends Hello packets on its interfaces. Existing OSPF neighbours detect it
+and begin <strong>adjacency formation</strong>. The neighbours exchange their LSDBs
+(Database Description packets, then Link-State Requests). Once synchronised, the new router
+has a complete topology map and can run SPF. The entire process takes seconds on a
+well-configured network &mdash; far faster than waiting for RIP&rsquo;s 30-second update cycle.</p>
+</div>
+</div>
+
+<!-- ==================== SLIDE 30: OSPF Areas ==================== -->
+<div class="slide" data-slide="30">
+<h2 class="slide-title">OSPF Areas</h2>
+<p class="fade-up">In large networks, a flat LSDB would become enormous and SPF recalculations
+expensive. OSPF solves this with a <strong>two-level hierarchy of areas</strong>.</p>
+<div class="diagram-container fade-up delay-1">
+<svg viewBox="0 0 900 320" style="max-width:95%;">
+  <!-- Area 0 backbone -->
+  <rect x="250" y="20" width="400" height="120" rx="20" fill="#ecfdf5" stroke="#059669" stroke-width="3"/>
+  <text x="450" y="50" text-anchor="middle" font-size="16" font-weight="700" fill="#065f46">Area 0 (Backbone)</text>
+  <circle cx="340" cy="100" r="22" fill="white" stroke="#059669" stroke-width="2"/>
+  <text x="340" y="106" text-anchor="middle" font-size="14" font-weight="700" fill="#065f46">R1</text>
+  <circle cx="450" cy="100" r="22" fill="white" stroke="#059669" stroke-width="2"/>
+  <text x="450" y="106" text-anchor="middle" font-size="14" font-weight="700" fill="#065f46">R2</text>
+  <circle cx="560" cy="100" r="22" fill="white" stroke="#059669" stroke-width="2"/>
+  <text x="560" y="106" text-anchor="middle" font-size="14" font-weight="700" fill="#065f46">R3</text>
+  <line x1="362" y1="100" x2="428" y2="100" stroke="#059669" stroke-width="2"/>
+  <line x1="472" y1="100" x2="538" y2="100" stroke="#059669" stroke-width="2"/>
+  <!-- Area 1 -->
+  <rect x="50" y="180" width="250" height="120" rx="20" fill="#f0f9ff" stroke="#0ea5e9" stroke-width="2"/>
+  <text x="175" y="210" text-anchor="middle" font-size="14" font-weight="700" fill="#0284c7">Area 1</text>
+  <circle cx="120" cy="260" r="20" fill="white" stroke="#0ea5e9" stroke-width="2"/>
+  <text x="120" y="266" text-anchor="middle" font-size="13" font-weight="700" fill="#0284c7">R4</text>
+  <circle cx="230" cy="260" r="20" fill="white" stroke="#0ea5e9" stroke-width="2"/>
+  <text x="230" y="266" text-anchor="middle" font-size="13" font-weight="700" fill="#0284c7">R5</text>
+  <line x1="142" y1="260" x2="208" y2="260" stroke="#0ea5e9" stroke-width="2"/>
+  <!-- ABR connection -->
+  <rect x="310" y="170" width="70" height="30" rx="8" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+  <text x="345" y="190" text-anchor="middle" font-size="12" font-weight="700" fill="#92400e">ABR</text>
+  <line x1="340" y1="122" x2="345" y2="168" stroke="#64748b" stroke-width="2" stroke-dasharray="5"/>
+  <line x1="300" y1="240" x2="340" y2="200" stroke="#64748b" stroke-width="2" stroke-dasharray="5"/>
+  <!-- Area 2 -->
+  <rect x="550" y="180" width="250" height="120" rx="20" fill="#fef2f2" stroke="#ef4444" stroke-width="2"/>
+  <text x="675" y="210" text-anchor="middle" font-size="14" font-weight="700" fill="#991b1b">Area 2</text>
+  <circle cx="620" cy="260" r="20" fill="white" stroke="#ef4444" stroke-width="2"/>
+  <text x="620" y="266" text-anchor="middle" font-size="13" font-weight="700" fill="#991b1b">R6</text>
+  <circle cx="730" cy="260" r="20" fill="white" stroke="#ef4444" stroke-width="2"/>
+  <text x="730" y="266" text-anchor="middle" font-size="13" font-weight="700" fill="#991b1b">R7</text>
+  <line x1="642" y1="260" x2="708" y2="260" stroke="#ef4444" stroke-width="2"/>
+  <!-- ABR connection 2 -->
+  <rect x="520" y="170" width="70" height="30" rx="8" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+  <text x="555" y="190" text-anchor="middle" font-size="12" font-weight="700" fill="#92400e">ABR</text>
+  <line x1="560" y1="122" x2="555" y2="168" stroke="#64748b" stroke-width="2" stroke-dasharray="5"/>
+  <line x1="555" y1="200" x2="600" y2="240" stroke="#64748b" stroke-width="2" stroke-dasharray="5"/>
+</svg>
+</div>
+<p class="fade-up delay-2"><strong>Area 0</strong> is the backbone &mdash; all other areas must
+connect to it. <strong>Area Border Routers (ABRs)</strong> summarise routes between areas,
+reducing the size of each area&rsquo;s LSDB and the cost of SPF calculations.</p>
+<button class="reveal-btn fade-up delay-3" onclick="toggleReveal(this)">&#128269; Think: What happens if Area 0 becomes partitioned?</button>
+<div class="reveal-content">
+<p>If Area 0 is split, inter-area routing breaks because all traffic between non-backbone
+areas must transit Area 0. OSPF requires a <strong>contiguous backbone</strong>. If physical
+contiguity is impossible, administrators use <strong>virtual links</strong> (RFC 2328, &sect;15)
+to logically bridge the gap through a transit area.</p>
+</div>
+</div>
+
+<!-- ==================== SLIDE 31: Dijkstra's Algorithm ==================== -->
+<div class="slide" data-slide="31">
+<h2 class="slide-title">Dijkstra&rsquo;s Algorithm</h2>
+<p class="fade-up">Dijkstra&rsquo;s algorithm (Edsger Dijkstra, 1956) computes the shortest path
+from a single source to all other nodes in a graph with <strong>non-negative</strong>
+edge weights. OSPF runs Dijkstra on the LSDB to build its routing table.</p>
+<div class="definition-box fade-up delay-1">
+<strong>Core principle:</strong> Greedily select the unvisited node with the smallest
+tentative distance, mark it as visited and relax all its outgoing edges.
+</div>
+<div class="step-list fade-up delay-2">
+<div class="step-item active">
+<div class="step-num">1</div>
+<div>Set <code>dist[source] = 0</code>, all others to &infin;. Create a priority queue.</div>
+</div>
+<div class="step-item">
+<div class="step-num">2</div>
+<div>Extract the node u with the smallest tentative distance from the queue.</div>
+</div>
+<div class="step-item">
+<div class="step-num">3</div>
+<div>For each neighbour v of u: if <code>dist[u] + weight(u, v) &lt; dist[v]</code>, update <code>dist[v]</code>.</div>
+</div>
+<div class="step-item">
+<div class="step-num">4</div>
+<div>Repeat steps 2&ndash;3 until the queue is empty.</div>
+</div>
+</div>
+<p class="fade-up delay-3"><strong>Complexity:</strong> O((|V| + |E|) log |V|) with a binary heap.
+Faster than Bellman&ndash;Ford for non-negative weights.</p>
+</div>
+
+<!-- ==================== SLIDE 32: Dijkstra Worked Example ==================== -->
+<div class="slide" data-slide="32">
+<h2 class="slide-title">Dijkstra &mdash; Worked Example</h2>
+<p class="fade-up">Same graph as before. Source: A. Let us trace Dijkstra step by step.</p>
+<div class="diagram-container fade-up delay-1">
+<svg viewBox="0 0 700 280" style="max-width:90%;">
+  <line x1="100" y1="80" x2="350" y2="80" stroke="#64748b" stroke-width="3"/>
+  <line x1="100" y1="80" x2="100" y2="220" stroke="#64748b" stroke-width="3"/>
+  <line x1="350" y1="80" x2="350" y2="220" stroke="#64748b" stroke-width="3"/>
+  <line x1="100" y1="220" x2="350" y2="220" stroke="#64748b" stroke-width="3"/>
+  <line x1="100" y1="80" x2="350" y2="220" stroke="#94a3b8" stroke-width="2" stroke-dasharray="8"/>
+  <circle cx="100" cy="80" r="28" fill="#ecfdf5" stroke="#059669" stroke-width="3"/>
+  <text x="100" y="86" text-anchor="middle" font-size="18" font-weight="700" fill="#065f46">A</text>
+  <circle cx="350" cy="80" r="28" fill="#f0f9ff" stroke="#0ea5e9" stroke-width="3"/>
+  <text x="350" y="86" text-anchor="middle" font-size="18" font-weight="700" fill="#0284c7">B</text>
+  <circle cx="100" cy="220" r="28" fill="#f0f9ff" stroke="#0ea5e9" stroke-width="3"/>
+  <text x="100" y="226" text-anchor="middle" font-size="18" font-weight="700" fill="#0284c7">C</text>
+  <circle cx="350" cy="220" r="28" fill="#fef2f2" stroke="#ef4444" stroke-width="3"/>
+  <text x="350" y="226" text-anchor="middle" font-size="18" font-weight="700" fill="#991b1b">D</text>
+  <rect x="200" y="55" width="40" height="26" rx="6" fill="white" stroke="#e2e8f0"/>
+  <text x="220" y="74" text-anchor="middle" font-size="14" font-weight="700" fill="#1e293b">1</text>
+  <rect x="60" y="135" width="40" height="26" rx="6" fill="white" stroke="#e2e8f0"/>
+  <text x="80" y="154" text-anchor="middle" font-size="14" font-weight="700" fill="#1e293b">4</text>
+  <rect x="358" y="135" width="40" height="26" rx="6" fill="white" stroke="#e2e8f0"/>
+  <text x="378" y="154" text-anchor="middle" font-size="14" font-weight="700" fill="#1e293b">2</text>
+  <rect x="200" y="195" width="40" height="26" rx="6" fill="white" stroke="#e2e8f0"/>
+  <text x="220" y="214" text-anchor="middle" font-size="14" font-weight="700" fill="#1e293b">3</text>
+  <rect x="240" y="125" width="40" height="26" rx="6" fill="white" stroke="#e2e8f0"/>
+  <text x="260" y="144" text-anchor="middle" font-size="14" font-weight="700" fill="#94a3b8">5</text>
+  <!-- Trace -->
+  <text x="480" y="75" font-size="13" font-weight="700" fill="#065f46">Step 1: Visit A (dist=0)</text>
+  <text x="480" y="100" font-size="12" font-weight="600" fill="#1e293b">Update B=1, C=4, D=5</text>
+  <text x="480" y="130" font-size="13" font-weight="700" fill="#0284c7">Step 2: Visit B (dist=1)</text>
+  <text x="480" y="155" font-size="12" font-weight="600" fill="#1e293b">Update D=1+2=3 &lt; 5 &rArr; D=3</text>
+  <text x="480" y="185" font-size="13" font-weight="700" fill="#991b1b">Step 3: Visit D (dist=3)</text>
+  <text x="480" y="210" font-size="12" font-weight="600" fill="#1e293b">C: 3+3=6 &gt; 4 &rArr; no change</text>
+  <text x="480" y="240" font-size="13" font-weight="700" fill="#0284c7">Step 4: Visit C (dist=4)</text>
+  <text x="480" y="260" font-size="12" font-weight="600" fill="#1e293b">Done. All visited.</text>
+</svg>
+</div>
+<p class="fade-up delay-2">Both algorithms produce the same result for this graph. The difference:
+Dijkstra visits each node <strong>once</strong> (greedy); Bellman&ndash;Ford relaxes
+<strong>all edges</strong> repeatedly.</p>
+</div>
+
+<!-- ==================== SLIDE 33: Dijkstra in Python ==================== -->
+<div class="slide" data-slide="33">
+<h2 class="slide-title">Dijkstra in Python</h2>
+<div class="code-block" data-lang="python">
+<span class="keyword">import</span> heapq
+
+<span class="keyword">def</span> <span class="function">dijkstra</span>(
+    graph: <span class="builtin">dict</span>[<span class="builtin">str</span>, <span class="builtin">list</span>[<span class="builtin">tuple</span>[<span class="builtin">str</span>, <span class="builtin">int</span>]]],
+    source: <span class="builtin">str</span>
+) -> <span class="builtin">dict</span>[<span class="builtin">str</span>, <span class="builtin">int</span>]:
+    <span class="comment"># Initialise distances</span>
+    dist = {v: <span class="builtin">float</span>(<span class="string">"inf"</span>) <span class="keyword">for</span> v <span class="keyword">in</span> graph}
+    dist[source] = <span class="number">0</span>
+    pq = [(<span class="number">0</span>, source)]
+
+    <span class="keyword">while</span> pq:
+        d, u = heapq.<span class="function">heappop</span>(pq)
+        <span class="keyword">if</span> d > dist[u]:
+            <span class="keyword">continue</span>
+        <span class="keyword">for</span> v, w <span class="keyword">in</span> graph[u]:
+            <span class="keyword">if</span> dist[u] + w < dist[v]:
+                dist[v] = dist[u] + w
+                heapq.<span class="function">heappush</span>(pq, (dist[v], v))
+
+    <span class="keyword">return</span> dist
+</div>
+<p class="fade-up delay-1">Usage:</p>
+<div class="code-block" data-lang="python">
+g = {
+    <span class="string">"A"</span>: [(<span class="string">"B"</span>, <span class="number">1</span>), (<span class="string">"C"</span>, <span class="number">4</span>), (<span class="string">"D"</span>, <span class="number">5</span>)],
+    <span class="string">"B"</span>: [(<span class="string">"D"</span>, <span class="number">2</span>)],
+    <span class="string">"C"</span>: [(<span class="string">"D"</span>, <span class="number">3</span>)],
+    <span class="string">"D"</span>: [],
+}
+<span class="builtin">print</span>(<span class="function">dijkstra</span>(g, <span class="string">"A"</span>))
+<span class="comment"># {'A': 0, 'B': 1, 'C': 4, 'D': 3}</span>
+</div>
+</div>
+
+<!-- ==================== SLIDE 34: Quick Prediction ==================== -->
+<div class="slide" data-slide="34">
+<h2 class="slide-title">Predict: Which Algorithm, Which Protocol?</h2>
+<p class="fade-up">Before we compare RIP and OSPF side by side, test your mental model.</p>
+<div class="quiz-container fade-up delay-1">
+<h4>A network engineer must run shortest-path computation on a router with 200 nodes
+in its topology database. Which statement is correct?</h4>
+<div class="quiz-option" onclick="checkQuiz(this, false, 'fb34')">
+A) The router uses Bellman&ndash;Ford because it is simpler and faster on large graphs
+</div>
+<div class="quiz-option" onclick="checkQuiz(this, true, 'fb34')">
+B) The router uses Dijkstra because OSPF guarantees non-negative link costs and needs faster convergence
+</div>
+<div class="quiz-option" onclick="checkQuiz(this, false, 'fb34')">
+C) The router uses both algorithms simultaneously and picks the better result
+</div>
+<div class="quiz-option" onclick="checkQuiz(this, false, 'fb34')">
+D) Neither algorithm is used; OSPF selects routes by hop count like RIP
+</div>
+<div class="quiz-feedback" id="fb34">
+<div class="correct-msg">
+&#10004; Correct. OSPF routers run Dijkstra on their LSDB. Because link costs (derived from
+bandwidth) are always non-negative, Dijkstra&rsquo;s greedy approach works and is
+asymptotically faster than Bellman&ndash;Ford. RIP is the protocol that conceptually
+uses Bellman&ndash;Ford, not OSPF.
+</div>
+<div class="incorrect-msg">
+&#10008; OSPF uses <strong>Dijkstra</strong> (not Bellman&ndash;Ford). Bellman&ndash;Ford
+underpins distance-vector protocols like RIP. OSPF link costs are always non-negative
+(typically 10<sup>8</sup> / bandwidth), so Dijkstra&rsquo;s assumption holds and it
+converges faster. Routers do not mix algorithms or use hop count in OSPF.
+</div>
+</div>
+</div>
+</div>
+
+<!-- ==================== SLIDE 35: RIP vs OSPF ==================== -->
+<div class="slide" data-slide="35">
+<h2 class="slide-title">RIP vs OSPF &mdash; Head to Head</h2>
+<table class="data-table fade-up">
+<thead>
+<tr><th>Feature</th><th><span class="badge badge-rip">RIP</span></th><th><span class="badge badge-ospf">OSPF</span></th></tr>
+</thead>
+<tbody>
+<tr><td>Algorithm family</td><td>Distance-vector</td><td>Link-state</td></tr>
+<tr><td>Metric</td><td>Hop count (max 15)</td><td>Cost (bandwidth-based)</td></tr>
+<tr><td>Convergence</td><td>Slow (minutes)</td><td>Fast (sub-second)</td></tr>
+<tr><td>Topology knowledge</td><td>Next hop only</td><td>Full LSDB</td></tr>
+<tr><td>Scalability</td><td>Small networks (&lt;15 hops)</td><td>Large networks (area hierarchy)</td></tr>
+<tr><td>Updates</td><td>Periodic (every 30 s)</td><td>Event-driven (topology changes)</td></tr>
+<tr><td>Loop prevention</td><td>Split horizon, holddown</td><td>Guaranteed by SPF on identical LSDB</td></tr>
+<tr><td>VLSM/CIDR</td><td>RIPv2+ only</td><td>Native</td></tr>
+<tr><td>Resource usage</td><td>Low CPU/RAM</td><td>Higher CPU/RAM (SPF calculation)</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ==================== SLIDE 35: Interactive Metric Calculator ==================== -->
+<div class="slide" data-slide="36">
+<h2 class="slide-title">Explore: Why Metrics Matter</h2>
+<p class="fade-up">Adjust the link bandwidths to see how RIP and OSPF may choose different paths.
+Path A has 3 hops; Path B has 2 hops.</p>
+<div class="interactive-panel fade-up delay-1">
+<h4>RIP vs OSPF Path Selection</h4>
+<div class="grid-2">
+<div>
+<label>Path A link bandwidth: <strong><span id="bwA">100</span> Mbps</strong></label>
+<input type="range" id="sliderBwA" min="10" max="10000" step="10" value="100" oninput="updateMetricCalc()"/>
+<p style="font-size:0.9rem;color:var(--text-muted);">3 hops, each link at this speed</p>
+</div>
+<div>
+<label>Path B link bandwidth: <strong><span id="bwB">10</span> Mbps</strong></label>
+<input type="range" id="sliderBwB" min="10" max="10000" step="10" value="10" oninput="updateMetricCalc()"/>
+<p style="font-size:0.9rem;color:var(--text-muted);">2 hops, each link at this speed</p>
+</div>
+</div>
+<div class="result-display">
+<p><strong>RIP decision:</strong> <span id="ripResult"></span></p>
+<p><strong>OSPF decision:</strong> <span id="ospfResult"></span></p>
+<p id="metricVerdict"></p>
+</div>
+</div>
+</div>
+
+<!-- ==================== SLIDE 36: Quiz — LS vs DV ==================== -->
+<div class="slide" data-slide="37">
+<h2 class="slide-title">Knowledge Check: Link-State vs Distance-Vector</h2>
+<div class="quiz-container">
+<h4>An OSPF network has three paths between routers A and D.
+Path 1: two 1 Gbps links. Path 2: one 100 Mbps link. Path 3: four 10 Gbps links.
+Reference bandwidth is 10 Gbps. Which path does OSPF select?</h4>
+<div class="quiz-option" onclick="checkQuiz(this, false, 'fb36')">
+A) Path 2 &mdash; fewest hops (1 hop)
+</div>
+<div class="quiz-option" onclick="checkQuiz(this, false, 'fb36')">
+B) Path 1 &mdash; good balance of hops and speed
+</div>
+<div class="quiz-option" onclick="checkQuiz(this, true, 'fb36')">
+C) Path 3 &mdash; lowest total cost (4 &times; 1 = 4)
+</div>
+<div class="quiz-option" onclick="checkQuiz(this, false, 'fb36')">
+D) OSPF cannot decide and drops the packet
+</div>
+<div class="quiz-feedback" id="fb36">
+<div class="correct-msg">
+&#10004; Correct. With reference 10 Gbps: Path 1 cost = 2 &times; (10000/1000) = 20.
+Path 2 cost = 1 &times; (10000/100) = 100. Path 3 cost = 4 &times; (10000/10000) = 4.
+Path 3 has the lowest total cost despite having the most hops.
+</div>
+<div class="incorrect-msg">
+&#10008; Remember the OSPF cost formula: cost = reference_bw / link_bw, summed over
+all links on the path. Path 1: 2&times;10 = 20. Path 2: 1&times;100 = 100.
+Path 3: 4&times;1 = 4. OSPF does not count hops &mdash; it sums costs. RIP would
+pick Path 2 (1 hop), but OSPF correctly identifies that Path 3&rsquo;s fast links
+make it the best choice.
+</div>
+</div>
+</div>
+</div>
+
+<!-- ==================== SLIDE 37: Mininet ==================== -->
+<div class="slide" data-slide="38">
+<h2 class="slide-title">Routing in Practice: Mininet</h2>
+<p class="fade-up">In the accompanying seminar exercises, we use Mininet to build a three-router
+triangle topology and configure static routes manually.</p>
+<div class="diagram-container fade-up delay-1">
+<svg viewBox="0 0 600 250" style="max-width:80%;">
+  <line x1="300" y1="50" x2="120" y2="200" stroke="#64748b" stroke-width="3"/>
+  <line x1="300" y1="50" x2="480" y2="200" stroke="#64748b" stroke-width="3"/>
+  <line x1="120" y1="200" x2="480" y2="200" stroke="#64748b" stroke-width="3"/>
+  <circle cx="300" cy="50" r="30" fill="#ecfdf5" stroke="#059669" stroke-width="3"/>
+  <text x="300" y="56" text-anchor="middle" font-size="16" font-weight="700" fill="#065f46">R1</text>
+  <circle cx="120" cy="200" r="30" fill="#f0f9ff" stroke="#0ea5e9" stroke-width="3"/>
+  <text x="120" y="206" text-anchor="middle" font-size="16" font-weight="700" fill="#0284c7">R2</text>
+  <circle cx="480" cy="200" r="30" fill="#fef2f2" stroke="#ef4444" stroke-width="3"/>
+  <text x="480" y="206" text-anchor="middle" font-size="16" font-weight="700" fill="#991b1b">R3</text>
+  <text x="190" y="110" text-anchor="middle" font-size="13" font-weight="600" fill="#64748b">10.0.1.0/24</text>
+  <text x="410" y="110" text-anchor="middle" font-size="13" font-weight="600" fill="#64748b">10.0.2.0/24</text>
+  <text x="300" y="230" text-anchor="middle" font-size="13" font-weight="600" fill="#64748b">10.0.3.0/24</text>
+</svg>
+</div>
+<div class="code-block fade-up delay-2" data-lang="bash">
+<span class="comment"># On R1: add a static route to R3's network via R2</span>
+ip route add 10.0.3.0/24 via 10.0.1.2
+
+<span class="comment"># Verify the routing table</span>
+ip route show
+
+<span class="comment"># Test connectivity</span>
+ping -c 3 10.0.3.1
+</div>
+</div>
+
+<!-- ==================== SLIDE 38: What If the Link Fails? ==================== -->
+<div class="slide" data-slide="39">
+<h2 class="slide-title">What If the Direct Link Fails?</h2>
+<p class="fade-up">Suppose the R1&mdash;R2 link goes down in our triangle topology.</p>
+<div class="grid-2 fade-up delay-1">
+<div class="card card-danger">
+<h4>With static routes only</h4>
+<p>R1&rsquo;s route to R2&rsquo;s network points at a dead interface. Packets are
+<strong>dropped silently</strong> until an administrator manually reconfigures the
+route to go via R3. There is no automatic recovery.</p>
+</div>
+<div class="card card-success">
+<h4>With a dynamic protocol (e.g. OSPF)</h4>
+<p>R1 detects the adjacency loss within seconds (dead timer expiry). It removes the
+failed link from its LSDB, floods an updated LSA to R3, recalculates SPF and installs
+a new route: <strong>reach R2 via R3</strong>. Convergence takes under 1 second on a
+well-tuned network.</p>
+</div>
+</div>
+<button class="reveal-btn fade-up delay-2" onclick="toggleReveal(this)">&#128269; Reveal: What about RIP?</button>
+<div class="reveal-content">
+<p>RIP would also eventually converge, but it takes much longer. The invalid timer
+(180 s) must expire before the route is marked unreachable. With triggered updates
+and split horizon, convergence improves somewhat &mdash; but it is still measured
+in tens of seconds to minutes, compared to OSPF&rsquo;s sub-second recovery.</p>
+</div>
+</div>
+
+<!-- ==================== SLIDE 39: AS 7007 Revisited ==================== -->
+<div class="slide" data-slide="40">
+<h2 class="slide-title">AS 7007 Revisited</h2>
+<p class="fade-up">We can now understand the hook from Slide 2. The AS 7007 incident was a
+<strong>BGP route leak</strong>: an EGP problem, not an IGP problem. But it illustrates
+the same principle we studied today at a global scale.</p>
+<div class="grid-2 fade-up delay-1">
+<div class="card card-accent">
+<h4>What went wrong</h4>
+<p>AS 7007&rsquo;s router was misconfigured to redistribute its full internal routing
+table into BGP, announcing itself as the best path to thousands of prefixes it did
+not actually serve. Neighbouring ASes accepted these announcements because BGP
+(at the time) lacked adequate filtering.</p>
+</div>
+<div class="card card-success">
+<h4>What we now understand</h4>
+<p>Routing protocols propagate information &mdash; correct or incorrect &mdash; through
+the network. <strong>A single bad entry can cascade</strong> because every router
+trusts its protocol&rsquo;s output. This is why route filtering, authentication and
+prefix validation (RPKI, developed years later) are essential.</p>
+</div>
+</div>
+<div class="highlight-box fade-up delay-2">
+<strong>Narrative closure:</strong> The AS 7007 event became a catalyst for BGP security
+improvements. It demonstrated that the power of routing protocols &mdash; their ability
+to propagate reachability information automatically &mdash; is also their greatest
+vulnerability when misconfigured.
+</div>
+</div>
+
+<!-- ==================== SLIDE 40: Synthesis Quiz ==================== -->
+<div class="slide" data-slide="41">
+<h2 class="slide-title">Synthesis Question</h2>
+<div class="quiz-container">
+<h4>A company has 50 routers in a single site, all connected via Ethernet.
+An engineer proposes using RIP for routing. Which is the <strong>strongest</strong>
+argument against this choice?</h4>
+<div class="quiz-option" onclick="checkQuiz(this, false, 'fb40')">
+A) RIP uses too much bandwidth for updates
+</div>
+<div class="quiz-option" onclick="checkQuiz(this, false, 'fb40')">
+B) RIP does not support Ethernet networks
+</div>
+<div class="quiz-option" onclick="checkQuiz(this, true, 'fb40')">
+C) With 50 routers, some paths will exceed 15 hops, making portions of the network unreachable
+</div>
+<div class="quiz-option" onclick="checkQuiz(this, false, 'fb40')">
+D) RIP cannot operate without a designated router
+</div>
+<div class="quiz-feedback" id="fb40">
+<div class="correct-msg">
+&#10004; Correct. The 15-hop ceiling is the fundamental scalability limit of RIP. In a
+network of 50 routers, the diameter (longest shortest path) can easily exceed 15 hops,
+rendering portions of the network unreachable. OSPF, with its area hierarchy and no
+hop limit, is the appropriate choice here.
+</div>
+<div class="incorrect-msg">
+&#10008; While RIP&rsquo;s periodic broadcasts do consume some bandwidth, the primary
+issue with 50 routers is the <strong>15-hop limit</strong>. Paths longer than 15 hops
+are treated as unreachable (metric 16 = infinity). RIP works fine on Ethernet, and
+the DR/BDR concept belongs to OSPF, not RIP. The hop limit is the decisive factor.
+</div>
+</div>
+</div>
+</div>
+
+<!-- ==================== SLIDE 41: Connections ==================== -->
+<div class="slide" data-slide="42">
+<h2 class="slide-title">Connections and Forward References</h2>
+<p class="fade-up">Routing does not exist in isolation. Here is how this week&rsquo;s concepts
+connect to the rest of the course:</p>
+<div class="grid-2 fade-up delay-1">
+<div class="card card-secondary">
+<h4>Seminar 7 &mdash; This Week</h4>
+<p>You will capture packets traversing routed paths, build a Python packet filter
+and implement a port scanner. Understanding routing tables helps you predict
+<em>where</em> captured packets came from and <em>why</em> they took a particular path.</p>
+</div>
+<div class="card card-purple">
+<h4>Week 8 &mdash; Transport Layer</h4>
+<p>TCP and UDP sit directly above the network layer. TCP&rsquo;s retransmission logic
+assumes that IP routing eventually delivers packets. When routes change mid-connection,
+TCP&rsquo;s sequence numbers and ACKs keep the conversation intact.</p>
+</div>
+<div class="card card-accent">
+<h4>Seminar 5&ndash;6 &mdash; Already Done</h4>
+<p>You configured static routes in Mininet and explored SDN topologies. Today&rsquo;s
+lecture explains <em>why</em> those static routes worked and what happens when
+you replace them with dynamic protocols.</p>
+</div>
+<div class="card card-success">
+<h4>Week 13 &mdash; Security</h4>
+<p>Route hijacking (like AS 7007), prefix filtering and RPKI are network security
+topics. Understanding routing protocols is a prerequisite for understanding
+routing-based attacks.</p>
+</div>
+</div>
+</div>
+
+<!-- ==================== SLIDE 42: Key Takeaways ==================== -->
+<div class="slide" data-slide="43">
+<h2 class="slide-title">Key Takeaways</h2>
+<div class="grid-2 fade-up">
+<div class="card card-success">
+<h4>1. Forwarding ≠ Routing</h4>
+<p>Forwarding is the per-packet data-plane decision. Routing is the background
+control-plane process that populates the forwarding table.</p>
+</div>
+<div class="card card-accent">
+<h4>2. Routing table = longest prefix match</h4>
+<p>The most specific matching entry wins. The default route (0.0.0.0/0) is the
+catch-all of last resort.</p>
+</div>
+<div class="card card-secondary">
+<h4>3. Distance-vector: simple but slow</h4>
+<p>RIP shares distances with neighbours. Hop count ignores bandwidth. Count-to-infinity
+is a real risk. Convergence takes minutes.</p>
+</div>
+<div class="card card-purple">
+<h4>4. Link-state: powerful but complex</h4>
+<p>OSPF shares link information with everyone. Each router computes routes locally
+via Dijkstra. Converges in sub-seconds. Scales via areas.</p>
+</div>
+</div>
+<div class="highlight-box fade-up delay-1">
+<strong>5. Metrics determine path selection.</strong> RIP counts hops; OSPF measures
+cost (inverse bandwidth). The same topology can produce different optimal paths
+depending on the metric. Choose the protocol that measures what matters.
+</div>
+<button class="reveal-btn fade-up delay-2" onclick="toggleReveal(this)">&#128269; Self-check: Can you explain to a colleague why OSPF is preferred for enterprise networks?</button>
+<div class="reveal-content">
+<p>If you can articulate these three points, you have grasped the core: (1) OSPF converges
+in sub-seconds versus minutes for RIP; (2) OSPF uses bandwidth-based cost, not hop count,
+so it picks genuinely faster paths; (3) OSPF scales via areas, whereas RIP collapses
+beyond 15 hops. For small, simple topologies RIP suffices; for anything else, OSPF is
+the standard IGP.</p>
+</div>
+</div>
+
+<!-- ==================== SLIDE 43: Resources ==================== -->
+<div class="slide" data-slide="44">
+<h2 class="slide-title">Further Reading and Resources</h2>
+<div class="grid-2 fade-up">
+<div class="card card-secondary">
+<h4>Standards and RFCs</h4>
+<p>RFC 2453 &mdash; RIP Version 2<br/>
+RFC 2328 &mdash; OSPF Version 2 (OSPFv2)<br/>
+RFC 5340 &mdash; OSPF for IPv6 (OSPFv3)<br/>
+RFC 4271 &mdash; BGP-4 (for context)</p>
+</div>
+<div class="card card-accent">
+<h4>Textbooks</h4>
+<p>Kurose &amp; Ross, <em>Computer Networking: A Top-Down Approach</em>, Ch. 5<br/>
+Doyle &amp; Carroll, <em>Routing TCP/IP, Volume 1</em>, 2nd ed. (Cisco Press)</p>
+</div>
+<div class="card card-success">
+<h4>Practical exercises</h4>
+<p>Seminar 7: packet sniffer, packet filter and port scanner (Python)<br/>
+Mininet static routing scenario: <code>assets/scenario-mininet-routing/</code><br/>
+Algorithm demos: <code>assets/scenario-bellman-ford/</code>, <code>assets/scenario-dijkstra/</code></p>
+</div>
+<div class="card card-purple">
+<h4>Self-assessment</h4>
+<p>Can you trace Dijkstra by hand on a 5-node graph?<br/>
+Can you explain why RIP fails in a 20-router network?<br/>
+Can you calculate the OSPF cost of a path with mixed-speed links?</p>
+</div>
+</div>
+</div>
+
+<!-- ==================== SLIDE 44: Closing ==================== -->
+<div class="slide title-slide" data-slide="45">
+<h1>Week 7 Complete</h1>
+<h2 style="font-weight:400;">Routing Protocols &mdash; RIP, OSPF and the Algorithms That Guide Every Packet</h2>
+<div class="grid-2" style="max-width: 600px; margin-top: 2.5rem;">
+<div class="card" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);">
+<h4 style="color: var(--text-on-dark);">Next</h4>
+<p style="color: var(--text-on-dark-muted);">Week 8: The Transport Layer &mdash; TCP, UDP and TLS</p>
+</div>
+<div class="card" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);">
+<h4 style="color: var(--text-on-dark);">Seminar</h4>
+<p style="color: var(--text-on-dark-muted);">Packet capture, filtering and port scanning</p>
+</div>
+</div>
+<p style="margin-top: 2.5rem; font-size: 0.95rem; color: var(--text-on-dark-muted);">
+Bucharest University of Economic Studies &mdash; Faculty CSIE</p>
+</div>
+
+</div><!-- end .presentation -->
+<!-- Navigation -->
+<div class="nav-container">
+<button class="nav-btn nav-btn-primary" onclick="prevSlide()" title="Previous slide">&larr; Prev</button>
+<button class="nav-btn nav-btn-secondary" onclick="openTOC()" title="Table of contents">Contents</button>
+<button class="nav-btn nav-btn-secondary" onclick="toggleFullscreen()" title="Toggle fullscreen">Fullscreen</button>
+<button class="nav-btn nav-btn-primary" onclick="nextSlide()" title="Next slide">Next &rarr;</button>
+</div>
+<!-- Footer -->
+<div class="footer-attribution">by Revolvix</div>
+<!-- ==================== TABLE OF CONTENTS ==================== -->
+<div class="toc-overlay" id="tocOverlay" onclick="if(event.target===this)closeTOC()">
+<div class="toc-modal">
+<h2>Table of Contents</h2>
+<div class="toc-section">
+<h4>Opening &mdash; Why Routing Matters</h4>
+<div class="toc-item" onclick="goToSlide(1)">1. Title</div>
+<div class="toc-item" onclick="goToSlide(2)">2. The AS 7007 Incident</div>
+<div class="toc-item" onclick="goToSlide(3)">3. Where We Stand</div>
+<div class="toc-item" onclick="goToSlide(4)">4. Learning Objectives</div>
+<div class="toc-item" onclick="goToSlide(5)">5. Course Roadmap</div>
+<div class="toc-item" onclick="goToSlide(6)">6. The Problem We Cannot Yet Solve</div>
+</div>
+<div class="toc-section">
+<h4>Foundations &mdash; Routers and Tables</h4>
+<div class="toc-item" onclick="goToSlide(7)">7. What Is a Router?</div>
+<div class="toc-item" onclick="goToSlide(8)">8. Routing vs Forwarding</div>
+<div class="toc-item" onclick="goToSlide(9)">9. L2 vs L3 Changes Along a Path</div>
+<div class="toc-item" onclick="goToSlide(10)">10. The Routing Table</div>
+<div class="toc-item" onclick="goToSlide(11)">11. Quiz: Foundations</div>
+<div class="toc-item" onclick="goToSlide(12)">12. Static vs Dynamic Routes</div>
+<div class="toc-item" onclick="goToSlide(13)">13. Routing Metrics</div>
+<div class="toc-item" onclick="goToSlide(14)">14. Network Classification</div>
+<div class="toc-item" onclick="goToSlide(15)">15. IGP vs EGP</div>
+</div>
+<div class="toc-section">
+<h4>Part I &mdash; Distance-Vector Protocols</h4>
+<div class="toc-item" onclick="goToSlide(16)">16. Section: Distance-Vector</div>
+<div class="toc-item" onclick="goToSlide(17)">17. The Distance-Vector Idea</div>
+<div class="toc-item" onclick="goToSlide(18)">18. RIP Overview</div>
+<div class="toc-item" onclick="goToSlide(19)">19. Count-to-Infinity Problem</div>
+<div class="toc-item" onclick="goToSlide(20)">20. Mitigating Count-to-Infinity</div>
+<div class="toc-item" onclick="goToSlide(21)">21. RIP Timers</div>
+<div class="toc-item" onclick="goToSlide(22)">22. Bellman&ndash;Ford Algorithm</div>
+<div class="toc-item" onclick="goToSlide(23)">23. Bellman&ndash;Ford Worked Example</div>
+<div class="toc-item" onclick="goToSlide(24)">24. Bellman&ndash;Ford in Python</div>
+<div class="toc-item" onclick="goToSlide(25)">25. Quiz: Distance-Vector</div>
+</div>
+<div class="toc-section">
+<h4>Part II &mdash; Link-State Protocols</h4>
+<div class="toc-item" onclick="goToSlide(26)">26. Section: Link-State</div>
+<div class="toc-item" onclick="goToSlide(27)">27. The Link-State Idea</div>
+<div class="toc-item" onclick="goToSlide(28)">28. OSPF Overview</div>
+<div class="toc-item" onclick="goToSlide(29)">29. OSPF Operation</div>
+<div class="toc-item" onclick="goToSlide(30)">30. OSPF Areas</div>
+<div class="toc-item" onclick="goToSlide(31)">31. Dijkstra&rsquo;s Algorithm</div>
+<div class="toc-item" onclick="goToSlide(32)">32. Dijkstra Worked Example</div>
+<div class="toc-item" onclick="goToSlide(33)">33. Dijkstra in Python</div>
+<div class="toc-item" onclick="goToSlide(34)">34. Predict: Which Algorithm?</div>
+<div class="toc-item" onclick="goToSlide(35)">35. RIP vs OSPF Comparison</div>
+<div class="toc-item" onclick="goToSlide(36)">36. Interactive: Metric Calculator</div>
+<div class="toc-item" onclick="goToSlide(37)">37. Quiz: Link-State vs Distance-Vector</div>
+</div>
+<div class="toc-section">
+<h4>Application &mdash; Putting It Together</h4>
+<div class="toc-item" onclick="goToSlide(38)">38. Routing in Mininet</div>
+<div class="toc-item" onclick="goToSlide(39)">39. What If the Direct Link Fails?</div>
+<div class="toc-item" onclick="goToSlide(40)">40. AS 7007 Revisited</div>
+<div class="toc-item" onclick="goToSlide(41)">41. Synthesis Quiz</div>
+</div>
+<div class="toc-section">
+<h4>Reflection &mdash; Summary and Next Steps</h4>
+<div class="toc-item" onclick="goToSlide(42)">42. Connections and Forward References</div>
+<div class="toc-item" onclick="goToSlide(43)">43. Key Takeaways</div>
+<div class="toc-item" onclick="goToSlide(44)">44. Resources</div>
+<div class="toc-item" onclick="goToSlide(45)">45. Closing</div>
+</div>
+<p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 1.5rem;">
+Press <kbd>T</kbd> to toggle &bull; <kbd>Esc</kbd> to close
+</p>
+</div>
+</div>
+<script>
+  // ==================== NAVIGATION ====================
+  let currentSlide = 1;
+  const totalSlides = 45;
+
+  function showSlide(n) {
+    const slides = document.querySelectorAll('.slide');
+    slides.forEach(s => s.classList.remove('active'));
+
+    if (n < 1) n = 1;
+    if (n > totalSlides) n = totalSlides;
+
+    currentSlide = n;
+    const targetSlide = document.querySelector(`[data-slide="${n}"]`);
+    if (targetSlide) {
+      targetSlide.classList.add('active');
+      targetSlide.scrollTop = 0;
+    }
+
+    document.getElementById('slideCounter').textContent = `${n} / ${totalSlides}`;
+    document.getElementById('progressBar').style.width = `${(n / totalSlides) * 100}%`;
+  }
+
+  function nextSlide() { showSlide(currentSlide + 1); }
+  function prevSlide() { showSlide(currentSlide - 1); }
+  function goToSlide(n) { showSlide(n); closeTOC(); }
+
+  // ==================== TOC ====================
+  function openTOC() {
+    document.getElementById('tocOverlay').classList.add('show');
+  }
+
+  function closeTOC() {
+    document.getElementById('tocOverlay').classList.remove('show');
+  }
+
+  // ==================== FULLSCREEN ====================
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+    } else {
+      document.exitFullscreen();
+    }
+  }
+
+  // ==================== KEYBOARD NAVIGATION ====================
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ') {
+      e.preventDefault();
+      nextSlide();
+    }
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      prevSlide();
+    }
+    if (e.key === 'Home') {
+      e.preventDefault();
+      showSlide(1);
+    }
+    if (e.key === 'End') {
+      e.preventDefault();
+      showSlide(totalSlides);
+    }
+    if (e.key === 'f' || e.key === 'F') {
+      toggleFullscreen();
+    }
+    if (e.key === 't' || e.key === 'T') {
+      const toc = document.getElementById('tocOverlay');
+      if (toc.classList.contains('show')) {
+        closeTOC();
+      } else {
+        openTOC();
+      }
+    }
+    if (e.key === 'Escape') {
+      closeTOC();
+    }
+  });
+
+  // ==================== QUIZ FUNCTIONS ====================
+  function checkQuiz(element, isCorrect, feedbackId) {
+    const container = element.closest('.quiz-container');
+    const options = container.querySelectorAll('.quiz-option');
+    const feedback = document.getElementById(feedbackId);
+
+    options.forEach(opt => {
+      opt.classList.remove('selected', 'correct', 'incorrect');
+    });
+
+    element.classList.add('selected');
+    element.classList.add(isCorrect ? 'correct' : 'incorrect');
+
+    feedback.classList.remove('correct', 'incorrect');
+    feedback.classList.add('show', isCorrect ? 'correct' : 'incorrect');
+  }
+
+  // ==================== REVEAL FUNCTIONS ====================
+  function toggleReveal(btn) {
+    const content = btn.nextElementSibling;
+    if (content.classList.contains('show')) {
+      content.classList.remove('show');
+      btn.textContent = btn.textContent.replace('Hide', 'Reveal');
+    } else {
+      content.classList.add('show');
+      btn.textContent = btn.textContent.replace('Reveal', 'Hide');
+    }
+  }
+
+  // ==================== METRIC CALCULATOR ====================
+  function updateMetricCalc() {
+    const bwA = parseInt(document.getElementById('sliderBwA').value);
+    const bwB = parseInt(document.getElementById('sliderBwB').value);
+
+    document.getElementById('bwA').textContent = bwA;
+    document.getElementById('bwB').textContent = bwB;
+
+    // RIP: pure hop count
+    const ripA = 3;
+    const ripB = 2;
+    const ripWinner = ripB < ripA ? 'Path B' : 'Path A';
+    document.getElementById('ripResult').textContent =
+      `${ripWinner} (${Math.min(ripA, ripB)} hops < ${Math.max(ripA, ripB)} hops) — RIP always picks fewer hops`;
+
+    // OSPF: cost = reference_bw / link_bw (reference = 10000 Mbps)
+    const ref = 10000;
+    const costA = 3 * (ref / bwA);
+    const costB = 2 * (ref / bwB);
+    const ospfWinner = costA < costB ? 'Path A' : 'Path B';
+    document.getElementById('ospfResult').textContent =
+      `${ospfWinner} (cost ${costA.toFixed(1)} vs ${costB.toFixed(1)})`;
+
+    const verdict = document.getElementById('metricVerdict');
+    if (ripWinner !== ospfWinner) {
+      verdict.innerHTML = '<strong style="color: #f59e0b;">⚠ RIP and OSPF disagree!</strong> ' +
+        'This shows why hop count alone can mislead — bandwidth matters.';
+    } else {
+      verdict.innerHTML = '<strong style="color: #10b981;">✓ Both agree on ' + ospfWinner + '.</strong> ' +
+        'Try adjusting the bandwidths to find a disagreement.';
+    }
+  }
+
+  // ==================== INITIALISE ====================
+  showSlide(1);
+
+  // Initialise metric calculator if present
+  if (document.getElementById('sliderBwA')) {
+    updateMetricCalc();
+  }
+</script>
+</body>
+</html>

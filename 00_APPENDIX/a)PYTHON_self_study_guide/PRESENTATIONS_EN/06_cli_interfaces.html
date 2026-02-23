@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python for Networks | 6. CLI Interfaces (argparse)</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e17; --bg-secondary: #121a2b; --bg-tertiary: #1a2438;
+            --accent-primary: #00d4aa; --accent-secondary: #7c3aed; --accent-warning: #f59e0b;
+            --accent-error: #ef4444; --accent-success: #10b981;
+            --text-primary: #f1f5f9; --text-secondary: #94a3b8; --text-muted: #64748b;
+            --border-color: #2d3a4f; --code-bg: #0d1117;
+            --font-display: 'Plus Jakarta Sans', sans-serif; --font-mono: 'JetBrains Mono', monospace;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: var(--font-display); background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; overflow: hidden; }
+        .progress-container { position: fixed; top: 0; left: 0; right: 0; height: 4px; background: var(--bg-tertiary); z-index: 1000; }
+        .progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary)); transition: width 0.3s ease; }
+        .nav-header { position: fixed; top: 4px; left: 0; right: 0; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(180deg, var(--bg-primary) 0%, transparent 100%); z-index: 100; }
+        .nav-title { font-size: 0.9rem; color: var(--text-secondary); display: flex; align-items: center; gap: 0.5rem; }
+        .nav-title .module-label { color: var(--accent-primary); font-weight: 600; }
+        .slide-counter { font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-muted); background: var(--bg-tertiary); padding: 0.4rem 0.8rem; border-radius: 20px; }
+        .slides-container { height: 100vh; overflow: hidden; position: relative; }
+        .slide { position: absolute; top: 0; left: 0; right: 0; bottom: 0; padding: 5rem 2rem 6rem; display: flex; flex-direction: column; opacity: 0; visibility: hidden; transform: translateX(100px); transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); overflow-y: auto; }
+        .slide.active { opacity: 1; visibility: visible; transform: translateX(0); }
+        .slide.exit { transform: translateX(-100px); }
+        .slide-content { max-width: 1200px; margin: 0 auto; width: 100%; }
+        h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; line-height: 1.1; margin-bottom: 1.5rem; background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-primary) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        h2 { font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 700; margin-bottom: 1rem; color: var(--text-primary); }
+        h3 { font-size: 1.3rem; font-weight: 600; margin-bottom: 0.75rem; color: var(--accent-primary); }
+        p { font-size: 1.1rem; line-height: 1.7; color: var(--text-secondary); margin-bottom: 1rem; }
+        code { font-family: var(--font-mono); background: var(--bg-tertiary); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.9em; color: var(--accent-primary); }
+        .badge { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
+        .badge-time { background: rgba(0, 212, 170, 0.15); color: var(--accent-primary); }
+        .badge-week { background: rgba(124, 58, 237, 0.15); color: var(--accent-secondary); }
+        .card { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 16px; padding: 1.5rem; margin-bottom: 1rem; }
+        .card-highlight { border-left: 4px solid var(--accent-primary); }
+        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin: 1.5rem 0; }
+        .objectives-box { background: linear-gradient(135deg, rgba(0, 212, 170, 0.1) 0%, rgba(124, 58, 237, 0.1) 100%); border: 1px solid var(--border-color); border-radius: 16px; padding: 2rem; margin: 1.5rem 0; }
+        .objective-item { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1rem; }
+        .objective-icon { width: 32px; height: 32px; background: var(--accent-primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .objective-text { flex: 1; }
+        .objective-text strong { display: block; color: var(--text-primary); margin-bottom: 0.25rem; }
+        .objective-text span { font-size: 0.95rem; color: var(--text-secondary); }
+        .code-container { background: var(--code-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; margin: 1.5rem 0; }
+        .code-header { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; background: var(--bg-tertiary); border-bottom: 1px solid var(--border-color); }
+        .code-filename { font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-secondary); }
+        .code-actions { display: flex; gap: 0.5rem; }
+        .btn-code { padding: 0.4rem 0.8rem; border-radius: 6px; border: none; font-family: var(--font-mono); font-size: 0.8rem; cursor: pointer; }
+        .btn-run { background: var(--accent-primary); color: var(--bg-primary); }
+        .btn-copy { background: var(--bg-secondary); color: var(--text-secondary); border: 1px solid var(--border-color); }
+        .code-body { padding: 1rem; overflow-x: auto; }
+        .code-body pre { font-family: var(--font-mono); font-size: 0.9rem; line-height: 1.6; color: var(--text-primary); margin: 0; }
+        .code-output { padding: 1rem; background: rgba(0, 212, 170, 0.05); border-top: 1px solid var(--border-color); display: none; }
+        .code-output.visible { display: block; }
+        .code-output-header { font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent-primary); margin-bottom: 0.5rem; text-transform: uppercase; }
+        .kw { color: #ff79c6; }
+        .fn { color: #50fa7b; }
+        .str { color: #f1fa8c; }
+        .num { color: #bd93f9; }
+        .cmt { color: #6272a4; font-style: italic; }
+        .cls { color: #8be9fd; }
+        .quiz-container { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 16px; padding: 2rem; margin: 1.5rem 0; }
+        .quiz-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+        .quiz-icon { width: 48px; height: 48px; background: linear-gradient(135deg, var(--accent-secondary), var(--accent-primary)); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+        .quiz-question { font-size: 1.15rem; color: var(--text-primary); margin-bottom: 1.5rem; }
+        .quiz-options { display: flex; flex-direction: column; gap: 0.75rem; }
+        .quiz-option { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.25rem; background: var(--bg-tertiary); border: 2px solid var(--border-color); border-radius: 12px; cursor: pointer; }
+        .quiz-option:hover { border-color: var(--accent-primary); }
+        .quiz-option.selected { border-color: var(--accent-secondary); background: rgba(124, 58, 237, 0.1); }
+        .quiz-option.correct { border-color: var(--accent-success); background: rgba(16, 185, 129, 0.1); }
+        .quiz-option.incorrect { border-color: var(--accent-error); background: rgba(239, 68, 68, 0.1); }
+        .option-marker { width: 28px; height: 28px; border-radius: 50%; background: var(--bg-secondary); border: 2px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.85rem; }
+        .quiz-option.selected .option-marker { background: var(--accent-secondary); border-color: var(--accent-secondary); color: #fff; }
+        .quiz-option.correct .option-marker { background: var(--accent-success); }
+        .quiz-option.incorrect .option-marker { background: var(--accent-error); }
+        .quiz-actions { display: flex; gap: 1rem; margin-top: 1.5rem; }
+        .btn-quiz { padding: 0.75rem 1.5rem; border-radius: 8px; border: none; font-family: var(--font-display); font-size: 0.95rem; font-weight: 600; cursor: pointer; }
+        .btn-check { background: var(--accent-primary); color: var(--bg-primary); }
+        .btn-hint { background: transparent; color: var(--accent-warning); border: 1px solid var(--accent-warning); }
+        .hint-box { margin-top: 1rem; padding: 1rem 1.25rem; background: rgba(245, 158, 11, 0.1); border-left: 4px solid var(--accent-warning); border-radius: 0 8px 8px 0; display: none; }
+        .hint-box.visible { display: block; }
+        .hint-level { font-size: 0.8rem; color: var(--accent-warning); text-transform: uppercase; margin-bottom: 0.5rem; }
+        .feedback-box { margin-top: 1rem; padding: 1rem 1.25rem; border-radius: 8px; display: none; }
+        .feedback-box.visible { display: block; }
+        .feedback-box.success { background: rgba(16, 185, 129, 0.1); border-left: 4px solid var(--accent-success); }
+        .feedback-box.error { background: rgba(239, 68, 68, 0.1); border-left: 4px solid var(--accent-error); }
+        .experiment-box { background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(0, 212, 170, 0.1) 100%); border: 2px dashed var(--accent-secondary); border-radius: 16px; padding: 2rem; margin: 1.5rem 0; }
+        .experiment-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+        .experiment-icon { font-size: 2rem; }
+        .experiment-title { font-size: 1.3rem; font-weight: 700; color: var(--accent-secondary); }
+        .experiment-step { display: flex; gap: 1rem; margin-bottom: 1rem; padding: 1rem; background: var(--bg-secondary); border-radius: 12px; }
+        .step-number { width: 32px; height: 32px; background: var(--accent-secondary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
+        .step-content h4 { color: var(--text-primary); margin-bottom: 0.5rem; }
+        .step-content p { font-size: 0.95rem; margin-bottom: 0.5rem; }
+        .step-why { font-size: 0.85rem; color: var(--accent-primary); font-style: italic; }
+        .callout { display: flex; gap: 1rem; padding: 1.25rem; border-radius: 12px; margin: 1rem 0; }
+        .callout-networking { background: rgba(0, 212, 170, 0.1); border: 1px solid rgba(0, 212, 170, 0.3); }
+        .callout-icon { font-size: 1.5rem; }
+        .callout-content h4 { color: var(--accent-primary); margin-bottom: 0.5rem; }
+        .callout-content p { margin: 0; font-size: 0.95rem; }
+        .nav-buttons { position: fixed; bottom: 0; left: 0; right: 0; padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(0deg, var(--bg-primary) 0%, transparent 100%); z-index: 100; }
+        .btn-nav { display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem; border-radius: 8px; border: none; font-family: var(--font-display); font-size: 1rem; font-weight: 600; cursor: pointer; }
+        .btn-prev { background: var(--bg-tertiary); color: var(--text-secondary); border: 1px solid var(--border-color); }
+        .btn-next { background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: #fff; }
+        .btn-nav:disabled { opacity: 0.5; cursor: not-allowed; }
+        .page-dots { display: flex; gap: 0.5rem; }
+        .page-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border-color); cursor: pointer; }
+        .page-dot.active { background: var(--accent-primary); transform: scale(1.3); }
+        @media (max-width: 768px) { .slide { padding: 4rem 1rem 5rem; } .grid-2 { grid-template-columns: 1fr; } }
+        .title-slide { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        .title-meta { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; margin: 2rem 0; }
+        .python-logo { font-size: 4rem; margin-bottom: 1rem; }
+    </style>
+</head>
+<body>
+    <div class="progress-container"><div class="progress-bar" role="progressbar" id="progressBar"></div></div>
+    <nav class="nav-header">
+        <div class="nav-title"><span class="module-label">Module 6/10</span><span>•</span><span>CLI Interfaces (argparse)</span></div>
+        <div class="slide-counter" aria-live="polite" id="slideCounter">1 / 10</div>
+    </nav>
+
+    <div class="slides-container" id="slidesContainer">
+        <!-- Slide 1: Title -->
+        <div class="slide active title-slide" data-slide="1">
+            <div class="slide-content">
+                <div class="python-logo">⌨️</div>
+                <h1>CLI Interfaces with argparse</h1>
+                <p class="lead">Command Line Arguments</p>
+                <div class="title-meta">
+                    <span class="badge badge-time">⏱️ ~20 minutes</span>
+                    <span class="badge badge-week">📅 Week 5</span>
+                </div>
+                <div class="callout callout-networking" style="max-width:600px;margin:2rem auto;text-align:left">
+                    <span class="callout-icon">🌐</span>
+                    <div class="callout-content">
+                        <h4>Networking Correlation</h4>
+                        <p>Week 5: <strong>Network Layer and IP</strong>. Exercises receive IP addresses, network masks and ports as CLI arguments.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Why argparse -->
+        <div class="slide" data-slide="2">
+            <div class="slide-content">
+                <h2>🎯 Why argparse?</h2>
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>❌ Without argparse</h3>
+                        <div class="code-container" style="margin:1rem 0">
+                            <div class="code-body">
+<pre><span class="cmt"># Must validate manually</span>
+<span class="kw">import</span> sys
+<span class="kw">if</span> <span class="fn">len</span>(sys.argv) < <span class="num">3</span>:
+    <span class="fn">print</span>(<span class="str">"Usage: script.py IP PORT"</span>)
+    sys.<span class="fn">exit</span>(<span class="num">1</span>)
+ip = sys.argv[<span class="num">1</span>]
+port = <span class="fn">int</span>(sys.argv[<span class="num">2</span>])  <span class="cmt"># Crashes if not int!</span></pre>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card card-highlight">
+                        <h3>✅ With argparse</h3>
+                        <div class="code-container" style="margin:1rem 0">
+                            <div class="code-body">
+<pre><span class="kw">import</span> argparse
+parser = argparse.ArgumentParser()
+parser.add_argument(<span class="str">"--ip"</span>, required=<span class="kw">True</span>)
+parser.add_argument(<span class="str">"--port"</span>, type=<span class="fn">int</span>, default=<span class="num">8080</span>)
+args = parser.parse_args()
+<span class="cmt"># Automatic validation + generated help!</span></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card card-highlight">
+                    <h3>💡 argparse provides automatically:</h3>
+                    <p>✓ Type validation  ✓ Default values  ✓ Generated <code>--help</code>  ✓ Clear error messages</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Basic Usage -->
+        <div class="slide" data-slide="3">
+            <div class="slide-content">
+                <h2>📝 Basic Usage</h2>
+                <div class="code-container">
+                    <div class="code-header"><span class="code-filename">🐍 port_scanner.py</span><div class="code-actions"><button class="btn-code btn-run" onclick="simulateRun(this,'out1')">▶ Run</button></div></div>
+                    <div class="code-body">
+<pre><span class="kw">import</span> argparse
+
+<span class="cmt"># Create the parser</span>
+parser = argparse.ArgumentParser(
+    description=<span class="str">"Simple port scanner"</span>
+)
+
+<span class="cmt"># Positional argument (required)</span>
+parser.add_argument(<span class="str">"target"</span>, help=<span class="str">"Target IP or hostname"</span>)
+
+<span class="cmt"># Optional arguments</span>
+parser.add_argument(<span class="str">"-p"</span>, <span class="str">"--port"</span>, type=<span class="fn">int</span>, default=<span class="num">80</span>,
+                    help=<span class="str">"Port to scan (default: 80)"</span>)
+parser.add_argument(<span class="str">"-t"</span>, <span class="str">"--timeout"</span>, type=<span class="fn">float</span>, default=<span class="num">1.0</span>,
+                    help=<span class="str">"Timeout in seconds"</span>)
+parser.add_argument(<span class="str">"-v"</span>, <span class="str">"--verbose"</span>, action=<span class="str">"store_true"</span>,
+                    help=<span class="str">"Show details"</span>)
+
+<span class="cmt"># Parse arguments</span>
+args = parser.parse_args()
+
+<span class="fn">print</span>(<span class="str">f"Target: </span>{args.target}<span class="str">"</span>)
+<span class="fn">print</span>(<span class="str">f"Port: </span>{args.port}<span class="str">"</span>)
+<span class="fn">print</span>(<span class="str">f"Timeout: </span>{args.timeout}<span class="str">s"</span>)
+<span class="fn">print</span>(<span class="str">f"Verbose: </span>{args.verbose}<span class="str">"</span>)</pre>
+                    </div>
+                    <div class="code-output" id="out1">
+                        <div class="code-output-header">$ python port_scanner.py 192.168.1.1 -p 443 -v</div>
+<pre>Target: 192.168.1.1
+Port: 443
+Timeout: 1.0s
+Verbose: True</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Subcommands -->
+        <div class="slide" data-slide="4">
+            <div class="slide-content">
+                <h2>🔀 Subcommands (git style)</h2>
+                <p>A pattern used in exercises for <code>--mode server</code> and <code>--mode client</code>:</p>
+                <div class="code-container">
+                    <div class="code-header"><span class="code-filename">🐍 tcp_app.py</span></div>
+                    <div class="code-body">
+<pre><span class="kw">import</span> argparse
+
+parser = argparse.ArgumentParser(description=<span class="str">"TCP Server/Client"</span>)
+subparsers = parser.add_subparsers(dest=<span class="str">"mode"</span>, required=<span class="kw">True</span>)
+
+<span class="cmt"># Subcommand: server</span>
+srv = subparsers.add_parser(<span class="str">"server"</span>, help=<span class="str">"Run as server"</span>)
+srv.add_argument(<span class="str">"--port"</span>, type=<span class="fn">int</span>, default=<span class="num">9090</span>)
+srv.add_argument(<span class="str">"--host"</span>, default=<span class="str">"0.0.0.0"</span>)
+
+<span class="cmt"># Subcommand: client</span>
+cli = subparsers.add_parser(<span class="str">"client"</span>, help=<span class="str">"Run as client"</span>)
+cli.add_argument(<span class="str">"--server"</span>, required=<span class="kw">True</span>, help=<span class="str">"Server IP"</span>)
+cli.add_argument(<span class="str">"--port"</span>, type=<span class="fn">int</span>, default=<span class="num">9090</span>)
+cli.add_argument(<span class="str">"--message"</span>, default=<span class="str">"Hello"</span>)
+
+args = parser.parse_args()
+
+<span class="kw">if</span> args.mode == <span class="str">"server"</span>:
+    <span class="fn">print</span>(<span class="str">f"🖥️ Server on </span>{args.host}<span class="str">:</span>{args.port}<span class="str">"</span>)
+<span class="kw">elif</span> args.mode == <span class="str">"client"</span>:
+    <span class="fn">print</span>(<span class="str">f"💻 Client → </span>{args.server}<span class="str">:</span>{args.port}<span class="str">"</span>)</pre>
+                    </div>
+                </div>
+                <p><code>python tcp_app.py server --port 8080</code> or <code>python tcp_app.py client --server 127.0.0.1</code></p>
+            </div>
+        </div>
+
+        <!-- Slide 5: Auto Help -->
+        <div class="slide" data-slide="5">
+            <div class="slide-content">
+                <h2>📖 Auto-Generated Help</h2>
+                <div class="code-container">
+                    <div class="code-header"><span class="code-filename">$ python port_scanner.py --help</span></div>
+                    <div class="code-body">
+<pre>usage: port_scanner.py [-h] [-p PORT] [-t TIMEOUT] [-v] target
+
+Simple port scanner
+
+positional arguments:
+  target                Target IP or hostname
+
+options:
+  -h, --help            show this help message and exit
+  -p PORT, --port PORT  Port to scan (default: 80)
+  -t TIMEOUT, --timeout TIMEOUT
+                        Timeout in seconds
+  -v, --verbose         Show details</pre>
+                    </div>
+                </div>
+                <div class="card card-highlight">
+                    <h3>💡 Tip</h3>
+                    <p>Run any exercise with <code>--help</code> to see all available options!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Type Validation -->
+        <div class="slide" data-slide="6">
+            <div class="slide-content">
+                <h2>✅ Type and Value Validation</h2>
+                <div class="code-container">
+                    <div class="code-header"><span class="code-filename">🐍 advanced_validation.py</span></div>
+                    <div class="code-body">
+<pre><span class="kw">import</span> argparse
+
+<span class="kw">def</span> <span class="fn">valid_port</span>(value):
+    <span class="str">"""Validate that the port falls within the valid range."""</span>
+    port = <span class="fn">int</span>(value)
+    <span class="kw">if</span> port < <span class="num">1</span> <span class="kw">or</span> port > <span class="num">65535</span>:
+        <span class="kw">raise</span> argparse.ArgumentTypeError(
+            <span class="str">f"Invalid port: </span>{port}<span class="str"> (must be 1-65535)"</span>
+        )
+    <span class="kw">return</span> port
+
+parser = argparse.ArgumentParser()
+
+<span class="cmt"># Custom validation</span>
+parser.add_argument(<span class="str">"--port"</span>, type=valid_port, default=<span class="num">8080</span>)
+
+<span class="cmt"># Choice from a list</span>
+parser.add_argument(<span class="str">"--protocol"</span>, choices=[<span class="str">"tcp"</span>, <span class="str">"udp"</span>], default=<span class="str">"tcp"</span>)
+
+<span class="cmt"># Port range (nargs for multiple values)</span>
+parser.add_argument(<span class="str">"--ports"</span>, type=<span class="fn">int</span>, nargs=<span class="str">"+"</span>,
+                    help=<span class="str">"List of ports"</span>)
+
+args = parser.parse_args()</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Experiment -->
+        <div class="slide" data-slide="7">
+            <div class="slide-content">
+                <h2>🧪 Experiment: Test --help</h2>
+                <div class="experiment-box">
+                    <div class="experiment-header">
+                        <span class="experiment-icon">🔬</span>
+                        <span class="experiment-title">Explore Exercise Arguments</span>
+                    </div>
+                    <div class="experiment-step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>Run --help on an exercise</h4>
+                            <p><code>python3 05roWSL/src/exercises/ex_5_01_cidr_flsm.py --help</code></p>
+                            <p class="step-why">🎯 What you will see: All arguments and their descriptions</p>
+                        </div>
+                    </div>
+                    <div class="experiment-step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4>Test with invalid arguments</h4>
+                            <p><code>python3 ex_5_01_cidr_flsm.py --port abc</code></p>
+                            <p class="step-why">🎯 What you will see: A clear error message from argparse</p>
+                        </div>
+                    </div>
+                    <div class="experiment-step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>Read the argument code</h4>
+                            <p>Open the file and search for <code>ArgumentParser</code></p>
+                            <p class="step-why">🎯 What we learn: How arguments are defined in exercises</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Quiz -->
+        <div class="slide" data-slide="8">
+            <div class="slide-content">
+                <h2>📝 Quiz</h2>
+                <div class="quiz-container" id="quiz1">
+                    <div class="quiz-header">
+                        <div class="quiz-icon">🧠</div>
+                        <div><h3 style="margin:0">What does <code>action="store_true"</code> do?</h3></div>
+                    </div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" onclick="selectOption(this,'quiz1')"><span class="option-marker">A</span><span>Stores the value as a string</span></div>
+                        <div class="quiz-option" onclick="selectOption(this,'quiz1')" data-correct="true"><span class="option-marker">B</span><span>Sets True if the flag is present, False otherwise</span></div>
+                        <div class="quiz-option" onclick="selectOption(this,'quiz1')"><span class="option-marker">C</span><span>Automatically converts to boolean</span></div>
+                        <div class="quiz-option" onclick="selectOption(this,'quiz1')"><span class="option-marker">D</span><span>Requires an explicit True or False value</span></div>
+                    </div>
+                    <div class="quiz-actions">
+                        <button class="btn-quiz btn-check" onclick="checkAnswer('quiz1')">Check</button>
+                        <button class="btn-quiz btn-hint" onclick="showHint('quiz1',1)">💡 Hint</button>
+                    </div>
+                    <div class="hint-box" id="quiz1-hint1"><div class="hint-level">Hint 1/3</div><p>Think about -v for verbose. You do not write "-v True", just "-v".</p></div>
+                    <div class="hint-box" id="quiz1-hint2"><div class="hint-level">Hint 2/3</div><p>Flag presence = True, absence = False (the default value).</p></div>
+                    <div class="hint-box" id="quiz1-hint3"><div class="hint-level">Hint 3/3</div><p>Answer B: <code>-v</code> sets args.verbose = True</p></div>
+                    <div class="feedback-box" id="quiz1-feedback"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Files Reference -->
+        <div class="slide" data-slide="9">
+            <div class="slide-content">
+                <h2>📂 Files with argparse in the Lab</h2>
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>📁 05roWSL</h3>
+                        <p><strong>ex_5_01_cidr_flsm.py</strong> — Subnet calculation</p>
+                        <p><code>--network 192.168.1.0/24 --hosts 50</code></p>
+                        <p><strong>ex_5_02_vlsm_ipv6.py</strong> — VLSM and IPv6</p>
+                    </div>
+                    <div class="card">
+                        <h3>📁 All exercises</h3>
+                        <p>Most follow this pattern:</p>
+                        <p><code>--mode server|client</code></p>
+                        <p><code>--host IP --port PORT</code></p>
+                        <p><code>-v for verbose</code></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Summary -->
+        <div class="slide" data-slide="10">
+            <div class="slide-content">
+                <h2>✅ Summary</h2>
+                <div class="grid-2">
+                    <div class="card card-highlight">
+                        <h3>📌 What we covered</h3>
+                        <ul style="list-style:none;padding:0">
+                            <li style="padding:.5rem 0;border-bottom:1px solid var(--border-color)">✓ ArgumentParser for professional CLIs</li>
+                            <li style="padding:.5rem 0;border-bottom:1px solid var(--border-color)">✓ Positional vs optional arguments</li>
+                            <li style="padding:.5rem 0;border-bottom:1px solid var(--border-color)">✓ Subcommands for multiple modes</li>
+                            <li style="padding:.5rem 0">✓ Type validation and auto --help</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h3>🚀 Next Module</h3>
+                        <p style="color:var(--accent-primary);font-weight:600">Module 7: Packet Analysis (struct)</p>
+                        <p>Parsing protocol headers at byte level</p>
+                        <span class="badge badge-week">📅 Correlated with Weeks 6-7</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-buttons">
+        <button class="btn-nav btn-prev" id="btnPrev" onclick="prevSlide()" disabled>← Back</button>
+        <div class="page-dots" id="pageDots"></div>
+        <button class="btn-nav btn-next" id="btnNext" onclick="nextSlide()">Continue →</button>
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 10;
+        const quizHintCounts = {};
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateUI();
+            createPageDots();
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight' || e.key === ' ') {
+                    e.preventDefault();
+                    nextSlide();
+                } else if (e.key === 'ArrowLeft') {
+                    prevSlide();
+                }
+            });
+        });
+
+        function createPageDots() {
+            const container = document.getElementById('pageDots');
+            for (let i = 1; i <= totalSlides; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'page-dot' + (i === 1 ? ' active' : '');
+                dot.onclick = () => goToSlide(i);
+                container.appendChild(dot);
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('progressBar').style.width = `${(currentSlide / totalSlides) * 100}%`;
+            document.getElementById('slideCounter').textContent = `${currentSlide} / ${totalSlides}`;
+            document.getElementById('btnPrev').disabled = currentSlide === 1;
+            document.getElementById('btnNext').textContent = currentSlide === totalSlides ? 'Finish ✓' : 'Continue →';
+            document.querySelectorAll('.page-dot').forEach((dot, i) => {
+                dot.classList.toggle('active', i + 1 === currentSlide);
+            });
+        }
+
+        function goToSlide(n) {
+            if (n < 1 || n > totalSlides || n === currentSlide) return;
+            const current = document.querySelector(`.slide[data-slide="${currentSlide}"]`);
+            const next = document.querySelector(`.slide[data-slide="${n}"]`);
+            current.classList.remove('active');
+            current.classList.add('exit');
+            setTimeout(() => {
+                current.classList.remove('exit');
+                next.classList.add('active');
+                currentSlide = n;
+                updateUI();
+            }, 100);
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides) goToSlide(currentSlide + 1);
+        }
+
+        function prevSlide() {
+            if (currentSlide > 1) goToSlide(currentSlide - 1);
+        }
+
+        function simulateRun(btn, id) {
+            const output = document.getElementById(id);
+            btn.textContent = '⏳...';
+            setTimeout(() => {
+                output.classList.add('visible');
+                btn.textContent = '▶ Run';
+            }, 500);
+        }
+
+        function selectOption(el, quizId) {
+            document.getElementById(quizId).querySelectorAll('.quiz-option').forEach(o => {
+                o.classList.remove('selected', 'correct', 'incorrect');
+            });
+            el.classList.add('selected');
+            document.getElementById(`${quizId}-feedback`).classList.remove('visible');
+        }
+
+        function checkAnswer(quizId) {
+            const container = document.getElementById(quizId);
+            const selected = container.querySelector('.quiz-option.selected');
+            const feedback = document.getElementById(`${quizId}-feedback`);
+
+            if (!selected) {
+                feedback.innerHTML = '<p style="color:var(--accent-warning)">⚠️ Select an option!</p>';
+                feedback.className = 'feedback-box visible';
+                return;
+            }
+
+            container.querySelectorAll('.quiz-option').forEach(o => {
+                if (o.dataset.correct === 'true') o.classList.add('correct');
+                else if (o.classList.contains('selected')) o.classList.add('incorrect');
+            });
+
+            if (selected.dataset.correct === 'true') {
+                feedback.innerHTML = '<p style="color:var(--accent-success)">🎉 Correct!</p>';
+                feedback.className = 'feedback-box success visible';
+            } else {
+                feedback.innerHTML = '<p style="color:var(--accent-error)">❌ See the correct answer highlighted above.</p>';
+                feedback.className = 'feedback-box error visible';
+            }
+        }
+
+        function showHint(quizId, level) {
+            if (!quizHintCounts[quizId]) quizHintCounts[quizId] = 0;
+            const cur = quizHintCounts[quizId] + 1;
+            if (cur > 3) return;
+            const hint = document.getElementById(`${quizId}-hint${cur}`);
+            if (hint) {
+                hint.classList.add('visible');
+                quizHintCounts[quizId] = cur;
+                const btn = document.querySelector(`#${quizId} .btn-hint`);
+                btn.textContent = cur >= 3 ? '✓ All hints' : `💡 Hint (${cur}/3)`;
+                if (cur >= 3) btn.disabled = true;
+            }
+        }
+    </script>
+</body>
+</html>

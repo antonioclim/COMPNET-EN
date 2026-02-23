@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="CSIE Faculty-ASE" name="author"/>
+<meta content="Revolvix" name="generator"/>
+<title>Week 12 – Email Protocols: SMTP, POP3, IMAP and WebMail | ASE-CSIE</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;family=Source+Serif+4:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+
+:root{--primary:#0f172a;--primary-light:#1e293b;--secondary:#0ea5e9;--secondary-dark:#0284c7;--accent:#f59e0b;--accent-warm:#ea580c;--success:#10b981;--success-dark:#059669;--danger:#ef4444;--purple:#8b5cf6;--purple-dark:#7c3aed;--bg-light:#f8fafc;--bg-cool:#f0f9ff;--bg-warm:#fffbeb;--text-dark:#1e293b;--text-muted:#64748b;--border:#e2e8f0;--text-on-dark:#f1f5f9;--text-on-dark-muted:#cbd5e1;--text-on-dark-heading:#ffffff;--gradient-primary:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);--gradient-secondary:linear-gradient(135deg,#0ea5e9 0%,#0284c7 100%);--gradient-accent:linear-gradient(135deg,#f59e0b 0%,#ea580c 100%);--gradient-success:linear-gradient(135deg,#10b981 0%,#059669 100%);--gradient-purple:linear-gradient(135deg,#8b5cf6 0%,#7c3aed 100%);--shadow-sm:0 1px 2px 0 rgb(0 0 0/.05);--shadow-md:0 4px 6px -1px rgb(0 0 0/.1),0 2px 4px -2px rgb(0 0 0/.1);--shadow-lg:0 10px 15px -3px rgb(0 0 0/.1),0 4px 6px -4px rgb(0 0 0/.1);--shadow-xl:0 20px 25px -5px rgb(0 0 0/.1),0 8px 10px -6px rgb(0 0 0/.1)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;overflow:hidden}body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:18px;line-height:1.7;color:var(--text-dark);background:var(--bg-light)}h1,h2,h3,h4{font-family:'Source Serif 4',Georgia,serif;font-weight:600;line-height:1.3;color:var(--primary)}h1{font-size:2.75rem;font-weight:700}h2{font-size:2.25rem}h3{font-size:1.75rem}h4{font-size:1.35rem}p{margin-bottom:1rem}a{color:var(--secondary);text-decoration:none;transition:color .2s ease}a:hover{color:var(--secondary-dark)}strong{font-weight:600}code{font-family:'JetBrains Mono',monospace;font-size:.9em;background:rgba(15,23,42,.08);padding:.15em .4em;border-radius:4px}
+.presentation{width:100vw;height:100vh;position:relative;overflow:hidden}.slide{position:absolute;top:0;left:0;width:100%;height:100%;padding:4rem 4rem 5rem;display:none;flex-direction:column;background:var(--bg-light);overflow-y:auto}.slide.active{display:flex;animation:slideIn .45s cubic-bezier(.4,0,.2,1)}@keyframes slideIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}.slide>*{animation:fadeUp .6s cubic-bezier(.4,0,.2,1) backwards}.delay-1{animation-delay:.1s}.delay-2{animation-delay:.2s}.delay-3{animation-delay:.3s}.delay-4{animation-delay:.4s}
+.slide.title-slide{background:var(--gradient-primary);justify-content:center;align-items:center;text-align:center}.slide.title-slide h1{color:var(--text-on-dark-heading);font-size:3.5rem;margin-bottom:1rem}.slide.title-slide .subtitle{color:var(--text-on-dark);font-size:1.5rem;font-weight:400;margin-bottom:2rem}.slide.title-slide .meta{color:var(--text-on-dark-muted);font-size:1rem}
+.slide.section-slide{background:var(--gradient-primary);justify-content:center;padding-left:6rem}.slide.section-slide .section-number{color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;margin-bottom:.5rem}.slide.section-slide h2{color:var(--text-on-dark-heading);font-size:3rem;margin-bottom:1rem}.slide.section-slide .section-desc{color:var(--text-on-dark);font-size:1.25rem;max-width:600px}
+.highlight-box{background:var(--gradient-secondary);color:#fff;padding:1.5rem 2rem;border-radius:16px;margin:1.5rem 0;box-shadow:var(--shadow-lg)}.highlight-box p,.highlight-box span,.highlight-box strong{color:#fff}
+.definition-box{background:linear-gradient(135deg,rgba(16,185,129,.1) 0%,rgba(5,150,105,.05) 100%);border-left:4px solid var(--success);padding:1.5rem 2rem;border-radius:0 16px 16px 0;margin:1.5rem 0}.definition-box .term{color:var(--success-dark);font-weight:700;font-size:1.1rem;margin-bottom:.5rem}
+.story-box{background:linear-gradient(135deg,rgba(139,92,246,.1) 0%,rgba(124,58,237,.05) 100%);border-left:4px solid var(--purple);padding:1.5rem 2rem;border-radius:0 16px 16px 0;margin:1.5rem 0}.story-box .story-title{color:var(--purple-dark);font-weight:700;font-size:1.1rem;margin-bottom:.5rem;display:flex;align-items:center;gap:.5rem}
+.warning-box{background:linear-gradient(135deg,rgba(245,158,11,.1) 0%,rgba(234,88,12,.05) 100%);border-left:4px solid var(--accent);padding:1.5rem 2rem;border-radius:0 16px 16px 0;margin:1.5rem 0}.warning-box .warning-title{color:var(--accent-warm);font-weight:700;font-size:1.1rem;margin-bottom:.5rem}
+.insight-box{background:linear-gradient(135deg,rgba(239,68,68,.1) 0%,rgba(220,38,38,.05) 100%);border-left:4px solid var(--danger);padding:1.5rem 2rem;border-radius:0 16px 16px 0;margin:1.5rem 0}.insight-box .insight-title{color:var(--danger);font-weight:700;font-size:1.1rem;margin-bottom:.5rem}
+pre,.code-block{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#e2e8f0;padding:1.25rem;border-radius:12px;font-family:'JetBrains Mono',monospace;font-size:.95rem;line-height:1.7;overflow-x:auto;margin:1rem 0;position:relative;white-space:pre;word-wrap:normal}.code-block[data-lang]::before{content:attr(data-lang);position:absolute;top:.5rem;right:.75rem;font-size:.7rem;color:var(--text-on-dark-muted);text-transform:uppercase;letter-spacing:.1em}.code-block .keyword{color:#f472b6}.code-block .function{color:#60a5fa}.code-block .string{color:#a5f3fc}.code-block .number{color:#fbbf24}.code-block .comment{color:#6b7280;font-style:italic}
+.table-container{overflow-x:auto;margin:1.5rem 0;border-radius:16px;box-shadow:var(--shadow-lg)}table{width:100%;border-collapse:collapse;background:#fff}thead{background:var(--gradient-primary)}th{padding:1rem 1.25rem;text-align:left;font-weight:600;color:var(--text-on-dark-heading);text-transform:uppercase;font-size:.85rem;letter-spacing:.05em}th:first-child{border-radius:16px 0 0 0}th:last-child{border-radius:0 16px 0 0}td{padding:1rem 1.25rem;border-bottom:1px solid var(--border)}tr:hover td{background:var(--bg-cool)}
+.card{background:#fff;border-radius:16px;padding:1.5rem;box-shadow:var(--shadow-md);transition:transform .3s ease,box-shadow .3s ease}.card:hover{transform:translateY(-6px);box-shadow:var(--shadow-xl)}.card.accent-left{border-left:4px solid var(--accent)}.card.success-left{border-left:4px solid var(--success)}.card.danger-left{border-left:4px solid var(--danger)}.card.purple-left{border-left:4px solid var(--purple)}
+.card-grid{display:grid;gap:1.5rem;margin:1.5rem 0}.card-grid.cols-2{grid-template-columns:repeat(2,1fr)}.card-grid.cols-3{grid-template-columns:repeat(3,1fr)}.card-grid.cols-4{grid-template-columns:repeat(4,1fr)}
+.diagram-container{margin:1.5rem 0;text-align:center}.diagram-container svg{max-width:100%;min-height:180px}
+.quiz-container{background:#fff;border-radius:16px;padding:2rem;box-shadow:var(--shadow-lg);margin:1.5rem 0}.quiz-question{font-weight:600;font-size:1.1rem;margin-bottom:1.5rem;color:var(--primary)}.quiz-options{display:flex;flex-direction:column;gap:.75rem}.quiz-option{padding:1rem 1.25rem;background:var(--bg-light);border:2px solid var(--border);border-radius:12px;cursor:pointer;transition:all .3s ease;font-size:1rem}.quiz-option:hover{border-color:var(--secondary);background:var(--bg-cool)}.quiz-option.correct{border-color:var(--success);background:rgba(16,185,129,.1)}.quiz-option.incorrect{border-color:var(--danger);background:rgba(239,68,68,.1)}.quiz-feedback{margin-top:1rem;padding:1rem;border-radius:10px;display:none}.quiz-feedback.show{display:block}.quiz-feedback.correct{background:rgba(16,185,129,.1);border:1px solid var(--success);color:var(--success-dark)}.quiz-feedback.incorrect{background:rgba(239,68,68,.1);border:1px solid var(--danger);color:var(--danger)}
+.reveal-btn{display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1.5rem;background:var(--gradient-secondary);color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:500;cursor:pointer;transition:transform .2s ease,box-shadow .2s ease}.reveal-btn:hover{transform:scale(1.05);box-shadow:var(--shadow-lg)}.reveal-content{display:none;margin-top:1rem;animation:fadeUp .4s ease}.reveal-content.show{display:block}
+.progress-bar{position:fixed;top:0;left:0;height:4px;background:var(--gradient-secondary);z-index:1000;transition:width .3s ease}.slide-counter{position:fixed;top:1.25rem;right:2rem;font-family:'JetBrains Mono',monospace;font-size:.9rem;color:var(--text-muted);z-index:1000}.course-id{position:fixed;top:1.25rem;left:2rem;font-size:.85rem;font-weight:600;color:var(--primary);z-index:1000}
+.navigation{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);display:flex;gap:.75rem;z-index:1000}.nav-btn{width:48px;height:48px;display:flex;align-items:center;justify-content:center;background:#fff;border:2px solid var(--border);border-radius:12px;cursor:pointer;transition:all .2s ease;font-size:1.25rem}.nav-btn:hover{border-color:var(--secondary);background:var(--bg-cool);transform:translateY(-2px)}.nav-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.footer-attr{position:fixed;bottom:1.5rem;left:2rem;font-size:.8rem;color:var(--text-muted);z-index:1000}
+.toc-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(15,23,42,.8);backdrop-filter:blur(8px);z-index:2000;justify-content:center;align-items:center}.toc-modal.show{display:flex}.toc-content{background:#fff;border-radius:20px;padding:2.5rem;max-width:700px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:var(--shadow-xl);position:relative}.toc-content h3{margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:2px solid var(--border)}.toc-section{margin-bottom:1.5rem}.toc-section-title{font-weight:700;color:var(--secondary);font-size:.9rem;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.75rem}.toc-item{padding:.5rem 1rem;border-radius:8px;cursor:pointer;transition:all .2s ease;display:flex;align-items:center;gap:.75rem}.toc-item:hover{background:var(--bg-cool)}.toc-item .toc-num{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--text-muted);min-width:2.5rem}.toc-close{position:absolute;top:1rem;right:1rem;width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:var(--bg-light);border:none;border-radius:10px;cursor:pointer;font-size:1.5rem;color:var(--text-muted);transition:all .2s ease}.toc-close:hover{background:var(--danger);color:#fff}
+.text-muted{color:var(--text-muted)}.mt-2{margin-top:1rem}.mb-2{margin-bottom:1rem}
+.interactive-panel{background:#fff;border:2px solid var(--secondary);border-radius:16px;padding:1.5rem 2rem;margin:1.5rem 0;box-shadow:var(--shadow-md)}.interactive-panel h4{color:var(--secondary-dark);margin-bottom:1rem}.interactive-panel label{font-weight:600;font-size:1rem;display:block;margin-bottom:.5rem}.interactive-panel input[type="number"],.interactive-panel input[type="text"],.interactive-panel select,.interactive-panel textarea{font-family:'JetBrains Mono',monospace;font-size:1rem;padding:.6rem 1rem;border:2px solid var(--border);border-radius:8px;width:100%;margin-bottom:.75rem;transition:border-color .2s ease}.interactive-panel input:focus,.interactive-panel select:focus,.interactive-panel textarea:focus{outline:none;border-color:var(--secondary)}.interactive-panel .result{background:var(--bg-cool);border-radius:10px;padding:1rem 1.25rem;margin-top:.75rem;font-size:1rem;min-height:2.5rem}.scenario-btn{padding:.75rem 1rem;background:var(--bg-light);border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:all .2s ease;font-size:.95rem;text-align:left;display:block;width:100%;margin-bottom:.5rem}.scenario-btn:hover{border-color:var(--secondary);background:var(--bg-cool)}.scenario-btn.selected{border-color:var(--success);background:rgba(16,185,129,.1)}
+@media(max-width:1200px){.slide{padding:3rem}h1{font-size:2.25rem}h2{font-size:1.85rem}.card-grid.cols-4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:768px){.slide{padding:2rem 1.5rem 4rem}h1{font-size:1.85rem}h2{font-size:1.5rem}body{font-size:16px}.card-grid.cols-2,.card-grid.cols-3,.card-grid.cols-4{grid-template-columns:1fr}}
+
+</style>
+</head>
+<body>
+<div aria-valuemax="42" aria-valuemin="1" class="progress-bar" id="progressBar" role="progressbar"></div>
+<div aria-live="polite" class="slide-counter" id="slideCounter">1 / 42</div>
+<div class="course-id">ASE-CSIE &bull; Computer Networks</div>
+<div class="footer-attr">by Revolvix</div>
+<div class="presentation" id="presentation">
+
+<!-- SLIDE 1: TITLE -->
+<div class="slide title-slide active" data-slide="1">
+<h1 class="delay-1">Email Protocols</h1>
+<p class="subtitle delay-2">SMTP &bull; POP3 &bull; IMAP &bull; WebMail</p>
+<div class="meta delay-3">
+<p>Computer Networks &mdash; Semester 2, Week 12 of 14</p>
+<p>Bucharest University of Economic Studies &bull; Faculty CSIE</p>
+<p style="margin-top:1rem;color:var(--accent);">Bachelor in Economic Informatics, Year 3</p>
+</div></div>
+
+<!-- SLIDE 2: HOOK -->
+<div class="slide" data-slide="2">
+<h2 class="delay-1">The Forged Letter That Nobody Questioned</h2>
+<div class="story-box delay-2">
+<div class="story-title">A Scenario You Can Reproduce in Five Minutes</div>
+<p>Open a terminal. Connect to any SMTP server on port 25. Type <code>MAIL FROM:&lt;rector@ase.ro&gt;</code>. The server replies <code>250 OK</code>. You have just set the envelope sender to the university rector &mdash; and the server accepted it without a single challenge. The original Simple Mail Transfer Protocol (SMTP), defined in 1982, includes <strong>no mechanism to verify the identity of the sender</strong>.</p>
+</div>
+<div class="card-grid cols-2 delay-3">
+<div class="card danger-left"><h4>Real Consequence</h4>
+<p class="text-muted">In 2020, security researchers demonstrated that over 80% of government domains lacked proper email authentication. Attackers could forge official emails indistinguishable from genuine ones.</p></div>
+<div class="card accent-left"><h4>The Question</h4>
+<p class="text-muted">How does an email system designed with <strong>zero authentication</strong> still carry 340 billion messages per day? What protections have been layered on top &mdash; and where do the gaps remain?</p></div>
+</div></div>
+
+<!-- SLIDE 3: HOOK CONTINUATION -->
+<div class="slide" data-slide="3">
+<h2 class="delay-1">Can You Trust the &ldquo;From:&rdquo; Field?</h2>
+<p class="delay-1">Consider the email below. It arrived in your inbox. Is it genuine?</p>
+<div class="code-block delay-2" data-lang="headers">From: IT Security &lt;security@ase.ro&gt;
+To: student@stud.ase.ro
+Subject: Urgent: Password Reset Required
+Date: Mon, 10 Mar 2026 09:15:00 +0200
+
+Your account will be locked in 24 hours.
+Click here to reset your password immediately.</div>
+<div class="warning-box delay-3">
+<div class="warning-title">The Uncomfortable Truth</div>
+<p>You cannot tell from these headers alone. The <code>From:</code> header is set freely by the sender &mdash; it is <strong>display information</strong>, not verified identity. By the end of this lecture, you will know exactly which records to check (SPF, DKIM, DMARC) and how to inspect the full header chain to distinguish authentic messages from forgeries.</p>
+</div></div>
+
+<!-- SLIDE 4: ACTIVATE PRIOR KNOWLEDGE -->
+<div class="slide" data-slide="4">
+<h2 class="delay-1">What We Have Built So Far</h2>
+<p class="delay-1">Email protocols sit at the application layer &mdash; the same layer as HTTP (Week 10) and FTP, DNS and SSH (Week 11). Recall these foundations:</p>
+<div class="card-grid cols-3 delay-2">
+<div class="card accent-left"><h4>TCP Connections</h4>
+<p class="text-muted">Email protocols run over TCP (recall Week 8). SMTP, POP3 and IMAP all require reliable, ordered delivery.</p></div>
+<div class="card success-left"><h4>DNS Resolution</h4>
+<p class="text-muted">When you send email to <code>bob@example.com</code>, your mail server queries DNS for <strong>MX records</strong> (recall Week 11) to locate the recipient&rsquo;s server.</p></div>
+<div class="card purple-left"><h4>Client&ndash;Server Model</h4>
+<p class="text-muted">Email follows the same request&ndash;response pattern as HTTP. Text commands from the client; numeric status codes from the server.</p></div>
+</div>
+<div class="highlight-box delay-3">
+<strong>Week 11 &rarr; Week 12:</strong> Last week we saw how DNS translates names to addresses and how SSH secures remote sessions. Today we examine the protocols that power the most persistent application on the internet: electronic mail.
+</div></div>
+
+<!-- SLIDE 5: PREREQUISITE QUIZ -->
+<div class="slide" data-slide="5">
+<h2 class="delay-1">Quick Check: Are You Ready?</h2>
+<div class="quiz-container delay-2">
+<div class="quiz-question">Your mail server needs to deliver a message to <code>alice@example.com</code>. Which DNS record type does it query?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkQuiz(this,false,'q5')">A) A record &mdash; resolves a hostname to an IPv4 address</div>
+<div class="quiz-option" onclick="checkQuiz(this,false,'q5')">B) CNAME record &mdash; creates an alias for another domain</div>
+<div class="quiz-option" onclick="checkQuiz(this,true,'q5')">C) MX record &mdash; specifies the mail exchanger for a domain</div>
+<div class="quiz-option" onclick="checkQuiz(this,false,'q5')">D) PTR record &mdash; maps an IP to a hostname</div>
+</div>
+<div class="quiz-feedback correct" id="q5-correct">Exactly right. MX (Mail Exchanger) records tell the sending server which host accepts email for the target domain. Without MX records, email delivery would require hard-coded server addresses &mdash; an approach that cannot scale.</div>
+<div class="quiz-feedback incorrect" id="q5-incorrect">Not quite. A records resolve hostnames to IPs, CNAME creates aliases, PTR performs reverse lookups. For email routing, the sending MTA queries the <strong>MX record</strong> of the recipient&rsquo;s domain (recall Week 11: DNS record types).</div>
+</div></div>
+
+<!-- SLIDE 6: CONFLICT -->
+<div class="slide" data-slide="6">
+<h2 class="delay-1">The Problem: One Message, Five Protocols</h2>
+<p class="delay-1">You open Gmail on your phone, compose a message to a colleague who uses Outlook on a laptop, and press <em>Send</em>. That single action triggers at least five distinct protocol interactions.</p>
+<div class="story-box delay-2">
+<div class="story-title">Can You Trace the Full Path?</div>
+<p>The message must be <strong>submitted</strong> to a server, <strong>routed</strong> across the internet, <strong>delivered</strong> to a remote mailbox, <strong>formatted</strong> with attachments and HTML, and finally <strong>retrieved</strong> by the recipient&rsquo;s client. Each step uses a different protocol &mdash; each designed in a different decade under different trust assumptions.</p>
+</div>
+<p class="delay-3">With what we know so far (TCP sockets, DNS, HTTP), we could build a raw connection to port 25 and type commands. But we cannot yet explain <em>why</em> there are separate protocols for sending and reading, <em>how</em> attachments survive the ASCII-only constraint of SMTP, or <em>what</em> prevents anyone from impersonating any sender.</p>
+</div>
+
+<!-- SLIDE 7: SECTION -->
+<div class="slide section-slide" data-slide="7">
+<div class="section-number">Section 01</div>
+<h2>Email Architecture</h2>
+<p class="section-desc">The postal system of the internet: agents, protocols and the journey of a message.</p>
+</div>
+
+<!-- SLIDE 8 -->
+<div class="slide" data-slide="8">
+<h2 class="delay-1">The Four Agents of the Email System</h2>
+<p class="delay-1">Email architecture mirrors a traditional postal service. Four specialised components divide the work.</p>
+<div class="table-container delay-2">
+<table><thead><tr><th>Agent</th><th>Full Name</th><th>Role</th><th>Postal Analogy</th></tr></thead>
+<tbody>
+<tr><td><strong>MUA</strong></td><td>Mail User Agent</td><td>Interface for composing and reading</td><td>Pen, paper and letterbox</td></tr>
+<tr><td><strong>MSA</strong></td><td>Mail Submission Agent</td><td>Accepts outgoing mail from MUA (port 587)</td><td>Post office counter</td></tr>
+<tr><td><strong>MTA</strong></td><td>Mail Transfer Agent</td><td>Routes messages between servers via SMTP</td><td>Sorting centres and trucks</td></tr>
+<tr><td><strong>MDA</strong></td><td>Mail Delivery Agent</td><td>Places message into recipient mailbox</td><td>Postman at your door</td></tr>
+</tbody></table></div>
+<div class="insight-box delay-3">
+<div class="insight-title">Why Separate Agents?</div>
+<p>Separation of concerns. The MUA never touches routing; the MTA never renders HTML. Each component can be implemented independently &mdash; Postfix for MTA, Dovecot for MDA, Thunderbird for MUA.</p>
+</div></div>
+
+<!-- SLIDE 9 -->
+<div class="slide" data-slide="9">
+<h2 class="delay-1">The Journey of an Email</h2>
+<div class="diagram-container delay-2">
+<svg viewBox="0 0 960 260" style="max-width:100%;min-height:240px;">
+<defs><marker id="arw" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L0,8 L10,4 z" fill="#0f172a"/></marker></defs>
+<rect x="20" y="30" width="280" height="190" rx="14" fill="#f0f9ff" stroke="#0ea5e9" stroke-width="2"/>
+<text x="160" y="56" text-anchor="middle" font-size="13" font-weight="700" fill="#0284c7">SENDER DOMAIN</text>
+<rect x="660" y="30" width="280" height="190" rx="14" fill="#f0fdf4" stroke="#10b981" stroke-width="2"/>
+<text x="800" y="56" text-anchor="middle" font-size="13" font-weight="700" fill="#059669">RECIPIENT DOMAIN</text>
+<rect x="50" y="80" width="100" height="50" rx="8" fill="#fff" stroke="#0f172a" stroke-width="2"/>
+<text x="100" y="110" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a">MUA</text>
+<rect x="180" y="80" width="100" height="50" rx="8" fill="#fff" stroke="#0f172a" stroke-width="2"/>
+<text x="230" y="102" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a">MSA</text>
+<text x="230" y="120" text-anchor="middle" font-size="12" font-weight="600" fill="#64748b">+ MTA</text>
+<ellipse cx="480" cy="105" rx="60" ry="32" fill="#f8fafc" stroke="#e2e8f0" stroke-width="2"/>
+<text x="480" y="110" text-anchor="middle" font-size="14" font-weight="700" fill="#64748b">Internet</text>
+<rect x="690" y="80" width="100" height="50" rx="8" fill="#fff" stroke="#0f172a" stroke-width="2"/>
+<text x="740" y="110" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a">MTA</text>
+<rect x="820" y="80" width="100" height="50" rx="8" fill="#fff" stroke="#0f172a" stroke-width="2"/>
+<text x="870" y="110" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a">MDA</text>
+<rect x="820" y="155" width="100" height="45" rx="8" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+<text x="870" y="183" text-anchor="middle" font-size="13" font-weight="700" fill="#92400e">Mailbox</text>
+<line x1="150" y1="105" x2="175" y2="105" stroke="#0f172a" stroke-width="2" marker-end="url(#arw)"/>
+<line x1="280" y1="105" x2="418" y2="105" stroke="#0f172a" stroke-width="2" marker-end="url(#arw)"/>
+<line x1="542" y1="105" x2="685" y2="105" stroke="#0f172a" stroke-width="2" marker-end="url(#arw)"/>
+<line x1="790" y1="105" x2="815" y2="105" stroke="#0f172a" stroke-width="2" marker-end="url(#arw)"/>
+<line x1="870" y1="130" x2="870" y2="150" stroke="#0f172a" stroke-width="2" marker-end="url(#arw)"/>
+<text x="330" y="93" font-size="13" font-weight="600" fill="#0ea5e9">SMTP :587</text>
+<text x="600" y="93" font-size="13" font-weight="600" fill="#64748b">SMTP :25</text>
+<text x="720" y="240" font-size="13" font-weight="600" fill="#8b5cf6">4. Retrieve via POP3 / IMAP</text>
+</svg></div>
+<div class="card-grid cols-2 delay-3">
+<div class="card accent-left"><h4>Sending (SMTP)</h4>
+<p class="text-muted">MUA &rarr; MSA (port 587, authenticated) &rarr; MTA queries DNS MX &rarr; recipient MTA (port 25) &rarr; MDA &rarr; mailbox.</p></div>
+<div class="card success-left"><h4>Retrieving (POP3 / IMAP)</h4>
+<p class="text-muted">Recipient MUA connects to the mailbox via POP3 (110/995) or IMAP (143/993) to download or synchronise.</p></div>
+</div></div>
+
+<!-- SLIDE 10 -->
+<div class="slide" data-slide="10">
+<h2 class="delay-1">Envelope vs Message Headers</h2>
+<p class="delay-1">The single most misunderstood concept in email: routing information and display information are <strong>completely separate</strong>.</p>
+<div class="card-grid cols-2 delay-2">
+<div class="card accent-left"><h4>SMTP Envelope (Routing)</h4>
+<div class="code-block" data-lang="smtp" style="font-size:.9rem;">MAIL FROM:&lt;alice@sender.com&gt;
+RCPT TO:&lt;bob@receiver.com&gt;</div>
+<p class="text-muted" style="margin-top:.5rem;">Set during SMTP session. Invisible to end user. Determines where bounces go.</p></div>
+<div class="card success-left"><h4>Message Headers (Display)</h4>
+<div class="code-block" data-lang="rfc5322" style="font-size:.9rem;">From: Alice &lt;alice@sender.com&gt;
+To: Bob &lt;bob@receiver.com&gt;
+Subject: Meeting tomorrow</div>
+<p class="text-muted" style="margin-top:.5rem;">Embedded in the message. Shown by the email client. <strong>Can be freely set by the sender.</strong></p></div>
+</div>
+<button class="reveal-btn delay-3" onclick="toggleReveal(this)">Think: Why is this a security problem?</button>
+<div class="reveal-content">
+<div class="warning-box"><div class="warning-title">The Spoofing Gap</div>
+<p>Because envelope and headers can <strong>differ</strong>, a malicious sender can set <code>MAIL FROM:&lt;attacker@evil.com&gt;</code> in the envelope while the header says <code>From: ceo@yourcompany.com</code>. The recipient sees only the header. This is exactly how phishing works &mdash; and why SPF, DKIM and DMARC were invented.</p>
+</div></div></div>
+
+<!-- SLIDE 11 -->
+<div class="slide section-slide" data-slide="11">
+<div class="section-number">Section 02</div>
+<h2>SMTP</h2>
+<p class="section-desc">Simple Mail Transfer Protocol: the workhorse that moves billions of messages daily.</p>
+</div>
+
+<!-- SLIDE 12 -->
+<div class="slide" data-slide="12">
+<h2 class="delay-1">SMTP &mdash; Simple Mail Transfer Protocol</h2>
+<div class="definition-box delay-2">
+<div class="term">RFC 5321 (2008) &mdash; supersedes RFC 2821 and the original RFC 821 (1982)</div>
+<p>SMTP is the standard protocol for <strong>transferring</strong> email between servers and for <strong>submitting</strong> email from a client to its outgoing server. Text-based, command&ndash;response, over TCP.</p>
+</div>
+<div class="card-grid cols-3 delay-3">
+<div class="card accent-left"><h4>Port 25</h4>
+<p class="text-muted">Server-to-server relay. Often blocked by ISPs for residential connections.</p></div>
+<div class="card success-left"><h4>Port 587</h4>
+<p class="text-muted">Message submission. Requires authentication. Correct port for MUA &rarr; MSA.</p></div>
+<div class="card purple-left"><h4>Port 465</h4>
+<p class="text-muted">SMTPS (implicit TLS). Re-standardised by RFC 8314 in 2018.</p></div>
+</div></div>
+
+<!-- SLIDE 13 -->
+<div class="slide" data-slide="13">
+<h2 class="delay-1">SMTP Commands</h2>
+<div class="table-container delay-2">
+<table><thead><tr><th>Command</th><th>Parameters</th><th>Purpose</th><th>Reply</th></tr></thead>
+<tbody>
+<tr><td><code>EHLO</code></td><td>client hostname</td><td>Extended greeting; requests extensions</td><td>250</td></tr>
+<tr><td><code>MAIL FROM</code></td><td>&lt;address&gt;</td><td>Specifies envelope sender (return-path)</td><td>250</td></tr>
+<tr><td><code>RCPT TO</code></td><td>&lt;address&gt;</td><td>Specifies envelope recipient (repeatable)</td><td>250</td></tr>
+<tr><td><code>DATA</code></td><td>&mdash;</td><td>Begins message body; ends with a lone dot</td><td>354, then 250</td></tr>
+<tr><td><code>QUIT</code></td><td>&mdash;</td><td>Terminates the session</td><td>221</td></tr>
+</tbody></table></div>
+<div class="story-box delay-3">
+<div class="story-title">Historical Note</div>
+<p>The original <code>HELO</code> (RFC 821, 1982) had no extension support. <code>EHLO</code> (RFC 1869) added negotiation for STARTTLS, AUTH and 8BITMIME. Modern servers should always use <code>EHLO</code>.</p>
+</div></div>
+
+<!-- SLIDE 14 -->
+<div class="slide" data-slide="14">
+<h2 class="delay-1">SMTP Response Codes &mdash; Explorer</h2>
+<p class="delay-1">SMTP replies use a three-digit structure. The first digit indicates the category. Type a code to see its meaning.</p>
+<div class="interactive-panel delay-2">
+<h4>SMTP Code Lookup</h4>
+<label for="smtpCodeInput">Enter a code (e.g. 250, 354, 421, 550):</label>
+<input type="number" id="smtpCodeInput" min="200" max="599" placeholder="250" oninput="lookupSMTPCode()"/>
+<div class="result" id="smtpCodeResult">Type a code above to see its meaning.</div>
+</div>
+<div class="card-grid cols-4 delay-3">
+<div class="card success-left"><h4 style="color:var(--success);">2xx</h4><p class="text-muted">Success</p></div>
+<div class="card accent-left"><h4 style="color:var(--accent);">3xx</h4><p class="text-muted">More input expected</p></div>
+<div class="card" style="border-left:4px solid var(--accent-warm);"><h4 style="color:var(--accent-warm);">4xx</h4><p class="text-muted">Temporary failure</p></div>
+<div class="card danger-left"><h4 style="color:var(--danger);">5xx</h4><p class="text-muted">Permanent failure</p></div>
+</div></div>
+
+<!-- SLIDE 15 -->
+<div class="slide" data-slide="15">
+<h2 class="delay-1">A Complete SMTP Session</h2>
+<div class="code-block delay-2" data-lang="smtp" style="font-size:.88rem;"><span class="comment">S: 220 mail.example.com ESMTP Postfix</span>
+<span class="keyword">C: EHLO</span> client.domain.com
+<span class="comment">S: 250-mail.example.com</span>
+<span class="comment">S: 250-STARTTLS</span>
+<span class="comment">S: 250 AUTH PLAIN LOGIN</span>
+
+<span class="keyword">C: MAIL FROM:</span>&lt;alice@sender.com&gt;
+<span class="comment">S: 250 OK</span>
+
+<span class="keyword">C: RCPT TO:</span>&lt;bob@receiver.com&gt;
+<span class="comment">S: 250 OK</span>
+
+<span class="keyword">C: DATA</span>
+<span class="comment">S: 354 End data with &lt;CR&gt;&lt;LF&gt;.&lt;CR&gt;&lt;LF&gt;</span>
+<span class="string">C: From: Alice &lt;alice@sender.com&gt;</span>
+<span class="string">C: To: Bob &lt;bob@receiver.com&gt;</span>
+<span class="string">C: Subject: Meeting notes</span>
+<span class="string">C: </span>
+<span class="string">C: Hello Bob, find the notes attached.</span>
+<span class="keyword">C: .</span>
+<span class="comment">S: 250 OK: queued as ABC123</span>
+
+<span class="keyword">C: QUIT</span>
+<span class="comment">S: 221 Bye</span></div>
+</div>
+
+<!-- SLIDE 16: LIVE CODING -->
+<div class="slide" data-slide="16">
+<h2 class="delay-1">Sending Email with Python</h2>
+<p class="delay-1">The <code>smtplib</code> module wraps SMTP commands into a clean, Pythonic API.</p>
+<div class="code-block delay-2" data-lang="python"><span class="keyword">import</span> smtplib
+<span class="keyword">from</span> email.mime.text <span class="keyword">import</span> MIMEText
+
+<span class="comment"># Build the message object</span>
+msg = MIMEText(
+    <span class="string">"Hello Bob, here are the notes."</span>,
+    <span class="string">"plain"</span>,
+    <span class="string">"utf-8"</span>
+)
+msg[<span class="string">"Subject"</span>] = <span class="string">"Meeting notes"</span>
+msg[<span class="string">"From"</span>]    = <span class="string">"alice@sender.com"</span>
+msg[<span class="string">"To"</span>]      = <span class="string">"bob@receiver.com"</span>
+
+<span class="comment"># Connect, authenticate and send</span>
+<span class="keyword">with</span> smtplib.SMTP(
+    <span class="string">"smtp.sender.com"</span>,
+    <span class="number">587</span>
+) <span class="keyword">as</span> server:
+    server.starttls()
+    server.login(<span class="string">"alice"</span>, <span class="string">"password"</span>)
+    server.send_message(msg)
+
+<span class="builtin">print</span>(<span class="string">"Message sent."</span>)</div>
+</div>
+
+<!-- SLIDE 17 -->
+<div class="slide" data-slide="17">
+<h2 class="delay-1">Knowledge Check: SMTP</h2>
+<div class="quiz-container delay-2">
+<div class="quiz-question">A colleague claims: &ldquo;I use SMTP to read my emails every morning.&rdquo; Is this correct?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkQuiz(this,false,'q17')">A) Yes &mdash; SMTP handles both sending and reading</div>
+<div class="quiz-option" onclick="checkQuiz(this,true,'q17')">B) No &mdash; SMTP is a transfer protocol; reading requires POP3 or IMAP</div>
+<div class="quiz-option" onclick="checkQuiz(this,false,'q17')">C) Partially &mdash; SMTP can read if the server supports EHLO extensions</div>
+<div class="quiz-option" onclick="checkQuiz(this,false,'q17')">D) It depends on whether the server uses port 25 or 587</div>
+</div>
+<div class="quiz-feedback correct" id="q17-correct">Correct. SMTP is exclusively a <strong>transfer</strong> protocol. It pushes messages from sender to recipient server. To <em>retrieve</em> messages, the client must use POP3 or IMAP.</div>
+<div class="quiz-feedback incorrect" id="q17-incorrect">SMTP stands for Simple Mail <strong>Transfer</strong> Protocol &mdash; it moves messages between servers. It has no commands for listing, fetching or managing a mailbox. That is the job of POP3 or IMAP.</div>
+</div></div>
+
+<!-- SLIDE 18 -->
+<div class="slide section-slide" data-slide="18">
+<div class="section-number">Section 03</div>
+<h2>POP3 &amp; IMAP</h2>
+<p class="section-desc">Two philosophies for mailbox access: download-and-delete vs server-side synchronisation.</p>
+</div>
+
+<!-- SLIDE 19 -->
+<div class="slide" data-slide="19">
+<h2 class="delay-1">POP3 &mdash; Post Office Protocol version 3</h2>
+<div class="definition-box delay-2">
+<div class="term">RFC 1939 (1996)</div>
+<p>POP3 is a simple download protocol. Design philosophy: <em>download-and-delete</em>. Retrieve messages to the local client, optionally remove them from the server.</p>
+</div>
+<div class="table-container delay-3">
+<table><thead><tr><th>Command</th><th>Purpose</th><th>Response</th></tr></thead>
+<tbody>
+<tr><td><code>USER name</code></td><td>Identifies the mailbox owner</td><td>+OK</td></tr>
+<tr><td><code>PASS secret</code></td><td>Authenticates the user</td><td>+OK logged in</td></tr>
+<tr><td><code>STAT</code></td><td>Returns message count and total size</td><td>+OK n octets</td></tr>
+<tr><td><code>LIST</code></td><td>Lists all messages with sizes</td><td>+OK (multi-line)</td></tr>
+<tr><td><code>RETR n</code></td><td>Retrieves message number n</td><td>+OK (content)</td></tr>
+<tr><td><code>DELE n</code></td><td>Marks message n for deletion</td><td>+OK marked</td></tr>
+<tr><td><code>QUIT</code></td><td>Commits deletions and closes</td><td>+OK bye</td></tr>
+</tbody></table></div>
+</div>
+
+<!-- SLIDE 20 -->
+<div class="slide" data-slide="20">
+<h2 class="delay-1">POP3 in Action</h2>
+<p class="delay-1">POP3 sessions are short-lived: connect, authenticate, download, disconnect. Predict the flow before revealing:</p>
+<button class="reveal-btn delay-2" onclick="toggleReveal(this)">Show the POP3 session transcript</button>
+<div class="reveal-content">
+<div class="code-block" data-lang="pop3" style="font-size:.88rem;"><span class="comment">S: +OK POP3 server ready</span>
+<span class="keyword">C: USER alice</span>
+<span class="comment">S: +OK</span>
+<span class="keyword">C: PASS secret123</span>
+<span class="comment">S: +OK alice has 3 messages (12480 octets)</span>
+<span class="keyword">C: STAT</span>
+<span class="comment">S: +OK 3 12480</span>
+<span class="keyword">C: RETR 1</span>
+<span class="comment">S: +OK 4520 octets</span>
+<span class="string">(message content follows...)</span>
+<span class="keyword">C: DELE 1</span>
+<span class="comment">S: +OK message 1 deleted</span>
+<span class="keyword">C: QUIT</span>
+<span class="comment">S: +OK POP3 server signing off (2 left)</span></div>
+</div>
+<div class="card-grid cols-2 delay-3">
+<div class="card success-left"><h4>Strengths</h4>
+<p class="text-muted">Simple implementation. Offline after download. Minimal server storage. Ports: 110 (plain), 995 (TLS).</p></div>
+<div class="card danger-left"><h4>Weaknesses</h4>
+<p class="text-muted">No sync across devices. No folders. No partial download. Local failure = lost messages.</p></div>
+</div></div>
+
+<!-- SLIDE 21 -->
+<div class="slide" data-slide="21">
+<h2 class="delay-1">IMAP &mdash; Internet Message Access Protocol</h2>
+<div class="definition-box delay-2">
+<div class="term">RFC 9051 (2021) &mdash; IMAP4rev2, supersedes RFC 3501 (2003)</div>
+<p>IMAP provides full remote mailbox management. Messages remain on the server. Clients synchronise state rather than downloading entire messages. Multi-device access is native.</p>
+</div>
+<div class="table-container delay-3">
+<table><thead><tr><th>Command</th><th>Purpose</th><th>Reply</th></tr></thead>
+<tbody>
+<tr><td><code>LOGIN</code></td><td>Authenticate with credentials</td><td>OK LOGIN completed</td></tr>
+<tr><td><code>SELECT</code></td><td>Open a mailbox folder</td><td>OK [READ-WRITE]</td></tr>
+<tr><td><code>FETCH</code></td><td>Retrieve message data (headers, body, parts)</td><td>* FETCH ...</td></tr>
+<tr><td><code>SEARCH</code></td><td>Find messages matching criteria</td><td>* SEARCH 1 4 7</td></tr>
+<tr><td><code>STORE</code></td><td>Modify message flags</td><td>OK STORE completed</td></tr>
+<tr><td><code>EXPUNGE</code></td><td>Permanently remove \Deleted messages</td><td>OK EXPUNGE completed</td></tr>
+</tbody></table></div>
+</div>
+
+<!-- SLIDE 22 -->
+<div class="slide" data-slide="22">
+<h2 class="delay-1">IMAP Session States and Flags</h2>
+<div class="diagram-container delay-2">
+<svg viewBox="0 0 800 130" style="max-width:90%;min-height:120px;">
+<rect x="20" y="35" width="160" height="55" rx="10" fill="#fef2f2" stroke="#ef4444" stroke-width="2"/>
+<text x="100" y="67" text-anchor="middle" font-size="13" font-weight="700" fill="#991b1b">Not Authenticated</text>
+<rect x="220" y="35" width="160" height="55" rx="10" fill="#f0fdf4" stroke="#10b981" stroke-width="2"/>
+<text x="300" y="67" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46">Authenticated</text>
+<rect x="420" y="35" width="160" height="55" rx="10" fill="#f0f9ff" stroke="#0ea5e9" stroke-width="2"/>
+<text x="500" y="67" text-anchor="middle" font-size="13" font-weight="700" fill="#0c4a6e">Selected</text>
+<rect x="620" y="35" width="160" height="55" rx="10" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="2"/>
+<text x="700" y="67" text-anchor="middle" font-size="13" font-weight="700" fill="#5b21b6">Logout</text>
+<line x1="180" y1="62" x2="215" y2="62" stroke="#0f172a" stroke-width="2" marker-end="url(#arw)"/>
+<line x1="380" y1="62" x2="415" y2="62" stroke="#0f172a" stroke-width="2" marker-end="url(#arw)"/>
+<line x1="580" y1="62" x2="615" y2="62" stroke="#0f172a" stroke-width="2" marker-end="url(#arw)"/>
+<text x="198" y="53" font-size="12" font-weight="600" fill="#64748b">LOGIN</text>
+<text x="398" y="53" font-size="12" font-weight="600" fill="#64748b">SELECT</text>
+<text x="598" y="53" font-size="12" font-weight="600" fill="#64748b">LOGOUT</text>
+</svg></div>
+<p class="delay-2">IMAP tracks message state with <strong>flags</strong>, synchronised across every connected client:</p>
+<div class="card-grid cols-3 delay-3">
+<div class="card accent-left"><h4><code>\Seen</code></h4><p class="text-muted">Message has been read.</p></div>
+<div class="card success-left"><h4><code>\Answered</code></h4><p class="text-muted">User replied to this message.</p></div>
+<div class="card" style="border-left:4px solid var(--accent-warm);"><h4><code>\Flagged</code></h4><p class="text-muted">Marked important / starred.</p></div>
+<div class="card danger-left"><h4><code>\Deleted</code></h4><p class="text-muted">Marked for removal (EXPUNGE).</p></div>
+<div class="card purple-left"><h4><code>\Draft</code></h4><p class="text-muted">Work-in-progress composition.</p></div>
+<div class="card"><h4><code>\Recent</code></h4><p class="text-muted">Arrived since last session.</p></div>
+</div></div>
+
+<!-- SLIDE 23 -->
+<div class="slide" data-slide="23">
+<h2 class="delay-1">POP3 vs IMAP &mdash; Side by Side</h2>
+<div class="table-container delay-2">
+<table><thead><tr><th>Aspect</th><th>POP3</th><th>IMAP</th></tr></thead>
+<tbody>
+<tr><td><strong>Storage</strong></td><td>Download to local client</td><td>Keep on server</td></tr>
+<tr><td><strong>Multi-device sync</strong></td><td>No &mdash; each device has its own state</td><td>Yes &mdash; all devices share one view</td></tr>
+<tr><td><strong>Folders</strong></td><td>INBOX only</td><td>Full hierarchy</td></tr>
+<tr><td><strong>Flags</strong></td><td>Not supported</td><td>\Seen, \Answered, \Flagged, etc.</td></tr>
+<tr><td><strong>Server search</strong></td><td>No</td><td>Yes (SEARCH command)</td></tr>
+</tbody></table></div>
+<div class="highlight-box delay-3">
+<strong>Industry reality:</strong> IMAP is the default for modern email. Gmail, Outlook.com and nearly all enterprise providers recommend IMAP. POP3 persists for legacy systems or low-bandwidth environments.
+</div></div>
+
+<!-- SLIDE 24 -->
+<div class="slide" data-slide="24">
+<h2 class="delay-1">Which Protocol Fits? &mdash; Scenario Selector</h2>
+<p class="delay-1">Select a scenario to see the recommendation and its rationale.</p>
+<div class="interactive-panel delay-2">
+<h4>Choose a Scenario</h4>
+<div class="scenario-btn" onclick="evaluateScenario(this,'imap','Multiple devices must see the same state. IMAP synchronises flags, folders and read-status across all clients.')">A freelancer checks email on laptop, phone and tablet.</div>
+<div class="scenario-btn" onclick="evaluateScenario(this,'pop3','One device plus unreliable connectivity makes POP3 ideal. Download everything, work offline.')">A field researcher with one laptop and satellite internet.</div>
+<div class="scenario-btn" onclick="evaluateScenario(this,'imap','A shared mailbox requires IMAP. Multiple team members must see the same messages and track replies.')">A support team sharing <code>support@company.com</code>.</div>
+<div class="scenario-btn" onclick="evaluateScenario(this,'pop3','If policy demands no email on external servers, POP3 with delete-on-download ensures local-only storage.')">A company requiring no data on provider servers.</div>
+<div class="result" id="scenarioResult" style="margin-top:1rem;">Select a scenario to see the recommendation.</div>
+</div></div>
+
+<!-- SLIDE 25 -->
+<div class="slide" data-slide="25">
+<h2 class="delay-1">Knowledge Check: Mailbox Access</h2>
+<div class="quiz-container delay-2">
+<div class="quiz-question">A user reads an email on their phone. On their laptop, the same email still shows as unread. Which protocol is their phone using?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkQuiz(this,true,'q25')">A) POP3 &mdash; downloaded without updating server state</div>
+<div class="quiz-option" onclick="checkQuiz(this,false,'q25')">B) IMAP &mdash; synchronises read status across devices</div>
+<div class="quiz-option" onclick="checkQuiz(this,false,'q25')">C) SMTP &mdash; the mail transfer was incomplete</div>
+<div class="quiz-option" onclick="checkQuiz(this,false,'q25')">D) HTTP &mdash; the webmail interface cached old state</div>
+</div>
+<div class="quiz-feedback correct" id="q25-correct">Correct. POP3 downloads but does <strong>not</strong> synchronise state. The laptop still sees the original unread state.</div>
+<div class="quiz-feedback incorrect" id="q25-incorrect">The symptom is <em>lack of sync</em>. IMAP would have set <code>\Seen</code> on the server. The protocol that does <em>not</em> propagate read-state is POP3.</div>
+</div></div>
+
+<!-- SLIDE 26 -->
+<div class="slide section-slide" data-slide="26">
+<div class="section-number">Section 04</div>
+<h2>MIME</h2>
+<p class="section-desc">How email outgrew plain ASCII: attachments, HTML bodies and multimedia content.</p>
+</div>
+
+<!-- SLIDE 27 -->
+<div class="slide" data-slide="27">
+<h2 class="delay-1">MIME &mdash; Multipurpose Internet Mail Extensions</h2>
+<div class="story-box delay-2">
+<div class="story-title">The 7-Bit Problem</div>
+<p>Original SMTP (RFC 821, 1982) allowed only 7-bit US-ASCII in the message body. No accented characters, no images, no attachments. MIME (RFCs 2045&ndash;2049, 1996) solved this with content types and transfer encodings that wrap arbitrary data into ASCII-safe formats.</p>
+</div>
+<div class="card-grid cols-2 delay-3">
+<div class="card accent-left"><h4>What MIME Enables</h4>
+<p class="text-muted">Non-ASCII text (UTF-8), file attachments, HTML-formatted bodies, multipart messages combining text and files.</p></div>
+<div class="card success-left"><h4>Three Key Headers</h4>
+<div class="code-block" data-lang="mime" style="font-size:.88rem;">MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: base64</div>
+</div></div></div>
+
+<!-- SLIDE 28 -->
+<div class="slide" data-slide="28">
+<h2 class="delay-1">Content Types and Multipart Structure</h2>
+<div class="card-grid cols-2 delay-2">
+<div class="card accent-left"><h4>Common Content-Types</h4>
+<p class="text-muted" style="font-size:.95rem;"><code>text/plain</code> &mdash; plain text<br/>
+<code>text/html</code> &mdash; HTML body<br/>
+<code>multipart/mixed</code> &mdash; body + attachments<br/>
+<code>multipart/alternative</code> &mdash; two formats<br/>
+<code>application/pdf</code> &mdash; PDF file<br/>
+<code>image/png</code> &mdash; PNG image</p></div>
+<div class="card success-left"><h4>Multipart Boundary</h4>
+<div class="code-block" data-lang="mime" style="font-size:.82rem;">Content-Type: multipart/mixed;
+ boundary="----=_Boundary"
+
+------=_Boundary
+Content-Type: text/plain; charset=utf-8
+
+Document attached below.
+
+------=_Boundary
+Content-Type: application/pdf
+Content-Disposition: attachment;
+ filename="report.pdf"
+Content-Transfer-Encoding: base64
+
+JVBERi0xLjQKJcOkw7zD...
+------=_Boundary--</div></div>
+</div>
+<div class="warning-box delay-3">
+<div class="warning-title">Boundary Rules</div>
+<p>Each part starts with <code>--boundary</code>. The final boundary ends with <code>--boundary--</code>. The boundary string must not appear inside the content.</p>
+</div></div>
+
+<!-- SLIDE 29 -->
+<div class="slide" data-slide="29">
+<h2 class="delay-1">MIME Type Builder &mdash; Interactive</h2>
+<p class="delay-1">Select a scenario to see the correct MIME structure.</p>
+<div class="interactive-panel delay-2">
+<h4>What kind of email are you sending?</h4>
+<select id="mimeSelect" onchange="buildMIME()">
+<option value="">-- Choose a scenario --</option>
+<option value="plain">Plain text message</option>
+<option value="html">HTML-formatted newsletter</option>
+<option value="alt">Both plain text and HTML versions</option>
+<option value="attach">Plain text with a PDF attachment</option>
+<option value="complex">HTML body + inline image + PDF attachment</option>
+</select>
+<div class="result" id="mimeResult" style="font-family:'JetBrains Mono',monospace;font-size:.9rem;white-space:pre-wrap;">Select a scenario to see the MIME structure.</div>
+</div></div>
+
+<!-- SLIDE 30 -->
+<div class="slide section-slide" data-slide="30">
+<div class="section-number">Section 05</div>
+<h2>Email Security</h2>
+<p class="section-desc">SPF, DKIM and DMARC: the triad that defends against spoofing and forgery.</p>
+</div>
+
+<!-- SLIDE 31 -->
+<div class="slide" data-slide="31">
+<h2 class="delay-1">Email Was Designed in an Era of Trust</h2>
+<p class="delay-1">Original SMTP assumed everyone was who they claimed to be. Four decades later, the consequences persist.</p>
+<div class="card-grid cols-2 delay-2">
+<div class="card danger-left"><h4>Spoofing</h4>
+<p class="text-muted">Any SMTP client can set any <code>From:</code> header. Sender identity is unverifiable without external mechanisms.</p></div>
+<div class="card danger-left"><h4>Phishing</h4>
+<p class="text-muted">Spoofed emails impersonating banks or colleagues remain the primary credential theft vector.</p></div>
+<div class="card" style="border-left:4px solid var(--accent-warm);"><h4>Interception</h4>
+<p class="text-muted">Without TLS, email travels as plaintext between servers &mdash; readable by any intermediary.</p></div>
+<div class="card" style="border-left:4px solid var(--accent-warm);"><h4>Spam</h4>
+<p class="text-muted">Approximately 45% of global email traffic is unsolicited bulk mail.</p></div>
+</div>
+<div class="highlight-box delay-3">
+<strong>Defence stack:</strong> <strong>SPF</strong> (who <em>may</em> send), <strong>DKIM</strong> (was the message <em>altered</em>?), <strong>DMARC</strong> (what <em>policy</em> on failure).
+</div></div>
+
+<!-- SLIDE 32 -->
+<div class="slide" data-slide="32">
+<h2 class="delay-1">SPF &mdash; Sender Policy Framework</h2>
+<div class="definition-box delay-2">
+<div class="term">RFC 7208 (2014)</div>
+<p>SPF lets a domain owner publish a DNS TXT record listing which IPs are authorised to send email for that domain.</p>
+</div>
+<div class="code-block delay-3" data-lang="dns">example.com.  IN  TXT  "v=spf1
+  ip4:192.0.2.0/24
+  include:_spf.google.com
+  -all"</div>
+<div class="card-grid cols-2 delay-4">
+<div class="card accent-left"><h4>Mechanisms</h4>
+<p class="text-muted"><code>ip4:</code> match range &bull; <code>include:</code> delegate &bull; <code>mx</code> match MX servers &bull; <code>-all</code> hard fail rest.</p></div>
+<div class="card success-left"><h4>Verdicts</h4>
+<p class="text-muted"><strong>pass</strong> &mdash; authorised. <strong>fail</strong> &mdash; not. <strong>softfail</strong> &mdash; probably not. <strong>neutral</strong> &mdash; no statement.</p></div>
+</div></div>
+
+<!-- SLIDE 33 -->
+<div class="slide" data-slide="33">
+<h2 class="delay-1">DKIM &mdash; DomainKeys Identified Mail</h2>
+<div class="definition-box delay-2">
+<div class="term">RFC 6376 (2011)</div>
+<p>DKIM adds a cryptographic signature to email headers. The sending server signs selected headers and body hash with a private key; the public key is published in DNS.</p>
+</div>
+<button class="reveal-btn delay-3" onclick="toggleReveal(this)">Show the DKIM verification process</button>
+<div class="reveal-content">
+<div class="card-grid cols-2">
+<div class="card accent-left"><h4>Signing (Sender)</h4>
+<p class="text-muted">Hash headers + body &rarr; Sign with private key &rarr; Add DKIM-Signature header &rarr; Publish public key in DNS.</p></div>
+<div class="card success-left"><h4>Verification (Receiver)</h4>
+<p class="text-muted">Extract <code>d=</code>, <code>s=</code> &rarr; Query DNS for public key &rarr; Recompute hash &rarr; Verify signature.</p></div>
+</div>
+<div class="code-block" data-lang="headers" style="font-size:.85rem;">DKIM-Signature: v=1; a=rsa-sha256;
+ d=example.com; s=selector1;
+ h=from:to:subject:date;
+ b=dzdVyOfAKCdLXJOc...</div>
+</div></div>
+
+<!-- SLIDE 34 -->
+<div class="slide" data-slide="34">
+<h2 class="delay-1">DMARC &mdash; Domain-based Message Authentication</h2>
+<div class="definition-box delay-2">
+<div class="term">RFC 7489 (2015)</div>
+<p>DMARC ties SPF and DKIM together by checking <strong>alignment</strong>: does the <code>From:</code> header domain match the domain verified by SPF or DKIM?</p>
+</div>
+<div class="card-grid cols-3 delay-3">
+<div class="card accent-left"><h4><code>p=none</code></h4><p class="text-muted">Monitor only. Collect reports.</p></div>
+<div class="card" style="border-left:4px solid var(--accent-warm);"><h4><code>p=quarantine</code></h4><p class="text-muted">Move failures to spam.</p></div>
+<div class="card danger-left"><h4><code>p=reject</code></h4><p class="text-muted">Reject outright. Strongest.</p></div>
+</div>
+<div class="code-block delay-4" data-lang="dns">_dmarc.example.com.  IN  TXT  "v=DMARC1;
+ p=quarantine;
+ rua=mailto:dmarc-reports@example.com"</div>
+</div>
+
+<!-- SLIDE 35 -->
+<div class="slide" data-slide="35">
+<h2 class="delay-1">Knowledge Check: Email Security</h2>
+<div class="quiz-container delay-2">
+<div class="quiz-question">You receive email from <code>hr@yourcompany.com</code>. SPF passes. DKIM passes. DMARC fails. Most likely cause?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkQuiz(this,false,'q35')">A) TLS encryption prevented the receiver from reading the message</div>
+<div class="quiz-option" onclick="checkQuiz(this,false,'q35')">B) The sender&rsquo;s DNS has no MX record</div>
+<div class="quiz-option" onclick="checkQuiz(this,true,'q35')">C) The domain verified by SPF/DKIM does not match the From: header domain</div>
+<div class="quiz-option" onclick="checkQuiz(this,false,'q35')">D) The message exceeded the maximum SMTP size</div>
+</div>
+<div class="quiz-feedback correct" id="q35-correct">Precisely. DMARC checks <strong>alignment</strong>: the authenticated domain must match the From: header domain. If they differ, DMARC fails even though SPF and DKIM passed individually.</div>
+<div class="quiz-feedback incorrect" id="q35-incorrect">DMARC&rsquo;s unique role is <strong>alignment</strong>: the authenticated domain must match the From: header domain. When they differ, DMARC fails regardless of individual SPF/DKIM results.</div>
+</div></div>
+
+<!-- SLIDE 36 -->
+<div class="slide" data-slide="36">
+<h2 class="delay-1">Revisiting the Forged Letter</h2>
+<p class="delay-1">At the start we showed that anyone can set <code>MAIL FROM:&lt;rector@ase.ro&gt;</code>. Now we have the full picture.</p>
+<div class="card-grid cols-3 delay-2">
+<div class="card accent-left"><h4>SPF Check</h4>
+<p class="text-muted">Attacker&rsquo;s IP not in <code>ase.ro</code> SPF record &rarr; <strong>SPF fail</strong>.</p></div>
+<div class="card success-left"><h4>DKIM Check</h4>
+<p class="text-muted">Attacker lacks <code>ase.ro</code> private key &rarr; <strong>DKIM fail</strong>.</p></div>
+<div class="card danger-left"><h4>DMARC Policy</h4>
+<p class="text-muted">If <code>p=reject</code>, receiving server discards the forgery.</p></div>
+</div>
+<div class="highlight-box delay-3">
+<strong>Answer:</strong> Trust the From: field only if the receiver checks SPF, DKIM and DMARC <em>and</em> the sender publishes correct records. Both sides must participate.
+</div></div>
+
+<!-- SLIDE 37 -->
+<div class="slide section-slide" data-slide="37">
+<div class="section-number">Section 06</div>
+<h2>Modern Email and Application</h2>
+<p class="section-desc">WebMail, Python implementations and debugging delivery failures.</p>
+</div>
+
+<!-- SLIDE 38 -->
+<div class="slide" data-slide="38">
+<h2 class="delay-1">WebMail Architecture</h2>
+<p class="delay-1">WebMail (Gmail, Outlook.com, Roundcube) is not a new protocol &mdash; it is a <strong>web frontend</strong> translating HTTP into SMTP and IMAP on the server side.</p>
+<div class="card-grid cols-2 delay-2">
+<div class="card accent-left"><h4>How It Works</h4>
+<p class="text-muted">Browser &harr; HTTPS &harr; WebMail server &harr; IMAP (read) + SMTP (send). No email protocol logic in the browser.</p></div>
+<div class="card success-left"><h4>Advantages</h4>
+<p class="text-muted">No client installation. Any browser. Integrated contacts, calendars and filtering.</p></div>
+</div>
+<div class="story-box delay-3">
+<div class="story-title">Modern Trend: Proprietary APIs</div>
+<p>Gmail API and Microsoft Graph use REST/GraphQL instead of raw IMAP, offering faster sync and richer features (labels, AI sorting). The trade-off is vendor lock-in.</p>
+</div></div>
+
+<!-- SLIDE 39: LIVE CODING -->
+<div class="slide" data-slide="39">
+<h2 class="delay-1">Reading Email with Python</h2>
+<p class="delay-1">The <code>imaplib</code> module provides low-level IMAP access. Compare with <code>smtplib</code> from slide 16.</p>
+<div class="code-block delay-2" data-lang="python"><span class="keyword">import</span> imaplib
+
+<span class="comment"># Connect over TLS</span>
+mail = imaplib.IMAP4_SSL(
+    <span class="string">"imap.example.com"</span>,
+    <span class="number">993</span>
+)
+
+<span class="comment"># Authenticate</span>
+mail.login(
+    <span class="string">"alice@example.com"</span>,
+    <span class="string">"password"</span>
+)
+
+<span class="comment"># Select the inbox folder</span>
+mail.select(<span class="string">"INBOX"</span>)
+
+<span class="comment"># Search for unread messages</span>
+status, msg_ids = mail.search(
+    <span class="keyword">None</span>,
+    <span class="string">"UNSEEN"</span>
+)
+
+<span class="comment"># Fetch the first unread message</span>
+<span class="keyword">for</span> mid <span class="keyword">in</span> msg_ids[<span class="number">0</span>].split()[:<span class="number">1</span>]:
+    status, data = mail.fetch(
+        mid,
+        <span class="string">"(RFC822)"</span>
+    )
+    <span class="builtin">print</span>(data[<span class="number">0</span>][<span class="number">1</span>].decode(<span class="string">"utf-8"</span>))
+
+mail.logout()</div>
+</div>
+
+<!-- SLIDE 40 -->
+<div class="slide" data-slide="40">
+<h2 class="delay-1">Debugging Email Delivery</h2>
+<p class="delay-1">When email fails to arrive, trace <code>Received:</code> headers bottom-to-top. Use the analyser below.</p>
+<div class="interactive-panel delay-2">
+<h4>Email Header Analyser</h4>
+<label for="headerInput">Paste email headers:</label>
+<textarea id="headerInput" rows="4" placeholder="Received: from mail.sender.com ...&#10;From: alice@sender.com&#10;Authentication-Results: spf=pass dkim=pass dmarc=pass" oninput="analyseHeaders()"></textarea>
+<div class="result" id="headerResult">Paste headers above to see analysis.</div>
+</div>
+<div class="code-block delay-3" data-lang="bash" style="font-size:.88rem;"><span class="comment"># Check MX records</span>
+dig MX example.com +short
+
+<span class="comment"># Check SPF record</span>
+dig TXT example.com +short | grep spf
+
+<span class="comment"># Test SMTP connectivity</span>
+openssl s_client \
+    -starttls smtp \
+    -connect mail.example.com:587</div>
+</div>
+
+<!-- SLIDE 41 -->
+<div class="slide" data-slide="41">
+<h2 class="delay-1">Key Takeaways</h2>
+<div class="card-grid cols-2 delay-2">
+<div class="highlight-box"><h4 style="margin-bottom:.5rem;">Architecture</h4>
+<p>Email flows through <strong>MUA &rarr; MSA &rarr; MTA &rarr; MDA &rarr; Mailbox</strong>. DNS MX records direct messages.</p></div>
+<div class="highlight-box" style="background:var(--gradient-success);"><h4 style="margin-bottom:.5rem;">Envelope vs Headers</h4>
+<p>SMTP envelope = <strong>routing</strong>. Message headers = <strong>display</strong>. They can differ &mdash; root cause of spoofing.</p></div>
+<div class="highlight-box" style="background:var(--gradient-accent);"><h4 style="margin-bottom:.5rem;">Three Protocols, Three Roles</h4>
+<p><strong>SMTP</strong> transfers. <strong>POP3</strong> downloads. <strong>IMAP</strong> synchronises. MIME enables rich content.</p></div>
+<div class="highlight-box" style="background:var(--gradient-purple);"><h4 style="margin-bottom:.5rem;">Security Triad</h4>
+<p><strong>SPF</strong> checks IP. <strong>DKIM</strong> verifies integrity. <strong>DMARC</strong> enforces alignment.</p></div>
+</div>
+<p class="delay-3 text-muted">Next week (13): <strong>IoT and Network Security</strong>. The S12 seminar covers RPC (JSON-RPC, Protobuf, gRPC).</p>
+</div>
+
+<!-- SLIDE 42 -->
+<div class="slide title-slide" data-slide="42">
+<h1 class="delay-1">Questions?</h1>
+<p class="subtitle delay-2">Thank you for your attention.</p>
+<div class="meta delay-3">
+<p>Email Protocols: SMTP &bull; POP3 &bull; IMAP &bull; WebMail</p>
+<p style="margin-top:.75rem;">Core RFCs: 5321 (SMTP) &bull; 1939 (POP3) &bull; 9051 (IMAP) &bull; 2045&ndash;2049 (MIME)</p>
+<p>7208 (SPF) &bull; 6376 (DKIM) &bull; 7489 (DMARC)</p>
+<p style="margin-top:.75rem;">Textbook: Kurose &amp; Ross, <em>Computer Networking</em>, 8th Ed. &mdash; Ch 2.4</p>
+<p style="margin-top:1rem;color:var(--accent);">Next: Week 13 &mdash; IoT &amp; Network Security</p>
+</div></div>
+
+</div><!-- /presentation -->
+
+<!-- Navigation -->
+<div class="navigation">
+<button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)" title="Previous">&#8592;</button>
+<button class="nav-btn" id="tocBtn" onclick="toggleTOC()" title="Table of Contents">&#9776;</button>
+<button class="nav-btn" id="fullscreenBtn" onclick="toggleFullscreen()" title="Fullscreen">&#9974;</button>
+<button class="nav-btn" id="nextBtn" onclick="changeSlide(1)" title="Next">&#8594;</button>
+</div>
+
+<!-- TOC -->
+<div class="toc-modal" id="tocModal">
+<div class="toc-content">
+<button class="toc-close" onclick="toggleTOC()">&times;</button>
+<h3>Table of Contents</h3>
+<div class="toc-section">
+<div class="toc-section-title">Opening &mdash; Why This Matters</div>
+<div class="toc-item" onclick="goToSlide(1)"><span class="toc-num">01</span> Title</div>
+<div class="toc-item" onclick="goToSlide(2)"><span class="toc-num">02</span> The Forged Letter</div>
+<div class="toc-item" onclick="goToSlide(3)"><span class="toc-num">03</span> Can You Trust From:?</div>
+<div class="toc-item" onclick="goToSlide(4)"><span class="toc-num">04</span> Prior Knowledge</div>
+<div class="toc-item" onclick="goToSlide(5)"><span class="toc-num">05</span> Prerequisite Check</div>
+<div class="toc-item" onclick="goToSlide(6)"><span class="toc-num">06</span> One Message, Five Protocols</div>
+</div>
+<div class="toc-section">
+<div class="toc-section-title">Section 1 &mdash; Email Architecture</div>
+<div class="toc-item" onclick="goToSlide(7)"><span class="toc-num">07</span> Section Cover</div>
+<div class="toc-item" onclick="goToSlide(8)"><span class="toc-num">08</span> The Four Agents</div>
+<div class="toc-item" onclick="goToSlide(9)"><span class="toc-num">09</span> Journey of an Email</div>
+<div class="toc-item" onclick="goToSlide(10)"><span class="toc-num">10</span> Envelope vs Headers</div>
+</div>
+<div class="toc-section">
+<div class="toc-section-title">Section 2 &mdash; SMTP</div>
+<div class="toc-item" onclick="goToSlide(11)"><span class="toc-num">11</span> Section Cover</div>
+<div class="toc-item" onclick="goToSlide(12)"><span class="toc-num">12</span> SMTP Overview</div>
+<div class="toc-item" onclick="goToSlide(13)"><span class="toc-num">13</span> Commands</div>
+<div class="toc-item" onclick="goToSlide(14)"><span class="toc-num">14</span> Response Code Explorer</div>
+<div class="toc-item" onclick="goToSlide(15)"><span class="toc-num">15</span> Complete Session</div>
+<div class="toc-item" onclick="goToSlide(16)"><span class="toc-num">16</span> Python smtplib</div>
+<div class="toc-item" onclick="goToSlide(17)"><span class="toc-num">17</span> SMTP Check</div>
+</div>
+<div class="toc-section">
+<div class="toc-section-title">Section 3 &mdash; POP3 &amp; IMAP</div>
+<div class="toc-item" onclick="goToSlide(18)"><span class="toc-num">18</span> Section Cover</div>
+<div class="toc-item" onclick="goToSlide(19)"><span class="toc-num">19</span> POP3 Overview</div>
+<div class="toc-item" onclick="goToSlide(20)"><span class="toc-num">20</span> POP3 Session</div>
+<div class="toc-item" onclick="goToSlide(21)"><span class="toc-num">21</span> IMAP Overview</div>
+<div class="toc-item" onclick="goToSlide(22)"><span class="toc-num">22</span> States and Flags</div>
+<div class="toc-item" onclick="goToSlide(23)"><span class="toc-num">23</span> POP3 vs IMAP</div>
+<div class="toc-item" onclick="goToSlide(24)"><span class="toc-num">24</span> Scenario Selector</div>
+<div class="toc-item" onclick="goToSlide(25)"><span class="toc-num">25</span> Mailbox Check</div>
+</div>
+<div class="toc-section">
+<div class="toc-section-title">Section 4 &mdash; MIME</div>
+<div class="toc-item" onclick="goToSlide(26)"><span class="toc-num">26</span> Section Cover</div>
+<div class="toc-item" onclick="goToSlide(27)"><span class="toc-num">27</span> MIME Introduction</div>
+<div class="toc-item" onclick="goToSlide(28)"><span class="toc-num">28</span> Content Types</div>
+<div class="toc-item" onclick="goToSlide(29)"><span class="toc-num">29</span> MIME Builder</div>
+</div>
+<div class="toc-section">
+<div class="toc-section-title">Section 5 &mdash; Email Security</div>
+<div class="toc-item" onclick="goToSlide(30)"><span class="toc-num">30</span> Section Cover</div>
+<div class="toc-item" onclick="goToSlide(31)"><span class="toc-num">31</span> Security Challenges</div>
+<div class="toc-item" onclick="goToSlide(32)"><span class="toc-num">32</span> SPF</div>
+<div class="toc-item" onclick="goToSlide(33)"><span class="toc-num">33</span> DKIM</div>
+<div class="toc-item" onclick="goToSlide(34)"><span class="toc-num">34</span> DMARC</div>
+<div class="toc-item" onclick="goToSlide(35)"><span class="toc-num">35</span> Security Check</div>
+<div class="toc-item" onclick="goToSlide(36)"><span class="toc-num">36</span> Revisiting the Hook</div>
+</div>
+<div class="toc-section">
+<div class="toc-section-title">Section 6 &mdash; Modern Email</div>
+<div class="toc-item" onclick="goToSlide(37)"><span class="toc-num">37</span> Section Cover</div>
+<div class="toc-item" onclick="goToSlide(38)"><span class="toc-num">38</span> WebMail</div>
+<div class="toc-item" onclick="goToSlide(39)"><span class="toc-num">39</span> Python imaplib</div>
+<div class="toc-item" onclick="goToSlide(40)"><span class="toc-num">40</span> Debugging Delivery</div>
+<div class="toc-item" onclick="goToSlide(41)"><span class="toc-num">41</span> Key Takeaways</div>
+<div class="toc-item" onclick="goToSlide(42)"><span class="toc-num">42</span> Questions</div>
+</div>
+</div></div>
+
+<script>
+
+let currentSlide=1;const totalSlides=42;
+function updateSlide(){document.querySelectorAll('.slide').forEach(s=>s.classList.remove('active'));const slide=document.querySelector('[data-slide="'+currentSlide+'"]');if(slide)slide.classList.add('active');document.getElementById('slideCounter').textContent=currentSlide+' / '+totalSlides;document.getElementById('progressBar').style.width=(currentSlide/totalSlides*100)+'%';document.getElementById('prevBtn').disabled=currentSlide===1;document.getElementById('nextBtn').disabled=currentSlide===totalSlides;}
+function changeSlide(d){var n=currentSlide+d;if(n>=1&&n<=totalSlides){currentSlide=n;updateSlide();}}
+function goToSlide(n){currentSlide=n;updateSlide();toggleTOC();}
+function toggleTOC(){document.getElementById('tocModal').classList.toggle('show');}
+function toggleFullscreen(){if(!document.fullscreenElement)document.documentElement.requestFullscreen();else document.exitFullscreen();}
+document.addEventListener('keydown',function(e){if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();changeSlide(1);}else if(e.key==='ArrowLeft')changeSlide(-1);else if(e.key==='f'||e.key==='F')toggleFullscreen();else if(e.key==='t'||e.key==='T')toggleTOC();else if(e.key==='Home'){currentSlide=1;updateSlide();}else if(e.key==='End'){currentSlide=totalSlides;updateSlide();}else if(e.key==='Escape')document.getElementById('tocModal').classList.remove('show');});
+function checkQuiz(el,ok,id){var c=el.closest('.quiz-container');c.querySelectorAll('.quiz-option').forEach(function(o){o.classList.remove('correct','incorrect');});el.classList.add(ok?'correct':'incorrect');c.querySelectorAll('.quiz-feedback').forEach(function(f){f.classList.remove('show');});c.querySelector('.quiz-feedback.'+(ok?'correct':'incorrect')).classList.add('show');}
+function toggleReveal(btn){var ct=btn.nextElementSibling;ct.classList.toggle('show');btn.textContent=ct.classList.contains('show')?'\u25B2 Hide':'\u25BC Reveal';}
+var smtpCodes={220:'220 \u2014 Service ready. The server greets you.',221:'221 \u2014 Closing connection. Sent after QUIT.',250:'250 \u2014 Requested action completed.',251:'251 \u2014 User not local; will forward.',354:'354 \u2014 Start mail input. End with a lone dot.',421:'421 \u2014 Service not available. Try later.',450:'450 \u2014 Mailbox temporarily unavailable.',451:'451 \u2014 Local error in processing.',452:'452 \u2014 Insufficient storage.',500:'500 \u2014 Syntax error, command unrecognised.',501:'501 \u2014 Syntax error in parameters.',502:'502 \u2014 Command not implemented.',503:'503 \u2014 Bad sequence of commands.',550:'550 \u2014 Mailbox unavailable. Permanent failure.',551:'551 \u2014 User not local.',552:'552 \u2014 Exceeded storage allocation.',553:'553 \u2014 Mailbox name not allowed.',554:'554 \u2014 Transaction failed.'};
+function lookupSMTPCode(){var i=document.getElementById('smtpCodeInput'),r=document.getElementById('smtpCodeResult'),c=parseInt(i.value);if(isNaN(c)||c<200||c>599){r.textContent='Enter a valid 3-digit code (200\u2013599).';r.style.borderLeft='';return;}if(smtpCodes[c])r.textContent=smtpCodes[c];else{var cat=Math.floor(c/100),cats={2:'Success',3:'Intermediate',4:'Temporary failure',5:'Permanent failure'};r.textContent=c+' \u2014 No specific entry. Category '+cat+'xx: '+(cats[cat]||'Unknown')+'.';}var colours={2:'var(--success)',3:'var(--accent)',4:'var(--accent-warm)',5:'var(--danger)'};r.style.borderLeft='4px solid '+(colours[Math.floor(c/100)]||'var(--border)');}
+function evaluateScenario(btn,proto,expl){document.querySelectorAll('.scenario-btn').forEach(function(b){b.classList.remove('selected');});btn.classList.add('selected');var r=document.getElementById('scenarioResult'),lbl=proto==='imap'?'IMAP':'POP3',clr=proto==='imap'?'var(--success)':'var(--accent)';r.innerHTML='<strong style="color:'+clr+'">Recommendation: '+lbl+'</strong><br/>'+expl;}
+function buildMIME(){var s=document.getElementById('mimeSelect'),r=document.getElementById('mimeResult'),m={plain:'MIME-Version: 1.0\nContent-Type: text/plain; charset=utf-8\nContent-Transfer-Encoding: 7bit\n\n(plain text body)',html:'MIME-Version: 1.0\nContent-Type: text/html; charset=utf-8\nContent-Transfer-Encoding: quoted-printable\n\n<html><body>...</body></html>',alt:'MIME-Version: 1.0\nContent-Type: multipart/alternative;\n boundary="----=_alt"\n\n------=_alt\nContent-Type: text/plain; charset=utf-8\n\n(plain text version)\n\n------=_alt\nContent-Type: text/html; charset=utf-8\n\n<html>...</html>\n------=_alt--',attach:'MIME-Version: 1.0\nContent-Type: multipart/mixed;\n boundary="----=_mix"\n\n------=_mix\nContent-Type: text/plain; charset=utf-8\n\nDocument attached below.\n\n------=_mix\nContent-Type: application/pdf\nContent-Disposition: attachment;\n filename="report.pdf"\nContent-Transfer-Encoding: base64\n\nJVBERi0xLjQK...\n------=_mix--',complex:'MIME-Version: 1.0\nContent-Type: multipart/mixed;\n boundary="----=_outer"\n\n------=_outer\nContent-Type: multipart/related;\n boundary="----=_rel"\n\n------=_rel\nContent-Type: text/html; charset=utf-8\n\n<html><body><img src="cid:logo123"/></body></html>\n\n------=_rel\nContent-Type: image/png\nContent-ID: <logo123>\nContent-Transfer-Encoding: base64\n\niVBORw0KGgo...\n------=_rel--\n\n------=_outer\nContent-Type: application/pdf\nContent-Disposition: attachment;\n filename="report.pdf"\nContent-Transfer-Encoding: base64\n\nJVBERi0xLjQK...\n------=_outer--'};r.textContent=m[s.value]||'Select a scenario to see the MIME structure.';}
+function analyseHeaders(){var i=document.getElementById('headerInput').value,r=document.getElementById('headerResult');if(!i.trim()){r.innerHTML='Paste headers above to see analysis.';return;}var a=[];var fm=i.match(/^From:\s*(.+)$/mi);if(fm)a.push('<strong>From:</strong> '+fm[1].replace(/</g,'&lt;').replace(/>/g,'&gt;'));var tm=i.match(/^To:\s*(.+)$/mi);if(tm)a.push('<strong>To:</strong> '+tm[1].replace(/</g,'&lt;').replace(/>/g,'&gt;'));var sm=i.match(/^Subject:\s*(.+)$/mi);if(sm)a.push('<strong>Subject:</strong> '+sm[1]);var rc=(i.match(/^Received:/gmi)||[]).length;a.push('<strong>Received hops:</strong> '+rc+' (trace bottom-to-top)');var sp=i.match(/spf=(pass|fail|softfail|neutral)/i);if(sp){var c=sp[1].toLowerCase()==='pass'?'var(--success)':'var(--danger)';a.push('<strong>SPF:</strong> <span style="color:'+c+';font-weight:700">'+sp[1]+'</span>');}var dk=i.match(/dkim=(pass|fail)/i);if(dk){var c2=dk[1].toLowerCase()==='pass'?'var(--success)':'var(--danger)';a.push('<strong>DKIM:</strong> <span style="color:'+c2+';font-weight:700">'+dk[1]+'</span>');}var dm2=i.match(/dmarc=(pass|fail)/i);if(dm2){var c3=dm2[1].toLowerCase()==='pass'?'var(--success)':'var(--danger)';a.push('<strong>DMARC:</strong> <span style="color:'+c3+';font-weight:700">'+dm2[1]+'</span>');}r.innerHTML=a.length?a.join('<br/>'):'No recognised headers found.';}
+updateSlide();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python for Networks | 7. Packet Analysis (struct)</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root{--bg-primary:#0a0e17;--bg-secondary:#121a2b;--bg-tertiary:#1a2438;--accent-primary:#00d4aa;--accent-secondary:#7c3aed;--accent-warning:#f59e0b;--accent-error:#ef4444;--accent-success:#10b981;--text-primary:#f1f5f9;--text-secondary:#94a3b8;--text-muted:#64748b;--border-color:#2d3a4f;--code-bg:#0d1117;--font-display:'Plus Jakarta Sans',sans-serif;--font-mono:'JetBrains Mono',monospace}*{margin:0;padding:0;box-sizing:border-box}body{font-family:var(--font-display);background:var(--bg-primary);color:var(--text-primary);min-height:100vh;overflow:hidden}.progress-container{position:fixed;top:0;left:0;right:0;height:4px;background:var(--bg-tertiary);z-index:1000}.progress-bar{height:100%;background:linear-gradient(90deg,var(--accent-primary),var(--accent-secondary));transition:width .3s ease}.nav-header{position:fixed;top:4px;left:0;right:0;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(180deg,var(--bg-primary) 0%,transparent 100%);z-index:100}.nav-title{font-size:.9rem;color:var(--text-secondary);display:flex;align-items:center;gap:.5rem}.nav-title .modulee{color:var(--accent-primary);font-weight:600}.slide-counter{font-family:var(--font-mono);font-size:.85rem;color:var(--text-muted);background:var(--bg-tertiary);padding:.4rem .8rem;border-radius:20px}.slides-container{height:100vh;overflow:hidden;position:relative}.slide{position:absolute;top:0;left:0;right:0;bottom:0;padding:5rem 2rem 6rem;display:flex;flex-direction:column;opacity:0;visibility:hidden;transform:translateX(100px);transition:all .5s cubic-bezier(.4,0,.2,1);overflow-y:auto}.slide.active{opacity:1;visibility:visible;transform:translateX(0)}.slide.exit{transform:translateX(-100px)}.slide-content{max-width:1200px;margin:0 auto;width:100%}h1{font-size:clamp(2rem,5vw,3.5rem);font-weight:800;line-height:1.1;margin-bottom:1.5rem;background:linear-gradient(135deg,var(--text-primary) 0%,var(--accent-primary) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}h2{font-size:clamp(1.5rem,3vw,2.2rem);font-weight:700;margin-bottom:1rem;color:var(--text-primary)}h3{font-size:1.3rem;font-weight:600;margin-bottom:.75rem;color:var(--accent-primary)}p{font-size:1.1rem;line-height:1.7;color:var(--text-secondary);margin-bottom:1rem}code{font-family:var(--font-mono);background:var(--bg-tertiary);padding:.2rem .5rem;border-radius:4px;font-size:.9em;color:var(--accent-primary)}.badge{display:inline-flex;align-items:center;gap:.4rem;padding:.4rem .8rem;border-radius:20px;font-size:.85rem;font-weight:600}.badge-time{background:rgba(0,212,170,.15);color:var(--accent-primary)}.badge-week{background:rgba(124,58,237,.15);color:var(--accent-secondary)}.badge-critical{background:rgba(239,68,68,.15);color:var(--accent-error)}.card{background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:16px;padding:1.5rem;margin-bottom:1rem}.card-highlight{border-left:4px solid var(--accent-primary)}.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem;margin:1.5rem 0}.objectives-box{background:linear-gradient(135deg,rgba(0,212,170,.1) 0%,rgba(124,58,237,.1) 100%);border:1px solid var(--border-color);border-radius:16px;padding:2rem;margin:1.5rem 0}.objective-item{display:flex;align-items:flex-start;gap:1rem;margin-bottom:1rem}.objective-icon{width:32px;height:32px;background:var(--accent-primary);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}.objective-text{flex:1}.objective-text strong{display:block;color:var(--text-primary);margin-bottom:.25rem}.objective-text span{font-size:.95rem;color:var(--text-secondary)}.code-container{background:var(--code-bg);border:1px solid var(--border-color);border-radius:12px;overflow:hidden;margin:1.5rem 0}.code-header{display:flex;justify-content:space-between;align-items:center;padding:.75rem 1rem;background:var(--bg-tertiary);border-bottom:1px solid var(--border-color)}.code-filename{font-family:var(--font-mono);font-size:.85rem;color:var(--text-secondary)}.btn-code{padding:.4rem .8rem;border-radius:6px;border:none;font-family:var(--font-mono);font-size:.8rem;cursor:pointer}.btn-run{background:var(--accent-primary);color:var(--bg-primary)}.code-body{padding:1rem;overflow-x:auto}.code-body pre{font-family:var(--font-mono);font-size:.9rem;line-height:1.6;color:var(--text-primary);margin:0}.code-output{padding:1rem;background:rgba(0,212,170,.05);border-top:1px solid var(--border-color);display:none}.code-output.visible{display:block}.code-output-header{font-family:var(--font-mono);font-size:.75rem;color:var(--accent-primary);margin-bottom:.5rem;text-transform:uppercase}.kw{color:#ff79c6}.fn{color:#50fa7b}.str{color:#f1fa8c}.num{color:#bd93f9}.cmt{color:#6272a4;font-style:italic}.cls{color:#8be9fd}.quiz-container{background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:16px;padding:2rem;margin:1.5rem 0}.quiz-header{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem}.quiz-icon{width:48px;height:48px;background:linear-gradient(135deg,var(--accent-secondary),var(--accent-primary));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.5rem}.quiz-question{font-size:1.15rem;color:var(--text-primary);margin-bottom:1.5rem}.quiz-options{display:flex;flex-direction:column;gap:.75rem}.quiz-option{display:flex;align-items:center;gap:1rem;padding:1rem 1.25rem;background:var(--bg-tertiary);border:2px solid var(--border-color);border-radius:12px;cursor:pointer}.quiz-option:hover{border-color:var(--accent-primary)}.quiz-option.selected{border-color:var(--accent-secondary);background:rgba(124,58,237,.1)}.quiz-option.correct{border-color:var(--accent-success);background:rgba(16,185,129,.1)}.quiz-option.incorrect{border-color:var(--accent-error);background:rgba(239,68,68,.1)}.option-marker{width:28px;height:28px;border-radius:50%;background:var(--bg-secondary);border:2px solid var(--border-color);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:.85rem}.quiz-option.selected .option-marker{background:var(--accent-secondary);border-color:var(--accent-secondary);color:#fff}.quiz-option.correct .option-marker{background:var(--accent-success)}.quiz-option.incorrect .option-marker{background:var(--accent-error)}.quiz-actions{display:flex;gap:1rem;margin-top:1.5rem}.btn-quiz{padding:.75rem 1.5rem;border-radius:8px;border:none;font-family:var(--font-display);font-size:.95rem;font-weight:600;cursor:pointer}.btn-check{background:var(--accent-primary);color:var(--bg-primary)}.btn-hint{background:transparent;color:var(--accent-warning);border:1px solid var(--accent-warning)}.hint-box{margin-top:1rem;padding:1rem 1.25rem;background:rgba(245,158,11,.1);border-left:4px solid var(--accent-warning);border-radius:0 8px 8px 0;display:none}.hint-box.visible{display:block}.hint-level{font-size:.8rem;color:var(--accent-warning);text-transform:uppercase;margin-bottom:.5rem}.feedback-box{margin-top:1rem;padding:1rem 1.25rem;border-radius:8px;display:none}.feedback-box.visible{display:block}.feedback-box.success{background:rgba(16,185,129,.1);border-left:4px solid var(--accent-success)}.feedback-box.error{background:rgba(239,68,68,.1);border-left:4px solid var(--accent-error)}.experiment-box{background:linear-gradient(135deg,rgba(124,58,237,.1) 0%,rgba(0,212,170,.1) 100%);border:2px dashed var(--accent-secondary);border-radius:16px;padding:2rem;margin:1.5rem 0}.experiment-header{display:flex;align-items:center;gap:1rem;margin-bottom:1rem}.experiment-icon{font-size:2rem}.experiment-title{font-size:1.3rem;font-weight:700;color:var(--accent-secondary)}.experiment-step{display:flex;gap:1rem;margin-bottom:1rem;padding:1rem;background:var(--bg-secondary);border-radius:12px}.step-number{width:32px;height:32px;background:var(--accent-secondary);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0}.step-content h4{color:var(--text-primary);margin-bottom:.5rem}.step-content p{font-size:.95rem;margin-bottom:.5rem}.step-why{font-size:.85rem;color:var(--accent-primary);font-style:italic}.callout{display:flex;gap:1rem;padding:1.25rem;border-radius:12px;margin:1rem 0}.callout-networking{background:rgba(0,212,170,.1);border:1px solid rgba(0,212,170,.3)}.callout-icon{font-size:1.5rem}.callout-content h4{color:var(--accent-primary);margin-bottom:.5rem}.callout-content p{margin:0;font-size:.95rem}.nav-buttons{position:fixed;bottom:0;left:0;right:0;padding:1.5rem 2rem;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(0deg,var(--bg-primary) 0%,transparent 100%);z-index:100}.btn-nav{display:flex;align-items:center;gap:.5rem;padding:.75rem 1.5rem;border-radius:8px;border:none;font-family:var(--font-display);font-size:1rem;font-weight:600;cursor:pointer}.btn-prev{background:var(--bg-tertiary);color:var(--text-secondary);border:1px solid var(--border-color)}.btn-next{background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:#fff}.btn-nav:disabled{opacity:.5;cursor:not-allowed}.page-dots{display:flex;gap:.5rem}.page-dot{width:8px;height:8px;border-radius:50%;background:var(--border-color);cursor:pointer}.page-dot.active{background:var(--accent-primary);transform:scale(1.3)}@media(max-width:768px){.slide{padding:4rem 1rem 5rem}.grid-2{grid-template-columns:1fr}}.title-slide{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}.title-meta{display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;margin:2rem 0}.python-logo{font-size:4rem;margin-bottom:1rem}.format-table{width:100%;border-collapse:collapse;margin:1rem 0;font-family:var(--font-mono);font-size:.85rem}.format-table th,.format-table td{padding:.75rem;border:1px solid var(--border-color);text-align:center}.format-table th{background:var(--bg-tertiary);color:var(--accent-primary)}.format-table td{background:var(--bg-secondary)}
+    </style>
+</head>
+<body>
+    <div class="progress-container"><div class="progress-bar" role="progressbar" id="progressBar"></div></div>
+    <nav class="nav-header">
+        <div class="nav-title"><span class="modulee">Module 7/10</span><span>•</span><span>Packet Analysis (struct)</span></div>
+        <div class="slide-counter" aria-live="polite" id="slideCounter">1 / 12</div>
+    </nav>
+
+    <div class="slides-container" id="slidesContainer">
+        <!-- Slide 1: Title -->
+        <div class="slide active title-slide" data-slide="1">
+            <div class="slide-content">
+                <div class="python-logo">📦</div>
+                <h1>Packet Analysis with struct</h1>
+                <p class="lead">Parsing Protocol Headers</p>
+                <div class="title-meta">
+                    <span class="badge badge-time">⏱️ ~25 minutes</span>
+                    <span class="badge badge-week">📅 Weeks 6-7</span>
+                    <span class="badge badge-critical">🔥 Essential for NAT/Firewall</span>
+                </div>
+                <div class="callout callout-networking" style="max-width:600px;margin:2rem auto;text-align:left">
+                    <span class="callout-icon">🌐</span>
+                    <div class="callout-content">
+                        <h4>Networking Correlation</h4>
+                        <p>Weeks 6-7: <strong>NAT and Firewall</strong>. You need to parse IP and TCP/UDP headers to understand and modify packets.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Why struct -->
+        <div class="slide" data-slide="2">
+            <div class="slide-content">
+                <h2>🎯 Why struct?</h2>
+                <p>Network protocols use <strong>binary data</strong> with fixed-size fields. The <code>struct</code> module converts between bytes and Python types.</p>
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>📦 IP Header (simplified)</h3>
+                        <div style="font-family:var(--font-mono);font-size:.85rem;color:var(--text-secondary)">
+                            <p>Bytes 0-3: Version, IHL, TOS, Length</p>
+                            <p>Bytes 4-7: ID, Flags, Fragment</p>
+                            <p>Bytes 8-11: TTL, Protocol, Checksum</p>
+                            <p>Bytes 12-15: Source IP</p>
+                            <p>Bytes 16-19: Dest IP</p>
+                        </div>
+                    </div>
+                    <div class="card card-highlight">
+                        <h3>🔧 What struct does</h3>
+                        <p><strong>pack()</strong> — Python → bytes</p>
+                        <p><strong>unpack()</strong> — bytes → Python</p>
+                        <p>You specify the exact format (size, endianness)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Format Codes -->
+        <div class="slide" data-slide="3">
+            <div class="slide-content">
+                <h2>📐 Format Codes</h2>
+                <table class="format-table">
+                    <thead>
+                        <tr><th>Code</th><th>C Type</th><th>Python Type</th><th>Bytes</th><th>Networking Example</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>B</td><td>unsigned char</td><td>int</td><td>1</td><td>TTL, Protocol</td></tr>
+                        <tr><td>H</td><td>unsigned short</td><td>int</td><td>2</td><td>Port, Checksum</td></tr>
+                        <tr><td>I</td><td>unsigned int</td><td>int</td><td>4</td><td>IP address, Seq num</td></tr>
+                        <tr><td>4s</td><td>char[4]</td><td>bytes</td><td>4</td><td>IP as bytes</td></tr>
+                        <tr><td>6s</td><td>char[6]</td><td>bytes</td><td>6</td><td>MAC address</td></tr>
+                    </tbody>
+                </table>
+                <div class="card card-highlight">
+                    <h3>🔑 Byte Order (Endianness)</h3>
+                    <p><code>!</code> or <code>&gt;</code> = Network byte order (Big Endian) — <strong>ALWAYS for network!</strong></p>
+                    <p><code>&lt;</code> = Little Endian (Intel native)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Apack Example -->
+        <div class="slide" data-slide="4">
+            <div class="slide-content">
+                <h2>📖 Parsing an IP Header</h2>
+                <div class="code-container">
+                    <div class="code-header"><span class="code-filename">🐍 parse_ip_header.py</span><button class="btn-code btn-run" onclick="simulateRun(this,'out1')">▶ Run</button></div>
+                    <div class="code-body">
+<pre><span class="kw">import</span> struct
+<span class="kw">import</span> socket
+
+<span class="cmt"># Raw IP header (20 bytes minimum)</span>
+ip_header = <span class="str">b'\x45\x00\x00\x3c\x1c\x46\x40\x00\x40\x06'</span> + \
+            <span class="str">b'\xb1\xe6\xc0\xa8\x01\x01\xc0\xa8\x01\x02'</span>
+
+<span class="cmt"># Unpacking (! = network byte order)</span>
+<span class="cmt"># B=1byte, H=2bytes, 4s=4bytes string</span>
+fields = struct.<span class="fn">unpack</span>(<span class="str">'!BBHHHBBH4s4s'</span>, ip_header)
+
+version_ihl = fields[<span class="num">0</span>]
+version = version_ihl >> <span class="num">4</span>        <span class="cmt"># First 4 bits</span>
+ihl = version_ihl & <span class="num">0x0F</span>          <span class="cmt"># Last 4 bits</span>
+ttl = fields[<span class="num">5</span>]
+protocol = fields[<span class="num">6</span>]
+src_ip = socket.<span class="fn">inet_ntoa</span>(fields[<span class="num">8</span>])
+dst_ip = socket.<span class="fn">inet_ntoa</span>(fields[<span class="num">9</span>])
+
+<span class="fn">print</span>(<span class="str">f"Version: IPv</span>{version}<span class="str">"</span>)
+<span class="fn">print</span>(<span class="str">f"Header Length: </span>{ihl * <span class="num">4</span>}<span class="str"> bytes"</span>)
+<span class="fn">print</span>(<span class="str">f"TTL: </span>{ttl}<span class="str">"</span>)
+<span class="fn">print</span>(<span class="str">f"Protocol: </span>{protocol}<span class="str"> (</span>{<span class="str">'TCP'</span> <span class="kw">if</span> protocol == <span class="num">6</span> <span class="kw">else</span> <span class="str">'UDP'</span>}<span class="str">)"</span>)
+<span class="fn">print</span>(<span class="str">f"Source: </span>{src_ip}<span class="str">"</span>)
+<span class="fn">print</span>(<span class="str">f"Destination: </span>{dst_ip}<span class="str">"</span>)</pre>
+                    </div>
+                    <div class="code-output" id="out1">
+                        <div class="code-output-header">Output</div>
+<pre>Version: IPv4
+Header Length: 20 bytes
+TTL: 64
+Protocol: 6 (TCP)
+Source: 192.168.1.1
+Destination: 192.168.1.2</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Pack Example -->
+        <div class="slide" data-slide="5">
+            <div class="slide-content">
+                <h2>✍️ Building a Packet</h2>
+                <div class="code-container">
+                    <div class="code-header"><span class="code-filename">🐍 build_udp_packet.py</span><button class="btn-code btn-run" onclick="simulateRun(this,'out2')">▶ Run</button></div>
+                    <div class="code-body">
+<pre><span class="kw">import</span> struct
+<span class="kw">import</span> socket
+
+<span class="cmt"># Build UDP header</span>
+src_port = <span class="num">12345</span>
+dst_port = <span class="num">53</span>      <span class="cmt"># DNS</span>
+payload = <span class="str">b"Hello DNS"</span>
+length = <span class="num">8</span> + <span class="fn">len</span>(payload)  <span class="cmt"># Header (8) + data</span>
+checksum = <span class="num">0</span>       <span class="cmt"># Optional in UDP</span>
+
+<span class="cmt"># Pack: H=port(2), H=port(2), H=len(2), H=checksum(2)</span>
+udp_header = struct.<span class="fn">pack</span>(<span class="str">'!HHHH'</span>,
+    src_port, dst_port, length, checksum
+)
+
+<span class="cmt"># Complete packet</span>
+packet = udp_header + payload
+
+<span class="fn">print</span>(<span class="str">f"UDP Header: </span>{udp_header.<span class="fn">hex</span>()}<span class="str">"</span>)
+<span class="fn">print</span>(<span class="str">f"Packet total: </span>{<span class="fn">len</span>(packet)}<span class="str"> bytes"</span>)
+<span class="fn">print</span>(<span class="str">f"Hex dump: </span>{packet.<span class="fn">hex</span>()}<span class="str">"</span>)
+
+<span class="cmt"># Verification via unpack</span>
+sp, dp, ln, cs = struct.<span class="fn">unpack</span>(<span class="str">'!HHHH'</span>, udp_header)
+<span class="fn">print</span>(<span class="str">f"\nVerification: </span>{sp}<span class="str"> → </span>{dp}<span class="str">, len=</span>{ln}<span class="str">"</span>)</pre>
+                    </div>
+                    <div class="code-output" id="out2">
+                        <div class="code-output-header">Output</div>
+<pre>UDP Header: 303900350011 0000
+Packet total: 17 bytes
+Hex dump: 3039003500110000 48656c6c6f20444e53
+
+Verification: 12345 → 53, len=17</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: TCP Header -->
+        <div class="slide" data-slide="6">
+            <div class="slide-content">
+                <h2>📦 Parsing TCP Header</h2>
+                <div class="code-container">
+                    <div class="code-header"><span class="code-filename">🐍 parse_tcp_header.py</span></div>
+                    <div class="code-body">
+<pre><span class="kw">import</span> struct
+
+<span class="kw">def</span> <span class="fn">parse_tcp_header</span>(data: <span class="cls">bytes</span>) -> <span class="cls">dict</span>:
+    <span class="str">"""Parse the first 20 bytes of a TCP header."""</span>
+
+    <span class="cmt"># Format: src_port(H), dst_port(H), seq(I), ack(I), </span>
+    <span class="cmt">#         offset_flags(H), window(H), checksum(H), urgent(H)</span>
+    fields = struct.<span class="fn">unpack</span>(<span class="str">'!HHIIHHHH'</span>, data[:<span class="num">20</span>])
+
+    offset_flags = fields[<span class="num">4</span>]
+    data_offset = (offset_flags >> <span class="num">12</span>) * <span class="num">4</span>  <span class="cmt"># in bytes</span>
+
+    <span class="cmt"># Extract flags (last 6 bits)</span>
+    flags = {
+        <span class="str">'URG'</span>: <span class="fn">bool</span>(offset_flags & <span class="num">0x20</span>),
+        <span class="str">'ACK'</span>: <span class="fn">bool</span>(offset_flags & <span class="num">0x10</span>),
+        <span class="str">'PSH'</span>: <span class="fn">bool</span>(offset_flags & <span class="num">0x08</span>),
+        <span class="str">'RST'</span>: <span class="fn">bool</span>(offset_flags & <span class="num">0x04</span>),
+        <span class="str">'SYN'</span>: <span class="fn">bool</span>(offset_flags & <span class="num">0x02</span>),
+        <span class="str">'FIN'</span>: <span class="fn">bool</span>(offset_flags & <span class="num">0x01</span>),
+    }
+
+    <span class="kw">return</span> {
+        <span class="str">'src_port'</span>: fields[<span class="num">0</span>],
+        <span class="str">'dst_port'</span>: fields[<span class="num">1</span>],
+        <span class="str">'seq'</span>: fields[<span class="num">2</span>],
+        <span class="str">'ack'</span>: fields[<span class="num">3</span>],
+        <span class="str">'header_len'</span>: data_offset,
+        <span class="str">'flags'</span>: flags,
+        <span class="str">'window'</span>: fields[<span class="num">5</span>],
+    }</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: struct.calcsize -->
+        <div class="slide" data-slide="7">
+            <div class="slide-content">
+                <h2>📏 struct Utilities</h2>
+                <div class="code-container">
+                    <div class="code-header"><span class="code-filename">🐍 struct_utils.py</span><button class="btn-code btn-run" onclick="simulateRun(this,'out3')">▶ Run</button></div>
+                    <div class="code-body">
+<pre><span class="kw">import</span> struct
+
+<span class="cmt"># calcsize() - size in bytes</span>
+ip_format = <span class="str">'!BBHHHBBH4s4s'</span>
+<span class="fn">print</span>(<span class="str">f"IP header size: </span>{struct.<span class="fn">calcsize</span>(ip_format)}<span class="str"> bytes"</span>)
+
+udp_format = <span class="str">'!HHHH'</span>
+<span class="fn">print</span>(<span class="str">f"UDP header size: </span>{struct.<span class="fn">calcsize</span>(udp_format)}<span class="str"> bytes"</span>)
+
+tcp_format = <span class="str">'!HHIIHHHH'</span>
+<span class="fn">print</span>(<span class="str">f"TCP header size: </span>{struct.<span class="fn">calcsize</span>(tcp_format)}<span class="str"> bytes"</span>)
+
+<span class="cmt"># unpack_from() - unpack from an offset</span>
+packet = <span class="str">b'\x00'</span> * <span class="num">20</span> + struct.<span class="fn">pack</span>(<span class="str">'!HH'</span>, <span class="num">80</span>, <span class="num">443</span>)
+src, dst = struct.<span class="fn">unpack_from</span>(<span class="str">'!HH'</span>, packet, offset=<span class="num">20</span>)
+<span class="fn">print</span>(<span class="str">f"\nPorts from offset 20: </span>{src}<span class="str"> → </span>{dst}<span class="str">"</span>)
+
+<span class="cmt"># pack_into() - pack into an existing buffer</span>
+buffer = <span class="fn">bytearray</span>(<span class="num">100</span>)
+struct.<span class="fn">pack_into</span>(<span class="str">'!HH'</span>, buffer, <span class="num">0</span>, <span class="num">8080</span>, <span class="num">9090</span>)
+<span class="fn">print</span>(<span class="str">f"Buffer: </span>{buffer[:<span class="num">4</span>].<span class="fn">hex</span>()}<span class="str">"</span>)</pre>
+                    </div>
+                    <div class="code-output" id="out3">
+                        <div class="code-output-header">Output</div>
+<pre>IP header size: 20 bytes
+UDP header size: 8 bytes
+TCP header size: 20 bytes
+
+Ports from offset 20: 80 → 443
+Buffer: 1f902382</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Real Exercise -->
+        <div class="slide" data-slide="8">
+            <div class="slide-content">
+                <h2>📂 In Lab Exercises</h2>
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>📁 06roWSL — NAT</h3>
+                        <p><strong>ex_6_01_nat_simple.py</strong></p>
+                        <ul style="color:var(--text-secondary);font-size:.95rem">
+                            <li>Parse IP src/dst</li>
+                            <li>Modify addresses (NAT)</li>
+                            <li>Recalculate checksum</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h3>📁 07roWSL — Firewall</h3>
+                        <p><strong>ex_7_01_packet_filter.py</strong></p>
+                        <ul style="color:var(--text-secondary);font-size:.95rem">
+                            <li>Inspect TCP/UDP ports</li>
+                            <li>Check TCP flags</li>
+                            <li>Decide accept/drop</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="callout callout-networking">
+                    <span class="callout-icon">💡</span>
+                    <div class="callout-content">
+                        <h4>Common Pattern</h4>
+                        <p><code>struct.unpack('!...', data[:20])</code> for header, then process the extracted fields.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Experiment -->
+        <div class="slide" data-slide="9">
+            <div class="slide-content">
+                <h2>🧪 Experiment: Parse a Captured Packet</h2>
+                <div class="experiment-box">
+                    <div class="experiment-header">
+                        <span class="experiment-icon">🔬</span>
+                        <span class="experiment-title">Analyse Real Traffic</span>
+                    </div>
+                    <div class="experiment-step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>Capture a packet in Wireshark</h4>
+                            <p>Export as hex dump or use <code>scapy</code> raw bytes</p>
+                            <p class="step-why">🎯 What you'll see: Raw bytes of a real packet</p>
+                        </div>
+                    </div>
+                    <div class="experiment-step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4>Identify the structure</h4>
+                            <p>Ethernet (14 bytes) + IP (20 bytes) + TCP/UDP</p>
+                            <p class="step-why">🎯 What we learn: Offsets for each layer</p>
+                        </div>
+                    </div>
+                    <div class="experiment-step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>Write a parser</h4>
+                            <p>Use struct.unpack() to extract fields</p>
+                            <p class="step-why">🎯 What we learn: Practical application of struct</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Quiz -->
+        <div class="slide" data-slide="10">
+            <div class="slide-content">
+                <h2>📝 Quiz</h2>
+                <div class="quiz-container" id="quiz1">
+                    <div class="quiz-header">
+                        <div class="quiz-icon">🧠</div>
+                        <div><h3 style="margin:0">What does '!' mean in format string?</h3></div>
+                    </div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" onclick="selectOption(this,'quiz1')"><span class="option-marker">A</span><span>Little Endian (Intel)</span></div>
+                        <div class="quiz-option" onclick="selectOption(this,'quiz1')" data-correct="true"><span class="option-marker">B</span><span>Network byte order (Big Endian)</span></div>
+                        <div class="quiz-option" onclick="selectOption(this,'quiz1')"><span class="option-marker">C</span><span>Native byte order</span></div>
+                        <div class="quiz-option" onclick="selectOption(this,'quiz1')"><span class="option-marker">D</span><span>Exclude padding</span></div>
+                    </div>
+                    <div class="quiz-actions">
+                        <button class="btn-quiz btn-check" onclick="checkAnswer('quiz1')">Check</button>
+                        <button class="btn-quiz btn-hint" onclick="showHint('quiz1',1)">💡 Hint</button>
+                    </div>
+                    <div class="hint-box" id="quiz1-hint1"><div class="hint-level">Hint 1/3</div><p>Network protocols use a standard for byte order. Which one is it?</p></div>
+                    <div class="hint-box" id="quiz1-hint2"><div class="hint-level">Hint 2/3</div><p>Big Endian = MSB first. Intel uses Little Endian natively.</p></div>
+                    <div class="hint-box" id="quiz1-hint3"><div class="hint-level">Hint 3/3</div><p>! = Network byte order = Big Endian. ALWAYS use this for network packets!</p></div>
+                    <div class="feedback-box" id="quiz1-feedback"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: Quiz 2 -->
+        <div class="slide" data-slide="11">
+            <div class="slide-content">
+                <div class="quiz-container" id="quiz2">
+                    <div class="quiz-header">
+                        <div class="quiz-icon">🧠</div>
+                        <div><h3 style="margin:0">What does <code>struct.unpack('!HH', data)</code> return?</h3></div>
+                    </div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" onclick="selectOption(this,'quiz2')"><span class="option-marker">A</span><span>A single integer of 4 bytes</span></div>
+                        <div class="quiz-option" onclick="selectOption(this,'quiz2')" data-correct="true"><span class="option-marker">B</span><span>A tuple with 2 integers, each 2 bytes</span></div>
+                        <div class="quiz-option" onclick="selectOption(this,'quiz2')"><span class="option-marker">C</span><span>A list with 4 bytes</span></div>
+                        <div class="quiz-option" onclick="selectOption(this,'quiz2')"><span class="option-marker">D</span><span>A string of 4 characters</span></div>
+                    </div>
+                    <div class="quiz-actions">
+                        <button class="btn-quiz btn-check" onclick="checkAnswer('quiz2')">Check</button>
+                        <button class="btn-quiz btn-hint" onclick="showHint('quiz2',1)">💡 Hint</button>
+                    </div>
+                    <div class="hint-box" id="quiz2-hint1"><div class="hint-level">Hint 1/3</div><p>H = unsigned short = 2 bytes. How many H are in the format?</p></div>
+                    <div class="hint-box" id="quiz2-hint2"><div class="hint-level">Hint 2/3</div><p>unpack() always returns a tuple.</p></div>
+                    <div class="hint-box" id="quiz2-hint3"><div class="hint-level">Hint 3/3</div><p>2 x H = 2 integers of 16 bits each, returned as tuple.</p></div>
+                    <div class="feedback-box" id="quiz2-feedback"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: Summary -->
+        <div class="slide" data-slide="12">
+            <div class="slide-content">
+                <h2>✅ Summary</h2>
+                <div class="grid-2">
+                    <div class="card card-highlight">
+                        <h3>📌 What we learnt</h3>
+                        <ul style="list-style:none;padding:0">
+                            <li style="padding:.5rem 0;border-bottom:1px solid var(--border-color)">✓ struct.pack() — Python → bytes</li>
+                            <li style="padding:.5rem 0;border-bottom:1px solid var(--border-color)">✓ struct.unpack() — bytes → tuple</li>
+                            <li style="padding:.5rem 0;border-bottom:1px solid var(--border-color)">✓ ! for network byte order</li>
+                            <li style="padding:.5rem 0">✓ Codes: B(1), H(2), I(4), Ns(N bytes)</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h3>🚀 Next Module</h3>
+                        <p style="color:var(--accent-primary);font-weight:600">Module 8: Concurrency (threading)</p>
+                        <p>Servers handling multiple clients</p>
+                        <span class="badge badge-week">📅 Correlated with Weeks 7-9</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-buttons">
+        <button class="btn-nav btn-prev" id="btnPrev" onclick="prevSlide()" disabled>← Back</button>
+        <div class="page-dots" id="pageDots"></div>
+        <button class="btn-nav btn-next" id="btnNext" onclick="nextSlide()">Continue →</button>
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 12;
+        const quizHintCounts = {};
+
+        document.addEventListener("DOMContentLoaded", () => {
+            updateUI();
+            createPageDots();
+            document.addEventListener("keydown", (e) => {
+                if (e.key === "ArrowRight" || e.key === " ") {
+                    e.preventDefault();
+                    nextSlide();
+                } else if (e.key === "ArrowLeft") {
+                    prevSlide();
+                }
+            });
+        });
+
+        function createPageDots() {
+            const container = document.getElementById("pageDots");
+            for (let i = 1; i <= totalSlides; i++) {
+                const dot = document.createElement("div");
+                dot.className = "page-dot" + (i === 1 ? " active" : "");
+                dot.onclick = () => goToSlide(i);
+                container.appendChild(dot);
+            }
+        }
+
+        function updateUI() {
+            document.getElementById("progressBar").style.width =
+                `${(currentSlide / totalSlides) * 100}%`;
+            document.getElementById("slideCounter").textContent =
+                `${currentSlide} / ${totalSlides}`;
+            document.getElementById("btnPrev").disabled = currentSlide === 1;
+            document.getElementById("btnNext").textContent =
+                currentSlide === totalSlides ? "Finish ✓" : "Continue →";
+            document.querySelectorAll(".page-dot").forEach((dot, i) =>
+                dot.classList.toggle("active", i + 1 === currentSlide)
+            );
+        }
+
+        function goToSlide(n) {
+            if (n < 1 || n > totalSlides || n === currentSlide) return;
+            const cur = document.querySelector(`.slide[data-slide="${currentSlide}"]`);
+            const nxt = document.querySelector(`.slide[data-slide="${n}"]`);
+            cur.classList.remove("active");
+            cur.classList.add("exit");
+            setTimeout(() => {
+                cur.classList.remove("exit");
+                nxt.classList.add("active");
+                currentSlide = n;
+                updateUI();
+            }, 100);
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides) goToSlide(currentSlide + 1);
+        }
+
+        function prevSlide() {
+            if (currentSlide > 1) goToSlide(currentSlide - 1);
+        }
+
+        function simulateRun(btn, id) {
+            const output = document.getElementById(id);
+            btn.textContent = "⏳...";
+            setTimeout(() => {
+                output.classList.add("visible");
+                btn.textContent = "▶ Run";
+            }, 500);
+        }
+
+        function selectOption(el, qid) {
+            document.getElementById(qid)
+                .querySelectorAll(".quiz-option")
+                .forEach((o) => o.classList.remove("selected", "correct", "incorrect"));
+            el.classList.add("selected");
+            document.getElementById(`${qid}-feedback`).classList.remove("visible");
+        }
+
+        function checkAnswer(qid) {
+            const container = document.getElementById(qid);
+            const selected = container.querySelector(".quiz-option.selected");
+            const feedback = document.getElementById(`${qid}-feedback`);
+
+            if (!selected) {
+                feedback.innerHTML =
+                    '<p style="color:var(--accent-warning)">⚠️ Select an option!</p>';
+                feedback.className = "feedback-box visible";
+                return;
+            }
+
+            container.querySelectorAll(".quiz-option").forEach((o) => {
+                if (o.dataset.correct === "true") o.classList.add("correct");
+                else if (o.classList.contains("selected")) o.classList.add("incorrect");
+            });
+
+            if (selected.dataset.correct === "true") {
+                feedback.innerHTML =
+                    '<p style="color:var(--accent-success)">🎉 Correct!</p>';
+                feedback.className = "feedback-box success visible";
+            } else {
+                feedback.innerHTML =
+                    '<p style="color:var(--accent-error)">❌ See the correct answer.</p>';
+                feedback.className = "feedback-box error visible";
+            }
+        }
+
+        function showHint(qid, level) {
+            if (!quizHintCounts[qid]) quizHintCounts[qid] = 0;
+            const cur = quizHintCounts[qid] + 1;
+            if (cur > 3) return;
+            const hint = document.getElementById(`${qid}-hint${cur}`);
+            if (hint) {
+                hint.classList.add("visible");
+                quizHintCounts[qid] = cur;
+                const btn = document.querySelector(`#${qid} .btn-hint`);
+                btn.textContent = cur >= 3 ? "✓ Hints" : `💡 (${cur}/3)`;
+                if (cur >= 3) btn.disabled = true;
+            }
+        }
+    </script>
+</body>
+</html>
