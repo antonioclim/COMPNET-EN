@@ -1,0 +1,36 @@
+# ── Romanian-only instructor notes ──────────────────────────
+**/roCOMPNETclass_*
+
+# ── Bilingual student quizzes (multichoice) ─────────────────
+00_APPENDIX/c)studentsQUIZes(multichoice_only)/
+
+# ── Non-text and binary artefacts ───────────────────────────
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.ico
+*.pdf
+*.xlsx
+*.pptx
+*.docx
+*.zip
+*.tar.gz
+*.jar
+*.pyc
+
+# ── Python and tool config ──────────────────────────────────
+*.py
+*.puml
+*.toml
+*.cfg
+*.ini
+*.sh
+*.bat
+*.ps1
+
+# ── Build and dependency directories ───────────────────────
+node_modules/
+__pycache__/
+.git/
