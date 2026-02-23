@@ -17,8 +17,14 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Check executable permissions (Phase 4)
+        run: bash 00_TOOLS/qa/check_executability.sh
+
       - name: Run Markdown link checker
         run: python 00_TOOLS/qa/check_markdown_links.py
+
+      - name: Run language & lexical integrity check (Phase 7)
+        run: python 00_TOOLS/qa/check_integrity.py
 
       - name: Run pytest (if present)
         shell: bash
