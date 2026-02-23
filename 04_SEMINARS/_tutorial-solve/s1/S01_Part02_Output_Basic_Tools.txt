@@ -1,0 +1,49 @@
+ping 192.168.1.1
+
+PING 192.168.1.1 (192.168.1.1) 56(84) bytes of data.
+64 bytes from 192.168.1.1: icmp_seq=1 ttl=64 time=4.70 ms
+64 bytes from 192.168.1.1: icmp_seq=2 ttl=64 time=4.77 ms
+64 bytes from 192.168.1.1: icmp_seq=3 ttl=64 time=6.18 ms
+^C
+--- 192.168.1.1 ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 2003ms
+rtt min/avg/max/mdev = 4.701/5.218/6.180/0.680 ms
+
+ping google.com
+
+PING google.com (172.217.20.14) 56(84) bytes of data.
+64 bytes from bud02s28-in-f14.1e100.net (172.217.20.14): icmp_seq=1 ttl=117 time=14.9 ms
+64 bytes from bud02s28-in-f14.1e100.net (172.217.20.14): icmp_seq=2 ttl=117 time=16.2 ms
+64 bytes from bud02s28-in-f14.1e100.net (172.217.20.14): icmp_seq=3 ttl=117 time=15.1 ms
+^C
+--- google.com ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 2003ms
+rtt min/avg/max/mdev = 14.877/15.392/16.154/0.549 ms
+
+netstat -tulpn |grep LISTEN
+
+(Not all processes could be identified, non-owned process info
+ will not be shown, you would have to be root to see it all.)
+tcp        0      0 0.0.0.0:11210           0.0.0.0:*               LISTEN   
+
+sudo netstat -tunp |grep ESTABLISHED
+tcp        0      0 192.168.1.199:44290     142.251.39.54:443       ESTABLISHED 2463876/renderD128  
+tcp        0      0 192.168.1.199:42460     104.18.39.21:443        ESTABLISHED 2463876/renderD128  
+
+nslookup google.com
+
+Server:		127.0.0.53
+Address:	127.0.0.53#53
+
+Non-authoritative answer:
+Name:	google.com
+Address: 142.250.180.206
+Name:	google.com
+Address: 2a00:1450:400d:803::200e
+
+nslookup qwertyuioo.com
+
+Server:		127.0.0.53
+Address:	127.0.0.53#53
+
+** server can't find qwertyuioo.com: NXDOMAIN
