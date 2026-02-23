@@ -1,0 +1,40 @@
+@startuml fig-dns-actors
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title DNS Actors and Their Roles
+
+package "Client side" as CS #FFF3E0 {
+    rectangle "Stub resolver\n(OS / browser)" as STUB #FFE0B2
+}
+
+package "Network infrastructure" as NI #F5F5F5 {
+    rectangle "Recursive resolver\n(ISP / enterprise / public)\ne.g. 8.8.8.8" as REC #BBDEFB
+    database "Response cache\n(TTL-based)" as CACHE #ECEFF1
+}
+
+package "Authoritative hierarchy" as AH #E8F5E9 {
+    rectangle "Root servers\n(13 logical instances)" as ROOT #C8E6C9
+    rectangle "TLD servers\n(.com, .ro, .org)" as TLD #C8E6C9
+    rectangle "Authoritative servers\n(zone owner)" as AUTH #C8E6C9
+}
+
+STUB -[#1565C0]-> REC : DNS query\n(recursive)
+REC -[#1565C0]-> ROOT : iterative query
+REC -[#1565C0]-> TLD : iterative query
+REC -[#1565C0]-> AUTH : authoritative query
+REC --> CACHE : store answer
+CACHE --> REC : check cache first
+REC -[#43A047]-> STUB : final response\n(possibly cached)
+
+legend right
+  The stub resolver delegates to a recursive
+  resolver which walks the DNS hierarchy.
+  Answers are cached according to their TTL.
+  Root servers direct to TLDs which direct
+  to authoritative servers for each zone.
+endlegend
+@enduml

@@ -1,0 +1,45 @@
+@startuml fig-http-caching-304
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title HTTP Caching — Conditional Requests and 304 Not Modified
+
+participant "Browser\n(cache)" as B #FFE0B2
+participant "Server" as S #C8E6C9
+
+== First Request — Full Response ==
+
+B -> S : GET /data.json
+S -[#43A047]-> B : 200 OK\nLast-Modified: Mon, 10 Feb 2025\nCache-Control: max-age=60\n\n{...payload...}
+
+note right of B
+  Browser stores the response
+  and the Last-Modified date.
+end note
+
+|||
+...60 seconds later (cache expired)...
+|||
+
+== Conditional Request — Cache Validation ==
+
+B -> S : GET /data.json\nIf-Modified-Since: Mon, 10 Feb 2025
+
+alt Resource unchanged
+  S -[#43A047]-> B : 304 Not Modified\n(no body)
+  note right of B : Browser uses cached copy
+else Resource changed
+  S -[#1565C0]-> B : 200 OK\nLast-Modified: Wed, 12 Feb 2025\n\n{...new payload...}
+  note right of B : Browser replaces cached copy
+end
+
+legend right
+  304 dramatically reduces bandwidth:
+  the server confirms validity without
+  retransmitting the full payload.
+  Caches operate at browser, proxy and CDN layers.
+endlegend
+@enduml

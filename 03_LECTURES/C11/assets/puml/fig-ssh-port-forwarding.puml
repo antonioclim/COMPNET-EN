@@ -1,0 +1,51 @@
+@startuml fig-ssh-port-forwarding
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title SSH Port Forwarding: Local, Remote and Dynamic
+
+participant "User\napplication" as U #FFE0B2
+participant "Client\nmachine" as C #BBDEFB
+participant "SSH Server\n(bastion)" as B #E1BEE7
+participant "Internal service\n(DB / HTTP)" as I #C8E6C9
+
+== LOCAL FORWARDING (-L) ==
+
+U -> C : connect localhost:9000
+C -[#1565C0]> B : SSH tunnel (encrypted)
+B -> I : connect internal:5432
+note right of B
+  ssh -L 9000:internal:5432 bastion
+  Access remote services via local port
+end note
+
+== REMOTE FORWARDING (-R) ==
+
+U -> B : connect bastion:9000
+B -[#1565C0]> C : SSH tunnel (encrypted)
+C -> I : connect localhost:3000
+note right of C
+  ssh -R 9000:localhost:3000 bastion
+  Expose a local service through the server
+end note
+
+== DYNAMIC FORWARDING (-D) ==
+
+U -> C : browser SOCKS → localhost:1080
+C -[#1565C0]> B : SSH SOCKS tunnel
+B -> I : dynamic destination
+note right of B
+  ssh -D 1080 bastion
+  General-purpose encrypted proxy
+end note
+
+legend right
+  Local: local port → tunnel → remote target
+  Remote: remote port → tunnel → local target
+  Dynamic: SOCKS proxy via tunnel to any host
+  All three modes reuse the SSH connection.
+endlegend
+@enduml

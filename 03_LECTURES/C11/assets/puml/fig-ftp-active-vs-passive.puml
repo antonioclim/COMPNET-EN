@@ -1,0 +1,46 @@
+@startuml fig-ftp-active-vs-passive
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title FTP: Active Mode vs Passive Mode
+
+participant "Client\n(behind NAT)" as C #FFE0B2
+participant "NAT /\nFirewall" as FW #FFCDD2
+participant "FTP Server" as S #C8E6C9
+
+== ACTIVE MODE (server initiates data connection) ==
+
+C -> S : TCP 21: PORT client_ip,client_port
+S --> C : 200 PORT command successful
+
+S -[#E53935]>x FW : TCP from server:20 → client:client_port
+note right of FW #FFEBEE
+  Blocked: NAT/firewall drops
+  inbound connections to client
+end note
+
+== PASSIVE MODE (client initiates data connection) ==
+
+C -> S : TCP 21: PASV
+S --> C : 227 (server_ip,p1,p2)
+
+C -[#43A047]> S : TCP from client:ephemeral → server:passive_port
+note right of S #E8F5E9
+  Success: client initiates both
+  control and data connections
+end note
+
+S -[#43A047]-> C : <data transfer>
+S --> C : 226 Transfer complete
+
+legend right
+  Active mode fails when clients sit behind
+  NAT because the server cannot reach back.
+  Passive mode solves this by letting the
+  client open both connections outward.
+  Modern networks almost always use PASV.
+endlegend
+@enduml

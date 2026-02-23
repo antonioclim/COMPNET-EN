@@ -1,0 +1,36 @@
+@startuml fig-http-request-response
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title HTTP Request and Response Structure
+
+rectangle "**HTTP Request**" as req #FFF3E0 {
+    rectangle "Request Line\nPOST /api/users HTTP/1.1" as rl #FFE0B2
+    rectangle "Headers\nHost: example.com\nContent-Type: application/json\nAccept: application/json\nAuthorization: Bearer ..." as rh #BBDEFB
+    rectangle "Body (optional)\n{\"name\": \"Alice\"}" as rb #FFF9C4
+}
+
+rectangle "**HTTP Response**" as res #E8F5E9 {
+    rectangle "Status Line\nHTTP/1.1 201 Created" as sl #C8E6C9
+    rectangle "Headers\nContent-Type: application/json\nLocation: /api/users/3\nCache-Control: no-store" as sh #BBDEFB
+    rectangle "Body (optional)\n{\"id\": 3, \"name\": \"Alice\"}" as sb #FFF9C4
+}
+
+rl -[hidden]down-> rh
+rh -[hidden]down-> rb
+
+sl -[hidden]down-> sh
+sh -[hidden]down-> sb
+
+req -[#1565C0]right-> res : TCP connection\n(keep-alive)
+
+legend bottom
+  The request line carries the method and path.
+  Headers control behaviour: caching, authentication
+  and content negotiation.
+  The body is interpreted only through Content-Type.
+endlegend
+@enduml

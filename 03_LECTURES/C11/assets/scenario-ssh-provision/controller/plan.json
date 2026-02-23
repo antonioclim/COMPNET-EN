@@ -1,0 +1,17 @@
+{
+  "hosts": [
+    {
+      "host": "node1",
+      "port": 22,
+      "user": "student",
+      "password": "student",
+      "commands": [
+        "mkdir -p ~/site",
+        "echo ok > ~/site/status.txt"
+      ],
+      "files": [
+        { "src": "/payload/index.html", "dst": "/home/student/site/index.html" }
+      ]
+    }
+  ]
+}

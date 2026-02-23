@@ -1,0 +1,66 @@
+@startuml fig-websocket-vs-polling
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title WebSocket vs HTTP Polling — Real-Time Notification Strategies
+
+participant "Client" as C1 #FFE0B2
+participant "Server" as S1 #C8E6C9
+
+== HTTP Polling (repeated requests) ==
+
+C1 -> S1 : GET /notifications
+S1 --> C1 : 200 [] (empty)
+
+...2 seconds later...
+
+C1 -> S1 : GET /notifications
+S1 --> C1 : 200 [] (empty)
+
+...2 seconds later...
+
+C1 -> S1 : GET /notifications
+S1 -[#43A047]-> C1 : 200 [{msg: "new data"}]
+
+note right of S1
+  Many requests return empty.
+  Latency = poll interval.
+  High overhead per request.
+end note
+
+|||
+== ═══════════════════════════════ ==
+|||
+
+participant "Client" as C2 #FFE0B2
+participant "Server" as S2 #C8E6C9
+
+== WebSocket (persistent connection) ==
+
+C2 -> S2 : GET /ws Upgrade: websocket
+S2 -[#43A047]-> C2 : 101 Switching Protocols
+
+...server event occurs...
+
+S2 -[#1565C0]-> C2 : {"type":"deliver","msg":"new data"}
+
+...another event...
+
+S2 -[#1565C0]-> C2 : {"type":"deliver","msg":"update"}
+
+note right of S2
+  Server pushes instantly.
+  No wasted requests.
+  Connection stays open.
+end note
+
+legend bottom
+  Polling wastes bandwidth on empty responses.
+  WebSocket provides true push with sub-second latency.
+  Trade-off: WebSocket requires persistent connections
+  that consume server resources and complicate load balancing.
+endlegend
+@enduml

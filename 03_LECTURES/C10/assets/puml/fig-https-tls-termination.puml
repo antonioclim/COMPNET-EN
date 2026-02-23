@@ -1,0 +1,53 @@
+@startuml fig-https-tls-termination
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title HTTPS — TLS Termination Strategies
+
+== Variant A: TLS Terminated at Proxy ==
+
+participant "Client" as CA #FFE0B2
+participant "Nginx\n(TLS termination)\n:443" as NA #E1BEE7
+participant "Backend\n(plain HTTP)\n:5000" as BA #C8E6C9
+
+CA -[#1565C0]> NA : HTTPS request\n(encrypted)
+activate NA
+NA -> BA : HTTP request\n+ X-Forwarded-Proto: https
+activate BA
+BA --> NA : HTTP response
+deactivate BA
+NA -[#1565C0]-> CA : HTTPS response\n(encrypted)
+deactivate NA
+
+note right of NA
+  Proxy decrypts and re-encrypts.
+  Backend receives plain HTTP.
+end note
+
+|||
+
+== Variant B: TLS End-to-End (Passthrough) ==
+
+participant "Client" as CB #FFE0B2
+participant "Nginx\n(TCP passthrough)\n:443" as NB #ECEFF1
+participant "Backend\n(TLS-enabled)\n:443" as BB #E1BEE7
+
+CB -[#1565C0]> NB : TLS stream (opaque)
+NB -[#1565C0]> BB : TLS stream (forwarded)
+BB -[#1565C0]-> NB : TLS stream
+NB -[#1565C0]-> CB : TLS stream
+
+note right of NB
+  Proxy cannot inspect
+  or cache content.
+end note
+
+legend right
+  Variant A: simpler backends, proxy handles certificates.
+  Variant B: true end-to-end encryption, zero trust.
+  Trade-off: observability vs confidentiality.
+endlegend
+@enduml

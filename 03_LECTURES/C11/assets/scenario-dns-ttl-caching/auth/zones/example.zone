@@ -1,0 +1,11 @@
+$TTL 5
+@   IN  SOA ns1.example.test. admin.example.test. (
+        1  ; serial
+        5  ; refresh
+        5  ; retry
+        5  ; expire
+        5  ; minimum
+)
+    IN  NS  ns1.example.test.
+ns1 IN  A   10.0.0.10
+www IN  A   10.0.0.42

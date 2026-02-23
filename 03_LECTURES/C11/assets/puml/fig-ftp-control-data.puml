@@ -1,0 +1,52 @@
+@startuml fig-ftp-control-data
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title FTP: Control Connection vs Data Connection
+
+participant "FTP Client" as C #FFE0B2
+participant "FTP Server\nport 21 (control)" as S #C8E6C9
+
+== CONTROL CONNECTION (persistent, port 21) ==
+
+C -> S : TCP connect to port 21
+S --> C : 220 Service ready
+
+C -> S : USER anonymous
+S --> C : 331 Password required
+
+C -> S : PASS user@host
+S --> C : 230 Login successful
+
+C -> S : PWD
+S --> C : 257 "/" is current directory
+
+== DATA CONNECTION (ephemeral, per transfer) ==
+
+C -> S : PASV
+S --> C : 227 Entering passive mode (h1,h2,h3,h4,p1,p2)
+
+C -[#1565C0]> S : TCP connect to data port
+note right : Separate TCP connection\nused only for this transfer
+
+C -> S : LIST
+S --> C : 150 Opening data connection
+S -[#1565C0]-> C : <directory listing bytes>
+S --> C : 226 Transfer complete
+note right : Data connection closed\nafter transfer completes
+
+C -> S : QUIT
+S --> C : 221 Goodbye
+
+legend right
+  The control channel (port 21) carries
+  text commands and numeric responses.
+  The data channel is a separate TCP
+  connection opened per transfer (LIST,
+  RETR or STOR) and closed afterwards.
+  This dual-channel design is unique to FTP.
+endlegend
+@enduml

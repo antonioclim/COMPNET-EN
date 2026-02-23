@@ -1,0 +1,32 @@
+@startuml fig-rest-maturity-levels
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Richardson Maturity Model — REST Levels 0 to 3
+
+together {
+    card "**Level 0 — The Swamp of POX**\n\nSingle endpoint: POST /api\nAction embedded in body:\n{\"action\": \"get_user\", \"user_id\": 1}\n\nPure RPC tunnelled over HTTP." as L0 #FFCDD2
+
+    card "**Level 1 — Resources**\n\nDistinct URIs: POST /users/1\nAction still in body:\n{\"action\": \"get\"}\n\nResources are addressable\nbut verbs are not used." as L1 #FFE0B2
+}
+
+together {
+    card "**Level 2 — Verbs + Status Codes**\n\nGET /users/1  → 200\nPOST /users   → 201 + Location\nPUT /users/1  → 200\nDELETE /users/1 → 204\n\nHTTP semantics used correctly." as L2 #BBDEFB
+
+    card "**Level 3 — Hypermedia (HATEOAS)**\n\nResponses include links:\n{\"links\": {\n  \"self\": \"/users/1\",\n  \"update\": \"/users/1\",\n  \"collection\": \"/users\"\n}}\n\nClient discovers actions dynamically." as L3 #C8E6C9
+}
+
+L0 -[#1565C0]right-> L1 : introduce\nresources
+L1 -[#1565C0]right-> L2 : add HTTP\nverbs
+L2 -[#1565C0]right-> L3 : add\nhypermedia
+
+legend bottom
+  Level 0 treats HTTP as a transport tunnel.
+  Level 2 is the practical standard for most APIs.
+  Level 3 enables true decoupling: clients follow
+  links rather than hard-coding URL patterns.
+endlegend
+@enduml

@@ -1,0 +1,37 @@
+@startuml fig-ssh-channels
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title SSH: Multiplexed Channels over a Single TCP Connection
+
+rectangle "SSH Client" as CLIENT #FFE0B2
+
+package "Single TCP connection (port 22)\nEncrypted transport layer" as CONN #E1BEE7 {
+    rectangle "Channel 0\nInteractive shell" as CH0 #BBDEFB
+    rectangle "Channel 1\nRemote command exec" as CH1 #BBDEFB
+    rectangle "Channel 2\nSFTP subsystem" as CH2 #BBDEFB
+    rectangle "Channel 3\nPort forwarding" as CH3 #BBDEFB
+}
+
+rectangle "SSH Server\n(sshd)" as SERVER #C8E6C9
+
+CLIENT -[#1565C0]-> CH0
+CLIENT -[#1565C0]-> CH1
+CLIENT -[#1565C0]-> CH2
+CLIENT -[#1565C0]-> CH3
+CH0 -[#1565C0]-> SERVER
+CH1 -[#1565C0]-> SERVER
+CH2 -[#1565C0]-> SERVER
+CH3 -[#1565C0]-> SERVER
+
+legend right
+  SSH opens one TCP connection and
+  multiplexes logical channels within it.
+  Each channel carries an independent
+  data stream: shell, exec, SFTP or tunnel.
+  All traffic is encrypted and authenticated.
+endlegend
+@enduml
