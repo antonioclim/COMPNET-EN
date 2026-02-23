@@ -11,12 +11,12 @@ All notable changes to the Week 0 prerequisite materials.
 
 - **CRITICAL:** Fixed `AicodeDecodeError` → `UnicodeDecodeError` in `01_socket_tcp.py:162`
 - Fixed all "modulee" → "module" typos (6 instances across docs)
-- Fixed all "adminilayeror" → "administrator" typos (4 instances)
+- Fixed all "administrator" → "administrator" typos (4 instances)
 - Fixed all "Aicode" → "Unicode" typos (3 instances)
-- Fixed all "Demonlayere" → "Demonstrate" typos (3 instances)
+- Fixed all "Demonstrate" → "Demonstrate" typos (3 instances)
 - Fixed all "Aderstanding" → "Understanding" typos in Prerequisites_CHECKS.md
 - Fixed "minutess" → "minutes" typos throughout
-- Fixed "Adminilayeror" → "Administrator" in PowerShell context
+- Fixed "Administrator" → "Administrator" in PowerShell context
 
 ### 📝 AI Decontamination
 

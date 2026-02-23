@@ -83,7 +83,7 @@ Pair programming is a technique where **two students work together** at the same
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │ DRIVER A (0-10 min)                                                         │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│ 1. Open PowerShell as Adminilayeror                                         │
+│ 1. Open PowerShell as Administrator                                         │
 │ 2. Run: wsl --install                                                       │
 │ 3. Wait for download                                                        │
 │                                                                             │

@@ -98,7 +98,7 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 ```python
 # TODO: We'll add error handling here
-# HACK: Temporarily using fixed port, ideally would be dynasmall
+# HACK: Temporarily using fixed port, ideally would be dynamic
 # QUESTION: Why did we choose port 8080?
 ```
 

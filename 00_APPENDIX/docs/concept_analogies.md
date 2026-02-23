@@ -55,7 +55,7 @@ Imagine a **modern apartment building** with centralised management:
 
 ### 🏠 Analogy: The Floor with Different Rules
 
-In a building, imagine a floor that operates under completely different rules — it has its own adminilayerion and utilities but uses the building's infrastructure (electricity, water).
+In a building, imagine a floor that operates under completely different rules — it has its own administration and utilities but uses the building's infrastructure (electricity, water).
 
 ### 🖼️ Visual Representation
 
