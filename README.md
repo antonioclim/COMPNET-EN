@@ -29,9 +29,9 @@ Java 8 or later is required for PlantUML rendering.
 
 1. Clone the repository.
 2. Install Java if absent.
-3. Download `plantuml.jar`:
+3. Download `plantuml.jar` (kept out of Git):
    ```bash
-   wget https://github.com/plantuml/plantuml/releases/latest/download/plantuml.jar -P 00_TOOLS/
+   bash 00_TOOLS/plantuml/get_plantuml_jar.sh
    ```
 4. Generate diagrams:
    ```bash
@@ -95,18 +95,6 @@ runs `pytest`.
 
 ---
 
-## Version
-
-**v13.05.00** — February 2026
-
----
-
 ## Licence
 
-**Restrictive Educational Licence** (based on [CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/) with additional restrictions) — see [`LICENCE.md`](LICENCE.md) for full terms.
-
-© 2017–2027 ing. dr. Antonio Clim. All rights reserved.
-
-Personal study and local experimentation are permitted. Classroom use is authorised exclusively within ASE-CSIE.
-All other teaching use, redistribution, and commercial exploitation require prior written consent.
-Published works that draw on these Materials must cite the Author; works exceeding 20% derived content must include the Author as co-author.
+Academic use.
