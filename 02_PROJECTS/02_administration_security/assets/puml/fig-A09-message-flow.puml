@@ -1,0 +1,61 @@
+@startuml fig-A09-message-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title SDN IPS — E2 Flow (Detect → Block → Expire → Recover)
+
+participant "h1\n(attacker)" as ATK #FFCDD2
+participant "s1\n(OVS)" as SW #BBDEFB
+participant "h2\n(victim)" as VIC #C8E6C9
+participant "IDS\n(h3)" as IDS #E3F2FD
+participant "Controller" as C #E1BEE7
+
+== PHASE 1 — ATTACK (before blocking) ==
+
+ATK -[#E53935]> SW : SYN → port 22
+SW -> VIC : forwarded
+ATK -[#E53935]> SW : SYN → port 80
+SW -> VIC : forwarded
+ATK -[#E53935]> SW : SYN → port 443 ... (>=10 ports)
+note right of SW : R3: SYN (ack==0) >= 10
+
+IDS -> IDS : aggregate: >=N SYNs\nin time window
+IDS -[#E53935]> C : POST /block\n{"src": "h1_ip", "duration": 30}
+note right of C : R1: tcp.port==6653 >= 1
+
+== PHASE 2 — BLOCKING ==
+
+C -> C : validate + whitelist check
+C -> SW : flow-mod: match src=h1_ip\naction=drop, priority=500\nidle_timeout=30
+note right of C : R2: tcp.port==6653\n&& tcp.len>0 >= 5
+
+ATK -[#E53935]> SW : SYN → port 25
+SW -[#E53935]>x SW : dropped by block rule
+ATK -[#E53935]> SW : SYN retransmission
+SW -[#E53935]>x SW : dropped
+note right of SW #FFCDD2 : no traffic reaches victim
+
+== PHASE 3 — LEGITIMATE TRAFFIC (contrast) ==
+
+VIC -[#43A047]> SW : ICMP ping → h1
+SW -[#43A047]> ATK : forwarded (return allowed)
+note right of SW : R4: icmp || tcp >= 1
+
+== PHASE 4 — EXPIRY AND RECOVERY ==
+
+... idle_timeout expires (30 s) ...
+SW -> SW : block rule removed
+ATK -> SW : SYN → port 80
+SW -> VIC : forwarded again
+note right of SW #E8F5E9 : traffic resumes after expiry
+
+legend right
+  Before blocking: scan traffic reaches victim.
+  After blocking: drop rule prevents delivery.
+  After expiry: traffic flows again.
+  All transitions visible in PCAP and dump-flows.
+endlegend
+@enduml

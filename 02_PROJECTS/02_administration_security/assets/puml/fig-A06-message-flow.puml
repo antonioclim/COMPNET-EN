@@ -1,0 +1,48 @@
+@startuml fig-A06-message-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title NAT and DHCP — E2 PCAP Flow (DORA + NAT Rewrite)
+
+participant "h1\n(client)" as C #FFE0B2
+participant "h3\n(gateway)\nDHCP + NAT" as GW #E1BEE7
+participant "h4\n(external\nserver)" as SRV #C8E6C9
+participant "tcpdump\n(gateway\ninterface any)" as CAP #ECEFF1
+
+== DHCP — DORA SEQUENCE ==
+
+C -[#1565C0]> GW : DHCP Discover\n(broadcast, xid=0x1234)
+note right of CAP : R1: bootp.option.dhcp==1 >= 1
+GW -[#43A047]-> C : DHCP Offer\n(10.0.1.10, lease=600s, gw=10.0.1.1)
+note right of CAP : R2: bootp.option.dhcp==2 >= 1
+C -[#1565C0]> GW : DHCP Request\n(requesting 10.0.1.10)
+note right of CAP : R3: bootp.option.dhcp==3 >= 1
+GW -[#43A047]-> C : DHCP Ack\n(confirmed 10.0.1.10)
+note right of CAP : R4: bootp.option.dhcp==5 >= 1
+
+== NAT — OUTBOUND ACCESS ==
+
+C -> GW : HTTP GET h4:80\nsrc=10.0.1.10
+note left of GW : internal capture:\nsrc = 10.0.1.10
+GW -> SRV : HTTP GET h4:80\nsrc=192.168.1.1 (MASQUERADE)
+note right of GW : external capture:\nsrc = 192.168.1.1 (rewritten)
+SRV -[#43A047]-> GW : HTTP 200 OK
+GW -[#43A047]-> C : HTTP 200 OK
+note right of CAP : R5: ip && (tcp||udp||icmp) >= 10
+
+== INBOUND BLOCK ==
+
+SRV -[#E53935]> GW : SYN → 10.0.1.10:22
+GW -[#E53935]>x GW : dropped (no DNAT rule)
+note right of GW #FFCDD2 : inbound blocked by default
+
+legend right
+  PCAP on gateway (interface any) shows
+  DORA with transaction ID correlation
+  and source-address rewrite proving NAT.
+  Inbound attempt has no reply in capture.
+endlegend
+@enduml

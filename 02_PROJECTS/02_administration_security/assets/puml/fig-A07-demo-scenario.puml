@@ -1,0 +1,60 @@
+@startuml fig-A07-demo-scenario
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title SDN Learning Switch — E3 Demo (Learn, Forward, Expire, Re-learn)
+
+participant "Examiner" as EX #FFE0B2
+participant "scripts/" as SH #ECEFF1
+participant "Controller" as C #E1BEE7
+participant "s1 (OVS)" as SW #BBDEFB
+participant "artifacts/" as ART #C8E6C9
+
+== STEP 1 — INITIAL LEARNING ==
+
+EX -> SH : ./start_topology.sh
+SH -> C : start controller
+SH -> SW : start 3-host topology
+
+EX -> SH : ping h1 → h2
+SH -> SW : ARP broadcast then ICMP
+C -> C : learn aa:aa → port 1\nlearn bb:bb → port 2
+C -> SW : install flow rules
+SH -> ART : ovs-ofctl dump-flows (after learning)
+note right of ART #E8F5E9 : two flow entries visible
+
+== STEP 2 — INCREMENTAL LEARNING ==
+
+EX -> SH : ping h2 → h3
+C -> C : learn cc:cc → port 3
+C -> SW : install flow: dst=cc:cc → port 3
+SH -> ART : dump-flows (three entries now)
+SH -> ART : export MAC table from controller
+
+== STEP 3 — AGEING AND RE-LEARNING ==
+
+EX -> SH : wait 60 s (idle timeout)
+SW -> SW : flow entries expired
+SH -> ART : dump-flows (entries removed)
+
+EX -> SH : ping h1 → h2
+C -> C : re-learn from packet-in
+C -> SW : reinstall flow rules
+SH -> ART : dump-flows (entries restored)
+note right of ART #E8F5E9 : ageing and re-learning\ndemonstrated via flow table
+
+== STEP 4 — EVIDENCE COLLECTION ==
+
+SH -> ART : PCAP + controller logs\n+ flow dumps (before/after)
+EX -> EX : correlate: broadcast vs unicast\nin PCAP with flow table state
+
+legend right
+  E3 validates: incremental MAC learning,
+  flood-to-unicast transition, ageing
+  with re-learning and correlation
+  between PCAP, logs and dump-flows.
+endlegend
+@enduml

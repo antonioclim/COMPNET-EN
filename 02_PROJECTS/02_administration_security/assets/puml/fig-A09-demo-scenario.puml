@@ -1,0 +1,67 @@
+@startuml fig-A09-demo-scenario
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title SDN IPS — E3 Demo (Full IPS Loop with Evidence)
+
+participant "Examiner" as EX #FFE0B2
+participant "scripts/" as SH #ECEFF1
+participant "IDS (h3)" as IDS #E3F2FD
+participant "Controller" as C #E1BEE7
+participant "s1 (OVS)" as SW #BBDEFB
+participant "artifacts/" as ART #C8E6C9
+
+== STEP 1 — START TOPOLOGY ==
+
+EX -> SH : ./start_scenario.sh
+SH -> C : start controller + IDS
+SH -> SW : start Mininet (h1, h2, h3, s1)
+SH -> ART : dump-flows (no block rules)
+
+== STEP 2 — ATTACK AND DETECTION ==
+
+EX -> SH : ./run_attack.sh
+SH -> SW : h1 scans h2 (SYN to 50 ports)
+IDS -> IDS : threshold exceeded
+IDS -> C : block event (src=h1_ip, 30 s)
+C -> SW : flow-mod: drop h1_ip (priority 500)
+SH -> ART : alert.json + dump-flows (block rule visible)
+note right of ART #FFCDD2 : block rule installed
+
+== STEP 3 — VERIFY BLOCKING ==
+
+EX -> SH : ping h1 → h2
+SH -> SW : ICMP from h1
+SW ->x SW : dropped
+note right of ART : no reply — blocking effective
+
+EX -> SH : ping h2 → h1
+SH -> SW : ICMP from h2 (not blocked)
+SW -> SW : forwarded
+note right of ART #E8F5E9 : legitimate traffic unaffected
+
+== STEP 4 — EXPIRY AND RECOVERY ==
+
+EX -> SH : wait 30 s
+SW -> SW : block rule expired
+EX -> SH : ping h1 → h2
+SH -> SW : ICMP from h1
+SW -> SW : forwarded (rule gone)
+SH -> ART : dump-flows (rule removed)
+note right of ART #E8F5E9 : traffic recovered after timeout
+
+== STEP 5 — EVIDENCE ==
+
+SH -> ART : PCAP + alerts + dump-flows\n(before, during, after blocking)
+EX -> EX : review full IPS loop\ncorrelate alert → rule → PCAP
+
+legend right
+  E3 validates: detection, automatic blocking,
+  effect on traffic, whitelist protection
+  for management, expiry and recovery.
+  Mini security audit covers API validation.
+endlegend
+@enduml

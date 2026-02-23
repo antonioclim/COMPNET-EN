@@ -1,0 +1,51 @@
+@startuml fig-A01-message-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title SDN Firewall — E2 PCAP Flow (Policy → Traffic → Evidence)
+
+participant "Policy File\n(YAML)" as PF #FFF9C4
+participant "Controller\n(Python)" as C #E1BEE7
+participant "s1\n(OVS)" as S #BBDEFB
+participant "h1\n(client)" as H1 #FFE0B2
+participant "h2\n(server)" as H2 #C8E6C9
+participant "tcpdump" as CAP #ECEFF1
+
+== PHASE 1 — RULE INSTALLATION ==
+
+PF -> C : load policy (allowed/blocked flows)
+C -> S : flow-mod: allow h1→h2:80 (priority 100)
+C -> S : flow-mod: drop h1→h2 ICMP (priority 200)
+S --> C : barrier-reply (rules committed)
+
+== PHASE 2 — ALLOWED TRAFFIC ==
+
+H1 -[#43A047]> S : SYN h1→h2:80
+S -[#43A047]> H2 : SYN (forwarded by allow rule)
+H2 -[#43A047]-> S : SYN-ACK
+S -[#43A047]-> H1 : SYN-ACK
+H1 -[#43A047]> S : ACK + HTTP GET
+note right of CAP : R3: >=5 IP data-plane packets
+
+== PHASE 3 — BLOCKED TRAFFIC ==
+
+H1 -[#E53935]> S : ICMP Echo Request
+S -[#E53935]>x S : drop (matches drop rule)
+note right of S #FFEBEE : no reply — blocked by flow entry
+
+== EVIDENCE COLLECTION ==
+
+S -> CAP : traffic_e2.pcap
+C -> CAP : controller logs
+S -> CAP : ovs-ofctl dump-flows
+
+legend right
+  R1: tcp.port==6653 >= 1 (OpenFlow present)
+  R2: tcp.port==6653 && tcp.len>0 >= 5
+  R3: ip && (tcp||udp||icmp) >= 5
+  PCAP must show allowed and blocked flows.
+endlegend
+@enduml

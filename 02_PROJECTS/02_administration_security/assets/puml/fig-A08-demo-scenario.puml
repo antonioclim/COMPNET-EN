@@ -1,0 +1,61 @@
+@startuml fig-A08-demo-scenario
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title VXLAN Tunnel — E3 Demo (Connectivity, MTU Break and Fix)
+
+participant "Examiner" as EX #FFE0B2
+participant "scripts/" as SH #ECEFF1
+participant "VTEPs\n(r1, r2)" as VTEP #E1BEE7
+participant "h1 ↔ h2\n(overlay)" as DATA #C8E6C9
+participant "artifacts/" as ART #C8E6C9
+
+== STEP 1 — TUNNEL SETUP ==
+
+EX -> SH : ./setup_vxlan.sh
+SH -> VTEP : ip link add vxlan0 (VNI=1010, port=4789)
+SH -> VTEP : brctl addif br0 vxlan0
+SH -> VTEP : set underlay IPs, FDB entries
+SH -> ART : ip link show + bridge fdb show
+
+== STEP 2 — CONNECTIVITY TEST ==
+
+EX -> SH : ping h1 → h2
+SH -> DATA : ICMP through VXLAN tunnel
+DATA -> DATA : replies received
+SH -> ART : PCAP on underlay (VXLAN packets)
+note right of ART #E8F5E9 : connectivity confirmed\nVNI=1010 visible in capture
+
+== STEP 3 — MTU PROBLEM ==
+
+EX -> SH : ./test_mtu_break.sh
+SH -> VTEP : set underlay MTU to 1400
+SH -> DATA : ping -s 1400 h1 → h2
+DATA -[#E53935]> DATA : fragmentation or drop
+note right of ART #FFCDD2 : inner 1400 + 50 overhead\nexceeds 1400 MTU → failure
+
+== STEP 4 — MTU FIX ==
+
+EX -> SH : ./fix_mtu.sh
+SH -> VTEP : set underlay MTU to 1550\nor set overlay MTU to 1350
+SH -> DATA : ping -s 1400 h1 → h2
+DATA -[#43A047]> DATA : replies received
+SH -> ART : PCAP showing successful transfer
+note right of ART #E8F5E9 : MTU adjusted for\nVXLAN overhead
+
+== STEP 5 — EVIDENCE AND CLEANUP ==
+
+SH -> ART : ip link, bridge fdb, ip neigh\n+ PCAP + config dumps
+EX -> SH : ./cleanup.sh
+SH -> VTEP : remove VXLAN interfaces and bridges
+
+legend right
+  E3 validates: VXLAN configuration via Bash,
+  overlay connectivity, encapsulation visible
+  in PCAP, MTU troubleshooting scenario
+  and a reversible cleanup procedure.
+endlegend
+@enduml

@@ -1,0 +1,45 @@
+@startuml fig-A04-architecture
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title ARP Spoofing Detection and Mitigation — System Architecture (E1)
+
+package "Mininet Topology" as topo #F5F5F5 {
+    rectangle "h1\n(victim)\n10.0.0.1\nMAC: aa:aa" as h1 #FFE0B2
+    rectangle "h2\n(gateway)\n10.0.0.254\nMAC: bb:bb" as h2 #C8E6C9
+    rectangle "h3\n(attacker)\n10.0.0.3\nMAC: cc:cc" as h3 #FFCDD2
+    rectangle "s1\n(switch)" as s1 #BBDEFB
+    rectangle "h4\n(sensor)" as h4 #E3F2FD
+}
+
+package "Detection System" as det #FCE4EC {
+    rectangle "ARP Monitor\n(live capture)" as mon #E1BEE7
+    rectangle "IP→MAC Table\n(observation state)" as table #FFF9C4
+    rectangle "Alert Engine\n(mapping change)" as alert #FFCDD2
+}
+
+rectangle "Mitigation\n(OVS rule or\nstatic ARP)" as mit #E8F5E9
+rectangle "Evidence\n(PCAP + alerts\n+ ARP dumps)" as ev #ECEFF1
+
+h1 --> s1 : normal traffic
+h2 --> s1 : normal traffic
+h3 -[#E53935]-> s1 : gratuitous ARP\n(spoofing)
+s1 --> h4 : mirrored ARP
+h4 --> mon : capture
+mon --> table : update mapping
+table --> alert : detect change\n(same IP, different MAC)
+alert --> mit : trigger block
+mit --> s1 : block attacker MAC
+alert --> ev : alert JSON + PCAP
+
+legend right
+  E1 scope: define IP-MAC observation table,
+  detection threshold (mapping change within
+  a short interval) and mitigation action.
+  Baseline learning period reduces false
+  positives on normal ARP traffic.
+endlegend
+@enduml

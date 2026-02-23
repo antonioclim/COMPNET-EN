@@ -1,0 +1,48 @@
+@startuml fig-A09-architecture
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title SDN IPS — System Architecture (E1)
+
+package "Mininet Topology" as topo #F5F5F5 {
+    rectangle "h1\n(attacker)" as h1 #FFCDD2
+    rectangle "h2\n(victim)" as h2 #C8E6C9
+    rectangle "s1\n(OVS)" as s1 #BBDEFB
+    rectangle "h3\n(IDS sensor)" as h3 #E3F2FD
+}
+
+package "IDS Engine" as ids #FCE4EC {
+    rectangle "Scan Detector\n(SYN threshold\ntime window)" as det #FFCDD2
+    rectangle "Block Event\n(JSON alert)" as evt #FFF9C4
+}
+
+package "SDN Controller" as ctrl_pkg #E8F5E9 {
+    rectangle "Controller\n(Python)" as ctrl #E1BEE7
+    rectangle "Block API\n(REST/local)" as api #C8E6C9
+    rectangle "Whitelist\n(management)" as wl #ECEFF1
+}
+
+rectangle "Evidence\n(PCAP, flow dumps,\nalert logs)" as ev #ECEFF1
+
+h1 -[#E53935]-> s1 : attack traffic
+h2 --> s1 : normal traffic
+s1 --> h3 : mirrored to sensor
+h3 --> det : captured packets
+det --> evt : threshold exceeded
+evt --> api : block request\n(src IP, duration)
+api --> ctrl : validate + whitelist check
+ctrl --> s1 : flow-mod: drop src\n(priority, timeout)
+ctrl --> ev : flow install log
+s1 --> ev : dump-flows + PCAP
+
+legend right
+  E1 scope: define IDS thresholds, block
+  duration (hard/idle timeout), whitelist
+  for management traffic, REST API schema
+  and OpenFlow rule specification (match,
+  priority, actions).
+endlegend
+@enduml

@@ -1,0 +1,44 @@
+@startuml fig-A05-architecture
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Laboratory Port Scanner — System Architecture (E1)
+
+package "Mininet Topology" as topo #F5F5F5 {
+    rectangle "h1\n(scanner)" as h1 #FFE0B2
+    rectangle "h2\n(victim)\nHTTP :80\nSSH mock :22" as h2 #C8E6C9
+    rectangle "h3\n(benign)" as h3 #ECEFF1
+    rectangle "s1\n(switch)" as s1 #BBDEFB
+}
+
+package "Scanner Engine" as eng #FFF3E0 {
+    rectangle "TCP Connect\n(thread pool / asyncio)" as conn #E3F2FD
+    rectangle "Port Classifier\n(open / closed / filtered)" as cls #BBDEFB
+    rectangle "Fingerprinter\n(banner grab + HTTP)" as fp #E1BEE7
+    rectangle "Rate Limiter\n(max probes/s)" as rl #FFF9C4
+}
+
+rectangle "Configuration\n(YAML: ports, timeouts,\nrate, scope)" as cfg #FFF9C4
+rectangle "Report Output\n(JSON + Markdown)" as rep #C8E6C9
+rectangle "Evidence\n(PCAP + report)" as ev #ECEFF1
+
+cfg --> eng : load scan parameters
+h1 --> s1 : scan probes
+s1 --> h2 : forwarded
+h3 --> s1 : benign noise (optional)
+conn --> cls : SYN-ACK → open\nRST → closed\ntimeout → filtered
+cls --> fp : probe open ports
+fp --> rep : service label + banner
+rep --> ev : artifacts/
+
+legend right
+  E1 scope: define scan algorithm, timeouts,
+  rate limit, classification logic and
+  fingerprinting probes. The scanner runs
+  exclusively inside controlled Mininet
+  topologies (laboratory scope only).
+endlegend
+@enduml

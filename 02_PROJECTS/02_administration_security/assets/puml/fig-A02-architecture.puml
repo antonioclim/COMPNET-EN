@@ -1,0 +1,47 @@
+@startuml fig-A02-architecture
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title IDS with Simple Rules — System Architecture (E1)
+
+package "Mininet Topology" as topo #F5F5F5 {
+    rectangle "h1\n(attacker)" as h1 #FFCDD2
+    rectangle "h2\n(victim)" as h2 #C8E6C9
+    rectangle "s1\n(switch)" as s1 #BBDEFB
+    rectangle "h3\n(sensor)" as h3 #E3F2FD
+}
+
+package "IDS Engine" as ids #FCE4EC {
+    rectangle "Packet Capture\n(live or PCAP)" as cap #FFE0B2
+    rectangle "Rule Evaluator\n(per-packet)" as eval #E1BEE7
+    rectangle "Scan Detector\n(time window)" as scan #FFCDD2
+    rectangle "Payload Matcher\n(substring)" as payload #FFF9C4
+}
+
+rectangle "Declarative Rules\n(YAML)" as rules #FFF9C4
+rectangle "Alert Output\n(JSON Lines)" as alerts #C8E6C9
+rectangle "Evidence\n(PCAP + report)" as evidence #ECEFF1
+
+h1 --> s1 : attack traffic
+h2 --> s1 : service responses
+s1 --> h3 : mirrored traffic
+h3 --> cap : capture interface
+rules --> eval : load rules
+cap --> eval : raw packets
+eval --> scan : SYN aggregation
+eval --> payload : pattern match
+scan --> alerts : scan alert
+payload --> alerts : signature alert
+alerts --> evidence : artifacts/
+
+legend right
+  E1 scope: define rule format, thresholds
+  and alert schema. The IDS evaluates
+  per-packet signatures and aggregates
+  SYNs over a configurable time window
+  to detect port scanning behaviour.
+endlegend
+@enduml

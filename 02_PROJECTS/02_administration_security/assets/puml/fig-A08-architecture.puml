@@ -1,0 +1,39 @@
+@startuml fig-A08-architecture
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title VXLAN Tunnel between Two Sites — System Architecture (E1)
+
+package "Site A" as siteA #E8F5E9 {
+    rectangle "h1\n(overlay host)\n10.100.0.1" as h1 #FFE0B2
+    rectangle "r1 — VTEP A\nunderlay: 172.16.0.1\nVXLAN: VNI 1010\nbridge br0" as r1 #E1BEE7
+}
+
+package "L3 Underlay" as under #F5F5F5 {
+    rectangle "s_underlay\n(switch)" as su #BBDEFB
+}
+
+package "Site B" as siteB #E8F5E9 {
+    rectangle "r2 — VTEP B\nunderlay: 172.16.0.2\nVXLAN: VNI 1010\nbridge br0" as r2 #E1BEE7
+    rectangle "h2\n(overlay host)\n10.100.0.2" as h2 #FFE0B2
+}
+
+rectangle "Capture Point\n(underlay interface)" as cap #ECEFF1
+
+h1 --> r1 : overlay L2 traffic
+r1 --> su : encapsulated\nUDP/4789 (VXLAN)
+su --> r2 : L3 underlay
+r2 --> h2 : decapsulated\noverlay traffic
+su --> cap : PCAP (shows\nouter + inner headers)
+
+legend right
+  E1 scope: define VTEP addresses, VNI,
+  MTU (accounting for 50-byte VXLAN overhead),
+  bridge and FDB configuration and the
+  verification method (ping + PCAP analysis).
+  Capture on the underlay reveals encapsulation.
+endlegend
+@enduml

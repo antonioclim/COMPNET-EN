@@ -1,0 +1,52 @@
+@startuml fig-A02-message-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title IDS — E2 PCAP Flow (Scan Detection and Payload Alert)
+
+participant "h1\n(attacker)" as ATK #FFCDD2
+participant "s1" as SW #BBDEFB
+participant "h2\n(victim)" as VIC #C8E6C9
+participant "IDS Engine" as IDS #E1BEE7
+participant "tcpdump" as CAP #ECEFF1
+
+== SCAN EPISODE (time window = 5 s) ==
+
+ATK -[#E53935]> SW : SYN → port 22
+SW -> VIC : SYN → port 22
+VIC --> SW : RST (closed)
+ATK -[#E53935]> SW : SYN → port 80
+SW -> VIC : SYN → port 80
+VIC -[#43A047]-> SW : SYN-ACK (open)
+ATK -[#E53935]> SW : SYN → port 443
+SW -> VIC : SYN → port 443
+VIC --> SW : RST (closed)
+note right of ATK : repeated for >=10\ndistinct ports
+
+IDS -> IDS : aggregate: >=N SYNs\nto different ports in 5 s
+IDS -[#E53935]> IDS : emit SCAN alert (JSON)
+note right of IDS #FFCDD2 : R1: tcp.flags.syn==1 && ack==0 >= 10\nR2: tcp.flags.reset==1 >= 1
+
+== PAYLOAD SIGNATURE ==
+
+ATK -> SW : HTTP GET /search?q=DROP TABLE
+SW -> VIC : forwarded
+IDS -> IDS : match substring "DROP TABLE"
+IDS -[#E53935]> IDS : emit PAYLOAD alert (JSON)
+note right of IDS #FFCDD2 : R3: tcp.len>0 && frame\ncontains "GET " >= 1
+
+== EVIDENCE ==
+
+SW -> CAP : traffic_e2.pcap
+IDS -> CAP : alerts.jsonl + summary.md
+
+legend right
+  Two alert classes demonstrated:
+  1. Port scan via SYN threshold
+  2. Payload signature via substring match
+  Each alert links to concrete PCAP packets.
+endlegend
+@enduml

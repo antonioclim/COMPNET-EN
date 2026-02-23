@@ -1,0 +1,58 @@
+@startuml fig-A05-message-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title Port Scanner — E2 PCAP Flow (Open, Closed and Filtered Ports)
+
+participant "h1\n(scanner)" as SC #FFE0B2
+participant "s1" as SW #BBDEFB
+participant "h2\n(victim)" as VIC #C8E6C9
+participant "tcpdump" as CAP #ECEFF1
+
+== OPEN PORT (port 80 — HTTP) ==
+
+SC -[#43A047]> SW : SYN → :80
+SW -> VIC : SYN
+VIC -[#43A047]-> SW : SYN-ACK
+SW -[#43A047]-> SC : SYN-ACK
+SC -[#43A047]> SW : ACK (handshake complete)
+note right of CAP : R2: SYN-ACK >= 1
+
+SC -> SW : HTTP GET / (fingerprint probe)
+VIC --> SC : HTTP 200 Server: nginx
+note right of CAP #E8F5E9 : R4: frame contains\n"HTTP" or "Server:" >= 1
+SC -> SW : FIN
+
+== CLOSED PORT (port 22 — no service) ==
+
+SC -[#E53935]> SW : SYN → :22
+SW -> VIC : SYN
+VIC -[#E53935]-> SW : RST
+SW -[#E53935]-> SC : RST
+note right of CAP : R3: RST >= 1\nclassification: closed
+
+== FILTERED PORT (port 443 — drop rule) ==
+
+SC -[#FF9800]> SW : SYN → :443
+SW -> VIC : SYN (dropped by rule)
+...
+SC -[#FF9800]> SW : SYN retransmission → :443
+...
+SC -> SC : timeout reached\nclassification: filtered
+note right of CAP : no SYN-ACK, no RST
+
+== EVIDENCE ==
+
+note right of CAP : R1: SYN (ack==0) >= 20
+SC -> CAP : scan_report.json\n+ summary.md
+
+legend right
+  Three port states demonstrated in PCAP:
+  open (SYN-ACK + banner), closed (RST)
+  and filtered (timeout with retransmissions).
+  Rate limiting keeps probes at max 200/s.
+endlegend
+@enduml

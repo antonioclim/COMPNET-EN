@@ -1,0 +1,50 @@
+@startuml fig-A10-architecture
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Network Hardening — Containerised Services Architecture (E1)
+
+package "Docker Host (h1)" as dhost #F5F5F5 {
+
+    package "Front Network (172.18.0.0/16)" as fnet #E8F5E9 {
+        rectangle "frontend\n:8080 (published)" as fe #FFE0B2
+    }
+
+    package "Back Network (172.19.0.0/16)" as bnet #FFF3E0 {
+        rectangle "backend\n:5000 (internal)" as be #BBDEFB
+        rectangle "db\n:3306 (internal)" as db #E1BEE7
+    }
+
+    rectangle "backend" as be2 #BBDEFB
+    note right of be2 : backend joins both\nfront and back networks
+
+    rectangle "DOCKER-USER\n(iptables chain)" as du #FCE4EC
+}
+
+package "Mininet" as mn #F5F5F5 {
+    rectangle "s1\n(switch)" as s1 #BBDEFB
+    rectangle "h2\n(external)" as h2 #FFCDD2
+}
+
+fe -[#43A047]-> be2 : allowed (front→back)
+be2 -[#43A047]-> db : allowed (back→db)
+fe -[#E53935]->x db : denied (front→db)
+du --> fe : filter inter-network traffic
+du --> be : filter egress
+dhost --> s1 : host interface
+s1 --> h2 : external network
+fe -[#E53935]->x h2 : egress blocked\n(by DOCKER-USER)
+h2 -[#E53935]->x db : inbound blocked
+
+legend right
+  E1 scope: define connectivity matrix
+  (least privilege), Docker network layout,
+  DOCKER-USER rules and egress filtering.
+  Only frontend is published to the host;
+  direct access to db is denied from all
+  external and front-network sources.
+endlegend
+@enduml

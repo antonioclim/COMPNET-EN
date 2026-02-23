@@ -1,0 +1,56 @@
+@startuml fig-A01-demo-scenario
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title SDN Firewall — E3 Demo Scenario (Live Policy Change)
+
+participant "Examiner" as EX #FFE0B2
+participant "Bash\nscripts/" as SH #ECEFF1
+participant "Controller" as C #E1BEE7
+participant "s1 (OVS)" as S #BBDEFB
+participant "h1 → h2" as DATA #C8E6C9
+
+== STEP 1 — INITIAL POLICY (ICMP blocked, HTTP allowed) ==
+
+EX -> SH : ./start_topology.sh
+SH -> C : start controller + load policy v1
+C -> S : install rules (allow HTTP, drop ICMP)
+
+EX -> SH : ping h1 → h2
+SH -> DATA : ICMP Echo Request
+DATA ->x DATA : blocked (no reply)
+note right of DATA #FFCDD2 : dump-flows shows drop rule
+
+EX -> SH : curl h1 → h2:80
+SH -> DATA : HTTP GET
+DATA --> SH : HTTP 200 OK
+note right of DATA #C8E6C9 : dump-flows shows allow rule
+
+== STEP 2 — LIVE POLICY RELOAD (allow ICMP) ==
+
+EX -> SH : ./reload_policy.sh v2
+SH -> C : signal reload
+C -> S : flow-mod: remove ICMP drop\nflow-mod: add ICMP allow
+
+EX -> SH : ping h1 → h2
+SH -> DATA : ICMP Echo Request
+DATA --> SH : ICMP Echo Reply
+note right of DATA #C8E6C9 : immediate effect without restart
+
+== STEP 3 — EVIDENCE REVIEW ==
+
+EX -> SH : ./collect_evidence.sh
+SH -> S : ovs-ofctl dump-flows
+SH -> S : export PCAP + logs
+note right of SH : artefacts saved under artifacts/
+
+legend right
+  E3 validates: live policy change,
+  immediate observable effect on traffic,
+  correlation between dump-flows and PCAP
+  and a mini security audit of the policy.
+endlegend
+@enduml

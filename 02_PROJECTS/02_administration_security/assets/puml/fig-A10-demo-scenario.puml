@@ -1,0 +1,67 @@
+@startuml fig-A10-demo-scenario
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title Network Hardening — E3 Demo (Segmentation Audit)
+
+participant "Examiner" as EX #FFE0B2
+participant "scripts/" as SH #ECEFF1
+participant "Docker\nCompose" as DC #BBDEFB
+participant "DOCKER-USER" as DU #FCE4EC
+participant "h2\n(external)" as EXT #FFCDD2
+participant "artifacts/" as ART #C8E6C9
+
+== STEP 1 — DEPLOY SERVICES ==
+
+EX -> SH : ./network_setup.sh
+SH -> DC : docker-compose up -d\n(frontend, backend, db)
+SH -> DU : apply_firewall.sh\n(DOCKER-USER rules)
+SH -> ART : iptables-save output
+SH -> ART : docker network inspect
+
+== STEP 2 — CONNECTIVITY MATRIX TEST ==
+
+EX -> SH : ./test_matrix.sh
+SH -> DC : frontend → backend:5000
+note right of ART #E8F5E9 : PASS (allowed)
+SH -> DC : backend → db:3306
+note right of ART #E8F5E9 : PASS (allowed)
+SH -> DC : frontend → db:3306
+note right of ART #FFCDD2 : PASS (blocked as expected)
+SH -> DC : frontend → external:80
+note right of ART #FFCDD2 : PASS (egress blocked)
+
+== STEP 3 — EXTERNAL ACCESS TEST ==
+
+EX -> SH : ./test_external.sh
+SH -> EXT : curl h2 → frontend:8080
+EXT -> DC : allowed (published port)
+note right of ART #E8F5E9 : frontend reachable from outside
+
+SH -> EXT : curl h2 → db:3306
+EXT ->x DC : blocked (not published, DOCKER-USER)
+note right of ART #FFCDD2 : db unreachable from outside
+
+== STEP 4 — EVIDENCE AND COUNTERS ==
+
+SH -> ART : iptables -L DOCKER-USER -v -n
+SH -> ART : PCAP + counters.txt
+EX -> EX : verify: counters show rule hits\nfor each blocked connection
+
+== STEP 5 — CLEANUP ==
+
+EX -> SH : ./cleanup.sh
+SH -> DU : remove DOCKER-USER rules
+SH -> DC : docker-compose down
+
+legend right
+  E3 validates: segmentation across networks,
+  egress filtering, minimal port publishing,
+  iptables counter evidence and a reversible
+  cleanup. Mini security audit reviews
+  least-privilege compliance.
+endlegend
+@enduml

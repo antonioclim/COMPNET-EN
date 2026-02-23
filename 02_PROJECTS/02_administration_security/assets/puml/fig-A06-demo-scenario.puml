@@ -1,0 +1,64 @@
+@startuml fig-A06-demo-scenario
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title NAT and DHCP — E3 Demo (Full Scenario with DNAT)
+
+participant "Examiner" as EX #FFE0B2
+participant "scripts/" as SH #ECEFF1
+participant "h1, h2\n(clients)" as CL #FFE0B2
+participant "h3\n(gateway)" as GW #E1BEE7
+participant "h4\n(external)" as SRV #C8E6C9
+participant "artifacts/" as ART #C8E6C9
+
+== STEP 1 — TOPOLOGY AND DHCP ==
+
+EX -> SH : ./setup_topology.sh
+SH -> GW : configure DHCP pool + iptables
+SH -> CL : dhclient on h1 and h2
+CL -> GW : DORA (h1 gets 10.0.1.10)
+CL -> GW : DORA (h2 gets 10.0.1.11)
+SH -> ART : dhcp_leases.txt
+
+== STEP 2 — NAT OUTBOUND ==
+
+EX -> SH : ./test_outbound.sh
+SH -> CL : curl h1 → h4:80
+CL -> GW : src=10.0.1.10
+GW -> SRV : src=192.168.1.1 (MASQUERADE)
+SRV --> GW : HTTP 200
+GW --> CL : HTTP 200
+SH -> ART : iptables-save output
+note right of ART #E8F5E9 : NAT rewrite confirmed\non both interfaces
+
+== STEP 3 — INBOUND BLOCK ==
+
+EX -> SH : ./test_inbound.sh
+SH -> SRV : curl h4 → 10.0.1.10:22
+SRV -[#E53935]> GW : SYN (no DNAT rule)
+GW ->x GW : dropped
+note right of ART #FFCDD2 : inbound blocked by default
+
+== STEP 4 — OPTIONAL DNAT ==
+
+EX -> SH : ./add_dnat.sh
+SH -> GW : iptables DNAT :8080 → h1:80
+SRV -> GW : HTTP GET :8080
+GW -> CL : forwarded to h1:80
+CL --> SRV : HTTP 200 (through DNAT)
+note right of ART #E8F5E9 : port forwarding demonstrated
+
+== STEP 5 — EVIDENCE COLLECTION ==
+
+SH -> ART : PCAP + iptables-save + leases
+
+legend right
+  E3 validates: DHCP allocation for two
+  clients, NAT outbound, inbound isolation
+  and optional DNAT port forwarding.
+  Mini security audit reviews iptables rules.
+endlegend
+@enduml

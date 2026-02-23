@@ -1,0 +1,53 @@
+@startuml fig-A04-message-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title ARP Spoofing — E2 PCAP Flow (Normal → Spoof → Detect → Mitigate)
+
+participant "h1\n(victim)" as V #FFE0B2
+participant "s1" as SW #BBDEFB
+participant "h2\n(gateway)" as GW #C8E6C9
+participant "h3\n(attacker)" as ATK #FFCDD2
+participant "Detector\n(h4)" as DET #E1BEE7
+participant "tcpdump" as CAP #ECEFF1
+
+== PHASE 1 — NORMAL ARP (baseline) ==
+
+V -> SW : ARP Request: who has 10.0.0.254?
+SW -> GW : broadcast
+GW -[#43A047]-> SW : ARP Reply: 10.0.0.254 is-at bb:bb
+SW -[#43A047]-> V : forwarded reply
+DET -> DET : learn: 10.0.0.254 → bb:bb
+note right of CAP : R1: arp.opcode==1 >= 1\nR3: arp >= 10
+
+== PHASE 2 — ARP SPOOFING ==
+
+ATK -[#E53935]> SW : Gratuitous ARP: 10.0.0.254 is-at cc:cc
+SW -[#E53935]> V : broadcast (victim updates cache)
+note right of V #FFCDD2 : ARP cache poisoned:\n10.0.0.254 → cc:cc
+
+DET -> DET : detect: 10.0.0.254 changed\nfrom bb:bb to cc:cc
+DET -[#E53935]> DET : emit SPOOF alert\n(IP, old MAC, new MAC, timestamp)
+note right of CAP : R2: arp.opcode==2 >= 5
+
+V -> SW : ICMP to gateway (10.0.0.254)
+SW -[#E53935]> ATK : traffic diverted to attacker
+note right of ATK #FFCDD2 : MITM: packets transit\nthrough attacker
+
+== PHASE 3 — MITIGATION ==
+
+DET -[#1565C0]> SW : block MAC cc:cc\n(OVS rule or static ARP)
+V -> SW : ICMP to gateway
+SW -[#43A047]> GW : traffic restored to gateway
+note right of GW #E8F5E9 : diversion stopped
+
+legend right
+  PCAP must show: normal ARP replies,
+  gratuitous ARP from attacker and
+  traffic restoration after mitigation.
+  Alerts correlate with specific packets.
+endlegend
+@enduml

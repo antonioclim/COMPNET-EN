@@ -1,0 +1,56 @@
+@startuml fig-A04-demo-scenario
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title ARP Spoofing — E3 Demo (Attack → Detection → Block → Restore)
+
+participant "Examiner" as EX #FFE0B2
+participant "scripts/" as SH #ECEFF1
+participant "Topology" as MN #BBDEFB
+participant "Detector" as DET #E1BEE7
+participant "artifacts/" as ART #C8E6C9
+
+== STEP 1 — BASELINE (normal traffic) ==
+
+EX -> SH : ./start_topology.sh
+SH -> MN : start h1, h2, h3, h4 + sensor
+EX -> SH : ping h1 → h2 (gateway)
+SH -> MN : normal ARP + ICMP
+SH -> ART : save ARP table dump (before)
+note right of ART #E8F5E9 : 10.0.0.254 → bb:bb (correct)
+
+== STEP 2 — ATTACK ==
+
+EX -> SH : ./run_attack.sh
+SH -> MN : h3 sends gratuitous ARP
+DET -> DET : mapping change detected
+DET -> ART : alert.json (IP, old MAC, new MAC)
+EX -> SH : arp -a on h1
+note right of ART #FFCDD2 : 10.0.0.254 → cc:cc (poisoned)
+
+== STEP 3 — MITIGATION ==
+
+EX -> SH : ./apply_mitigation.sh
+SH -> MN : block attacker MAC (OVS/iptables)
+EX -> SH : ping h1 → h2
+SH -> MN : traffic reaches gateway again
+SH -> ART : save ARP table dump (after)
+note right of ART #E8F5E9 : diversion stopped, mapping restored
+
+== STEP 4 — RESTORATION ==
+
+EX -> SH : ./restore.sh
+SH -> MN : remove block rule, reset ARP
+SH -> ART : final PCAP + logs + evidence
+EX -> EX : review alert↔PCAP correlation
+
+legend right
+  E3 validates: reproducible attack scenario,
+  detection accuracy (no false positives on
+  benign traffic), effective mitigation and
+  a reversible restoration mechanism.
+endlegend
+@enduml

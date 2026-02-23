@@ -1,0 +1,55 @@
+@startuml fig-A02-demo-scenario
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title IDS — E3 Demo Scenario (Benign vs Malicious Contrast)
+
+participant "Examiner" as EX #FFE0B2
+participant "scripts/" as SH #ECEFF1
+participant "h1\n(attacker)" as ATK #FFCDD2
+participant "h2\n(victim)" as VIC #C8E6C9
+participant "IDS" as IDS #E1BEE7
+
+== STEP 1 — BENIGN TRAFFIC (no alert expected) ==
+
+EX -> SH : ./run_benign.sh
+SH -> ATK : curl h2:80 (single HTTP request)
+ATK -> VIC : GET /index.html
+VIC --> ATK : HTTP 200 OK
+IDS -> IDS : evaluate: no threshold\nbreached, no pattern match
+note right of IDS #E8F5E9 : zero alerts — negative case validated
+
+== STEP 2 — SCAN ATTACK ==
+
+EX -> SH : ./run_scan.sh
+SH -> ATK : TCP connect to ports 1–100
+ATK -[#E53935]> VIC : SYN to 100 ports (5 s window)
+IDS -> IDS : threshold exceeded (>=N ports)
+IDS -[#E53935]> IDS : SCAN alert emitted
+note right of IDS #FFCDD2 : alert log: source, ports, severity
+
+== STEP 3 — PAYLOAD ATTACK ==
+
+EX -> SH : ./run_payload.sh
+SH -> ATK : crafted HTTP request with SQL marker
+ATK -[#E53935]> VIC : GET /?q=DROP TABLE
+IDS -> IDS : substring match on payload
+IDS -[#E53935]> IDS : PAYLOAD alert emitted
+note right of IDS #FFCDD2 : alert log: rule, matched pattern
+
+== STEP 4 — EVIDENCE REVIEW ==
+
+EX -> SH : ./collect_evidence.sh
+SH -> SH : save PCAP + alerts.jsonl\n+ summary.md under artifacts/
+EX -> EX : verify traceability:\nalert → rule → packets
+
+legend right
+  E3 validates: at least two distinct alerts,
+  one negative case (no false positives)
+  and full traceability from rule to PCAP.
+  Mini security audit covers input validation.
+endlegend
+@enduml

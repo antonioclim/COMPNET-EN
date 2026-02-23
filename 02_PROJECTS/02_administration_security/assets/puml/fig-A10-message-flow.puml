@@ -1,0 +1,63 @@
+@startuml fig-A10-message-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title Network Hardening — E2 PCAP Flow (Allowed vs Blocked Connections)
+
+participant "frontend\n:8080" as FE #FFE0B2
+participant "DOCKER-USER\n(iptables)" as DU #FCE4EC
+participant "backend\n:5000" as BE #BBDEFB
+participant "db\n:3306" as DB #E1BEE7
+participant "h2\n(external)" as EXT #FFCDD2
+participant "tcpdump\n(bridge)" as CAP #ECEFF1
+
+== ALLOWED: frontend → backend ==
+
+FE -[#43A047]> DU : SYN → backend:5000
+DU -[#43A047]> BE : allowed by rule
+BE -[#43A047]-> DU : SYN-ACK
+DU -[#43A047]-> FE : SYN-ACK
+FE -[#43A047]> BE : ACK + HTTP request
+BE -[#43A047]-> FE : HTTP 200
+note right of CAP : R1: tcp || udp >= 10\ncomplete handshake visible
+
+== ALLOWED: backend → db ==
+
+BE -[#43A047]> DU : SYN → db:3306
+DU -[#43A047]> DB : allowed by rule
+DB -[#43A047]-> BE : SYN-ACK
+BE -[#43A047]> DB : ACK + query
+
+== BLOCKED: frontend → db (segmentation) ==
+
+FE -[#E53935]> DU : SYN → db:3306
+DU -[#E53935]>x DU : DROP (DOCKER-USER rule)
+note right of DU #FFCDD2 : SYN without reply in PCAP\n(no SYN-ACK, no RST)
+
+== BLOCKED: container → external (egress) ==
+
+FE -[#E53935]> DU : SYN → h2:80
+DU -[#E53935]>x DU : DROP (egress filter)
+note right of DU #FFCDD2 : R3: tcp.port==80 >= 1\negress attempt visible, no reply
+
+== BLOCKED: external → db (inbound) ==
+
+EXT -[#E53935]> DU : SYN → db:3306
+DU -[#E53935]>x DU : DROP
+note right of DU #FFCDD2 : direct external access denied
+
+== DNS RESOLUTION ==
+
+FE -> DU : DNS query (UDP/53)
+note right of CAP : R2: dns || udp.port==53 >= 1
+
+legend right
+  PCAP on Docker bridge shows: complete
+  handshake for allowed flows and SYN
+  without progress for blocked flows.
+  iptables counters confirm rule hits.
+endlegend
+@enduml

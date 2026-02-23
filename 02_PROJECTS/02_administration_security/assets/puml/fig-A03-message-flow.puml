@@ -1,0 +1,54 @@
+@startuml fig-A03-message-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title PCAP Report Generator — E2 End-to-End Pipeline
+
+participant "Bash\nscripts/" as SH #ECEFF1
+participant "h1\n(client)" as H1 #FFE0B2
+participant "s1 (switch\nwith delay/loss)" as SW #BBDEFB
+participant "h2\n(web server)" as H2 #C8E6C9
+participant "h3\n(DNS)" as H3 #E1BEE7
+participant "tcpdump" as CAP #ECEFF1
+participant "Report\nTool" as TOOL #E1BEE7
+
+== TRAFFIC GENERATION ==
+
+SH -> SW : tc qdisc: add 50 ms delay + 2% loss
+H1 -> SW : DNS query (h2.lab)
+SW -> H3 : forward
+H3 --> SW : DNS response
+SW --> H1 : DNS response
+note right of CAP : R3: ip >= 50
+
+H1 -> SW : TCP SYN → h2:80
+SW -> H2 : SYN (delayed)
+H2 --> SW : SYN-ACK
+SW --> H1 : SYN-ACK
+H1 -> SW : ACK + HTTP GET
+H2 --> H1 : HTTP 200 + payload
+
+H1 -[#FF9800]> SW : large TCP transfer
+SW -[#FF9800]> H2 : segments (some lost)
+H2 -[#E53935]-> SW : retransmission
+note right of CAP : R1: tcp >= 50\nR2: tcp.analysis.retransmission >= 1
+
+== CAPTURE AND ANALYSIS ==
+
+SW -> CAP : stop capture → traffic_e2.pcap
+SH -> TOOL : analyse traffic_e2.pcap
+TOOL -> TOOL : parse → aggregate flows\n→ compute RTT, retransmissions\n→ rank top talkers
+
+TOOL -> SH : report.md + metrics.json
+note right of TOOL : verify with tshark\nStatistics → Conversations
+
+legend right
+  The report includes: top talkers (bytes),
+  flow count, TCP retransmissions per flow
+  and estimated RTT (median). Each metric
+  is linked to a tshark filter for validation.
+endlegend
+@enduml

@@ -1,0 +1,59 @@
+@startuml fig-A07-message-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title SDN Learning Switch — E2 Flow (Flood → Learn → Unicast → Age)
+
+participant "h1\nport 1" as H1 #FFE0B2
+participant "s1\n(OVS)" as SW #BBDEFB
+participant "Controller" as C #E1BEE7
+participant "h2\nport 2" as H2 #FFE0B2
+participant "h3\nport 3" as H3 #FFE0B2
+
+== PHASE 1 — UNKNOWN DESTINATION (flood) ==
+
+H1 -> SW : ARP Request: who has h2?\n(src MAC aa:aa)
+SW -> C : packet-in (unknown dst ff:ff)
+C -> C : learn: aa:aa → port 1
+C -> SW : flood ARP to all ports
+SW -> H2 : ARP Request (broadcast)
+SW -> H3 : ARP Request (broadcast)
+note right of C : R3: arp || icmp || ip >= 5
+
+== PHASE 2 — LEARNING AND RULE INSTALL ==
+
+H2 -> SW : ARP Reply (src MAC bb:bb)
+SW -> C : packet-in
+C -> C : learn: bb:bb → port 2
+C -> SW : flow-mod: dst=aa:aa → port 1\n(idle_timeout=60)
+C -> SW : flow-mod: dst=bb:bb → port 2\n(idle_timeout=60)
+SW -> H1 : ARP Reply (unicast via rule)
+note right of C : R1: tcp.port==6653 >= 1\nR2: tcp.port==6653 && tcp.len>0 >= 5
+
+== PHASE 3 — UNICAST (no controller involvement) ==
+
+H1 -[#43A047]> SW : ICMP Echo → h2
+SW -[#43A047]> H2 : forwarded by flow rule\n(no packet-in)
+H2 -[#43A047]-> SW : ICMP Reply → h1
+SW -[#43A047]-> H1 : forwarded by flow rule
+note right of SW #E8F5E9 : controller not involved
+
+== PHASE 4 — AGEING ==
+
+... idle_timeout expires (60 s) ...
+SW -> SW : flow entry removed
+H1 -> SW : ICMP Echo → h2
+SW -> C : packet-in (rule expired)
+C -> C : re-learn, reinstall rule
+note right of C : ageing demonstrated
+
+legend right
+  Transition: flood → unicast is observable
+  in PCAP (broadcast ARP then direct ICMP).
+  dump-flows confirms installed rules and
+  their removal after idle timeout expiry.
+endlegend
+@enduml

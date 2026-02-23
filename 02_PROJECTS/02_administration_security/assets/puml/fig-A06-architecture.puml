@@ -1,0 +1,37 @@
+@startuml fig-A06-architecture
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title NAT and DHCP Laboratory — System Architecture (E1)
+
+package "Internal LAN (10.0.1.0/24)" as lan #E8F5E9 {
+    rectangle "h1\n(client1)\nDHCP client" as h1 #FFE0B2
+    rectangle "h2\n(client2)\nDHCP client" as h2 #FFE0B2
+    rectangle "s1\n(internal switch)" as s1 #BBDEFB
+}
+
+rectangle "h3 — Gateway\neth-int: 10.0.1.1\neth-ext: 192.168.1.1\nDHCP server\niptables NAT" as gw #E1BEE7
+
+package "External Network (192.168.1.0/24)" as ext #FFF3E0 {
+    rectangle "s2\n(external switch)" as s2 #BBDEFB
+    rectangle "h4\n(external server)\n192.168.1.100\nHTTP :80" as h4 #C8E6C9
+}
+
+h1 --> s1 : DHCP + data
+h2 --> s1 : DHCP + data
+s1 --> gw : internal interface
+gw --> s2 : external interface\n(MASQUERADE)
+s2 --> h4 : forwarded traffic
+
+legend right
+  E1 scope: define subnets, DHCP pool
+  with lease time, iptables rules for
+  MASQUERADE and ip_forward. Clients
+  obtain addresses via DORA and reach
+  the external server through NAT.
+  Inbound access is blocked by default.
+endlegend
+@enduml

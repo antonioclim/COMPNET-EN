@@ -1,0 +1,48 @@
+@startuml fig-A03-demo-scenario
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title PCAP Report Generator — E3 Demo (Good Link vs Lossy Link)
+
+participant "Examiner" as EX #FFE0B2
+participant "scripts/" as SH #ECEFF1
+participant "Mininet\nTopology" as MN #BBDEFB
+participant "Report\nTool" as TOOL #E1BEE7
+participant "artifacts/" as ART #C8E6C9
+
+== SCENARIO A — GOOD LINK (baseline) ==
+
+EX -> SH : ./run_scenario.sh --profile good
+SH -> MN : start topology (no delay, no loss)
+SH -> MN : generate traffic (HTTP + DNS + transfer)
+SH -> MN : capture → good_link.pcap
+SH -> TOOL : analyse good_link.pcap
+TOOL -> ART : report_good.md + metrics_good.json
+note right of ART #E8F5E9 : low RTT, 0 retransmissions\ntop talker: h1 (client)
+
+== SCENARIO B — LOSSY LINK ==
+
+EX -> SH : ./run_scenario.sh --profile lossy
+SH -> MN : start topology (50 ms delay, 2% loss)
+SH -> MN : generate identical traffic
+SH -> MN : capture → lossy_link.pcap
+SH -> TOOL : analyse lossy_link.pcap
+TOOL -> ART : report_lossy.md + metrics_lossy.json
+note right of ART #FFCDD2 : high RTT, retransmissions present\nanomalies flagged in report
+
+== COMPARISON AND REVIEW ==
+
+EX -> ART : compare reports side by side
+EX -> EX : verify RTT difference\nverify retransmission count\ncross-check with tshark
+note right of EX : Wireshark IO Graph confirms\nthe tool's measurements
+
+legend right
+  E3 validates: stable report output across
+  two link conditions, anomaly detection
+  for the lossy scenario and correlation
+  with Wireshark statistics.
+endlegend
+@enduml

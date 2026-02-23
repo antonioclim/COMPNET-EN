@@ -1,0 +1,47 @@
+@startuml fig-A03-architecture
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title PCAP Report Generator — System Architecture (E1)
+
+package "Mininet Topology" as topo #F5F5F5 {
+    rectangle "h1\n(client)" as h1 #FFE0B2
+    rectangle "h2\n(web server)" as h2 #C8E6C9
+    rectangle "h3\n(DNS server)" as h3 #E1BEE7
+    rectangle "s1\n(switch)" as s1 #BBDEFB
+}
+
+package "Analysis Pipeline" as pipe #FFF3E0 {
+    rectangle "PCAP Parser\n(scapy/pyshark/dpkt)" as parser #E3F2FD
+    rectangle "Flow Aggregator\n(5-tuple grouping)" as agg #BBDEFB
+    rectangle "TCP Indicators\n(RTT, retransmissions)" as tcp #FFCDD2
+    rectangle "Top Talkers\n(bytes per host)" as top #FFF9C4
+}
+
+rectangle "Capture Point\n(tcpdump on s1)" as cap #ECEFF1
+rectangle "Markdown\nReport" as md #C8E6C9
+rectangle "JSON\nMetrics" as json #C8E6C9
+
+h1 --> s1 : HTTP, DNS, TCP transfer
+h2 --> s1 : responses
+h3 --> s1 : DNS replies
+s1 --> cap : traffic_e2.pcap
+
+cap --> parser : offline input
+parser --> agg : parsed packets
+agg --> tcp : per-flow stats
+agg --> top : per-host bytes
+tcp --> md : tables and summaries
+top --> json : structured metrics
+
+legend right
+  E1 scope: define metrics (RTT, retransmissions,
+  flows, top talkers), aggregation method
+  and output format. The report includes
+  a PCAP hash and generation timestamp
+  for reproducibility.
+endlegend
+@enduml

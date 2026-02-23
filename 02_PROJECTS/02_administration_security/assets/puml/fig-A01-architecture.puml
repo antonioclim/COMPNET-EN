@@ -1,0 +1,36 @@
+@startuml fig-A01-architecture
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title SDN Firewall — System Architecture (E1)
+
+rectangle "Filtering Policy\n(YAML file)" as policy #FFF9C4
+rectangle "SDN Controller\n(Python application)" as ctrl #E1BEE7
+
+package "Mininet Topology" as topo #F5F5F5 {
+    rectangle "h1\n(client)" as h1 #FFE0B2
+    rectangle "h2\n(server)" as h2 #C8E6C9
+    rectangle "h3\n(admin)" as h3 #FFE0B2
+    rectangle "s1\n(Open vSwitch)" as s1 #BBDEFB
+}
+
+rectangle "Evidence Collection\n(Bash scripts)" as evidence #ECEFF1
+
+policy --> ctrl : parse and compile rules
+ctrl --> s1 : OpenFlow flow-mod\n(TCP/6653)
+h1 --> s1 : data traffic
+h2 --> s1 : data traffic
+h3 --> s1 : management traffic
+s1 --> evidence : dump-flows\nPCAP capture\nlogs
+
+legend right
+  E1 scope: specify YAML policy schema
+  with fields, priorities, evaluation order
+  and a logging format for allow/deny decisions.
+  The controller compiles policy into flow rules
+  and applies them without restarting the switch.
+endlegend
+@enduml

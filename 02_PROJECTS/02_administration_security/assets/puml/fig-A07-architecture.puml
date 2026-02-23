@@ -1,0 +1,42 @@
+@startuml fig-A07-architecture
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title SDN Learning Switch — System Architecture (E1)
+
+rectangle "SDN Controller\n(Python)" as ctrl #E1BEE7
+
+package "Controller State" as state #FCE4EC {
+    rectangle "MAC→Port Table\n(with ageing timer)" as mac #FFF9C4
+    rectangle "Ageing Policy\n(idle timeout, e.g. 60 s)" as age #FFCDD2
+}
+
+package "Mininet Topology" as topo #F5F5F5 {
+    rectangle "h1\nMAC: aa:aa\nport 1" as h1 #FFE0B2
+    rectangle "h2\nMAC: bb:bb\nport 2" as h2 #FFE0B2
+    rectangle "h3\nMAC: cc:cc\nport 3" as h3 #FFE0B2
+    rectangle "s1\n(OVS)" as s1 #BBDEFB
+}
+
+rectangle "Evidence\n(dump-flows\nPCAP, logs)" as ev #ECEFF1
+
+ctrl --> s1 : OpenFlow (TCP/6653)\npacket-in / flow-mod
+s1 --> ctrl : packet-in (unknown dst)
+h1 --> s1 : port 1
+h2 --> s1 : port 2
+h3 --> s1 : port 3
+ctrl --> mac : learn src MAC → ingress port
+mac --> age : expire after idle timeout
+ctrl --> ev : learning events, flow installs
+
+legend right
+  E1 scope: define MAC table structure,
+  ageing time (idle/hard timeout), flood
+  policy for unknown destinations and
+  how broadcast ARP is handled. Entries
+  expire to allow adaptation to changes.
+endlegend
+@enduml

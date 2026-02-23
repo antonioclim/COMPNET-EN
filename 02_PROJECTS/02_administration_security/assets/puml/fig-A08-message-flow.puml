@@ -1,0 +1,54 @@
+@startuml fig-A08-message-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title VXLAN Tunnel — E2 PCAP Flow (Encapsulation and Connectivity)
+
+participant "h1\nSite A\n10.100.0.1" as H1 #FFE0B2
+participant "r1\nVTEP A\n172.16.0.1" as R1 #E1BEE7
+participant "Underlay\n(capture point)" as UL #ECEFF1
+participant "r2\nVTEP B\n172.16.0.2" as R2 #E1BEE7
+participant "h2\nSite B\n10.100.0.2" as H2 #FFE0B2
+
+== ARP RESOLUTION (overlay) ==
+
+H1 -> R1 : ARP: who has 10.100.0.2?
+R1 -> UL : outer: 172.16.0.1 → 172.16.0.2\nUDP/4789 | VXLAN VNI=1010\ninner: ARP Request
+UL -> R2 : forwarded on underlay
+R2 -> H2 : ARP Request (decapsulated)
+H2 --> R2 : ARP Reply
+R2 -> UL : outer: 172.16.0.2 → 172.16.0.1\nUDP/4789 | VXLAN VNI=1010\ninner: ARP Reply
+UL -> R1 : forwarded
+R1 --> H1 : ARP Reply (decapsulated)
+note right of UL : R2: arp || icmp >= 1
+
+== ICMP PING (overlay through tunnel) ==
+
+H1 -[#43A047]> R1 : ICMP Echo 10.100.0.1 → 10.100.0.2
+R1 -[#43A047]> UL : outer: 172.16.0.1 → 172.16.0.2\nUDP/4789 | VNI=1010\ninner: ICMP Echo
+note right of UL #E8F5E9 : R1: udp.port==4789 >= 5
+UL -> R2 : underlay delivery
+R2 -[#43A047]> H2 : ICMP Echo (decapsulated)
+H2 -[#43A047]-> R2 : ICMP Reply
+R2 -> UL : VXLAN encapsulated reply
+UL -> R1 : forwarded
+R1 -[#43A047]-> H1 : ICMP Reply
+
+== PACKET STRUCTURE (observed at capture point) ==
+
+note over UL #FFF9C4
+  Outer: Ethernet | IP (172.16.x) | UDP/4789
+  VXLAN: VNI=1010 | Flags
+  Inner: Ethernet | IP (10.100.x) | ICMP
+end note
+
+legend right
+  PCAP on underlay interface shows
+  outer UDP/4789 with VXLAN header (VNI)
+  wrapping the original Ethernet frame.
+  Both ARP and ICMP traverse the tunnel.
+endlegend
+@enduml

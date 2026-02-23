@@ -1,0 +1,57 @@
+@startuml fig-A05-demo-scenario
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title Port Scanner — E3 Demo (Scan, Fingerprint and Rate Control)
+
+participant "Examiner" as EX #FFE0B2
+participant "scripts/" as SH #ECEFF1
+participant "Scanner" as SC #FFE0B2
+participant "Victim\n(h2)" as VIC #C8E6C9
+participant "artifacts/" as ART #C8E6C9
+
+== STEP 1 — SERVICE SETUP ==
+
+EX -> SH : ./setup_victim.sh
+SH -> VIC : start HTTP on :80\nstart SSH mock on :2222
+SH -> VIC : drop rule on :443 (filtered)
+
+== STEP 2 — SCAN (polite mode) ==
+
+EX -> SH : ./run_scan.sh --ports 1-100 --rate 50
+SH -> SC : TCP connect scan (50 probes/s)
+SC -> VIC : SYN to 100 ports
+SC -> SC : classify: open, closed, filtered
+SC -> ART : scan_report.json
+note right of ART : ports 80 (open), 2222 (open)\nothers closed or filtered
+
+== STEP 3 — FINGERPRINTING ==
+
+SC -> VIC : banner grab on :2222 (SSH-2.0-...)
+SC -> VIC : HTTP GET on :80 (Server: nginx)
+SC -> ART : update report with service labels
+note right of ART #E8F5E9 : service_guess: http, ssh
+
+== STEP 4 — RATE COMPARISON ==
+
+EX -> SH : ./run_scan.sh --rate 200
+SH -> SC : scan at higher rate
+EX -> EX : compare PCAP: SYN/s\nrate at 50 vs 200
+note right of EX : PCAP confirms rate control
+
+== STEP 5 — EVIDENCE ==
+
+EX -> SH : ./collect_evidence.sh
+SH -> ART : PCAP + JSON + summary.md
+EX -> EX : correlate report with PCAP\n(handshake vs RST vs timeout)
+
+legend right
+  E3 validates: deterministic classification
+  of open, closed and filtered ports plus
+  banner grabbing for at least two services.
+  Rate limiting is demonstrable in PCAP.
+endlegend
+@enduml
