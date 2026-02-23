@@ -1,0 +1,43 @@
+@startuml fig-dns-resolution-overview
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title DNS Iterative Resolution for www.example.com
+
+participant "Application\n(stub resolver)" as APP #FFE0B2
+participant "Recursive resolver\n(ISP / public)" as REC #BBDEFB
+participant "Root server" as ROOT #C8E6C9
+participant "TLD server\n(.com)" as TLD #C8E6C9
+participant "Authoritative\n(example.com)" as AUTH #C8E6C9
+
+APP -> REC : Query A www.example.com
+
+REC -> ROOT : Where is .com?
+ROOT --> REC : NS referral for .com
+
+REC -> TLD : Where is example.com?
+TLD --> REC : NS referral for example.com
+
+REC -> AUTH : A record for www.example.com?
+AUTH --> REC : 93.184.216.34 (TTL=3600)
+
+REC -[#43A047]-> APP : 93.184.216.34\n(cached for 3600 s)
+
+|||
+
+note over REC
+  Subsequent queries for the same name
+  are served from cache until TTL expires
+end note
+
+legend right
+  Step 1: Stub asks recursive resolver
+  Step 2: Resolver queries root for TLD
+  Step 3: Resolver queries TLD for zone NS
+  Step 4: Resolver queries authoritative server
+  Step 5: Answer returned and cached by TTL
+endlegend
+@enduml

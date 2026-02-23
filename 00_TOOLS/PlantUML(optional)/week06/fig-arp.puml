@@ -1,0 +1,32 @@
+@startuml fig-arp
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title ARP (IPv4): Resolving IP to MAC on a LAN
+
+participant "Host A\nIP_A, MAC_A" as A #FFE0B2
+participant "Switch" as SW #E3F2FD
+participant "Host B\nIP_B, MAC_B" as B #C8E6C9
+participant "Host C\nIP_C, MAC_C" as C #ECEFF1
+
+A -[#1565C0]> SW : ARP Request (broadcast)\n"Who has IP_B? Tell MAC_A"
+SW -[#1565C0]> B : broadcast delivered
+SW -[#1565C0]> C : broadcast delivered
+
+B -[#43A047]> SW : ARP Reply (unicast)\n"IP_B is at MAC_B"
+SW -[#43A047]> A : unicast to MAC_A
+
+== Host A caches IP_B → MAC_B ==
+
+A -> B : Ethernet frame to MAC_B
+
+legend right
+  Step 1: Host A broadcasts an ARP request
+  Step 2: Host B replies with its MAC (unicast)
+  Step 3: Host A caches the mapping
+  Host C ignores the request (not its IP)
+endlegend
+@enduml

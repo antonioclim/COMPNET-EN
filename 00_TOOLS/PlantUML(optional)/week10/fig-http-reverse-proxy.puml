@@ -1,0 +1,44 @@
+@startuml fig-http-reverse-proxy
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title HTTP via a Reverse Proxy (Nginx)
+
+participant "Browser" as B #FFE0B2
+participant "Nginx\nReverse Proxy\n:80" as N #E3F2FD
+participant "Web App\n(container)\n:8000" as W #C8E6C9
+participant "API Service\n(container)\n:5000" as A #C8E6C9
+
+== Root Request — Redirect ==
+
+B -> N : GET /
+N --> B : 302 Location: /app/
+
+== Web App — Path Rewrite ==
+
+B -> N : GET /app/
+N -> W : GET /\n(rewrite /app/ → /)
+activate W
+W --> N : 200 OK (HTML)
+deactivate W
+N --> B : 200 OK (HTML)\n+ X-Debug-Proxy: nginx
+
+== API — Proxied with Forwarded Headers ==
+
+B -> N : GET /api/users
+N -> A : GET /users\n+ X-Forwarded-For\n+ X-Forwarded-Proto
+activate A
+A --> N : 200 OK (JSON)
+deactivate A
+N --> B : 200 OK (JSON)
+
+legend right
+  Nginx rewrites /app/* and /api/* paths
+  before forwarding to upstream containers.
+  X-Forwarded-For preserves the client IP.
+  The browser never contacts backends directly.
+endlegend
+@enduml

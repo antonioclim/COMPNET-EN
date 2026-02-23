@@ -1,0 +1,44 @@
+@startuml fig-osi-l5-l6
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam roundcorner 12
+
+title OSI reference model — focus on L5 and L6
+
+rectangle "L7  Application\n(HTTP, DNS, SMTP, FTP)" as l7 #BBDEFB
+rectangle "L6  Presentation\n(data formats, encoding, compression)" as l6 #E1BEE7
+rectangle "L5  Session\n(dialogue control, state, resumption)" as l5 #FFE0B2
+rectangle "L4  Transport\n(TCP, UDP, TLS)" as l4 #F5F5F5
+rectangle "L3  Network\n(IP, ICMP, routing)" as l3 #F5F5F5
+rectangle "L2  Data Link\n(Ethernet, Wi-Fi, MAC)" as l2 #ECEFF1
+rectangle "L1  Physical\n(bits, signals, cables)" as l1 #ECEFF1
+
+l7 -[hidden]down- l6
+l6 -[hidden]down- l5
+l5 -[hidden]down- l4
+l4 -[hidden]down- l3
+l3 -[hidden]down- l2
+l2 -[hidden]down- l1
+
+note right of l6
+  Modern Internet:
+  L6 functions live inside
+  libraries and application
+  protocols (JSON, UTF-8, gzip).
+end note
+
+note right of l5
+  Modern Internet:
+  L5 functions are handled by
+  cookies, tokens, TLS session
+  resumption and WebSockets.
+end note
+
+legend bottom
+  L5 (Session) and L6 (Presentation) are conceptual layers.
+  On today's Internet they are not separate wire-level protocols.
+  Their responsibilities are absorbed by L7 applications and middleware.
+endlegend
+@enduml

@@ -1,0 +1,41 @@
+@startuml fig-quic-handshake
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title QUIC Connection Establishment (1-RTT and 0-RTT)
+
+participant "Client" as C #FFE0B2
+participant "Server" as S #C8E6C9
+
+== First connection (1-RTT) ==
+
+C -[#1565C0]> S : **Initial**\nClientHello (TLS 1.3)\nQUIC transport parameters\n(over UDP)
+
+S -[#1565C0]> C : **Initial + Handshake**\nServerHello\nEncrypted Extensions\nCertificate + Finished
+
+C -[#43A047]> S : **Handshake Finished**
+
+C <-[#333333]> S : Application data (encrypted)
+
+== Subsequent connection (0-RTT) ==
+
+C -[#FF9800]> S : **Initial + 0-RTT data**\nClientHello + cached key\n+ early application data
+
+S -[#43A047]> C : **Handshake** + accept 0-RTT
+
+note over C, S #FFF9C4
+  0-RTT sends data with the very first packet
+  (lower latency but vulnerable to replay)
+end note
+
+legend right
+  QUIC runs over UDP and integrates TLS 1.3.
+  The first connection requires one round trip.
+  Subsequent connections may use 0-RTT
+  for immediate data transmission.
+  QUIC is the foundation of HTTP/3.
+endlegend
+@enduml

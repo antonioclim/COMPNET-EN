@@ -1,0 +1,48 @@
+@startuml fig-http11-vs-http2
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title HTTP/1.1 vs HTTP/2 — Multiplexing
+
+participant "Client" as C #FFE0B2
+participant "Server" as S #C8E6C9
+
+== HTTP/1.1 — Sequential (Head-of-Line Blocking) ==
+
+C -> S : GET /index.html
+S --> C : 200 index.html
+C -> S : GET /style.css
+S --> C : 200 style.css
+C -> S : GET /app.js
+S --> C : 200 app.js
+
+note right of S
+  Each request must wait
+  for the previous response.
+end note
+
+== HTTP/2 — Multiplexed Streams ==
+
+C -[#1565C0]> S : Stream 1: GET /index.html
+C -[#1565C0]> S : Stream 3: GET /style.css
+C -[#1565C0]> S : Stream 5: GET /app.js
+
+S -[#43A047]-> C : Stream 5: app.js (first to complete)
+S -[#43A047]-> C : Stream 3: style.css
+S -[#43A047]-> C : Stream 1: index.html
+
+note right of S
+  Responses arrive in any order.
+  No head-of-line blocking.
+end note
+
+legend right
+  HTTP/1.1 serialises requests on one connection.
+  HTTP/2 multiplexes independent streams over
+  a single TCP connection with header compression.
+  Semantics (methods, status codes) remain identical.
+endlegend
+@enduml

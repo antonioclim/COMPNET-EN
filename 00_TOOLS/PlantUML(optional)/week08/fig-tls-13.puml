@@ -1,0 +1,41 @@
+@startuml fig-tls-13
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title TLS 1.3 Handshake (1-RTT)
+
+participant "Client" as C #FFE0B2
+participant "Server" as S #C8E6C9
+
+== TCP Connection (already established) ==
+
+C -[#1565C0]> S : **ClientHello**\nSupported cipher suites\nKey share (ECDHE public key)\nSupported versions
+
+S -[#1565C0]> C : **ServerHello**\nChosen cipher suite\nKey share (server public key)
+
+note over C, S #E1BEE7
+  Both sides compute the shared secret
+  (Diffie–Hellman key exchange)
+  All subsequent messages are encrypted
+end note
+
+S -[#43A047]> C : {EncryptedExtensions}\n{Certificate}\n{CertificateVerify}\n{Finished}
+
+C -[#43A047]> S : {Finished}
+
+== APPLICATION DATA (encrypted) ==
+
+C <-[#333333]> S : Encrypted application data
+
+legend right
+  TLS 1.3 completes in a single round trip.
+  The key exchange uses ephemeral
+  Diffie–Hellman (no RSA key transport).
+  Curly braces {} denote encrypted messages.
+  Resumption allows 0-RTT in subsequent
+  connections (with replay risk).
+endlegend
+@enduml

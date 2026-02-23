@@ -1,0 +1,40 @@
+@startuml fig-rip-loop
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title RIP Count-to-Infinity Problem and Mitigations
+
+participant "Router R1" as R1 #E3F2FD
+participant "Router R2" as R2 #E3F2FD
+participant "Router R3" as R3 #E3F2FD
+
+== NORMAL STATE ==
+
+R1 -> R2 : "Network Z: hops=1"
+R2 -> R3 : "Network Z: hops=2"
+
+== R1–Z LINK FAILS ==
+
+R1 ->x R1 : link to Z goes down
+
+R2 -[#E53935]> R1 : "Network Z: hops=3"\n(learned from R3)
+R1 -[#E53935]> R3 : "Network Z: hops=4"\n(learned from R2)
+R3 -[#E53935]> R2 : "Network Z: hops=5"\n(loop continues)
+
+...
+
+R2 -[#E53935]> R1 : "Network Z: hops=16"\n(infinity — unreachable)
+
+== CONVERGENCE (SLOW) ==
+
+legend right
+  After the failure, R2 and R3 falsely
+  believe Z is still reachable via each other.
+  Metrics grow until reaching 16 (infinity).
+  Mitigations: split horizon, route poisoning,
+  holddown timers and flush timers.
+endlegend
+@enduml

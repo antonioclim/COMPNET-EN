@@ -1,0 +1,44 @@
+@startuml fig-dnssec-chain-of-trust
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title DNSSEC: Cryptographic Chain of Trust
+
+package "Root zone" as RZ #FCE4EC {
+    rectangle "Root KSK\n(trust anchor)" as RKSK #E1BEE7
+    rectangle "Root ZSK" as RZSK #E1BEE7
+}
+
+package ".com TLD zone" as TZ #FFF3E0 {
+    rectangle "DS record\n(hash of .com KSK)" as RDS #FFE0B2
+    rectangle ".com KSK" as TKSK #E1BEE7
+    rectangle ".com ZSK" as TZSK #E1BEE7
+}
+
+package "example.com zone" as EZ #E8F5E9 {
+    rectangle "DS record\n(hash of example.com KSK)" as TDS #FFE0B2
+    rectangle "example.com KSK" as EKSK #E1BEE7
+    rectangle "example.com ZSK" as EZSK #E1BEE7
+    rectangle "Signed RRsets\n(RRSIG records)" as RRSIG #C8E6C9
+}
+
+RKSK -[#1565C0]-> RZSK : signs
+RZSK -[#1565C0]-> RDS : signs DS for .com
+RDS -[#43A047]-> TKSK : validates\n(DS hash matches KSK)
+TKSK -[#1565C0]-> TZSK : signs
+TZSK -[#1565C0]-> TDS : signs DS for example.com
+TDS -[#43A047]-> EKSK : validates\n(DS hash matches KSK)
+EKSK -[#1565C0]-> EZSK : signs
+EZSK -[#1565C0]-> RRSIG : signs resource records
+
+legend right
+  Trust flows from the root anchor downward.
+  Each parent publishes a DS record linking
+  to the child zone's key-signing key (KSK).
+  The resolver validates the chain at each
+  level. If any link breaks: answer is bogus.
+endlegend
+@enduml

@@ -1,0 +1,49 @@
+@startuml fig-pop3-session
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title POP3 Session (Download-and-Delete Model)
+
+participant "Client\n(MUA)" as C #FFE0B2
+participant "POP3 Server\n:110 / :995" as S #C8E6C9
+database "Mailbox" as MB #E3F2FD
+
+== Authorisation Phase ==
+
+C -> S : TCP connect :110 (or :995 for TLS)
+S --> C : +OK POP3 server ready
+C -> S : USER alice
+S --> C : +OK
+C -> S : PASS ********
+S --> C : +OK mailbox locked (3 messages)
+
+== Transaction Phase ==
+
+C -> S : STAT
+S --> C : +OK 3 4820
+C -> S : LIST
+S --> C : +OK\n1 1520\n2 1800\n3 1500\n.
+C -> S : RETR 1
+S --> C : +OK 1520 octets\n<message body>\n.
+C -> S : RETR 2
+S --> C : +OK 1800 octets\n<message body>\n.
+C -> S : DELE 1
+S --> C : +OK message 1 deleted
+
+== Update Phase ==
+
+C -> S : QUIT
+S -> MB : apply pending deletions
+S --> C : +OK bye
+
+legend right
+  Authorisation: USER/PASS credentials.
+  Transaction: STAT, LIST, RETR, DELE.
+  Update: QUIT commits deletions.
+  Messages are downloaded and optionally
+  removed from the server mailbox.
+endlegend
+@enduml

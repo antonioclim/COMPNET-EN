@@ -1,0 +1,35 @@
+@startuml fig-http-methods-idempotency
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+left to right direction
+
+title HTTP Methods — Safety, Idempotency and Cacheability
+
+card "**GET**\nRetrieve a resource\n\nSafe: Yes\nIdempotent: Yes\nCacheable: Yes" as GET #C8E6C9
+
+card "**POST**\nCreate / submit\n\nSafe: No\nIdempotent: No\nCacheable: No" as POST #FFCDD2
+
+card "**PUT**\nFull replacement\n\nSafe: No\nIdempotent: Yes\nCacheable: No" as PUT #BBDEFB
+
+card "**PATCH**\nPartial update\n\nSafe: No\nIdempotent: No*\nCacheable: No" as PATCH #FFF9C4
+
+card "**DELETE**\nRemove a resource\n\nSafe: No\nIdempotent: Yes\nCacheable: No" as DELETE #FFE0B2
+
+card "**OPTIONS**\nCapabilities query\n\nSafe: Yes\nIdempotent: Yes\nCacheable: No" as OPTIONS #ECEFF1
+
+GET -[hidden]right-> POST
+POST -[hidden]right-> PUT
+PUT -[hidden]right-> PATCH
+PATCH -[hidden]right-> DELETE
+DELETE -[hidden]right-> OPTIONS
+
+legend bottom
+  Safe: no side effects on the server.
+  Idempotent: repeated calls produce the same result.
+  *PATCH is not guaranteed idempotent by specification.
+  Proxies and load balancers may retry idempotent methods automatically.
+endlegend
+@enduml

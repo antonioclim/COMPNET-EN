@@ -1,0 +1,40 @@
+@startuml fig-connection-vs-session
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title Connection (L4) vs session (L5)
+
+participant "Client\napplication" as C #FFE0B2
+participant "Server\napplication" as S #C8E6C9
+
+== TCP connection 1 (transport layer) ==
+
+C -> S : SYN / SYN-ACK / ACK
+C -> S : HTTP request\n(Cookie: Session-ID=abc)
+S --> C : HTTP response (200 OK)
+C -> S : FIN
+
+... TCP connection closes ...
+
+== TCP connection 2 (transport layer) ==
+
+C -> S : SYN / SYN-ACK / ACK
+C -> S : HTTP request\n(Cookie: Session-ID=abc)
+S --> C : HTTP response (200 OK)
+C -> S : FIN
+
+note right of S
+  Same session "abc" persists
+  across two independent
+  transport connections.
+end note
+
+legend bottom
+  A connection is a transport-layer delivery mechanism (L4).
+  A session is the logical context of an interaction (L5).
+  Sessions can survive connection teardowns and reconnections.
+endlegend
+@enduml

@@ -1,0 +1,57 @@
+@startuml fig-smtp-transaction
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title SMTP Transaction (Submission → Relay → Delivery)
+
+participant "MUA\n(Client)" as MUA #FFE0B2
+participant "Outgoing MSA/MTA\n(smtp.sender.tld)" as MTA1 #C8E6C9
+participant "DNS\n(MX)" as DNS #E1BEE7
+participant "Incoming MTA\n(mx.receiver.tld)" as MTA2 #C8E6C9
+database "Mailbox" as MB #E3F2FD
+
+== Submission Phase ==
+
+MUA -> MTA1 : TCP connect :587
+MTA1 --> MUA : 220 Service ready
+MUA -> MTA1 : EHLO client.local
+MTA1 --> MUA : 250 capabilities\n(AUTH, STARTTLS, SIZE)
+MUA -> MTA1 : STARTTLS
+MTA1 --> MUA : 220 Ready for TLS
+MUA -> MTA1 : AUTH LOGIN
+MTA1 --> MUA : 235 Authenticated
+MUA -> MTA1 : MAIL FROM:<alice@sender.tld>
+MTA1 --> MUA : 250 OK
+MUA -> MTA1 : RCPT TO:<bob@receiver.tld>
+MTA1 --> MUA : 250 OK
+MUA -> MTA1 : DATA
+MTA1 --> MUA : 354 End data with <CRLF>.<CRLF>
+MUA -> MTA1 : RFC 822 headers + MIME body\n.
+MTA1 --> MUA : 250 Queued as <id>
+MUA -> MTA1 : QUIT
+MTA1 --> MUA : 221 Bye
+
+== Relay / Delivery Phase ==
+
+MTA1 -> DNS : MX lookup receiver.tld
+DNS --> MTA1 : mx.receiver.tld (priority 10)
+MTA1 -> MTA2 : TCP connect :25
+MTA2 --> MTA1 : 220 Service ready
+MTA1 -> MTA2 : EHLO smtp.sender.tld
+MTA2 --> MTA1 : 250 OK
+MTA1 -> MTA2 : MAIL FROM / RCPT TO / DATA
+MTA2 --> MTA1 : 250 Accepted
+MTA2 -> MB : deliver to bob's mailbox
+
+legend right
+  Phase 1: MUA submits on port 587 with
+  STARTTLS and authentication.
+  Phase 2: MTA relays via port 25 after
+  resolving the MX record through DNS.
+  The message is finally stored in the
+  recipient's mailbox for later retrieval.
+endlegend
+@enduml

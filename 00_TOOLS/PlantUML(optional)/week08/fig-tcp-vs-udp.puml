@@ -1,0 +1,38 @@
+@startuml fig-tcp-vs-udp
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title TCP vs UDP — Comparative Overview
+
+together {
+  card "**TCP**\nTransmission Control Protocol" as tcp #C8E6C9 {
+    card "Connection-oriented\n(three-way handshake)" as tcp1 #E8F5E9
+    card "Reliable delivery\n(ACK, retransmission)" as tcp2 #E8F5E9
+    card "Ordered byte stream\n(sequence numbers)" as tcp3 #E8F5E9
+    card "Flow and congestion control\n(window, ECN)" as tcp4 #E8F5E9
+    card "Header: 20–60 bytes" as tcp5 #E8F5E9
+    card "Protocols: HTTP, FTP,\nSMTP, SSH" as tcp6 #E8F5E9
+  }
+
+  card "**UDP**\nUser Datagram Protocol" as udp #BBDEFB {
+    card "Connectionless\n(no handshake)" as udp1 #E3F2FD
+    card "Best-effort delivery\n(no acknowledgements)" as udp2 #E3F2FD
+    card "Independent datagrams\n(no ordering)" as udp3 #E3F2FD
+    card "No flow or congestion\ncontrol" as udp4 #E3F2FD
+    card "Header: 8 bytes (fixed)" as udp5 #E3F2FD
+    card "Protocols: DNS, DHCP,\nTFTP, SNMP" as udp6 #E3F2FD
+  }
+}
+
+tcp -[hidden]right- udp
+
+legend bottom
+  TCP provides reliability at the cost of higher
+  overhead and latency. UDP provides speed and
+  simplicity but the application must handle loss.
+  The choice depends on application requirements.
+endlegend
+@enduml

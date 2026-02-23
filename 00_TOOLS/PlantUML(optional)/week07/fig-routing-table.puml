@@ -1,0 +1,44 @@
+@startuml fig-routing-table
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+
+title Routing Table Lookup Process
+
+start
+
+:Incoming packet arrives\nDest = 10.20.0.5;
+
+:Consult the routing table;
+
+partition "Lookup logic" #F5F5F5 {
+    if (Longest prefix match\nfound?) then (yes)
+        :Select entry with\nlongest matching prefix;
+        if (Multiple equal-cost\nroutes?) then (yes)
+            :Apply ECMP\n(load balance);
+        else (no)
+        endif
+        :Forward via selected\nnext hop / interface;
+    else (no)
+        if (Default route\n0.0.0.0/0 exists?) then (yes)
+            :Forward via\ndefault gateway;
+        else (no)
+            #FFCDD2:Drop packet\n(destination unreachable);
+            stop
+        endif
+    endif
+}
+
+:Rewrite L2 headers\nDecrement TTL;
+
+stop
+
+legend right
+  The table contains: directly connected
+  routes, static routes, dynamic routes
+  and the default route (0.0.0.0/0).
+  Longest prefix match determines
+  the most specific entry.
+endlegend
+@enduml

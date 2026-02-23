@@ -1,0 +1,47 @@
+@startuml fig-tcp-header
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title TCP Header Structure (20–60 bytes)
+
+rectangle "**TCP Header**" as hdr #E3F2FD {
+
+  rectangle "Source Port\n(16 bits)" as sp #BBDEFB
+  rectangle "Destination Port\n(16 bits)" as dp #BBDEFB
+
+  rectangle "Sequence Number\n(32 bits)" as seq #C8E6C9
+
+  rectangle "Acknowledgement Number\n(32 bits)" as ack #C8E6C9
+
+  rectangle "Data\nOffset\n(4 bits)" as doff #F5F5F5
+  rectangle "Reserved\n(4 bits)" as res #ECEFF1
+  rectangle "Flags\n(8 bits)\nSYN ACK FIN\nRST PSH URG\nECE CWR" as flags #FFE0B2
+  rectangle "Window Size\n(16 bits)" as win #FFF9C4
+
+  rectangle "Checksum\n(16 bits)" as chk #E1BEE7
+  rectangle "Urgent Pointer\n(16 bits)" as urg #ECEFF1
+
+  rectangle "Options (0–40 bytes)\nMSS | SACK | Window Scale | Timestamps | TFO" as opt #FFF9C4
+  rectangle "Padding" as pad #F5F5F5
+}
+
+sp -[hidden]right- dp
+seq -[hidden]down- ack
+doff -[hidden]right- res
+res -[hidden]right- flags
+flags -[hidden]right- win
+chk -[hidden]right- urg
+opt -[hidden]right- pad
+
+legend right
+  The minimum header is 20 bytes (no options).
+  Data Offset indicates the header length in
+  32-bit words. Options such as MSS and SACK
+  are negotiated during the handshake.
+  Checksum covers header, data and
+  the IP pseudo-header.
+endlegend
+@enduml

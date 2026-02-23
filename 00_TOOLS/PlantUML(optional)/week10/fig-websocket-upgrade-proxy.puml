@@ -1,0 +1,37 @@
+@startuml fig-websocket-upgrade-proxy
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title WebSocket Handshake via Reverse Proxy
+
+participant "Browser" as B #FFE0B2
+participant "Nginx\nReverse Proxy" as N #E3F2FD
+participant "WebSocket Server\n:9000" as WS #C8E6C9
+
+== HTTP Upgrade Handshake ==
+
+B -> N : GET /ws\nUpgrade: websocket\nConnection: Upgrade\nSec-WebSocket-Key: ...
+N -> WS : GET /ws\nUpgrade: websocket\nConnection: Upgrade\nSec-WebSocket-Key: ...
+
+WS -[#43A047]-> N : 101 Switching Protocols\nSec-WebSocket-Accept: ...
+N -[#43A047]-> B : 101 Switching Protocols\nSec-WebSocket-Accept: ...
+
+== WebSocket Frames (bidirectional) ==
+
+B -[#1565C0]> WS : {"type":"join","room":"networks"}
+WS -[#43A047]-> B : {"type":"joined","room":"networks"}
+
+B -[#1565C0]> WS : {"type":"msg","text":"Hello"}
+WS -[#43A047]-> B : {"type":"deliver","id":1,...}
+WS -[#43A047]-> B : {"type":"ack","id":1}
+
+legend right
+  The connection begins as an HTTP request.
+  After 101 Switching Protocols it becomes
+  a persistent, full-duplex frame protocol.
+  Nginx must support proxy_set_header Upgrade.
+endlegend
+@enduml

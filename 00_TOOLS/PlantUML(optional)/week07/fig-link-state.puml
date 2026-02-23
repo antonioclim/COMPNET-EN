@@ -1,0 +1,45 @@
+@startuml fig-link-state
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Link-State Routing (Dijkstra / SPF Concept)
+
+rectangle "Router A" as A #E3F2FD
+rectangle "Router B" as B #E3F2FD
+rectangle "Router C" as C #E3F2FD
+rectangle "Router D" as D #E3F2FD
+
+A -- B : cost 4
+B -- C : cost 2
+C -- D : cost 3
+A -- D : cost 7
+B -- D : cost 5
+
+rectangle "Each router's view" as view #E8F5E9 {
+    rectangle "1. Build LSDB\n(full topology map)" as step1 #C8E6C9
+    rectangle "2. Run Dijkstra\n(SPF locally)" as step2 #C8E6C9
+    rectangle "3. Derive routing table\n(shortest paths)" as step3 #C8E6C9
+    step1 -down-> step2
+    step2 -down-> step3
+}
+
+A .. view : every router\nhas the same\nLSDB
+
+rectangle "LSA flooding" as flood #FFF9C4
+
+A -[#1565C0]-> flood : announces\nown links
+B -[#1565C0]-> flood : announces\nown links
+C -[#1565C0]-> flood : announces\nown links
+D -[#1565C0]-> flood : announces\nown links
+
+legend right
+  Every router floods Link-State
+  Advertisements (LSAs) to all neighbours.
+  All routers converge on the same LSDB.
+  Each runs Dijkstra independently.
+  Associated protocol: OSPF.
+endlegend
+@enduml

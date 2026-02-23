@@ -1,0 +1,53 @@
+@startuml fig-email-system
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Overall Email System Architecture
+
+rectangle "Sender Side" as sender #FFF3E0 {
+    rectangle "MUA\n(Mail User Agent)\nCLI / GUI / Webmail" as mua_s #FFE0B2
+    rectangle "MSA / MTA\n(Outgoing SMTP Server)" as mta_out #C8E6C9
+}
+
+rectangle "Internet" as internet #F5F5F5 {
+    rectangle "DNS\n(MX Record Lookup)" as dns #E1BEE7
+}
+
+rectangle "Receiver Side" as receiver #E8F5E9 {
+    rectangle "MTA\n(Incoming SMTP)" as mta_in #C8E6C9
+    rectangle "MDA\n(Mail Delivery Agent)" as mda #BBDEFB
+    database "Mailbox\n(Maildir / mbox)" as mb #E3F2FD
+
+    rectangle "POP3 Server\n:110 / :995" as pop3 #BBDEFB
+    rectangle "IMAP Server\n:143 / :993" as imap #BBDEFB
+    rectangle "Webmail\n(Roundcube / Gmail)\n:80 / :443" as webmail #90CAF9
+}
+
+rectangle "Recipient MUA\n(Mail Client)" as mua_r #FFE0B2
+
+mua_s -down-> mta_out : SMTP submission\n:587 / :465
+mta_out -right-> dns : MX query
+dns -right-> mta_in : resolved host
+mta_out -right-> mta_in : SMTP relay\n:25
+mta_in -down-> mda : local delivery
+mda -down-> mb : store message
+
+mb -down-> pop3 : fetch
+mb -down-> imap : fetch + sync
+mb -down-> webmail : IMAP backend
+
+pop3 -down-> mua_r : download\n(offline model)
+imap -down-> mua_r : access + sync\n(online model)
+webmail -down-> mua_r : HTTPS\n(browser)
+
+legend right
+  MUA composes and submits via SMTP.
+  MTA relays across the Internet using MX records.
+  MDA delivers into the recipient mailbox.
+  POP3 downloads; IMAP synchronises; webmail
+  provides browser-based access over IMAP/SMTP.
+endlegend
+@enduml

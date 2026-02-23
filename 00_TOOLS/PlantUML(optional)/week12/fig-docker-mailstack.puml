@@ -1,0 +1,42 @@
+@startuml fig-docker-mailstack
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Docker Compose Mail Stack (Local Scenario)
+
+rectangle "Host Machine" as host #F5F5F5 {
+
+    rectangle "Docker Network" as dnet #E3F2FD {
+
+        rectangle "docker-mailserver (dms)\nmail.example.test" as dms #C8E6C9 {
+            rectangle "SMTP :25 (relay)\nSMTP :587 (submission)" as smtp_p #BBDEFB
+            rectangle "IMAP :143 / IMAPS :993" as imap_p #BBDEFB
+            rectangle "POP3 :110 / POP3S :995" as pop3_p #BBDEFB
+            database "Maildir\n/var/mail" as mdir #E3F2FD
+        }
+
+        rectangle "Roundcube (webmail)\n:8080 → :80" as rc #90CAF9
+    }
+}
+
+rectangle "Python Scripts\n(send_mail, fetch_imap,\nfetch_pop3)" as py #FFE0B2
+
+rectangle "Web Browser\nhttp://localhost:8080" as br #FFE0B2
+
+py -up-> smtp_p : SMTP submission\nlocalhost:587
+py -up-> imap_p : IMAP fetch\nlocalhost:143
+py -up-> pop3_p : POP3 fetch\nlocalhost:110
+br -up-> rc : HTTP\nlocalhost:8080
+rc -right-> imap_p : IMAP backend
+rc -right-> smtp_p : SMTP sending
+
+legend bottom
+  docker compose up -d starts both services.
+  docker exec dms setup email add creates mailboxes.
+  Python scripts interact directly with exposed ports.
+  Roundcube provides a browser-based webmail interface.
+endlegend
+@enduml

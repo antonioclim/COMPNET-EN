@@ -1,0 +1,41 @@
+@startuml fig-cors-preflight
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title CORS Preflight — Why It Works in Postman but Not in the Browser
+
+participant "Browser\n(origin: app.com)" as B #FFE0B2
+participant "API Server\n(origin: api.com)" as S #C8E6C9
+
+== Preflight (automatic OPTIONS request) ==
+
+B -[#FF9800]> S : OPTIONS /api/users\nOrigin: https://app.com\nAccess-Control-Request-Method: PUT\nAccess-Control-Request-Headers: Authorization
+
+alt Server allows the origin
+  S -[#43A047]-> B : 204 No Content\nAccess-Control-Allow-Origin: https://app.com\nAccess-Control-Allow-Methods: GET, PUT, DELETE\nAccess-Control-Allow-Headers: Authorization\nAccess-Control-Max-Age: 3600
+else Server rejects the origin
+  S -[#E53935]-> B : 204 (missing Allow-Origin)\nor 403 Forbidden
+  note right of B
+    Browser blocks the actual
+    request entirely.
+  end note
+end
+
+|||
+
+== Actual Request (only if preflight succeeded) ==
+
+B -[#1565C0]> S : PUT /api/users/3\nOrigin: https://app.com\nAuthorization: Bearer ...
+S -[#43A047]-> S : process request
+S -[#43A047]-> B : 200 OK\nAccess-Control-Allow-Origin: https://app.com
+
+legend right
+  CORS is a browser security policy, not a server one.
+  Postman and curl skip preflight entirely.
+  Non-simple methods (PUT, DELETE) or custom headers
+  trigger the automatic OPTIONS check.
+endlegend
+@enduml

@@ -1,0 +1,41 @@
+@startuml fig-mime-examples
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title MIME types — common examples by category
+
+package "text/*" as pkg_text #E8F5E9 {
+  card "text/plain\n(.txt, README)" as t1 #C8E6C9
+  card "text/html\n(.html, web pages)" as t2 #C8E6C9
+  card "text/css\n(.css, stylesheets)" as t3 #C8E6C9
+  card "text/csv\n(.csv, tabular data)" as t4 #C8E6C9
+}
+
+package "application/*" as pkg_app #E3F2FD {
+  card "application/json\n(.json, API payloads)" as a1 #BBDEFB
+  card "application/pdf\n(.pdf, documents)" as a2 #BBDEFB
+  card "application/xml\n(.xml, structured data)" as a3 #BBDEFB
+  card "application/octet-stream\n(generic binary)" as a4 #BBDEFB
+}
+
+package "image/*" as pkg_img #FFF3E0 {
+  card "image/png\n(.png, lossless)" as i1 #FFE0B2
+  card "image/jpeg\n(.jpg, lossy)" as i2 #FFE0B2
+  card "image/svg+xml\n(.svg, vector)" as i3 #FFE0B2
+}
+
+package "audio / video" as pkg_media #FCE4EC {
+  card "audio/mpeg\n(.mp3)" as m1 #FFCDD2
+  card "video/mp4\n(.mp4)" as m2 #FFCDD2
+  card "multipart/form-data\n(file uploads)" as m3 #FFCDD2
+}
+
+legend bottom
+  Format: type/subtype (registered by IANA).
+  Carried in the HTTP Content-Type header and in e-mail headers.
+  The server declares the MIME type; the client interprets accordingly.
+endlegend
+@enduml

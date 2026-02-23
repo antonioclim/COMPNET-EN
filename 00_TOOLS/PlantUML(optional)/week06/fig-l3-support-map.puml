@@ -1,0 +1,45 @@
+@startuml fig-l3-support-map
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Network Layer: IP and Support Protocols (Overview)
+
+rectangle "IP\n(IPv4 / IPv6)\nPacket transport" as IP #E3F2FD
+
+rectangle "Address Resolution" as AR #E8F5E9 {
+    rectangle "ARP\n(IPv4)\nIP → MAC" as ARP #C8E6C9
+    rectangle "NDP\n(IPv6)\nNS/NA, RS/RA" as NDP #C8E6C9
+}
+
+rectangle "Configuration" as CFG #FFF3E0 {
+    rectangle "DHCP\n(IPv4)\nAutomatic allocation" as DHCP #FFE0B2
+    rectangle "DHCPv6 / SLAAC\n(IPv6)\nStateful + stateless" as DHCP6 #FFE0B2
+}
+
+rectangle "Diagnostics" as DIAG #FCE4EC {
+    rectangle "ICMP\n(IPv4)\nErrors + ping" as ICMP #FFCDD2
+    rectangle "ICMPv6\n(IPv6)\nErrors + NDP" as ICMP6 #FFCDD2
+}
+
+rectangle "Address Translation" as XLAT #F5F5F5 {
+    rectangle "NAT / PAT\n(IPv4 transition)" as NAT #ECEFF1
+}
+
+ARP --> IP : resolves L2
+NDP --> IP : resolves L2 + discovery
+DHCP --> IP : assigns addresses
+DHCP6 --> IP : assigns addresses
+ICMP --> IP : error feedback
+ICMP6 --> IP : error + NDP support
+NAT --> IP : rewrites addresses
+
+legend right
+  IP delivers packets between networks.
+  Support protocols handle resolution,
+  configuration, diagnostics and
+  address translation.
+endlegend
+@enduml

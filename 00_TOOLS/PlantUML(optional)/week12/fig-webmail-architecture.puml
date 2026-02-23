@@ -1,0 +1,36 @@
+@startuml fig-webmail-architecture
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+left to right direction
+
+title Webmail Architecture (Browser → Webmail Server → Mail Protocols)
+
+rectangle "User" as user #FFE0B2
+rectangle "Web Browser" as browser #FFE0B2
+
+rectangle "Webmail Server\n(Roundcube, Gmail, Outlook)" as wm #90CAF9
+
+rectangle "Mail Infrastructure" as infra #F5F5F5 {
+    rectangle "IMAP Server\n:143 / :993" as imap #C8E6C9
+    rectangle "SMTP Server\n:587 / :465" as smtp #C8E6C9
+    database "Mailbox\nStorage" as mb #E3F2FD
+}
+
+user -right-> browser : interact
+browser -right-> wm : HTTPS\n:443
+wm -right-> imap : read/sync\nmessages
+wm -right-> smtp : send\nmessages
+imap -right-> mb : fetch
+smtp -right-> mb : queue
+
+legend bottom
+  The browser communicates only via HTTPS.
+  The webmail server translates user actions
+  into IMAP (reading) and SMTP (sending).
+  No email protocol logic runs in the browser;
+  all mail operations occur server-side.
+endlegend
+@enduml

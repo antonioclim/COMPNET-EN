@@ -1,0 +1,43 @@
+@startuml fig-udp-vs-tcp-loss-topo
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Mininet Topology — UDP vs TCP Under Packet Loss
+
+rectangle "**h1**\n10.0.0.1/24\n(sender)" as h1 #FFE0B2
+
+rectangle "**s1**\nOVS Switch" as s1 #90CAF9
+
+rectangle "**h2**\n10.0.0.2/24\n(receiver)" as h2 #C8E6C9
+
+h1 -right--> s1 : <color:#E53935>loss = 20%</color>\nTCLink
+s1 -right--> h2 : <color:#E53935>loss = 20%</color>\nTCLink
+
+note bottom of h1 #FFF9C4
+  udp_sender.py → port 9091
+  tcp_sender.py → port 9092
+  Sends 200 messages
+end note
+
+note bottom of h2 #FFF9C4
+  udp_receiver.py ← port 9091
+  tcp_receiver.py ← port 9092
+  Counts received messages
+end note
+
+note top of s1 #FFEBEE
+  Artificial loss configured
+  via TCLink (configurable %)
+end note
+
+legend bottom
+  The scenario demonstrates that UDP loses
+  messages under packet loss whilst TCP
+  delivers the full stream transparently.
+  Loss percentage is configurable in topo.py.
+  Run with: sudo ./run.sh [loss%]
+endlegend
+@enduml

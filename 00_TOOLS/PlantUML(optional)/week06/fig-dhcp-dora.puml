@@ -1,0 +1,35 @@
+@startuml fig-dhcp-dora
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title DHCP: DORA — Four-Step Address Allocation
+
+participant "Client\n(no IP yet)" as C #FFE0B2
+participant "DHCP Server\n(e.g. 10.0.0.1)" as S #C8E6C9
+
+C -[#1565C0]> S : **Discover** (broadcast)\nUDP src 0.0.0.0:68 → 255.255.255.255:67
+
+S -[#43A047]> C : **Offer**\nProposed IP, mask, gateway, DNS, lease
+
+C -[#1565C0]> S : **Request** (broadcast)\nAccepts the offered IP
+
+S -[#43A047]> C : **Acknowledge**\nLease confirmed, parameters finalised
+
+== Client now has a valid IP configuration ==
+
+|||
+
+C -> S : Renew (unicast at T1 = 50% lease)
+S --> C : ACK (lease extended)
+
+legend right
+  D — Discover: client searches for servers
+  O — Offer: server proposes an address
+  R — Request: client accepts (broadcast)
+  A — Acknowledge: server confirms the lease
+  Renewal occurs at half the lease time
+endlegend
+@enduml

@@ -1,0 +1,42 @@
+@startuml fig-icmp-role
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+left to right direction
+
+title ICMP: Diagnostics and Error Reporting
+
+rectangle "IP (IPv4)" as IP #E3F2FD
+
+package "ICMP Messages" as msgs #F5F5F5 {
+    rectangle "Echo Request /\nEcho Reply" as echo #C8E6C9
+    rectangle "Destination\nUnreachable" as unreach #FFCDD2
+    rectangle "Time\nExceeded" as ttl #FFE0B2
+    rectangle "Redirect" as redir #ECEFF1
+}
+
+package "Tools" as tools #E8F5E9 {
+    rectangle "ping" as ping #C8E6C9
+    rectangle "traceroute" as trace #C8E6C9
+}
+
+echo -up-> IP : encapsulated in IP
+unreach -up-> IP : encapsulated in IP
+ttl -up-> IP : encapsulated in IP
+redir -up-> IP : encapsulated in IP
+
+ping -down-> echo : uses Echo Req/Rep
+trace -down-> ttl : uses Time Exceeded
+trace -down-> unreach : uses Dest Unreachable
+
+legend bottom
+  ICMP provides feedback about network
+  problems (unreachable, TTL expired).
+  Tools like ping and traceroute are
+  built on top of ICMP messages.
+  ICMP is not a transport protocol;
+  it supports IP-level diagnostics.
+endlegend
+@enduml
