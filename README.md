@@ -95,6 +95,18 @@ runs `pytest`.
 
 ---
 
+## Version
+
+**v13.05.00** — February 2026
+
+---
+
 ## Licence
 
-Academic use.
+**Restrictive Educational Licence** (based on [CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/) with additional restrictions) — see [`LICENCE.md`](LICENCE.md) for full terms.
+
+© 2017–2027 ing. dr. Antonio Clim. All rights reserved.
+
+Personal study and local experimentation are permitted. Classroom use is authorised exclusively within ASE-CSIE.
+All other teaching use, redistribution, and commercial exploitation require prior written consent.
+Published works that draw on these Materials must cite the Author; works exceeding 20% derived content must include the Author as co-author.
