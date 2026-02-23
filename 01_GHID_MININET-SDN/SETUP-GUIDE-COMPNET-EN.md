@@ -2,9 +2,9 @@
 
 ## The MININET-SDN Virtual Workstation on Windows 10/11
 
-**Course:** Computer Networks — ASE-CSIE  
-**Author:** ing. dr. Antonio Clim  
-**Last updated:** February 2026  
+**Course:** Computer Networks — ASE-CSIE
+**Author:** ing. dr. Antonio Clim
+**Last updated:** February 2026
 **Level:** Step-by-step guide (no prior virtualisation knowledge required)
 
 ---
