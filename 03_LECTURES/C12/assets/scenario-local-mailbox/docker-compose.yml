@@ -1,0 +1,41 @@
+services:
+  mail:
+    image: mailserver/docker-mailserver:latest
+    container_name: dms
+    hostname: mail
+    domainname: example.test
+    env_file:
+      - mailserver.env
+    ports:
+      - "25:25"     # SMTP (server-to-server)
+      - "587:587"   # SMTP submission (client)
+      - "143:143"   # IMAP
+      - "993:993"   # IMAPS
+      - "110:110"   # POP3
+      - "995:995"   # POP3S
+    volumes:
+      - ./docker-mailserver:/tmp/docker-mailserver
+      - dms-maildata:/var/mail
+      - dms-state:/var/mail-state
+      - dms-logs:/var/log/mail
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+
+  webmail:
+    image: roundcube/roundcubemail:latest
+    container_name: roundcube
+    depends_on:
+      - mail
+    ports:
+      - "8080:80"
+    environment:
+      - ROUNDCUBEMAIL_DEFAULT_HOST=mail
+      - ROUNDCUBEMAIL_SMTP_SERVER=mail
+      - ROUNDCUBEMAIL_SMTP_PORT=587
+    restart: unless-stopped
+
+volumes:
+  dms-maildata:
+  dms-state:
+  dms-logs:

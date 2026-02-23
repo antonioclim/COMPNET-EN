@@ -1,0 +1,37 @@
+@startuml fig-mime-multipart
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title MIME Multipart Email Structure (with Attachment)
+
+rectangle "RFC 5322 Message" as msg #F5F5F5 {
+
+    rectangle "Headers" as hdr #E3F2FD {
+        rectangle "From: alice@example.tld" as h1 #BBDEFB
+        rectangle "To: bob@example.tld" as h2 #BBDEFB
+        rectangle "Subject: Report" as h3 #BBDEFB
+        rectangle "MIME-Version: 1.0" as h4 #BBDEFB
+        rectangle "Content-Type: multipart/mixed;\n boundary=\"----abc\"" as h5 #BBDEFB
+    }
+
+    rectangle "Body: multipart/mixed" as body #FFF9C4 {
+
+        rectangle "Part 1: text/plain\n\n\"Hello Bob, please find\nthe report attached.\"" as p1 #E8F5E9
+
+        rectangle "Part 2: application/pdf\nContent-Transfer-Encoding: base64\nContent-Disposition: attachment;\n  filename=\"report.pdf\"\n\n[base64-encoded data]" as p2 #FFE0B2
+    }
+}
+
+hdr -[hidden]down-> body
+
+legend right
+  MIME extends RFC 5322 to support
+  binary content and multiple parts.
+  Each part has its own Content-Type
+  and encoding, separated by a
+  boundary string in the wire format.
+endlegend
+@enduml

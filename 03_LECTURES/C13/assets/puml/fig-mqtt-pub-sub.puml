@@ -1,0 +1,44 @@
+@startuml fig-mqtt-pub-sub
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title MQTT Publish/Subscribe Model
+
+participant "Publisher\n(sensor)" as pub #FFE0B2
+participant "MQTT Broker\n(Mosquitto)" as broker #E1BEE7
+participant "Subscriber A\n(actuator)" as subA #C8E6C9
+participant "Subscriber B\n(dashboard)" as subB #BBDEFB
+
+== SUBSCRIPTION PHASE ==
+
+subA -> broker : SUBSCRIBE\ntopic: sensors/temperature
+broker --> subA : SUBACK
+
+subB -> broker : SUBSCRIBE\ntopic: sensors/temperature
+broker --> subB : SUBACK
+
+== PUBLISH PHASE ==
+
+pub -> broker : PUBLISH\ntopic: sensors/temperature\npayload: 27.5
+
+broker -[#43A047]-> subA : DELIVER\npayload: 27.5
+broker -[#1565C0]-> subB : DELIVER\npayload: 27.5
+
+== DECOUPLED OPERATION ==
+
+pub -> broker : PUBLISH\ntopic: sensors/temperature\npayload: 31.2
+
+broker -[#43A047]-> subA : DELIVER\npayload: 31.2
+broker -[#1565C0]-> subB : DELIVER\npayload: 31.2
+
+legend right
+The broker matches topics and routes
+messages to all active subscribers.
+Publishers and subscribers are fully
+decoupled — neither knows the other.
+QoS levels control delivery guarantees.
+endlegend
+@enduml

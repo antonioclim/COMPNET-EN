@@ -1,0 +1,48 @@
+@startuml fig-pop3-vs-imap
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title POP3 vs IMAP — Operational Models Compared
+
+together {
+    rectangle "POP3 Model (Download)" as pop3_box #FFEBEE {
+        rectangle "Mail Server" as ps #C8E6C9 {
+            database "Mailbox" as pmb #E3F2FD
+        }
+
+        rectangle "Client A\n(Desktop)" as pca #FFE0B2
+        rectangle "Local Storage\n(messages moved here)" as pls #FFF9C4
+
+        pmb -down-> pca : RETR (download)
+        pca -down-> pls : store locally
+        pca -up-> pmb : DELE (optional)
+    }
+
+    rectangle "IMAP Model (Server Access)" as imap_box #E8F5E9 {
+        rectangle "Mail Server" as is #C8E6C9 {
+            database "Mailbox\n(authoritative copy)" as imb #E3F2FD
+        }
+
+        rectangle "Client A\n(Desktop)" as ica #FFE0B2
+        rectangle "Client B\n(Mobile)" as icb #FFE0B2
+        rectangle "Client C\n(Webmail)" as icc #FFE0B2
+
+        imb -down-> ica : FETCH + sync
+        imb -down-> icb : FETCH + sync
+        imb -down-> icc : FETCH + sync
+        ica -up-> imb : STORE flags
+        icb -up-> imb : STORE flags
+    }
+}
+
+legend bottom
+  POP3: messages are downloaded to a single client
+  and optionally deleted from the server.
+  IMAP: messages remain on the server; multiple
+  clients synchronise state (flags, folders) centrally.
+  POP3 favours offline use; IMAP favours multi-device access.
+endlegend
+@enduml

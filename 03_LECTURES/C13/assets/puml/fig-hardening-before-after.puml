@@ -1,0 +1,34 @@
+@startuml fig-hardening-before-after
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+left to right direction
+
+title System Hardening: Before and After
+
+package "Unhardened System" as before #FFEBEE {
+    rectangle "Open ports\n(22, 80, 443, 3306, 8080...)" as ports #FFCDD2
+    rectangle "Default credentials\n(admin/admin, root/root)" as creds #FFCDD2
+    rectangle "Unnecessary services\n(FTP, Telnet, debug endpoints)" as services #FFCDD2
+    rectangle "No input validation\n(shell=True, raw SQL)" as input #FFCDD2
+}
+
+package "Hardened System" as after #E8F5E9 {
+    rectangle "Minimal ports\n(only 443)" as hports #C8E6C9
+    rectangle "Strong authentication\n(keys, MFA, unique passwords)" as hcreds #C8E6C9
+    rectangle "Essential services only\n(principle of least privilege)" as hservices #C8E6C9
+    rectangle "Input validation\n(allowlists, parameterised queries)" as hinput #C8E6C9
+}
+
+before -[#43A047]-> after : hardening\nmeasures
+
+legend bottom
+Hardening reduces the attack surface by
+removing unnecessary functionality and
+enforcing strict access controls.
+It does not eliminate risk entirely but
+significantly raises the cost of exploitation.
+endlegend
+@enduml

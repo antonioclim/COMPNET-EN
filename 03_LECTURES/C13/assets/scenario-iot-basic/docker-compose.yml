@@ -1,0 +1,33 @@
+services:
+  broker:
+    image: eclipse-mosquitto:2
+    container_name: iot-broker
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+
+  sensor:
+    build: ./sensor
+    container_name: iot-sensor
+    environment:
+      - BROKER=broker
+      - MQTT_PORT=1883
+      - TOPIC=sensors/temperature
+      - INTERVAL_SEC=1
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      - broker
+
+  actuator:
+    build: ./actuator
+    container_name: iot-actuator
+    environment:
+      - BROKER=broker
+      - MQTT_PORT=1883
+      - SENSOR_TOPIC=sensors/temperature
+      - COMMAND_TOPIC=actuators/fan
+      - THRESHOLD=28.0
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      - broker

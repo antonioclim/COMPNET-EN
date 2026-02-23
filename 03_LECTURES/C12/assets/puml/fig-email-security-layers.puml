@@ -1,0 +1,40 @@
+@startuml fig-email-security-layers
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Email Security Mechanisms
+
+rectangle "Transport Encryption" as te #FCE4EC {
+    rectangle "STARTTLS\nUpgrades plaintext to TLS\n(ports 25, 587, 143, 110)" as starttls #E1BEE7
+    rectangle "Implicit TLS\nSMTPS :465 / IMAPS :993 / POP3S :995" as itls #E1BEE7
+}
+
+rectangle "Authentication" as auth #FFF3E0 {
+    rectangle "SMTP AUTH\n(LOGIN, PLAIN, CRAM-MD5)\nPrevents open relay abuse" as smtpauth #FFE0B2
+    rectangle "POP3/IMAP AUTH\n(USER/PASS, SASL)\nMailbox access control" as imapauth #FFE0B2
+}
+
+rectangle "Domain Verification (DNS-based)" as dv #E8F5E9 {
+    rectangle "SPF\nSender Policy Framework\nAuthorised sending IPs in DNS TXT" as spf #C8E6C9
+    rectangle "DKIM\nDomainKeys Identified Mail\nCryptographic signature in headers" as dkim #C8E6C9
+    rectangle "DMARC\nDomain-based Message Auth\nPolicy + reporting for SPF/DKIM" as dmarc #C8E6C9
+}
+
+te -[hidden]down-> auth
+auth -[hidden]down-> dv
+
+spf -right[hidden]-> dkim
+dkim -right[hidden]-> dmarc
+
+legend right
+  Transport encryption protects data in transit.
+  Authentication verifies sender identity to the
+  mail server. Domain verification (SPF, DKIM
+  and DMARC) lets receivers confirm that a
+  message genuinely originated from the
+  claimed sending domain.
+endlegend
+@enduml

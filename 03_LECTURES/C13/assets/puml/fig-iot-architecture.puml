@@ -1,0 +1,33 @@
+@startuml fig-iot-architecture
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Generic IoT System Architecture
+
+package "IoT Deployment" as iot #F5F5F5 {
+
+    rectangle "Sensor\n(temperature, humidity\nmotion, light)" as sensor #FFE0B2
+
+    rectangle "MQTT Broker\n(message routing\ntopic matching)" as broker #E1BEE7
+
+    rectangle "Actuator\n(fan, valve\nrelay, motor)" as actuator #C8E6C9
+
+    rectangle "Backend / Dashboard\n(storage, analytics\nvisualisation)" as backend #BBDEFB
+}
+
+sensor -[#1565C0]-> broker : publish\ntelemetry data
+broker -[#43A047]-> actuator : deliver\ncontrol messages
+broker -[#1565C0]-> backend : forward\ntelemetry stream
+backend -[#FF9800].> actuator : optional\ndirect command
+
+legend right
+Components communicate exclusively
+through the broker (spatial decoupling).
+Publishers and subscribers need not be
+online simultaneously (temporal decoupling).
+The broker holds no business logic.
+endlegend
+@enduml

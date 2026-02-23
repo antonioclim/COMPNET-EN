@@ -1,0 +1,36 @@
+@startuml fig-iot-scenario-runtime
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title IoT Runtime Scenario (Docker Containers)
+
+package "Docker Host" as host #F5F5F5 {
+
+    rectangle "iot-sensor\n(Python + paho-mqtt)" as sensor #FFE0B2 {
+        rectangle "publish every 1 s\ntopic: sensors/temperature" as spub #FFF3E0
+    }
+
+    rectangle "iot-broker\n(Eclipse Mosquitto)\nport 1883" as broker #E1BEE7
+
+    rectangle "iot-actuator\n(Python + paho-mqtt)" as actuator #C8E6C9 {
+        rectangle "subscribe: sensors/temperature\npublish: actuators/fan\nthreshold: 28.0 °C" as asub #E8F5E9
+    }
+}
+
+sensor -[#1565C0]-> broker : PUBLISH\ntemperature value
+broker -[#43A047]-> actuator : DELIVER\ntemperature value
+
+actuator -[#FF9800].> broker : PUBLISH\nfan ON/OFF\n(when threshold crossed)
+
+legend right
+docker compose up starts three containers.
+The sensor emits random temperatures with
+occasional spikes above 28 °C.
+The actuator turns the fan ON when
+the threshold is exceeded and OFF
+when temperature stabilises.
+endlegend
+@enduml

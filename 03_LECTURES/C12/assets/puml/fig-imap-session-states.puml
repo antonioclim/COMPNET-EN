@@ -1,0 +1,37 @@
+@startuml fig-imap-session-states
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam shadowing false
+
+title IMAP Session States
+
+state "Not Authenticated" as NA #FFCDD2
+state "Authenticated" as AUTH #FFF9C4
+state "Selected" as SEL #C8E6C9
+state "Logout" as LO #ECEFF1
+
+[*] --> NA : TCP connect\n(:143 / :993)
+
+NA --> AUTH : LOGIN / AUTHENTICATE
+NA --> LO : LOGOUT
+NA : Server greets with capability list
+
+AUTH --> SEL : SELECT <mailbox>\nor EXAMINE <mailbox>
+AUTH --> LO : LOGOUT
+AUTH : CREATE, DELETE, RENAME,\nLIST, SUBSCRIBE folders
+
+SEL --> AUTH : CLOSE / UNSELECT
+SEL --> LO : LOGOUT
+SEL : FETCH, STORE, SEARCH,\nCOPY, EXPUNGE, IDLE
+
+LO --> [*] : connection closed
+
+legend right
+  Not Authenticated: credentials required.
+  Authenticated: folder management only.
+  Selected: full mailbox operations
+  (fetch, flag, search, expunge).
+  LOGOUT terminates from any state.
+endlegend
+@enduml

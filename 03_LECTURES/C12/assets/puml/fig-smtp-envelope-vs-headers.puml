@@ -1,0 +1,37 @@
+@startuml fig-smtp-envelope-vs-headers
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title SMTP Envelope vs RFC 822 Message Headers
+
+rectangle "SMTP Envelope\n(transport-level addressing)" as env #E8F5E9 {
+    rectangle "MAIL FROM: <alice@sender.tld>" as ef #C8E6C9
+    rectangle "RCPT TO: <bob@receiver.tld>" as et #C8E6C9
+    rectangle "RCPT TO: <carol@other.tld>" as et2 #C8E6C9
+
+    rectangle "RFC 822 Message\n(content-level headers + body)" as msg #FFF3E0 {
+        rectangle "Headers" as hdr #FFF9C4 {
+            rectangle "From: Alice <alice@sender.tld>" as hf #BBDEFB
+            rectangle "To: Bob <bob@receiver.tld>" as ht #BBDEFB
+            rectangle "Cc: Carol <carol@other.tld>" as hcc #BBDEFB
+            rectangle "Subject: Meeting notes" as hs #BBDEFB
+            rectangle "Date: Mon, 12 May 2025 09:00 +0300" as hd #BBDEFB
+            rectangle "Message-ID: <unique@sender.tld>" as hid #BBDEFB
+        }
+
+        rectangle "Body\n(plain text, HTML or MIME multipart)" as body #FFE0B2
+    }
+}
+
+legend right
+  The envelope controls routing (who receives
+  the message) and is used by MTAs only.
+  The message headers are visible to the recipient
+  and may differ from the envelope addresses
+  (e.g. Bcc recipients appear in RCPT TO
+  but not in the RFC 822 headers).
+endlegend
+@enduml

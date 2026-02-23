@@ -1,0 +1,33 @@
+@startuml fig-vuln-lab-architecture
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Vulnerability Testing Lab Architecture
+
+package "Docker Bridge Network" as net #F5F5F5 {
+
+    rectangle "vuln-attacker\n(Kali-like container)\nnmap, curl, nc, Python" as attacker #FFCDD2
+
+    rectangle "vuln-target\n(Flask app on port 8080)\n/ping endpoint\ncommand injection" as target #FFE0B2
+
+}
+
+rectangle "Host Machine\n(browser, terminal)" as host #BBDEFB
+
+host -[#1565C0]-> target : http://localhost:8080
+host -[#1565C0]-> attacker : docker exec -it
+
+attacker -[#E53935]-> target : scan / enumerate\n/ exploit
+attacker .[#FF9800].> target : /ping?host=;\ncommand injection
+
+legend right
+The lab runs in an isolated Docker network.
+The target exposes a vulnerable /ping
+endpoint (shell=True, no input validation).
+The hardened version validates input with
+ipaddress.ip_address() and avoids shell=True.
+endlegend
+@enduml
