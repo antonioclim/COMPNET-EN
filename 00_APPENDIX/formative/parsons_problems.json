@@ -1,0 +1,130 @@
+{
+  "metadata": {
+    "title": "Week 0: Parsons Problems - Python Networking",
+    "description": "Code ordering exercises for Python socket programming",
+    "course": "Computer Networks",
+    "institution": "ASE Bucharest, CSIE",
+    "author": "ing. dr. Antonio Clim",
+    "version": "1.5.0",
+    "date": "2026-01-24",
+    "total_problems": 5,
+    "learning_objectives": ["LO0.4", "LO0.5"]
+  },
+  "problems": [
+    {
+      "id": "P1",
+      "title": "TCP Server Setup",
+      "learning_objective": "LO0.5",
+      "difficulty": "basic",
+      "points": 2,
+      "description": "Arrange the lines to create a TCP server that listens on port 8080.",
+      "blocks": [
+        {"id": "A", "code": "server_sock.listen(5)", "correct_position": 5, "is_distractor": false},
+        {"id": "B", "code": "server_sock.bind(('0.0.0.0', 8080))", "correct_position": 4, "is_distractor": false},
+        {"id": "C", "code": "import socket", "correct_position": 1, "is_distractor": false},
+        {"id": "D", "code": "server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)", "correct_position": 2, "is_distractor": false},
+        {"id": "E", "code": "server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)", "correct_position": 3, "is_distractor": false},
+        {"id": "F", "code": "conn, addr = server_sock.accept()", "correct_position": 6, "is_distractor": false},
+        {"id": "G", "code": "server_sock.connect(('0.0.0.0', 8080))", "correct_position": null, "is_distractor": true, "distractor_reason": "connect() is for clients, not servers"},
+        {"id": "H", "code": "socket.listen(5)", "correct_position": null, "is_distractor": true, "distractor_reason": "Wrong syntax - should be server_sock.listen()"}
+      ],
+      "correct_order": ["C", "D", "E", "B", "A", "F"],
+      "hint": "The server sequence is: import → create socket → set options → bind → listen → accept. Servers do NOT call connect()!",
+      "explanation": "Server sockets need bind() + listen() + accept(). connect() is only for client sockets."
+    },
+    {
+      "id": "P2",
+      "title": "Bytes Encoding and Sending",
+      "learning_objective": "LO0.4",
+      "difficulty": "basic",
+      "points": 2,
+      "description": "Arrange the lines to send an encoded message over a socket.",
+      "blocks": [
+        {"id": "A", "code": "sock.send(encoded_msg)", "correct_position": 6, "is_distractor": false},
+        {"id": "B", "code": "message = \"Hello, Server!\"", "correct_position": 4, "is_distractor": false},
+        {"id": "C", "code": "encoded_msg = message.encode('utf-8')", "correct_position": 5, "is_distractor": false},
+        {"id": "D", "code": "sock.connect(('localhost', 8080))", "correct_position": 3, "is_distractor": false},
+        {"id": "E", "code": "import socket", "correct_position": 1, "is_distractor": false},
+        {"id": "F", "code": "sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)", "correct_position": 2, "is_distractor": false},
+        {"id": "G", "code": "encoded_msg = message.decode('utf-8')", "correct_position": null, "is_distractor": true, "distractor_reason": "decode() converts bytes→str, not str→bytes"},
+        {"id": "H", "code": "sock.send(message)", "correct_position": null, "is_distractor": true, "distractor_reason": "Cannot send a string directly - must be bytes"}
+      ],
+      "correct_order": ["E", "F", "D", "B", "C", "A"],
+      "hint": "You must encode a string to bytes BEFORE sending. Remember: encode() converts str → bytes.",
+      "explanation": "Sockets only accept bytes. Use encode() to convert strings before sending."
+    },
+    {
+      "id": "P3",
+      "title": "Receiving and Decoding Data",
+      "learning_objective": "LO0.4",
+      "difficulty": "intermediate",
+      "points": 3,
+      "description": "Arrange the lines to safely receive and decode data from a socket.",
+      "blocks": [
+        {"id": "A", "code": "print(f\"Received: {text}\")", "correct_position": 5, "is_distractor": false},
+        {"id": "B", "code": "data = conn.recv(1024)", "correct_position": 1, "is_distractor": false},
+        {"id": "C", "code": "text = data.decode('utf-8', errors='replace')", "correct_position": 4, "is_distractor": false},
+        {"id": "D", "code": "if not data:", "correct_position": 2, "is_distractor": false},
+        {"id": "E", "code": "    break", "correct_position": 3, "is_distractor": false},
+        {"id": "F", "code": "text = data.encode('utf-8')", "correct_position": null, "is_distractor": true, "distractor_reason": "encode() is wrong direction - need decode() for received bytes"},
+        {"id": "G", "code": "data = conn.send(1024)", "correct_position": null, "is_distractor": true, "distractor_reason": "send() doesn't receive data, recv() does"},
+        {"id": "H", "code": "text = data.decode('utf-8')", "correct_position": null, "is_distractor": true, "distractor_reason": "Missing errors='replace' - could crash on invalid UTF-8"}
+      ],
+      "correct_order": ["B", "D", "E", "C", "A"],
+      "hint": "Always use errors='replace' when decoding to handle invalid UTF-8 gracefully.",
+      "explanation": "Using error handling prevents crashes on invalid data. Check for empty data (connection closed) first."
+    },
+    {
+      "id": "P4",
+      "title": "Complete Echo Server Handler",
+      "learning_objective": "LO0.5",
+      "difficulty": "intermediate",
+      "points": 3,
+      "description": "Arrange the lines to handle a client connection in an echo server.",
+      "blocks": [
+        {"id": "A", "code": "response = data.upper()", "correct_position": 5, "is_distractor": false},
+        {"id": "B", "code": "conn.sendall(response)", "correct_position": 6, "is_distractor": false},
+        {"id": "C", "code": "data = conn.recv(1024)", "correct_position": 4, "is_distractor": false},
+        {"id": "D", "code": "with conn:", "correct_position": 3, "is_distractor": false},
+        {"id": "E", "code": "conn, addr = server_sock.accept()", "correct_position": 1, "is_distractor": false},
+        {"id": "F", "code": "print(f\"Connected by {addr}\")", "correct_position": 2, "is_distractor": false},
+        {"id": "G", "code": "response = data.upper().decode()", "correct_position": null, "is_distractor": true, "distractor_reason": "data is already bytes, upper() returns bytes, no need for decode()"},
+        {"id": "H", "code": "conn.send(response.encode())", "correct_position": null, "is_distractor": true, "distractor_reason": "If response is bytes, don't encode again; also sendall() is preferred"}
+      ],
+      "correct_order": ["E", "F", "D", "C", "A", "B"],
+      "hint": "recv() returns bytes. The upper() method works on both str and bytes. sendall() is preferred over send().",
+      "explanation": "Use context manager for automatic cleanup. sendall() ensures complete transmission."
+    },
+    {
+      "id": "P5",
+      "title": "Struct Packing for Network Protocol",
+      "learning_objective": "LO0.5",
+      "difficulty": "advanced",
+      "points": 4,
+      "description": "Arrange the lines to pack a simple protocol header with version, type and length.",
+      "blocks": [
+        {"id": "A", "code": "header = struct.pack('!BBH', version, msg_type, length)", "correct_position": 6, "is_distractor": false},
+        {"id": "B", "code": "import struct", "correct_position": 1, "is_distractor": false},
+        {"id": "C", "code": "length = len(payload)", "correct_position": 5, "is_distractor": false},
+        {"id": "D", "code": "version = 1", "correct_position": 3, "is_distractor": false},
+        {"id": "E", "code": "msg_type = 0x02", "correct_position": 4, "is_distractor": false},
+        {"id": "F", "code": "sock.sendall(header + payload)", "correct_position": 7, "is_distractor": false},
+        {"id": "G", "code": "payload = b\"Hello\"", "correct_position": 2, "is_distractor": false},
+        {"id": "H", "code": "header = struct.pack('BBH', version, msg_type, length)", "correct_position": null, "is_distractor": true, "distractor_reason": "Missing '!' for network byte order - will use native byte order"},
+        {"id": "I", "code": "header = struct.pack('!HHH', version, msg_type, length)", "correct_position": null, "is_distractor": true, "distractor_reason": "Wrong format - '!HHH' uses 2 bytes each for version and type (should be 1 byte each)"}
+      ],
+      "correct_order": ["B", "G", "D", "E", "C", "A", "F"],
+      "hint": "The '!' prefix means network byte order (big-endian). 'B' = unsigned byte (1 byte), 'H' = unsigned short (2 bytes).",
+      "explanation": "Always use '!' for network protocols. Calculate length after defining the payload."
+    }
+  ],
+  "scoring": {
+    "total_points": 14,
+    "grade_boundaries": [
+      {"min": 12, "max": 14, "grade": "A", "label": "Excellent"},
+      {"min": 9, "max": 11, "grade": "B", "label": "Good"},
+      {"min": 6, "max": 8, "grade": "C", "label": "Satisfactory"},
+      {"min": 0, "max": 5, "grade": "D", "label": "Needs Improvement"}
+    ]
+  }
+}

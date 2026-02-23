@@ -1,0 +1,264 @@
+{
+  "metadata": {
+    "title": "Week 0: Environment Setup and Python Networking Basics",
+    "description": "Formative assessment for Computer Networks prerequisites",
+    "course": "Computer Networks",
+    "institution": "ASE Bucharest, CSIE",
+    "author": "ing. dr. Antonio Clim",
+    "version": "1.5.0",
+    "date": "2026-01-24",
+    "language": "en-GB",
+    "estimated_time_minutes": 15,
+    "passing_score_percent": 70,
+    "total_points": 10,
+    "shuffle_questions": false,
+    "shuffle_answers": true,
+    "show_feedback": true,
+    "allow_review": true,
+    "lms_format": {
+      "moodle": "GIFT/XML",
+      "canvas": "QTI 1.2",
+      "blackboard": "Pool"
+    }
+  },
+  "learning_objectives": [
+    {
+      "id": "LO0.1",
+      "description": "Configure complete WSL2 + Docker environment",
+      "bloom_level": "Apply",
+      "questions": ["q01", "q02"]
+    },
+    {
+      "id": "LO0.2",
+      "description": "Distinguish Docker images from containers",
+      "bloom_level": "Understand",
+      "questions": ["q03", "q10"]
+    },
+    {
+      "id": "LO0.3",
+      "description": "Apply port mapping between host and containers",
+      "bloom_level": "Apply",
+      "questions": ["q04", "q05"]
+    },
+    {
+      "id": "LO0.4",
+      "description": "Convert between bytes and strings in Python",
+      "bloom_level": "Apply",
+      "questions": ["q06", "q07"]
+    },
+    {
+      "id": "LO0.5",
+      "description": "Create and configure basic TCP sockets",
+      "bloom_level": "Apply",
+      "questions": ["q08", "q09"]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q01",
+      "type": "multiple_choice",
+      "bloom_level": "remember",
+      "learning_objective": "LO0.1",
+      "difficulty": "basic",
+      "points": 1,
+      "stem": "What is the default port for the Portainer web interface?",
+      "options": [
+        {"key": "a", "text": "8080", "correct": false},
+        {"key": "b", "text": "9000", "correct": true},
+        {"key": "c", "text": "443", "correct": false},
+        {"key": "d", "text": "3000", "correct": false}
+      ],
+      "feedback": {
+        "correct": "Well done! Portainer defaults to port 9000.",
+        "incorrect": "Portainer uses port 9000 for HTTP access and 9443 for HTTPS."
+      },
+      "tags": ["docker", "portainer", "ports"]
+    },
+    {
+      "id": "q02",
+      "type": "multiple_choice",
+      "bloom_level": "remember",
+      "learning_objective": "LO0.1",
+      "difficulty": "basic",
+      "points": 1,
+      "stem": "Which command starts the Docker service in WSL2 (without systemd)?",
+      "options": [
+        {"key": "a", "text": "docker start", "correct": false},
+        {"key": "b", "text": "systemctl start docker", "correct": false},
+        {"key": "c", "text": "sudo service docker start", "correct": true},
+        {"key": "d", "text": "wsl --start docker", "correct": false}
+      ],
+      "feedback": {
+        "correct": "Correct! The service command works in WSL2 without systemd.",
+        "incorrect": "In WSL2 without systemd enabled, services are managed with 'sudo service <name> start'."
+      },
+      "tags": ["wsl2", "docker", "services"]
+    },
+    {
+      "id": "q03",
+      "type": "multiple_choice",
+      "bloom_level": "understand",
+      "learning_objective": "LO0.2",
+      "difficulty": "intermediate",
+      "points": 1,
+      "stem": "What is the relationship between a Docker image and a container?",
+      "options": [
+        {"key": "a", "text": "They are the same thing with different names", "correct": false},
+        {"key": "b", "text": "An image is a running instance of a container", "correct": false},
+        {"key": "c", "text": "A container is a running instance created from an image", "correct": true},
+        {"key": "d", "text": "Images are created by stopping containers", "correct": false}
+      ],
+      "feedback": {
+        "correct": "Exactly! Think of images as templates and containers as instances.",
+        "incorrect": "An image is a read-only template; a container is a runnable instance created from that image."
+      },
+      "tags": ["docker", "images", "containers"]
+    },
+    {
+      "id": "q04",
+      "type": "multiple_choice",
+      "bloom_level": "understand",
+      "learning_objective": "LO0.3",
+      "difficulty": "intermediate",
+      "points": 1,
+      "stem": "In the command 'docker run -p 8080:80 nginx', what does 8080 represent?",
+      "options": [
+        {"key": "a", "text": "The container's internal port", "correct": false},
+        {"key": "b", "text": "The host machine's port", "correct": true},
+        {"key": "c", "text": "The maximum number of connections", "correct": false},
+        {"key": "d", "text": "The nginx version number", "correct": false}
+      ],
+      "feedback": {
+        "correct": "Correct! The format is HOST:CONTAINER.",
+        "incorrect": "The format is -p HOST:CONTAINER. Here, 8080 is the host port that maps to container port 80."
+      },
+      "tags": ["docker", "port-mapping", "networking"]
+    },
+    {
+      "id": "q05",
+      "type": "multiple_choice",
+      "bloom_level": "understand",
+      "learning_objective": "LO0.3",
+      "difficulty": "intermediate",
+      "points": 1,
+      "stem": "Why does 'curl localhost:9000' fail when run from inside an Alpine container, even though Portainer is running on the host at port 9000?",
+      "options": [
+        {"key": "a", "text": "Alpine containers don't support the curl command", "correct": false},
+        {"key": "b", "text": "Portainer blocks access from other containers", "correct": false},
+        {"key": "c", "text": "localhost inside a container refers to that container, not the host", "correct": true},
+        {"key": "d", "text": "Port 9000 is reserved for system processes", "correct": false}
+      ],
+      "feedback": {
+        "correct": "Exactly! Each container has its own localhost.",
+        "incorrect": "Each container has its own network namespace. 'localhost' refers to the container's own loopback. Use 'host.docker.internal' to reach the host."
+      },
+      "tags": ["docker", "networking", "localhost"]
+    },
+    {
+      "id": "q06",
+      "type": "fill_in_blank",
+      "bloom_level": "apply",
+      "learning_objective": "LO0.4",
+      "difficulty": "intermediate",
+      "points": 1,
+      "stem": "To convert the string 'Hello' to bytes in Python, use: 'Hello'.___('utf-8')",
+      "correct_answers": ["encode"],
+      "case_sensitive": false,
+      "hint": "This method is the opposite of decode()",
+      "feedback": {
+        "correct": "Correct! encode() converts strings to bytes for network transmission.",
+        "incorrect": "encode() converts str to bytes; decode() converts bytes to str."
+      },
+      "tags": ["python", "encoding", "bytes"]
+    },
+    {
+      "id": "q07",
+      "type": "fill_in_blank",
+      "bloom_level": "apply",
+      "learning_objective": "LO0.4",
+      "difficulty": "intermediate",
+      "points": 1,
+      "stem": "To safely decode bytes that might contain invalid UTF-8 characters, use: data.decode('utf-8', errors='___')",
+      "correct_answers": ["replace", "ignore", "backslashreplace"],
+      "case_sensitive": true,
+      "hint": "Common options: 'replace', 'ignore', or 'backslashreplace'",
+      "feedback": {
+        "correct": "Well done! Using error handling prevents crashes on invalid data.",
+        "incorrect": "Using errors='replace' substitutes invalid bytes with the Unicode replacement character, preventing exceptions."
+      },
+      "tags": ["python", "decoding", "error-handling"]
+    },
+    {
+      "id": "q08",
+      "type": "fill_in_blank",
+      "bloom_level": "apply",
+      "learning_objective": "LO0.5",
+      "difficulty": "advanced",
+      "points": 1,
+      "stem": "To allow immediate port reuse after a server restart (avoiding 'Address already in use'), add before bind(): sock.setsockopt(socket.SOL_SOCKET, socket.___, 1)",
+      "correct_answers": ["SO_REUSEADDR"],
+      "case_sensitive": true,
+      "hint": "This socket option allows reusing the address",
+      "feedback": {
+        "correct": "Correct! SO_REUSEADDR is essential for development servers.",
+        "incorrect": "SO_REUSEADDR allows binding to a port in TIME_WAIT state, which is useful during development."
+      },
+      "tags": ["python", "sockets", "server"]
+    },
+    {
+      "id": "q09",
+      "type": "multiple_choice",
+      "bloom_level": "apply",
+      "learning_objective": "LO0.5",
+      "difficulty": "advanced",
+      "points": 1,
+      "stem": "Which struct format string correctly packs a port number (2 bytes) in network byte order (big-endian)?",
+      "options": [
+        {"key": "a", "text": "struct.pack('H', port)", "correct": false},
+        {"key": "b", "text": "struct.pack('!H', port)", "correct": true},
+        {"key": "c", "text": "struct.pack('h', port)", "correct": false},
+        {"key": "d", "text": "struct.pack('I', port)", "correct": false}
+      ],
+      "feedback": {
+        "correct": "Excellent! Always use '!' for network protocols.",
+        "incorrect": "The '!' prefix specifies network byte order (big-endian). 'H' is an unsigned short (2 bytes)."
+      },
+      "tags": ["python", "struct", "binary"]
+    },
+    {
+      "id": "q10",
+      "type": "multiple_choice",
+      "bloom_level": "understand",
+      "learning_objective": "LO0.2",
+      "difficulty": "basic",
+      "points": 1,
+      "stem": "After running 'docker stop mycontainer', what happens to the container and its data?",
+      "options": [
+        {"key": "a", "text": "The container and all its data are permanently deleted", "correct": false},
+        {"key": "b", "text": "The container enters 'Exited' state; data is preserved", "correct": true},
+        {"key": "c", "text": "Data is automatically backed up to a volume", "correct": false},
+        {"key": "d", "text": "The container is removed but volumes are kept", "correct": false}
+      ],
+      "feedback": {
+        "correct": "Correct! stop preserves the container; rm removes it.",
+        "incorrect": "docker stop gracefully stops a container but preserves it and its data. Use 'docker rm' to remove."
+      },
+      "tags": ["docker", "containers", "lifecycle"]
+    }
+  ],
+  "scoring": {
+    "total_points": 10,
+    "passing_threshold": 7,
+    "grade_boundaries": [
+      {"min": 9, "max": 10, "grade": "A", "label": "Excellent"},
+      {"min": 7, "max": 8, "grade": "B", "label": "Good"},
+      {"min": 5, "max": 6, "grade": "C", "label": "Needs Review"},
+      {"min": 0, "max": 4, "grade": "D", "label": "Requires Attention"}
+    ]
+  },
+  "export_formats": {
+    "moodle_gift": "Use: python run_quiz.py --export moodle",
+    "canvas_qti": "Use: python run_quiz.py --export canvas",
+    "plain_text": "Use: python run_quiz.py --export text"
+  }
+}

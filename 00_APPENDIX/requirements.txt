@@ -1,0 +1,19 @@
+# requirements.txt — Week 0 Prerequisites
+# Computer Networks — ASE, CSIE | by ing. dr. Antonio Clim
+# Version: 1.0.0 | Date: 2026-01-25
+#
+# Install with: pip install -r requirements.txt
+
+# Core dependencies for quiz and formative assessment
+PyYAML>=6.0
+
+# Development and testing
+pytest>=7.0
+pytest-cov>=4.0
+
+# Code quality (optional but recommended)
+ruff>=0.1.0
+
+# Documentation (optional)
+# mkdocs>=1.5.0
+# mkdocs-material>=9.0.0

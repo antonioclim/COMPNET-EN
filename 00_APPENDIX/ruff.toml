@@ -1,0 +1,49 @@
+# ruff.toml — Linting Configuration for Week 0
+# Computer Networks — ASE, CSIE | by ing. dr. Antonio Clim
+#
+# Ruff is a fast Python linter written in Rust.
+# Install: pip install ruff
+# Run: ruff check .
+#
+# Documentation: https://docs.astral.sh/ruff/
+
+[lint]
+# Enable rules
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # Pyflakes
+    "I",      # isort
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "UP",     # pyupgrade
+]
+
+# Ignore specific rules
+ignore = [
+    "E501",   # Line too long (handled by formatter)
+    "E402",   # Module level import not at top (common in examples)
+    "B008",   # Do not perform function calls in argument defaults
+    "B905",   # zip() without explicit strict=
+]
+
+# Allow certain patterns in variable names
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[lint.per-file-ignores]
+# Tests can have longer lines and unused imports
+"**/tests/*.py" = ["E501", "F401"]
+# Example files may have educational comments
+"**/examples/*.py" = ["E501"]
+
+[lint.isort]
+# Group imports: stdlib, third-party, first-party
+known-first-party = ["formative"]
+
+[format]
+# Use double quotes for strings
+quote-style = "double"
+# Indent with 4 spaces
+indent-style = "space"
+# Unix line endings
+line-ending = "lf"
