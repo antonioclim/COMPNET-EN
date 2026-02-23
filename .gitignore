@@ -1,0 +1,55 @@
+# ── Python ──────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+.venv/
+venv/
+env/
+
+# ── pytest / coverage ──────────────────────────────────────
+.pytest_cache/
+htmlcov/
+.coverage
+.coverage.*
+
+# ── Node / Prettier ────────────────────────────────────────
+node_modules/
+package-lock.json
+
+# ── PlantUML (auto-downloadable) ───────────────────────────
+plantuml.jar
+00_TOOLS/plantuml.jar
+00_TOOLS/PlantUML(optional)/plantuml.jar
+
+# ── IDE and editor artefacts ───────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# ── OS artefacts ───────────────────────────────────────────
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ── Archives and legacy bundles ────────────────────────────
+*.tar.gz
+*.zip
+*.rar
+*.7z
+
+# ── Temporary and log files ────────────────────────────────
+*.log
+*.tmp
+*.bak
+*.orig
