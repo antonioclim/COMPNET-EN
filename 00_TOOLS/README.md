@@ -48,6 +48,18 @@ wrapping is set to `preserve` so paragraph reflows do not occur.
 for PNG output (via HTTP server or local JAR). See
 [PlantUML(optional)/README.md](<PlantUML(optional)/README.md>) for details.
 
+### `plantuml/`
+
+Canonical provisioning and rendering helpers used by every `assets/render.sh`
+wrapper in the repository.
+
+- **`get_plantuml_jar.sh`** — downloads the latest PlantUML release JAR into
+  `00_TOOLS/plantuml.jar` (which is listed in `.gitignore`). Run once after
+  cloning.
+- **`render_puml.sh`** — renders all `.puml` files from an input directory into
+  an output directory. Accepts `PLANTUML_JAR` as an environment variable;
+  defaults to `00_TOOLS/plantuml.jar`.
+
 ### `Prerequisites/`
 
 Student-facing checklist covering the tools needed before the first seminar:

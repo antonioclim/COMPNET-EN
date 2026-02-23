@@ -1,0 +1,100 @@
+# executable_manifest.txt — Phase 4 executability enforcement
+# -----------------------------------------------------------
+# Every path listed here MUST carry chmod +x in the working tree.
+# Generated from: files whose first line is a shebang (#!/…)
+# plus all assets/render.sh wrappers.
+#
+# Maintenance: re-scan with
+#   find . -type f ! -path './.git/*' \
+#     -exec sh -c 'head -1 "$1" 2>/dev/null | grep -q "^#!" && echo "$1"' _ {} \; | sort
+
+# ── 00_APPENDIX ──────────────────────────────────────────────
+00_APPENDIX/a)PYTHON_self_study_guide/examples/01_socket_tcp.py
+00_APPENDIX/a)PYTHON_self_study_guide/examples/02_bytes_vs_str.py
+00_APPENDIX/a)PYTHON_self_study_guide/examples/03_struct_parsing.py
+00_APPENDIX/a)PYTHON_self_study_guide/examples/04_error_handling.py
+00_APPENDIX/a)PYTHON_self_study_guide/examples/tests/test_bytes_vs_str.py
+00_APPENDIX/a)PYTHON_self_study_guide/examples/tests/test_smoke.py
+00_APPENDIX/a)PYTHON_self_study_guide/examples/tests/test_struct_parsing.py
+00_APPENDIX/a)PYTHON_self_study_guide/formative/parsons_runner.py
+00_APPENDIX/a)PYTHON_self_study_guide/formative/run_quiz.py
+00_APPENDIX/formative/run_quiz.py
+00_APPENDIX/formative/tests/test_quiz_exports.py
+
+# ── 00_TOOLS ─────────────────────────────────────────────────
+00_TOOLS/PlantUML(optional)/generate_a4.py
+00_TOOLS/PlantUML(optional)/generate_all.sh
+00_TOOLS/PlantUML(optional)/generate_diagrams.py
+00_TOOLS/PlantUML(optional)/generate_png_simple.py
+00_TOOLS/Prerequisites/verify_lab_environment.sh
+00_TOOLS/plantuml/get_plantuml_jar.sh
+00_TOOLS/plantuml/render_puml.sh
+00_TOOLS/qa/apply_permissions.sh
+00_TOOLS/qa/check_executability.sh
+00_TOOLS/qa/check_markdown_links.py
+
+# ── 02_PROJECTS ──────────────────────────────────────────────
+02_PROJECTS/00_common/assets/render.sh
+02_PROJECTS/00_common/docker/tester_base/entrypoint.sh
+02_PROJECTS/00_common/tools/validate_pcap.py
+02_PROJECTS/01_network_applications/assets/render.sh
+02_PROJECTS/02_administration_security/assets/render.sh
+
+# ── 03_LECTURES ──────────────────────────────────────────────
+03_LECTURES/C01/assets/render.sh
+03_LECTURES/C02/assets/render.sh
+03_LECTURES/C03/assets/render.sh
+03_LECTURES/C04/assets/render.sh
+03_LECTURES/C04/assets/scenario-line-coding/line_coding_demo.py
+03_LECTURES/C05/assets/render.sh
+03_LECTURES/C06/assets/render.sh
+03_LECTURES/C06/assets/scenario-nat-linux/nat-demo.sh
+03_LECTURES/C07/assets/render.sh
+03_LECTURES/C07/assets/scenario-mininet-routing/tringle-net.py
+03_LECTURES/C08/assets/render.sh
+03_LECTURES/C08/assets/scenario-tcp-handshake-tcpdump/cleanup.sh
+03_LECTURES/C08/assets/scenario-tcp-handshake-tcpdump/run.sh
+03_LECTURES/C08/assets/scenario-tls-openssl/cleanup.sh
+03_LECTURES/C08/assets/scenario-tls-openssl/gen_certs.sh
+03_LECTURES/C08/assets/scenario-tls-openssl/run_client.sh
+03_LECTURES/C08/assets/scenario-tls-openssl/run_server.sh
+03_LECTURES/C08/assets/scenario-udp-vs-tcp-loss/run.sh
+03_LECTURES/C09/assets/render.sh
+03_LECTURES/C09/assets/scenario-encoding-utf8/run.sh
+03_LECTURES/C09/assets/scenario-mime-encoding-gzip/run.sh
+03_LECTURES/C10/assets/render.sh
+03_LECTURES/C11/assets/render.sh
+03_LECTURES/C11/assets/scenario-ftp-nat-firewall/natfw/setup.sh
+03_LECTURES/C12/assets/render.sh
+03_LECTURES/C13/assets/render.sh
+
+# ── 04_SEMINARS ──────────────────────────────────────────────
+04_SEMINARS/S01/assets/render.sh
+04_SEMINARS/S02/assets/render.sh
+04_SEMINARS/S03/assets/render.sh
+04_SEMINARS/S04/assets/render.sh
+04_SEMINARS/S05/assets/render.sh
+04_SEMINARS/S06/assets/render.sh
+04_SEMINARS/S07/1_sniffing/S07_Part01B_Script_Packet_Sniffer.py
+04_SEMINARS/S07/2_packet-filter/S07_Part02A_Script_Packet_Filter.py
+04_SEMINARS/S07/3_port-scanning/S07_Part03A_Script_Port_Scanner.py
+04_SEMINARS/S07/4_scan-detector/S07_Part04A_Script_Detect_Scan.py
+04_SEMINARS/S07/5_mini-ids/S07_Part05A_Script_Mini_IDS.py
+04_SEMINARS/S07/assets/render.sh
+04_SEMINARS/S08/2_simple-http/S08_Part02B_Example_Simple_HTTP_Builtin.py
+04_SEMINARS/S08/3_socket-http/S08_Part03B_Example_Socket_HTTP_Server.py
+04_SEMINARS/S08/assets/render.sh
+04_SEMINARS/S09/1_ftp/S09_Part01C_Script_Pyftpd_Server.py
+04_SEMINARS/S09/1_ftp/S09_Part01D_Script_Pyftpd_Client.py
+04_SEMINARS/S09/2_custom-pseudo-ftp/S09_Part02B_Script_Pseudo_FTP_Server.py
+04_SEMINARS/S09/2_custom-pseudo-ftp/S09_Part02C_Script_Pseudo_FTP_Client.py
+04_SEMINARS/S09/3_multi-client-containers/S09_Part03_Script_Pyftpd_Multi_Client.py
+04_SEMINARS/S09/3_multi-client-containers/S09_Part03_Script_Pyftpd_Server.py
+04_SEMINARS/S09/assets/render.sh
+04_SEMINARS/S10/assets/render.sh
+04_SEMINARS/S11/assets/render.sh
+04_SEMINARS/S12/assets/render.sh
+04_SEMINARS/S13/assets/render.sh
+
+# ── Root ─────────────────────────────────────────────────────
+format-offline.js

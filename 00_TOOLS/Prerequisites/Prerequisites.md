@@ -1,8 +1,8 @@
 # 🖧 Computer Networks Lab — Environment Setup Guide
 
 > **Complete Documentation for Prerequisites**
-> Bucharest Aiversity of Econosmall Studies — Faculty of Cybernetics, Statistics and Econosmall Informatics
-> *Econosmall Informatics & AI in Econosmalls and Business Programmes*
+> Bucharest University of Economic Studies — Faculty of Cybernetics, Statistics and Economic Informatics
+> *Economic Informatics & AI in Economics and Business Programmes*
 
 ---
 
@@ -54,7 +54,7 @@ We use **WSL2 + Docker in Ubuntu** instead of Docker Desktop for several compell
 | WSL2 | 2.x | Windows Subsystem for Linux |
 | Ubuntu | 22.04 LTS | Linux distribution |
 | Docker | 28.2.2 | Container runtime |
-| Docker Compose | 1.29.x | Multi-container orchelayerion |
+| Docker Compose | 1.29.x | Multi-container orchestration |
 | Portainer CE | 2.33.6 LTS | Web-based container management |
 | Wireshark | 4.4.x | Network protocol analyser |
 | Python Packages | Latest | docker, scapy, dpkt |
@@ -131,7 +131,7 @@ We use **WSL2 + Docker in Ubuntu** instead of Docker Desktop for several compell
 
 This user is created during Ubuntu installation and has `sudo` privileges.
 
-### 3.2 Portainer Adminilayeror
+### 3.2 Portainer Administrator
 
 | Field | Value |
 |-------|-------|
@@ -163,7 +163,7 @@ This user is created during Ubuntu installation and has `sudo` privileges.
 
 ### 4.3 Installation Steps
 
-#### Step 1: Open PowerShell as Adminilayeror
+#### Step 1: Open PowerShell as Administrator
 
 1. Press `Win + X` or right-click the Start button
 2. Select **"Windows Terminal (Admin)"** or **"PowerShell (Admin)"**
@@ -209,7 +209,7 @@ Default Version: 2
 Windows Subsystem for Linux was last updated on [data]
 WSL automatic updates are on.
 
-Kernel version: 5.15.x.x-smallrosoft-standard-WSL2
+Kernel version: 5.15.x.x-microsoft-standard-WSL2
 ```
 
 ### 4.4 Checklist
@@ -235,7 +235,7 @@ Kernel version: 5.15.x.x-smallrosoft-standard-WSL2
 
 #### Step 1: Install Ubuntu from PowerShell
 
-Open PowerShell as Adminilayeror and execute:
+Open PowerShell as Administrator and execute:
 
 ```powershell
 wsl --install -d Ubuntu-22.04 --web-download
@@ -527,7 +527,7 @@ Open your Windows browser and navigate to:
 http://localhost:9000
 ```
 
-#### Step 2: Create Adminilayeror Account
+#### Step 2: Create Administrator Account
 
 On the initial setup screen:
 
@@ -1077,7 +1077,7 @@ docker run -d -p 9000:9000 --name portainer --restart=always \
 #### No interfaces visible
 
 - Ensure Npcap is installed
-- Run Wireshark as Adminilayeror
+- Run Wireshark as Administrator
 - Reinstall Npcap from https://npcap.com/
 
 #### "vEthernet (WSL)" doesn't appear
@@ -1126,7 +1126,7 @@ sudo service docker stop    # Stop Docker
 | Portainer | http://localhost:9000 |
 | Docker Docs | https://docs.docker.com/ |
 | Wireshark Docs | https://www.wireshark.org/docs/ |
-| WSL Docs | https://learn.smallrosoft.com/en-us/windows/wsl/ |
+| WSL Docs | https://learn.microsoft.com/en-us/windows/wsl/ |
 
 ### Credentials
 
