@@ -1,8 +1,24 @@
+try:
+    import grpc
+except ModuleNotFoundError as exc:
+    raise SystemExit(
+        "Missing dependency: grpcio.\n\n"
+        "Install optional packages from the repository root:\n"
+        "  python -m pip install -r requirements-optional.txt\n"
+    ) from exc
 
-import grpc
-
-import S12_Part02_Config_Calculator_pb2 as calculator_pb2
-import S12_Part02_Config_Calculator_pb2_grpc as calculator_pb2_grpc
+try:
+    import S12_Part02_Config_Calculator_pb2 as calculator_pb2
+    import S12_Part02_Config_Calculator_pb2_grpc as calculator_pb2_grpc
+except ModuleNotFoundError as exc:
+    raise SystemExit(
+        "Generated gRPC stubs are missing.\n\n"
+        "From 04_SEMINARS/S12/3_grpc run:\n"
+        "  python -m grpc_tools.protoc -I../2_protobuf "
+        "--python_out=. --grpc_python_out=. "
+        "../2_protobuf/S12_Part02_Config_Calculator.proto\n\n"
+        "If you add the Power method in the .proto file, regenerate the stubs.\n"
+    ) from exc
 
 
 GRPC_TARGET = "localhost:50051"

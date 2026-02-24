@@ -1,6 +1,6 @@
 # Lectures
 
-Thirteen lectures (C01–C13) cover the full span of computer networking, from physical-layer fundamentals through application protocols to IoT and security. Each lecture directory contains a slide-by-slide markdown file, PlantUML diagram sources in `assets/puml/`, rendered PNG images in `assets/images/` and executable demo scenarios in `assets/scenario-*/`.
+Fourteen lectures (C01–C14) cover the full span of computer networking, from physical-layer fundamentals through application protocols to IoT and security. Each lecture directory contains a slide-by-slide markdown file, PlantUML diagram sources in `assets/puml/`, an `assets/images/` directory for rendered PNGs and executable demo scenarios in `assets/scenario-*/`.
 
 ## Lecture index
 
@@ -19,10 +19,15 @@ Thirteen lectures (C01–C13) cover the full span of computer networking, from p
 | C11 | FTP, DNS and SSH | `c11-ftp-dns-ssh.md` |
 | C12 | Email protocols (SMTP, POP3 and IMAP) | `c12-email-protocols.md` |
 | C13 | IoT and network security | `c13-iot-security.md` |
+| C14 | Revision and examination preparation | `c14-revision-and-exam-prep.md` |
 
 ## Generating diagrams
 
-PNG files are generated from `.puml` sources. From any lecture directory run:
+PNG files are generated from `.puml` sources.
+
+The repository keeps PlantUML sources under version control and expects PNGs to be generated locally when needed. CI validates that each `[FIG] assets/images/<name>.png` marker has a matching `assets/puml/<name>.puml` source.
+
+From any lecture directory run:
 
 ```
 cd C01/assets && bash render.sh

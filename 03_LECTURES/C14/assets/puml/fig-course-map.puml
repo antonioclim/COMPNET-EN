@@ -1,0 +1,27 @@
+@startuml fig-course-map
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Course revision map: layers, protocols and artefacts
+
+rectangle "Application\nHTTP, DNS, SMTP, SSH\nIoT, gRPC" as app #E8F5E9
+rectangle "Transport\nTCP, UDP, TLS" as transport #E3F2FD
+rectangle "Network\nIP, NAT, routing" as network #FFF3E0
+rectangle "Link\nEthernet, Wi-Fi, switching" as link #F3E5F5
+rectangle "Physical\nMedia, coding, modulation" as phys #ECEFF1
+
+phys -down-> link
+link -down-> network
+network -down-> transport
+transport -down-> app
+
+legend right
+  Use this map to connect lecture content
+  with seminar activities and project artefacts.
+  In examination questions, justify each
+  design choice at the correct layer.
+endlegend
+@enduml

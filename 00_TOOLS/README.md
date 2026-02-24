@@ -65,3 +65,13 @@ wrapper in the repository.
 Student-facing checklist covering the tools needed before the first seminar:
 Python 3.10+, Wireshark, Docker, Java (for PlantUML) and the Mininet-SDN VM.
 See [Prerequisites/Prerequisites.md](Prerequisites/Prerequisites.md).
+
+### `release/`
+
+Utilities for producing a distributable ZIP archive.
+
+From the repository root:
+
+```bash
+bash 00_TOOLS/release/create_release_zip.sh
+```

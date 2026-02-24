@@ -13,6 +13,8 @@ scapy
 grpcio
 grpcio-tools
 os-ken
+PyYAML
+Pillow
 
 # Mininet is usually installed as a system package (not via pip).
 # gRPC stubs (calculator_pb2*.py) are generated via grpcio-tools; see assets/tutorial/s12/*.

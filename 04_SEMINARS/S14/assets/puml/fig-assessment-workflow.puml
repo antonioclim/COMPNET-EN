@@ -1,0 +1,22 @@
+@startuml fig-assessment-workflow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam roundcorner 12
+
+title Team project assessment workflow
+
+start
+:Submit repository and artefacts;
+:Run automated checks\n(formatting, links, tests);
+:Validate deterministic network evidence\n(PCAP rules if applicable);
+:Review documentation and evidence table;
+:Live demonstration and viva discussion;
+stop
+
+legend right
+  Automated gates reduce ambiguity.
+  The viva focuses on reasoning and trade-offs.
+endlegend
+@enduml

@@ -26,6 +26,9 @@ jobs:
       - name: Run language & lexical integrity check (Phase 7)
         run: python 00_TOOLS/qa/check_integrity.py
 
+      - name: Validate lecture figure targets (Phase 8)
+        run: python 00_TOOLS/qa/check_fig_targets.py --puml-only
+
       - name: Run pytest (if present)
         shell: bash
         run: |

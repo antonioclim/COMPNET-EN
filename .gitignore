@@ -1,55 +1,32 @@
-# ── Python ──────────────────────────────────────────────────
+# ──────────────────────────────────────────────
+# .gitignore — Computer Networks course kit
+# ──────────────────────────────────────────────
+
+# Python cache & bytecode
 __pycache__/
-*.py[cod]
-*$py.class
-*.egg-info/
-dist/
-build/
-*.egg
+*.pyc
+*.pyo
+*.pyd
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
 .venv/
 venv/
-env/
 
-# ── pytest / coverage ──────────────────────────────────────
-.pytest_cache/
-htmlcov/
-.coverage
-.coverage.*
+# Environment locals
+.env.local
 
-# ── Node / Prettier ────────────────────────────────────────
+# Node / JS tooling
 node_modules/
-package-lock.json
+dist/
+build/
 
-# ── PlantUML (auto-downloadable) ───────────────────────────
-plantuml.jar
-00_TOOLS/plantuml.jar
-00_TOOLS/PlantUML(optional)/plantuml.jar
-
-# ── IDE and editor artefacts ───────────────────────────────
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-.project
-.classpath
-.settings/
-
-# ── OS artefacts ───────────────────────────────────────────
+# macOS metadata
 .DS_Store
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-$RECYCLE.BIN/
 
-# ── Archives and legacy bundles ────────────────────────────
-*.tar.gz
-*.zip
-*.rar
-*.7z
-
-# ── Temporary and log files ────────────────────────────────
-*.log
-*.tmp
-*.bak
-*.orig
+# Large binaries fetched later
+00_TOOLS/plantuml.jar

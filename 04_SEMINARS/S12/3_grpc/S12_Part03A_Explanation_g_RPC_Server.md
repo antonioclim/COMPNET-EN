@@ -17,8 +17,15 @@ service Calculator {
 Code generation is performed with:
 
 ```bash
-python -m grpc_tools.protoc -I.   --python_out=.   --grpc_python_out=.   S12_Part02_Config_Calculator.proto
+# from 04_SEMINARS/S12/3_grpc
+python -m grpc_tools.protoc \
+  -I../2_protobuf \
+  --python_out=. \
+  --grpc_python_out=. \
+  ../2_protobuf/S12_Part02_Config_Calculator.proto
 ```
+
+If you extend the `.proto` file (for example by adding the `Power` request, response and RPC method), regenerate the stubs before running the server.
 
 This creates two files:
 

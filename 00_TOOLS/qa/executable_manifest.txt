@@ -31,7 +31,9 @@
 00_TOOLS/plantuml/render_puml.sh
 00_TOOLS/qa/apply_permissions.sh
 00_TOOLS/qa/check_executability.sh
+00_TOOLS/qa/check_fig_targets.py
 00_TOOLS/qa/check_markdown_links.py
+00_TOOLS/release/create_release_zip.sh
 
 # ── 02_PROJECTS ──────────────────────────────────────────────
 02_PROJECTS/00_common/assets/render.sh
@@ -67,6 +69,7 @@
 03_LECTURES/C11/assets/scenario-ftp-nat-firewall/natfw/setup.sh
 03_LECTURES/C12/assets/render.sh
 03_LECTURES/C13/assets/render.sh
+03_LECTURES/C14/assets/render.sh
 
 # ── 04_SEMINARS ──────────────────────────────────────────────
 04_SEMINARS/S01/assets/render.sh
@@ -95,6 +98,7 @@
 04_SEMINARS/S11/assets/render.sh
 04_SEMINARS/S12/assets/render.sh
 04_SEMINARS/S13/assets/render.sh
+04_SEMINARS/S14/assets/render.sh
 
 # ── Root ─────────────────────────────────────────────────────
 format-offline.js

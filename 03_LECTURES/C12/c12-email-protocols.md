@@ -1,4 +1,4 @@
-## Lecture 12 – Application layer
+### Lecture 12 – Application layer
 
 ### SMTP, POP3, IMAP and webmail
 
@@ -14,7 +14,7 @@
 
 ---
 
-## Learning objectives
+### Learning objectives
 
 * Describe the architecture of email systems
 * Explain the role and limitations of SMTP, POP3 and IMAP
@@ -25,7 +25,7 @@
 
 ---
 
-## The general email architecture
+### The general email architecture
 
 * Distributed, asynchronous system
 * Based on:
@@ -44,7 +44,7 @@
 
 ---
 
-## Email system components
+### Email system components
 
 * **MUA (Mail User Agent)**
 
@@ -64,7 +64,7 @@
 
 ---
 
-## SMTP – Simple Mail Transfer Protocol
+### SMTP – Simple Mail Transfer Protocol
 
 ---
 
@@ -188,7 +188,7 @@ The envelope and the message headers serve different purposes and can contain di
 
 ---
 
-## POP3 – Post Office Protocol
+### POP3 – Post Office Protocol
 
 ---
 
@@ -247,7 +247,7 @@ The envelope and the message headers serve different purposes and can contain di
 
 ---
 
-## IMAP – Internet Message Access Protocol
+### IMAP – Internet Message Access Protocol
 
 ---
 
@@ -316,7 +316,7 @@ The envelope and the message headers serve different purposes and can contain di
 
 ---
 
-## POP3 vs IMAP
+### POP3 vs IMAP
 
 | Feature | POP3 | IMAP |
 | --- | --- | --- |
@@ -330,7 +330,7 @@ The envelope and the message headers serve different purposes and can contain di
 
 ---
 
-## Webmail
+### Webmail
 
 ---
 
@@ -368,7 +368,7 @@ The browser communicates only with the webmail server over HTTPS. The webmail se
 
 ---
 
-## Email security
+### Email security
 
 * STARTTLS/SMTPS/IMAPS
 * Authentication
@@ -381,7 +381,7 @@ Email security operates at multiple layers. STARTTLS and SMTPS protect the trans
 
 ---
 
-## Link to the laboratory scenarios
+### Link to the laboratory scenarios
 
 * **SMTP**
 
@@ -405,7 +405,7 @@ The lab scenario deploys all components — SMTP server, IMAP server and webmail
 
 ---
 
-## Key takeaway
+### Key takeaway
 
 Email:
 
@@ -419,6 +419,6 @@ Email:
 
 ---
 
-## Thank you
+### Thank you
 
 ### See you in the next lecture

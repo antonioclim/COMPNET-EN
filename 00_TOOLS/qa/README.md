@@ -9,6 +9,34 @@ Automated quality-assurance scripts that run in CI and can be invoked locally.
 | `check_executability.sh` | 4 | File permission bits match `executable_manifest.txt` |
 | `check_markdown_links.py` | 5 | Relative links in `*.md` resolve to existing files |
 | `check_integrity.py` | 7 | No corrupted tokens (mojibake) or Romanian-language leakage |
+| `check_fig_targets.py` | 8 | Lecture `[FIG]` markers point to an existing `assets/puml/*.puml` source |
+
+## `check_fig_targets.py` — lecture figure reference guard
+
+Lecture slides refer to local figure renders using a stable marker format:
+
+```text
+[FIG] assets/images/<name>.png
+```
+
+The source of truth is the corresponding PlantUML file:
+
+```text
+assets/puml/<name>.puml
+```
+
+The default mode requires only the PlantUML source, which supports repositories
+where rendered PNG files are generated locally and kept out of version control.
+
+```bash
+python 00_TOOLS/qa/check_fig_targets.py --puml-only
+```
+
+To require both the source and the rendered PNG, use:
+
+```bash
+python 00_TOOLS/qa/check_fig_targets.py --require-png
+```
 
 ## `check_integrity.py` — language & lexical integrity guard
 
@@ -37,7 +65,7 @@ required.  Exit code `0` = clean, `1` = violations found, `2` = runtime error.
    - files under `00_APPENDIX/c)studentsQUIZes(multichoice_only)/`
 
    Detection uses two heuristics: (a) Romanian-specific diacritics  <!-- qa:allow-ro -->
-   (U+0103, U+0218, U+021A and uppercase), and (b) a density threshold of Romanian function words
+   (U+0103, U+0218, U+021A and uppercase) and (b) a density threshold of Romanian function words
    that have no English homograph.
 
 ### Extending the token / word lists

@@ -1,4 +1,4 @@
-## Lecture 11 – Application layer: FTP, DNS and SSH
+### Lecture 11 – Application layer: FTP, DNS and SSH
 
 ### FTP, DNS and SSH: classic application protocols and their operational role
 
@@ -36,7 +36,7 @@ By the end of the lecture, students should be able to:
 
 ---
 
-## FTP – File Transfer Protocol
+### FTP – File Transfer Protocol
 
 ---
 
@@ -102,7 +102,7 @@ By the end of the lecture, students should be able to:
 
 ---
 
-## DNS – Domain Name System
+### DNS – Domain Name System
 
 ---
 
@@ -174,7 +174,7 @@ By the end of the lecture, students should be able to:
 
 ---
 
-## SSH – Secure Shell
+### SSH – Secure Shell
 
 ---
 
@@ -236,7 +236,7 @@ By the end of the lecture, students should be able to:
 
 ---
 
-## Practical scenarios
+### Practical scenarios
 
 ---
 

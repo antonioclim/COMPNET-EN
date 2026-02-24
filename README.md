@@ -1,6 +1,6 @@
 # Computer Networks — Course Kit (EN)
 
-A full course kit for an undergraduate computer networks module. It covers 13 lectures, 13 practical seminars, team projects and PlantUML diagrams.
+A full course kit for an undergraduate computer networks module. It covers 14 lectures, 14 practical seminars, team projects and PlantUML diagrams.
 
 ---
 
@@ -12,8 +12,8 @@ A full course kit for an undergraduate computer networks module. It covers 13 le
 | [`00_TOOLS/`](00_TOOLS/) | Tooling: PlantUML diagrams, generation scripts, prerequisite checklist |
 | [`01_GHID_MININET-SDN/`](01_GHID_MININET-SDN/) | Installation and configuration guide for the Mininet-SDN virtual machine |
 | [`02_PROJECTS/`](02_PROJECTS/) | 15 network-application projects and 10 administration/security projects with specifications, diagrams and a CI pipeline |
-| [`03_LECTURES/`](03_LECTURES/) | 13 lectures with slide-by-slide markdown, PlantUML diagrams and executable demo scenarios (Python/Docker) |
-| [`04_SEMINARS/`](04_SEMINARS/) | 13 practical seminars with explanation/task/scenario files, Python code, Docker configurations and HTML support pages |
+| [`03_LECTURES/`](03_LECTURES/) | 14 lectures with slide-by-slide markdown, PlantUML diagrams and executable demo scenarios (Python/Docker) |
+| [`04_SEMINARS/`](04_SEMINARS/) | 14 practical seminars with explanation/task/scenario files, Python code, Docker configurations and HTML support pages |
 
 ---
 

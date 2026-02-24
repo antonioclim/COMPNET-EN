@@ -14,7 +14,7 @@ By the end of this lecture, students should be able to:
 
 ---
 
-## Part I – Internet of Things (IoT)
+### Part I – Internet of Things (IoT)
 
 ---
 
@@ -112,7 +112,7 @@ A running broker does not guarantee that publishers or subscribers are connected
 
 ---
 
-## Part II – Security and vulnerability testing
+### Part II – Security and vulnerability testing
 
 ---
 

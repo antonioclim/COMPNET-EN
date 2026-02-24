@@ -11,7 +11,7 @@ Lecture 10 – The application layer: HTTP(S) (REST and SOAP).
 Lecture 11 – The application layer: FTP, DNS and SSH.
 Lecture 12 – The application layer: SMTP, POP3, IMAP and webmail.
 Lecture 13 – IoT and security in computer networks.
-Lecture 14 – Revision.
+Lecture 14 – Revision and examination preparation.
 
 Seminar 1 – Network analysis: Wireshark/tshark, netcat (TCP/UDP) and traffic debugging.
 Seminar 2 – Socket programming: implementing a concurrent TCP and UDP server and the corresponding clients, plus traffic analysis.
@@ -26,4 +26,4 @@ Seminar 10 – Network services: DNS, SSH and FTP in containers orchestrated wit
 Seminar 11 – Distributed applications with Nginx: load balancing and reverse proxying for multiple containers started with Docker Compose.
 Seminar 12 – Remote method invocation: RPC concepts and an implementation using a framework.
 Seminar 13 – Security in computer networks: port scanning and testing simple vulnerabilities.
-Seminar 14 – Team project assessment.
+Seminar 14 – Team project assessment and viva.

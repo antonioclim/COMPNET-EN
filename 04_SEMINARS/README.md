@@ -1,6 +1,6 @@
 # Seminars
 
-Thirteen practical seminars (S01–S13) progress from basic network analysis through socket programming and protocol implementation to security testing and RPC frameworks. Each seminar directory contains markdown files (Explanation, Tasks and Scenario), Python source code, Docker configurations where applicable and PlantUML diagrams.
+Fourteen practical seminars (S01–S14) progress from basic network analysis through socket programming and protocol implementation to security testing and RPC frameworks. Each seminar directory contains markdown files (Explanation, Tasks and Scenario), Python source code, Docker configurations where applicable and PlantUML diagrams.
 
 ## Seminar index
 
@@ -19,6 +19,7 @@ Thirteen practical seminars (S01–S13) progress from basic network analysis thr
 | S11 | Load balancing and reverse proxying with Nginx and Docker Compose |
 | S12 | Remote method invocation: JSON-RPC, Protobuf and gRPC |
 | S13 | Network security: port scanning and vulnerability testing |
+| S14 | Revision and team project assessment |
 
 ## Supporting materials
 
