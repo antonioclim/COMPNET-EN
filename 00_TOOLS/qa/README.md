@@ -1,101 +1,115 @@
-# QA tools
+# qa — Automated Quality Assurance
 
-Automated quality-assurance scripts that run in CI and can be invoked locally.
+Four automated checks that guard repository integrity across CI and local development. The CI pipeline (`.github/workflows/ci.yml`) runs all four in sequence; contributors can invoke them locally before pushing.
 
-## Quick reference
+## File Index
 
-| Script | Phase | What it guards |
+| File | Description | Lines |
 |---|---|---|
-| `check_executability.sh` | 4 | File permission bits match `executable_manifest.txt` |
-| `check_markdown_links.py` | 5 | Relative links in `*.md` resolve to existing files |
-| `check_integrity.py` | 7 | No corrupted tokens (mojibake) or Romanian-language leakage |
-| `check_fig_targets.py` | 8 | Lecture `[FIG]` markers point to an existing `assets/puml/*.puml` source |
+| [`check_executability.sh`](check_executability.sh) | Verifies that file permission bits match `executable_manifest.txt` | 51 |
+| [`check_markdown_links.py`](check_markdown_links.py) | Validates that every relative link in `*.md` files resolves to an existing file or directory | 406 |
+| [`check_integrity.py`](check_integrity.py) | Detects corrupted UTF-8 tokens (mojibake) and Romanian-language leakage outside permitted zones | 344 |
+| [`check_fig_targets.py`](check_fig_targets.py) | Confirms that every `[FIG]` marker in lecture Markdown points to an existing `.puml` source | 175 |
+| [`apply_permissions.sh`](apply_permissions.sh) | Applies `chmod +x` to every path listed in the manifest — a repair tool, not a check | 68 |
+| [`executable_manifest.txt`](executable_manifest.txt) | Authoritative list of files that must carry the executable bit | 86 entries |
 
-## `check_fig_targets.py` — lecture figure reference guard
+## Visual Overview
 
-Lecture slides refer to local figure renders using a stable marker format:
+```mermaid
+graph LR
+    CI["CI pipeline\nci.yml"]
+    E["check_executability.sh\nPhase 4"]
+    ML["check_markdown_links.py\nPhase 5"]
+    INT["check_integrity.py\nPhase 7"]
+    FIG["check_fig_targets.py\nPhase 8"]
+    MAN["executable_manifest.txt"]
 
-```text
-[FIG] assets/images/<name>.png
+    CI --> E --> ML --> INT --> FIG
+    E -.->|"reads"| MAN
+
+    style CI fill:#e1f5fe,stroke:#0288d1
+    style E fill:#fff3e0,stroke:#f57c00
+    style ML fill:#fff3e0,stroke:#f57c00
+    style INT fill:#fff3e0,stroke:#f57c00
+    style FIG fill:#fff3e0,stroke:#f57c00
 ```
 
-The source of truth is the corresponding PlantUML file:
+## Usage
 
-```text
-assets/puml/<name>.puml
-```
-
-The default mode requires only the PlantUML source, which supports repositories
-where rendered PNG files are generated locally and kept out of version control.
+All scripts run from the repository root. Python scripts require Python 3.10+ with no third-party dependencies.
 
 ```bash
+# Phase 4 — executability
+bash 00_TOOLS/qa/check_executability.sh
+
+# Phase 5 — Markdown link validation
+python 00_TOOLS/qa/check_markdown_links.py
+
+# Phase 7 — integrity (mojibake + Romanian leakage)
+python 00_TOOLS/qa/check_integrity.py
+
+# Phase 8 — figure targets (PlantUML source only)
 python 00_TOOLS/qa/check_fig_targets.py --puml-only
-```
 
-To require both the source and the rendered PNG, use:
-
-```bash
+# Phase 8 — figure targets (require rendered PNGs too)
 python 00_TOOLS/qa/check_fig_targets.py --require-png
 ```
 
-## `check_integrity.py` — language & lexical integrity guard
+Exit codes: `0` = clean, `1` = violations found, `2` = runtime error.
 
-### Running locally
+### Repairing Permissions
+
+If `check_executability.sh` reports mismatches, apply the manifest:
 
 ```bash
-# from the repository root
-python 00_TOOLS/qa/check_integrity.py          # default: scans "."
-python 00_TOOLS/qa/check_integrity.py /path/to/repo   # explicit root
+bash 00_TOOLS/qa/apply_permissions.sh
 ```
 
-The script is **standard-library only** (Python 3.10+); no `pip install`
-required.  Exit code `0` = clean, `1` = violations found, `2` = runtime error.
+### Extending `check_integrity.py`
 
-### What it checks
-
-1. **Corrupted tokens** — UTF-8 mojibake byte sequences produced when Romanian
-   diacritics (a-breve, s/t-comma-below, i/a-circumflex and uppercase forms)
-   undergo double-encoding or
-   CP1252 mis-decoding.  These are invalid in *every* file regardless of
-   language zone.
-
-2. **Romanian leakage** — Romanian prose that appears outside the two
-   permitted zones:
-   - files whose basename starts with `ro` (case-insensitive)
-   - files under `00_APPENDIX/c)studentsQUIZes(multichoice_only)/`
-
-   Detection uses two heuristics: (a) Romanian-specific diacritics  <!-- qa:allow-ro -->
-   (U+0103, U+0218, U+021A and uppercase) and (b) a density threshold of Romanian function words
-   that have no English homograph.
-
-### Extending the token / word lists
-
-All configuration lives as plain Python sets at the top of
-`check_integrity.py`:
+All configuration lives as plain Python sets at the top of the script:
 
 | Collection | Purpose | How to extend |
 |---|---|---|
 | `CORRUPTED_TOKENS` | Mojibake byte strings | Reproduce the encoding round-trip and add the garbled result |
-| `RO_FUNCTION_WORDS` | Romanian function words (≥ 3 chars) | Add unambiguous words that have no English homograph |
-| `RO_PROPER_NOUN_PATTERNS` | Allowlisted proper nouns (regex) | Add patterns for institutional names, city names, or encoding examples |
+| `RO_FUNCTION_WORDS` | Romanian function words (three or more characters) | Add unambiguous words with no English homograph |
+| `RO_PROPER_NOUN_PATTERNS` | Allowlisted proper nouns (regex) | Add patterns for institutional names or encoding examples |
 | `SELF_EXEMPT_BASENAMES` | Files entirely skipped | Add filenames that contain token definitions by necessity |
 
-### Inline suppression
+Inline suppression markers can be appended to any line: `qa:allow-corrupt` (corrupted-token check) or `qa:allow-ro` (Romanian-leakage check). Lines where corrupted tokens appear exclusively inside inline code spans are automatically exempted as encoding-pedagogy examples.
 
-Append one of the following markers anywhere on a line (typically inside a code
-comment) to suppress the corresponding check **on that line only**:
+## Cross-References and Contextual Connections
 
-- `qa:allow-corrupt` — suppress the corrupted-token check
-- `qa:allow-ro` — suppress the Romanian-leakage check
+### Downstream Dependencies
 
-Example:
+| Dependent | Path | What it invokes |
+|---|---|---|
+| CI pipeline | [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) | All four checks in sequence |
+| Release script | [`../release/create_release_zip.sh`](../release/create_release_zip.sh) | `check_executability.sh` and `executable_manifest.txt` |
 
-```markdown
-This line mentions București as a proper noun  <!-- qa:allow-ro -->
+### Related Materials
+
+| Aspect | Link |
+|---|---|
+| PlantUML sources checked by `check_fig_targets.py` | [`03_LECTURES/C*/assets/puml/`](../../03_LECTURES/) |
+| Batch diagram collection | [`../PlantUML(optional)/`](<../PlantUML(optional)/README.md>) |
+
+### Suggested Learning Sequence
+
+**Suggested sequence:** (contributor onboarding) clone repository → run all four checks locally → consult this README for interpretation → fix any violations → push
+
+## Selective Clone Instructions
+
+**Method A — Git sparse-checkout (Git 2.25+)**
+
+```bash
+git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
+cd COMPNET-EN
+git sparse-checkout set 00_TOOLS/qa
 ```
 
-### Pedagogical exemption
+**Method B — Direct download (no Git required)**
 
-Lines where corrupted tokens appear exclusively inside inline code spans
-(Markdown `` ` `` or HTML `<code>`) are recognised as encoding-pedagogy
-examples and are automatically exempted from the corrupted-token check.
+```
+https://github.com/antonioclim/COMPNET-EN/tree/main/00_TOOLS/qa
+```
