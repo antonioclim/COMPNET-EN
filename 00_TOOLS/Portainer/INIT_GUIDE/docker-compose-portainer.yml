@@ -1,0 +1,23 @@
+# ─────────────────────────────────────────────────────
+#  Portainer CE — COMPNET lab environment
+#
+#  Port  : 9050 → 9000  (9000 reserved by S10 SSH tunnel,
+#                         9090 reserved by C08 TCP scenarios)
+#  Access: http://localhost:9050
+#  Login : stud / studstudstud
+# ─────────────────────────────────────────────────────
+
+services:
+  portainer:
+    image: portainer/portainer-ce:2.21-alpine
+    container_name: portainer
+    restart: unless-stopped
+    ports:
+      - "9050:9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - portainer_data:/data
+
+volumes:
+  portainer_data:
+    name: portainer_data
