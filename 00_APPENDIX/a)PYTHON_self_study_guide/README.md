@@ -1,223 +1,143 @@
-# 🐍 Python Self-Study Guide for Computer Networks
-## Version 5.1 — Tailored for Multi-Language Backgrounds
+# Python Self-Study Guide for Computer Networks
+## Version 5.1 — Multi-Language Transition Guide
 
-> **Status:** Optional, Not Assessed
-> **Course:** Computer Networks — ASE Bucharest, CSIE
+> **Status:** optional, not assessed  
+> **Course:** Computer Networks — ASE Bucharest, CSIE  
 > **Environment:** WSL2 + Ubuntu 22.04 + Docker + Python 3.10+
-> **Version:** 5.1 — January 2026
 
----
+A translation-oriented guide for students who already program in C, C++, JavaScript, Java or Kotlin and need to read and write Python code for laboratory exercises. This is not a Python course from scratch; it maps existing programming knowledge onto Python syntax and networking idioms.
 
-## 🎯 What Is This?
+## File / Folder Index
 
-This guide helps students who know **C, C++, JavaScript, Java or Kotlin** quickly understand Python code used in lab exercises. It is designed as a **translation guide**, not a Python course from scratch.
+| Path | Description | Metric |
+|---|---|---|
+| [`PYTHON_NETWORKING_GUIDE.md`](PYTHON_NETWORKING_GUIDE.md) | Complete 9-step networking guide | 2 222 lines |
+| [`Makefile`](Makefile) | Build automation: quiz, parsons, test, lint targets | 50+ targets |
+| [`comparisons/`](comparisons/) | Side-by-side code in 5 languages and misconception guides | 2 files, 455 lines |
+| [`formative/`](formative/) | Quiz (31 questions), Parsons problems, CLI runner | 5 files + subdirs |
+| [`cheatsheets/`](cheatsheets/) | Quick-reference card for socket API, struct and argparse | 1 file, 178 lines |
+| [`docs/`](docs/) | Troubleshooting (16 scenarios) and weekly self-check checkpoints | 2 files, 815 lines |
+| [`examples/`](examples/) | Annotated Python scripts with unit tests | 4 scripts, 3 test files |
+| [`PRESENTATIONS_EN/`](PRESENTATIONS_EN/) | 10 HTML slide decks (browser-viewable) | 10 files |
+| [`images/`](images/) | Screenshot directory (placeholder) | naming convention only |
 
-> "You do not need to learn Python from zero. You need to translate what you already know."
+## Visual Overview
 
----
+```mermaid
+graph TD
+    ROOT["PYTHON_self_study_guide/"]
+    ROOT --> GUIDE["PYTHON_NETWORKING_GUIDE.md\n(2 222 lines, 9 steps)"]
+    ROOT --> COMP["comparisons/\nRosetta Stone + Misconceptions"]
+    ROOT --> FORM["formative/\nQuiz (31 q) + Parsons"]
+    ROOT --> CS["cheatsheets/\nPYTHON_QUICK.md"]
+    ROOT --> DOCS["docs/\nTroubleshooting + Checkpoints"]
+    ROOT --> EX["examples/\n4 scripts + tests/"]
+    ROOT --> PRES["PRESENTATIONS_EN/\n10 HTML slide decks"]
+    ROOT --> IMG["images/\n(placeholder)"]
+    COMP -->|"feeds"| FORM
+    GUIDE -->|"theory for"| EX
+    EX -->|"tested by"| FORM
+    style ROOT fill:#e1f5fe,stroke:#0288d1
+    style GUIDE fill:#fff3e0,stroke:#f57c00
+```
 
-## 📑 Navigation Index
+## Quick Start
 
-### Getting Started
-- [Quick Start](#-quick-start) — Begin here
-- [Learning Paths](#-choose-your-learning-path) — Based on your background
-- [Environment Check](#1-check-your-environment) — Verify setup
+### 1. Verify the environment
 
-### Core Resources
-- [PYTHON_NETWORKING_GUIDE.md](PYTHON_NETWORKING_GUIDE.md) — Complete 9-step guide (2200+ lines)
-- [Rosetta Stone](comparisons/ROSETTA_STONE.md) — Same code in 5 languages
-- [Misconceptions Guide](comparisons/MISCONCEPTIONS_BY_BACKGROUND.md) — Common mistakes by background
-
-### Practice & Assessment
-- [Quiz System](formative/quiz.yaml) — 31 self-assessment questions
-- [Parsons Problems](formative/parsons/) — Code ordering exercises
-- [Examples](examples/) — Annotated working code
-
-### Reference
-- [Cheatsheet](cheatsheets/PYTHON_QUICK.md) — Quick reference for networking
-- [Troubleshooting](docs/TROUBLESHOOTING.md) — 16 common issues and fixes
-- [Presentations](PRESENTATIONS_EN/) — 10 HTML slide decks
-
----
-
-## 📁 Contents
-
-| Folder/File | Description | When to Use |
-|-------------|-------------|-------------|
-| `comparisons/` | 🆕 Side-by-side code in C, JS, Java, Kotlin, Python | First, to map your knowledge |
-| `formative/` | 🆕 Quiz (31 questions) + Parsons problems | To self-assess readiness |
-| `docs/` | 🆕 Troubleshooting guide (16 scenarios) | When you encounter errors |
-| `Makefile` | Easy commands: `make quiz`, `make test` | To run everything |
-| `cheatsheets/` | Quick reference for networking | During lab work |
-| `examples/` | Annotated code examples with tests | To study patterns |
-| `PRESENTATIONS_EN/` | 10 HTML slide presentations | For visual learners |
-| `PYTHON_NETWORKING_GUIDE.md` | Complete guide (2200+ lines) | Deep study |
-
----
-
-## 🚀 Quick Start
-
-### 1. Check Your Environment
 ```bash
 make check
 ```
 
-Expected output:
-```
-Python version: Python 3.10.x or higher
-Required modules:
-  ✓ socket
-  ✓ struct
-  ✓ pyyaml
-```
+Expected output: Python 3.10+, `socket`, `struct` and `pyyaml` modules available.
 
-### 2. Take a Quick Assessment
+### 2. Take a diagnostic quiz
+
 ```bash
 make quiz-quick    # 10 questions, ~10 minutes
 ```
 
-**Score interpretation:**
-- **80%+** → Ready for labs, skim the guide
-- **60-79%** → Review weak sections, then proceed
-- **Below 60%** → Work through the full guide first
+Score interpretation: 80%+ → ready for labs (skim the guide); 60–79% → review weak sections; below 60% → work through the full guide.
 
-### 3. Choose Your Learning Path
+### 3. Choose a learning path
 
-| Your Background | Start Here | Quiz Command | Estimated Time |
-|-----------------|------------|--------------|----------------|
-| **C / C++** | [Rosetta Stone](comparisons/ROSETTA_STONE.md) | `make quiz-c` | 2-3 hours |
-| **JavaScript** | [Misconceptions](comparisons/MISCONCEPTIONS_BY_BACKGROUND.md#for-javascript-programmers) | `make quiz-js` | 2-3 hours |
-| **Java** | [Rosetta Stone](comparisons/ROSETTA_STONE.md) | `make quiz-java` | 1-2 hours |
-| **Kotlin** | [Misconceptions](comparisons/MISCONCEPTIONS_BY_BACKGROUND.md#for-kotlin-programmers) | `make quiz-kotlin` | 1-2 hours |
-| **Multiple** | Take quiz first | `make quiz-quick` | Varies |
+| Background | Start with | Quiz filter | Estimated time |
+|---|---|---|---|
+| C / C++ | [Rosetta Stone](comparisons/ROSETTA_STONE.md) | `make quiz-c` | 2–3 hours |
+| JavaScript | [Misconceptions](comparisons/MISCONCEPTIONS_BY_BACKGROUND.md) | `make quiz-js` | 2–3 hours |
+| Java | [Rosetta Stone](comparisons/ROSETTA_STONE.md) | `make quiz-java` | 1–2 hours |
+| Kotlin | [Misconceptions](comparisons/MISCONCEPTIONS_BY_BACKGROUND.md) | `make quiz-kotlin` | 1–2 hours |
+| Multiple languages | Diagnostic quiz first | `make quiz-quick` | varies |
 
----
-
-## 📝 Available Commands
+## Make Targets (abridged)
 
 ```bash
-make help              # Show all commands
-
-# === Quiz ===
-make quiz              # Full quiz (31 questions)
-make quiz-quick        # Quick check (10 questions)
-make quiz-c            # For C/C++ programmers
-make quiz-js           # For JavaScript programmers
-make quiz-java         # For Java programmers
-make quiz-kotlin       # For Kotlin programmers
-
-# === Parsons Problems ===
-make parsons           # Code ordering exercises
-make parsons-socket    # Socket-specific problems
-make parsons-bytes     # Bytes/encoding problems
-
-# === View Documents ===
-make view-rosetta      # Side-by-side code comparisons
-make view-misconceptions  # Common mistakes by background
-make view-cheatsheet   # Python quick reference
-make view-troubleshooting # Error solutions
-
-# === Testing ===
-make test              # Run all tests
-make check             # Verify Python environment
-make lint              # Check code style
+make help              # full target listing
+make quiz              # 31-question interactive quiz
+make quiz-quick        # 10 random questions
+make quiz-c            # C/C++ programmer filter
+make parsons           # all Parsons problems
+make test              # smoke tests for examples
+make lint              # ruff / flake8 check
+make check             # environment verification
 ```
 
----
+## Lab Week Correspondence
 
-## 📖 Key Documents
-
-### For Language Transition
-| Document | Purpose | Best For |
-|----------|---------|----------|
-| [ROSETTA_STONE.md](comparisons/ROSETTA_STONE.md) | Same algorithms in 5 languages | Visual comparison |
-| [MISCONCEPTIONS_BY_BACKGROUND.md](comparisons/MISCONCEPTIONS_BY_BACKGROUND.md) | What trips up C/JS/Java/Kotlin programmers | Avoiding common errors |
-
-### For Reference
-| Document | Purpose | Best For |
-|----------|---------|----------|
-| [PYTHON_QUICK.md](cheatsheets/PYTHON_QUICK.md) | Sockets, struct, argparse cheatsheet | Quick lookup |
-| [TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) | 16 error scenarios with fixes | Problem solving |
-| [PYTHON_NETWORKING_GUIDE.md](PYTHON_NETWORKING_GUIDE.md) | Complete 9-step learning guide | Deep understanding |
-
-### For Practice
-| Resource | Purpose | Best For |
-|----------|---------|----------|
-| [formative/quiz.yaml](formative/quiz.yaml) | 31 self-assessment questions | Testing knowledge |
-| [formative/parsons/](formative/parsons/) | Code ordering exercises | Active learning |
-| [examples/](examples/) | Working code with tests | Studying patterns |
-
----
-
-## 🗺️ Lab Week Correspondence
-
-| Week | Lab Topic | Guide Section | Key Python Concepts |
-|:----:|-----------|---------------|---------------------|
-| 1-2 | Network fundamentals | Rosetta Stone: TCP/UDP | socket basics |
-| 3-4 | Sockets, Binary protocols | struct parsing | bytes, struct.pack/unpack |
+| Weeks | Lab topic | Guide section | Key Python constructs |
+|---|---|---|---|
+| 1–2 | Network fundamentals | Rosetta Stone: TCP/UDP | `socket` basics |
+| 3–4 | Sockets, binary protocols | struct parsing | `bytes`, `struct.pack/unpack` |
 | 5 | CLI, IP addressing | argparse | command-line interfaces |
-| 6-10 | Application protocols | HTTP, JSON | requests, json module |
-| 11-14 | Advanced topics | Concurrency, debugging | threading, logging |
+| 6–10 | Application protocols | HTTP, JSON | `requests`, `json` module |
+| 11–14 | Advanced topics | Concurrency, debugging | `threading`, `logging` |
 
----
+## Cross-References
 
-## 🔍 Self-Assessment Checkpoints
+| Prerequisite | Path | Reason |
+|---|---|---|
+| Environment setup | [`../../00_TOOLS/Prerequisites/`](../../00_TOOLS/Prerequisites/) | Docker and WSL2 must be configured before running examples |
+| Week 0 orientation | [`../`](../) | Root appendix README with full learning path |
 
-Before each lab, verify you can answer:
+| This folder | Lecture | Seminar | Quiz |
+|---|---|---|---|
+| Socket examples (01) | [`03_LECTURES/C01/`](../../03_LECTURES/C01/) | [`04_SEMINARS/S01/`](../../04_SEMINARS/S01/) | [`W01`](../c%29studentsQUIZes%28multichoice_only%29/COMPnet_W01_Questions.md) |
+| Bytes/struct examples (02, 03) | [`03_LECTURES/C03/`](../../03_LECTURES/C03/) | [`04_SEMINARS/S04/`](../../04_SEMINARS/S04/) | [`W03`](../c%29studentsQUIZes%28multichoice_only%29/COMPnet_W03_Questions.md) |
+| Error handling (04) | [`03_LECTURES/C08/`](../../03_LECTURES/C08/) | [`04_SEMINARS/S08/`](../../04_SEMINARS/S08/) | [`W08`](../c%29studentsQUIZes%28multichoice_only%29/COMPnet_W08_Questions.md) |
+| Concurrency (slide 08) | [`03_LECTURES/C03/`](../../03_LECTURES/C03/) | [`04_SEMINARS/S03/`](../../04_SEMINARS/S03/) | [`W03`](../c%29studentsQUIZes%28multichoice_only%29/COMPnet_W03_Questions.md) |
 
-### Before Week 1-2
-- [ ] How do I create a TCP socket in Python?
-- [ ] What is the difference between `str` and `bytes`?
-- [ ] How do I send data through a socket?
+### Downstream Dependencies
 
-### Before Week 3-4
-- [ ] How do I pack an integer into network byte order?
-- [ ] What does `struct.pack('!H', 8080)` return?
-- [ ] How do I receive exactly N bytes from a socket?
+The root [`../README.md`](../README.md) links to this guide as Step 2 of the Week 0 learning path. The root-level Makefile references `PYTHON_self_study_guide/examples/` for test targets.
 
-### Before Week 5+
-- [ ] How do I parse command-line arguments?
-- [ ] How do I handle socket timeouts?
-- [ ] How do I read and write JSON data?
+**Suggested sequence:** `../../00_TOOLS/Prerequisites/` → `../` (Week 0 orientation) → this folder → `../../04_SEMINARS/S01/`
 
----
+## Selective Clone
 
-## ❓ FAQ
+**Method A — sparse-checkout (Git 2.25+):**
 
-**Q: Is this mandatory?**
-A: No. You can complete labs without it, but it will save you time.
+```bash
+git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
+cd COMPNET-EN
+git sparse-checkout set "00_APPENDIX/a)PYTHON_self_study_guide"
+```
 
-**Q: I know multiple languages. Which quiz should I take?**
-A: Take the quiz for your most recent language, or use `make quiz-quick` for a general assessment.
+**Method B — browse on GitHub:**
 
-**Q: How do I know if I am ready for labs?**
-A: If you score 70%+ on the quiz and can answer the checkpoint questions, you are ready.
+```
+https://github.com/antonioclim/COMPNET-EN/tree/main/00_APPENDIX/a)PYTHON_self_study_guide
+```
 
-**Q: I got an error. What do I do?**
-A: Check [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) for 16 common scenarios with solutions.
+## Version
 
-**Q: The quiz says I need to review "bytes_and_strings". Where is that?**
-A: See [PYTHON_NETWORKING_GUIDE.md Step 2](PYTHON_NETWORKING_GUIDE.md#step-2-data-types-for-networking) and [examples/02_bytes_vs_str.py](examples/02_bytes_vs_str.py).
-
----
-
-## 📚 Additional Resources
-
-- **Official Python Tutorial:** [docs.python.org/3/tutorial](https://docs.python.org/3/tutorial/)
-- **Socket Programming HOWTO:** [docs.python.org/3/howto/sockets.html](https://docs.python.org/3/howto/sockets.html)
-- **Real Python Networking:** [realpython.com/python-sockets](https://realpython.com/python-sockets/)
-
----
-
-## 🆘 Getting Help
-
-1. **Check Troubleshooting:** [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)
-2. **Search the error message:** Copy the exact text into a search engine
-3. **Review relevant section:** Use the Navigation Index above
-4. **Ask during lab hours:** Bring your code and the full error message
+| Field | Value |
+|---|---|
+| Version | 5.1 |
+| Last updated | January 2026 |
+| Author | ing. dr. Antonio Clim |
+| Institution | ASE Bucharest, CSIE |
 
 ---
 
 *Python Self-Study Guide — Computer Networks Course*
 *ASE Bucharest, CSIE — ing. dr. Antonio Clim*
-*Version 5.1 — January 2026*
