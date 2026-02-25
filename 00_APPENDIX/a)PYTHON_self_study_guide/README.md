@@ -1,120 +1,114 @@
-# Python Self-Study Guide for Computer Networks
-## Version 5.1 — Multi-Language Transition Guide
+# a)PYTHON_self_study_guide — Python Networking Bridge Pack
 
-> **Status:** optional, not assessed  
-> **Course:** Computer Networks — ASE Bucharest, CSIE  
-> **Environment:** WSL2 + Ubuntu 22.04 + Docker + Python 3.10+
+Optional remediation pack for students who must write network code in Python during seminars and projects but come from C, C++, JavaScript, Java or Kotlin. The folder combines a long-form guide, runnable examples, self-check quizzes, Parsons problems, quick-reference notes and lightweight HTML slide decks.
 
-A translation-oriented guide for students who already program in C, C++, JavaScript, Java or Kotlin and need to read and write Python code for laboratory exercises. This is not a Python course from scratch; it maps existing programming knowledge onto Python syntax and networking idioms.
+## File and Folder Index
 
-## File / Folder Index
-
-| Path | Description | Metric |
+| Name | Description | Metric |
 |---|---|---|
-| [`PYTHON_NETWORKING_GUIDE.md`](PYTHON_NETWORKING_GUIDE.md) | Complete 9-step networking guide | 2 222 lines |
-| [`Makefile`](Makefile) | Build automation: quiz, parsons, test, lint targets | 50+ targets |
-| [`comparisons/`](comparisons/) | Side-by-side code in 5 languages and misconception guides | 2 files, 455 lines |
-| [`formative/`](formative/) | Quiz (31 questions), Parsons problems, CLI runner | 5 files + subdirs |
-| [`cheatsheets/`](cheatsheets/) | Quick-reference card for socket API, struct and argparse | 1 file, 178 lines |
-| [`docs/`](docs/) | Troubleshooting (16 scenarios) and weekly self-check checkpoints | 2 files, 815 lines |
-| [`examples/`](examples/) | Annotated Python scripts with unit tests | 4 scripts, 3 test files |
-| [`PRESENTATIONS_EN/`](PRESENTATIONS_EN/) | 10 HTML slide decks (browser-viewable) | 10 files |
-| [`images/`](images/) | Screenshot directory (placeholder) | naming convention only |
+| [`README.md`](README.md) | Orientation for the Python bridge pack (you are reading it) | — |
+| [`PYTHON_NETWORKING_GUIDE.md`](PYTHON_NETWORKING_GUIDE.md) | Long-form guide (Python networking patterns, cross-language notes) | 2,222 lines |
+| [`Makefile`](Makefile) | Local automation: run examples, quizzes, Parsons problems, lint and tests | 314 lines |
+| [`examples/`](examples/) | Annotated Python scripts (sockets, bytes/encoding, `struct`, error handling) | 13 files (recursive) |
+| [`formative/`](formative/) | Python-focused formative quiz (31 questions) and Parsons runner | 9 files (recursive) |
+| [`comparisons/`](comparisons/) | Rosetta Stone and misconception lists by language background | 3 files |
+| [`cheatsheets/`](cheatsheets/) | Fast lookup notes for common Python networking idioms | 2 files |
+| [`docs/`](docs/) | Self-check checkpoints and troubleshooting scenarios | 3 files |
+| [`PRESENTATIONS_EN/`](PRESENTATIONS_EN/) | HTML slide decks mirroring the guide structure (10 modules) | 11 files |
+| [`images/`](images/) | Image placeholders referenced by the guide and HTML slides | 2 files |
 
 ## Visual Overview
 
 ```mermaid
 graph TD
-    ROOT["PYTHON_self_study_guide/"]
-    ROOT --> GUIDE["PYTHON_NETWORKING_GUIDE.md\n(2 222 lines, 9 steps)"]
-    ROOT --> COMP["comparisons/\nRosetta Stone + Misconceptions"]
-    ROOT --> FORM["formative/\nQuiz (31 q) + Parsons"]
-    ROOT --> CS["cheatsheets/\nPYTHON_QUICK.md"]
-    ROOT --> DOCS["docs/\nTroubleshooting + Checkpoints"]
-    ROOT --> EX["examples/\n4 scripts + tests/"]
-    ROOT --> PRES["PRESENTATIONS_EN/\n10 HTML slide decks"]
-    ROOT --> IMG["images/\n(placeholder)"]
-    COMP -->|"feeds"| FORM
-    GUIDE -->|"theory for"| EX
-    EX -->|"tested by"| FORM
-    style ROOT fill:#e1f5fe,stroke:#0288d1
-    style GUIDE fill:#fff3e0,stroke:#f57c00
+    GUIDE["PYTHON_NETWORKING_GUIDE.md"]
+    EX["examples/
+Runnable scripts"]
+    QUIZ["formative/
+Quiz + Parsons"]
+    SLIDES["PRESENTATIONS_EN/
+HTML slides"]
+    COMP["comparisons/
+Rosetta + misconceptions"]
+    CHEAT["cheatsheets/
+Quick lookup"]
+    DOCS["docs/
+Checkpoints + troubleshooting"]
+
+    GUIDE --> EX
+    GUIDE --> QUIZ
+    GUIDE --> SLIDES
+    GUIDE --> COMP
+    EX -.-> QUIZ
+    COMP -.-> QUIZ
+    CHEAT -.-> EX
+    DOCS -.-> GUIDE
+
+    style GUIDE fill:#e1f5fe,stroke:#0288d1
+    style QUIZ fill:#fff3e0,stroke:#f57c00
+    style EX fill:#e8f5e9,stroke:#388e3c
 ```
 
-## Quick Start
-
-### 1. Verify the environment
+## Usage
 
 ```bash
-make check
+# from the repository root
+cd "00_APPENDIX/a)PYTHON_self_study_guide"
+
+# see available targets
+make help
+
+# run the socket example (reads args; see script footer for usage)
+python3 examples/01_socket_tcp.py help
+
+# run the Python bridge formative quiz
+make quiz
+
+# run Parsons problems (code line reordering)
+make parsons
+
+# run the included tests
+make test-all
 ```
 
-Expected output: Python 3.10+, `socket`, `struct` and `pyyaml` modules available.
+If you only need the written material, open `PYTHON_NETWORKING_GUIDE.md` in GitHub and ignore the automation.
 
-### 2. Take a diagnostic quiz
+## Design Notes
 
-```bash
-make quiz-quick    # 10 questions, ~10 minutes
-```
+The pack is structured around a single guide so that students can move from concept explanation to runnable code without switching repositories or tooling. Cross-language comparisons are separated into their own folder to avoid interrupting the networking narrative while still making misconceptions explicit for students changing language ecosystems.
 
-Score interpretation: 80%+ → ready for labs (skim the guide); 60–79% → review weak sections; below 60% → work through the full guide.
+## Cross-References and Context
 
-### 3. Choose a learning path
+### Prerequisites and Dependencies
 
-| Background | Start with | Quiz filter | Estimated time |
-|---|---|---|---|
-| C / C++ | [Rosetta Stone](comparisons/ROSETTA_STONE.md) | `make quiz-c` | 2–3 hours |
-| JavaScript | [Misconceptions](comparisons/MISCONCEPTIONS_BY_BACKGROUND.md) | `make quiz-js` | 2–3 hours |
-| Java | [Rosetta Stone](comparisons/ROSETTA_STONE.md) | `make quiz-java` | 1–2 hours |
-| Kotlin | [Misconceptions](comparisons/MISCONCEPTIONS_BY_BACKGROUND.md) | `make quiz-kotlin` | 1–2 hours |
-| Multiple languages | Diagnostic quiz first | `make quiz-quick` | varies |
-
-## Make Targets (abridged)
-
-```bash
-make help              # full target listing
-make quiz              # 31-question interactive quiz
-make quiz-quick        # 10 random questions
-make quiz-c            # C/C++ programmer filter
-make parsons           # all Parsons problems
-make test              # smoke tests for examples
-make lint              # ruff / flake8 check
-make check             # environment verification
-```
-
-## Lab Week Correspondence
-
-| Weeks | Lab topic | Guide section | Key Python constructs |
-|---|---|---|---|
-| 1–2 | Network fundamentals | Rosetta Stone: TCP/UDP | `socket` basics |
-| 3–4 | Sockets, binary protocols | struct parsing | `bytes`, `struct.pack/unpack` |
-| 5 | CLI, IP addressing | argparse | command-line interfaces |
-| 6–10 | Application protocols | HTTP, JSON | `requests`, `json` module |
-| 11–14 | Advanced topics | Concurrency, debugging | `threading`, `logging` |
-
-## Cross-References
-
-| Prerequisite | Path | Reason |
+| Prerequisite | Path | Why |
 |---|---|---|
-| Environment setup | [`../../00_TOOLS/Prerequisites/`](../../00_TOOLS/Prerequisites/) | Docker and WSL2 must be configured before running examples |
-| Week 0 orientation | [`../`](../) | Root appendix README with full learning path |
+| Week 0 environment check | [`../formative/`](../formative/) | Python and tooling must work locally before attempting socket labs |
+| General prerequisites | [`../../00_TOOLS/Prerequisites/`](../../00_TOOLS/Prerequisites/) | Docker, WSL2 and packet tools are assumed by the course labs |
+| Course schedule context | [`../../04_SEMINARS/README.md`](../../04_SEMINARS/README.md) | Seminar S02 onward expects working Python fluency |
 
-| This folder | Lecture | Seminar | Quiz |
-|---|---|---|---|
-| Socket examples (01) | [`03_LECTURES/C01/`](../../03_LECTURES/C01/) | [`04_SEMINARS/S01/`](../../04_SEMINARS/S01/) | [`W01`](../c%29studentsQUIZes%28multichoice_only%29/COMPnet_W01_Questions.md) |
-| Bytes/struct examples (02, 03) | [`03_LECTURES/C03/`](../../03_LECTURES/C03/) | [`04_SEMINARS/S04/`](../../04_SEMINARS/S04/) | [`W03`](../c%29studentsQUIZes%28multichoice_only%29/COMPnet_W03_Questions.md) |
-| Error handling (04) | [`03_LECTURES/C08/`](../../03_LECTURES/C08/) | [`04_SEMINARS/S08/`](../../04_SEMINARS/S08/) | [`W08`](../c%29studentsQUIZes%28multichoice_only%29/COMPnet_W08_Questions.md) |
-| Concurrency (slide 08) | [`03_LECTURES/C03/`](../../03_LECTURES/C03/) | [`04_SEMINARS/S03/`](../../04_SEMINARS/S03/) | [`W03`](../c%29studentsQUIZes%28multichoice_only%29/COMPnet_W03_Questions.md) |
+### Bridge Pack Mapped to Lectures, Seminars, Projects and Quizzes
+
+| Bridge pack area | Lecture foundation | Seminar practice | Project extension | Quiz alignment |
+|---|---|---|---|---|
+| `PYTHON_NETWORKING_GUIDE.md` | [`../../03_LECTURES/C03/c3-intro-network-programming.md`](../../03_LECTURES/C03/c3-intro-network-programming.md), [`../../03_LECTURES/C08/c8-transport-layer.md`](../../03_LECTURES/C08/c8-transport-layer.md) | [`../../04_SEMINARS/S02/`](../../04_SEMINARS/S02/), [`../../04_SEMINARS/S03/`](../../04_SEMINARS/S03/) and [`../../04_SEMINARS/S04/`](../../04_SEMINARS/S04/) | [`../../02_PROJECTS/01_network_applications/S01_multi_client_tcp_chat_text_protocol_and_presence.md`](../../02_PROJECTS/01_network_applications/S01_multi_client_tcp_chat_text_protocol_and_presence.md), [`../../02_PROJECTS/01_network_applications/S03_http11_socket_server_no_framework_static_files.md`](../../02_PROJECTS/01_network_applications/S03_http11_socket_server_no_framework_static_files.md) | [`../c)studentsQUIZes(multichoice_only)/COMPnet_W02_Questions.md`](../c%29studentsQUIZes%28multichoice_only%29/COMPnet_W02_Questions.md), [`../c)studentsQUIZes(multichoice_only)/COMPnet_W03_Questions.md`](../c%29studentsQUIZes%28multichoice_only%29/COMPnet_W03_Questions.md), [`../c)studentsQUIZes(multichoice_only)/COMPnet_W04_Questions.md`](../c%29studentsQUIZes%28multichoice_only%29/COMPnet_W04_Questions.md) |
+| `examples/` | [`../../03_LECTURES/C03/c3-intro-network-programming.md`](../../03_LECTURES/C03/c3-intro-network-programming.md) | [`../../04_SEMINARS/S02/`](../../04_SEMINARS/S02/), [`../../04_SEMINARS/S04/`](../../04_SEMINARS/S04/) | [`../../02_PROJECTS/01_network_applications/`](../../02_PROJECTS/01_network_applications/) | Weeks 02–04 |
+| `formative/` | — (Python skill check) | [`../../04_SEMINARS/S02/`](../../04_SEMINARS/S02/) (readiness) | — | — |
+| `comparisons/` | — | — | — | — |
 
 ### Downstream Dependencies
 
-The root [`../README.md`](../README.md) links to this guide as Step 2 of the Week 0 learning path. The root-level Makefile references `PYTHON_self_study_guide/examples/` for test targets.
+- `00_TOOLS/Prerequisites/README.md` links to this folder as the course’s Python remediation option.
+- `03_LECTURES/README.md` and `03_LECTURES/C03/README.md` link to this folder as assumed preparation for socket programming.
+- `02_PROJECTS/01_network_applications/README.md` links to this folder as the Python baseline for network application projects.
 
-**Suggested sequence:** `../../00_TOOLS/Prerequisites/` → `../` (Week 0 orientation) → this folder → `../../04_SEMINARS/S01/`
+### Suggested Learning Sequence
+
+`00_TOOLS/Prerequisites/` → `00_APPENDIX/formative/` → `00_APPENDIX/a)PYTHON_self_study_guide/` → `04_SEMINARS/S02/`
 
 ## Selective Clone
 
-**Method A — sparse-checkout (Git 2.25+):**
+Method A — Git sparse-checkout (requires Git ≥ 2.25)
 
 ```bash
 git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
@@ -122,22 +116,16 @@ cd COMPNET-EN
 git sparse-checkout set "00_APPENDIX/a)PYTHON_self_study_guide"
 ```
 
-**Method B — browse on GitHub:**
+Method B — Direct download (no Git required)
 
-```
+```text
 https://github.com/antonioclim/COMPNET-EN/tree/main/00_APPENDIX/a)PYTHON_self_study_guide
 ```
 
-## Version
+## Version and Provenance
 
-| Field | Value |
+| Item | Value |
 |---|---|
-| Version | 5.1 |
-| Last updated | January 2026 |
-| Author | ing. dr. Antonio Clim |
-| Institution | ASE Bucharest, CSIE |
-
----
-
-*Python Self-Study Guide — Computer Networks Course*
-*ASE Bucharest, CSIE — ing. dr. Antonio Clim*
+| Folder owner | Student support materials (optional) |
+| Change log | [`../CHANGELOG.md`](../CHANGELOG.md) |
+| Quiz runner version markers | `formative/run_quiz.py` header and YAML metadata |
