@@ -1,63 +1,92 @@
-# Formative Assessment — Week 0 Environment Check
+# formative — Week 0 Formative Quiz and Export Tests
 
-Self-assessment quiz and LMS export pipeline for the Week 0 prerequisite module. The 10-question quiz verifies that students can configure WSL2 + Docker, distinguish images from containers, apply port mapping and perform basic Python socket and byte operations.
+Week 0 formative assessment for the course toolchain: an interactive quiz runner driven by a YAML source file, plus export artefacts and tests that verify JSON and Moodle GIFT exports. The goal is to detect environment issues early (Python, dependencies and basic CLI use) before seminar work begins.
 
-| File / Folder | Description | Metric |
+## File and Folder Index
+
+| Name | Description | Metric |
 |---|---|---|
-| [`quiz.yaml`](quiz.yaml) | Question source: 10 items across 3 Bloom levels | 269 lines |
-| [`quiz.json`](quiz.json) | LMS-ready JSON export (Moodle / Canvas) | 264 lines |
-| [`parsons_problems.json`](parsons_problems.json) | JSON export of code-ordering exercises | 130 lines |
-| [`run_quiz.py`](run_quiz.py) | Interactive CLI runner with export, filter and review modes | 657 lines |
-| [`tests/`](tests/) | Unit tests for export functions | 1 test file |
+| [`README.md`](README.md) | Orientation for the Week 0 formative quiz | — |
+| [`quiz.yaml`](quiz.yaml) | Quiz source in YAML (Week 0) | 269 lines, 10 questions |
+| [`run_quiz.py`](run_quiz.py) | Interactive quiz runner and exporter | 657 lines |
+| [`quiz.json`](quiz.json) | Exported quiz artefact (do not edit by hand) | 418 lines |
+| [`parsons_problems.json`](parsons_problems.json) | Exported Parsons artefact (do not edit by hand) | 186 lines |
+| [`tests/`](tests/) | Pytest suite validating quiz exports | 6 files (recursive) |
+| [`__pycache__/`](__pycache__/) | CPython bytecode cache (generated) | 2 files (recursive) |
 
-```
-┌──────────────┐     ┌──────────────┐     ┌──────────────┐
-│  quiz.yaml   │────►│  run_quiz.py │────►│  quiz.json   │
-│  (source)    │     │  (runner)    │     │  (LMS export)│
-└──────────────┘     └──────────────┘     └──────────────┘
+## Visual Overview
+
+```mermaid
+flowchart TD
+    YAML["quiz.yaml"] --> RUN["run_quiz.py"]
+    RUN --> JSON["quiz.json"]
+    RUN --> GIFT["Moodle GIFT export"]
+    RUN --> PAR["parsons_problems.json"]
+    TEST["tests/test_quiz_exports.py"] --> RUN
+
+    style RUN fill:#fff3e0,stroke:#f57c00
+    style TEST fill:#e1f5fe,stroke:#0288d1
 ```
 
 ## Usage
 
 ```bash
-# from 00_APPENDIX/
-make quiz              # interactive mode
-make quiz-review       # show answers
-make quiz-random       # randomised order
-make export-json       # export to JSON
-make export-moodle     # export to Moodle GIFT format
+cd 00_APPENDIX/formative
+
+# interactive run
+python3 run_quiz.py
+
+# export quiz
+python3 run_quiz.py --export json
+python3 run_quiz.py --export gift
+
+# run export tests
+python3 -m pytest -q
 ```
 
-Direct invocation:
+If you prefer Make targets:
 
 ```bash
-python3 formative/run_quiz.py
-python3 formative/run_quiz.py --show-answers
-python3 formative/run_quiz.py --export json
-python3 formative/run_quiz.py --validate
+cd 00_APPENDIX
+python3 -m pip install -r requirements.txt
+make quiz
+make export-json
+make export-moodle
+make test-exports
 ```
 
-## Pedagogical Context
+## Design Notes
 
-The quiz acts as a gate check before Week 1: students scoring below 70% are directed back to the prerequisite materials. Questions span recall (Docker terminology), application (port mapping, socket calls) and analysis (diagnosing byte-encoding errors), aligned to the learning objectives in [`../docs/learning_objectives.md`](../docs/learning_objectives.md).
+The formative quiz is positioned at Week 0 to shift common environment failures to the start of the course, when remediation time is still available. Export testing is included because instructors often repurpose the same YAML for LMS delivery.
 
-## Cross-References
+## Cross-References and Context
 
-| Related resource | Path | Relationship |
+### Prerequisites and Dependencies
+
+| Prerequisite | Path | Why |
 |---|---|---|
-| Learning objectives | [`../docs/learning_objectives.md`](../docs/learning_objectives.md) | Each question maps to a specific LO |
-| Python guide quiz | [`../a)PYTHON_self_study_guide/formative/`](../a%29PYTHON_self_study_guide/formative/) | Separate, larger quiz (31 questions) focused on Python proficiency |
-| Misconceptions | [`../docs/misconceptions.md`](../docs/misconceptions.md) | Quiz feedback references common errors documented here |
-| Makefile | [`../Makefile`](../Makefile) | `make quiz`, `make export`, `make ci` targets |
-| Prerequisites | [`../../00_TOOLS/Prerequisites/`](../../00_TOOLS/Prerequisites/) | Environment setup the quiz validates |
+| Environment verification | [`../../00_TOOLS/Prerequisites/`](../../00_TOOLS/Prerequisites/) | Confirms Docker, networking tools and the base runtime |
+| Week 0 Makefile wrapper | [`../Makefile`](../Makefile) | Provides `make quiz`, export and validation targets |
+| Python dependency list | [`../requirements.txt`](../requirements.txt) | Installs `PyYAML`, `pytest`, `ruff` and TUI dependencies |
+
+### Lecture ↔ Seminar ↔ Project ↔ Quiz Mapping
+
+| This folder | Lecture | Seminar | Project | Quiz |
+|---|---|---|---|---|
+| Week 0 readiness check | — | [`../../04_SEMINARS/S01/`](../../04_SEMINARS/S01/) (first lab assumes tooling works) | [`../../02_PROJECTS/`](../../02_PROJECTS/) (all projects assume the environment) | Week 0 only |
 
 ### Downstream Dependencies
 
-The Makefile targets `quiz`, `export-json`, `export-moodle` and `ci` all invoke `run_quiz.py`. The `tests/test_quiz_exports.py` file imports from `run_quiz.py`.
+- `../Makefile` calls `formative/run_quiz.py` for `make quiz` and export targets.
+- The repository CI runs `pytest -q`, which collects `tests/test_quiz_exports.py`.
+
+### Suggested Learning Sequence
+
+`../../00_TOOLS/Prerequisites/` → run this quiz → proceed to `../../04_SEMINARS/S01/`
 
 ## Selective Clone
 
-**Method A — sparse-checkout (Git 2.25+):**
+Method A — Git sparse-checkout (requires Git ≥ 2.25)
 
 ```bash
 git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
@@ -65,8 +94,21 @@ cd COMPNET-EN
 git sparse-checkout set 00_APPENDIX/formative
 ```
 
-**Method B — browse on GitHub:**
+To run the quiz you also need the dependency list:
 
+```bash
+git sparse-checkout add 00_APPENDIX/requirements.txt
 ```
+
+Method B — Direct download (no Git required)
+
+```text
 https://github.com/antonioclim/COMPNET-EN/tree/main/00_APPENDIX/formative
 ```
+
+## Version and Provenance
+
+| Item | Value |
+|---|---|
+| Quiz runner header | `run_quiz.py` contains the course kit version marker |
+| YAML source of truth | `quiz.yaml` |
