@@ -1,119 +1,110 @@
-# PlantUML Diagrams — Weeks 1–13
+# PlantUML(optional) — Week Mirrors of Lecture Diagrams (Batch Export)
 
-118 PlantUML diagram sources distributed across 13 weekly directories, covering every lecture from network fundamentals (week 1) through IoT and security (week 13). Each `.puml` file is identical to its counterpart in `03_LECTURES/C{NN}/assets/puml/` — this directory exists as a flat, week-indexed collection for batch generation and printing.
+Optional diagram collection used when instructors or students want batch export of PlantUML figures without traversing each lecture’s `assets/puml/` directory. Each `weekNN/` folder mirrors the PlantUML sources used in `03_LECTURES/CNN/assets/puml/` (Weeks 01–13) and can be rendered into PNG (and optionally PDF/SVG) using the scripts in this directory.
 
-## Diagram Count per Week
+## File and Folder Index
 
-| Week | Topic | Diagrams | Week | Topic | Diagrams |
-|------|-------|----------|------|-------|----------|
-| 01 | Network fundamentals | 9 | 08 | Transport layer (TCP, UDP, TLS) | 12 |
-| 02 | OSI vs TCP/IP models | 8 | 09 | Session and presentation layers | 6 |
-| 03 | Socket programming | 7 | 10 | HTTP(S), REST, WebSockets | 10 |
-| 04 | Physical and data link layers | 13 | 11 | FTP, DNS and SSH | 7 |
-| 05 | Network layer (IPv4, IPv6) | 10 | 12 | E-mail (SMTP, POP3, IMAP) | 10 |
-| 06 | ARP, DHCP, NAT, ICMP | 11 | 13 | IoT and security | 6 |
-| 07 | Routing protocols | 9 | | | |
+| Name | Type | Description | Metric |
+|---|---|---|---|
+| [`README.md`](README.md) | Markdown | Orientation for the week-mirror diagram bundle (this file) | — |
+| [`generate_all.sh`](generate_all.sh) | Bash | Offline renderer that downloads `plantuml.jar` into this directory and generates PNG next to each `.puml` | 234 lines |
+| [`generate_diagrams.py`](generate_diagrams.py) | Python | Offline batch renderer supporting PNG/SVG/EPS/PDF/TXT with an explicit output directory | 471 lines |
+| [`generate_a4.py`](generate_a4.py) | Python | Post-processes rendered PNG into page-friendly images for handouts | 241 lines |
+| [`generate_png_simple.py`](generate_png_simple.py) | Python | Online renderer using the public PlantUML server (no local Java) | 147 lines |
+| [`week01/`](week01/) | Subdir | Week 01 mirror | 9×`.puml` |
+| [`week02/`](week02/) | Subdir | Week 02 mirror | 8×`.puml` |
+| [`week03/`](week03/) | Subdir | Week 03 mirror | 7×`.puml` |
+| [`week04/`](week04/) | Subdir | Week 04 mirror | 13×`.puml` |
+| [`week05/`](week05/) | Subdir | Week 05 mirror | 10×`.puml` |
+| [`week06/`](week06/) | Subdir | Week 06 mirror | 11×`.puml` |
+| [`week07/`](week07/) | Subdir | Week 07 mirror | 9×`.puml` |
+| [`week08/`](week08/) | Subdir | Week 08 mirror | 12×`.puml` |
+| [`week09/`](week09/) | Subdir | Week 09 mirror | 6×`.puml` |
+| [`week10/`](week10/) | Subdir | Week 10 mirror | 10×`.puml` |
+| [`week11/`](week11/) | Subdir | Week 11 mirror | 7×`.puml` |
+| [`week12/`](week12/) | Subdir | Week 12 mirror | 10×`.puml` |
+| [`week13/`](week13/) | Subdir | Week 13 mirror | 6×`.puml` |
 
-Range: 6–13 diagrams per week. Week 14 is a revision session with no dedicated diagrams.
+## Visual Overview
 
-## File / Folder Index
+```mermaid
+flowchart TD
+    W["weekNN/*.puml"] -->|"offline"| J["plantuml.jar (Java)"]
+    J --> GA["generate_all.sh\nPNG next to .puml"]
+    J --> GD["generate_diagrams.py\nPNG/SVG/PDF → out/"]
+    GA --> A4["generate_a4.py\npage-friendly PNG"]
+    GD --> A4
+    W -->|"online"| GS["generate_png_simple.py\nPlantUML server"]
 
-| Name | Description | Metric |
-|---|---|---|
-| [`week01/`](week01/README.md)–[`week13/`](week13/README.md) | Per-week diagram directories | 6–13 `.puml` files each |
-| `generate_png_simple.py` | Renders diagrams via the PlantUML HTTP server | 147 lines |
-| `generate_diagrams.py` | Full-featured renderer with error handling and parallelism | 471 lines |
-| `generate_a4.py` | Produces A4-sized PNGs for printing (requires Pillow) | 241 lines |
-| `generate_all.sh` | Shell wrapper that calls the Python generators | 234 lines |
+    MIR["Mirrors lecture sources"] -.-> L["03_LECTURES/CNN/assets/puml/"]
+    W -.-> MIR
+
+    style W fill:#e1f5fe,stroke:#0288d1
+    style J fill:#fff3e0,stroke:#f57c00
+    style GS fill:#fce4ec,stroke:#c62828
+```
 
 ## Usage
 
-### PlantUML HTTP server (online, no local JAR)
+### Option 1: Offline rendering (recommended)
+
+From the repository root:
 
 ```bash
+# Option 1A: use the canonical JAR location used by the whole repository
+bash 00_TOOLS/plantuml/get_plantuml_jar.sh
+
+# Render all week folders into PNG next to each .puml
+bash "00_TOOLS/PlantUML(optional)/generate_all.sh"
+```
+
+### Option 2: Offline rendering into a separate output directory
+
+```bash
+cd "00_TOOLS/PlantUML(optional)"
+python3 generate_diagrams.py --input-dir . --output-dir ./out --formats png pdf
+```
+
+### Option 3: Online rendering (no local Java)
+
+```bash
+cd "00_TOOLS/PlantUML(optional)"
 python3 generate_png_simple.py
-```
-
-### Local JAR (recommended for offline or bulk rendering)
-
-```bash
-# Download the JAR once
-bash ../plantuml/get_plantuml_jar.sh
-
-# Render all diagrams
-java -jar ../plantuml.jar -tpng week*/*.puml
-```
-
-### A4 format for printing
-
-```bash
-pip install Pillow
-python3 generate_a4.py --dpi 150 --output-dir ./png_a4
 ```
 
 ## Design Rationale
 
-The flat week-indexed layout allows batch operations (rendering, linting, counting) without navigating the lecture hierarchy. All diagrams use validated PlantUML syntax, a Material Design colour palette, Arial font and include `title` and `legend` blocks for consistency.
-
-## Resolved Issues
-
-Previous revisions removed `note as` syntax (which can produce empty renders on certain servers), eliminated complex multi-line notes and switched to `legend` blocks for explanatory text.
+Lecture folders keep diagrams near the teaching material, while this directory provides a single location for batch export and handout preparation. The week partition mirrors the course delivery structure so instructors can export only the diagrams used in a given week.
 
 ## Cross-References and Contextual Connections
 
-### Lecture Mirror Mapping
-
-Every `.puml` file here has an identical counterpart inside its corresponding lecture folder:
-
-| This folder | Lecture folder |
-|---|---|
-| `week01/*.puml` | [`03_LECTURES/C01/assets/puml/`](../../03_LECTURES/C01/assets/puml/) |
-| `week02/*.puml` | [`03_LECTURES/C02/assets/puml/`](../../03_LECTURES/C02/assets/puml/) |
-| `week03/*.puml` | [`03_LECTURES/C03/assets/puml/`](../../03_LECTURES/C03/assets/puml/) |
-| `week04/*.puml` | [`03_LECTURES/C04/assets/puml/`](../../03_LECTURES/C04/assets/puml/) |
-| `week05/*.puml` | [`03_LECTURES/C05/assets/puml/`](../../03_LECTURES/C05/assets/puml/) |
-| `week06/*.puml` | [`03_LECTURES/C06/assets/puml/`](../../03_LECTURES/C06/assets/puml/) |
-| `week07/*.puml` | [`03_LECTURES/C07/assets/puml/`](../../03_LECTURES/C07/assets/puml/) |
-| `week08/*.puml` | [`03_LECTURES/C08/assets/puml/`](../../03_LECTURES/C08/assets/puml/) |
-| `week09/*.puml` | [`03_LECTURES/C09/assets/puml/`](../../03_LECTURES/C09/assets/puml/) |
-| `week10/*.puml` | [`03_LECTURES/C10/assets/puml/`](../../03_LECTURES/C10/assets/puml/) |
-| `week11/*.puml` | [`03_LECTURES/C11/assets/puml/`](../../03_LECTURES/C11/assets/puml/) |
-| `week12/*.puml` | [`03_LECTURES/C12/assets/puml/`](../../03_LECTURES/C12/assets/puml/) |
-| `week13/*.puml` | [`03_LECTURES/C13/assets/puml/`](../../03_LECTURES/C13/assets/puml/) |
-
-### Downstream Dependencies
-
-The QA script `check_fig_targets.py` validates that every `[FIG]` marker in lecture Markdown points to an existing `.puml` source — those sources live in the lecture copies, not here. This directory is not referenced by CI directly but serves as the canonical batch-generation source.
-
-### Prerequisite
+### Prerequisites and Dependency Links
 
 | Prerequisite | Path | Why |
 |---|---|---|
-| PlantUML JAR | [`../plantuml/get_plantuml_jar.sh`](../plantuml/get_plantuml_jar.sh) | Local rendering requires the JAR; run once after cloning |
+| Canonical PlantUML renderer | [`../plantuml/`](../plantuml/) | Provides the JAR used across the repository |
+| Java (offline modes) | — | Required for `generate_all.sh` and `generate_diagrams.py` when using a local JAR |
+| Internet access (online mode) | — | Required by `generate_png_simple.py` |
+
+### Lecture, Seminar, Project and Quiz Mapping
+
+| This folder component | Lecture foundation | Seminar | Project | Quiz |
+|---|---|---|---|---|
+| `week01/` … `week13/` | Mirrors `03_LECTURES/C01–C13/assets/puml/` | Same-week seminars `04_SEMINARS/S01–S13/` | Not required | Weeks 01–13 (`COMPnet_W01_Questions.md` … `COMPnet_W13_Questions.md`) |
+
+For week-specific lecture, seminar and quiz links, open the README in the relevant `weekNN/` subdirectory.
+
+### Downstream Dependencies
+
+No CI jobs and no course runtime scripts depend on this directory. It exists as an optional mirror and batch-export convenience layer.
 
 ### Suggested Learning Sequence
 
-**Suggested sequence:** `../plantuml/get_plantuml_jar.sh` (download JAR) → this folder (batch render) → `03_LECTURES/CNN/assets/` (per-lecture rendering)
-
-## Troubleshooting
-
-**The JAR does not download:**
-
-```bash
-curl -L -o plantuml.jar https://github.com/plantuml/plantuml/releases/latest/download/plantuml.jar
-```
-
-**Java is missing:**
-
-```bash
-sudo apt install default-jre
-```
-
-**A diagram does not render:** check the syntax in the online editor at `https://www.plantuml.com/plantuml/uml/` and confirm the file begins with `@startuml` and ends with `@enduml`.
+**Suggested sequence:** render diagrams in-place for a lecture (`03_LECTURES/CNN/assets/render.sh`) → if batch export is needed, use this folder’s scripts → optionally post-process with `generate_a4.py` for handouts
 
 ## Selective Clone Instructions
 
-**Method A — Git sparse-checkout (Git 2.25+)**
+**Method A — Git sparse-checkout (requires Git 2.25+)**
 
 ```bash
 git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
@@ -121,7 +112,7 @@ cd COMPNET-EN
 git sparse-checkout set "00_TOOLS/PlantUML(optional)"
 ```
 
-To also fetch the rendering helpers:
+To fetch the canonical renderer as well:
 
 ```bash
 git sparse-checkout add 00_TOOLS/plantuml
@@ -132,3 +123,8 @@ git sparse-checkout add 00_TOOLS/plantuml
 ```
 https://github.com/antonioclim/COMPNET-EN/tree/main/00_TOOLS/PlantUML(optional)
 ```
+
+## Version and Provenance
+
+- The week mirrors are kept in sync with the lecture `assets/puml/` sources
+- Rendering scripts are maintained to support both offline (local JAR) and online (server-based) export
