@@ -1,42 +1,54 @@
-# release — Distributable ZIP Builder
+# release — Course Kit Packaging
 
-Single-script utility for producing a clean, distributable ZIP archive of the course kit. The script runs the QA checks, applies executable permission bits from the manifest and packages the repository while excluding development artefacts.
+Maintainer-only helper for producing a distributable ZIP archive of the repository. The script runs the repository QA checks first, then builds a ZIP using the inclusion and exclusion rules encoded in `create_release_zip.sh`.
 
-## File Index
+## File and Folder Index
 
-| File | Description | Lines |
-|---|---|---|
-| [`create_release_zip.sh`](create_release_zip.sh) | Bash script: runs QA, applies permissions, builds ZIP | 60 |
+| Name | Type | Description | Metric |
+|---|---|---|---|
+| [`README.md`](README.md) | Markdown | Orientation for release packaging (this file) | — |
+| [`create_release_zip.sh`](create_release_zip.sh) | Bash | Runs QA, then builds the release ZIP (path printed on success) | 60 lines |
 
 ## Usage
 
-From the repository root:
+Run from the repository root:
 
 ```bash
 bash 00_TOOLS/release/create_release_zip.sh
 ```
 
-To specify an explicit output name:
+The script prints the output ZIP path and exits non-zero if a QA check fails.
 
-```bash
-bash 00_TOOLS/release/create_release_zip.sh compnet-course-kit.zip
-```
+## Design Rationale
 
-The script performs three steps in order: runs the repository QA checks, applies `chmod +x` based on `qa/executable_manifest.txt` and packages a ZIP excluding `.git/`, `node_modules/` and other development-only files.
+Release creation is kept as a single script so that local packaging follows the same gates as CI. Packaging rules are kept next to the build logic to avoid divergence between documentation and what is actually shipped.
 
-## Cross-References
+## Cross-References and Contextual Connections
 
-| Aspect | Link |
-|---|---|
-| QA checks (invoked internally) | [`../qa/`](../qa/README.md) |
-| Executable manifest | [`../qa/executable_manifest.txt`](../qa/executable_manifest.txt) |
-| Permission repair script | [`../qa/apply_permissions.sh`](../qa/apply_permissions.sh) |
+### Prerequisites and Dependency Links
 
-No other repository components depend on this directory. It is a leaf node in the build graph.
+| Prerequisite | Path | Why |
+|---|---|---|
+| QA checks pass | [`../qa/`](../qa/) | The release builder aborts on failing checks |
+| `zip` available | — | The script uses `zip` to produce the archive |
+
+### Lecture, Seminar, Project and Quiz Mapping
+
+| This folder | Lecture foundation | Seminar usage | Project usage | Quiz |
+|---|---|---|---|---|
+| Release packaging | — | — | — | — |
+
+### Downstream Dependencies
+
+No course content depends on this directory at runtime. It is referenced by tool documentation and by the executable permission manifest.
+
+### Suggested Learning Sequence
+
+**Suggested sequence:** run QA locally (`00_TOOLS/qa/`) → run this script → distribute the resulting ZIP through the course channel
 
 ## Selective Clone Instructions
 
-**Method A — Git sparse-checkout (Git 2.25+)**
+**Method A — Git sparse-checkout (requires Git 2.25+)**
 
 ```bash
 git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
@@ -44,14 +56,12 @@ cd COMPNET-EN
 git sparse-checkout set 00_TOOLS/release
 ```
 
-The release script requires the `qa/` folder to run. Add it:
-
-```bash
-git sparse-checkout add 00_TOOLS/qa
-```
-
 **Method B — Direct download (no Git required)**
 
 ```
 https://github.com/antonioclim/COMPNET-EN/tree/main/00_TOOLS/release
 ```
+
+## Version and Provenance
+
+The release builder is updated when the packaging exclusions change or when the QA checks gain new gates.
