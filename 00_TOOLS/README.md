@@ -1,89 +1,113 @@
 # 00_TOOLS — Build, QA and Classroom Support Utilities
 
-Repository infrastructure that students, instructors and the CI pipeline depend on throughout the semester. The folder groups five concerns: environment setup, diagram generation, Docker observability, automated quality assurance and release packaging.
+Shared infrastructure for COMPNET-EN: environment setup, diagram rendering, Docker observability, repository QA checks and release packaging. Students rely on it for Week 0 setup and Docker-based seminars, instructors use it for repeatable classroom demonstrations and maintainers use it to validate and package the repository.
 
-## File / Folder Index
+## File and Folder Index
 
-| Name | Description | Metric |
-|---|---|---|
-| [`PlantUML(optional)/`](<PlantUML(optional)/README.md>) | 118 `.puml` diagram sources (weeks 1–13) and four generation scripts | 118 diagrams, 4 scripts |
-| [`plantuml/`](plantuml/README.md) | Central JAR provisioning (`get_plantuml_jar.sh`) and rendering helper (`render_puml.sh`) used by every `assets/render.sh` across the repository | 2 shell scripts |
-| [`Portainer/`](Portainer/README.md) | Optional Docker dashboard guides — init, seminar-specific tasks and project mapping | 15 files across 7 subdirectories |
-| [`Prerequisites/`](Prerequisites/README.md) | Student-facing environment setup guide, self-assessment checks and automated verification script | 2 Markdown, 1 Bash, 1 PNG |
-| [`qa/`](qa/README.md) | Automated quality-assurance scripts invoked by CI and locally | 3 Python, 2 Bash, 1 manifest |
-| [`release/`](release/README.md) | ZIP archive builder for distributable course kit | 1 Bash script |
+| Name | Type | Description | Metric |
+|---|---|---|---|
+| [`README.md`](README.md) | Markdown | Orientation for the tools layer (this file) | — |
+| [`Prerequisites/`](Prerequisites/) | Subdir | Week 0 environment setup guide, self-assessment checks and a verification script | 5 files (3×`.md`, 1×`.sh`, 1×`.png`) |
+| [`Portainer/`](Portainer/) | Subdir | Portainer installation guide plus seminar and project walkthroughs | 22 files across 7 subdirectories |
+| [`plantuml/`](plantuml/) | Subdir | Downloads `plantuml.jar` (kept out of Git) and renders `assets/puml/*.puml` into PNG | 2 scripts (+ downloaded JAR) |
+| [`PlantUML(optional)/`](<PlantUML(optional)/README.md>) | Subdir | Optional batch diagram collection mirroring lecture `assets/puml/` for Weeks 1–13 | 136 files: 118×`.puml`, 14×README, 4 scripts |
+| [`qa/`](qa/) | Subdir | Local and CI checks: executability, Markdown link integrity, text hygiene and figure target validation | 7 files (3×`.py`, 2×`.sh`, 1×manifest, 1×README) |
+| [`release/`](release/) | Subdir | Maintainer script for building a distributable course-kit ZIP | 2 files (1×`.sh`, 1×README) |
 
 ## Visual Overview
 
 ```mermaid
 graph TD
     TOOLS["00_TOOLS/"]
-    PUML["PlantUML(optional)/\n118 diagrams"]
-    PUMLH["plantuml/\nJAR + renderer"]
+    PRE["Prerequisites/\nsetup + verification"]
     PORT["Portainer/\nDocker dashboard"]
-    PRE["Prerequisites/\nEnvironment setup"]
+    PUMLH["plantuml/\nJAR + renderer"]
+    PUML["PlantUML(optional)/\nweek mirrors"]
     QA["qa/\nCI checks"]
     REL["release/\nZIP builder"]
 
-    TOOLS --> PUML
-    TOOLS --> PUMLH
-    TOOLS --> PORT
     TOOLS --> PRE
+    TOOLS --> PORT
+    TOOLS --> PUMLH
+    TOOLS --> PUML
     TOOLS --> QA
     TOOLS --> REL
 
-    QA -->|"invoked by"| REL
-    PUMLH -->|"downloaded JAR"| PUML
-    PRE -->|"installs Docker for"| PORT
+    PRE -->|"prepares Docker for"| PORT
+    PUMLH -->|"provides plantuml.jar"| PUML
+    QA -->|"gate before"| REL
 
     style TOOLS fill:#e1f5fe,stroke:#0288d1
-    style QA fill:#fff3e0,stroke:#f57c00
     style PRE fill:#e8f5e9,stroke:#388e3c
+    style QA fill:#fff3e0,stroke:#f57c00
 ```
 
-## Prettier Formatting (Root-Level Concern)
+## Usage
 
-The repository ships a Prettier configuration (`.prettierrc`, `.prettierignore`) and a `package.json` at the root so that Markdown and HTML files can be formatted deterministically.
-
-**With npm:**
+Typical entry points, run from the repository root:
 
 ```bash
-npm install          # one-time — fetches prettier
-npm run format:check # dry-run: exits non-zero if any file would change
-npm run format:write # rewrite files in place
+# Week 0 environment verification
+bash 00_TOOLS/Prerequisites/verify_lab_environment.sh
+
+# Download PlantUML JAR (kept out of Git) for offline diagram rendering
+bash 00_TOOLS/plantuml/get_plantuml_jar.sh
+
+# Render diagrams for a lecture/seminar/project (example)
+bash 03_LECTURES/C01/assets/render.sh
+
+# Run the same checks as CI
+bash 00_TOOLS/qa/check_executability.sh
+python 00_TOOLS/qa/check_markdown_links.py
+python 00_TOOLS/qa/check_integrity.py
+python 00_TOOLS/qa/check_fig_targets.py --puml-only
+
+# Build a distributable ZIP (maintainers)
+bash 00_TOOLS/release/create_release_zip.sh
 ```
 
-**Without network access:**
+## Design Rationale
 
-A zero-dependency Node.js script (`format-offline.js`) replicates the same rules. No `npm install` required.
-
-```bash
-node format-offline.js --check
-node format-offline.js --write
-```
-
-Prettier targets every `*.md` and `*.html` file except: `roCOMPNETclass_*` (Romanian instructor notes), `00_APPENDIX/c)studentsQUIZes(multichoice_only)/` (bilingual quizzes) and binary/Python/PlantUML/shell files. The formatting pass normalises LF line endings, strips trailing whitespace, collapses excessive blank lines and ensures a single trailing newline. Prose wrapping is set to `preserve` so paragraph reflows do not occur.
+All course code and documentation is intentionally supported by a small set of shared scripts rather than per-folder copies. Centralising diagram rendering, environment checks and QA reduces drift between weeks and keeps CI behaviour identical to local checks.
 
 ## Cross-References and Contextual Connections
 
-### Downstream Dependencies
+### Prerequisites and Dependency Links
 
-Every lecture, seminar and project `assets/render.sh` wrapper calls `00_TOOLS/plantuml/render_puml.sh`. The CI pipeline (`.github/workflows/ci.yml`) invokes all four `qa/` scripts. The root `README.md` links to `Prerequisites/Prerequisites.md` and `Prerequisites/verify_lab_environment.sh`. The release script depends on `qa/` for pre-packaging checks.
+| Prerequisite | Path | Why |
+|---|---|---|
+| Week 0 environment setup | [`Prerequisites/`](Prerequisites/) | Docker, Wireshark and Python tooling required across lectures, seminars and projects |
+| Portainer installed (optional) | [`Portainer/INIT_GUIDE/`](Portainer/INIT_GUIDE/) | GUI support for Docker scenarios in seminars and project work |
+| PlantUML renderer | [`plantuml/`](plantuml/) | Enables offline rendering of `assets/puml/` diagrams throughout the repository |
+
+### Lecture, Seminar, Project and Quiz Connections
+
+| Tool component | Lecture foundation | Seminar usage | Project usage | Quiz weeks |
+|---|---|---|---|---|
+| `Prerequisites/` | Environment assumptions appear in [`03_LECTURES/README.md`](../03_LECTURES/README.md) and lecture prerequisites such as [`03_LECTURES/C10/README.md`](../03_LECTURES/C10/README.md) | Required for all seminars, Docker required from [`04_SEMINARS/S08/`](../04_SEMINARS/S08/) onward | Required for project tooling and validation, see [`02_PROJECTS/README.md`](../02_PROJECTS/README.md) | Not assessed directly; assumed from Week 01 onward |
+| `Portainer/` | Docker-heavy lectures reference Portainer guides, e.g. [`03_LECTURES/C11/README.md`](../03_LECTURES/C11/README.md) | Guides for [`S08`](../04_SEMINARS/S08/), [`S09`](../04_SEMINARS/S09/), [`S10`](../04_SEMINARS/S10/), [`S11`](../04_SEMINARS/S11/) and [`S13`](../04_SEMINARS/S13/) | Project map links Portainer walkthroughs per project, see [`02_PROJECTS/01_network_applications/assets/PORTAINER/`](../02_PROJECTS/01_network_applications/assets/PORTAINER/) | Weeks 08, 09, 10, 11 and 13 |
+| `plantuml/` | Diagrams support all lecture slide decks via per-lecture `assets/render.sh` | Same renderer used in every seminar `assets/render.sh` | Same renderer used in project `assets/render.sh` wrappers | — |
+| `PlantUML(optional)/` | Mirrors lecture diagram sources (`03_LECTURES/C01–C13/assets/puml/`) for batch export | Week directories link to same-week seminars (`04_SEMINARS/S01–S13/`) | Not required; intended for slide or handout generation | Weeks 01–13 |
+| `qa/` | — | — | — | — |
+| `release/` | — | — | — | — |
+
+### Downstream Dependencies
 
 | Dependent | Path | What it uses |
 |---|---|---|
-| CI pipeline | `.github/workflows/ci.yml` | `qa/check_executability.sh`, `qa/check_markdown_links.py`, `qa/check_integrity.py`, `qa/check_fig_targets.py` |
-| All `render.sh` wrappers | `03_LECTURES/C*/assets/render.sh`, `04_SEMINARS/S*/assets/render.sh`, `02_PROJECTS/*/assets/render.sh` | `plantuml/render_puml.sh` |
-| Root README | `README.md` | `Prerequisites/Prerequisites.md`, `Prerequisites/verify_lab_environment.sh` |
-| Release script | `release/create_release_zip.sh` | `qa/check_executability.sh`, `qa/executable_manifest.txt` |
+| CI pipeline | [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) | `qa/check_executability.sh`, `qa/check_markdown_links.py`, `qa/check_integrity.py`, `qa/check_fig_targets.py` |
+| Diagram render wrappers | `03_LECTURES/C*/assets/render.sh`, `04_SEMINARS/S*/assets/render.sh`, `02_PROJECTS/*/assets/render.sh` | `plantuml/render_puml.sh` and `00_TOOLS/plantuml.jar` |
+| Appendix Makefile | [`00_APPENDIX/Makefile`](../00_APPENDIX/Makefile) | Calls `Prerequisites/verify_lab_environment.sh` |
+| Root README | [`README.md`](../README.md) | Links to `Prerequisites/Prerequisites.md` and `Prerequisites/verify_lab_environment.sh` |
+| Release builder | [`release/create_release_zip.sh`](release/create_release_zip.sh) | Executes the `qa/` checks before packaging |
 
 ### Suggested Learning Sequence
 
-**Suggested sequence:** `Prerequisites/` (week 0) → `Portainer/INIT_GUIDE/` (pre-semester) → `plantuml/` (first diagram render) → `qa/` (contributor onboarding) → `release/` (kit distribution)
+**Suggested sequence:** [`Prerequisites/`](Prerequisites/) → [`../00_APPENDIX/`](../00_APPENDIX/) (Week 0 orientation) → [`Portainer/INIT_GUIDE/`](Portainer/INIT_GUIDE/) (optional) → first seminar render (`04_SEMINARS/S01/assets/render.sh`) → `qa/` (contributors) → `release/` (maintainers)
 
 ## Selective Clone Instructions
 
-**Method A — Git sparse-checkout (Git 2.25+)**
+**Method A — Git sparse-checkout (requires Git 2.25+)**
 
 ```bash
 git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
@@ -91,16 +115,18 @@ cd COMPNET-EN
 git sparse-checkout set 00_TOOLS
 ```
 
-**Method B — Direct download (no Git required)**
+To add the seminars or lectures later:
 
-Browse the folder at:
+```bash
+git sparse-checkout add 04_SEMINARS 03_LECTURES
+```
+
+**Method B — Direct download (no Git required)**
 
 ```
 https://github.com/antonioclim/COMPNET-EN/tree/main/00_TOOLS
 ```
 
-Or use a tool such as `download-directory.github.io` to fetch a single folder as a ZIP.
+## Version and Provenance
 
-## Version
-
-Last significant update: February 2026 (v13 documentation enrichment pass).
+Last significant update: February 2026 (documentation enrichment pass).
