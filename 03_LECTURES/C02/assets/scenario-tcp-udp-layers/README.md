@@ -77,3 +77,34 @@ UDP:
 - Transport: TCP or UDP
 - Network: IP (IP header in the capture)
 - Network access: depends on the adaptor (Ethernet or Wi‑Fi); not examined here
+
+## Files
+
+| Name | Lines |
+|------|-------|
+| `tcp-client.py` | 15 |
+| `tcp-server.py` | 21 |
+| `udp-client.py` | 14 |
+| `udp-server.py` | 16 |
+
+## Cross-References
+
+Parent lecture: [`C02/ — Architectural Models (OSI and TCP/IP)`](../../)
+  
+Lecture slides: [`c2-architectural-models.md`](../../c2-architectural-models.md)
+  
+Quiz: [`W02`](../../../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W02_Questions.md)
+
+## Selective Clone
+
+**Method A — Git sparse-checkout (Git 2.25+)**
+
+```bash
+git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
+cd COMPNET-EN
+git sparse-checkout set 03_LECTURES/C02/assets/scenario-tcp-udp-layers
+```
+
+**Method B — Direct download**
+
+Browse at: `https://github.com/antonioclim/COMPNET-EN/tree/main/03_LECTURES/C02/assets/scenario-tcp-udp-layers`

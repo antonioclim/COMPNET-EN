@@ -24,3 +24,33 @@ Exercises:
 2) Observe acknowledgement ids increasing
 3) Implement a client-side rule: ignore messages from other rooms
 4) Discuss what TCP already guarantees and what this protocol adds
+
+## Files
+
+| Name | Lines |
+|------|-------|
+| `index.html` | 65 |
+| `protocol.md` | 28 |
+| `server.py` | 102 |
+
+## Cross-References
+
+Parent lecture: [`C10/ — HTTP(S), REST and WebSockets`](../../)
+  
+Lecture slides: [`c10-http-application-layer.md`](../../c10-http-application-layer.md)
+  
+Quiz: [`W10`](../../../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W10_Questions.md)
+
+## Selective Clone
+
+**Method A — Git sparse-checkout (Git 2.25+)**
+
+```bash
+git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
+cd COMPNET-EN
+git sparse-checkout set 03_LECTURES/C10/assets/scenario-websocket-protocol
+```
+
+**Method B — Direct download**
+
+Browse at: `https://github.com/antonioclim/COMPNET-EN/tree/main/03_LECTURES/C10/assets/scenario-websocket-protocol`

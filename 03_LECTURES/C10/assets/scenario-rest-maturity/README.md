@@ -27,3 +27,36 @@ What to observe:
 - Where actions leak into payloads (Level 0)
 - When URLs identify resources (Level 1+)
 - When hypermedia guides the client (Level 3)
+
+## Files
+
+| Name | Lines |
+|------|-------|
+| `client-test.py` | 113 |
+| `common.py` | 14 |
+| `server-level0.py` | 49 |
+| `server-level1.py` | 53 |
+| `server-level2.py` | 55 |
+| `server-level3.py` | 83 |
+
+## Cross-References
+
+Parent lecture: [`C10/ — HTTP(S), REST and WebSockets`](../../)
+  
+Lecture slides: [`c10-http-application-layer.md`](../../c10-http-application-layer.md)
+  
+Quiz: [`W10`](../../../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W10_Questions.md)
+
+## Selective Clone
+
+**Method A — Git sparse-checkout (Git 2.25+)**
+
+```bash
+git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
+cd COMPNET-EN
+git sparse-checkout set 03_LECTURES/C10/assets/scenario-rest-maturity
+```
+
+**Method B — Direct download**
+
+Browse at: `https://github.com/antonioclim/COMPNET-EN/tree/main/03_LECTURES/C10/assets/scenario-rest-maturity`

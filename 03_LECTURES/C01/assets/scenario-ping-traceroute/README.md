@@ -60,3 +60,25 @@ Observe:
 #### Quick questions (2–3 minutes)
 - Why does ping use ICMP rather than TCP?
 - Why do some routers not respond to traceroute?
+
+## Cross-References
+
+Parent lecture: [`C01/ — Network Fundamentals`](../../)
+  
+Lecture slides: [`c1-network-fundamentals.md`](../../c1-network-fundamentals.md)
+  
+Quiz: [`W01`](../../../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W01_Questions.md)
+
+## Selective Clone
+
+**Method A — Git sparse-checkout (Git 2.25+)**
+
+```bash
+git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
+cd COMPNET-EN
+git sparse-checkout set 03_LECTURES/C01/assets/scenario-ping-traceroute
+```
+
+**Method B — Direct download**
+
+Browse at: `https://github.com/antonioclim/COMPNET-EN/tree/main/03_LECTURES/C01/assets/scenario-ping-traceroute`

@@ -59,3 +59,35 @@ Note: For local demonstrations, TLS certificates are self-signed so clients may 
 ```bash
 docker compose down -v
 ```
+
+## Files
+
+| Name | Lines |
+|------|-------|
+| `docker-compose.yml` | 41 |
+| `mailserver.env` | 15 |
+| `requirements.txt` | 1 |
+| `docker-mailserver/` | 1 files |
+| `scripts/` | 4 files |
+
+## Cross-References
+
+Parent lecture: [`C12/ — Email Protocols (SMTP, POP3, IMAP)`](../../)
+  
+Lecture slides: [`c12-email-protocols.md`](../../c12-email-protocols.md)
+  
+Quiz: [`W12`](../../../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W12_Questions.md)
+
+## Selective Clone
+
+**Method A — Git sparse-checkout (Git 2.25+)**
+
+```bash
+git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
+cd COMPNET-EN
+git sparse-checkout set 03_LECTURES/C12/assets/scenario-local-mailbox
+```
+
+**Method B — Direct download**
+
+Browse at: `https://github.com/antonioclim/COMPNET-EN/tree/main/03_LECTURES/C12/assets/scenario-local-mailbox`

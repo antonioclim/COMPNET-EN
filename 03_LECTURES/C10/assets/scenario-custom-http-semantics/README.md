@@ -25,3 +25,32 @@ Run:
 - pip install flask requests
 - python server.py
 - python client.py
+
+## Files
+
+| Name | Lines |
+|------|-------|
+| `client.py` | 26 |
+| `server.py` | 92 |
+
+## Cross-References
+
+Parent lecture: [`C10/ — HTTP(S), REST and WebSockets`](../../)
+  
+Lecture slides: [`c10-http-application-layer.md`](../../c10-http-application-layer.md)
+  
+Quiz: [`W10`](../../../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W10_Questions.md)
+
+## Selective Clone
+
+**Method A — Git sparse-checkout (Git 2.25+)**
+
+```bash
+git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
+cd COMPNET-EN
+git sparse-checkout set 03_LECTURES/C10/assets/scenario-custom-http-semantics
+```
+
+**Method B — Direct download**
+
+Browse at: `https://github.com/antonioclim/COMPNET-EN/tree/main/03_LECTURES/C10/assets/scenario-custom-http-semantics`

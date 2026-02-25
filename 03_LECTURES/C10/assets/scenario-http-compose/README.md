@@ -27,3 +27,34 @@ Run:
   - curl -i http://localhost:8080/
   - curl -i http://localhost:8080/app/
   - curl -i http://localhost:8080/api/users
+
+## Files
+
+| Name | Lines |
+|------|-------|
+| `docker-compose.yml` | 20 |
+| `api/` | 3 files |
+| `nginx/` | 1 files |
+| `web/` | 3 files |
+
+## Cross-References
+
+Parent lecture: [`C10/ — HTTP(S), REST and WebSockets`](../../)
+  
+Lecture slides: [`c10-http-application-layer.md`](../../c10-http-application-layer.md)
+  
+Quiz: [`W10`](../../../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W10_Questions.md)
+
+## Selective Clone
+
+**Method A — Git sparse-checkout (Git 2.25+)**
+
+```bash
+git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
+cd COMPNET-EN
+git sparse-checkout set 03_LECTURES/C10/assets/scenario-http-compose
+```
+
+**Method B — Direct download**
+
+Browse at: `https://github.com/antonioclim/COMPNET-EN/tree/main/03_LECTURES/C10/assets/scenario-http-compose`

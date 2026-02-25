@@ -83,3 +83,25 @@ Observe the ARP request (broadcast) and ARP reply (unicast).
 
 - A screenshot of `ip neigh` after a ping
 - A short excerpt from `tcpdump` showing an ARP request and reply
+
+## Cross-References
+
+Parent lecture: [`C04/ — Physical and Data Link Layer`](../../)
+  
+Lecture slides: [`c4-physical-and-data-link.md`](../../c4-physical-and-data-link.md)
+  
+Quiz: [`W04`](../../../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W04_Questions.md)
+
+## Selective Clone
+
+**Method A — Git sparse-checkout (Git 2.25+)**
+
+```bash
+git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
+cd COMPNET-EN
+git sparse-checkout set 03_LECTURES/C04/assets/scenario-mac-arp-ethernet
+```
+
+**Method B — Direct download**
+
+Browse at: `https://github.com/antonioclim/COMPNET-EN/tree/main/03_LECTURES/C04/assets/scenario-mac-arp-ethernet`

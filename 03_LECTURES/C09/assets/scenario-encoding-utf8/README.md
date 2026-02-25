@@ -26,3 +26,32 @@
 - The body is identical (UTF-8)
 - Only the charset in the header differs
 - A browser might render the characters incorrectly for the /bad endpoint
+
+## Files
+
+| Name | Lines |
+|------|-------|
+| `run.sh` | 5 |
+| `server.py` | 43 |
+
+## Cross-References
+
+Parent lecture: [`C09/ — Session and Presentation Layer`](../../)
+  
+Lecture slides: [`c9-session-presentation.md`](../../c9-session-presentation.md)
+  
+Quiz: [`W09`](../../../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W09_Questions.md)
+
+## Selective Clone
+
+**Method A — Git sparse-checkout (Git 2.25+)**
+
+```bash
+git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
+cd COMPNET-EN
+git sparse-checkout set 03_LECTURES/C09/assets/scenario-encoding-utf8
+```
+
+**Method B — Direct download**
+
+Browse at: `https://github.com/antonioclim/COMPNET-EN/tree/main/03_LECTURES/C09/assets/scenario-encoding-utf8`

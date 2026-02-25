@@ -30,3 +30,36 @@ The script:
 In topo.py you can modify:
 - loss (e.g. 5, 10, 20)
 - delay (optional)
+
+## Files
+
+| Name | Lines |
+|------|-------|
+| `run.sh` | 50 |
+| `tcp_receiver.py` | 29 |
+| `tcp_sender.py` | 20 |
+| `topo.py` | 33 |
+| `udp_receiver.py` | 43 |
+| `udp_sender.py` | 16 |
+
+## Cross-References
+
+Parent lecture: [`C08/ — Transport Layer (TCP, UDP, TLS, QUIC)`](../../)
+  
+Lecture slides: [`c8-transport-layer.md`](../../c8-transport-layer.md)
+  
+Quiz: [`W08`](../../../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W08_Questions.md)
+
+## Selective Clone
+
+**Method A — Git sparse-checkout (Git 2.25+)**
+
+```bash
+git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
+cd COMPNET-EN
+git sparse-checkout set 03_LECTURES/C08/assets/scenario-udp-vs-tcp-loss
+```
+
+**Method B — Direct download**
+
+Browse at: `https://github.com/antonioclim/COMPNET-EN/tree/main/03_LECTURES/C08/assets/scenario-udp-vs-tcp-loss`
