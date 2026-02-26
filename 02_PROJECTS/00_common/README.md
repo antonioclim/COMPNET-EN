@@ -1,95 +1,88 @@
-# 00_common — Shared Assessment Infrastructure
+# 00_common — shared assessment infrastructure for RC2026 projects
 
-Common templates, tooling and CI configuration that enforce reproducibility and consistency across all 25 RC2026 projects. Student repositories are expected to mirror the structure defined here; the automatic E2 pipeline depends on standard file names and directory conventions.
+Standards, templates and validation tooling that student project repositories are expected to copy verbatim. The directory defines the fixed filenames, E2 automation pattern and deterministic PCAP acceptance rules used during marking.
 
-## File/Folder Index
+## File and folder index
 
 | Name | Description | Metric |
 |---|---|---|
-| [`README_STANDARD_RC2026.md`](README_STANDARD_RC2026.md) | Minimum student-repository structure, PCAP validation protocol and E3 evidence requirements | 71 lines |
-| [`assets/`](assets/) | PlantUML source diagrams and a rendering script for the shared assessment architecture | 6 `.puml` files, 326 lines total |
-| [`ci/`](ci/) | GitHub Actions workflow template for E2 automation | 1 file, 27 lines |
-| [`docker/`](docker/) | Base tester container: Dockerfile and entrypoint script | 2 files, 53 lines total |
-| [`tools/`](tools/) | PCAP validation script and per-project rule sets | 26 files (1 Python script + 25 JSON rule files) |
+| [`assets/`](assets/) | Shared figures and rendering helpers for the parent group | 11 files (6 .puml, 3 .md) |
+| [`ci/`](ci/) | CI templates for the E2 automation stage | 2 files (1 .md, 1 .yml) |
+| [`docker/`](docker/) | Docker build and runtime artefacts for the tester container | 4 files (2 .md, 1 .sh) |
+| [`tools/`](tools/) | PCAP validation tooling and rule sets | 28 files (25 .json, 2 .md) |
+| `README.md` | Directory orientation and cross-reference map | 102 lines |
+| [`README_STANDARD_RC2026.md`](README_STANDARD_RC2026.md) | RC2026 — Standardisation, automation and common criteria (for all projects) | 71 lines |
 
-## Visual Overview
+## Visual overview
 
 ```mermaid
 graph TD
-    STD["README_STANDARD_RC2026.md\n(student repo blueprint)"]
-    CI["ci/github_actions_e2.yml\n(CI template)"]
-    DOCK["docker/tester_base/\nDockerfile + entrypoint.sh"]
-    VAL["tools/validate_pcap.py"]
-    RULES["tools/pcap_rules/\nS01..S15, A01..A10 (.json)"]
-    PUML["assets/puml/\n6 architecture diagrams"]
+    STD["README_STANDARD_RC2026.md\nrepo blueprint"]
+    CI["ci/github_actions_e2.yml\nGitHub Actions template"]
+    DOCK["docker/tester_base/\nE2 tester image"]
+    VAL["tools/validate_pcap.py\nPCAP validator"]
+    RULES["tools/pcap_rules/\nS01..S15, A01..A10"]
+    FIGS["assets/puml/\nassessment diagrams"]
 
-    STD -->|defines structure for| CI
-    STD -->|defines structure for| DOCK
-    CI -->|invokes| DOCK
-    DOCK -->|calls| VAL
-    VAL -->|reads| RULES
-    PUML -.->|illustrates| STD
-
-    style STD fill:#fff3e0,stroke:#f57c00
-    style CI fill:#e3f2fd,stroke:#0288d1
-    style DOCK fill:#e3f2fd,stroke:#0288d1
-    style VAL fill:#e8f5e9,stroke:#388e3c
-    style RULES fill:#e8f5e9,stroke:#388e3c
-    style PUML fill:#f3e5f5,stroke:#7b1fa2
+    STD --> CI
+    STD --> DOCK
+    DOCK --> VAL
+    VAL --> RULES
+    FIGS -.-> STD
 ```
 
 ## Usage
 
-The contents of this directory are not executed in place. Students copy the relevant files into their own repositories:
+This directory is a reference source. Typical use is copying a subset into a student repository:
 
 ```bash
-# copy PCAP validation tooling into the student project
-cp tools/validate_pcap.py  <student-repo>/tools/
-cp tools/pcap_rules/S01.json <student-repo>/tools/pcap_rules/
+# PCAP validator and one rule set
+cp 02_PROJECTS/00_common/tools/validate_pcap.py  <student-repo>/tools/
+cp 02_PROJECTS/00_common/tools/pcap_rules/S01.json <student-repo>/tools/pcap_rules/
 
-# copy CI template
-cp ci/github_actions_e2.yml <student-repo>/.github/workflows/e2.yml
+# E2 automation template (rename as needed)
+mkdir -p <student-repo>/.github/workflows
+cp 02_PROJECTS/00_common/ci/github_actions_e2.yml <student-repo>/.github/workflows/e2.yml
 
-# copy tester Dockerfile
-cp -r docker/tester_base/ <student-repo>/docker/tester_base/
+# tester image template
+mkdir -p <student-repo>/docker
+cp -r 02_PROJECTS/00_common/docker/tester_base <student-repo>/docker/
 ```
 
-To render PlantUML diagrams (requires `plantuml.jar` — see [`../../00_TOOLS/plantuml/`](../../00_TOOLS/plantuml/)):
+## Design and teaching intent
 
-```bash
-bash assets/render.sh
-```
+Centralising acceptance criteria keeps assessment repeatable: rules change in one place and student repositories remain structurally uniform. The validator separates tshark logic from per-project expectations so instructors can refine thresholds without touching student code.
 
-Rendered PNGs appear in `assets/images/`.
+## Cross-references and contextual connections
 
-## Design Rationale
 
-Centralising assessment tooling in a single directory ensures that rule updates propagate to all projects without per-brief edits. The separation of JSON rule files from the validation engine allows instructors to modify acceptance criteria independently of the tshark-parsing logic.
+### Prerequisites and dependencies
 
-## Cross-References
-
-| Related area | Path | Relationship |
+| Prerequisite | Path | Why |
 |---|---|---|
-| Network-application project briefs | [`../01_network_applications/`](../01_network_applications/) | Each S-project references rules from `tools/pcap_rules/S{NN}.json` |
-| Administration/security project briefs | [`../02_administration_security/`](../02_administration_security/) | Each A-project references rules from `tools/pcap_rules/A{NN}.json` |
-| Course–seminar mapping | [`../COURSE_SEMINAR_MAPPING.md`](../COURSE_SEMINAR_MAPPING.md) | Aligns project codes to lectures and seminars |
-| Portainer project map | [`../../00_TOOLS/Portainer/PROJECTS/PROJECTS_PORTAINER_MAP.md`](../../00_TOOLS/Portainer/PROJECTS/PROJECTS_PORTAINER_MAP.md) | References the `tester` container pattern defined here |
-| PlantUML central renderer | [`../../00_TOOLS/plantuml/`](../../00_TOOLS/plantuml/) | `assets/render.sh` delegates to the central `render_puml.sh` |
-| Environment prerequisites | [`../../00_TOOLS/Prerequisites/`](../../00_TOOLS/Prerequisites/) | Docker and tshark must be installed before validation works |
+| Environment and tooling | [`00_TOOLS/Prerequisites/`](../../00_TOOLS/Prerequisites) | Docker, tcpdump and tshark are required for the E2 pattern described here |
+| PlantUML renderer | [`00_TOOLS/plantuml/`](../../00_TOOLS/plantuml) | `assets/render.sh` delegates diagram rendering to the central scripts |
 
-### Downstream Dependencies
+### Lecture ↔ seminar ↔ project ↔ quiz mapping
 
-Every student repository built to the RC2026 standard copies files from this directory. The GitHub Actions template in `ci/` and the Dockerfile in `docker/tester_base/` reference `tools/validate_pcap.py` by relative path within the student repository (not from this location). No CI or Makefile within the course repository itself invokes files from `00_common/` directly.
+| This folder item | Lecture | Seminar | Project | Quiz |
+|---|---|---|---|---|
+| [`tools/validate_pcap.py`](tools/validate_pcap.py) | [C03](../../03_LECTURES/C03) and [C08](../../03_LECTURES/C08) | [S14](../../04_SEMINARS/S14) | All briefs under [`01_network_applications/`](../01_network_applications) and [`02_administration_security/`](../02_administration_security) | [W03](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W03_Questions.md), [W08](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W08_Questions.md) |
+| [`ci/github_actions_e2.yml`](ci/github_actions_e2.yml) | — | [S14](../../04_SEMINARS/S14) | All projects (copied into student repos) | — |
 
-### Suggested Learning Sequence
+### Downstream dependencies
 
-```
-00_TOOLS/Prerequisites/ → this folder (read README_STANDARD_RC2026.md) → project brief selection → student repo initialisation
-```
+Student repositories are expected to copy files from this folder; the course repository does not execute them in place.
+`00_TOOLS/qa/check_executability.sh` includes the shell scripts here in its manifest, so file modes must remain consistent with CI expectations.
 
-## Selective Clone
+### Suggested learning sequence
 
-**Method A — Git sparse-checkout (requires Git ≥ 2.25)**
+Suggested sequence: read `README_STANDARD_RC2026.md` → pick a brief in `01_network_applications/` or `02_administration_security/` → set up the student repository skeleton → implement E1 then E2 automation.
+
+
+## Selective clone
+
+### Method A — Git sparse-checkout (Git ≥ 2.25)
 
 ```bash
 git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
@@ -97,6 +90,20 @@ cd COMPNET-EN
 git sparse-checkout set 02_PROJECTS/00_common
 ```
 
-**Method B — Direct download (no Git required)**
+To add another path later:
 
-Browse: <https://github.com/antonioclim/COMPNET-EN/tree/main/02_PROJECTS/00_common>
+```bash
+git sparse-checkout add <ANOTHER_PATH>
+```
+
+### Method B — Direct download (no Git required)
+
+```text
+https://github.com/antonioclim/COMPNET-EN/tree/main/02_PROJECTS/00_common
+```
+
+GitHub can only download the full repository as a ZIP. For a single folder, use a browser-side downloader such as download-directory.github.io or gitzip.
+
+## Version and provenance
+
+RC2026 assessment infrastructure snapshot (February 2026).
