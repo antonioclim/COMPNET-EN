@@ -1,89 +1,94 @@
-# RC2026 — Project Catalogue (Computer Networks)
+# 02_PROJECTS — RC2026 project briefs and assessment tooling
 
-Twenty-five laboratory projects constitute the practical assessment backbone of RC2026. Each project requires students to specify, implement and verify a network system — progressing from protocol observation (E1) through automated capture validation (E2) to a final demonstration with evidence (E3). Projects are split into two groups that differ in scope, tooling expectations and the presence of a mandatory multi-language interoperability component.
+Project specifications and shared assessment artefacts for the RC2026 Computer Networks laboratory. Students select one brief from this catalogue and implement it in their own repository, while instructors rely on the common tooling and verification index for repeatable marking across cohorts.
 
-## Catalogue Structure
+## File and folder index
 
-| Directory | Contents | Count | Purpose |
-|---|---|---|---|
-| [`00_common/`](00_common/) | Shared standards, tooling and CI templates | 38 files | Assessment infrastructure reused by every project |
-| [`01_network_applications/`](01_network_applications/) | Application-layer project briefs S01–S15 | 78 files (15 specs, 15 Portainer guides, 45 PlantUML, 3 support) | Group 1 — protocol design and service implementation |
-| [`02_administration_security/`](02_administration_security/) | Administration and security briefs A01–A10 | 43 files (10 specs, 30 PlantUML, 3 support) | Group 2 — SDN, PCAP analysis and controlled security labs |
-| [`COURSE_SEMINAR_MAPPING.md`](COURSE_SEMINAR_MAPPING.md) | Full project ↔ lecture ↔ seminar alignment table | 31 lines | Curriculum traceability |
-| [`RC2026_VERIFICATION_INDEX.xlsx`](RC2026_VERIFICATION_INDEX.xlsx) | Per-ID checklist for assessment (M01, NF01 …) | 140 KB | Instructor grading instrument |
+| Name | Description | Metric |
+|---|---|---|
+| [`00_common/`](00_common/) | Shared assessment infrastructure (templates, CI, tester container and validation tooling) | 47 files (25 .json, 10 .md) |
+| [`01_network_applications/`](01_network_applications/) | Group 1 project briefs (S01–S15): application protocols and services | 97 files (50 .md, 45 .puml) |
+| [`02_administration_security/`](02_administration_security/) | Group 2 project briefs (A01–A10): SDN, analysis and controlled security labs | 46 files (30 .puml, 14 .md) |
+| [`COURSE_SEMINAR_MAPPING.md`](COURSE_SEMINAR_MAPPING.md) | Project ↔ course/seminar mapping (RC2026) | 31 lines |
+| [`RC2026_VERIFICATION_INDEX.xlsx`](RC2026_VERIFICATION_INDEX.xlsx) | Instructor verification index (spreadsheet checklist) | 140 KB |
+| `README.md` | Directory orientation and cross-reference map | 102 lines |
 
-## Assessment Model
+## Visual overview
 
 ```mermaid
-flowchart LR
-    E1["E1 (25%)\nSpecification\n+ Phase 0"]
-    E2["E2 (35%)\nPrototype + PCAP\n+ Automation"]
-    E3["E3 (40%)\nFinal + Demo\n+ Evidence"]
-    E1 --> E2 --> E3
-    style E1 fill:#fff3e0,stroke:#f57c00
-    style E2 fill:#e3f2fd,stroke:#0288d1
-    style E3 fill:#e8f5e9,stroke:#388e3c
+graph TD
+    P["02_PROJECTS"]
+    C["00_common/"]
+    S["01_network_applications/"]
+    A["02_administration_security/"]
+    MAP["COURSE_SEMINAR_MAPPING.md"]
+    IDX["RC2026_VERIFICATION_INDEX.xlsx"]
+
+    P --> C
+    P --> S
+    P --> A
+    P --> MAP
+    P --> IDX
+    C -->|"E2 validation rules"| S
+    C -->|"E2 validation rules"| A
 ```
 
-| Phase | Weight | Deliverable | Automation gate |
-|---|---|---|---|
-| E1 | 25 % | `docs/E1_specification.md` + `docs/E1_phase0_observations.md` | — |
-| E2 | 35 % | Reproducible run via `make e2`; capture `artifacts/pcap/traffic_e2.pcap` | `python tools/validate_pcap.py --project <CODE> --pcap artifacts/pcap/traffic_e2.pcap` |
-| E3 | 40 % | Final documentation, demo and evidence table (`docs/E3_final_documentation.md`) | MANIFEST.txt completeness |
+## Usage
 
-Group 1 (S-projects) adds a mandatory Flex component in E3: the team must implement one interoperable subsystem in a language other than Python (C, C++, Java, Go, Rust, JavaScript/Node.js or similar). Group 2 (A-projects) does not require Flex; Bash scripting and Python are sufficient.
-
-## Deterministic PCAP Validation (E2)
-
-Every project must produce a packet capture during its automated E2 run. Validation rules are project-specific JSON files stored in [`00_common/tools/pcap_rules/`](00_common/tools/pcap_rules/). The validator [`00_common/tools/validate_pcap.py`](00_common/tools/validate_pcap.py) applies `tshark` display filters and checks packet-count thresholds.
+Typical workflow for a student team:
 
 ```bash
-# from the student repository root
-python tools/validate_pcap.py --project S01 --pcap artifacts/pcap/traffic_e2.pcap
+# 1) choose a brief and read its E1/E2/E3 gates
+ls 01_network_applications/S*.md 02_administration_security/A*.md
+
+# 2) consult the standard structure and tooling expectations
+sed -n '1,120p' 00_common/README_STANDARD_RC2026.md
+
+# 3) use the mapping table to locate the relevant lecture and seminar material
+sed -n '1,120p' COURSE_SEMINAR_MAPPING.md
 ```
 
-Rules files follow the naming convention `<CODE>.json` (e.g. `S01.json`, `A07.json`). Each rule specifies a `tshark` filter, a numeric condition and a human-readable description.
+## Design and teaching intent
 
-## Project ↔ Lecture ↔ Seminar Mapping (excerpt)
+The catalogue keeps assessment mechanics separate from subject matter: briefs describe network behaviour and evidence gates, while `00_common/` concentrates the E2 automation and PCAP acceptance rules so criteria can be updated without rewriting each brief.
 
-The full mapping lives in [`COURSE_SEMINAR_MAPPING.md`](COURSE_SEMINAR_MAPPING.md). The table below shows the primary lecture for each project (first listed in the competency field):
+## Cross-references and contextual connections
 
-| Code | Primary lecture | Primary seminar | Difficulty |
-|---|---|---|---|
-| S01–S05 | C03 (Application layer) | S03, S09, S08, S11 | ★★★★☆ |
-| S06–S09 | C03 + C08 (Transport) | S03, S10, S04 | ★★★★★ |
-| S10–S13 | C03 + C10 (HTTP/REST) | S09, S11, S12 | ★★★★☆ |
-| S14 | C05 (Network layer) | S06 | ★★★★★ |
-| S15 | C03 + C10 (IoT/HTTP) | S07 | ★★★★☆ |
-| A01–A10 | C13 (Security), C04–C06 | S06, S07, S13 | ★★★★☆ to ★★★★★ |
 
-## Cross-References
+### Prerequisites and dependencies
 
-| Related area | Path | Relationship |
+| Prerequisite | Path | Why |
 |---|---|---|
-| Lecture slides and notes | [`../03_LECTURES/`](../03_LECTURES/) | Theoretical foundation for every project (see mapping) |
-| Seminar exercises | [`../04_SEMINARS/`](../04_SEMINARS/) | Practical skill-building sessions that precede project work |
-| Quiz bank | [`../00_APPENDIX/c)studentsQUIZes(multichoice_only)/`](../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/) | Formative self-assessment aligned to lecture weeks |
-| Environment setup | [`../00_TOOLS/Prerequisites/`](../00_TOOLS/Prerequisites/) | Docker, WSL2 and Wireshark configuration required before E2 |
-| Portainer overview | [`../00_TOOLS/Portainer/`](../00_TOOLS/Portainer/) | Container dashboard used during project debugging |
-| Portainer project map | [`../00_TOOLS/Portainer/PROJECTS/PROJECTS_PORTAINER_MAP.md`](../00_TOOLS/Portainer/PROJECTS/PROJECTS_PORTAINER_MAP.md) | Per-project container architecture and benefit tier |
-| Instructor notes (Romanian) | [`../00_APPENDIX/d)instructor_NOTES4sem/`](../00_APPENDIX/d%29instructor_NOTES4sem/) | Seminar delivery guides that reference project exercises |
-| PlantUML renderer | [`../00_TOOLS/plantuml/`](../00_TOOLS/plantuml/) | Central rendering script invoked by `assets/render.sh` in each group |
-| QA checks | [`../00_TOOLS/qa/`](../00_TOOLS/qa/) | `check_markdown_links.py` and `check_integrity.py` validate this folder |
+| Environment and tooling | [`00_TOOLS/Prerequisites/`](../00_TOOLS/Prerequisites) | Docker, Wireshark/tshark and base shell tools are assumed for E2 evidence |
+| Python sockets primer | [`00_APPENDIX/a)PYTHON_self_study_guide/`](../00_APPENDIX/a%29PYTHON_self_study_guide) | S-projects assume socket programming, parsing and basic concurrency |
+| Lecture notes | [`03_LECTURES/`](../03_LECTURES) | Protocol theory and layer models used by the briefs |
+| Seminar exercises | [`04_SEMINARS/`](../04_SEMINARS) | Worked examples and laboratory skills that precede project work |
+| Portainer setup (optional) | [`00_TOOLS/Portainer/INIT_GUIDE/`](../00_TOOLS/Portainer/INIT_GUIDE) | Container inspection during debugging, especially for multi-service projects |
 
-### Downstream Dependencies
+### Lecture ↔ seminar ↔ project ↔ quiz mapping (group view)
 
-The root [`README.md`](../README.md) references `02_PROJECTS/` in the repository structure table. The Portainer project map (`00_TOOLS/Portainer/PROJECTS/`) links back to project briefs and Portainer guides within this folder. CI templates in `00_common/ci/` are designed to be copied into student repositories, not invoked from this location.
+| This area | Lectures | Seminars | Quiz weeks | Portainer |
+|---|---|---|---|---|
+| [`01_network_applications/`](01_network_applications) | [C03](../03_LECTURES/C03), [C08](../03_LECTURES/C08), [C09](../03_LECTURES/C09), [C11](../03_LECTURES/C11), [C10](../03_LECTURES/C10), [C13](../03_LECTURES/C13), [C12](../03_LECTURES/C12), [C05](../03_LECTURES/C05), [C06](../03_LECTURES/C06), [C07](../03_LECTURES/C07) | [S02](../04_SEMINARS/S02), [S03](../04_SEMINARS/S03), [S04](../04_SEMINARS/S04), [S05](../04_SEMINARS/S05), [S06](../04_SEMINARS/S06), [S07](../04_SEMINARS/S07), [S08](../04_SEMINARS/S08), [S09](../04_SEMINARS/S09), [S10](../04_SEMINARS/S10), [S11](../04_SEMINARS/S11), [S12](../04_SEMINARS/S12) | [W03](../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W03_Questions.md), [W08](../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W08_Questions.md), [W09](../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W09_Questions.md), [W11](../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W11_Questions.md), [W10](../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W10_Questions.md), [W13](../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W13_Questions.md), [W12](../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W12_Questions.md), [W05](../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W05_Questions.md), [W06](../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W06_Questions.md), [W07](../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W07_Questions.md) | [`00_TOOLS/Portainer/`](../00_TOOLS/Portainer) and [`assets/PORTAINER/`](01_network_applications/assets/PORTAINER) |
+| [`02_administration_security/`](02_administration_security) | [C13](../03_LECTURES/C13), [C04](../03_LECTURES/C04), [C05](../03_LECTURES/C05), [C08](../03_LECTURES/C08), [C03](../03_LECTURES/C03), [C06](../03_LECTURES/C06) | [S01](../04_SEMINARS/S01), [S02](../04_SEMINARS/S02), [S04](../04_SEMINARS/S04), [S05](../04_SEMINARS/S05), [S06](../04_SEMINARS/S06), [S07](../04_SEMINARS/S07), [S11](../04_SEMINARS/S11), [S13](../04_SEMINARS/S13) | [W13](../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W13_Questions.md), [W04](../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W04_Questions.md), [W05](../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W05_Questions.md), [W08](../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W08_Questions.md), [W03](../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W03_Questions.md), [W06](../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W06_Questions.md) | [`00_TOOLS/Portainer/`](../00_TOOLS/Portainer) (selected labs) |
+| [`00_common/`](00_common) | [C03](../03_LECTURES/C03), [C08](../03_LECTURES/C08), [C13](../03_LECTURES/C13) | [S14](../04_SEMINARS/S14) | [W03](../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W03_Questions.md), [W08](../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W08_Questions.md), [W13](../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W13_Questions.md) | — |
 
-### Suggested Learning Sequence
+Per-project mappings are in the group READMEs and in [`COURSE_SEMINAR_MAPPING.md`](COURSE_SEMINAR_MAPPING.md).
 
-```
-00_TOOLS/Prerequisites/ → 00_APPENDIX/ (Week 0) → 04_SEMINARS/S01–S02/ → 03_LECTURES/C01–C03/ → 02_PROJECTS/ (project selection and E1)
-```
+### Downstream dependencies
 
-## Selective Clone
+[CI workflow](../.github/workflows/ci.yml) runs repository-wide checks that include Markdown link and lexical integrity validation.
+Several lecture READMEs link directly to project briefs in this folder, for example [`03_LECTURES/C03/README.md`](../03_LECTURES/C03/README.md).
+[`00_TOOLS/Portainer/PROJECTS/PROJECTS_PORTAINER_MAP.md`](../00_TOOLS/Portainer/PROJECTS/PROJECTS_PORTAINER_MAP.md) indexes the per-project Portainer guides under `01_network_applications/assets/PORTAINER/`.
 
-**Method A — Git sparse-checkout (requires Git ≥ 2.25)**
+### Suggested learning sequence
+
+Suggested sequence: `00_TOOLS/Prerequisites/` → `04_SEMINARS/S01–S04/` → `03_LECTURES/C01–C03/` → choose a project here → iterate with the matching lecture week and seminar.
+
+
+## Selective clone
+
+### Method A — Git sparse-checkout (Git ≥ 2.25)
 
 ```bash
 git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
@@ -91,12 +96,20 @@ cd COMPNET-EN
 git sparse-checkout set 02_PROJECTS
 ```
 
-**Method B — Direct download (no Git required)**
+To add another path later:
 
-Browse: <https://github.com/antonioclim/COMPNET-EN/tree/main/02_PROJECTS>
+```bash
+git sparse-checkout add <ANOTHER_PATH>
+```
 
-For a single-folder zip download, use a tool such as `download-directory.github.io` or `gitzip`.
+### Method B — Direct download (no Git required)
 
-## Provenance
+```text
+https://github.com/antonioclim/COMPNET-EN/tree/main/02_PROJECTS
+```
 
-RC2026 project catalogue — version 13, February 2026. Author: ing. dr. Antonio Clim, ASE Bucharest (CSIE).
+GitHub can only download the full repository as a ZIP. For a single folder, use a browser-side downloader such as download-directory.github.io or gitzip.
+
+## Version and provenance
+
+RC2026 catalogue snapshot shipped with the course kit (February 2026).
