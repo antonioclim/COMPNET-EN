@@ -7,7 +7,7 @@ The PCAP validation script and the full set of per-project rule files that defin
 | Name | Description | Metric |
 |---|---|---|
 | [`validate_pcap.py`](validate_pcap.py) | Python script: loads a JSON rule file, runs `tshark` with each display filter, checks packet-count thresholds | 173 lines |
-| [`pcap_rules/`](pcap_rules/) | Per-project JSON rule files (S01–S15 and A01–A10) | 25 files |
+| [`pcap_rules/`](pcap_rules/) | Per-project JSON rule files (S01–S20 and A01–A10) | 31 files total (30 JSON rules plus this folder index) |
 
 ## Usage
 

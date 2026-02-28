@@ -1,0 +1,37 @@
+{
+  "project": "S17",
+  "pcap_relpath": "artifacts/pcap/traffic_e2.pcap",
+  "decode_as": [],
+  "rules": [
+    {
+      "id": "R1",
+      "filter": "tcp.dstport==5017 && tcp.flags.syn==1 && tcp.flags.ack==0",
+      "condition": ">= 1",
+      "description": "Handshake to the object-store service."
+    },
+    {
+      "id": "R2",
+      "filter": "tcp.port==5017 && frame contains \"PUBLISH\"",
+      "condition": ">= 1",
+      "description": "Publication of a keyed object."
+    },
+    {
+      "id": "R3",
+      "filter": "tcp.port==5017 && frame contains \"GET\"",
+      "condition": ">= 1",
+      "description": "Retrieval request for a key."
+    },
+    {
+      "id": "R4",
+      "filter": "tcp.port==5017 && (frame contains \"OBJECT\" || frame contains \"FETCH\" || frame contains \"VALUE\")",
+      "condition": ">= 1",
+      "description": "Brokered retrieval result appears in payload."
+    },
+    {
+      "id": "R5",
+      "filter": "tcp.port==5017 && (frame contains \"LEASE\" || frame contains \"HEARTBEAT\" || frame contains \"EXPIRED\" || frame contains \"REMOVED\")",
+      "condition": ">= 1",
+      "description": "Lease or cleanup semantics are observable."
+    }
+  ]
+}

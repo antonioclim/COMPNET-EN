@@ -1,0 +1,37 @@
+{
+  "project": "S20",
+  "pcap_relpath": "artifacts/pcap/traffic_e2.pcap",
+  "decode_as": [],
+  "rules": [
+    {
+      "id": "R1",
+      "filter": "tcp.dstport==5020 && tcp.flags.syn==1 && tcp.flags.ack==0",
+      "condition": ">= 1",
+      "description": "Handshake to the object service."
+    },
+    {
+      "id": "R2",
+      "filter": "tcp.port==5020 && (frame contains \"QUERY\" || frame contains \"GET\")",
+      "condition": ">= 1",
+      "description": "A selection or retrieval request appears in payload."
+    },
+    {
+      "id": "R3",
+      "filter": "tcp.port==5020 && frame contains \"UPDATE\"",
+      "condition": ">= 1",
+      "description": "Update operation is visible in the session."
+    },
+    {
+      "id": "R4",
+      "filter": "tcp.port==5020 && (frame contains \"NOTIFY\" || frame contains \"CHANGED\" || frame contains \"UPDATED\")",
+      "condition": ">= 1",
+      "description": "Change notification is visible to another client."
+    },
+    {
+      "id": "R5",
+      "filter": "tcp.port==5020 && frame contains \"DELETE\"",
+      "condition": ">= 1",
+      "description": "Delete operation is visible in the session."
+    }
+  ]
+}

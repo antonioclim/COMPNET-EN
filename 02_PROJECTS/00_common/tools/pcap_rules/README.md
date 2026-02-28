@@ -1,15 +1,15 @@
 # 00_common/tools/pcap_rules — Per-Project Validation Rules
 
-Twenty-five JSON rule files, one per project code, consumed by [`../validate_pcap.py`](../validate_pcap.py). Each file defines a sequence of `tshark` display-filter rules with packet-count thresholds that the E2 capture must satisfy.
+Thirty JSON rule files, one per project code, consumed by [`../validate_pcap.py`](../validate_pcap.py). Each file defines a sequence of `tshark` display-filter rules with packet-count thresholds that the E2 capture must satisfy.
 
 ## File Index
 
 | File | Project group | Target protocol(s) |
 |---|---|---|
-| `S01.json` – `S15.json` | Group 1 — Network applications | TCP, UDP, HTTP, DNS, SMTP, POP3, TLS, gRPC |
+| `S01.json` – `S20.json` | Group 1 — Network applications | TCP, UDP, HTTP, DNS, SMTP, POP3, TLS, gRPC and custom coordination protocols |
 | `A01.json` – `A10.json` | Group 2 — Administration and security | OpenFlow, ARP, ICMP, DHCP, VXLAN, iptables markers |
 
-Total: 25 files. Each contains a `rules` array where every entry specifies `id`, `filter`, `condition` and `description`.
+Total: 30 JSON rule files plus this README index. Each rule file contains a `rules` array where every entry specifies `id`, `filter`, `condition` and `description`.
 
 ## Rule Structure (example)
 
