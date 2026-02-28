@@ -1,27 +1,52 @@
-# Restrictive Educational Licence
+# Open Educational Licence — Multi-Category
 
-**Version 13.05.00 — February 2026**
+**Version 14.00.00 — February 2026**
 
 ---
 
-## Base Framework
+## Overview
 
-This licence incorporates and extends the terms of the
-[Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International
-(CC BY-NC-ND 4.0)](https://creativecommons.org/licenses/by-nc-nd/4.0/) licence.
-Where the additional clauses below impose stricter conditions than the base
-CC BY-NC-ND 4.0 terms, the stricter conditions prevail.
+This repository uses a **multi-licence model**, similar to those adopted by
+open educational projects such as UCLouvain CNP3 and SEED Labs. Different
+categories of content carry different licences so that educational materials
+can be shared and adapted while examination resources remain controlled and
+authorship is protected.
+
+```
+┌──────────────────────────────────────────────────────────────────────┐
+│  Category A — Documentation and Educational Content                  │
+│  Licence: CC BY-NC-SA 4.0                                            │
+│  Scope:  lectures, seminars, README files, guides, diagrams (puml),  │
+│          HTML presentations, instructor notes, project briefs,       │
+│          cheatsheets, troubleshooting docs, the Python self-study    │
+│          guide, Portainer guides                                     │
+├──────────────────────────────────────────────────────────────────────┤
+│  Category B — Source Code and Configuration                          │
+│  Licence: GPL-3.0-or-later                                           │
+│  Scope:  Python scripts (.py), shell scripts (.sh), Dockerfiles,     │
+│          Docker Compose files (.yml/.yaml), nginx configs (.conf),   │
+│          CI workflow files, QA scripts, Makefiles, PlantUML render   │
+│          scripts, lab_runner, format-offline.js, package.json        │
+├──────────────────────────────────────────────────────────────────────┤
+│  Category C — Examination and Assessment Materials                   │
+│  Licence: All Rights Reserved                                        │
+│  Scope:  quiz banks (00_APPENDIX/c)studentsQUIZes*), formative       │
+│          quizzes (quiz.json, quiz.yaml, parsons_problems.json),      │
+│          assessment rubrics, verification index (.xlsx),              │
+│          PCAP validation rules (tools/pcap_rules/*.json),            │
+│          solution templates (*Solution*), instructor outlines         │
+│          (d)instructor_NOTES4sem/*)                                   │
+└──────────────────────────────────────────────────────────────────────┘
+```
+
+If a file does not clearly fall into one of the categories above, it
+follows Category A by default.
 
 ---
 
 ## Copyright Notice
 
-**© 2017–2027 ing. dr. Antonio Clim. All rights reserved.**
-
-This Licence Agreement ("Licence") governs the use of educational materials
-contained in this repository ("Materials"), including but not limited to
-source code, documentation, configuration files, diagrams, exercises,
-examination resources, and any associated content.
+**© 2017–2027 ing. dr. Antonio Clim.**
 
 The Materials are protected under Romanian law (Law No. 8/1996 on Copyright
 and Related Rights, as amended), European Union Directive 2001/29/EC, and
@@ -30,64 +55,104 @@ Protection of Literary and Artistic Works.
 
 ---
 
-## 1. Grant of Limited Licence
+## Category A — Documentation and Educational Content
 
-Subject to the terms below, the Author grants you a **non-exclusive,
-non-transferable, revocable** licence to:
+### Licence
 
-| Permission | Description |
-|:----------:|-------------|
-| ✓ | **Personal Study** — Download and engage with Materials for individual learning |
-| ✓ | **Code Execution** — Run code examples on personal computing devices |
-| ✓ | **Local Modification** — Modify code locally for personal experimentation |
-| ✓ | **Personal Notes** — Create derivative notes strictly for personal reference |
+This content is licensed under the
+[Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
+(CC BY-NC-SA 4.0)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+licence.
 
----
+### What This Permits
 
-## 2. Institutional Teaching Restriction
+| Action | Permitted? | Condition |
+|--------|:----------:|-----------|
+| Read, download, study | ✓ | — |
+| Share and redistribute | ✓ | Attribution required (see Section 5) |
+| Adapt, translate, remix | ✓ | Same licence (ShareAlike), attribution, non-commercial |
+| Use in teaching at any institution | ✓ | Non-commercial, with attribution (see Section 5) |
+| Use in commercial training or paid courses | ✗ | Written permission required |
+| Remove or obscure the original attribution | ✗ | — |
 
-### 2.1 Exclusive Teaching Rights
+### ShareAlike Obligation
 
-The Materials are authorised for classroom instruction, seminar delivery,
-laboratory exercises, and examination purposes **exclusively** within:
-
-> **Bucharest University of Economic Studies (ASE)**
-> **Faculty of Economic Cybernetics, Statistics and Informatics (CSIE)**
-
-### 2.2 All Other Institutions
-
-No other educational institution, training provider, university, school,
-bootcamp, corporate training programme, online learning platform, or any
-other entity — whether public or private, whether for-profit or non-profit —
-may use the Materials for teaching, instruction, or any form of organised
-educational delivery **without the prior express written consent** of the
-Author.
-
-### 2.3 How to Request Institutional Permission
-
-Institutions wishing to use the Materials in their curricula must:
-
-1. Submit a formal written request through the repository **Issue Tracker**
-   or through official ASE-CSIE academic channels.
-2. Specify the scope of intended use (course name, enrolment, duration).
-3. Await explicit written authorisation from the Author before any use.
-
-Verbal agreements, implied permissions, or the mere public availability of
-this repository do **not** constitute authorisation.
+If you remix, transform, or build upon the Category A materials, you must
+distribute your contributions under the **same or a compatible licence**
+(CC BY-NC-SA 4.0 or later).
 
 ---
 
-## 3. Citation and Co-authorship Requirements
+## Category B — Source Code and Configuration
 
-### 3.1 Mandatory Citation (any use up to 20%)
+### Licence
 
-Any published work — including but not limited to journal articles, conference
-papers, books, book chapters, theses, dissertations, technical reports,
-blog posts, online tutorials, course materials, presentations, and any other
-form of disseminated content — that incorporates, references, adapts, or is
-substantially inspired by **any portion** of the Materials (even below 20%
-of the derived work's total content) **must** include a full citation in the
-following format:
+This content is licensed under the
+[GNU General Public License v3.0 or later
+(GPL-3.0-or-later)](https://www.gnu.org/licenses/gpl-3.0.html).
+
+### What This Permits
+
+| Action | Permitted? | Condition |
+|--------|:----------:|-----------|
+| Run, study, inspect | ✓ | — |
+| Modify and distribute modifications | ✓ | Same licence (copyleft), attribution, source availability |
+| Include in open-source projects | ✓ | GPL-3.0-compatible licence required |
+| Include in proprietary/closed-source products | ✗ | GPL copyleft applies |
+| Use code snippets for personal learning | ✓ | — |
+
+### Copyleft Obligation
+
+If you distribute modified versions of the Category B code, you must make
+your source code available under the GPL-3.0-or-later licence.
+
+### Linking and Aggregation
+
+Mere aggregation of Category B code with independently developed software
+in a distribution medium does not bring the other software under the scope
+of the GPL-3.0. The full GPL-3.0 text governs boundary cases.
+
+---
+
+## Category C — Examination and Assessment Materials
+
+### Licence
+
+**All rights reserved.** No part of the Category C materials may be
+reproduced, distributed, adapted, translated, publicly displayed, or used
+for any purpose beyond personal study without the prior express written
+consent of the Author.
+
+### Rationale
+
+Examination materials, quiz banks, solution templates, PCAP validation
+rules, and instructor outlines derive their pedagogical value from
+controlled access. Public redistribution would compromise assessment
+integrity for current and future cohorts.
+
+### How to Request Access
+
+Instructors at other institutions who wish to use Category C materials
+in their own courses may request access by:
+
+1. Opening a formal request on the repository **Issue Tracker** or
+   contacting the Author through official ASE-CSIE academic channels.
+2. Specifying the institution, course, expected enrolment, and intended
+   use.
+3. Awaiting explicit written authorisation before any use.
+
+Category C materials may be shared under a separate bilateral agreement
+at the Author's discretion.
+
+---
+
+## 5. Attribution and Citation
+
+### 5.1 Mandatory Attribution (all uses)
+
+Any use of the Materials — whether under Category A, Category B, or an
+authorised use of Category C — **must** include a clear and reasonably
+prominent attribution in the following format:
 
 ```
 Clim, A. (2025). Computer Networks — Course Kit (EN).
@@ -96,118 +161,132 @@ Clim, A. (2025). Computer Networks — Course Kit (EN).
   https://github.com/antonioclim/COMPNET-EN
 ```
 
-The Author must be referenced as **ing. dr. Antonio Clim** wherever author
-names appear in full form.
+Where author names appear in full form, the Author must be referenced as
+**ing. dr. Antonio Clim**.
 
-### 3.2 Mandatory Co-authorship (use exceeding 20%)
+For code files (Category B), attribution may alternatively take the form
+of a comment header or a NOTICE file, consistent with GPL-3.0 practice.
 
-Any published work in which Materials from this repository constitute
-**more than 20%** of the total content — whether measured by volume, by
-structural contribution, or by conceptual framework — **must** include
-**ing. dr. Antonio Clim** among the **first four listed co-authors** of
-that work.
+### 5.2 Co-authorship Requirement (use exceeding 20%)
+
+Any published work — including but not limited to journal articles,
+conference papers, books, theses, technical reports, or course materials
+intended for public distribution — in which materials from this repository
+constitute **more than 20%** of the total content must include
+**ing. dr. Antonio Clim** among the listed co-authors.
 
 The 20% threshold applies to any combination of verbatim reproduction,
-paraphrased content, adapted code, redrawn diagrams, restructured exercises,
-or conceptual frameworks traceable to the Materials.
+paraphrased content, adapted code, redrawn diagrams, restructured
+exercises, or conceptual frameworks traceable to the Materials.
 
-### 3.3 Determination of Proportion
+### 5.3 Determination of Proportion
 
-In case of dispute regarding the proportion of Materials used, the
+In the event of a dispute regarding the proportion of Materials used, the
 assessment shall be conducted by an independent academic expert mutually
 agreed upon by the parties, or — failing agreement — appointed by the
 competent court.
 
 ---
 
-## 4. Prohibited Uses
+## 6. Teaching Permission — Detailed Terms
 
-Without the express prior written consent of the Author, you may **NOT**:
+### 6.1 Non-Commercial Teaching
 
-### 4.1 Distribution and Sharing
+Any educational institution — university, school, or non-profit training
+programme — may use Category A and Category B materials for classroom
+instruction, seminar delivery, and laboratory exercises, **provided that**:
 
-| Prohibition | Description |
-|:-----------:|-------------|
-| ✗ | Upload, post, publish, or share the Materials on any website, repository, cloud storage, or file-sharing platform |
-| ✗ | Distribute copies of the Materials by email, messaging services, or any other means |
-| ✗ | Include the Materials in any collection, compilation, or anthology |
-| ✗ | Create mirrors, forks, or copies of this repository for distribution |
+1. The use is **non-commercial** (no tuition surcharge, course fee, or
+   other charge is levied specifically for access to these materials).
+2. The attribution requirements of Section 5.1 are satisfied.
+3. Any adapted or translated versions carry the CC BY-NC-SA 4.0 licence
+   (for Category A content) or the GPL-3.0-or-later licence (for
+   Category B content).
 
-### 4.2 Teaching and Presentation (outside ASE-CSIE)
+### 6.2 Commercial and Paid Use
 
-| Prohibition | Description |
-|:-----------:|-------------|
-| ✗ | Use the Materials in courses, workshops, seminars, bootcamps, or any form of organised instruction outside ASE-CSIE |
-| ✗ | Present, demonstrate, or display the Materials to any audience outside ASE-CSIE |
-| ✗ | Use the Materials to create teaching resources, lesson plans, or curricula for use outside ASE-CSIE |
-| ✗ | Incorporate the Materials into educational programmes or training delivered by any other institution |
+Use of the Materials in any paid training programme, commercial bootcamp,
+corporate workshop, or online platform that charges learners requires the
+**prior express written consent** of the Author. Requests should be
+submitted through the repository Issue Tracker or official ASE-CSIE
+channels.
 
-### 4.3 Derivative Works
+### 6.3 Examination Materials in External Teaching
 
-| Prohibition | Description |
-|:-----------:|-------------|
-| ✗ | Create and distribute derivative works based on the Materials |
-| ✗ | Translate the Materials into other languages for distribution |
-| ✗ | Adapt, modify, or transform the Materials for distribution |
-| ✗ | Reproduce (even partially) the Materials in other published works without satisfying the citation and co-authorship requirements of Section 3 |
-| ✗ | Include fragments from the Materials in other repositories or projects |
-
-### 4.4 Commercial Activities
-
-| Prohibition | Description |
-|:-----------:|-------------|
-| ✗ | Sell, licence, or sublicence the Materials |
-| ✗ | Use the Materials in any product or service offered for sale |
-| ✗ | Use the Materials to provide paid consulting, training, or support services |
-| ✗ | Use the Materials in any manner intended to generate revenue |
+Category C materials are **not included** in the general teaching
+permission. Instructors at other institutions must request access
+separately under Section 4 (Category C).
 
 ---
 
-## 5. Enforcement and Remedies
+## 7. Contributions
 
-### 5.1 Breach
+### 7.1 Pull Requests and External Contributions
 
-Any use of the Materials that violates this Licence constitutes copyright
-infringement under applicable law and may give rise to civil and criminal
-liability.
+By submitting a pull request or other contribution to this repository,
+you agree that your contribution will be licensed under the applicable
+category licence:
 
-### 5.2 Termination
+- Documentation contributions: CC BY-NC-SA 4.0
+- Code contributions: GPL-3.0-or-later
 
-This Licence terminates automatically and without notice upon any breach of
-its terms. Upon termination, you must immediately destroy all copies of the
-Materials in your possession.
+You retain copyright over your contribution but grant the Author a
+perpetual, irrevocable, worldwide licence to use, modify, and distribute
+it under the terms above.
 
-### 5.3 Remedies
+### 7.2 Attribution of Contributors
 
-The Author reserves the right to seek all available legal remedies,
-including injunctive relief, damages, and recovery of legal costs.
+Significant contributions will be acknowledged in the repository
+CHANGELOG or README, at the Author's discretion.
 
 ---
 
-## 6. Disclaimer of Warranty
+## 8. Disclaimer of Warranty
 
 THE MATERIALS ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL
 THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-CONNECTION WITH THE MATERIALS OR THE USE OR OTHER DEALINGS IN THE MATERIALS.
+CONNECTION WITH THE MATERIALS OR THE USE OR OTHER DEALINGS IN THE
+MATERIALS.
 
 ---
 
-## 7. Governing Law and Jurisdiction
+## 9. Governing Law and Jurisdiction
 
 This Licence shall be governed by and construed in accordance with the laws
 of Romania. Any disputes arising under or in connection with this Licence
 shall be subject to the exclusive jurisdiction of the courts of Bucharest,
 Romania.
 
+EU Directive 2001/29/EC and the Berne Convention apply where Romanian law
+is silent or where cross-border enforcement requires harmonised
+interpretation.
+
 ---
 
-## 8. Severability
+## 10. Severability
 
 If any provision of this Licence is held to be invalid or unenforceable,
-the remaining provisions shall continue in full force and effect.
+the remaining provisions shall continue in full force and effect. The
+invalid provision shall be replaced by a valid provision that most closely
+achieves the original intent.
+
+---
+
+## 11. Licence Compatibility Summary
+
+| If you want to… | Use Category A (CC BY-NC-SA) | Use Category B (GPL-3.0) | Use Category C (Reserved) |
+|------------------|:----------------------------:|:------------------------:|:-------------------------:|
+| Study personally | ✓ | ✓ | ✓ |
+| Teach non-commercially | ✓ with attribution | ✓ with attribution | Request required |
+| Adapt and reshare | ✓ same licence, non-commercial | ✓ same licence, source available | ✗ |
+| Include in commercial product | ✗ (request needed) | ✗ (GPL copyleft) | ✗ (request needed) |
+| Publish a paper using < 20% | ✓ with citation | ✓ with citation | ✓ with citation |
+| Publish a paper using > 20% | ✓ with co-authorship | ✓ with co-authorship | ✓ with co-authorship |
+| Fork the repository | ✓ A+B only, with attribution | ✓ code under GPL-3.0 | ✗ (Category C excluded) |
+| Translate into another language | ✓ same licence, attribution | ✓ same licence | ✗ (request needed) |
 
 ---
 
@@ -217,7 +296,8 @@ the remaining provisions shall continue in full force and effect.
 Bucharest University of Economic Studies (ASE)
 Faculty of Economic Cybernetics, Statistics and Informatics (CSIE)
 
-For permissions: use the repository **Issue Tracker** or official ASE-CSIE channels.
+For permissions, questions, or institutional access requests:
+use the repository **Issue Tracker** or official ASE-CSIE channels.
 
 ---
 
