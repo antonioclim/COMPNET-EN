@@ -523,17 +523,23 @@ Scoring 1–10 per dimension, evaluated by the author with acknowledged bias. Sc
 
 ### 5.2. Findings that Changed from the First Edition
 
-1. **C2 (Code Quality) lowered from 7 to 6.** The first edition was generous. Without strict Python linting in CI, the score cannot match Stanford (10) or CMU (9). The `ruff.toml` exists but is not enforced.
+1. **C1 (Comprehensiveness) raised from 7 to 8.** The first edition evaluated a kit that covered standard networking topics across 14 weeks but lacked IoT/MQTT, gRPC/modern RPC, and the 39 runnable micro-scenarios now embedded in lecture directories. The current kit is the broadest in the sample — no other course covers both IoT/MQTT and gRPC. The score does not reach 9 or 10 because Berkeley CS168 (17 weeks) and ETH Zürich (15 weeks, deeper per-topic) remain ahead in either duration or depth.
 
-2. **C3 (Pedagogy) maintained at 8 but with caveats.** The new kit has significantly more pedagogical artefacts (misconception lists, Parsons problems, Python self-study guide with cross-language comparisons), but UCLouvain's INGInious remains ahead in auto-graded formative assessment. Score 8 reflects artefact richness, not validated effectiveness.
+2. **C2 (Code Quality) lowered from 7 to 6.** The first edition was generous. Without strict Python linting in CI, the score cannot match Stanford (10) or CMU (9). The `ruff.toml` exists but is not enforced.
 
-3. **C4 (Infrastructure) raised from 8 to 9.** The lab_runner framework, Docker Compose coherence validation, Portainer integration, and 18 registered labs represent a genuine advance.
+3. **C3 (Pedagogy) maintained at 8 but with caveats.** The new kit has significantly more pedagogical artefacts (misconception lists, Parsons problems, Python self-study guide with cross-language comparisons), but UCLouvain's INGInious remains ahead in auto-graded formative assessment. Score 8 reflects artefact richness, not validated effectiveness.
 
-4. **C6 (Projects) adjusted from 9 to 8.** The 25 project briefs with E1/E2/E3 gates and PCAP validation rules are substantial, but honest comparison with Stanford's TCP stack build and CMU's multi-week systems projects requires acknowledging the depth gap.
+4. **C4 (Infrastructure) raised from 8 to 9.** The lab_runner framework, Docker Compose coherence validation, Portainer integration, and 18 registered labs represent a genuine advance.
 
-5. **C8 (QA) and C9 (Validation) are new dimensions.** COMPNET-EN scores 10 on QA — no other course in the sample comes close — and 2 on validation. The asymmetry is itself a finding.
+5. **C5 (Documentation) raised from 8 to 9.** The first edition already scored well on documentation, but the current kit adds 386 PlantUML diagram sources with a render toolchain (unique in the sample), a 2 222-line Python self-study guide with Rosetta Stone cross-language comparisons, per-seminar instructor notes with Mininet-SDN variants, sparse checkout guidance, and a full QA audit report. Only Berkeley CS168's open textbook prevents a score of 10.
 
-6. **C10 (Licensing) raised from 3 to 7.** The adoption of a multi-licence model (CC BY-NC-SA / GPL-3.0 / Reserved) replaces the CC BY-NC-ND 4.0 licence that the first edition flagged as a growth constraint. The new structure is comparable to UCLouvain and Kathará. The score remains below NPS (public domain, 10) and UCLouvain (CC BY-SA, 9) because the NC clause and the co-authorship requirement introduce frictions that fully permissive licences do not, and because no external adoption has yet been documented under the new terms.
+6. **C6 (Projects) adjusted from 9 to 8.** The 25 project briefs with E1/E2/E3 gates and PCAP validation rules are substantial, but honest comparison with Stanford's TCP stack build and CMU's multi-week systems projects requires acknowledging the depth gap.
+
+7. **C8 (Quality Assurance) is a new dimension — scored 10.** No other course in the sample maintains a CI/CD pipeline that validates Markdown links (2 231 targets), Docker Compose coherence, executable permissions from a manifest, lexical integrity, and PlantUML figure targets on every push. KAIST CS341 is the closest with 4 GitHub Actions workflows, but their scope is build verification, not content quality assurance.
+
+8. **C9 (Academic Validation) is a new dimension — scored 2.** COMPNET-EN has zero peer-reviewed publications, zero documented adoption beyond ASE-CSIE Bucharest, and no conference presentations describing its approach. Compare this to ETH Zürich (SIGCOMM'20), KAIST (SIGCSE'15), NPS Labtainers (IEEE S&P'18, SIGCSE'21), and UCLouvain (multiple venues, 2014–2024). The asymmetry between C8 (10) and C9 (2) is itself a finding: engineering excellence and scholarly validation are independent dimensions.
+
+9. **C10 (Licensing) raised from 3 to 7.** The adoption of a multi-licence model (CC BY-NC-SA / GPL-3.0 / Reserved) replaces the CC BY-NC-ND 4.0 licence that the first edition flagged as a growth constraint. The new structure is comparable to UCLouvain and Kathará. The score remains below NPS (public domain, 10) and UCLouvain (CC BY-SA, 9) because the NC clause and the co-authorship requirement introduce frictions that fully permissive licences do not, and because no external adoption has yet been documented under the new terms.
 
 ### 5.3. Main Conclusions
 
