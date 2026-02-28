@@ -4,13 +4,31 @@
 
 ### 1. Starting the Os-Ken Controller
 
-In a separate terminal (NOT inside Mininet), run:
+In a separate terminal (NOT inside Mininet), run the **baseline** controller:
 
 ```bash
-osken-manager index_sdn_os-keb_controller.py
-````
+# Option A (Os-Ken)
+osken-manager S06_Part02C_Script_SDNOS_Ken_Controller.py
 
-You should see Os-Ken log messages and, eventually, a notification when the switch connects.
+# Option B (Ryu-compatible entrypoint, depending on your installation)
+ryu-manager S06_Part02C_Script_SDNOS_Ken_Controller.py
+```
+
+You should see controller log messages and, eventually, a notification when the switch connects.
+
+> **Optional (extra): advanced policy controller**
+>
+> This repository also includes an *extra* controller with timeouts and a clearer policy structure:
+>
+> ```bash
+> osken-manager S06_Part02C_Script_SDNOS_Ken_Controller_AdvancedPolicy.py
+> ```
+>
+> It blocks IPv4 to/from `h3` by default. You can optionally allow UDP to `h3`:
+>
+> ```bash
+> ALLOW_UDP_TO_H3=1 osken-manager S06_Part02C_Script_SDNOS_Ken_Controller_AdvancedPolicy.py
+> ```
 
 ---
 
@@ -19,7 +37,7 @@ You should see Os-Ken log messages and, eventually, a notification when the swit
 In another terminal:
 
 ```bash
-sudo python3 index_sdn_topo_switch.py
+sudo python3 S06_Part02B_Script_SDN_Topo_Switch.py
 ```
 
 After startup you will enter the Mininet CLI (`mininet>`).
@@ -42,7 +60,7 @@ h3 ip a
 h1 ping -c 3 10.0.10.2
 ```
 
-You should see replies and new flows appearing in s1.
+You should see replies and new flows appearing in `s1`.
 
 #### b) h1 to h3 (should be blocked)
 
@@ -72,7 +90,7 @@ Analyse:
 
 ### 5. *Optional*: Traffic Capture
 
-Start a capture on s1:
+Start a capture on `s1`:
 
 ```bash
 s1 tcpdump -i s1-eth1 -n
@@ -102,6 +120,7 @@ It must contain:
 
   * `h1 ping 10.0.10.2`
   * `h1 ping 10.0.10.3`
+
 * an `ovs-ofctl dump-flows s1` dump (complete or partial)
 * 5–7 sentences explaining:
 
