@@ -240,3 +240,13 @@ In networking, correct answers are usually structured.
 State the layer, state the mechanism and state the consequence.
 
 If you do this consistently, your answers become both correct and readable.
+
+---
+
+## Week 14 integration lab (recommended)
+
+If you want a single end-to-end rehearsal before the exam, run:
+
+- [`c14-week14-integration-lab.md`](c14-week14-integration-lab.md)
+- [`assets/scenario-week14-integration-lab/`](assets/scenario-week14-integration-lab/)
+

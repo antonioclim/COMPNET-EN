@@ -7,9 +7,11 @@ Week 14 is the final lecture and serves as an integrative review. Rather than in
 | Name | Description | Metric |
 |------|-------------|--------|
 | [`c14-revision-and-exam-prep.md`](c14-revision-and-exam-prep.md) | Slide-by-slide lecture content | 242 lines |
+| [`c14-week14-integration-lab.md`](c14-week14-integration-lab.md) | Week 14 integration lab handout (capstone) | — |
 | [`assets/puml/`](assets/puml/) | PlantUML diagram sources | 1 file |
 | [`assets/images/`](assets/images/) | Rendered PNG output | .gitkeep |
 | [`assets/render.sh`](assets/render.sh) | Diagram rendering script | — |
+| [`assets/scenario-week14-integration-lab/`](assets/scenario-week14-integration-lab/) | Integrated Docker Compose capstone lab (DNS → HTTP → TLS → proxy) | scenario |
 
 ## PlantUML Diagrams
 
@@ -59,7 +61,7 @@ No other repository components depend on this directory. The `fig-course-map.pum
 
 ### Suggested Sequence
 
-[`C13/`](../C13/) → this folder → examination
+[`C13/`](../C13/) → this folder → `assets/scenario-week14-integration-lab/` → examination
 
 ## Selective Clone
 

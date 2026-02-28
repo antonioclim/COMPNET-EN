@@ -1,0 +1,13 @@
+services:
+  nginx:
+    ports:
+      - "8443:443"
+    volumes:
+      - ./nginx/nginx_tls.conf:/etc/nginx/nginx-tls.conf:ro
+      - ./tls/server:/etc/nginx/certs:ro
+      - ./tls/ca:/etc/nginx/ca:ro
+    command: ["nginx", "-g", "daemon off;", "-c", "/etc/nginx/nginx-tls.conf"]
+
+  client:
+    volumes:
+      - ./tls/ca:/client/certs:ro

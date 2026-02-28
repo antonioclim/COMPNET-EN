@@ -1,0 +1,17 @@
+$TTL 15
+@   IN  SOA ns.week14.local. admin.week14.local. (
+        2026022701  ; serial
+        60          ; refresh
+        30          ; retry
+        1209600     ; expire
+        15          ; minimum
+)
+
+    IN  NS  ns.week14.local.
+
+; Authoritative server (BIND)
+ns  IN  A   10.14.0.10
+
+; Reverse proxy front-door
+www IN  A   10.14.0.80
+api IN  A   10.14.0.80

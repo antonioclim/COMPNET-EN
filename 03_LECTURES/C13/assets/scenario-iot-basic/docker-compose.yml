@@ -5,29 +5,39 @@ services:
     ports:
       - "1883:1883"
     volumes:
-      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - ./mosquitto:/mosquitto/config:ro
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - "mosquitto_pub -h 127.0.0.1 -p 1883 -t healthcheck -m ping -q 0 >/dev/null 2>&1"
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
 
   sensor:
     build: ./sensor
     container_name: iot-sensor
     environment:
-      - BROKER=broker
-      - MQTT_PORT=1883
-      - TOPIC=sensors/temperature
-      - INTERVAL_SEC=1
-      - PYTHONUNBUFFERED=1
+      BROKER: broker
+      MQTT_PORT: "1883"
+      TOPIC: sensors/temperature
+      INTERVAL_SEC: "1"
+      PYTHONUNBUFFERED: "1"
     depends_on:
-      - broker
+      broker:
+        condition: service_healthy
 
   actuator:
     build: ./actuator
     container_name: iot-actuator
     environment:
-      - BROKER=broker
-      - MQTT_PORT=1883
-      - SENSOR_TOPIC=sensors/temperature
-      - COMMAND_TOPIC=actuators/fan
-      - THRESHOLD=28.0
-      - PYTHONUNBUFFERED=1
+      BROKER: broker
+      MQTT_PORT: "1883"
+      SENSOR_TOPIC: sensors/temperature
+      COMMAND_TOPIC: actuators/fan
+      THRESHOLD: "28.0"
+      PYTHONUNBUFFERED: "1"
     depends_on:
-      - broker
+      broker:
+        condition: service_healthy

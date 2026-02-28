@@ -1,0 +1,26 @@
+services:
+  broker:
+    ports:
+      - "8883:8883"
+    volumes:
+      - ./tls/ca:/mosquitto/certs/ca:ro
+      - ./tls/server:/mosquitto/certs/server:ro
+      - ./tls/mosquitto_tls.conf:/mosquitto/config/conf.d/99_tls.conf:ro
+
+  sensor:
+    environment:
+      MQTT_PORT: "8883"
+      MQTT_TLS: "1"
+      MQTT_TLS_CA: "/certs/ca.crt"
+      MQTT_TLS_INSECURE: "0"
+    volumes:
+      - ./tls/ca:/certs:ro
+
+  actuator:
+    environment:
+      MQTT_PORT: "8883"
+      MQTT_TLS: "1"
+      MQTT_TLS_CA: "/certs/ca.crt"
+      MQTT_TLS_INSECURE: "0"
+    volumes:
+      - ./tls/ca:/certs:ro

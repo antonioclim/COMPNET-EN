@@ -1,0 +1,138 @@
+services:
+  auth:
+    image: internetsystemsconsortium/bind9:9.18
+    volumes:
+      - ./auth:/etc/bind
+    networks:
+      week14net:
+        ipv4_address: 10.14.0.10
+    healthcheck:
+      test: ["CMD-SHELL", "grep -q '^named$' /proc/1/comm"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+
+  resolver:
+    image: mvance/unbound:1.20.0
+    volumes:
+      - ./resolver:/opt/unbound/etc/unbound
+    depends_on:
+      auth:
+        condition: service_healthy
+    networks:
+      week14net:
+        ipv4_address: 10.14.0.53
+    healthcheck:
+      test: ["CMD-SHELL", "grep -q '^unbound$' /proc/1/comm"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+
+  web1:
+    build: ./web
+    environment:
+      WEB_INSTANCE: "web1"
+    expose:
+      - "8000"
+    networks:
+      week14net:
+        ipv4_address: 10.14.0.11
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import socket,sys; s=socket.socket(); s.settimeout(1); sys.exit(0 if s.connect_ex(('127.0.0.1',8000))==0 else 1)"
+      interval: 3s
+      timeout: 2s
+      retries: 20
+      start_period: 3s
+
+  web2:
+    build: ./web
+    environment:
+      WEB_INSTANCE: "web2"
+    expose:
+      - "8000"
+    networks:
+      week14net:
+        ipv4_address: 10.14.0.12
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import socket,sys; s=socket.socket(); s.settimeout(1); sys.exit(0 if s.connect_ex(('127.0.0.1',8000))==0 else 1)"
+      interval: 3s
+      timeout: 2s
+      retries: 20
+      start_period: 3s
+
+  api:
+    build: ./api
+    expose:
+      - "5000"
+    networks:
+      week14net:
+        ipv4_address: 10.14.0.20
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import socket,sys; s=socket.socket(); s.settimeout(1); sys.exit(0 if s.connect_ex(('127.0.0.1',5000))==0 else 1)"
+      interval: 3s
+      timeout: 2s
+      retries: 20
+      start_period: 3s
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "8088:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      web1:
+        condition: service_healthy
+      web2:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    networks:
+      week14net:
+        ipv4_address: 10.14.0.80
+    healthcheck:
+      test: ["CMD-SHELL", "grep -q '^nginx$' /proc/1/comm"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+
+  client:
+    image: python:3.12-slim
+    working_dir: /client
+    volumes:
+      - ./client:/client
+    dns:
+      - 10.14.0.53
+    depends_on:
+      resolver:
+        condition: service_healthy
+      nginx:
+        condition: service_healthy
+    networks:
+      week14net:
+        ipv4_address: 10.14.0.100
+    stdin_open: true
+    tty: true
+    command: ["sh", "-lc", "sleep infinity"]
+
+networks:
+  week14net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.14.0.0/24

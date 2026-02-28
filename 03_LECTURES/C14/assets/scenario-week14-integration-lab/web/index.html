@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Week 14 integration lab</title>
+</head>
+<body>
+  <h1>Week 14 integration lab</h1>
+  <p>If you can read this through <code>/app/</code>, the reverse proxy rewrite works.</p>
+
+  <p>Try the API:</p>
+  <ul>
+    <li><a href="/api/users">/api/users</a></li>
+  </ul>
+
+  <p>Look at response headers:</p>
+  <ul>
+    <li><code>X-Debug-Proxy</code> (added by nginx)</li>
+    <li><code>X-Web-Instance</code> (added by the backend web server)</li>
+  </ul>
+</body>
+</html>

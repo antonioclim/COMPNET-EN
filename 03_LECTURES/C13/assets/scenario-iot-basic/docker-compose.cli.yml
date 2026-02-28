@@ -1,0 +1,10 @@
+services:
+  mqtt-cli:
+    build: ./client
+    profiles: ["cli"]
+    depends_on:
+      broker:
+        condition: service_healthy
+    volumes:
+      # CA mount is harmless in plaintext mode; required for TLS mode.
+      - ./tls/ca:/certs:ro
