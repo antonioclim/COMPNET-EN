@@ -425,26 +425,34 @@ This is the dimension that the first edition ignored and that the second edition
 
 **COMPNET-EN has zero peer-reviewed publications, zero documented adoption beyond ASE-CSIE Bucharest, and limited external community engagement.** No GitHub stars/forks data suggests significant external usage. No conference presentation has described its approach. No measurable learning outcomes have been published.
 
-This matters for two reasons. First, without external validation, the pedagogical claims made in this report — and in the kit's own documentation — rest entirely on the authors' assertions. Second, the restrictive CC BY-NC-ND 4.0 licence (extended with additional clauses) limits the potential for community contribution, adaptation, and replication at other institutions. Compare this to MIT (KAIST, CUHK), GPL (Kathará, UCLouvain exercises), or public domain (NPS) licences.
+This matters because, without external validation, the pedagogical claims made in this report — and in the kit's own documentation — rest entirely on the authors' assertions. The recently adopted multi-licence model (CC BY-NC-SA 4.0 for documentation, GPL-3.0 for code — see Section 3.10) removes the licensing barrier to external replication that existed in the first edition, but replication itself has not yet occurred.
 
 > *Self-criticism:* This is the single largest weakness of the COMPNET-EN project. Infrastructure without validation is engineering; validated infrastructure is scholarship. The transition from the first to the second requires work that has not yet been done.
 
 ### 3.10. Dimension C10: Licensing, Ecosystem, and Adoption
 
-The value of a course kit is a function not only of its contents but of who can use it, adapt it, and build upon it.
+The value of a course kit is a function not only of its contents but of who can use it, adapt it, and build upon it. As of February 2026, COMPNET-EN has adopted a **multi-licence model** structurally aligned with UCLouvain CNP3:
 
-| Course/Framework | Licence | Institutional Adoption (documented) |
-|:-----------------|:--------|:-----------------------------------:|
-| NPS Labtainers | Public domain | Military + civilian institutions; NSF-funded |
-| SEED Labs (Syracuse) | Open | 1 180+ institutions worldwide |
-| UCLouvain CNP3 ecosystem | CC BY-SA (ebook), GPL (exercises) | Multiple European universities |
-| Kathará | GPL-3.0 | Roma Tre, Télécom Paris, KTH, UCLouvain |
-| ETH mini-Internet | Apache-2.0 | Used at workshops, NANOG presentations |
-| Stanford CS144 | — | Global self-study community (PKUFlyingPig fork) |
-| KAIST KENSv3 | MIT | 151 GitHub stars |
-| COMPNET-EN | CC BY-NC-ND 4.0 (extended, restrictive) | ASE-CSIE Bucharest only |
+- **Category A (documentation, lectures, seminars, guides, diagrams, HTML presentations):** CC BY-NC-SA 4.0 — any institution may use, adapt, and translate for non-commercial teaching, provided attribution and ShareAlike conditions are met.
+- **Category B (Python scripts, shell scripts, Dockerfiles, Compose configs, CI workflows, QA tools, lab_runner):** GPL-3.0-or-later — standard open-source copyleft; modifications must be published under the same licence.
+- **Category C (quiz banks, formative quizzes, solution templates, PCAP validation rules, instructor outlines):** All Rights Reserved — access by bilateral agreement, protecting assessment integrity.
 
-The restrictive licence is a deliberate choice — it protects authorship and prevents unauthorised commercial use — but it also means that COMPNET-EN cannot currently benefit from the community dynamics that have made SEED Labs, Labtainers, and Kathará successful at scale.
+An additional clause requires co-authorship when materials constitute more than 20% of a derived published work.
+
+| Course/Framework | Licence Model | Non-Commercial Teaching | Adaptation Permitted | Institutional Adoption (documented) |
+|:-----------------|:-------------|:-----------------------:|:--------------------:|:-----------------------------------:|
+| NPS Labtainers | Public domain | ✅ | ✅ | Military + civilian; NSF-funded |
+| SEED Labs (Syracuse) | Open | ✅ | ✅ | 1 180+ institutions worldwide |
+| UCLouvain CNP3 ecosystem | CC BY-SA (ebook), GPL (exercises) | ✅ | ✅ | Multiple European universities |
+| Kathará | GPL-3.0 | ✅ | ✅ | Roma Tre, Télécom Paris, KTH, UCLouvain |
+| ETH mini-Internet | Apache-2.0 | ✅ | ✅ | Workshops, NANOG presentations |
+| Stanford CS144 | — (no explicit licence) | ⚠️ | ⚠️ | Global self-study community (PKUFlyingPig fork) |
+| KAIST KENSv3 | MIT | ✅ | ✅ | 151 GitHub stars |
+| **COMPNET-EN** | **CC BY-NC-SA / GPL-3.0 / Reserved** | **✅** | **✅ (A+B)** | **ASE-CSIE Bucharest (elsewhere not yet documented)** |
+
+**What changed and why.** The first edition of this report identified the then-restrictive CC BY-NC-ND 4.0 licence as a structural impediment to community growth. That licence has since been replaced. COMPNET-EN now uses a tri-category model comparable in openness to UCLouvain, Kathará, and SEED Labs — the three projects with the strongest documented adoption trajectories. The non-commercial clause (NC in CC BY-NC-SA) is more restrictive than UCLouvain's CC BY-SA or NPS's public domain, but it is the same constraint applied by many OER projects and does not prevent academic adoption.
+
+**What has not changed.** The licence is a structural prerequisite for community growth, not a guarantee of it. No documented adoption outside ASE-CSIE Bucharest exists yet. No GitHub fork or star data suggests significant external usage. The licence change removes a barrier; whether the materials prove useful enough for others to invest in adapting them is a question that only time and the quality of the kit itself can answer.
 
 ---
 
@@ -500,7 +508,7 @@ Scoring 1–10 per dimension, evaluated by the author with acknowledged bias. Sc
 
 | Course | C1 | C2 | C3 | C4 | C5 | C6 | C7 | C8 | C9 | C10 | TOTAL |
 |:-------|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:---:|:-----:|
-| **COMPNET-EN** | **8** | **6** | **8** | **9** | **9** | **8** | **9** | **10** | **2** | **3** | **72/100** |
+| **COMPNET-EN** | **8** | **6** | **8** | **9** | **9** | **8** | **9** | **10** | **2** | **7** | **76/100** |
 | Stanford CS144 | 7 | 10 | 4 | 5 | 7 | 10 | 2 | 2 | 5 | 6 | 58/100 |
 | ETH Zürich | 9 | 7 | 3 | 10 | 6 | 7 | 2 | 2 | 9 | 8 | 63/100 |
 | Berkeley CS168 | 10 | 5 | 3 | 3 | 9 | 5 | 3 | 2 | 3 | 8 | 51/100 |
@@ -525,6 +533,8 @@ Scoring 1–10 per dimension, evaluated by the author with acknowledged bias. Sc
 
 5. **C8 (QA) and C9 (Validation) are new dimensions.** COMPNET-EN scores 10 on QA — no other course in the sample comes close — and 2 on validation. The asymmetry is itself a finding.
 
+6. **C10 (Licensing) raised from 3 to 7.** The adoption of a multi-licence model (CC BY-NC-SA / GPL-3.0 / Reserved) replaces the CC BY-NC-ND 4.0 licence that the first edition flagged as a growth constraint. The new structure is comparable to UCLouvain and Kathará. The score remains below NPS (public domain, 10) and UCLouvain (CC BY-SA, 9) because the NC clause and the co-authorship requirement introduce frictions that fully permissive licences do not, and because no external adoption has yet been documented under the new terms.
+
 ### 5.3. Main Conclusions
 
 1. **COMPNET-EN occupies a distinctive niche.** It is arguably the most infrastructure-complete, pedagogically explicit, and operationally detailed single-repository networking course kit that is publicly accessible. This is a verifiable claim: the reader can check the file counts, the CI pipeline, the QA report, and the documentation against any other course in the sample.
@@ -533,7 +543,7 @@ Scoring 1–10 per dimension, evaluated by the author with acknowledged bias. Sc
 
 3. **The validation gap is the critical weakness.** Without peer-reviewed publication, documented learning outcomes, and multi-institutional adoption, COMPNET-EN's claims rest on self-assessment. This report is itself an instance of the problem: a self-evaluation cannot substitute for external review.
 
-4. **The licence choice constrains growth.** The restrictive CC BY-NC-ND 4.0 licence protects authorship but prevents the community dynamics that have made SEED Labs (1 180+ institutions), Labtainers, and Kathará successful at scale. Whether this trade-off is acceptable depends on the project's goals.
+4. **The licence model is now structurally aligned with the field.** The adoption of a multi-licence model (CC BY-NC-SA for documentation, GPL-3.0 for code, all-rights-reserved for examination materials) removes the licensing barrier identified in the first edition. COMPNET-EN now uses a structure comparable to UCLouvain CNP3, Kathará, and SEED Labs — the three projects with the strongest documented adoption trajectories. Whether the materials attract external adoption remains an open question, but the licence is no longer the obstacle.
 
 5. **The breadth-versus-depth trade-off is real.** COMPNET-EN covers IoT/MQTT, gRPC, email protocols, SDN, load balancing, and security across 14 weeks. No other course in the sample matches this breadth. But no other course in the sample sacrifices as much depth per topic, either. The design philosophy prioritises survey completeness over implementation mastery.
 
@@ -574,7 +584,7 @@ Scoring 1–10 per dimension, evaluated by the author with acknowledged bias. Sc
                   │ First external pilot (partner institution)
                   │
 2027+       ─────► Publication of learning outcome data
-                  │ Licence review: consider dual-licensing for academic adoption
+                  │ Track and document external adoption under the new licence
                   │ Companion open textbook (Berkeley-inspired)
 ```
 
