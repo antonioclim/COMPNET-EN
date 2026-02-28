@@ -1,0 +1,37 @@
+@startuml fig-S19-e2-message-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title S19 — E2 Path: Auction Opening, Competing Bids and Closure
+
+participant "Seller" as SELLER #E3F2FD
+participant "Bidder A" as A #E3F2FD
+participant "Bidder B" as B #E3F2FD
+participant "auction_service\n:5019" as S #C8E6C9
+
+== Auction creation ==
+SELLER -> S : HELLO seller
+SELLER -> S : SELL camera 100 duration=20s
+S --> SELLER : OPEN auction_id=19 current=100
+
+== Competitive bidding ==
+A -> S : BID 19 120
+S --> A : TOP_BID 120
+B -> S : BID 19 150
+S --> B : TOP_BID 150
+S -[#1565C0]-> A : OUTBID auction_id=19 top=150
+
+== Closure ==
+S -[#43A047]-> SELLER : CLOSED auction_id=19
+S -[#43A047]-> A : CLOSED auction_id=19
+S -[#43A047]-> B : WINNER auction_id=19 amount=150
+
+legend right
+  PCAP shows SELL / OPEN, BID and OUTBID
+  plus CLOSED / WINNER at expiry
+  Validates R1–R5 in S19.json
+endlegend
+@enduml

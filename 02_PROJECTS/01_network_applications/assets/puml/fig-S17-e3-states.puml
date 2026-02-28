@@ -1,0 +1,25 @@
+@startuml fig-S17-e3-states
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+
+title S17 — Object Lifecycle with Lease Expiry
+
+[*] --> Absent
+
+Absent --> Published : PUBLISH(key)
+Published --> Published : HEARTBEAT / LIST / WATCH
+Published --> Retrieved : GET(key)\nbrokered transfer
+Retrieved --> Published : VALUE delivered
+Published --> Removed : DELETE(key)
+Published --> Expired : lease timeout\nor owner disconnect
+Removed --> Absent
+Expired --> Absent
+
+legend right
+  Key uniqueness enforced by server
+  Retrieval is brokered, not peer-to-peer
+  Lease expiry removes stale registry entries
+endlegend
+@enduml

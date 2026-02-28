@@ -1,0 +1,37 @@
+@startuml fig-S20-e2-message-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title S20 — E2 Path: Query, Update, Notify and Delete
+
+participant "Client A" as A #E3F2FD
+participant "Client B" as B #E3F2FD
+participant "object_db_service\n:5020" as S #C8E6C9
+
+== Initial selection ==
+A -> S : HELLO alice
+B -> S : HELLO bob
+A -> S : QUERY key=alpha
+S --> A : RESULT key=alpha rev=1
+B -> S : WATCH alpha
+S --> B : OK WATCH alpha
+
+== Update and fan-out ==
+A -> S : UPDATE alpha {payload}
+S --> A : OK UPDATED rev=2
+S -[#1565C0]-> B : CHANGED alpha rev=2
+
+== Delete ==
+A -> S : DELETE alpha
+S --> A : OK DELETED
+S -[#43A047]-> B : NOTIFY DELETED alpha
+
+legend right
+  PCAP shows QUERY / GET, UPDATE and DELETE
+  plus a pushed change notification
+  Validates R1–R5 in S20.json
+endlegend
+@enduml

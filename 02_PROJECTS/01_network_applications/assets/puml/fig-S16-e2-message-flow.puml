@@ -1,0 +1,44 @@
+@startuml fig-S16-e2-message-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title S16 — E2 Path: Lock Exclusivity, Save and Notification
+
+participant "Client A" as A #E3F2FD
+participant "Client B" as B #E3F2FD
+participant "Watcher" as W #E3F2FD
+participant "editor_server\n:5016" as S #C8E6C9
+
+== Session setup ==
+A -> S : HELLO alice
+B -> S : HELLO bob
+W -> S : HELLO watcher
+W -> S : WATCH notes.txt
+
+== Lock acquisition ==
+A -> S : LOCK notes.txt
+S --> A : OK LOCKED version=3 owner=alice
+
+B -> S : LOCK notes.txt
+S --> B : ERR_LOCKED owner=alice
+
+== Save and update ==
+A -> S : SAVE notes.txt version=3 length=128\n<full document payload>
+S -> S : atomic write\nversion := 4
+S --> A : OK SAVED version=4
+S -[#43A047]-> W : DOC_UPDATE notes.txt version=4
+S -[#1565C0]-> B : UPDATED notes.txt version=4
+
+== Closure ==
+A -> S : UNLOCK notes.txt
+S --> A : OK UNLOCKED
+
+legend right
+  PCAP shows: LOCK, ERR_LOCKED, SAVE
+  plus post-save update markers
+  Validates R1–R5 in S16.json
+endlegend
+@enduml

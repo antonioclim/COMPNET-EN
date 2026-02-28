@@ -1,0 +1,52 @@
+@startuml fig-S16-architecture
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title S16 — Collaborative Text Editing: System Architecture
+
+package "Docker Network" as net #F5F5F5 {
+
+    rectangle "editor_client_a" as cA #E3F2FD {
+        rectangle "CLI Editor" as cliA #BBDEFB
+    }
+
+    rectangle "editor_client_b" as cB #E3F2FD {
+        rectangle "CLI Reader / Competing Editor" as cliB #BBDEFB
+    }
+
+    rectangle "editor_server\n:5016/TCP" as srv #C8E6C9 {
+        rectangle "Session Manager" as sess #A5D6A7
+        rectangle "Lock Table\n(doc → owner)" as locks #FFCDD2
+        rectangle "Version Tracker\n(doc → version)" as vers #FFF9C4
+        rectangle "Watcher Registry" as watch #E1BEE7
+        rectangle "Document Store\n/plain text files" as store #FFF9C4
+    }
+
+    rectangle "observer_client" as obs #E3F2FD {
+        rectangle "Watcher" as cliObs #BBDEFB
+    }
+
+    rectangle "tester\n(pytest -m e2)" as tester #FFF9C4
+}
+
+cA --> srv : "TCP :5016\nHELLO, LIST, LOCK, SAVE, UNLOCK"
+cB --> srv : "TCP :5016\nLIST, LOCK, VIEW"
+obs --> srv : "TCP :5016\nWATCH, VIEW"
+tester -up-> srv : prepares scenario\nruns capture + validation
+
+sess --> locks : lock ownership
+sess --> vers : monotonic versions
+sess --> watch : notification fan-out
+sess --> store : atomic writes
+
+legend right
+  One document → at most one active editor
+  Readers and watchers remain concurrent
+  SAVE increments the authoritative version
+  Post-save notifications reach watchers
+  Port: 5016/TCP
+endlegend
+@enduml

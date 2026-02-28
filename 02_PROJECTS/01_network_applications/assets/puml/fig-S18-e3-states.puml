@@ -1,0 +1,27 @@
+@startuml fig-S18-e3-states
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+
+title S18 — Reservation State Machine
+
+[*] --> Available
+
+Available --> Held : HOLD accepted
+Held --> Reserved : CONFIRM
+Held --> Available : EXPIRED
+Held --> Available : CANCEL_HOLD
+Held --> Available : client disconnect\nautomatic release
+Reserved --> Reserved : MODIFY
+Reserved --> Available : DELETE
+Reserved --> Available : admin release\n(if documented)
+Available --> Conflict : overlapping HOLD
+Conflict --> Available : OVERLAP / REJECT
+
+legend right
+  Hold lifetime is finite
+  Server clock decides expiry
+  Only non-overlapping intervals become RESERVED
+endlegend
+@enduml

@@ -1,0 +1,41 @@
+@startuml fig-S17-e2-message-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title S17 — E2 Path: Publish, Brokered Retrieval and Expiry
+
+participant "Owner" as O #E3F2FD
+participant "Requester" as R #E3F2FD
+participant "Watcher" as W #E3F2FD
+participant "object_registry\n:5017" as S #C8E6C9
+
+== Publication ==
+O -> S : HELLO owner-1
+O -> S : PUBLISH lab:key/json type=json length=64
+S --> O : OK STORED lease=30
+
+W -> S : WATCH lab:
+S --> W : OK WATCHING
+
+== Retrieval ==
+R -> S : HELLO requester-1
+R -> S : GET lab:key/json
+S -> O : FETCH lab:key/json
+O --> S : OBJECT length=64\n{"temp": 22.5, "unit": "C"}
+S --> R : VALUE length=64\n{"temp": 22.5, "unit": "C"}
+
+== Lease cleanup ==
+O -> S : HEARTBEAT lease=30
+S --> O : OK
+... owner disconnects or lease expires ...
+S -[#43A047]-> W : EXPIRED lab:key/json
+
+legend right
+  PCAP shows PUBLISH, GET and VALUE
+  plus lease or cleanup semantics
+  Validates R1–R5 in S17.json
+endlegend
+@enduml

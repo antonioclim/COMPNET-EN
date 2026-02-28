@@ -1,0 +1,44 @@
+@startuml fig-S17-architecture
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title S17 — In-Memory Object Store: Registry and Brokered Transfer
+
+package "Docker Network" as net #F5F5F5 {
+
+    rectangle "owner_client" as owner #E3F2FD
+    rectangle "requester_client" as req #E3F2FD
+    rectangle "watcher_client" as watcher #E3F2FD
+
+    rectangle "object_registry\n:5017/TCP" as srv #C8E6C9 {
+        rectangle "Session Manager" as sess #A5D6A7
+        rectangle "Key Registry\n(key → owner, metadata)" as reg #FFF9C4
+        rectangle "Lease Manager" as lease #FFCDD2
+        rectangle "Watcher Table" as wtab #E1BEE7
+        rectangle "Brokered Transfer Engine" as broker #BBDEFB
+    }
+
+    rectangle "tester\n(pytest -m e2)" as tester #FFF9C4
+}
+
+owner --> srv : "PUBLISH, HEARTBEAT"
+req --> srv : "LIST, GET"
+watcher --> srv : "WATCH prefix:key"
+tester -up-> srv : publishes, retrieves\nobserves cleanup
+
+sess --> reg
+sess --> lease
+sess --> wtab
+sess --> broker
+
+legend right
+  Objects remain in memory
+  Server is authoritative for key ownership
+  Requester never contacts owner directly
+  Expiry or disconnect removes stale keys
+  Port: 5017/TCP
+endlegend
+@enduml

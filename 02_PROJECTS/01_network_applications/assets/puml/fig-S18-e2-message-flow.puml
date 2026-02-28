@@ -1,0 +1,43 @@
+@startuml fig-S18-e2-message-flow
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title S18 — E2 Path: Hold, Overlap Refusal and Confirmation
+
+participant "Client A" as A #E3F2FD
+participant "Client B" as B #E3F2FD
+participant "Watcher" as W #E3F2FD
+participant "reservation_service\n:5018" as S #C8E6C9
+
+== Initial hold ==
+A -> S : HELLO alice
+B -> S : HELLO bob
+W -> S : WATCH lab-pc-01
+
+A -> S : HOLD lab-pc-01 2026-04-01T10:00 2026-04-01T11:00
+S --> A : OK HOLD hold_id=42 expires=30s
+S -[#1565C0]-> W : HELD lab-pc-01 hold_id=42
+
+== Competing request ==
+B -> S : HOLD lab-pc-01 2026-04-01T10:30 2026-04-01T11:30
+S --> B : OVERLAP hold_id=42
+
+== Confirmation ==
+A -> S : CONFIRM 42
+S --> A : OK RESERVED reservation_id=100
+S -[#43A047]-> W : RESERVED lab-pc-01 reservation_id=100
+
+== Release path ==
+A -> S : DELETE 100
+S --> A : OK DELETED
+S --> W : RELEASED lab-pc-01
+
+legend right
+  PCAP shows HOLD, OVERLAP and CONFIRM
+  plus RELEASED / EXPIRED / CANCELLED
+  Validates R1–R5 in S18.json
+endlegend
+@enduml

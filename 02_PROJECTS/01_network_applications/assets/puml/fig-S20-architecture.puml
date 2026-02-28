@@ -1,0 +1,45 @@
+@startuml fig-S20-architecture
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title S20 — Database-backed Object Service: Query, Update and Notifications
+
+package "Docker Network" as net #F5F5F5 {
+
+    rectangle "client_a" as cA #E3F2FD
+    rectangle "client_b" as cB #E3F2FD
+    rectangle "watcher_client" as cW #E3F2FD
+
+    rectangle "object_db_service\n:5020/TCP" as srv #C8E6C9 {
+        rectangle "Session Manager" as sess #A5D6A7
+        rectangle "Query Parser" as query #FFF9C4
+        rectangle "Revision Tracker" as rev #FFCDD2
+        rectangle "In-Memory Index" as idx #BBDEFB
+        rectangle "SQLite Store" as db #D1C4E9
+        rectangle "Notification Router" as notif #E1BEE7
+    }
+
+    rectangle "tester\n(pytest -m e2)" as tester #FFF9C4
+}
+
+cA --> srv : "QUERY, GET, UPDATE"
+cB --> srv : "WATCH, GET"
+cW --> srv : "WATCH prefix or key"
+tester -up-> srv : drives E2\ncaptures update and delete
+
+sess --> query
+query --> rev
+rev --> idx
+rev --> db
+rev --> notif
+
+legend right
+  Persistent state survives restart
+  Updates change durable and visible state
+  Notifications target interested sessions only
+  Port: 5020/TCP
+endlegend
+@enduml

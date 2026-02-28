@@ -1,0 +1,48 @@
+@startuml fig-S19-architecture
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 12
+
+title S19 — Distributed Auction: Bids, Timers and Event Log
+
+package "Docker Network" as net #F5F5F5 {
+
+    rectangle "seller_client" as seller #E3F2FD
+    rectangle "bidder_a" as bidA #E3F2FD
+    rectangle "bidder_b" as bidB #E3F2FD
+    rectangle "watcher_client" as watch #E3F2FD
+
+    rectangle "auction_service\n:5019/TCP" as srv #C8E6C9 {
+        rectangle "Session Manager" as sess #A5D6A7
+        rectangle "Auction Store" as store #FFF9C4
+        rectangle "Bid Validator" as valid #FFCDD2
+        rectangle "Deadline Timer" as timer #BBDEFB
+        rectangle "Event Log" as elog #D1C4E9
+        rectangle "Notification Fan-out" as notif #E1BEE7
+    }
+
+    rectangle "tester\n(pytest -m e2)" as tester #FFF9C4
+}
+
+seller --> srv : "SELL item"
+bidA --> srv : "WATCH, BID"
+bidB --> srv : "WATCH, BID"
+watch --> srv : "LIST, WATCH"
+tester -up-> srv : drives E2\ncaptures closure and winner
+
+sess --> store
+sess --> valid
+valid --> timer
+valid --> elog
+valid --> notif
+
+legend right
+  Server time is authoritative
+  Higher bids replace the current top bid
+  Closure is timer-driven and deterministic
+  Event log justifies the final winner
+  Port: 5019/TCP
+endlegend
+@enduml

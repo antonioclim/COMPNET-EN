@@ -1,0 +1,30 @@
+@startuml fig-S16-e3-states
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+
+title S16 — Document Lock and Version Lifecycle
+
+[*] --> Unlocked
+
+state Unlocked {
+  [*] --> Idle
+}
+
+Unlocked --> Locked : LOCK(doc) accepted
+Locked --> Locked : VIEW / WATCH / LIST
+Locked --> Saved : SAVE(doc, version, payload)
+Saved --> Locked : ACK to owner\nnotify watchers
+Locked --> Unlocked : UNLOCK(doc)
+Locked --> Unlocked : owner disconnect\nautomatic release
+Unlocked --> Conflict : LOCK by second client when owner exists
+Conflict --> Locked : ERR_LOCKED sent
+Saved --> Unlocked : owner releases lock
+
+legend right
+  Single-writer semantics
+  Version number increases only on SAVE
+  Disconnect triggers lock cleanup
+endlegend
+@enduml

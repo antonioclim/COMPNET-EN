@@ -1,0 +1,23 @@
+@startuml fig-S20-e3-states
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+
+title S20 — Object Lifecycle State Machine
+
+[*] --> Present : seed data or INSERT
+Present --> Selected : QUERY or GET match
+Selected --> Present : session returns to idle
+Present --> Present : UPDATE commit\nrevision incremented
+Present --> Deleted : DELETE commit
+Deleted --> [*]
+Present --> Missing : unknown key queried
+Missing --> Present : valid key requested
+
+legend right
+  Notifications follow committed UPDATE and DELETE events
+  Durable storage is the source of truth
+  Watch state belongs to sessions, not objects
+endlegend
+@enduml

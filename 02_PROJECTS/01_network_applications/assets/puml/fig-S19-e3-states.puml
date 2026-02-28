@@ -1,0 +1,23 @@
+@startuml fig-S19-e3-states
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+
+title S19 — Auction State Machine
+
+[*] --> OPEN : SELL accepted
+OPEN --> OPEN : higher BID accepted
+OPEN --> REJECTED : low or invalid BID
+REJECTED --> OPEN : continue waiting
+OPEN --> CLOSED : deadline reached
+CLOSED --> CLOSED : late BID rejected
+CLOSED --> SETTLED : winner announced
+SETTLED --> [*]
+
+legend right
+  The server clock decides closure
+  Equal-value bids follow the documented tie-break rule
+  The event log records every accepted transition
+endlegend
+@enduml
