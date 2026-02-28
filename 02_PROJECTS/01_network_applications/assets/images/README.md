@@ -1,6 +1,6 @@
 # 01_network_applications/assets/images — Rendered Diagram Output
 
-Placeholder directory for PNG files produced by [`../render.sh`](../render.sh) from the 45 PlantUML sources in [`../puml/`](../puml/). Currently contains only `.gitkeep`.
+Placeholder directory for PNG files produced by [`../render.sh`](../render.sh) from the 60 PlantUML sources in [`../puml/`](../puml/). Currently contains only `.gitkeep`.
 
 Run `bash ../render.sh` to populate this folder.
 

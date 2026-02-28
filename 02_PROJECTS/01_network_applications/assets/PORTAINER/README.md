@@ -1,6 +1,6 @@
 # 01_network_applications/assets/PORTAINER — Per-Project Portainer Guides
 
-Fifteen debugging and observation guides, one per S-project, showing how to use the Portainer container dashboard during E2 development and troubleshooting. Each guide documents the expected container architecture, published ports, log-observation strategies and console commands specific to that project.
+Twenty debugging and observation guides, one per S-project, showing how to use the Portainer container dashboard during E2 development and troubleshooting. Each guide documents the expected container architecture, published ports, log-observation strategies and console commands specific to that project.
 
 ## Guide Index
 
@@ -21,6 +21,11 @@ Fifteen debugging and observation guides, one per S-project, showing how to use 
 | [`S13/`](S13/) | `PORTAINER_GUIDE_S13.md` | gRPC service |
 | [`S14/`](S14/) | `PORTAINER_GUIDE_S14.md` | DV routing in Mininet |
 | [`S15/`](S15/) | `PORTAINER_GUIDE_S15.md` | IoT gateway |
+| [`S16/`](S16/) | `PORTAINER_GUIDE_S16.md` | Collaborative text editing |
+| [`S17/`](S17/) | `PORTAINER_GUIDE_S17.md` | In-memory object store |
+| [`S18/`](S18/) | `PORTAINER_GUIDE_S18.md` | Resource reservation |
+| [`S19/`](S19/) | `PORTAINER_GUIDE_S19.md` | Distributed auction |
+| [`S20/`](S20/) | `PORTAINER_GUIDE_S20.md` | Database-backed object service |
 
 ## Portainer Access
 
