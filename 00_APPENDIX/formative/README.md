@@ -12,7 +12,6 @@ Week 0 formative assessment for the course toolchain: an interactive quiz runner
 | [`quiz.json`](quiz.json) | Exported quiz artefact (do not edit by hand) | 418 lines |
 | [`parsons_problems.json`](parsons_problems.json) | Exported Parsons artefact (do not edit by hand) | 186 lines |
 | [`tests/`](tests/) | Pytest suite validating quiz exports | 6 files (recursive) |
-| [`__pycache__/`](__pycache__/) | CPython bytecode cache (generated) | 2 files (recursive) |
 
 ## Visual Overview
 

@@ -9,7 +9,6 @@ Pytest suite that validates the Week 0 quiz runner’s export formats and struct
 | [`README.md`](README.md) | Orientation for the export tests | — |
 | [`__init__.py`](__init__.py) | Test package marker (allows imports) | 0 lines |
 | [`test_quiz_exports.py`](test_quiz_exports.py) | Tests for JSON export, Moodle GIFT export and validation helpers | 295 lines |
-| [`__pycache__/`](__pycache__/) | CPython bytecode cache (generated) | 3 files (recursive) |
 
 ## Visual Overview
 
