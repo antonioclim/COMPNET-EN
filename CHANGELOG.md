@@ -1,11 +1,13 @@
-# CHANGELOG — Backbone comparison (compnet-2025-redo-main → COMPNET-EN-main)
+# CHANGELOG — Backbone comparison and downstream evolution (compnet-2025-redo-main → COMPNET-EN-main → COMPNET-EN-main_PHASEC_plus_more_labs_QAfix)
 
-Prepared on 25 February 2026.
+Originally prepared on 25 February 2026. Extended on 28 February 2026.
 
 This document is a **snapshot-level changelog** that compares two repository archives:
 
 - **Backbone (upstream):** `compnet-2025-redo-main.zip` (from `hypothetical-andrei/compnet-2025-redo`)
 - **Derived course kit (downstream):** `COMPNET-EN-main.zip` (from `antonioclim/COMPNET-EN`)
+
+**Extension note (28 February 2026).** Sections 10–14 add a second audit layer for the next downstream comparison: `COMPNET-EN-main.zip` → `COMPNET-EN-main_PHASEC_plus_more_labs_QAfix.zip`. Part I (Sections 1–9 and Appendices A–E) is preserved, and Part II appends the cumulative Phase A/B/C, registry-expansion and QA-hardening delta.
 
 The intent is to provide an **audit-grade** description of what was preserved, what was refactored, what was renamed and what was newly introduced. The emphasis is on **functional artefacts** (Python scripts, Docker Compose files, configuration files and build scripts) and on the **pedagogical restructuring** (lectures, seminars, projects and supporting tooling).
 
@@ -3243,5 +3245,578 @@ The following section provides a scenario-level inventory, including unchanged a
 - **Symlinks:** no symlinks were detected in either archive.
 - **Binary artefacts:** the backbone’s `plantuml.jar` and most PNG diagrams are not present in COMPNET-EN-main, which materially reduces repository size and pushes rendering to tooling.
 - **Python bytecode:** COMPNET-EN-main contains committed `.pyc` files under `04_SEMINARS/S06/__pycache__/`. This is inconsistent with the `.gitignore` policy and may be treated as a clean-up candidate if the repository is intended to remain source-only.
+
+---
+
+## 10. Supplementary downstream delta (COMPNET-EN-main -> COMPNET-EN-main_PHASEC_plus_more_labs_QAfix)
+
+### 10.1 Scope, rationale and method
+
+This second comparison extends the original backbone-focused changelog with a **downstream evolution layer**. The two snapshots compared here are:
+
+- **Baseline downstream kit:** `COMPNET-EN-main.zip`
+- **Current phase-complete kit:** `COMPNET-EN-main_PHASEC_plus_more_labs_QAfix.zip`
+
+The goal is to describe the cumulative delta introduced by:
+
+- **Phase A** — low-risk additions
+- **Phase B** — reliability improvements
+- **Phase C** — capstone and runner framework
+- **Phase C follow-up** — broader `lab_runner` registry coverage
+- **Post-Phase C QA hardening** — functional repair, bytecode cleanup and audit artefacts
+
+The same audit method used in Part I is reused here:
+
+1. **Path-based comparison** — additions, removals and modifications by relative path  
+2. **SHA-256 identity** — verbatim reuse detection  
+3. **Text-level delta statistics** — approximate line additions/deletions for modified UTF-8 artefacts  
+4. **Registry-aware scenario inspection** — explicit attention to Docker Compose labs exposed through `00_TOOLS/lab_runner/labs.json`
+
+### 10.2 Snapshot metrics
+
+| Metric | COMPNET-EN-main | COMPNET-EN-main_PHASEC_plus_more_labs_QAfix |
+| --- | --- | --- |
+| Archive name | COMPNET-EN-main.zip | COMPNET-EN-main_PHASEC_plus_more_labs_QAfix.zip |
+| Total files | 1193 | 1249 |
+| Total size (bytes) | 8349028 | 8214002 |
+| Total size (MiB) | 7.96 | 7.83 |
+| Text files (UTF-8 decodable) | 1185 | 1247 |
+| Total text lines | 176407 | 179381 |
+| Total text words (heuristic) | 860860 | 874362 |
+| Symlinks | 0 | 0 |
+
+Key observations:
+
+- The later archive grows from **1193** to **1249** files, but shrinks from **8349028** to **8214002 bytes** (a reduction of **135,026 bytes**).  
+- The size reduction is explained largely by the removal of committed **`.pyc` bytecode caches** and by the fact that most new content is lightweight text/configuration rather than large binaries.  
+- Textual surface area increases by **2,974 lines** and **13,502 heuristic words**, which is consistent with the addition of new READMEs, overlays, helper scripts and audit documents.
+
+### 10.3 Structural footprint
+
+Top-level file distribution:
+
+| Top-level | COMPNET-EN-main | COMPNET-EN-main_PHASEC_plus_more_labs_QAfix | Delta |
+| --- | --- | --- | --- |
+| (root) | 12 | 14 | 2 |
+| 00_APPENDIX | 132 | 126 | -6 |
+| 00_TOOLS | 176 | 188 | 12 |
+| 01_GUIDE_MININET-SDN | 3 | 3 | 0 |
+| 02_PROJECTS | 193 | 193 | 0 |
+| 03_LECTURES | 320 | 361 | 41 |
+| 04_SEMINARS | 356 | 363 | 7 |
+| .github | 1 | 1 | 0 |
+
+Interpretation:
+
+- **`03_LECTURES/`** absorbs the largest growth (**+41 files**), driven primarily by the new **Week 14 integration lab**, the **advanced HTTP proxy overlay**, the **IoT TLS/CLI expansion** and the **C11 runtime-fix Dockerfiles**.  
+- **`00_TOOLS/`** grows by **12 files**, reflecting the introduction of **`lab_runner/`**, **`pcap/`**, **`mininet/`** and **`subnetting/`** utilities.  
+- **`04_SEMINARS/`** grows by **7 files**, mainly due to S13 helper additions and the extra SDN controller variant in S06.  
+- **`00_APPENDIX/`** decreases by **6 files** only because committed bytecode caches are removed; this is a hygiene improvement, not a content loss.
+
+### 10.4 File type comparison
+
+Selected extension counts:
+
+| Extension | COMPNET-EN-main | COMPNET-EN-main_PHASEC_plus_more_labs_QAfix | Delta |
+| --- | --- | --- | --- |
+| md | 379 | 391 | 12 |
+| puml | 386 | 386 | 0 |
+| py | 138 | 154 | 16 |
+| yml | 19 | 24 | 5 |
+| yaml | 4 | 4 | 0 |
+| sh | 51 | 55 | 4 |
+| html | 100 | 101 | 1 |
+| png | 1 | 1 | 0 |
+| json | 30 | 31 | 1 |
+| proto | 1 | 1 | 0 |
+| pyc | 6 | 0 | -6 |
+| xlsx | 1 | 1 | 0 |
+| conf | 6 | 13 | 7 |
+| env | 1 | 1 | 0 |
+| zone | 1 | 2 | 1 |
+| (no ext) | 14 | 21 | 7 |
+
+Operational implications:
+
+- **Python scripts** grow from **138** to **154**, but only **4 existing Python paths are modified in place**; most Python growth is additive.  
+- **Compose / YAML** files grow from **23** to **28**, reflecting healthcheck overlays, new Docker Compose scenarios and runner metadata.  
+- **Config artefacts** (`.conf`, `.zone`) grow sharply from **7** to **15**, because the new C14 integration lab and the optional MQTT/TLS support introduce more service-level configuration.  
+- **Committed `.pyc` files drop from 6 to 0**, which materially improves distribution cleanliness.
+
+### 10.5 Path-level delta summary
+
+| Category | Count | Interpretation |
+| --- | --- | --- |
+| Old downstream paths retained (same relative path, regardless of content) | 1187 | 99.50% of COMPNET-EN-main |
+| Old downstream paths retained verbatim | 1152 | 96.56% of COMPNET-EN-main |
+| Old downstream paths modified in place | 35 | 2.93% of COMPNET-EN-main |
+| New downstream paths added | 62 | 4.96% of final snapshot |
+| Old downstream paths removed | 6 | 0.50% of COMPNET-EN-main |
+
+The important contrast with Part I is that this downstream delta is **highly path-stable**. The transition from `COMPNET-EN-main` to the phase-complete QA-hardened kit is mostly **incremental and additive**, not architectural.
+
+---
+
+## 11. Downstream continuity and phase decomposition
+
+### 11.1 Verbatim reuse of functional artefacts
+
+| Artefact family | Old count | New count | Old reused verbatim | Old modified in place | New additions |
+| --- | --- | --- | --- | --- | --- |
+| Python scripts (.py) | 138 | 154 | 134 | 4 | 16 |
+| Compose / YAML (.yml, .yaml) | 23 | 28 | 15 | 8 | 5 |
+| Shell scripts (.sh) | 51 | 55 | 51 | 0 | 4 |
+| Config files (.conf, .zone) | 7 | 15 | 6 | 1 | 8 |
+| Markdown (.md) | 379 | 391 | 358 | 21 | 12 |
+
+Interpretation:
+
+- **Shell script continuity is perfect for existing paths**: all **51** shell scripts from `COMPNET-EN-main` remain unchanged, and the four new shell scripts are purely additive.  
+- **Python continuity is also strong**: **134** of the **138** baseline Python files are preserved verbatim, with only **4 existing Python files** being modified in place.  
+- The main locus of in-place change is **Compose/YAML**, which is exactly where reliability improvements were expected.  
+- The downstream evolution therefore preserves the original educational backbone while adding opt-in functionality, orchestration convenience and runtime correctness.
+
+### 11.2 Phase decomposition (cumulative view)
+
+| Phase | New paths introduced in final delta | Primary character | Representative additions or effects |
+| --- | --- | --- | --- |
+| Phase A — low-risk additions | 24 | Additive tools and optional scenario extensions | 00_TOOLS/mininet/, 00_TOOLS/pcap/, 00_TOOLS/subnetting/, C13 MQTT TLS/CLI overlay, S13 defensive checker/report helper, S06 advanced SDN controller |
+| Phase B — reliability improvements | 3 | Healthchecks, start-order gating and optional port environment support | C10/C11/C13 compose healthchecks; S13 .env support with generate_env_ports.py and s13_env.py |
+| Phase C — capstone framework | 29 | Runner framework and new teaching scenario assets | 00_TOOLS/lab_runner/, C10 advanced proxy overlay, C14 Week 14 integration lab |
+| Phase C follow-up — registry expansion | 0 | Broader Compose registry coverage without repo refactor | labs.json expanded from pilot-only coverage to 18 registered labs |
+| Post-Phase C QA hardening | 6 | Functional repair and archive hygiene | C11 dependency Dockerfiles, QA_AUDIT_REPORT.md, REVISELOG.md, removal of committed .pyc caches |
+
+The final snapshot therefore contains a **cumulative** delta rather than a single monolithic edit. In functional terms, the phases behave as follows:
+
+1. **Phase A** enriches the repository with optional helpers and scenario extensions while deliberately avoiding breaking changes.  
+2. **Phase B** targets **start-order reliability** and **local host-port robustness** in Docker Compose labs.  
+3. **Phase C** adds a **runner framework**, a **capstone integration lab** and a **more advanced HTTP reverse-proxy track**.  
+4. The **follow-up registry pass** broadens runner coverage without refactoring repository structure.  
+5. The **QA hardening pass** corrects real runtime blockers in C11, removes accidental distribution noise and records the audit work explicitly.
+
+### 11.3 Concentration of change
+
+Change is **concentrated**, not diffuse:
+
+- **`02_PROJECTS/` remains untouched** across this downstream delta.  
+- **C01–C09 lecture assets are untouched**; change begins materially at **C10**, then intensifies in **C11**, **C13** and **C14**.  
+- Seminar changes are concentrated in **S06** and **S13**.  
+- At repository root, the only new files are **`QA_AUDIT_REPORT.md`** and **`REVISELOG.md`**.
+
+This concentration is a positive coherence signal: the delta does not destabilise unrelated weeks.
+
+---
+
+## 12. Detailed downstream change log by area
+
+### 12.1 Phase A — low-risk additions
+
+The low-risk phase adds **new tools** and **optional scenario layers** without restructuring the baseline kit.
+
+| Path or area | What was added | Why it matters |
+| --- | --- | --- |
+| 00_TOOLS/mininet/ovs_reset.sh | Deep OVS / Mininet reset helper | Useful after failed SDN/mininet runs; added with README and executable-manifest entry. |
+| 00_TOOLS/pcap/pcap_stats.py | Dependency-light packet statistics helper | Supports auto-backend selection and a pure classic-PCAP fallback. |
+| 00_TOOLS/pcap/pcap_tshark_summary.py | Optional tshark-based summariser | Complements `pcap_stats.py` when tshark is available. |
+| 00_TOOLS/pcap/capture_demo.sh | Minimal capture demonstration wrapper | Provides a ready-made entry point for packet capture demonstrations. |
+| 00_TOOLS/subnetting/subnet_quiz_generator.py | Dynamic subnet/VLSM quiz generator | Adds optional practice generation without touching existing lecture assets. |
+| 03_LECTURES/C13/assets/scenario-iot-basic/docker-compose.tls.yml | TLS overlay for the MQTT scenario | Keeps plaintext as default while making TLS an opt-in extension. |
+| 03_LECTURES/C13/assets/scenario-iot-basic/docker-compose.cli.yml | CLI overlay/profile for MQTT testing | Introduces an explicit learner-facing client without altering the base stack. |
+| 03_LECTURES/C13/assets/scenario-iot-basic/client/mqtt_cli.py | CLI MQTT client | Provides a controllable publisher/subscriber entry point. |
+| 03_LECTURES/C13/assets/scenario-iot-basic/tls/generate_demo_certs.sh | Demo certificate generator | Produces a self-signed CA plus server certificate for the optional TLS lab. |
+| 04_SEMINARS/S13/S13_Part05_Script_Defensive_Vuln_Checker.py | Defensive-only vulnerability checker | Adds controlled enumeration without exploitation. |
+| 04_SEMINARS/S13/report_generator.py | Markdown report helper | Supports evidence-oriented reporting in S13. |
+| 04_SEMINARS/S06/2_sdn/S06_Part02C_Script_SDNOS_Ken_Controller_AdvancedPolicy.py | Advanced SDN controller variant | Adds an optional higher-level policy controller without replacing the baseline controller. |
+
+Further notes:
+
+- The MQTT baseline remains **plaintext by default**; TLS is introduced as a **compose overlay**, which preserves backwards compatibility while widening the teaching envelope.  
+- The S13 defensive checker and report helper explicitly strengthen the **defensive / evidence-oriented** side of the security seminar, rather than pushing the kit further into exploit-centric content.  
+- The advanced SDN controller is exposed as an **extra** in S06 and is documented as such; it does not replace the existing controller.
+
+### 12.2 Phase B — reliability improvements
+
+Phase B is dominated by **Compose healthchecks**, **`depends_on: condition: service_healthy`** wiring and **optional local `.env` host-port generation** for S13.
+
+| Compose file or area | Change | Operational effect |
+| --- | --- | --- |
+| 03_LECTURES/C10/assets/scenario-http-compose/docker-compose.yml | Added TCP healthchecks for `web` and `api`; `nginx` now waits for `service_healthy`. | Prevents proxy start before upstream sockets exist. |
+| 03_LECTURES/C11/assets/scenario-dns-ttl-caching/docker-compose.yml | Added PID1 healthchecks for `auth` and `resolver`; `client` waits for `resolver`. | Avoids DNS queries against not-yet-ready services. |
+| 03_LECTURES/C11/assets/scenario-ftp-baseline/docker-compose.yml | Added FTP socket healthcheck; `client` waits for a healthy server; later switched server from stock image to `build: ./server`. | Eliminates race conditions and ensures `pyftpdlib` exists at runtime. |
+| 03_LECTURES/C11/assets/scenario-ftp-nat-firewall/docker-compose.yml | Added FTP and NAT/firewall healthchecks; `client` waits for both; later switched FTP server to `build: ./ftp`. | Ensures routing/NAT is actually up before the FTP client runs and fixes `pyftpdlib` availability. |
+| 03_LECTURES/C11/assets/scenario-ssh-provision/docker-compose.yml | Added `sshd` readiness probe; `controller` waits; later switched controller to `build: ./controller`. | Prevents Paramiko automation from failing due to both timing and missing dependency (`paramiko`). |
+| 03_LECTURES/C13/assets/scenario-iot-basic/docker-compose.yml | Added broker healthcheck; sensor and actuator now wait for the broker. | Prevents initial MQTT connection failures from masking the lab goal. |
+| 03_LECTURES/C13/assets/scenario-iot-basic/docker-compose.cli.yml | Optional CLI profile now also waits for broker health. | Keeps the optional interactive client aligned with the main stack. |
+| 03_LECTURES/C13/assets/scenario-vulnerability-lab/docker-compose.yml | Added target TCP healthcheck; attacker waits for `service_healthy`. | Avoids false negatives when the attacker shell opens before the target binds port 8080. |
+| 04_SEMINARS/S13/S13_Part02_Config_Docker_Compose_Pentest.yml | Introduced `${VAR:-default}` host-port expansion for DVWA, WebGoat and vsftpd/backdoor exposure. | Allows local port conflict avoidance without changing the lab topology. |
+
+Additional S13 notes:
+
+- `04_SEMINARS/S13/.env.example` is added as a documented template.  
+- `04_SEMINARS/S13/generate_env_ports.py` adds a conservative local generator that refuses to overwrite an existing `.env`.  
+- `04_SEMINARS/S13/s13_env.py` gives the seminar scripts a small standard-library loader for the generated values.  
+- `04_SEMINARS/S13/S13_Part09_Script_FTP_Backdoor_Exploit.py` is updated so that, when `.env` exists, it follows the configured host ports rather than silently assuming defaults.
+
+### 12.3 Phase C — runner framework, advanced proxy and capstone lab
+
+Phase C introduces the main structural additions of the downstream delta.
+
+| Component | Role | Why it matters |
+| --- | --- | --- |
+| 00_TOOLS/lab_runner/lab_runner.py | Standard-library Compose runner | Provides list/up/down/logs/status style orchestration from the repository root. |
+| 00_TOOLS/lab_runner/labs.json | Lab registry | Final snapshot registers 18 Compose-backed scenarios and variants. |
+| 03_LECTURES/C10/assets/scenario-http-compose/advanced/ | Advanced Nginx proxy overlay | Adds a second backend plus failover, forwarded headers, rate limiting, caching and a smoke test. |
+| 03_LECTURES/C14/assets/scenario-week14-integration-lab/ | Week 14 capstone scenario subtree | New end-to-end integration lab tying together DNS, HTTP, reverse proxying and optional TLS. |
+| 03_LECTURES/C14/c14-week14-integration-lab.md | Capstone handout | Provides the pedagogical wrapper, expected deliverables and suggested walkthrough. |
+
+Supporting documentation and indexing changes include:
+
+- `00_TOOLS/README.md` — now indexes and demonstrates the lab runner  
+- `README.md` — tooling list now mentions the lab runner as an optional entry point  
+- `03_LECTURES/C14/README.md` — indexes the new capstone lab  
+- `03_LECTURES/C14/c14-revision-and-exam-prep.md` — now points explicitly to the integration lab as a final rehearsal route  
+- `03_LECTURES/C10/assets/scenario-http-compose/README.md` — expanded to cover the advanced overlay
+
+The C10 base web server is also adjusted so that responses expose **`X-Web-Instance`**, enabling students to prove which backend handled a request.
+
+### 12.4 Phase C follow-up — expanded `lab_runner` registration without repo refactor
+
+The final snapshot's `00_TOOLS/lab_runner/labs.json` registers **18** lab IDs / variant sets:
+
+| Lab ID | Path | Variants |
+| --- | --- | --- |
+| c10-http-compose | 03_LECTURES/C10/assets/scenario-http-compose | default, advanced-proxy |
+| c11-dns-ttl-caching | 03_LECTURES/C11/assets/scenario-dns-ttl-caching | default |
+| c11-ftp-baseline | 03_LECTURES/C11/assets/scenario-ftp-baseline | default |
+| c11-ftp-nat-firewall | 03_LECTURES/C11/assets/scenario-ftp-nat-firewall | default |
+| c11-ssh-provision | 03_LECTURES/C11/assets/scenario-ssh-provision | default |
+| c12-local-mailbox | 03_LECTURES/C12/assets/scenario-local-mailbox | default |
+| c13-iot-basic | 03_LECTURES/C13/assets/scenario-iot-basic | default, tls, cli, tls+cli |
+| c13-vulnerability-lab | 03_LECTURES/C13/assets/scenario-vulnerability-lab | default |
+| c14-week14-integration | 03_LECTURES/C14/assets/scenario-week14-integration-lab | default, tls |
+| s08-nginx-compose | 04_SEMINARS/S08/4_nginx | default |
+| s09-multi-client-containers | 04_SEMINARS/S09/3_multi-client-containers | default |
+| s10-dns-containers | 04_SEMINARS/S10/2_dns-containers | default |
+| s10-ssh | 04_SEMINARS/S10/3_ssh | default |
+| s10-ssh-port-forwarding | 04_SEMINARS/S10/4_ssh-port-forwarding | default |
+| s11-custom-load-balancer | 04_SEMINARS/S11/2_custom-load-balancer | default |
+| s11-nginx-compose | 04_SEMINARS/S11/1_nginx-compose | default |
+| s13-pentest-compose | 04_SEMINARS/S13 | default |
+| tool-portainer | 00_TOOLS/Portainer/INIT_GUIDE | default |
+
+This is important because the runner is no longer a purely illustrative pilot. It now covers:
+
+- the original Phase C pilot scenarios (**C10**, **C13**, **C14**)  
+- four lecture scenarios from **C11**  
+- one lecture scenario from **C12**  
+- the C13 vulnerability lab  
+- several seminar Compose labs (**S08**, **S09**, **S10**, **S11**, **S13**)  
+- the optional Portainer bootstrap stack
+
+The repository structure itself is not refactored to support this; the broader coverage is achieved purely by manifest expansion.
+
+### 12.5 Post-Phase C QA hardening
+
+The QA pass adds a small but critical set of **functional repairs** and **distribution cleanups**.
+
+| Path or area | Hardening action | Reason |
+| --- | --- | --- |
+| 03_LECTURES/C11/assets/scenario-dns-ttl-caching/client/Dockerfile | Installs `dnspython` for `query.py`. | Fixes an otherwise guaranteed `ModuleNotFoundError` at runtime. |
+| 03_LECTURES/C11/assets/scenario-ftp-baseline/server/Dockerfile | Installs `pyftpdlib` for the FTP server. | Makes the lecture scenario executable after `docker compose up --build`. |
+| 03_LECTURES/C11/assets/scenario-ftp-nat-firewall/ftp/Dockerfile | Installs `pyftpdlib` in the NAT/firewall FTP service. | Fixes the same runtime failure class in the more advanced FTP lab. |
+| 03_LECTURES/C11/assets/scenario-ssh-provision/controller/Dockerfile | Installs `paramiko` for the provisioner. | Makes SSH automation actually runnable inside the container. |
+| QA_AUDIT_REPORT.md | Audit record for static QA and coherence checks. | Documents repository-wide validation of the distributed kit. |
+| REVISELOG.md | Implementation log for the ported/adapted additions. | Keeps detailed phase notes without overloading the high-level README. |
+| 00_APPENDIX/formative/README.md and tests/README.md | Removed references to committed `__pycache__/` directories. | Keeps the file indexes coherent after cache cleanup. |
+| 00_TOOLS/qa/executable_manifest.txt | Expanded executable inventory. | Captures the new shell and Python entry points added across all phases. |
+
+This phase is particularly significant because it corrects **real runtime-breaker classes**:
+
+- `scenario-dns-ttl-caching/client/query.py` depends on **`dnspython`**  
+- `scenario-ftp-baseline/server/ftp_server.py` and `scenario-ftp-nat-firewall/ftp/ftp_server.py` depend on **`pyftpdlib`**  
+- `scenario-ssh-provision/controller/provision.py` depends on **`paramiko`**
+
+In the baseline downstream kit, these services ran inside stock `python:3.12-slim` containers with **no installation step**. The hardening pass repairs that mismatch by switching the affected services to local `build:` contexts with service-specific `Dockerfile`s.
+
+---
+
+## 13. Verified diffs and concrete change excerpts for the downstream delta
+
+### 13.1 Compose reliability: C10 HTTP proxy stack
+
+```diff
+--- COMPNET-EN-main/03_LECTURES/C10/assets/scenario-http-compose/docker-compose.yml
++++ COMPNET-EN-main_PHASEC_plus_more_labs_QAfix/03_LECTURES/C10/assets/scenario-http-compose/docker-compose.yml
+@@
+   nginx:
+@@
+-    depends_on:
+-      - web
+-      - api
++    depends_on:
++      web:
++        condition: service_healthy
++      api:
++        condition: service_healthy
+@@
+   web:
+     build: ./web
+     expose:
+       - "8000"
++    healthcheck:
++      test:
++        - CMD
++        - python
++        - -c
++        - "import socket,sys; s=socket.socket(); s.settimeout(1); sys.exit(0 if s.connect_ex(('127.0.0.1',8000))==0 else 1)"
+@@
+   api:
+     build: ./api
+     expose:
+       - "5000"
++    healthcheck:
++      test:
++        - CMD
++        - python
++        - -c
++        - "import socket,sys; s=socket.socket(); s.settimeout(1); sys.exit(0 if s.connect_ex(('127.0.0.1',5000))==0 else 1)"
+```
+
+This is the characteristic Phase B pattern: **probe service readiness explicitly**, then gate dependent services on **health**, not mere container start.
+
+### 13.2 Optional TLS overlay: C13 MQTT scenario
+
+```yaml
+services:
+  broker:
+    ports:
+      - "8883:8883"
+    volumes:
+      - ./tls/ca:/mosquitto/certs/ca:ro
+      - ./tls/server:/mosquitto/certs/server:ro
+      - ./tls/mosquitto_tls.conf:/mosquitto/config/conf.d/99_tls.conf:ro
+
+  sensor:
+    environment:
+      MQTT_PORT: "8883"
+      MQTT_TLS: "1"
+      MQTT_TLS_CA: "/certs/ca.crt"
+      MQTT_TLS_INSECURE: "0"
+    volumes:
+      - ./tls/ca:/certs:ro
+
+  actuator:
+    environment:
+      MQTT_PORT: "8883"
+      MQTT_TLS: "1"
+      MQTT_TLS_CA: "/certs/ca.crt"
+      MQTT_TLS_INSECURE: "0"
+    volumes:
+      - ./tls/ca:/certs:ro
+```
+
+The important design choice is that TLS is **not baked into the base compose file**. Instead, it is layered through `docker-compose.tls.yml`, preserving the original classroom path while enabling a richer optional branch.
+
+### 13.3 Runtime dependency fix: C11 FTP baseline
+
+```dockerfile
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# pyftpdlib is required by ftp_server.py (FTP server implementation).
+RUN pip install --no-cache-dir pyftpdlib
+
+# The actual server script is bind-mounted by docker-compose for easy editing.
+CMD ["python", "ftp_server.py"]
+```
+
+This is representative of the QA hardening pass: the scenario keeps its bind-mounted teaching script, but dependency installation moves into a tiny service-local build context so the lab is runnable without manual container surgery.
+
+### 13.4 Local host-port variableisation: S13 pentest compose
+
+```diff
+--- COMPNET-EN-main/04_SEMINARS/S13/S13_Part02_Config_Docker_Compose_Pentest.yml
++++ COMPNET-EN-main_PHASEC_plus_more_labs_QAfix/04_SEMINARS/S13/S13_Part02_Config_Docker_Compose_Pentest.yml
+@@
+-    ports:
+-      - "8888:80"
++    ports:
++      - "${DVWA_HOST_PORT:-8888}:80"
+@@
+-    ports:
+-      - "8080:8080"
++    ports:
++      - "${WEBGOAT_HOST_PORT:-8080}:8080"
+@@
+-    ports:
+-      - "2121:21"
+-      - "6200:6200"
++    ports:
++      - "${VSFTPD_HOST_PORT:-2121}:21"
++      - "${VSFTPD_BACKDOOR_HOST_PORT:-6200}:6200"
+```
+
+This excerpt captures the Phase B goal precisely: **keep the topology identical, but make host-port publication configurable** through a local `.env` layer.
+
+---
+
+## 14. Supplementary downstream appendices (COMPNET-EN-main -> COMPNET-EN-main_PHASEC_plus_more_labs_QAfix)
+
+### 14.1 Appendix F — Path-based additions in the final snapshot
+
+<details>
+<summary>Full list of added paths (relative to repository root): 62 entries</summary>
+
+```text
+00_TOOLS/lab_runner/README.md
+00_TOOLS/lab_runner/lab_runner.py
+00_TOOLS/lab_runner/labs.json
+00_TOOLS/mininet/README.md
+00_TOOLS/mininet/ovs_reset.sh
+00_TOOLS/pcap/README.md
+00_TOOLS/pcap/artifacts/.gitkeep
+00_TOOLS/pcap/capture_demo.sh
+00_TOOLS/pcap/pcap_stats.py
+00_TOOLS/pcap/pcap_tshark_summary.py
+00_TOOLS/subnetting/README.md
+00_TOOLS/subnetting/subnet_quiz_generator.py
+03_LECTURES/C10/assets/scenario-http-compose/advanced/README.md
+03_LECTURES/C10/assets/scenario-http-compose/advanced/docker-compose.advanced.yml
+03_LECTURES/C10/assets/scenario-http-compose/advanced/nginx/nginx.advanced.conf
+03_LECTURES/C10/assets/scenario-http-compose/advanced/solutions/nginx.solution_full.conf
+03_LECTURES/C10/assets/scenario-http-compose/advanced/tests/test_advanced_proxy.py
+03_LECTURES/C11/assets/scenario-dns-ttl-caching/client/Dockerfile
+03_LECTURES/C11/assets/scenario-ftp-baseline/server/Dockerfile
+03_LECTURES/C11/assets/scenario-ftp-nat-firewall/ftp/Dockerfile
+03_LECTURES/C11/assets/scenario-ssh-provision/controller/Dockerfile
+03_LECTURES/C13/assets/scenario-iot-basic/client/Dockerfile
+03_LECTURES/C13/assets/scenario-iot-basic/client/mqtt_cli.py
+03_LECTURES/C13/assets/scenario-iot-basic/docker-compose.cli.yml
+03_LECTURES/C13/assets/scenario-iot-basic/docker-compose.tls.yml
+03_LECTURES/C13/assets/scenario-iot-basic/mosquitto/conf.d/.gitkeep
+03_LECTURES/C13/assets/scenario-iot-basic/tls/README.md
+03_LECTURES/C13/assets/scenario-iot-basic/tls/ca/.gitkeep
+03_LECTURES/C13/assets/scenario-iot-basic/tls/generate_demo_certs.sh
+03_LECTURES/C13/assets/scenario-iot-basic/tls/mosquitto_tls.conf
+03_LECTURES/C13/assets/scenario-iot-basic/tls/private/.gitkeep
+03_LECTURES/C13/assets/scenario-iot-basic/tls/server/.gitkeep
+03_LECTURES/C14/assets/scenario-week14-integration-lab/README.md
+03_LECTURES/C14/assets/scenario-week14-integration-lab/api/Dockerfile
+03_LECTURES/C14/assets/scenario-week14-integration-lab/api/app.py
+03_LECTURES/C14/assets/scenario-week14-integration-lab/api/requirements.txt
+03_LECTURES/C14/assets/scenario-week14-integration-lab/auth/named.conf
+03_LECTURES/C14/assets/scenario-week14-integration-lab/auth/zones/week14.zone
+03_LECTURES/C14/assets/scenario-week14-integration-lab/client/README.md
+03_LECTURES/C14/assets/scenario-week14-integration-lab/client/dns_query.py
+03_LECTURES/C14/assets/scenario-week14-integration-lab/client/http_probe.py
+03_LECTURES/C14/assets/scenario-week14-integration-lab/client/smoke_test.py
+03_LECTURES/C14/assets/scenario-week14-integration-lab/docker-compose.tls.yml
+03_LECTURES/C14/assets/scenario-week14-integration-lab/docker-compose.yml
+03_LECTURES/C14/assets/scenario-week14-integration-lab/nginx/nginx.conf
+03_LECTURES/C14/assets/scenario-week14-integration-lab/nginx/nginx_tls.conf
+03_LECTURES/C14/assets/scenario-week14-integration-lab/resolver/unbound.conf
+03_LECTURES/C14/assets/scenario-week14-integration-lab/tls/README.md
+03_LECTURES/C14/assets/scenario-week14-integration-lab/tls/generate_demo_certs.sh
+03_LECTURES/C14/assets/scenario-week14-integration-lab/web/Dockerfile
+03_LECTURES/C14/assets/scenario-week14-integration-lab/web/index.html
+03_LECTURES/C14/assets/scenario-week14-integration-lab/web/server.py
+03_LECTURES/C14/c14-week14-integration-lab.md
+04_SEMINARS/S06/2_sdn/S06_Part02C_Script_SDNOS_Ken_Controller_AdvancedPolicy.py
+04_SEMINARS/S13/.env.example
+04_SEMINARS/S13/S13_Part05_Script_Defensive_Vuln_Checker.py
+04_SEMINARS/S13/artifacts/.gitkeep
+04_SEMINARS/S13/generate_env_ports.py
+04_SEMINARS/S13/report_generator.py
+04_SEMINARS/S13/s13_env.py
+QA_AUDIT_REPORT.md
+REVISELOG.md
+```
+
+</details>
+
+### 14.2 Appendix G — Path-based modifications in the final snapshot
+
+The table below lists every path that existed in both snapshots but changed by content. Line counts are approximate and are computed only for UTF-8 decodable text files.
+
+| Path | Old lines | New lines | Approx. added lines | Approx. deleted lines |
+| --- | --- | --- | --- | --- |
+| 00_APPENDIX/formative/README.md | 114 | 113 | 0 | 1 |
+| 00_APPENDIX/formative/tests/README.md | 80 | 79 | 0 | 1 |
+| 00_TOOLS/README.md | 132 | 139 | 7 | 0 |
+| 00_TOOLS/qa/executable_manifest.txt | 104 | 117 | 13 | 0 |
+| 03_LECTURES/C10/assets/scenario-http-compose/README.md | 60 | 84 | 29 | 5 |
+| 03_LECTURES/C10/assets/scenario-http-compose/docker-compose.yml | 20 | 42 | 24 | 2 |
+| 03_LECTURES/C10/assets/scenario-http-compose/web/server.py | 15 | 21 | 7 | 1 |
+| 03_LECTURES/C11/assets/scenario-dns-ttl-caching/README.md | 51 | 51 | 1 | 1 |
+| 03_LECTURES/C11/assets/scenario-dns-ttl-caching/docker-compose.yml | 25 | 41 | 19 | 3 |
+| 03_LECTURES/C11/assets/scenario-ftp-baseline/README.md | 55 | 55 | 1 | 1 |
+| 03_LECTURES/C11/assets/scenario-ftp-baseline/docker-compose.yml | 20 | 31 | 13 | 2 |
+| 03_LECTURES/C11/assets/scenario-ftp-nat-firewall/README.md | 53 | 53 | 1 | 1 |
+| 03_LECTURES/C11/assets/scenario-ftp-nat-firewall/docker-compose.yml | 36 | 56 | 23 | 3 |
+| 03_LECTURES/C11/assets/scenario-ssh-provision/README.md | 53 | 53 | 1 | 1 |
+| 03_LECTURES/C11/assets/scenario-ssh-provision/docker-compose.yml | 18 | 26 | 10 | 2 |
+| 03_LECTURES/C13/assets/scenario-iot-basic/README.md | 52 | 92 | 56 | 16 |
+| 03_LECTURES/C13/assets/scenario-iot-basic/actuator/actuator.py | 50 | 80 | 61 | 31 |
+| 03_LECTURES/C13/assets/scenario-iot-basic/docker-compose.yml | 33 | 43 | 24 | 14 |
+| 03_LECTURES/C13/assets/scenario-iot-basic/mosquitto/mosquitto.conf | 3 | 9 | 6 | 0 |
+| 03_LECTURES/C13/assets/scenario-iot-basic/sensor/sensor.py | 37 | 82 | 63 | 18 |
+| 03_LECTURES/C13/assets/scenario-vulnerability-lab/docker-compose.yml | 15 | 26 | 12 | 1 |
+| 03_LECTURES/C14/README.md | 79 | 81 | 3 | 1 |
+| 03_LECTURES/C14/c14-revision-and-exam-prep.md | 242 | 252 | 10 | 0 |
+| 04_SEMINARS/S06/2_sdn/S06_Part02D_Tasks_SDN.md | 112 | 131 | 26 | 7 |
+| 04_SEMINARS/S13/README.md | 101 | 132 | 31 | 0 |
+| 04_SEMINARS/S13/S13_Part01_Explanation_Pentest_Intro.md | 118 | 120 | 5 | 3 |
+| 04_SEMINARS/S13/S13_Part02_Config_Docker_Compose_Pentest.yml | 48 | 53 | 10 | 5 |
+| 04_SEMINARS/S13/S13_Part02_Tasks_Pentest.md | 70 | 82 | 15 | 3 |
+| 04_SEMINARS/S13/S13_Part05_Explanation_Vuln_Enumeration.md | 143 | 143 | 5 | 5 |
+| 04_SEMINARS/S13/S13_Part06_Tasks_Vuln_Enumeration.md | 75 | 75 | 3 | 3 |
+| 04_SEMINARS/S13/S13_Part07_Explanation_Exploitation.md | 135 | 135 | 2 | 2 |
+| 04_SEMINARS/S13/S13_Part08_Tasks_Exploitation.md | 85 | 85 | 2 | 2 |
+| 04_SEMINARS/S13/S13_Part09_Script_FTP_Backdoor_Exploit.py | 82 | 95 | 17 | 4 |
+| CHANGELOG.md | 3247 | 3821 | 577 | 3 |
+| README.md | 481 | 482 | 1 | 0 |
+
+### 14.3 Appendix H — Path-based removals from `COMPNET-EN-main`
+
+<details>
+<summary>Full list of removed paths (relative to repository root): 6 entries</summary>
+
+```text
+00_APPENDIX/a)PYTHON_self_study_guide/examples/tests/__pycache__/test_bytes_vs_str.cpython-311-pytest-8.2.2.pyc
+00_APPENDIX/a)PYTHON_self_study_guide/examples/tests/__pycache__/test_smoke.cpython-311-pytest-8.2.2.pyc
+00_APPENDIX/a)PYTHON_self_study_guide/examples/tests/__pycache__/test_struct_parsing.cpython-311-pytest-8.2.2.pyc
+00_APPENDIX/formative/__pycache__/run_quiz.cpython-311.pyc
+00_APPENDIX/formative/tests/__pycache__/__init__.cpython-311.pyc
+00_APPENDIX/formative/tests/__pycache__/test_quiz_exports.cpython-311-pytest-8.2.2.pyc
+```
+
+</details>
+
+Interpretation: all removals are **generated bytecode caches**, not source artefacts or teaching materials.
+
+### 14.4 Appendix I — Final `lab_runner` registry
+
+| Lab ID | Path | Variants |
+| --- | --- | --- |
+| c10-http-compose | 03_LECTURES/C10/assets/scenario-http-compose | default, advanced-proxy |
+| c11-dns-ttl-caching | 03_LECTURES/C11/assets/scenario-dns-ttl-caching | default |
+| c11-ftp-baseline | 03_LECTURES/C11/assets/scenario-ftp-baseline | default |
+| c11-ftp-nat-firewall | 03_LECTURES/C11/assets/scenario-ftp-nat-firewall | default |
+| c11-ssh-provision | 03_LECTURES/C11/assets/scenario-ssh-provision | default |
+| c12-local-mailbox | 03_LECTURES/C12/assets/scenario-local-mailbox | default |
+| c13-iot-basic | 03_LECTURES/C13/assets/scenario-iot-basic | default, tls, cli, tls+cli |
+| c13-vulnerability-lab | 03_LECTURES/C13/assets/scenario-vulnerability-lab | default |
+| c14-week14-integration | 03_LECTURES/C14/assets/scenario-week14-integration-lab | default, tls |
+| s08-nginx-compose | 04_SEMINARS/S08/4_nginx | default |
+| s09-multi-client-containers | 04_SEMINARS/S09/3_multi-client-containers | default |
+| s10-dns-containers | 04_SEMINARS/S10/2_dns-containers | default |
+| s10-ssh | 04_SEMINARS/S10/3_ssh | default |
+| s10-ssh-port-forwarding | 04_SEMINARS/S10/4_ssh-port-forwarding | default |
+| s11-custom-load-balancer | 04_SEMINARS/S11/2_custom-load-balancer | default |
+| s11-nginx-compose | 04_SEMINARS/S11/1_nginx-compose | default |
+| s13-pentest-compose | 04_SEMINARS/S13 | default |
+| tool-portainer | 00_TOOLS/Portainer/INIT_GUIDE | default |
+
 
 End of document.

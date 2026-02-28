@@ -120,6 +120,7 @@ You should expand your toolchain as the seminars demand it.
 | 🐍 Python 3.10+ | runnable scripts and protocol exercises | seminars, scenarios and project tooling |
 | 🔎 Wireshark and tshark | packet capture and protocol inspection | S01 and most later labs |
 | 🐳 Docker Engine and Docker Compose | isolated services and reproducible stacks | many seminars and several lecture scenarios |
+| 🏁 COMPNET lab runner (optional) | consistent start/stop commands for Compose scenarios | selected lecture scenarios (Phase C pilot) |
 | 🎛️ Portainer CE (optional) | visual inspection of containers and networks | convenient debugging and classroom demos |
 | ☕ Java 8+ | PlantUML rendering | diagrams in lectures, seminars and projects |
 | 🧩 Node.js (optional) | formatting checks (Prettier) | if you edit Markdown or HTML |
