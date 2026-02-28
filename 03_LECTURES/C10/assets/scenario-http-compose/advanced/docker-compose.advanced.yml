@@ -1,0 +1,29 @@
+services:
+  nginx:
+    volumes:
+      - ./advanced/nginx/nginx.advanced.conf:/etc/nginx/nginx-advanced.conf:ro
+    command: ["nginx", "-g", "daemon off;", "-c", "/etc/nginx/nginx-advanced.conf"]
+    depends_on:
+      web2:
+        condition: service_healthy
+
+  web:
+    environment:
+      WEB_INSTANCE: "web1"
+
+  web2:
+    build: ./web
+    expose:
+      - "8000"
+    environment:
+      WEB_INSTANCE: "web2"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import socket,sys; s=socket.socket(); s.settimeout(1); sys.exit(0 if s.connect_ex(('127.0.0.1',8000))==0 else 1)"
+      interval: 3s
+      timeout: 2s
+      retries: 20
+      start_period: 3s

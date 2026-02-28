@@ -21,12 +21,35 @@ Exercises:
    - change the redirect status code from 302 to 301 and discuss caching implications
 
 Run:
-- docker compose up --build
+- `docker compose up --build`
 - Open a browser: http://localhost:8080/
 - Test:
-  - curl -i http://localhost:8080/
-  - curl -i http://localhost:8080/app/
-  - curl -i http://localhost:8080/api/users
+  - `curl -i http://localhost:8080/`
+  - `curl -i http://localhost:8080/app/`
+  - `curl -i http://localhost:8080/api/users`
+
+#### Optional: run via the Phase C lab runner
+From the repository root:
+
+```bash
+python 00_TOOLS/lab_runner/lab_runner.py up c10-http-compose --build
+python 00_TOOLS/lab_runner/lab_runner.py logs c10-http-compose --follow
+python 00_TOOLS/lab_runner/lab_runner.py down c10-http-compose
+```
+
+#### Optional: advanced proxy exercises (with solutions + tests)
+See [`advanced/`](advanced/) for:
+- load balancing (adds `web2`)
+- X-Forwarded-For chaining
+- rate limiting
+- proxy caching
+
+Start the advanced variant:
+
+```bash
+docker compose -f docker-compose.yml -f advanced/docker-compose.advanced.yml up --build
+python advanced/tests/test_advanced_proxy.py
+```
 
 ## Files
 
@@ -34,8 +57,9 @@ Run:
 |------|-------|
 | `docker-compose.yml` | 20 |
 | `api/` | 3 files |
-| `nginx/` | 1 files |
+| `nginx/` | 1 file |
 | `web/` | 3 files |
+| `advanced/` | overlay + exercises |
 
 ## Cross-References
 

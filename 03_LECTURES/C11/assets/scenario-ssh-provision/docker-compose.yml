@@ -3,14 +3,22 @@ services:
     build: ./nodes/node1
     container_name: node1
     networks: [sshnet]
+    healthcheck:
+      test: ["CMD-SHELL", "grep -q '^sshd$' /proc/1/comm"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
 
   controller:
-    image: python:3.12-slim
+    build: ./controller
     working_dir: /app
     volumes:
       - ./controller:/app
       - ./payload:/payload
-    depends_on: [node1]
+    depends_on:
+      node1:
+        condition: service_healthy
     command: ["python", "provision.py"]
     networks: [sshnet]
 

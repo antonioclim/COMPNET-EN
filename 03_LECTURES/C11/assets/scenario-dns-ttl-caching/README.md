@@ -25,7 +25,7 @@ docker compose up --build
 |------|-------|
 | `docker-compose.yml` | 25 |
 | `auth/` | 1 files |
-| `client/` | 1 files |
+| `client/` | 2 files |
 | `resolver/` | 1 files |
 
 ## Cross-References

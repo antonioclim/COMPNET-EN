@@ -1,6 +1,6 @@
 services:
   ftp:
-    image: python:3.12-slim
+    build: ./ftp
     working_dir: /app
     volumes:
       - ./ftp:/app
@@ -8,6 +8,16 @@ services:
     command: ["python", "ftp_server.py"]
     networks:
       - net_server
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import socket,sys; s=socket.socket(); s.settimeout(1); sys.exit(0 if s.connect_ex(('127.0.0.1',2121))==0 else 1)"
+      interval: 3s
+      timeout: 2s
+      retries: 25
+      start_period: 3s
 
   natfw:
     image: debian:stable-slim
@@ -18,6 +28,14 @@ services:
     networks:
       - net_client
       - net_server
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - "sysctl -n net.ipv4.ip_forward 2>/dev/null | grep -q '^1$' && iptables -t nat -S 2>/dev/null | grep -q 'MASQUERADE'"
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 30s
 
   client:
     image: python:3.12-slim
@@ -25,8 +43,10 @@ services:
     volumes:
       - ./client:/app
     depends_on:
-      - natfw
-      - ftp
+      natfw:
+        condition: service_healthy
+      ftp:
+        condition: service_healthy
     command: ["python", "ftp_client.py"]
     networks:
       - net_client

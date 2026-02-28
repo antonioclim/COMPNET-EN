@@ -30,7 +30,7 @@ docker compose up --build
 | `docker-compose.yml` | 20 |
 | `client/` | 1 files |
 | `data/` | 1 files |
-| `server/` | 1 files |
+| `server/` | 2 files |
 
 ## Cross-References
 

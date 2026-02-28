@@ -4,20 +4,36 @@ services:
     volumes:
       - ./auth:/etc/bind
     networks: [dnsnet]
+    healthcheck:
+      test: ["CMD-SHELL", "grep -q '^named$' /proc/1/comm"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
 
   resolver:
     image: mvance/unbound:1.20.0
     volumes:
       - ./resolver:/opt/unbound/etc/unbound
-    depends_on: [auth]
+    depends_on:
+      auth:
+        condition: service_healthy
     networks: [dnsnet]
+    healthcheck:
+      test: ["CMD-SHELL", "grep -q '^unbound$' /proc/1/comm"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
 
   client:
-    image: python:3.12-slim
+    build: ./client
     working_dir: /app
     volumes:
       - ./client:/app
-    depends_on: [resolver]
+    depends_on:
+      resolver:
+        condition: service_healthy
     command: ["python", "query.py"]
     networks: [dnsnet]
 

@@ -27,7 +27,7 @@ docker compose up --build
 | `docker-compose.yml` | 36 |
 | `client/` | 1 files |
 | `data/` | 1 files |
-| `ftp/` | 2 files |
+| `ftp/` | 3 files |
 | `natfw/` | 1 files |
 
 ## Cross-References

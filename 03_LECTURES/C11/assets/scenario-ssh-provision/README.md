@@ -26,7 +26,7 @@ docker compose up --build
 | Name | Lines |
 |------|-------|
 | `docker-compose.yml` | 18 |
-| `controller/` | 2 files |
+| `controller/` | 3 files |
 | `nodes/` | 0 files |
 | `payload/` | 1 files |
 
