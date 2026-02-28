@@ -27,13 +27,19 @@
 00_TOOLS/PlantUML(optional)/generate_diagrams.py
 00_TOOLS/PlantUML(optional)/generate_png_simple.py
 00_TOOLS/Prerequisites/verify_lab_environment.sh
+00_TOOLS/mininet/ovs_reset.sh
+00_TOOLS/pcap/capture_demo.sh
+00_TOOLS/pcap/pcap_stats.py
+00_TOOLS/pcap/pcap_tshark_summary.py
 00_TOOLS/plantuml/get_plantuml_jar.sh
 00_TOOLS/plantuml/render_puml.sh
 00_TOOLS/qa/apply_permissions.sh
 00_TOOLS/qa/check_executability.sh
 00_TOOLS/qa/check_fig_targets.py
 00_TOOLS/qa/check_markdown_links.py
+00_TOOLS/lab_runner/lab_runner.py
 00_TOOLS/release/create_release_zip.sh
+00_TOOLS/subnetting/subnet_quiz_generator.py
 
 # ── 02_PROJECTS ──────────────────────────────────────────────
 02_PROJECTS/00_common/assets/render.sh
@@ -65,11 +71,17 @@
 03_LECTURES/C09/assets/scenario-encoding-utf8/run.sh
 03_LECTURES/C09/assets/scenario-mime-encoding-gzip/run.sh
 03_LECTURES/C10/assets/render.sh
+03_LECTURES/C10/assets/scenario-http-compose/advanced/tests/test_advanced_proxy.py
 03_LECTURES/C11/assets/render.sh
 03_LECTURES/C11/assets/scenario-ftp-nat-firewall/natfw/setup.sh
 03_LECTURES/C12/assets/render.sh
 03_LECTURES/C13/assets/render.sh
+03_LECTURES/C13/assets/scenario-iot-basic/tls/generate_demo_certs.sh
 03_LECTURES/C14/assets/render.sh
+03_LECTURES/C14/assets/scenario-week14-integration-lab/client/dns_query.py
+03_LECTURES/C14/assets/scenario-week14-integration-lab/client/http_probe.py
+03_LECTURES/C14/assets/scenario-week14-integration-lab/client/smoke_test.py
+03_LECTURES/C14/assets/scenario-week14-integration-lab/tls/generate_demo_certs.sh
 
 # ── 04_SEMINARS ──────────────────────────────────────────────
 04_SEMINARS/S01/assets/render.sh
@@ -98,6 +110,7 @@
 04_SEMINARS/S11/assets/render.sh
 04_SEMINARS/S12/assets/render.sh
 04_SEMINARS/S13/assets/render.sh
+04_SEMINARS/S13/generate_env_ports.py
 04_SEMINARS/S14/assets/render.sh
 
 # ── Root ─────────────────────────────────────────────────────

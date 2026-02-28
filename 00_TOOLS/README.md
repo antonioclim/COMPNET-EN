@@ -12,6 +12,7 @@ Shared infrastructure for COMPNET-EN: environment setup, diagram rendering, Dock
 | [`plantuml/`](plantuml/) | Subdir | Downloads `plantuml.jar` (kept out of Git) and renders `assets/puml/*.puml` into PNG | 2 scripts (+ downloaded JAR) |
 | [`PlantUML(optional)/`](<PlantUML(optional)/README.md>) | Subdir | Optional batch diagram collection mirroring lecture `assets/puml/` for Weeks 1–13 | 136 files: 118×`.puml`, 14×README, 4 scripts |
 | [`qa/`](qa/) | Subdir | Local and CI checks: executability, Markdown link integrity, text hygiene and figure target validation | 7 files (3×`.py`, 2×`.sh`, 1×manifest, 1×README) |
+| [`lab_runner/`](lab_runner/) | Subdir | Minimal runner for Docker Compose labs (start/stop/status) — Phase C pilot | 3 files (1×`.py`, 1×`.json`, 1×README) |
 | [`release/`](release/) | Subdir | Maintainer script for building a distributable course-kit ZIP | 2 files (1×`.sh`, 1×README) |
 
 ## Visual Overview
@@ -24,6 +25,7 @@ graph TD
     PUMLH["plantuml/\nJAR + renderer"]
     PUML["PlantUML(optional)/\nweek mirrors"]
     QA["qa/\nCI checks"]
+    RUN["lab_runner/\nCompose runner"]
     REL["release/\nZIP builder"]
 
     TOOLS --> PRE
@@ -31,6 +33,7 @@ graph TD
     TOOLS --> PUMLH
     TOOLS --> PUML
     TOOLS --> QA
+    TOOLS --> RUN
     TOOLS --> REL
 
     PRE -->|"prepares Docker for"| PORT
@@ -52,6 +55,10 @@ bash 00_TOOLS/Prerequisites/verify_lab_environment.sh
 
 # Download PlantUML JAR (kept out of Git) for offline diagram rendering
 bash 00_TOOLS/plantuml/get_plantuml_jar.sh
+
+# Start/stop a Docker Compose lab (Phase C pilot)
+python 00_TOOLS/lab_runner/lab_runner.py list
+python 00_TOOLS/lab_runner/lab_runner.py up c10-http-compose --build
 
 # Render diagrams for a lecture/seminar/project (example)
 bash 03_LECTURES/C01/assets/render.sh

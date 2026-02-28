@@ -1,0 +1,206 @@
+{
+  "schema_version": 1,
+  "labs": [
+    {
+      "id": "c10-http-compose",
+      "title": "C10 — HTTP via reverse proxy (nginx + web + api)",
+      "path": "03_LECTURES/C10/assets/scenario-http-compose",
+      "variants": {
+        "default": [
+          "docker-compose.yml"
+        ],
+        "advanced-proxy": [
+          "docker-compose.yml",
+          "advanced/docker-compose.advanced.yml"
+        ]
+      }
+    },
+    {
+      "id": "c11-dns-ttl-caching",
+      "title": "C11 — DNS TTL & caching (authoritative + resolver + client)",
+      "path": "03_LECTURES/C11/assets/scenario-dns-ttl-caching",
+      "variants": {
+        "default": [
+          "docker-compose.yml"
+        ]
+      }
+    },
+    {
+      "id": "c11-ftp-baseline",
+      "title": "C11 — FTP baseline (server + client)",
+      "path": "03_LECTURES/C11/assets/scenario-ftp-baseline",
+      "variants": {
+        "default": [
+          "docker-compose.yml"
+        ]
+      }
+    },
+    {
+      "id": "c11-ftp-nat-firewall",
+      "title": "C11 — FTP through NAT/firewall (server + NAT/FW + client)",
+      "path": "03_LECTURES/C11/assets/scenario-ftp-nat-firewall",
+      "variants": {
+        "default": [
+          "docker-compose.yml"
+        ]
+      }
+    },
+    {
+      "id": "c11-ssh-provision",
+      "title": "C11 — SSH provisioning (node + controller)",
+      "path": "03_LECTURES/C11/assets/scenario-ssh-provision",
+      "variants": {
+        "default": [
+          "docker-compose.yml"
+        ]
+      }
+    },
+    {
+      "id": "c12-local-mailbox",
+      "title": "C12 — Local mailbox lab (SMTP/IMAP in containers)",
+      "path": "03_LECTURES/C12/assets/scenario-local-mailbox",
+      "variants": {
+        "default": [
+          "docker-compose.yml"
+        ]
+      }
+    },
+    {
+      "id": "c13-iot-basic",
+      "title": "C13 — Basic IoT over MQTT (sensor + actuator)",
+      "path": "03_LECTURES/C13/assets/scenario-iot-basic",
+      "variants": {
+        "default": [
+          "docker-compose.yml"
+        ],
+        "tls": [
+          "docker-compose.yml",
+          "docker-compose.tls.yml"
+        ],
+        "cli": [
+          "docker-compose.yml",
+          "docker-compose.cli.yml"
+        ],
+        "tls+cli": [
+          "docker-compose.yml",
+          "docker-compose.tls.yml",
+          "docker-compose.cli.yml"
+        ]
+      }
+    },
+    {
+      "id": "c13-vulnerability-lab",
+      "title": "C13 — Vulnerability lab (target + attacker)",
+      "path": "03_LECTURES/C13/assets/scenario-vulnerability-lab",
+      "variants": {
+        "default": [
+          "docker-compose.yml"
+        ]
+      }
+    },
+    {
+      "id": "c14-week14-integration",
+      "title": "C14 — Week 14 integration lab (DNS → HTTP → TLS → proxy)",
+      "path": "03_LECTURES/C14/assets/scenario-week14-integration-lab",
+      "variants": {
+        "default": [
+          "docker-compose.yml"
+        ],
+        "tls": [
+          "docker-compose.yml",
+          "docker-compose.tls.yml"
+        ]
+      }
+    },
+    {
+      "id": "s08-nginx-compose",
+      "title": "S08 — Nginx compose lab (single reverse proxy scenario)",
+      "path": "04_SEMINARS/S08/4_nginx",
+      "variants": {
+        "default": [
+          "S08_Part04_Config_Docker_Compose.yml"
+        ]
+      }
+    },
+    {
+      "id": "s09-multi-client-containers",
+      "title": "S09 — Multi-client containers lab",
+      "path": "04_SEMINARS/S09/3_multi-client-containers",
+      "variants": {
+        "default": [
+          "S09_Part03_Config_Docker_Compose.yml"
+        ]
+      }
+    },
+    {
+      "id": "s10-dns-containers",
+      "title": "S10 — DNS containers lab",
+      "path": "04_SEMINARS/S10/2_dns-containers",
+      "variants": {
+        "default": [
+          "S10_Part02_Config_Docker_Compose.yml"
+        ]
+      }
+    },
+    {
+      "id": "s10-ssh",
+      "title": "S10 — SSH containers lab",
+      "path": "04_SEMINARS/S10/3_ssh",
+      "variants": {
+        "default": [
+          "S10_Part03_Config_Docker_Compose.yml"
+        ]
+      }
+    },
+    {
+      "id": "s10-ssh-port-forwarding",
+      "title": "S10 — SSH port forwarding lab",
+      "path": "04_SEMINARS/S10/4_ssh-port-forwarding",
+      "variants": {
+        "default": [
+          "S10_Part04_Config_Docker_Compose.yml"
+        ]
+      }
+    },
+    {
+      "id": "s11-custom-load-balancer",
+      "title": "S11 — Custom load balancer compose lab",
+      "path": "04_SEMINARS/S11/2_custom-load-balancer",
+      "variants": {
+        "default": [
+          "S11_Part02_Config_Docker_Compose_Lb_Custom.yml"
+        ]
+      }
+    },
+    {
+      "id": "s11-nginx-compose",
+      "title": "S11 — Nginx compose (basic) lab",
+      "path": "04_SEMINARS/S11/1_nginx-compose",
+      "variants": {
+        "default": [
+          "S11_Part01_Config_Docker_Compose_Nginx.yml"
+        ]
+      }
+    },
+    {
+      "id": "s13-pentest-compose",
+      "title": "S13 — Pentest compose lab (ports via .env optional)",
+      "path": "04_SEMINARS/S13",
+      "variants": {
+        "default": [
+          "S13_Part02_Config_Docker_Compose_Pentest.yml"
+        ]
+      }
+    },
+    {
+      "id": "tool-portainer",
+      "title": "Tool — Portainer (Docker UI) quickstart",
+      "path": "00_TOOLS/Portainer/INIT_GUIDE",
+      "variants": {
+        "default": [
+          "docker-compose-portainer.yml"
+        ]
+      }
+    }
+  ]
+}
