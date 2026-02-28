@@ -1,132 +1,147 @@
-# 01_network_applications — project briefs S01–S15 (application protocols and services)
+# Group 1 — Network Applications (S01–S20)
 
-Fifteen project briefs for designing and implementing application-layer network systems, from custom text protocols to DNS, SMTP/POP3, proxies, load balancers and a didactic routing simulation. Each brief follows the RC2026 E1/E2/E3 assessment model and references the shared E2 PCAP validation tooling.
+Eighteen projects targeting application-layer protocol design, service implementation and reproducible network experimentation. Each brief follows the RC2026 E1/E2/E3 assessment structure and mandates a Flex component in E3: at least one interoperable subsystem implemented in a language other than Python (C, C++, Java, Go, Rust, JavaScript/Node.js or similar).
 
-## File and folder index
+## Project Index
 
-| Name | Description | Metric |
-|---|---|---|
-| [`assets/`](assets/) | Shared figures and rendering helpers for the parent group | 81 files (45 .puml, 34 .md) |
-| `README.md` | Directory orientation and cross-reference map | 138 lines |
-| [`S01_multi_client_tcp_chat_text_protocol_and_presence.md`](S01_multi_client_tcp_chat_text_protocol_and_presence.md) | S01 — Multi-client TCP chat with a text protocol and presence | 217 lines |
-| [`S02_file_transfer_server_control_and_data_channels_ftp_passive.md`](S02_file_transfer_server_control_and_data_channels_ftp_passive.md) | S02 — File transfer server with a control channel and a data channel (passive FTP style) | 214 lines |
-| [`S03_http11_socket_server_no_framework_static_files.md`](S03_http11_socket_server_no_framework_static_files.md) | S03 — HTTP/1.1 server on raw sockets (no framework) for static files | 215 lines |
-| [`S04_forward_http_proxy_with_filtering_and_traffic_logging.md`](S04_forward_http_proxy_with_filtering_and_traffic_logging.md) | S04 — Forward HTTP proxy with filtering and traffic logging | 213 lines |
-| [`S05_application_level_http_load_balancer_health_checks_and_two_algorithms.md`](S05_application_level_http_load_balancer_health_checks_and_two_algorithms.md) | S05 — Application-layer HTTP load balancer with health checks and two algorithms | 214 lines |
-| [`S06_tcp_pub_sub_broker_topics_and_deterministic_routing.md`](S06_tcp_pub_sub_broker_topics_and_deterministic_routing.md) | S06 — TCP Pub/Sub broker with topics and deterministic routing | 212 lines |
-| [`S07_udp_dns_resolver_local_zone_forwarding_and_ttl_cache.md`](S07_udp_dns_resolver_local_zone_forwarding_and_ttl_cache.md) | S07 — DNS resolver over UDP with a local zone, forwarding and TTL cache | 211 lines |
-| [`S08_minimal_email_system_smtp_delivery_and_pop3_retrieval.md`](S08_minimal_email_system_smtp_delivery_and_pop3_retrieval.md) | S08 — Minimal email system: SMTP server for delivery and POP3 server for reading | 215 lines |
-| [`S09_tcp_tunnel_single_port_session_multiplexing_and_demultiplexing.md`](S09_tcp_tunnel_single_port_session_multiplexing_and_demultiplexing.md) | S09 — TCP tunnel on a single port with session multiplexing and demultiplexing | 214 lines |
-| [`S10_network_file_synchronisation_manifest_hashes_and_conflict_resolution.md`](S10_network_file_synchronisation_manifest_hashes_and_conflict_resolution.md) | S10 — Network file synchronisation with manifest, hashes and conflict resolution | 212 lines |
-| [`S11_rest_microservices_service_registry_api_gateway_dynamic_routing.md`](S11_rest_microservices_service_registry_api_gateway_dynamic_routing.md) | S11 — REST microservices with a service registry and an API gateway with dynamic routing | 217 lines |
-| [`S12_client_server_messaging_tls_channel_and_minimal_authentication.md`](S12_client_server_messaging_tls_channel_and_minimal_authentication.md) | S12 — Client–server messaging with a TLS channel and minimal authentication | 212 lines |
-| [`S13_grpc_rpc_service_proto_definition_unary_and_streaming_methods.md`](S13_grpc_rpc_service_proto_definition_unary_and_streaming_methods.md) | S13 — gRPC-based RPC service: .proto definition, unary and streaming methods | 211 lines |
-| [`S14_didactic_distance_vector_routing_in_mininet_convergence_and_anti_loop.md`](S14_didactic_distance_vector_routing_in_mininet_convergence_and_anti_loop.md) | S14 — Didactic distance-vector routing in Mininet with convergence and anti-loop | 190 lines |
-| [`S15_iot_gateway_udp_telemetry_ingestion_http_api_query_and_streaming.md`](S15_iot_gateway_udp_telemetry_ingestion_http_api_query_and_streaming.md) | S15 — IoT gateway: UDP telemetry ingestion and an HTTP API for querying and streaming | 211 lines |
+| Code | Title | Lines | Difficulty | Primary protocols |
+|---|---|---|---|---|
+| [S01](S01_multi_client_tcp_chat_text_protocol_and_presence.md) | Multi-client TCP chat with a text protocol and presence | 217 | ★★★★☆ | TCP custom text |
+| [S02](S02_file_transfer_server_control_and_data_channels_ftp_passive.md) | File transfer server — control and data channels (FTP passive) | 214 | ★★★★☆ | TCP (FTP-style) |
+| [S03](S03_http11_socket_server_no_framework_static_files.md) | HTTP/1.1 socket server (no framework) for static files | 215 | ★★★★☆ | HTTP/1.1 raw |
+| [S04](S04_forward_http_proxy_with_filtering_and_traffic_logging.md) | Forward HTTP proxy with filtering and traffic logging | 213 | ★★★★☆ | HTTP proxy |
+| [S05](S05_application_level_http_load_balancer_health_checks_and_two_algorithms.md) | Application-level HTTP load balancer with health checks | 214 | ★★★★☆ | HTTP |
+| [S06](S06_tcp_pub_sub_broker_topics_and_deterministic_routing.md) | TCP pub/sub broker with topics and deterministic routing | 212 | ★★★★★ | TCP custom |
+| [S07](S07_udp_dns_resolver_local_zone_forwarding_and_ttl_cache.md) | DNS resolver over UDP — local zone, forwarding, TTL cache | 211 | ★★★★★ | UDP/DNS |
+| [S08](S08_minimal_email_system_smtp_delivery_and_pop3_retrieval.md) | Minimal email system — SMTP delivery and POP3 retrieval | 215 | ★★★★★ | SMTP, POP3 |
+| [S09](S09_tcp_tunnel_single_port_session_multiplexing_and_demultiplexing.md) | TCP tunnel — single-port session multiplexing | 214 | ★★★★★ | TCP tunnel |
+| [S10](S10_network_file_synchronisation_manifest_hashes_and_conflict_resolution.md) | Network file synchronisation — manifest, hashes, conflicts | 212 | ★★★★☆ | TCP/HTTP |
+| [S11](S11_rest_microservices_service_registry_api_gateway_dynamic_routing.md) | REST microservices — service registry and API gateway | 217 | ★★★★☆ | HTTP/REST |
+| [S12](S12_client_server_messaging_tls_channel_and_minimal_authentication.md) | Client–server messaging — TLS channel and authentication | 212 | ★★★★☆ | TLS/TCP |
+| [S13](S13_grpc_rpc_service_proto_definition_unary_and_streaming_methods.md) | gRPC RPC service — .proto, unary and streaming methods | 211 | ★★★★☆ | gRPC/HTTP2 |
+| [S14](S14_didactic_distance_vector_routing_in_mininet_convergence_and_anti_loop.md) | Didactic distance-vector routing in Mininet | 190 | ★★★★★ | UDP (routing) |
+| [S15](S15_iot_gateway_udp_telemetry_ingestion_http_api_query_and_streaming.md) | IoT gateway — UDP telemetry ingestion and HTTP API | 211 | ★★★★☆ | UDP, HTTP |
+| [S16](S16_collaborative_text_editing_locking_notifications_and_versioned_saves.md) | Collaborative text editing — locking, notifications and versioned saves | 203 | ★★★★★ | TCP custom control |
+| [S17](S17_in_memory_object_store_registry_lookup_watchers_and_lease_expiry.md) | In-memory object store — registry, lookup, watchers, lease expiry | 200 | ★★★★☆ | TCP custom registry |
+| [S18](S18_resource_reservation_holds_leases_wait_queue_and_consistency.md) | Resource reservation — holds, leases, wait queue and consistency | 202 | ★★★★★ | TCP stateful service |
+| [S19](S19_distributed_auction_bids_timers_state_transitions_and_event_log.md) | Distributed auction — bids, timers, state transitions and an event log | 202 | ★★★★☆ | TCP auction control |
+| [S20](S20_database_backed_object_service_selection_update_delete_and_notifications.md) | Database-backed object service — selection, update, delete and notifications | 201 | ★★★★★ | TCP + SQLite |
 
-## Visual overview
+## E1/E2/E3 Summary
+
+| Phase | Weight | Key deliverable | Automation |
+|---|---|---|---|
+| E1 | 25 % | Specification + Phase 0 Wireshark observations | — |
+| E2 | 35 % | `make e2` → `artifacts/pcap/traffic_e2.pcap` + `validate_pcap.py` | PCAP rules in `../00_common/tools/pcap_rules/S{NN}.json` |
+| E3 | 40 % | Final implementation + demo + Flex component (non-Python) | MANIFEST.txt completeness |
+
+## Visual Overview — Thematic Clusters
 
 ```mermaid
 graph TD
-    BRIEF["Sxx brief (.md)"] --> E1["E1: specification + Phase 0"]
-    BRIEF --> E2["E2: automation + PCAP"]
-    BRIEF --> E3["E3: final + evidence"]
-    E2 --> RULES["00_common/tools/pcap_rules/Sxx.json"]
-    E2 --> VAL["00_common/tools/validate_pcap.py"]
-    BRIEF -.-> FIGS["assets/puml/fig-Sxx-*.puml"]
-    BRIEF -.-> PT["assets/PORTAINER/Sxx/"]
+    subgraph "Socket fundamentals"
+        S01["S01 TCP Chat"]
+        S02["S02 FTP Transfer"]
+        S06["S06 Pub/Sub Broker"]
+        S09["S09 TCP Tunnel"]
+    end
+    subgraph "HTTP and service APIs"
+        S03["S03 HTTP Server"]
+        S04["S04 HTTP Proxy"]
+        S05["S05 Load Balancer"]
+        S11["S11 REST µservices"]
+        S13["S13 gRPC"]
+        S15["S15 IoT Gateway"]
+    end
+    subgraph "Named protocols"
+        S07["S07 DNS Resolver"]
+        S08["S08 SMTP/POP3"]
+        S12["S12 TLS Messaging"]
+    end
+    subgraph "Stateful coordination"
+        S10["S10 File Sync"]
+        S16["S16 Collab Editing"]
+        S17["S17 Object Store"]
+        S18["S18 Reservation"]
+        S19["S19 Auction"]
+        S20["S20 Object DB"]
+    end
+    subgraph "Network control and routing"
+        S14["S14 DV Routing"]
+    end
+
+    style S01 fill:#e3f2fd,stroke:#0288d1
+    style S02 fill:#e3f2fd,stroke:#0288d1
+    style S06 fill:#e3f2fd,stroke:#0288d1
+    style S09 fill:#e3f2fd,stroke:#0288d1
+    style S03 fill:#fff3e0,stroke:#f57c00
+    style S04 fill:#fff3e0,stroke:#f57c00
+    style S05 fill:#fff3e0,stroke:#f57c00
+    style S11 fill:#fff3e0,stroke:#f57c00
+    style S13 fill:#fff3e0,stroke:#f57c00
+    style S15 fill:#fff3e0,stroke:#f57c00
+    style S07 fill:#e8f5e9,stroke:#388e3c
+    style S08 fill:#e8f5e9,stroke:#388e3c
+    style S12 fill:#e8f5e9,stroke:#388e3c
+    style S10 fill:#f3e5f5,stroke:#7b1fa2
+    style S16 fill:#f3e5f5,stroke:#7b1fa2
+    style S17 fill:#f3e5f5,stroke:#7b1fa2
+    style S18 fill:#f3e5f5,stroke:#7b1fa2
+    style S19 fill:#f3e5f5,stroke:#7b1fa2
+    style S20 fill:#f3e5f5,stroke:#7b1fa2
+    style S14 fill:#ffebee,stroke:#c62828
 ```
 
-## Usage
+## Lecture ↔ Seminar ↔ Project Cross-Reference
 
-Pick a brief, then use its metadata block to locate the required lecture and seminar prerequisites:
+Data sourced from [`../COURSE_SEMINAR_MAPPING.md`](../COURSE_SEMINAR_MAPPING.md). Lecture directories resolve to [`../../03_LECTURES/C{NN}/`](../../03_LECTURES/), seminar directories to [`../../04_SEMINARS/S{NN}/`](../../04_SEMINARS/).
 
-```bash
-# list available briefs
-ls S*.md
+| Project | Lectures | Seminars | Quiz weeks |
+|---|---|---|---|
+| S01 | [C03](../../03_LECTURES/C03/), [C08](../../03_LECTURES/C08/), [C09](../../03_LECTURES/C09/) | [S03](../../04_SEMINARS/S03/), [S04](../../04_SEMINARS/S04/), [S02](../../04_SEMINARS/S02/) | W03, W08, W09 |
+| S02 | [C03](../../03_LECTURES/C03/), [C08](../../03_LECTURES/C08/), [C11](../../03_LECTURES/C11/) | [S09](../../04_SEMINARS/S09/), [S04](../../04_SEMINARS/S04/), [S02](../../04_SEMINARS/S02/) | W03, W08, W11 |
+| S03 | [C03](../../03_LECTURES/C03/), [C08](../../03_LECTURES/C08/), [C10](../../03_LECTURES/C10/) | [S08](../../04_SEMINARS/S08/), [S04](../../04_SEMINARS/S04/), [S02](../../04_SEMINARS/S02/) | W03, W08, W10 |
+| S04 | [C03](../../03_LECTURES/C03/), [C10](../../03_LECTURES/C10/), [C08](../../03_LECTURES/C08/) | [S11](../../04_SEMINARS/S11/), [S08](../../04_SEMINARS/S08/), [S04](../../04_SEMINARS/S04/) | W03, W10, W08 |
+| S05 | [C03](../../03_LECTURES/C03/), [C10](../../03_LECTURES/C10/), [C08](../../03_LECTURES/C08/) | [S11](../../04_SEMINARS/S11/), [S08](../../04_SEMINARS/S08/), [S04](../../04_SEMINARS/S04/) | W03, W10, W08 |
+| S06 | [C03](../../03_LECTURES/C03/), [C08](../../03_LECTURES/C08/), [C13](../../03_LECTURES/C13/) | [S03](../../04_SEMINARS/S03/), [S04](../../04_SEMINARS/S04/), [S02](../../04_SEMINARS/S02/) | W03, W08, W13 |
+| S07 | [C03](../../03_LECTURES/C03/), [C11](../../03_LECTURES/C11/), [C08](../../03_LECTURES/C08/) | [S10](../../04_SEMINARS/S10/), [S07](../../04_SEMINARS/S07/), [S04](../../04_SEMINARS/S04/) | W03, W11, W08 |
+| S08 | [C03](../../03_LECTURES/C03/), [C08](../../03_LECTURES/C08/), [C12](../../03_LECTURES/C12/) | [S04](../../04_SEMINARS/S04/), [S02](../../04_SEMINARS/S02/), [S07](../../04_SEMINARS/S07/) | W03, W08, W12 |
+| S09 | [C03](../../03_LECTURES/C03/), [C08](../../03_LECTURES/C08/), [C09](../../03_LECTURES/C09/) | [S04](../../04_SEMINARS/S04/), [S07](../../04_SEMINARS/S07/), [S02](../../04_SEMINARS/S02/) | W03, W08, W09 |
+| S10 | [C03](../../03_LECTURES/C03/), [C08](../../03_LECTURES/C08/), [C11](../../03_LECTURES/C11/) | [S09](../../04_SEMINARS/S09/), [S04](../../04_SEMINARS/S04/), [S07](../../04_SEMINARS/S07/) | W03, W08, W11 |
+| S11 | [C03](../../03_LECTURES/C03/), [C10](../../03_LECTURES/C10/), [C08](../../03_LECTURES/C08/) | [S11](../../04_SEMINARS/S11/), [S08](../../04_SEMINARS/S08/), [S07](../../04_SEMINARS/S07/) | W03, W10, W08 |
+| S12 | [C03](../../03_LECTURES/C03/), [C08](../../03_LECTURES/C08/), [C13](../../03_LECTURES/C13/) | [S02](../../04_SEMINARS/S02/), [S07](../../04_SEMINARS/S07/), [S04](../../04_SEMINARS/S04/) | W03, W08, W13 |
+| S13 | [C03](../../03_LECTURES/C03/), [C10](../../03_LECTURES/C10/), [C09](../../03_LECTURES/C09/) | [S12](../../04_SEMINARS/S12/), [S07](../../04_SEMINARS/S07/), [S04](../../04_SEMINARS/S04/) | W03, W10, W09 |
+| S14 | [C05](../../03_LECTURES/C05/), [C06](../../03_LECTURES/C06/), [C07](../../03_LECTURES/C07/) | [S06](../../04_SEMINARS/S06/), [S05](../../04_SEMINARS/S05/), [S07](../../04_SEMINARS/S07/) | W05, W06, W07 |
+| S15 | [C03](../../03_LECTURES/C03/), [C10](../../03_LECTURES/C10/), [C13](../../03_LECTURES/C13/) | [S07](../../04_SEMINARS/S07/), [S08](../../04_SEMINARS/S08/), [S02](../../04_SEMINARS/S02/) | W03, W10, W13 |
+| S16 | [C03](../../03_LECTURES/C03/), [C08](../../03_LECTURES/C08/), [C09](../../03_LECTURES/C09/) | [S03](../../04_SEMINARS/S03/), [S04](../../04_SEMINARS/S04/), [S09](../../04_SEMINARS/S09/) | W03, W08, W09 |
+| S17 | [C03](../../03_LECTURES/C03/), [C08](../../03_LECTURES/C08/), [C09](../../03_LECTURES/C09/) | [S03](../../04_SEMINARS/S03/), [S04](../../04_SEMINARS/S04/), [S02](../../04_SEMINARS/S02/) | W03, W08, W09 |
+| S18 | [C03](../../03_LECTURES/C03/), [C08](../../03_LECTURES/C08/), [C09](../../03_LECTURES/C09/) | [S03](../../04_SEMINARS/S03/), [S04](../../04_SEMINARS/S04/), [S02](../../04_SEMINARS/S02/) | W03, W08, W09 |
+| S19 | [C03](../../03_LECTURES/C03/), [C08](../../03_LECTURES/C08/), [C09](../../03_LECTURES/C09/) | [S03](../../04_SEMINARS/S03/), [S04](../../04_SEMINARS/S04/), [S02](../../04_SEMINARS/S02/) | W03, W08, W09 |
+| S20 | [C03](../../03_LECTURES/C03/), [C08](../../03_LECTURES/C08/), [C09](../../03_LECTURES/C09/) | [S04](../../04_SEMINARS/S04/), [S02](../../04_SEMINARS/S02/), [S07](../../04_SEMINARS/S07/) | W03, W08, W09 |
 
-# open one brief (example: DNS resolver)
-sed -n '1,80p' S07_udp_dns_resolver_local_zone_forwarding_and_ttl_cache.md
-```
+## Supporting Assets
 
-When you move to implementation, start from the shared standard in `../00_common/README_STANDARD_RC2026.md`.
-
-## Design and teaching intent
-
-The set progresses from protocol framing and parsing to multi-service orchestration and controlled experiments. Each brief forces explicit choices about message formats, state and observability, then asks for evidence via tests and captured traffic.
-
-## Cross-references and contextual connections
-
-
-### Prerequisites and dependencies
-
-| Prerequisite | Path | Why |
+| Directory | Contents | Count |
 |---|---|---|
-| RC2026 standard | [`00_common/README_STANDARD_RC2026.md`](../00_common/README_STANDARD_RC2026.md) | Fixed directory layout and E2 artefact paths assumed by the briefs |
-| Environment and tooling | [`00_TOOLS/Prerequisites/`](../../00_TOOLS/Prerequisites) | Docker, tcpdump and tshark are needed for E2 evidence |
-| Python socket practice | [`00_APPENDIX/a)PYTHON_self_study_guide/`](../../00_APPENDIX/a%29PYTHON_self_study_guide) | Most briefs assume low-level socket programming and parsing without frameworks |
-| Portainer setup (optional) | [`00_TOOLS/Portainer/INIT_GUIDE/`](../../00_TOOLS/Portainer/INIT_GUIDE) | Container debugging for multi-service stacks and gateways |
+| [`assets/PORTAINER/`](assets/PORTAINER/) | Per-project Portainer debugging guides (S01–S20) | 18 Markdown guides |
+| [`assets/puml/`](assets/puml/) | PlantUML sources: architecture, E2 message flow and state diagrams for each project | 60 `.puml` files (3 × 20 projects) |
+| [`assets/images/`](assets/images/) | Rendered diagram output (populated by `assets/render.sh`) | `.gitkeep` placeholder |
 
-### Lecture ↔ seminar ↔ project ↔ quiz mapping
+## Prerequisites
 
-| This item | Lectures | Seminars | Quiz weeks | Portainer |
-|---|---|---|---|---|
-| [S01](S01_multi_client_tcp_chat_text_protocol_and_presence.md) | [C03](../../03_LECTURES/C03), [C08](../../03_LECTURES/C08), [C09](../../03_LECTURES/C09) | [S03](../../04_SEMINARS/S03), [S04](../../04_SEMINARS/S04), [S02](../../04_SEMINARS/S02) | [W03](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W03_Questions.md), [W08](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W08_Questions.md), [W09](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W09_Questions.md) | [Guide](assets/PORTAINER/S01/PORTAINER_GUIDE_S01.md) |
-| [S02](S02_file_transfer_server_control_and_data_channels_ftp_passive.md) | [C03](../../03_LECTURES/C03), [C08](../../03_LECTURES/C08), [C11](../../03_LECTURES/C11) | [S09](../../04_SEMINARS/S09), [S04](../../04_SEMINARS/S04), [S02](../../04_SEMINARS/S02) | [W03](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W03_Questions.md), [W08](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W08_Questions.md), [W11](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W11_Questions.md) | [Guide](assets/PORTAINER/S02/PORTAINER_GUIDE_S02.md) |
-| [S03](S03_http11_socket_server_no_framework_static_files.md) | [C03](../../03_LECTURES/C03), [C08](../../03_LECTURES/C08), [C10](../../03_LECTURES/C10) | [S08](../../04_SEMINARS/S08), [S04](../../04_SEMINARS/S04), [S02](../../04_SEMINARS/S02) | [W03](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W03_Questions.md), [W08](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W08_Questions.md), [W10](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W10_Questions.md) | [Guide](assets/PORTAINER/S03/PORTAINER_GUIDE_S03.md) |
-| [S04](S04_forward_http_proxy_with_filtering_and_traffic_logging.md) | [C03](../../03_LECTURES/C03), [C10](../../03_LECTURES/C10), [C08](../../03_LECTURES/C08) | [S11](../../04_SEMINARS/S11), [S08](../../04_SEMINARS/S08), [S04](../../04_SEMINARS/S04) | [W03](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W03_Questions.md), [W10](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W10_Questions.md), [W08](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W08_Questions.md) | [Guide](assets/PORTAINER/S04/PORTAINER_GUIDE_S04.md) |
-| [S05](S05_application_level_http_load_balancer_health_checks_and_two_algorithms.md) | [C03](../../03_LECTURES/C03), [C10](../../03_LECTURES/C10), [C08](../../03_LECTURES/C08) | [S11](../../04_SEMINARS/S11), [S08](../../04_SEMINARS/S08), [S04](../../04_SEMINARS/S04) | [W03](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W03_Questions.md), [W10](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W10_Questions.md), [W08](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W08_Questions.md) | [Guide](assets/PORTAINER/S05/PORTAINER_GUIDE_S05.md) |
-| [S06](S06_tcp_pub_sub_broker_topics_and_deterministic_routing.md) | [C03](../../03_LECTURES/C03), [C08](../../03_LECTURES/C08), [C13](../../03_LECTURES/C13) | [S03](../../04_SEMINARS/S03), [S04](../../04_SEMINARS/S04), [S02](../../04_SEMINARS/S02) | [W03](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W03_Questions.md), [W08](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W08_Questions.md), [W13](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W13_Questions.md) | [Guide](assets/PORTAINER/S06/PORTAINER_GUIDE_S06.md) |
-| [S07](S07_udp_dns_resolver_local_zone_forwarding_and_ttl_cache.md) | [C03](../../03_LECTURES/C03), [C11](../../03_LECTURES/C11), [C08](../../03_LECTURES/C08) | [S10](../../04_SEMINARS/S10), [S07](../../04_SEMINARS/S07), [S04](../../04_SEMINARS/S04) | [W03](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W03_Questions.md), [W11](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W11_Questions.md), [W08](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W08_Questions.md) | [Guide](assets/PORTAINER/S07/PORTAINER_GUIDE_S07.md) |
-| [S08](S08_minimal_email_system_smtp_delivery_and_pop3_retrieval.md) | [C03](../../03_LECTURES/C03), [C08](../../03_LECTURES/C08), [C12](../../03_LECTURES/C12) | [S04](../../04_SEMINARS/S04), [S02](../../04_SEMINARS/S02), [S07](../../04_SEMINARS/S07) | [W03](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W03_Questions.md), [W08](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W08_Questions.md), [W12](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W12_Questions.md) | [Guide](assets/PORTAINER/S08/PORTAINER_GUIDE_S08.md) |
-| [S09](S09_tcp_tunnel_single_port_session_multiplexing_and_demultiplexing.md) | [C03](../../03_LECTURES/C03), [C08](../../03_LECTURES/C08), [C09](../../03_LECTURES/C09) | [S04](../../04_SEMINARS/S04), [S07](../../04_SEMINARS/S07), [S02](../../04_SEMINARS/S02) | [W03](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W03_Questions.md), [W08](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W08_Questions.md), [W09](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W09_Questions.md) | [Guide](assets/PORTAINER/S09/PORTAINER_GUIDE_S09.md) |
-| [S10](S10_network_file_synchronisation_manifest_hashes_and_conflict_resolution.md) | [C03](../../03_LECTURES/C03), [C08](../../03_LECTURES/C08), [C11](../../03_LECTURES/C11) | [S09](../../04_SEMINARS/S09), [S04](../../04_SEMINARS/S04), [S07](../../04_SEMINARS/S07) | [W03](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W03_Questions.md), [W08](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W08_Questions.md), [W11](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W11_Questions.md) | [Guide](assets/PORTAINER/S10/PORTAINER_GUIDE_S10.md) |
-| [S11](S11_rest_microservices_service_registry_api_gateway_dynamic_routing.md) | [C03](../../03_LECTURES/C03), [C10](../../03_LECTURES/C10), [C08](../../03_LECTURES/C08) | [S11](../../04_SEMINARS/S11), [S08](../../04_SEMINARS/S08), [S07](../../04_SEMINARS/S07) | [W03](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W03_Questions.md), [W10](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W10_Questions.md), [W08](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W08_Questions.md) | [Guide](assets/PORTAINER/S11/PORTAINER_GUIDE_S11.md) |
-| [S12](S12_client_server_messaging_tls_channel_and_minimal_authentication.md) | [C03](../../03_LECTURES/C03), [C08](../../03_LECTURES/C08), [C13](../../03_LECTURES/C13) | [S02](../../04_SEMINARS/S02), [S07](../../04_SEMINARS/S07), [S04](../../04_SEMINARS/S04) | [W03](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W03_Questions.md), [W08](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W08_Questions.md), [W13](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W13_Questions.md) | [Guide](assets/PORTAINER/S12/PORTAINER_GUIDE_S12.md) |
-| [S13](S13_grpc_rpc_service_proto_definition_unary_and_streaming_methods.md) | [C03](../../03_LECTURES/C03), [C10](../../03_LECTURES/C10), [C09](../../03_LECTURES/C09) | [S12](../../04_SEMINARS/S12), [S07](../../04_SEMINARS/S07), [S04](../../04_SEMINARS/S04) | [W03](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W03_Questions.md), [W10](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W10_Questions.md), [W09](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W09_Questions.md) | [Guide](assets/PORTAINER/S13/PORTAINER_GUIDE_S13.md) |
-| [S14](S14_didactic_distance_vector_routing_in_mininet_convergence_and_anti_loop.md) | [C05](../../03_LECTURES/C05), [C06](../../03_LECTURES/C06), [C07](../../03_LECTURES/C07) | [S06](../../04_SEMINARS/S06), [S05](../../04_SEMINARS/S05), [S07](../../04_SEMINARS/S07) | [W05](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W05_Questions.md), [W06](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W06_Questions.md), [W07](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W07_Questions.md) | [Guide](assets/PORTAINER/S14/PORTAINER_GUIDE_S14.md) |
-| [S15](S15_iot_gateway_udp_telemetry_ingestion_http_api_query_and_streaming.md) | [C03](../../03_LECTURES/C03), [C10](../../03_LECTURES/C10), [C13](../../03_LECTURES/C13) | [S07](../../04_SEMINARS/S07), [S08](../../04_SEMINARS/S08), [S02](../../04_SEMINARS/S02) | [W03](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W03_Questions.md), [W10](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W10_Questions.md), [W13](../../00_APPENDIX/c%29studentsQUIZes%28multichoice_only%29/COMPnet_W13_Questions.md) | [Guide](assets/PORTAINER/S15/PORTAINER_GUIDE_S15.md) |
-
-### Portainer support guides
-
-| Tool guide (00_TOOLS) | When it helps |
-|---|---|
-| [S08](../../00_TOOLS/Portainer/SEMINAR08) | Projects whose primary workflow matches seminar S08 |
-| [S09](../../00_TOOLS/Portainer/SEMINAR09) | Projects whose primary workflow matches seminar S09 |
-| [S10](../../00_TOOLS/Portainer/SEMINAR10) | Projects whose primary workflow matches seminar S10 |
-| [S11](../../00_TOOLS/Portainer/SEMINAR11) | Projects whose primary workflow matches seminar S11 |
-| [S13](../../00_TOOLS/Portainer/SEMINAR13) | Projects whose primary workflow matches seminar S13 |
-
-### Instructor notes (Romanian) for referenced seminars
-
-| Seminar | English seminar folder | Instructor notes (Romanian) |
+| Prerequisite | Path | Reason |
 |---|---|---|
-| `S02` | [S02](../../04_SEMINARS/S02) | [roCOMPNETclass_S02-instructor-outline-v2.md](../../00_APPENDIX/d%29instructor_NOTES4sem/roCOMPNETclass_S02-instructor-outline-v2.md), [roCOMPNETclass_S02-instructor-outline-v2__noMININET-SDN_.md](../../00_APPENDIX/d%29instructor_NOTES4sem/roCOMPNETclass_S02-instructor-outline-v2__noMININET-SDN_.md) |
-| `S03` | [S03](../../04_SEMINARS/S03) | [roCOMPNETclass_S03-instructor-outline-v2.md](../../00_APPENDIX/d%29instructor_NOTES4sem/roCOMPNETclass_S03-instructor-outline-v2.md), [roCOMPNETclass_S03-instructor-outline-v2__noMININET-SDN_.md](../../00_APPENDIX/d%29instructor_NOTES4sem/roCOMPNETclass_S03-instructor-outline-v2__noMININET-SDN_.md) |
-| `S04` | [S04](../../04_SEMINARS/S04) | [roCOMPNETclass_S04-instructor-outline-v2.md](../../00_APPENDIX/d%29instructor_NOTES4sem/roCOMPNETclass_S04-instructor-outline-v2.md), [roCOMPNETclass_S04-instructor-outline-v2__noMININET-SDN_.md](../../00_APPENDIX/d%29instructor_NOTES4sem/roCOMPNETclass_S04-instructor-outline-v2__noMININET-SDN_.md) |
-| `S05` | [S05](../../04_SEMINARS/S05) | [roCOMPNETclass_S05-instructor-outline-v2.md](../../00_APPENDIX/d%29instructor_NOTES4sem/roCOMPNETclass_S05-instructor-outline-v2.md), [roCOMPNETclass_S05-instructor-outline-v2__noMININET-SDN_.md](../../00_APPENDIX/d%29instructor_NOTES4sem/roCOMPNETclass_S05-instructor-outline-v2__noMININET-SDN_.md) |
-| `S06` | [S06](../../04_SEMINARS/S06) | [roCOMPNETclass_S06-instructor-outline-v2.md](../../00_APPENDIX/d%29instructor_NOTES4sem/roCOMPNETclass_S06-instructor-outline-v2.md), [roCOMPNETclass_S06-instructor-outline-v2__noMININET-SDN_.md](../../00_APPENDIX/d%29instructor_NOTES4sem/roCOMPNETclass_S06-instructor-outline-v2__noMININET-SDN_.md) |
-| `S07` | [S07](../../04_SEMINARS/S07) | [roCOMPNETclass_S07-instructor-outline-v2.md](../../00_APPENDIX/d%29instructor_NOTES4sem/roCOMPNETclass_S07-instructor-outline-v2.md), [roCOMPNETclass_S07-instructor-outline-v2__noMININET-SDN_.md](../../00_APPENDIX/d%29instructor_NOTES4sem/roCOMPNETclass_S07-instructor-outline-v2__noMININET-SDN_.md) |
-| `S08` | [S08](../../04_SEMINARS/S08) | [roCOMPNETclass_S08-instructor-outline-v2.md](../../00_APPENDIX/d%29instructor_NOTES4sem/roCOMPNETclass_S08-instructor-outline-v2.md), [roCOMPNETclass_S08-instructor-outline-v2__noMININET-SDN_.md](../../00_APPENDIX/d%29instructor_NOTES4sem/roCOMPNETclass_S08-instructor-outline-v2__noMININET-SDN_.md) |
-| `S09` | [S09](../../04_SEMINARS/S09) | [roCOMPNETclass_S09-instructor-outline-v2.md](../../00_APPENDIX/d%29instructor_NOTES4sem/roCOMPNETclass_S09-instructor-outline-v2.md), [roCOMPNETclass_S09-instructor-outline-v2__noMININET-SDN_.md](../../00_APPENDIX/d%29instructor_NOTES4sem/roCOMPNETclass_S09-instructor-outline-v2__noMININET-SDN_.md) |
-| `S10` | [S10](../../04_SEMINARS/S10) | [roCOMPNETclass_S10-instructor-outline-v2.md](../../00_APPENDIX/d%29instructor_NOTES4sem/roCOMPNETclass_S10-instructor-outline-v2.md), [roCOMPNETclass_S10-instructor-outline-v2__noMININET-SDN_.md](../../00_APPENDIX/d%29instructor_NOTES4sem/roCOMPNETclass_S10-instructor-outline-v2__noMININET-SDN_.md) |
-| `S11` | [S11](../../04_SEMINARS/S11) | [roCOMPNETclass_S11-instructor-outline-v2.md](../../00_APPENDIX/d%29instructor_NOTES4sem/roCOMPNETclass_S11-instructor-outline-v2.md), [roCOMPNETclass_S11-instructor-outline-v2__noMININET-SDN_.md](../../00_APPENDIX/d%29instructor_NOTES4sem/roCOMPNETclass_S11-instructor-outline-v2__noMININET-SDN_.md) |
-| `S12` | [S12](../../04_SEMINARS/S12) | [roCOMPNETclass_S12-instructor-outline-v2.md](../../00_APPENDIX/d%29instructor_NOTES4sem/roCOMPNETclass_S12-instructor-outline-v2.md), [roCOMPNETclass_S12-instructor-outline-v2__noMININET-SDN_.md](../../00_APPENDIX/d%29instructor_NOTES4sem/roCOMPNETclass_S12-instructor-outline-v2__noMININET-SDN_.md) |
+| Environment setup | [`../../00_TOOLS/Prerequisites/`](../../00_TOOLS/Prerequisites/) | Docker, WSL2, Wireshark and tshark must be configured |
+| Common assessment standard | [`../00_common/README_STANDARD_RC2026.md`](../00_common/README_STANDARD_RC2026.md) | Defines the student-repository structure assumed by all briefs |
+| Python socket fluency | [`../../00_APPENDIX/a)PYTHON_self_study_guide/`](../../00_APPENDIX/a%29PYTHON_self_study_guide/) | Socket programming skills expected from seminar exercises |
 
-### Downstream dependencies
+## Notes
 
-The Portainer project index at [`00_TOOLS/Portainer/PROJECTS/PROJECTS_PORTAINER_MAP.md`](../../00_TOOLS/Portainer/PROJECTS/PROJECTS_PORTAINER_MAP.md) links into `assets/PORTAINER/Sxx/`.
-Lecture READMEs link directly to these briefs, for example [`03_LECTURES/C03/README.md`](../../03_LECTURES/C03/README.md).
-Each brief references a PCAP rule file under `../00_common/tools/pcap_rules/` by name.
+The Flex component is mandatory for every S-project in E3. Specifications should remain stable after E1 submission to preserve deterministic automated testing. Keep E2 artefacts reproducible: identical input must yield identical PCAP validation results.
 
-### Suggested learning sequence
+## Selective Clone
 
-Suggested sequence: complete the matching seminar(s) → read the brief → draft E1 spec → implement a minimal end-to-end path → containerise E2 and validate the PCAP → finalise E3 evidence.
-
-
-## Selective clone
-
-### Method A — Git sparse-checkout (Git ≥ 2.25)
+**Method A — Git sparse-checkout (requires Git ≥ 2.25)**
 
 ```bash
 git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
@@ -134,20 +149,12 @@ cd COMPNET-EN
 git sparse-checkout set 02_PROJECTS/01_network_applications
 ```
 
-To add another path later:
+To include the shared assessment tools as well:
 
 ```bash
-git sparse-checkout add <ANOTHER_PATH>
+git sparse-checkout add 02_PROJECTS/00_common
 ```
 
-### Method B — Direct download (no Git required)
+**Method B — Direct download (no Git required)**
 
-```text
-https://github.com/antonioclim/COMPNET-EN/tree/main/02_PROJECTS/01_network_applications
-```
-
-GitHub can only download the full repository as a ZIP. For a single folder, use a browser-side downloader such as download-directory.github.io or gitzip.
-
-## Version and provenance
-
-Group 1 briefs snapshot (February 2026).
+Browse: <https://github.com/antonioclim/COMPNET-EN/tree/main/02_PROJECTS/01_network_applications>
