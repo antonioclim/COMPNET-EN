@@ -2,6 +2,34 @@
 
 Week 13 introduces a structured penetration testing methodology within a controlled Docker environment. Students perform reconnaissance, port scanning, vulnerability enumeration and basic exploitation against intentionally vulnerable targets. The session covers both automated tools (Nmap) and manual techniques (custom Python scripts), culminating in a scripted exploit against a known vsftpd backdoor.
 
+## Optional: avoid host port conflicts via `.env`
+
+By default, the S13 lab publishes these services on the host:
+
+- DVWA → `localhost:8888`
+- WebGoat → `localhost:8080`
+- vsftpd 2.3.4 → `localhost:2121` (backdoor port: `6200`)
+
+If you already have something running on those ports, you can generate a local `.env`
+file (in this directory) and Docker Compose will automatically use it.
+
+From `04_SEMINARS/S13`:
+
+```bash
+python3 generate_env_ports.py
+cat .env
+```
+
+Then start the lab normally:
+
+```bash
+docker compose -f S13_Part02_Config_Docker_Compose_Pentest.yml up -d
+```
+
+All S13 helper scripts that connect to host ports (defensive checker, vsftpd exploit)
+will also read `.env` automatically.
+
+
 ## File/Folder Index
 
 | Name | Type | Description |
@@ -13,7 +41,10 @@ Week 13 introduces a structured penetration testing methodology within a control
 | [`S13_Part04_Script_Simple_Scanner.py`](S13_Part04_Script_Simple_Scanner.py) | Script | Python port scanner for the lab |
 | [`S13_Part04_Tasks_Scanning.md`](S13_Part04_Tasks_Scanning.md) | Tasks | Scanning exercises |
 | [`S13_Part05_Explanation_Vuln_Enumeration.md`](S13_Part05_Explanation_Vuln_Enumeration.md) | Explanation | Vulnerability enumeration methods |
+| [`S13_Part05_Script_Defensive_Vuln_Checker.py`](S13_Part05_Script_Defensive_Vuln_Checker.py) | Script | Defensive-only fingerprinting for the lab targets (optional) |
 | [`S13_Part06_Tasks_Vuln_Enumeration.md`](S13_Part06_Tasks_Vuln_Enumeration.md) | Tasks | Enumeration exercises |
+| [`report_generator.py`](report_generator.py) | Script | Generate a single Markdown report from artefacts (optional) |
+| [`artifacts/`](artifacts/) | Folder | Generated outputs: JSON checks, notes, report.md |
 | [`S13_Part07_Explanation_Exploitation.md`](S13_Part07_Explanation_Exploitation.md) | Explanation | Exploitation fundamentals |
 | [`S13_Part08_Tasks_Exploitation.md`](S13_Part08_Tasks_Exploitation.md) | Tasks | Exploitation exercises |
 | [`S13_Part09_Explanation_Exploit_Script.md`](S13_Part09_Explanation_Exploit_Script.md) | Explanation | Writing exploit scripts |

@@ -29,7 +29,7 @@ In the file:
 E.g.:
 
 ```bash
-nikto -h http://172.20.0.10:8888
+nikto -h http://172.20.0.10
 nikto -h http://172.20.0.11:8080
 ```
 
@@ -45,7 +45,7 @@ In the file:
 Execute:
 
 ```bash
-curl -I http://172.20.0.10:8888
+curl -I http://172.20.0.10
 curl -I http://172.20.0.11:8080
 ```
 
@@ -59,7 +59,7 @@ In the file:
 ## 4. Banner grabbing for the vulnerable FTP service
 
 ```
-nc 172.20.0.12 2121
+nc 172.20.0.12 21
 ```
 
 In the file:

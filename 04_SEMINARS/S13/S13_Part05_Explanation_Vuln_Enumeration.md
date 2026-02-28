@@ -46,7 +46,7 @@ This command runs every NSE script tagged as *vuln*.
 ### Concrete example (vulnerable vsftpd):
 
 ```bash
-nmap -sV --script ftp-vsftpd-backdoor -p 2121 172.20.0.12
+nmap -sV --script ftp-vsftpd-backdoor -p 21 172.20.0.12
 ```
 
 This script confirms the presence of the notorious backdoor in `vsftpd 2.3.4`.
@@ -65,7 +65,7 @@ Nikto is a highly useful scanner for:
 Minimal execution:
 
 ```bash
-nikto -h http://172.20.0.10:8888
+nikto -h http://172.20.0.10
 ```
 
 or for WebGoat:
@@ -85,7 +85,7 @@ Some vulnerabilities are only visible through manual inspection:
 ### 3.1. Server identification
 
 ```bash
-curl -I http://172.20.0.10:8888/
+curl -I http://172.20.0.10/
 ```
 
 Observe:
@@ -98,7 +98,7 @@ Outdated VERSIONS are indicators of vulnerabilities.
 ### 3.2. Discovering HTTP methods
 
 ```bash
-curl -X OPTIONS -I http://172.20.0.10:8888/
+curl -X OPTIONS -I http://172.20.0.10/
 ```
 
 If the response includes:
@@ -116,7 +116,7 @@ Allow: GET, POST, PUT, DELETE
 Connect:
 
 ```bash
-nc 172.20.0.12 2121
+nc 172.20.0.12 21
 ```
 
 Banner:
