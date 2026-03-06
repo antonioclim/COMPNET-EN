@@ -1,13 +1,742 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="refresh" content="0; url=S01_Part01_Page_CLI_Netcat_Wireshark_Sim.html">
-  <title>Redirecting…</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S01 — NetLab: CLI · Netcat · Wireshark Simulator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════════════════════════
+   S01 NetLab v3.0 — Cyber Operations Center Aesthetic
+   ══════════════════════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#0a0e17;--bg-surface:#0f1420;--bg-card:#141a2a;--bg-elevated:#1a2236;
+  --border:#1e2d4a;--border-glow:#2a4a7f40;
+  --cyan:#00e5ff;--cyan-dim:#00e5ff40;--cyan-glow:0 0 20px #00e5ff30,0 0 40px #00e5ff15;
+  --green:#00ff9d;--green-dim:#00ff9d50;--green-glow:0 0 15px #00ff9d30;
+  --magenta:#ff006e;--magenta-dim:#ff006e40;
+  --amber:#ffc107;--amber-dim:#ffc10740;
+  --blue:#4dabf7;--blue-dim:#4dabf730;
+  --red:#ff4757;--red-dim:#ff475740;
+  --text:#c8d6e5;--text-bright:#e8f0fe;--text-dim:#5a6a85;--text-faint:#3a4a65;
+  --ws-tcp:#1a3a1a;--ws-udp:#1a2a3a;--ws-other:#2a2a1a;
+  --ws-sel:#0055ff;
+  --font-ui:'IBM Plex Sans',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono','Cascadia Code','Fira Code',monospace;
+  --radius:10px;--radius-sm:6px;
+  --transition:all .3s cubic-bezier(.4,0,.2,1);
+}
+
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);
+  font-family:var(--font-ui);font-size:14px;-webkit-font-smoothing:antialiased}
+
+/* ── ANIMATED GRID BACKGROUND ───────────────────────────────── */
+.grid-bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.grid-bg canvas{width:100%;height:100%}
+
+/* ── KEYFRAMES ──────────────────────────────────────────────── */
+@keyframes fadeSlideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes glow-pulse{0%,100%{box-shadow:0 0 8px var(--cyan-dim)}50%{box-shadow:0 0 20px var(--cyan-dim),0 0 40px #00e5ff10}}
+@keyframes scanline{0%{top:-100%}100%{top:200%}}
+@keyframes badge-pulse{0%,100%{box-shadow:0 0 4px currentColor}50%{box-shadow:0 0 12px currentColor,0 0 24px currentColor}}
+@keyframes data-flow{0%{stroke-dashoffset:20}100%{stroke-dashoffset:0}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+@keyframes packet-fly{0%{transform:translateX(-10px);opacity:0}20%{opacity:1}100%{transform:translateX(0);opacity:1}}
+@keyframes red-glow-pulse{0%,100%{box-shadow:0 0 8px var(--red-dim)}50%{box-shadow:0 0 20px var(--red-dim),0 0 40px #ff475710}}
+
+/* ── LAYOUT ─────────────────────────────────────────────────── */
+.app{display:flex;height:100vh;width:100vw;overflow:hidden;position:relative;z-index:1}
+
+/* ── SIDEBAR ────────────────────────────────────────────────── */
+.sidebar{width:270px;min-width:270px;background:var(--bg-surface);display:flex;flex-direction:column;
+  border-right:1px solid var(--border);z-index:20;position:relative;overflow:hidden}
+.sidebar::after{content:'';position:absolute;right:0;top:0;bottom:0;width:1px;
+  background:linear-gradient(180deg,transparent,var(--cyan-dim),transparent);pointer-events:none}
+.sidebar-brand{padding:22px 20px;font-weight:700;font-size:1.3rem;
+  border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;
+  color:var(--text-bright);position:relative;overflow:hidden}
+.sidebar-brand::before{content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,#00e5ff08,transparent 60%);pointer-events:none}
+.sidebar-brand .icon-box{width:40px;height:40px;background:linear-gradient(135deg,#00e5ff,#0088cc);
+  border-radius:10px;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 20px #00e5ff40;position:relative}
+.sidebar-brand .icon-box::after{content:'';position:absolute;inset:-2px;border-radius:12px;
+  background:linear-gradient(135deg,var(--cyan),transparent);opacity:.3;z-index:-1}
+.sidebar-brand .ver{font-size:10px;color:var(--cyan);font-weight:500;letter-spacing:.08em;
+  background:var(--cyan-dim);padding:2px 8px;border-radius:20px;align-self:center}
+
+.sidebar nav{flex:1;padding:16px 12px;display:flex;flex-direction:column;gap:4px}
+.nav-btn{width:100%;text-align:left;padding:14px 16px;border-radius:var(--radius);border:1px solid transparent;
+  background:transparent;color:var(--text-dim);cursor:pointer;font-size:.88rem;
+  font-weight:500;display:flex;align-items:center;gap:12px;transition:var(--transition);
+  font-family:var(--font-ui);position:relative;overflow:hidden}
+.nav-btn:hover{background:var(--bg-elevated);color:var(--text);border-color:var(--border)}
+.nav-btn.active{background:linear-gradient(135deg,#00e5ff12,#00e5ff06);
+  color:var(--cyan);border-color:var(--cyan-dim);
+  box-shadow:0 0 20px #00e5ff08,inset 0 0 20px #00e5ff05}
+.nav-btn.active::before{content:'';position:absolute;left:0;top:20%;bottom:20%;width:3px;
+  background:var(--cyan);border-radius:0 3px 3px 0;box-shadow:0 0 10px var(--cyan)}
+.nav-btn .num{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;
+  justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0;
+  background:var(--bg-card);border:1px solid var(--border);transition:var(--transition)}
+.nav-btn.active .num{background:var(--cyan-dim);border-color:var(--cyan);color:var(--cyan)}
+.nav-btn svg{width:18px;height:18px;stroke-width:2;flex-shrink:0;transition:var(--transition)}
+
+.sidebar .footer{padding:16px;text-align:center;font-size:10px;color:var(--text-faint);
+  border-top:1px solid var(--border);line-height:1.8;letter-spacing:.03em}
+.sidebar .footer .course{color:var(--cyan);font-weight:600}
+
+.sidebar .status-bar{padding:12px 16px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px}
+.status-bar .progress-label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--text-faint);font-weight:600;display:flex;justify-content:space-between}
+.status-bar .progress-track{height:4px;background:var(--bg);border-radius:2px;overflow:hidden}
+.status-bar .progress-fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--green));
+  border-radius:2px;transition:width .6s cubic-bezier(.4,0,.2,1);box-shadow:0 0 10px var(--cyan-dim)}
+
+/* ── MAIN ───────────────────────────────────────────────────── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
+.topbar{background:var(--bg-surface);border-bottom:1px solid var(--border);
+  padding:14px 28px;display:flex;justify-content:space-between;align-items:center;
+  min-height:64px;flex-shrink:0;position:relative}
+.topbar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--cyan-dim),transparent)}
+.topbar h1{font-size:1.15rem;font-weight:700;color:var(--text-bright);letter-spacing:-.01em}
+.topbar .sub{font-size:.78rem;color:var(--text-dim);margin-top:3px}
+.pill-btn{font-size:.82rem;font-weight:600;padding:8px 20px;border-radius:999px;
+  border:1px solid var(--border);background:var(--bg-card);color:var(--text-dim);
+  cursor:pointer;display:flex;align-items:center;gap:7px;transition:var(--transition);font-family:var(--font-ui)}
+.pill-btn:hover{border-color:var(--cyan-dim);color:var(--text)}
+.pill-btn.on{background:var(--cyan-dim);color:var(--cyan);border-color:var(--cyan)}
+.pill-btn svg{width:15px;height:15px}
+
+/* ── WORKSPACE ──────────────────────────────────────────────── */
+.workspace{flex:1;display:flex;overflow:hidden}
+.module-area{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.module{display:none;height:100%;animation:fadeIn .35s ease}
+.module.visible{display:flex;flex-direction:column}
+
+/* ── GUIDE PANEL ────────────────────────────────────────────── */
+.guide-panel{width:390px;min-width:390px;background:var(--bg-surface);
+  border-left:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column;
+  transition:margin-right .35s cubic-bezier(.4,0,.2,1),opacity .25s ease;flex-shrink:0;position:relative}
+.guide-panel::before{content:'';position:absolute;left:0;top:0;bottom:0;width:1px;
+  background:linear-gradient(180deg,transparent,var(--cyan-dim),transparent);pointer-events:none}
+.guide-panel.hidden{margin-right:-390px;opacity:0;pointer-events:none}
+.guide-panel .section-label{text-transform:uppercase;letter-spacing:.14em;font-size:.65rem;
+  font-weight:700;color:var(--text-faint);padding:20px 24px 10px;border-bottom:1px solid var(--border)}
+.guide-panel .body{padding:24px;flex:1;font-size:.84rem;color:var(--text);line-height:1.75}
+.guide-panel .body h3{font-size:.95rem;font-weight:700;color:var(--cyan);margin:20px 0 8px;
+  display:flex;align-items:center;gap:8px}
+.guide-panel .body h3::before{content:'';width:8px;height:8px;border-radius:2px;
+  background:var(--cyan);box-shadow:var(--green-glow);flex-shrink:0}
+.guide-panel .body h3:first-child{margin-top:0}
+.guide-panel .body ol{padding-left:22px;margin:10px 0}
+.guide-panel .body ol li{margin:8px 0;padding-left:4px}
+.guide-panel .body ol li::marker{color:var(--cyan);font-weight:700}
+.guide-panel .body code{background:var(--bg);border:1px solid var(--border);padding:2px 8px;
+  border-radius:var(--radius-sm);font-family:var(--font-mono);font-size:.78rem;color:var(--green)}
+.tool-card{padding:14px;background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);margin:8px 0;transition:var(--transition)}
+.tool-card:hover{border-color:var(--cyan-dim);box-shadow:0 0 15px #00e5ff08}
+.tool-card .name{font-weight:700;color:var(--text-bright);font-size:.85rem}
+.tool-card .desc{font-size:.76rem;color:var(--text-dim);margin-top:4px;line-height:1.5}
+.tcp-box{background:#0a1a2a;border:1px solid #1a3a5a;border-radius:var(--radius);padding:14px;margin:10px 0}
+.tcp-box h4{color:var(--blue);font-weight:700;font-size:.85rem;margin-bottom:6px}
+.udp-box{background:#1a1508;border:1px solid #3a2a0a;border-radius:var(--radius);padding:14px;margin:10px 0}
+.udp-box h4{color:var(--amber);font-weight:700;font-size:.85rem;margin-bottom:6px}
+.cmd-block{background:var(--bg);color:var(--green);padding:10px 12px;border-radius:var(--radius-sm);
+  font-family:var(--font-mono);font-size:.75rem;margin-top:8px;line-height:1.7;border:1px solid var(--border)}
+.filter-tip{border-left:3px solid;padding:8px 14px;margin:10px 0;
+  background:var(--bg-card);border-radius:0 var(--radius-sm) var(--radius-sm) 0}
+.filter-tip.capture{border-color:var(--red)}
+.filter-tip.display{border-color:var(--blue)}
+.filter-tip h4{font-weight:700;color:var(--text-bright);font-size:.83rem}
+.filter-tip p{font-size:.75rem;color:var(--text-dim);margin-top:3px}
+.guide-panel .proof{padding:20px 24px;background:var(--bg-card);border-top:1px solid var(--border);
+  font-size:.78rem;color:var(--text-dim)}
+.guide-panel .proof h4{font-weight:700;color:var(--text-bright);margin-bottom:6px;font-size:.82rem}
+
+/* ── CHECKLIST ──────────────────────────────────────────────── */
+.checklist{margin:10px 0;display:flex;flex-direction:column;gap:6px}
+.check-item{display:flex;align-items:center;gap:10px;padding:8px 12px;
+  background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);
+  cursor:pointer;transition:var(--transition);font-size:.8rem;user-select:none}
+.check-item:hover{border-color:var(--cyan-dim);background:var(--bg-elevated)}
+.check-item.done{border-color:var(--green-dim);background:#00ff9d08}
+.check-item .cbox{width:18px;height:18px;border:2px solid var(--border);border-radius:4px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:var(--transition)}
+.check-item.done .cbox{border-color:var(--green);background:var(--green);color:var(--bg)}
+.check-item.done .cbox::after{content:'✓';font-size:12px;font-weight:700;color:var(--bg)}
+
+/* ── TERMINAL ───────────────────────────────────────────────── */
+.terminal{display:flex;flex-direction:column;background:var(--bg);border-radius:var(--radius);
+  overflow:hidden;border:1px solid var(--border);font-family:var(--font-mono);font-size:13px;
+  position:relative;transition:box-shadow .3s ease}
+.terminal:focus-within{box-shadow:0 0 0 1px var(--cyan-dim),var(--cyan-glow)}
+.terminal .scanline{position:absolute;inset:0;pointer-events:none;z-index:5;overflow:hidden;opacity:.03}
+.terminal .scanline::after{content:'';position:absolute;left:0;right:0;height:40%;
+  background:linear-gradient(transparent,rgba(0,229,255,.1),transparent);animation:scanline 8s linear infinite}
+.terminal .hdr{background:#0d1117;padding:10px 14px;font-size:.75rem;
+  display:flex;justify-content:space-between;align-items:center;
+  border-bottom:1px solid var(--border);user-select:none;color:var(--text-dim)}
+.terminal .hdr .title-area{display:flex;align-items:center;gap:10px}
+.terminal .hdr .title-area svg{opacity:.5}
+.terminal .hdr .title-text{font-weight:600;letter-spacing:.02em;color:var(--text)}
+.terminal .hdr .badge{padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.06em;display:none;animation:badge-pulse 2s ease infinite}
+.badge-listen{background:#00ff9d18;color:var(--green);border:1px solid var(--green-dim)}
+.badge-connected{background:#4dabf718;color:var(--blue);border:1px solid var(--blue-dim)}
+.terminal .hdr .controls{display:flex;align-items:center;gap:10px}
+.terminal .hdr .stop-btn{color:var(--red);cursor:pointer;background:var(--red-dim);
+  border:1px solid var(--red);font-size:10px;font-weight:700;text-transform:uppercase;
+  display:none;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;
+  transition:var(--transition);font-family:var(--font-mono)}
+.terminal .hdr .stop-btn:hover{background:var(--red);color:#fff}
+.terminal .hdr .dots{display:flex;gap:7px}
+.terminal .hdr .dots span{width:12px;height:12px;border-radius:50%;transition:transform .2s}
+.terminal .hdr .dots span:hover{transform:scale(1.3)}
+.dot-r{background:#ff5f56}.dot-y{background:#ffbd2e}.dot-g{background:#27c93f}
+
+.terminal .body{flex:1;padding:14px;overflow-y:auto;color:var(--text);cursor:text;
+  line-height:1.55;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.terminal .body::-webkit-scrollbar{width:6px}
+.terminal .body::-webkit-scrollbar-track{background:transparent}
+.terminal .body::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.terminal .body .line{white-space:pre-wrap;word-break:break-all}
+.terminal .body .line.cmd{color:var(--text-bright)}
+.terminal .body .line.error{color:var(--red)}
+.terminal .body .line.success{color:var(--green)}
+.terminal .body .line.info{color:var(--cyan)}
+.terminal .input-row{display:flex;align-items:center;margin-top:4px}
+.terminal .input-row .prompt{color:var(--green);font-weight:700;margin-right:8px;
+  flex-shrink:0;user-select:none;text-shadow:var(--green-glow)}
+.terminal .input-row input{background:transparent;border:none;outline:none;color:#fff;
+  font-family:inherit;font-size:inherit;flex:1;caret-color:var(--cyan)}
+
+/* ── MODULE: BASICS ─────────────────────────────────────────── */
+.basics-wrap{padding:24px;height:100%;display:flex;align-items:center;justify-content:center}
+.basics-wrap .terminal{width:100%;max-width:960px;height:100%}
+
+/* ── MODULE: NETCAT ─────────────────────────────────────────── */
+.netcat-wrap{padding:20px 24px;height:100%;display:flex;flex-direction:column;gap:14px}
+.netcat-topo{height:60px;background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);display:flex;align-items:center;justify-content:center;
+  overflow:hidden;flex-shrink:0}
+.netcat-topo svg{width:100%;max-width:500px;height:50px}
+.netcat-topo .flow-line{stroke-dasharray:6 4;animation:data-flow 1s linear infinite}
+.netcat-topo .flow-line.inactive{animation:none;stroke:var(--border)}
+.netcat-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;flex:1;min-height:0}
+.netcat-grid .col{display:flex;flex-direction:column;gap:8px;min-height:0}
+.netcat-grid .col-label{font-weight:600;color:var(--text);font-size:.88rem;display:flex;align-items:center;gap:10px;padding-left:4px}
+.netcat-grid .col-label svg{opacity:.7}
+.netcat-grid .terminal{flex:1;min-height:0}
+.netcat-cheat{background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:12px 18px;font-size:.82rem;color:var(--text-dim);
+  display:flex;align-items:center;gap:12px;flex-shrink:0}
+.netcat-cheat::before{content:'💡';font-size:16px}
+.netcat-cheat code{background:var(--bg);border:1px solid var(--border);padding:2px 8px;
+  border-radius:var(--radius-sm);font-family:var(--font-mono);font-size:.78rem;color:var(--green)}
+
+/* ── MODULE: WIRESHARK ──────────────────────────────────────── */
+.ws-wrap{display:flex;flex-direction:column;height:100%;background:var(--bg-surface);font-size:12px}
+.ws-toolbar{background:var(--bg-card);padding:8px 12px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;flex-shrink:0;flex-wrap:wrap}
+.ws-toolbar .btn-group{display:flex;gap:4px}
+.ws-toolbar button{padding:6px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);
+  background:var(--bg-elevated);color:var(--text-dim);cursor:pointer;font-size:11px;
+  font-weight:600;transition:var(--transition);font-family:var(--font-ui)}
+.ws-toolbar button:hover{background:var(--bg);color:var(--text);border-color:var(--text-faint)}
+.ws-toolbar button:active{transform:scale(.97)}
+.ws-toolbar button:disabled{opacity:.35;cursor:default;transform:none}
+.ws-toolbar .capture-on{background:var(--red-dim);border-color:var(--red);color:var(--red);
+  animation:red-glow-pulse 2s ease infinite}
+.ws-toolbar .capture-off{background:var(--cyan-dim);border-color:var(--cyan);color:var(--cyan)}
+.ws-toolbar .sep{width:1px;height:24px;background:var(--border)}
+.ws-toolbar .filter-label{font-weight:700;color:var(--text-dim);font-size:10px;
+  text-transform:uppercase;letter-spacing:.08em;white-space:nowrap}
+.ws-toolbar .filter-wrap{flex:1;min-width:150px;position:relative;display:flex;align-items:center}
+.ws-toolbar .filter-wrap svg{position:absolute;left:8px;color:var(--text-faint);pointer-events:none;width:14px;height:14px}
+.ws-toolbar .filter-input{width:100%;padding:5px 10px 5px 28px;border:1px solid var(--green-dim);
+  border-radius:var(--radius-sm);font-family:var(--font-mono);font-size:12px;outline:none;
+  background:var(--bg);color:var(--green);transition:var(--transition)}
+.ws-toolbar .filter-input:disabled{background:var(--bg-elevated);border-color:var(--border);color:var(--text-faint)}
+.ws-toolbar .filter-input:focus{box-shadow:0 0 0 2px var(--green-dim)}
+.ws-toolbar .sim-btns{display:flex;gap:4px}
+.ws-toolbar .sim-btns button{padding:5px 12px;background:var(--bg-elevated);font-weight:600}
+
+.ws-display-bar{background:var(--bg-card);padding:5px 12px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:8px;flex-shrink:0}
+.ws-display-bar .filter-label{font-weight:700;color:var(--text-dim);font-size:10px;
+  text-transform:uppercase;letter-spacing:.08em;white-space:nowrap}
+.ws-display-bar input{flex:1;padding:4px 10px;border:1px solid var(--border);
+  border-radius:var(--radius-sm);font-family:var(--font-mono);font-size:12px;outline:none;
+  background:var(--bg);color:var(--blue);transition:var(--transition)}
+.ws-display-bar input:focus{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-dim)}
+.ws-display-bar button{padding:4px 14px;background:var(--bg-elevated);border:1px solid var(--border);
+  border-radius:var(--radius-sm);font-size:11px;cursor:pointer;color:var(--text-dim);
+  font-family:var(--font-ui);transition:var(--transition)}
+.ws-display-bar button:hover{color:var(--text);border-color:var(--text-faint)}
+
+.ws-packets{flex:1;overflow:auto;background:var(--bg);font-family:var(--font-mono);
+  scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.ws-packets::-webkit-scrollbar{width:6px}
+.ws-packets::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.ws-packets table{width:100%;border-collapse:collapse;table-layout:fixed}
+.ws-packets thead{background:var(--bg-card);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:5}
+.ws-packets th{padding:5px 8px;text-align:left;font-size:10px;text-transform:uppercase;
+  color:var(--text-faint);border-right:1px solid var(--border);font-weight:700;letter-spacing:.05em}
+.ws-packets td{padding:4px 8px;border-right:1px solid #ffffff06;border-bottom:1px solid #ffffff04;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ws-packets tr{cursor:pointer;transition:filter .15s;animation:packet-fly .3s ease both}
+.ws-packets tr.tcp{background:var(--ws-tcp);color:#a3e635}
+.ws-packets tr.udp{background:var(--ws-udp);color:var(--blue)}
+.ws-packets tr.other{background:var(--ws-other);color:var(--amber)}
+.ws-packets tr.selected{background:var(--ws-sel)!important;color:#fff}
+.ws-packets tr:hover:not(.selected){filter:brightness(1.3)}
+.ws-packets .col-no{width:45px;text-align:right;padding-right:10px}
+.ws-packets .col-time{width:85px}
+.ws-packets .col-src,.ws-packets .col-dst{width:110px}
+.ws-packets .col-proto{width:60px;font-weight:700}
+.ws-packets .col-len{width:55px;text-align:right;padding-right:10px}
+
+.ws-details{height:33%;border-top:2px solid var(--border);background:var(--bg-surface);
+  display:flex;flex-direction:column;flex-shrink:0}
+.ws-details .details-hdr{background:var(--bg-card);padding:6px 12px;border-bottom:1px solid var(--border);
+  font-size:11px;font-weight:700;color:var(--text-dim);letter-spacing:.03em}
+.ws-details .details-body{flex:1;overflow-y:auto;padding:12px;
+  font-family:var(--font-mono);font-size:12px;color:var(--text);
+  scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.ws-details .detail-line{padding:3px 8px;border-radius:4px;cursor:default;transition:background .15s}
+.ws-details .detail-line:hover{background:var(--bg-elevated)}
+.ws-details .detail-line .lbl{color:var(--text-faint)}
+.ws-details .sub{margin-left:20px;border-left:2px solid var(--cyan-dim);padding-left:12px;margin-top:8px}
+.ws-details .sub .flag{color:var(--cyan)}
+.ws-details .sub .dim{color:var(--text-dim)}
+.ws-details .payload-box{margin-top:10px;background:var(--bg);border:1px solid var(--border);
+  padding:10px;border-radius:var(--radius-sm)}
+.ws-details .payload-box .payload-label{font-size:10px;text-transform:uppercase;font-weight:700;
+  color:var(--text-faint);margin-bottom:6px;letter-spacing:.06em}
+.ws-details .payload-box .payload-data{color:var(--green);text-shadow:var(--green-glow)}
+.ws-details .empty{height:100%;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;color:var(--text-faint);gap:8px}
+.ws-details .empty svg{opacity:.15}
+
+@media(max-width:1000px){
+  .sidebar{width:60px;min-width:60px}
+  .sidebar-brand span,.sidebar-brand .ver,.nav-btn span,.sidebar .footer,.sidebar .status-bar{display:none}
+  .sidebar-brand{justify-content:center;padding:14px}
+  .nav-btn{justify-content:center;padding:10px}
+  .guide-panel{width:320px;min-width:320px}
+  .guide-panel.hidden{margin-right:-320px}
+  .netcat-grid{grid-template-columns:1fr}
+}
+</style>
 </head>
 <body>
-  <p>This file has been renamed for consistency.
-     If you are not redirected automatically,
-     <a href="S01_Part01_Page_CLI_Netcat_Wireshark_Sim.html">click here</a>.</p>
+<div class="grid-bg"><canvas id="gridCanvas"></canvas></div>
+<div class="app">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="icon-box"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="5" r="3"/><line x1="12" y1="8" x2="12" y2="16"/><circle cx="5" cy="19" r="3"/><circle cx="19" cy="19" r="3"/><line x1="12" y1="16" x2="5" y2="16"/><line x1="12" y1="16" x2="19" y2="16"/></svg></div>
+      <span>NetLab</span><span class="ver">v3.0</span>
+    </div>
+    <nav>
+      <button class="nav-btn active" data-tab="basics" onclick="switchTab('basics')">
+        <span class="num">01</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+        <span>Basic Utilities</span>
+      </button>
+      <button class="nav-btn" data-tab="netcat" onclick="switchTab('netcat')">
+        <span class="num">02</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="7 8 3 12 7 16"/><polyline points="17 8 21 12 17 16"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
+        <span>Netcat TCP/UDP</span>
+      </button>
+      <button class="nav-btn" data-tab="wireshark" onclick="switchTab('wireshark')">
+        <span class="num">03</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <span>Wireshark Sim</span>
+      </button>
+    </nav>
+    <div class="status-bar">
+      <div class="progress-label"><span>Lab Progress</span><span id="progressPct">0%</span></div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    </div>
+    <div class="footer">S01 — Network Analysis Lab<br><span class="course">COMPNET-EN · ASE-CSIE Bucharest</span></div>
+  </aside>
+  <div class="main">
+    <div class="topbar">
+      <div><h1 id="topTitle">1. Basic Network Utilities</h1><div class="sub" id="topSub">Mastering ping, netstat, nslookup, traceroute, and ss commands.</div></div>
+      <button class="pill-btn on" id="guideToggle" onclick="toggleGuide()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        <span id="guideToggleText">Guide</span>
+      </button>
+    </div>
+    <div class="workspace">
+      <div class="module-area">
+        <div id="mod-basics" class="module visible basics-wrap"></div>
+        <div id="mod-netcat" class="module netcat-wrap"></div>
+        <div id="mod-wireshark" class="module ws-wrap"></div>
+      </div>
+      <div class="guide-panel" id="guidePanel">
+        <div class="section-label">Lab Guide</div>
+        <div class="body" id="guideBody"></div>
+        <div class="proof"><h4>📁 Proof of Completion</h4>Take screenshots of your terminal outputs or packet captures once you have successfully completed the tasks above.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════ */
+
+// ── GRID BACKGROUND ────────────────────────────────────────────
+(function(){
+  const c=document.getElementById('gridCanvas'),ctx=c.getContext('2d');let w,h;
+  const P=[];const G=40;const N=30;
+  function resize(){w=c.width=window.innerWidth;h=c.height=window.innerHeight;}
+  window.addEventListener('resize',resize);resize();
+  for(let i=0;i<N;i++)P.push({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,r:Math.random()*1.5+.5});
+  function draw(){
+    ctx.clearRect(0,0,w,h);
+    ctx.strokeStyle='rgba(0,229,255,0.03)';ctx.lineWidth=1;
+    for(let x=0;x<w;x+=G){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}
+    for(let y=0;y<h;y+=G){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
+    for(const p of P){p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=w;if(p.x>w)p.x=0;if(p.y<0)p.y=h;if(p.y>h)p.y=0;
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle='rgba(0,229,255,0.15)';ctx.fill();}
+    ctx.strokeStyle='rgba(0,229,255,0.04)';ctx.lineWidth=.5;
+    for(let i=0;i<P.length;i++)for(let j=i+1;j<P.length;j++){
+      const d=Math.hypot(P[i].x-P[j].x,P[i].y-P[j].y);
+      if(d<160){ctx.beginPath();ctx.moveTo(P[i].x,P[i].y);ctx.lineTo(P[j].x,P[j].y);ctx.stroke();}
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ── STATE ──────────────────────────────────────────────────────
+let currentTab='basics',guideVisible=true;
+let bLines=[],bPingIv=null,bHist=[],bHIdx=-1;
+let sLog=[],cLog=[];
+let ncS={active:false,port:null,proto:'tcp'},ncC={connected:false,proto:'tcp',tp:null};
+let wsOn=false,wsCF='',wsDF='';
+let wsAll=[],wsVis=[],wsSel=null,wsPid=1,wsT=0,wsNoise=null;
+let tasks={basics:Array(4).fill(false),netcat:Array(4).fill(false),wireshark:Array(6).fill(false)};
+
+const META={
+  basics:{title:'1. Basic Network Utilities',sub:'Mastering ping, netstat, nslookup, traceroute, and ss commands.',
+    guide:`<h3>Introduction</h3>
+<p>Three fundamental tools — your "eyes and ears" on the network.</p>
+<div class="tool-card"><div class="name">📡 ping — Packet Internet Groper</div><div class="desc">Uses <b>ICMP</b> Echo Request packets to test reachability and measure round-trip latency.</div></div>
+<div class="tool-card"><div class="name">🌐 netstat / ss — Network Statistics</div><div class="desc">Displays active connections, listening ports, and processes. Modern alternative: <code>ss -tulnp</code>.</div></div>
+<div class="tool-card"><div class="name">🔍 nslookup — Name Server Lookup</div><div class="desc">Queries DNS servers to translate domain names into IP addresses.</div></div>
+<div class="tool-card"><div class="name">🛤️ traceroute — Route Tracing</div><div class="desc">Displays the path (hops) packets take to reach a destination.</div></div>
+<h3>Tasks</h3>
+<div class="checklist" id="cl-basics">
+<div class="check-item" onclick="toggleTask('basics',0)"><div class="cbox"></div>Test connectivity: <code>ping google.com</code></div>
+<div class="check-item" onclick="toggleTask('basics',1)"><div class="cbox"></div>Test local gateway: <code>ping 192.168.1.1</code></div>
+<div class="check-item" onclick="toggleTask('basics',2)"><div class="cbox"></div>Check ports: <code>netstat -tulnp</code></div>
+<div class="check-item" onclick="toggleTask('basics',3)"><div class="cbox"></div>Resolve a domain: <code>nslookup google.com</code></div>
+</div>
+<p style="font-size:.76rem;color:var(--text-faint);margin-top:10px">💡 Type <code>help</code> for all commands. Use ↑↓ for history.</p>`},
+  netcat:{title:'2. Netcat (TCP vs UDP)',sub:'The "Swiss Army Knife" of networking: Client/Server simulation.',
+    guide:`<h3>Netcat Concepts</h3>
+<p>Netcat (<code>nc</code>) reads and writes data across network connections — indispensable for debugging.</p>
+<div class="tcp-box"><h4>↔ TCP Mode</h4><p style="font-size:.78rem;color:var(--text-dim)">Connection-oriented. 3-way handshake → reliable bidirectional session.</p>
+<div class="cmd-block"># Server<br>nc -l -p 9100<br># Client<br>nc 127.0.0.1 9100</div></div>
+<div class="udp-box"><h4>⚡ UDP Mode</h4><p style="font-size:.78rem;color:var(--text-dim)">Connectionless "Fire and Forget". Each datagram is independent.</p>
+<div class="cmd-block"># Server<br>nc -u -l -p 9101<br># Client (pipe)<br>echo "hi" | nc -u 127.0.0.1 9101</div></div>
+<h3>Tasks</h3>
+<div class="checklist" id="cl-netcat">
+<div class="check-item" onclick="toggleTask('netcat',0)"><div class="cbox"></div>TCP: server 9100, connect & chat</div>
+<div class="check-item" onclick="toggleTask('netcat',1)"><div class="cbox"></div>Stop server (observe reset)</div>
+<div class="check-item" onclick="toggleTask('netcat',2)"><div class="cbox"></div>UDP: server 9101, send 2 messages</div>
+<div class="check-item" onclick="toggleTask('netcat',3)"><div class="cbox"></div>Compare TCP session vs UDP independent</div>
+</div>`},
+  wireshark:{title:'3. Wireshark Simulator',sub:'Packet capture analysis, filtering, and protocol inspection.',
+    guide:`<h3>Wireshark Workflow</h3>
+<p>Two filtering stages for traffic analysis:</p>
+<div class="filter-tip capture"><h4>1. Capture Filters (BPF)</h4><p>Applied <b>before</b> capture. Limits what enters the buffer.</p><code>tcp port 9300</code></div>
+<div class="filter-tip display"><h4>2. Display Filters</h4><p>Applied <b>after</b> capture. Focus on specific packets.</p><code>tcp.stream eq 0</code></div>
+<h3>Exam Scenario</h3>
+<div class="checklist" id="cl-wireshark">
+<div class="check-item" onclick="toggleTask('wireshark',0)"><div class="cbox"></div>Set Capture Filter: <code>tcp port 9300</code></div>
+<div class="check-item" onclick="toggleTask('wireshark',1)"><div class="cbox"></div><b>Start Capture</b></div>
+<div class="check-item" onclick="toggleTask('wireshark',2)"><div class="cbox"></div>Generate TCP Handshake + Data</div>
+<div class="check-item" onclick="toggleTask('wireshark',3)"><div class="cbox"></div><b>Stop</b> — find SYN→SYN-ACK→ACK</div>
+<div class="check-item" onclick="toggleTask('wireshark',4)"><div class="cbox"></div>Switch filter to <code>udp port 9301</code></div>
+<div class="check-item" onclick="toggleTask('wireshark',5)"><div class="cbox"></div>Generate UDP & compare to TCP</div>
+</div>`}
+};
+
+const $=id=>document.getElementById(id);
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function scrollBot(el){if(el)requestAnimationFrame(()=>el.scrollTop=el.scrollHeight);}
+
+function toggleTask(m,i){tasks[m][i]=!tasks[m][i];
+  const cl=$('cl-'+m);if(cl)cl.querySelectorAll('.check-item')[i]?.classList.toggle('done',tasks[m][i]);
+  const all=[...tasks.basics,...tasks.netcat,...tasks.wireshark];
+  const pct=Math.round(all.filter(Boolean).length/all.length*100);
+  $('progressPct').textContent=pct+'%';$('progressFill').style.width=pct+'%';
+}
+
+function switchTab(t){currentTab=t;
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));
+  document.querySelectorAll('.module').forEach(m=>m.classList.remove('visible'));
+  $('mod-'+t).classList.add('visible');
+  $('topTitle').textContent=META[t].title;$('topSub').textContent=META[t].sub;
+  $('guideBody').innerHTML=META[t].guide;
+  if(tasks[t]){const cl=$('cl-'+t);if(cl)cl.querySelectorAll('.check-item').forEach((c,i)=>c.classList.toggle('done',tasks[t][i]));}
+}
+function toggleGuide(){guideVisible=!guideVisible;$('guidePanel').classList.toggle('hidden',!guideVisible);
+  $('guideToggle').classList.toggle('on',guideVisible);}
+
+// ── TERMINAL ───────────────────────────────────────────────────
+function mkTerm(id,title,ps){
+  const d=document.createElement('div');d.className='terminal';d.style.height='100%';
+  d.innerHTML=`<div class="scanline"></div>
+<div class="hdr"><div class="title-area"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+<span class="title-text">${esc(title)}</span><span class="badge" id="${id}-badge"></span></div>
+<div class="controls"><button class="stop-btn" id="${id}-stop" onclick="termStop_${id}()">■ STOP</button>
+<div class="dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div></div></div>
+<div class="body" id="${id}-body" onclick="document.getElementById('${id}-input')?.focus()">
+<div id="${id}-lines"></div>
+<div class="input-row"><span class="prompt">${esc(ps||'$')}</span><input id="${id}-input" type="text" autocomplete="off" spellcheck="false"></div></div>`;
+  return d;
+}
+function rend(id,L){const c=$(id+'-lines');if(!c)return;
+  c.innerHTML=L.map(l=>{let s='line';
+    if(l.startsWith('student@')||l.endsWith('$ '))s+=' cmd';
+    else if(/error|refused|not found|NXDOMAIN/i.test(l))s+=' error';
+    else if(/Listen|Accept|LISTEN/i.test(l))s+=' success';
+    else if(/PING|---|\u2503|\u250f|\u2517|\u2523|\u2501|\u2533|\u253b|\u256d|\u256e|\u256f|\u2570|\u2550|\u2551|\u2554|\u2557|\u255a|\u255d|\u2560|\u2563|\u2566|\u2569|\u256c|╔|╚|╗|╝|║|═|╠|╣|╦|╩/i.test(l))s+=' info';
+    return`<div class="${s}">${esc(l)}</div>`;}).join('');
+  scrollBot(c.parentElement);}
+function setBadge(id,t,c){const b=$(id+'-badge');if(!b)return;if(!t){b.style.display='none';return;}b.style.display='';b.textContent=t;b.className='badge '+(c||'');}
+function setStop(id,s){const b=$(id+'-stop');if(b)b.style.display=s?'flex':'none';}
+
+// ── BASICS ─────────────────────────────────────────────────────
+function initBasics(){const w=$('mod-basics');w.innerHTML='';w.appendChild(mkTerm('bt','student@lab-vm: ~','$'));
+  bLines=['Welcome to Ubuntu 24.04.2 LTS (GNU/Linux 6.8.0-generic x86_64)','',
+  '  ███╗   ██╗███████╗████████╗██╗      █████╗ ██████╗',
+  '  ████╗  ██║██╔════╝╚══██╔══╝██║     ██╔══██╗██╔══██╗',
+  '  ██╔██╗ ██║█████╗     ██║   ██║     ███████║██████╔╝',
+  '  ██║╚██╗██║██╔══╝     ██║   ██║     ██╔══██║██╔══██╗',
+  '  ██║ ╚████║███████╗   ██║   ███████╗██║  ██║██████╔╝',
+  '  ╚═╝  ╚═══╝╚══════╝   ╚═╝   ╚══════╝╚═╝  ╚═╝╚═════╝  S01','',
+  '  Type "help" for available commands. Use ↑/↓ for history.',''];
+  rend('bt',bLines);bHist=[];bHIdx=-1;
+  const inp=$('bt-input');
+  inp.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){const v=inp.value;if(v.trim()){bHist.push(v);bHIdx=bHist.length;}bExec(v);inp.value='';}
+    else if(e.key==='ArrowUp'){e.preventDefault();if(bHIdx>0){bHIdx--;inp.value=bHist[bHIdx];}}
+    else if(e.key==='ArrowDown'){e.preventDefault();if(bHIdx<bHist.length-1){bHIdx++;inp.value=bHist[bHIdx];}else{bHIdx=bHist.length;inp.value='';}}
+  });
+}
+function bp(l){bLines.push(l);rend('bt',bLines);}
+function bExec(raw){const cmd=raw.trim();if(!cmd)return;bp('student@lab-vm:~$ '+cmd);const p=cmd.split(/\s+/),b=p[0];
+  if(b==='clear'){bLines=[];rend('bt',bLines);return;}
+  if(b==='help'){['','  ╔══════════════════════════════════════════════════════╗',
+    '  ║  Available Commands for S01 Lab                      ║',
+    '  ╠══════════════════════════════════════════════════════╣',
+    '  ║  ping <host>       Check network connectivity        ║',
+    '  ║  traceroute <host> Trace route to host               ║',
+    '  ║  netstat -tulnp    Print network connections         ║',
+    '  ║  ss -tulnp         Socket statistics (modern)        ║',
+    '  ║  nslookup <dom>    Query DNS Name Servers            ║',
+    '  ║  whoami / hostname / date / uname -a                 ║',
+    '  ║  clear             Clear the terminal screen         ║',
+    '  ╚══════════════════════════════════════════════════════╝',''].forEach(bp);return;}
+  if(b==='whoami'){bp('student');return;}if(b==='hostname'){bp('lab-vm');return;}
+  if(b==='date'){bp(new Date().toString());return;}
+  if(b==='uname'){bp('Linux lab-vm 6.8.0-generic #1 SMP x86_64 GNU/Linux');return;}
+  if(b==='ping'){const t=p[1];if(!t){bp('ping: usage error: Destination address required');return;}
+    if(t.includes('fake')){bp('ping: '+t+': Name or service not known');return;}
+    const ip=t==='google.com'?'142.250.180.14':t==='192.168.1.1'?'192.168.1.1':t.match(/^\d/)?t:'93.184.216.34';
+    bp(`PING ${t} (${ip}) 56(84) bytes of data.`);
+    if(bPingIv)clearInterval(bPingIv);let c=0;
+    bPingIv=setInterval(()=>{c++;bp(`64 bytes from ${ip}: icmp_seq=${c} ttl=114 time=${(Math.random()*10+14).toFixed(1)} ms`);
+      if(c>=4){clearInterval(bPingIv);bPingIv=null;bp('');bp(`--- ${t} ping statistics ---`);
+        bp('4 packets transmitted, 4 received, 0% packet loss, time 3010ms');bp('rtt min/avg/max/mdev = 14.2/18.5/24.1/3.2 ms');}},700);return;}
+  if(b==='traceroute'){const t=p[1];if(!t){bp('Usage: traceroute <host>');return;}
+    bp(`traceroute to ${t}, 30 hops max, 60 byte packets`);
+    const H=[['192.168.1.1','1.2','1.1','1.5'],['10.0.0.1','5.4','5.9','6.0'],['172.16.0.1','12.3','12.0','13.1'],
+      [t==='google.com'?'142.250.180.14':'93.184.216.34','18.8','17.5','19.3']];
+    let i=0;const iv=setInterval(()=>{const h=H[i];bp(` ${i+1}  ${h[0]}  ${h[1]} ms  ${h[2]} ms  ${h[3]} ms`);i++;if(i>=H.length)clearInterval(iv);},500);return;}
+  if(b==='ss'){if(p[1]==='-tulnp'||p[1]==='-an'){
+    ['Netid State  Recv-Q Send-Q  Local Address:Port   Peer Address:Port  Process',
+     'tcp   LISTEN 0      4096    127.0.0.53:53        0.0.0.0:*          systemd-resolve',
+     'tcp   LISTEN 0      128     0.0.0.0:22           0.0.0.0:*          sshd',
+     'udp   UNCONN 0      0       127.0.0.53:53        0.0.0.0:*          systemd-resolve',
+     'udp   UNCONN 0      0       0.0.0.0:68           0.0.0.0:*          dhclient'].forEach(bp);}
+    else bp("Usage: ss [opts]  Try 'ss -tulnp'");return;}
+  if(b==='netstat'){if(p[1]==='-tulnp'||p[1]==='-an'){
+    ['Active Internet connections (only servers)',
+     'Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program',
+     'tcp        0      0 127.0.0.53:53           0.0.0.0:*               LISTEN      551/systemd-resolve',
+     'tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      852/sshd',
+     'udp        0      0 127.0.0.53:53           0.0.0.0:*                           551/systemd-resolve',
+     'udp        0      0 0.0.0.0:68              0.0.0.0:*                           654/dhclient'].forEach(bp);}
+    else bp("Try 'netstat -tulnp'");return;}
+  if(b==='nslookup'){const d=p[1];if(!d){bp('usage: nslookup <domain>');return;}
+    setTimeout(()=>{bp('Server:\t\t127.0.0.53');bp('Address:\t127.0.0.53#53');bp('');
+      if(d.includes('fake')){bp("** server can't find "+d+": NXDOMAIN");}
+      else{bp('Non-authoritative answer:');bp('Name:\t'+d);
+        bp('Address: '+(d==='google.com'?'142.250.180.14':'93.184.216.34'));
+        if(d==='google.com')bp('Address: 2a00:1450:400e:80e::200e');}},350);return;}
+  bp(b+': command not found');
+  const tm=$('bt-body')?.closest('.terminal');if(tm){tm.style.animation='shake .3s ease';setTimeout(()=>tm.style.animation='',400);}
+}
+window.termStop_bt=function(){};
+
+// ── NETCAT ─────────────────────────────────────────────────────
+function initNetcat(){const w=$('mod-netcat');w.innerHTML=`
+<div class="netcat-topo"><svg viewBox="0 0 500 50">
+<circle cx="60" cy="25" r="16" fill="none" stroke="#5a6a85" stroke-width="2" id="t-srv"/>
+<text x="60" y="29" text-anchor="middle" fill="#5a6a85" font-size="10" font-family="var(--font-mono)" font-weight="700">SRV</text>
+<line x1="76" y1="25" x2="424" y2="25" stroke="#1e2d4a" stroke-width="2" class="flow-line inactive" id="t-line" stroke-dasharray="6 4"/>
+<circle cx="440" cy="25" r="16" fill="none" stroke="#5a6a85" stroke-width="2" id="t-cli"/>
+<text x="440" y="29" text-anchor="middle" fill="#5a6a85" font-size="10" font-family="var(--font-mono)" font-weight="700">CLI</text>
+<text x="250" y="16" text-anchor="middle" fill="#3a4a65" font-size="9" font-family="var(--font-ui)" id="t-lbl">No active connection</text>
+</svg></div>
+<div class="netcat-grid">
+<div class="col"><div class="col-label"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#a78bfa" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/></svg>Server (Listener)</div><div id="nc-ss"></div></div>
+<div class="col"><div class="col-label"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#4dabf7" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Client (Sender)</div><div id="nc-cs"></div></div>
+</div>
+<div class="netcat-cheat">TCP: <code>nc -l -p 9100</code> + <code>nc 127.0.0.1 9100</code> · UDP: <code>nc -u -l -p 9101</code> + <code>echo "hi" | nc -u 127.0.0.1 9101</code></div>`;
+  $('nc-ss').appendChild(mkTerm('ns','student@server',''));
+  $('nc-cs').appendChild(mkTerm('nc','student@client',''));
+  sLog=['student@server:~$ '];cLog=['student@client:~$ '];
+  ncS={active:false,port:null,proto:'tcp'};ncC={connected:false,proto:'tcp',tp:null};
+  rend('ns',sLog);rend('nc',cLog);
+  $('ns-input').addEventListener('keydown',e=>{if(e.key==='Enter'){nsCmd(e.target.value);e.target.value='';}});
+  $('nc-input').addEventListener('keydown',e=>{if(e.key==='Enter'){ncCmd(e.target.value);e.target.value='';}});
+}
+function uTopo(){const l=$('t-line'),s=$('t-srv'),c=$('t-cli'),lb=$('t-lbl');if(!l)return;
+  if(ncC.connected){const col=ncC.proto==='tcp'?'#00e5ff':'#ffc107';
+    l.setAttribute('stroke',col);l.classList.remove('inactive');s.setAttribute('stroke',col);c.setAttribute('stroke',col);
+    lb.textContent=ncC.proto.toUpperCase()+' :'+ncC.tp+' — ACTIVE';lb.setAttribute('fill',col);}
+  else if(ncS.active){l.setAttribute('stroke','#5a6a85');l.classList.add('inactive');
+    s.setAttribute('stroke','#00ff9d');c.setAttribute('stroke','#5a6a85');
+    lb.textContent='Listening '+ncS.proto.toUpperCase()+' :'+ncS.port;lb.setAttribute('fill','#00ff9d');}
+  else{l.setAttribute('stroke','#1e2d4a');l.classList.add('inactive');
+    s.setAttribute('stroke','#5a6a85');c.setAttribute('stroke','#5a6a85');
+    lb.textContent='No active connection';lb.setAttribute('fill','#3a4a65');}}
+function sp(l){sLog.push(l);rend('ns',sLog);}
+function cp(l){cLog.push(l);rend('nc',cLog);}
+window.termStop_ns=function(){ncS={active:false,port:null,proto:'tcp'};sp('^C');sp('student@server:~$ ');
+  setBadge('ns','');setStop('ns',false);
+  if(ncC.connected&&ncC.proto==='tcp'){ncC={connected:false,proto:'tcp',tp:null};cp('Ncat: Connection reset by peer.');cp('student@client:~$ ');setBadge('nc','');setStop('nc',false);}uTopo();};
+window.termStop_nc=function(){ncC={connected:false,proto:'tcp',tp:null};cp('^C');cp('student@client:~$ ');
+  setBadge('nc','');setStop('nc',false);if(ncS.active&&ncS.proto==='tcp')sp('Connection closed by 127.0.0.1.');uTopo();};
+
+function nsCmd(raw){const cmd=raw.trim();if(!cmd)return;
+  if(ncS.active&&ncS.proto==='tcp'&&ncC.connected){sp(cmd);cp(cmd);return;}
+  const p=cmd.split(/\s+/);
+  if(p[0]==='nc'&&p.includes('-l')){const pi=p.indexOf('-p');const port=pi!==-1?p[pi+1]:'9000';const u=p.includes('-u');
+    ncS={active:true,port,proto:u?'udp':'tcp'};sp('student@server:~$ '+cmd);
+    sp(`Listening on 0.0.0.0 ${port}${u?' (UDP)':''}`);
+    setBadge('ns',`LISTENING ${ncS.proto.toUpperCase()}:${port}`,'badge-listen');setStop('ns',true);uTopo();}
+  else{sp('student@server:~$ '+cmd);sp(p[0]+': command not found');}}
+
+function ncCmd(raw){const cmd=raw.trim();if(!cmd)return;
+  if(ncC.connected){cp(cmd);if(ncC.proto==='tcp')sp(cmd);
+    else if(ncS.active&&ncS.port===ncC.tp)sp(cmd);return;}
+  if(cmd.includes('|')&&cmd.includes('nc')){cp('student@client:~$ '+cmd);
+    const[m,n]=cmd.split('|');const msg=m.replace('echo','').replace(/[\"']/g,'').trim();
+    const a=n.trim().split(/\s+/);const u=a.includes('-u');const port=a[a.length-1];
+    if(ncS.active&&ncS.port===port&&ncS.proto===(u?'udp':'tcp'))sp(msg);cp('student@client:~$ ');return;}
+  const p=cmd.split(/\s+/);cp('student@client:~$ '+cmd);
+  if(p[0]==='nc'){const u=p.includes('-u');const port=p[p.length-1];
+    if(u){ncC={connected:true,proto:'udp',tp:port};cp(`(UDP mode: Type messages to send to ${port})`);
+      setBadge('nc','ESTABLISHED UDP','badge-connected');setStop('nc',true);}
+    else{if(ncS.active&&ncS.port===port&&ncS.proto==='tcp'){ncC={connected:true,proto:'tcp',tp:port};
+        sp('Accepted connection from 127.0.0.1:56232');setBadge('nc','ESTABLISHED TCP','badge-connected');setStop('nc',true);}
+      else{cp(`(UNKNOWN) [127.0.0.1] ${port} (?) : Connection refused`);cp('student@client:~$ ');
+        const tm=$('nc-body')?.closest('.terminal');if(tm){tm.style.animation='shake .3s ease';setTimeout(()=>tm.style.animation='',400);}}}
+    uTopo();return;}cp('command not found');}
+
+// ── WIRESHARK ──────────────────────────────────────────────────
+function initWireshark(){$('mod-wireshark').innerHTML=`
+<div class="ws-toolbar">
+<div class="btn-group"><button id="ws-cb" class="capture-off" onclick="wsToggle()">▶ Start</button>
+<button onclick="wsClear()">✕ Clear</button></div><div class="sep"></div>
+<span class="filter-label">Capture:</span>
+<div class="filter-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+<input class="filter-input" id="ws-cf" placeholder='e.g., tcp port 9300' oninput="wsCF=this.value"></div>
+<div class="sim-btns"><button id="ws-bh" disabled onclick="wsHS()">TCP Handshake</button>
+<button id="ws-bd" disabled onclick="wsData()">TCP Data</button>
+<button id="ws-bu" disabled onclick="wsUDP()">UDP Packet</button></div></div>
+<div class="ws-display-bar"><span class="filter-label">Display:</span>
+<input id="ws-df" placeholder='e.g., tcp.stream eq 0' oninput="wsDF2(this.value)">
+<button onclick="document.getElementById('ws-df').value='';wsDF2('')">Clear</button></div>
+<div class="ws-packets" id="ws-ps"><table><thead><tr>
+<th class="col-no">No.</th><th class="col-time">Time</th><th class="col-src">Source</th>
+<th class="col-dst">Destination</th><th class="col-proto">Proto</th><th class="col-len">Len</th><th>Info</th>
+</tr></thead><tbody id="ws-pb"></tbody></table></div>
+<div class="ws-details"><div class="details-hdr">Packet Details</div>
+<div class="details-body" id="ws-db"><div class="empty"><svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><p>Select a packet to inspect its headers.</p></div></div></div>`;
+  wsOn=false;wsCF='';wsDF='';wsAll=[];wsVis=[];wsSel=null;wsPid=1;wsT=0;}
+
+function wsToggle(){wsOn=!wsOn;const b=$('ws-cb'),cf=$('ws-cf'),sb=['ws-bh','ws-bd','ws-bu'];
+  if(wsOn){wsAll=[];wsVis=[];wsSel=null;wsPid=1;wsT=0;wsRP();wsRD();
+    b.innerHTML='■ Stop';b.className='capture-on';cf.disabled=true;sb.forEach(i=>$(i).disabled=false);
+    wsCF=$('ws-cf').value;
+    wsNoise=setInterval(()=>{if(Math.random()>.8&&wsCF==='')wsAP({protocol:'SSDP',source:'192.168.1.105',dest:'239.255.255.250',length:214,info:'NOTIFY * HTTP/1.1',port:1900});},2500);
+  }else{b.innerHTML='▶ Start';b.className='capture-off';cf.disabled=false;sb.forEach(i=>$(i).disabled=true);
+    if(wsNoise){clearInterval(wsNoise);wsNoise=null;}}}
+function wsClear(){wsAll=[];wsVis=[];wsSel=null;wsRP();wsRD();}
+function wsPC(pk){if(!wsCF)return true;const f=wsCF.toLowerCase();
+  if(f.includes('tcp')&&pk.protocol==='TCP'){const m=f.match(/(\d+)/);return!m||pk.port==m[1];}
+  if(f.includes('udp')&&pk.protocol==='UDP'){const m=f.match(/(\d+)/);return!m||pk.port==m[1];}return false;}
+function wsAP(d){if(!wsPC(d))return;wsT+=(Math.random()*.05)+.001;
+  wsAll.push({id:wsPid++,time:wsT.toFixed(6),source:d.source||'127.0.0.1',dest:d.dest||'127.0.0.1',
+    protocol:d.protocol,length:d.length||64,info:d.info,port:d.port,streamId:d.streamId||0,details:d.details||{}});
+  wsDF2($('ws-df')?$('ws-df').value:'');}
+function wsDF2(f){wsDF=f;if(!f)wsVis=[...wsAll];
+  else{const fl=f.toLowerCase();wsVis=wsAll.filter(p=>{
+    if(fl.includes('tcp')&&p.protocol==='TCP')return true;if(fl.includes('udp')&&p.protocol==='UDP')return true;
+    if(fl.includes('eq 0')&&p.streamId===0)return true;
+    if(fl.includes('port')){const m=fl.match(/(\d+)/);return m&&(p.info.includes(m[1])||p.port==m[1]);}return false;});}
+  wsRP();}
+function wsRP(){const t=$('ws-pb');if(!t)return;
+  t.innerHTML=wsVis.map(p=>{let c=p.protocol==='TCP'?'tcp':p.protocol==='UDP'?'udp':'other';if(wsSel===p.id)c='selected';
+    return`<tr class="${c}" onclick="wsSP(${p.id})"><td class="col-no">${p.id}</td><td class="col-time">${p.time}</td>
+<td class="col-src">${esc(p.source)}</td><td class="col-dst">${esc(p.dest)}</td>
+<td class="col-proto">${p.protocol}</td><td class="col-len">${p.length}</td><td>${esc(p.info)}</td></tr>`;}).join('');
+  scrollBot($('ws-ps'));}
+function wsSP(id){wsSel=id;wsRP();wsRD();}
+function wsRD(){const db=$('ws-db');if(!db)return;const pk=wsAll.find(p=>p.id===wsSel);
+  if(!pk){db.innerHTML=`<div class="empty"><svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><p>Select a packet to inspect its headers.</p></div>`;return;}
+  const pn=pk.protocol==='TCP'?'Transmission Control Protocol':'User Datagram Protocol';
+  let h=`<div class="detail-line"><span class="lbl">Frame ${pk.id}:</span> ${pk.length} bytes on wire (${pk.length*8} bits)</div>
+<div class="detail-line"><span class="lbl">Ethernet II, Src:</span> 00:00:00_00:00:00 <span class="lbl">Dst:</span> 00:00:00_00:00:00</div>
+<div class="detail-line"><span class="lbl">IPv4, Src:</span> ${esc(pk.source)} <span class="lbl">Dst:</span> ${esc(pk.dest)}</div>
+<div class="detail-line"><span class="lbl">${pn}, Src Port:</span> ${pk.port?'High':'?'} <span class="lbl">Dst Port:</span> ${pk.port||'?'}</div>`;
+  const d=pk.details;if(d.flags||d.seq!==undefined||d.payload){h+=`<div class="sub">`;
+    if(d.flags)h+=`<div class="flag">Flags: ${esc(d.flags)}</div>`;
+    if(d.seq!==undefined)h+=`<div class="dim">Seq: ${d.seq}</div>`;
+    if(d.ack!==undefined)h+=`<div class="dim">Ack: ${d.ack}</div>`;
+    if(d.payload)h+=`<div class="payload-box"><div class="payload-label">Payload (ASCII)</div><div class="payload-data">${esc(d.payload)}</div></div>`;
+    h+=`</div>`;}db.innerHTML=h;}
+function wsHS(){if(!wsOn){alert('Start Capture first!');return;}const p=9300;
+  wsAP({protocol:'TCP',port:p,length:74,info:`56230 → ${p} [SYN] Seq=0 Win=65535 Len=0 MSS=1460`,details:{flags:'0x002 (SYN)',seq:0,ack:0}});
+  setTimeout(()=>wsAP({protocol:'TCP',port:p,length:74,info:`${p} → 56230 [SYN, ACK] Seq=0 Ack=1 Win=65535 Len=0`,details:{flags:'0x012 (SYN, ACK)',seq:0,ack:1}}),120);
+  setTimeout(()=>wsAP({protocol:'TCP',port:p,length:66,info:`56230 → ${p} [ACK] Seq=1 Ack=1 Win=65535 Len=0`,details:{flags:'0x010 (ACK)',seq:1,ack:1}}),240);}
+function wsData(){if(!wsOn)return;const p=9300;
+  wsAP({protocol:'TCP',port:p,length:79,info:`56230 → ${p} [PSH, ACK] Seq=1 Ack=1 Len=13 [Data: "Hello World"]`,details:{flags:'0x018 (PSH, ACK)',payload:'Hello World',seq:1,ack:1}});
+  setTimeout(()=>wsAP({protocol:'TCP',port:p,length:66,info:`${p} → 56230 [ACK] Seq=1 Ack=14 Len=0`,details:{flags:'0x010 (ACK)',seq:1,ack:14}}),150);}
+function wsUDP(){if(!wsOn)return;const p=9301;
+  wsAP({protocol:'UDP',port:p,length:60,info:`Src:45882 → Dst:${p} Len=12`,details:{payload:'UDP Payload Data',flags:'None (UDP)'}});}
+
+// ── INIT ───────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',()=>{
+  initBasics();initNetcat();initWireshark();switchTab('basics');
+  document.querySelectorAll('.nav-btn').forEach((b,i)=>{b.style.animation=`fadeSlideUp .4s ${i*.1+.1}s cubic-bezier(.4,0,.2,1) both`;});
+});
+</script>
 </body>
 </html>
