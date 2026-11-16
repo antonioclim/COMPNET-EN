@@ -70,6 +70,6 @@ The implementation works as follows:
 - test connectivity:
   - `h1 ping h2` should succeed
   - `h1 ping h3` should be blocked
-- inspect the flow table in s1 with `ovs-ofctl dump-flows`
+- inspect the flow table in s1 with `ovs-ofctl -O OpenFlow13 dump-flows s1`
 
 Python servers and clients will be added in the next stage to generate more interesting traffic than ping.

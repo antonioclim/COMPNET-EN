@@ -1,63 +1,41 @@
-# Portainer — Installation and Configuration Guide
+# Portainer — Installation and Configuration
 
-Pre-semester setup for Portainer Community Edition on port 9050. Students (or instructors) run this once; the container persists across all Docker-heavy seminars from week 8 onwards.
+Portainer is optional: Docker commands can run without its web interface. The course uses host port **9050**, with the HTTP listener bound to **127.0.0.1**. Port 9000 is available for the S10 SSH tunnel exercise.
 
-## File Index
+## Choose the machine that runs Docker
 
-| File | Description | Lines |
+| Docker runs in | Use | Browser access |
 |---|---|---|
-| [`PORTAINER_SETUP.md`](PORTAINER_SETUP.md) | Step-by-step installation guide covering Windows (PowerShell) and Linux/WSL (Bash) paths | 218 |
-| [`docker-compose-portainer.yml`](docker-compose-portainer.yml) | Declarative Compose file — the recommended deployment method | 23 |
-| [`portainer-init.ps1`](portainer-init.ps1) | PowerShell automation script for Windows hosts | 153 |
-| [`portainer-init.sh`](portainer-init.sh) | Bash automation script for Linux/WSL hosts | 121 |
+| MININET-SDN VirtualBox guest | `bash portainer-init.sh` inside the guest | SSH tunnel described in the [setup guide](PORTAINER_SETUP.md) |
+| Ubuntu in WSL2 | `bash portainer-init.sh` inside that distribution | Windows `http://localhost:9050`, subject to WSL localhost forwarding |
+| Docker Desktop on Windows, Linux containers | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\portainer-init.ps1` | Windows `http://localhost:9050` |
 
-## Usage
+The Windows script does not install or manage Docker inside the VirtualBox guest. Do not install Docker Desktop merely to use Docker already running in MININET-SDN.
 
-The fastest path is the Compose file:
+## Files
 
-```bash
-docker compose -f docker-compose-portainer.yml up -d
-```
-
-Then open `http://localhost:9050` and log in with `stud` / `studstudstud`.
-
-For automated setup with health checks and credential pre-configuration, use the platform-appropriate script:
-
-```bash
-# Linux / WSL
-bash portainer-init.sh
-
-# Windows PowerShell
-.\portainer-init.ps1
-```
-
-## Design Rationale
-
-Port 9050 was chosen because port 9000 is reserved for the S10 SSH tunnel exercise and port 9090 is occupied by C08 TCP handshake scenarios. The Compose file pins the image to `portainer/portainer-ce:2.21-alpine` for reproducibility.
-
-## Cross-References
-
-| Aspect | Link |
+| File | Purpose |
 |---|---|
-| Parent guide | [`../README.md`](../README.md) |
-| Docker prerequisites | [`../../Prerequisites/Prerequisites.md`](../../Prerequisites/Prerequisites.md) |
-| First use in class | [`../SEMINAR08/S08_PORTAINER_TEASER.md`](../SEMINAR08/S08_PORTAINER_TEASER.md) |
-| First full introduction | [`../SEMINAR09/S09_PORTAINER_GUIDE.md`](../SEMINAR09/S09_PORTAINER_GUIDE.md) |
+| [PORTAINER_SETUP.md](PORTAINER_SETUP.md) | Import route, commands, access and troubleshooting |
+| [docker-compose-portainer.yml](docker-compose-portainer.yml) | Declarative container setup; initial administrator setup is separate |
+| [portainer-init.sh](portainer-init.sh) | Local Linux/WSL/VM setup with API, login and Docker connectivity checks |
+| [portainer-init.ps1](portainer-init.ps1) | Local Windows Docker Desktop setup; PowerShell 5.1 syntax |
 
-No other repository components reference this directory directly. The setup is a one-time operation with no downstream CI or build dependencies.
+The scripts preserve existing containers, accounts and volumes. They reuse a matching local instance or stop with a diagnostic if it differs. They do not reset existing passwords, delete data or update an existing image automatically. An uncached image requires internet access. A cached image can be used without pulling it again.
 
-## Selective Clone Instructions
+The default image remains the kit's `portainer/portainer-ce:2.21-alpine`. This tag identifies a version family, not an immutable image digest. A successful API and Docker check is required for the selected Docker/Portainer pair; the tag alone does not establish compatibility with every Docker release.
 
-**Method A — Git sparse-checkout (Git 2.25+)**
+## Related materials
+
+- [MININET-SDN setup](../../../01_GUIDE_MININET-SDN/)
+- [Alternative WSL2 prerequisites](../../Prerequisites/Prerequisites.md)
+- [Portainer in S08](../SEMINAR08/S08_PORTAINER_TEASER.md)
+- [Portainer in S09](../SEMINAR09/S09_PORTAINER_GUIDE.md)
+
+## Selective checkout
 
 ```bash
 git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
 cd COMPNET-EN
 git sparse-checkout set 00_TOOLS/Portainer/INIT_GUIDE
-```
-
-**Method B — Direct download (no Git required)**
-
-```
-https://github.com/antonioclim/COMPNET-EN/tree/main/00_TOOLS/Portainer/INIT_GUIDE
 ```

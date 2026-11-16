@@ -1,218 +1,153 @@
 # Portainer CE — Installation and Configuration Guide
 
-| | |
+Portainer provides a browser interface to the Docker daemon used by the exercises. It is optional for command-line Docker work.
+
+| Setting | Course default |
 |---|---|
-| **Course** | Computer Networks — COMPNET (ASE-CSIE) |
-| **Port** | `9050` — verified conflict-free across the entire repository |
-| **Credentials** | `stud` / `studstudstud` |
-| **Image** | `portainer/portainer-ce:2.21-alpine` |
+| Host HTTP address | `127.0.0.1:9050` |
+| Container HTTP port | `9000` |
+| Initial lab account | `stud` / `studstudstud` |
+| Image selected by this kit | `portainer/portainer-ce:2.21-alpine` |
+| Data volume | `portainer_data` |
 
----
+Port 9000 is used by the S10 SSH tunnel exercise. The external Portainer port is therefore 9050. The default image is a version-family tag rather than a digest; record the actual installed image when preparing a fixed teaching release. These instructions do not upgrade the image embedded in MININET-SDN.
 
-## 1  Why port 9050 (not 9000)
+## 1. Choose the execution environment
 
-Port 9000 is taken by S10 Part 4, where the SSH tunnel command is `ssh -L 9000:web:8000`. That exercise is hardcoded across two dozen references in seminar materials, instructor outlines and task sheets — changing it would be disruptive.
+**MININET-SDN VirtualBox route:** connect to the VM and run Linux commands there. Docker Desktop and the PowerShell Portainer installer are not required on Windows. The working appliance already supplies its Docker environment; do not replace its packages as part of this optional installation.
 
-Port 9090 is likewise occupied by the C08 TCP handshake scenario and several socket examples in the Python self-study guide.
+**WSL2 route:** run Linux commands in the Ubuntu distribution containing Docker Engine. Windows Python and a second Docker daemon on Windows are separate environments.
 
-Port 9050 returned zero hits when searched against every `.md`, `.yml`, `.py`, `.conf` and `.html` file in the repository. It is safe to claim.
+**Docker Desktop route:** run the PowerShell script on Windows with Docker Desktop running in Linux-containers mode. This operates on the local Desktop engine, not the VirtualBox guest.
 
----
+All routes require a responsive local Linux Docker daemon. The Bash installer also checks for `curl`, `python3`, `ss` and `mktemp`. The scripts reject remote Docker contexts because a remote daemon cannot be reached through the local loopback URL used by this setup.
 
-## 2  Prerequisites
+## 2. Automated setup
 
-You need Docker Engine 20.10 or later (Docker Desktop on Windows, or Docker Engine inside the VM), Docker Compose v2 (bundled with Docker Desktop) and a modern browser. Port 9050 must be free on the host — if something else is already bound there, the container will fail to start with a clear error message.
+Run from this directory in the intended environment.
 
----
+### Linux, WSL or MININET-SDN guest
 
-## 3  Installation — Recommended: Docker Compose
+```bash
+bash portainer-init.sh
+```
 
-The cleanest approach. Use the `docker-compose-portainer.yml` provided in this directory.
+For an existing account with different credentials, supply its actual details without resetting the account:
 
-**Windows (PowerShell):**
+```bash
+read -r -p 'Portainer username: ' PORTAINER_USER
+read -r -s -p 'Portainer password: ' PORTAINER_PASSWORD
+printf '\n'
+export PORTAINER_USER PORTAINER_PASSWORD
+bash portainer-init.sh
+unset PORTAINER_USER PORTAINER_PASSWORD
+```
+
+Optional environment variables are `PORTAINER_IMAGE`, `PORTAINER_NAME`, `PORTAINER_PORT`, `PORTAINER_VOLUME`, `PORTAINER_USER` and `PORTAINER_PASSWORD`. Set these only for a deliberate alternative instance. Changing the requested port or volume does not reconfigure an existing container automatically.
+
+### Windows with Docker Desktop
 
 ```powershell
-cd <repo>\00_TOOLS\Portainer\INIT_GUIDE
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\portainer-init.ps1
+```
 
+This execution-policy choice applies to the new PowerShell process. The script requires no administrator elevation of its own, although Docker Desktop must already be installed and accessible.
+
+For an existing Portainer account:
+
+```powershell
+$portainerCredential = Get-Credential -UserName stud -Message 'Existing Portainer account'
+.\portainer-init.ps1 -User $portainerCredential.UserName -Password ($portainerCredential.GetNetworkCredential().Password)
+Remove-Variable portainerCredential
+```
+
+The script accepts `-Image`, `-Name`, `-Port`, `-Volume`, `-User` and `-Password`.
+
+### What the scripts verify
+
+The scripts check the Docker daemon, its Linux container mode and the requested local binding. They preserve existing containers and volumes, reuse a matching instance and download the image only when it is absent locally. They then require a responding Portainer API, successful authentication and `OK` from the local Docker endpoint through Portainer.
+
+A failed login, failed endpoint registration or HTTP 500 produces an error exit. An existing administrator is not treated as proof that the supplied password works. An existing service with a different binding or volume remains untouched and is reported for review.
+
+A successful setup check verifies these management operations. It does not execute every networking seminar or validate a different Docker/Portainer version pair.
+
+## 3. Open the interface
+
+### Docker Desktop or WSL2
+
+Open `http://localhost:9050` in the Windows browser. In WSL, if the Linux API responds but the Windows page does not, check WSL's localhost forwarding and the actual Docker context; do not replace the container to fix an unrelated host-access problem.
+
+### VirtualBox guest from Windows
+
+The guest's `127.0.0.1` is different from Windows' `127.0.0.1`. With the course SSH forwarding already configured (`127.0.0.1:2222` on Windows to guest port 22), open a Windows terminal and run:
+
+```powershell
+ssh -N -p 2222 -L 127.0.0.1:9050:127.0.0.1:9050 stud@127.0.0.1
+```
+
+Use the guest's confirmed SSH login. Keep that terminal open, then browse to `http://127.0.0.1:9050` on Windows. Stop the tunnel with Ctrl+C when finished.
+
+If Windows port 9050 is already used by another Docker environment, use a different **Windows** port without changing Portainer in the VM:
+
+```powershell
+ssh -N -p 2222 -L 127.0.0.1:19050:127.0.0.1:9050 stud@127.0.0.1
+```
+
+Then open `http://127.0.0.1:19050`. This tunnel requires the SSH service and the matching VirtualBox SSH rule; it does not require exposing the Docker API or Portainer to the LAN.
+
+## 4. Compose alternative
+
+For a new instance, the included Compose file starts the container:
+
+```bash
 docker compose -f docker-compose-portainer.yml up -d
 ```
 
-**Linux / VM (Bash):**
+The Compose file does **not** create the administrator or authenticate to Docker. Use the browser for initial setup, or run the matching installer afterwards to perform those steps and its checks. Do not run Compose over an existing unmanaged container of the same name expecting an automatic migration.
+
+The named volume retains the database across container restarts. Avoid `down -v` and volume deletion when preserving accounts and settings.
+
+## 5. First browser setup
+
+If the administrator has not been initialised, create the lab account shown above or the account selected for your deployment, then connect the local Docker socket through the environment wizard. Portainer may time out an uninitialised installation. Restart the container and complete setup promptly:
 
 ```bash
-cd <repo>/00_TOOLS/Portainer/INIT_GUIDE
-
-docker compose -f docker-compose-portainer.yml up -d
+docker restart portainer
 ```
 
-The Compose file creates a container named `portainer`, a named volume `portainer_data` for persistence, maps `9050 → 9000` (host → container) and sets a restart policy of `unless-stopped` so Portainer survives reboots.
+A message saying that Portainer is already initialised means an account already exists; use that account. Deleting the volume is not the remedy for an unknown password or a timed-out setup page.
 
-**Quick verification:**
-
-```text
-docker ps --filter name=portainer --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
-
-NAMES       STATUS          PORTS
-portainer   Up 2 minutes    0.0.0.0:9050->9000/tcp, :::9050->9000/tcp
-```
-
----
-
-## 4  Installation — Alternative: single command
-
-If you prefer not to use the Compose file, a one-liner does the same thing.
-
-**Windows (PowerShell):**
-
-```powershell
-docker volume create portainer_data
-
-docker run -d -p 9050:9000          `
-  --name portainer                   `
-  --restart unless-stopped           `
-  -v /var/run/docker.sock:/var/run/docker.sock `
-  -v portainer_data:/data            `
-  portainer/portainer-ce:2.21-alpine
-```
-
-**Linux / VM (Bash):**
+## 6. Daily use
 
 ```bash
-docker volume create portainer_data
+# Status, binding and diagnostic logs
+docker ps -a --filter name=portainer --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
+docker logs --tail 80 portainer
 
-docker run -d -p 9050:9000          \
-  --name portainer                   \
-  --restart unless-stopped           \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  -v portainer_data:/data            \
-  portainer/portainer-ce:2.21-alpine
-```
-
----
-
-## 5  Installation — Automated scripts
-
-For bulk provisioning (e.g. pre-configuring lab workstations), two scripts are included. They pull the image, create the volume, start the container, wait for the API to become available and create the admin user programmatically.
-
-**Windows:**
-
-```powershell
-.\portainer-init.ps1
-```
-
-**Linux / VM:**
-
-```bash
-chmod +x portainer-init.sh
-./portainer-init.sh
-```
-
-Both scripts are idempotent — running them a second time detects the existing container and recreates it cleanly.
-
----
-
-## 6  First-time browser setup
-
-1. Open `http://localhost:9050`.
-
-2. If this is the first launch (no admin user yet), you will see a registration form:
-   - **Username:** `stud`
-   - **Password:** `studstudstud` (exactly 12 characters — Portainer's minimum)
-   - Confirm the password, then click **Create user**.
-
-3. On the next screen, click **Get Started**. Portainer detects the local Docker socket automatically.
-
-4. You should now see the **Home** dashboard with one environment ("local") showing container, image, volume and network counts.
-
-**If you miss the 5-minute window:** Portainer enforces a timeout on admin creation after first boot. If the form disappears and you see a "timed out" message, recreate from scratch:
-
-```bash
-docker stop portainer && docker rm portainer
-docker volume rm portainer_data
-# re-run the install command from Section 3 or 4
-```
-
-The automated scripts (Section 5) avoid this problem entirely by creating the user through the API.
-
----
-
-## 7  What the dashboard shows you
-
-### Containers view
-
-The main table lists every container with its name, state (running / stopped / exited), image, creation timestamp, internal IP and published ports. From here you can start, stop, restart or remove containers, and jump straight to their logs or an interactive console.
-
-### Networks view
-
-Lists all Docker networks with driver, subnet, gateway and connected containers. Click a network to see which containers are attached and what IPs they hold — this is the visual equivalent of `docker network inspect`, minus the JSON.
-
-### Container detail — Logs
-
-Live tail with auto-scroll, timestamp toggle and in-log search. You can also download the full log as a text file.
-
-### Container detail — Console
-
-Opens a browser-based terminal (`/bin/sh` or `/bin/bash`) inside the container. This is exactly `docker exec -it <name> sh`, but without needing to remember the container name or switch to a terminal window.
-
----
-
-## 8  Day-to-day management
-
-Starting Portainer (after a reboot or manual stop):
-
-```bash
+# Stop or restart this management interface
+docker stop portainer
 docker start portainer
 ```
 
-Stopping Portainer to free resources:
+Do not stop an unrelated service merely because it occupies port 9050. Select another intentional host port, or close the competing instance after identifying it.
 
-```bash
-docker stop portainer
-```
+## 7. Troubleshooting
 
-Removing Portainer entirely:
+| Symptom | Action |
+|---|---|
+| Docker CLI missing or daemon unavailable | Start the intended engine and confirm `docker info`; the installer does not install Docker |
+| Linux socket permission denied | Check membership of the Docker group and re-login if it was just changed; do not run the Windows installer against the guest |
+| Existing container has another binding or volume | Inspect it and retain its data; the installer refuses automatic replacement |
+| API works in VM but Windows page fails | Use the SSH tunnel in section 3 and confirm the guest SSH port forwarding |
+| Administrator already exists, login fails | Use the existing credentials; no password reset occurs |
+| API starts but local endpoint cannot communicate | Inspect `docker logs`, the socket mount and the selected engine/image compatibility |
+| Image unavailable and no internet | Obtain the selected image beforehand; a failed pull does not delete the existing instance |
+| HTTP 500 during environment registration | Treat as a server error, inspect the logs and do not label it “already configured” |
 
-```bash
-docker stop portainer && docker rm portainer
-docker volume rm portainer_data
-```
+## 8. Scope and upstream references
 
-Updating the image:
+Binding to loopback keeps the shared teaching login off the LAN. Portainer has administrative control over the selected Docker daemon through its socket. The course configuration is for the local teaching environment.
 
-```bash
-docker stop portainer && docker rm portainer
-docker pull portainer/portainer-ce:2.21-alpine
-# re-run the install command — the volume is preserved
-```
+The automation retains the existing image choice and does not promise compatibility with every newer Docker engine. The executable check must pass for the actual pair used. Consult [Portainer's API documentation](https://docs.portainer.io/api/docs) and [installation documentation](https://docs.portainer.io/start/install-ce/server/docker/linux) when selecting a different version.
 
----
-
-## 9  Troubleshooting
-
-| What you see | Likely cause | What to do |
-|---|---|---|
-| `localhost:9050` does not load | Container is not running | `docker start portainer` |
-| Registration form is gone, no login prompt | Admin-creation timeout (5 min) | Remove container + volume, reinstall |
-| "Port 9050 already in use" on start | Something else is bound to 9050 | Windows: `netstat -ano \| findstr :9050` — note the PID, then kill it. Linux: `ss -tlnp \| grep 9050` |
-| "Permission denied" on Docker socket | Linux user not in `docker` group | Run with `sudo`, or `sudo usermod -aG docker $USER` then re-login |
-| Portainer shows 0 containers | Wrong environment selected | Home → click the "local" environment tile |
-| Compose containers not visible | Mismatched Docker context | `docker context ls` — the active context must be "default" |
-
----
-
-## 10  A note on security
-
-Portainer mounts the Docker socket, which gives it full control over the Docker daemon. In a local lab environment this is perfectly fine — the workstation is not exposed to the internet, the VM is disposable and the credentials are shared lab credentials.
-
-In a production setting, Portainer would sit behind TLS, enforce role-based access control and restrict network exposure. That distinction is worth a brief mention when you introduce the tool at S09 — it plants the seed for S13's discussion of attack surfaces.
-
----
-
-## 11  Files in this directory
-
-| File | What it does |
-|------|-------------|
-| `PORTAINER_SETUP.md` | This guide |
-| `docker-compose-portainer.yml` | Declarative Portainer deployment |
-| `portainer-init.ps1` | Automated setup for Windows (PowerShell) |
-| `portainer-init.sh` | Automated setup for Linux / VM (Bash) |
+Scalar endpoint fields in the selected 2.21 API are read through [`Request.FormValue`](https://github.com/portainer/portainer/blob/2.21.5/pkg/libhttp/request/request.go). The Bash script uses multipart form fields; the Windows PowerShell 5.1 script uses URL-encoded scalar form fields for the local socket endpoint.

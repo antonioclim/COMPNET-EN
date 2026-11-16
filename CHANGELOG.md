@@ -1,5 +1,49 @@
 # CHANGELOG — Backbone comparison and downstream evolution (compnet-2025-redo-main → COMPNET-EN-main → COMPNET-EN-main_PHASEC_plus_more_labs_QAfix)
 
+## 16 November 2026 — MININET-SDN distribution and student setup
+
+The update below uses the current GitHub snapshot as its base; the historical
+archive comparisons that follow remain unchanged.
+
+- Add the author-supplied identity of `MININET-SDN.ova`, a SHA-256 manifest and
+  the reserved Zenodo DOI `10.5281/zenodo.24289763`. The record is explicitly
+  marked as awaiting publication, with canonical links from course entry points.
+- Separate the VirtualBox appliance route from the WSL alternative and the
+  institutional Windows provisioning script. Correct obsolete paths, Compose
+  filenames, host/guest commands and the S08/S09 scenario checks in both setup
+  guide formats.
+- Make Portainer initialisation preserve existing data and fail on unsuccessful
+  authentication or Docker access. Correct Windows PowerShell native exit-code
+  handling and document loopback-only access and VM SSH forwarding.
+- Add a bounded, read-only appliance prerequisite checker and revise the WSL
+  checker. Verification no longer pulls an image or treats a remote Docker
+  daemon as evidence of local readiness.
+- Correct the S06 advanced controller's OS-Ken base class, OpenFlow event state,
+  UDP exception precedence and exception lifetime; select OpenFlow 1.3 explicitly
+  and stop the topology when startup or CLI execution fails.
+- Make OVS cleanup report failed database queries and failed cleanup operations.
+  Add eight isolated regression tests for the controller and OVS query handling.
+- Bound the optional OS-Ken dependency below version 4, whose release removes
+  the command-line manager used by this course. This bound is not a complete
+  environment lockfile.
+
+Validation covers repository links and integrity, script and documentation
+syntax, command parity, isolated controller tests and mocked setup scenarios.
+Native Windows, VirtualBox, WSL, Docker and appliance acceptance were not run as
+part of this source revision. The author's existing classroom testing of the OVA
+is recorded separately from these checks. Existing licence terms are unchanged.
+
+### Publication follow-up — 16 November 2026
+
+The subsequent Zenodo record export confirms publication of appliance version
+1.0.0 under DOI `10.5281/zenodo.24289763`. It also explicitly identifies the
+concept DOI `10.5281/zenodo.24289762`. All four release files retain the same
+identifiers, sizes and stored checksums as the checked final draft. Current
+download instructions and appliance metadata now reflect the published state;
+the earlier preparation entry above records the state before publication.
+
+---
+
 Originally prepared on 25 February 2026. Extended on 28 February 2026.
 
 This document is a **snapshot-level changelog** that compares two repository archives:

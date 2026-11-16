@@ -1,965 +1,591 @@
-# Installation and Configuration Guide — Computer Networks (CompNet)
+# Installation and Configuration Guide — Computer Networks and SDN
 
-## The MININET-SDN Virtual Workstation on Windows 10/11
+## The MININET-SDN virtual workstation on Windows
 
-**Course:** Computer Networks — ASE-CSIE
-**Author:** ing. dr. Antonio Clim
-**Last updated:** February 2026
-**Level:** Step-by-step guide (no prior virtualisation knowledge required)
+**Course:** Networking and SDN — Year 3, Semester 2, Economic Informatics, ASE-CSIE  
+**Author:** ing. dr. Antonio Clim  
+**Last updated:** 16 November 2026  
+**Level:** Step-by-step guide; no prior virtualisation knowledge required
 
----
+The MININET-SDN appliance was built, configured and tested by Antonio Clim for the ASE laboratories. This guide explains how students use that appliance and the files in the current COMPNET-EN repository.
+
+**On an ASE classroom PC:** use the existing MININET-SDN VM. Start at Section 6, check the available connection and continue to Section 11. The institutional deployment script used to prepare classroom PCs is not a student prerequisite.
+
+**On your own PC:** download version 1.0.0 from Zenodo and follow the installation and import steps below. Section 4 provides the release link and checksum.
 
 ## Contents
 
-1. [What you will install and why](#1-what-you-will-install-and-why)
-2. [Minimum requirements (hardware & software)](#2-minimum-requirements-hardware--software)
-3. [Step 1 — Installing VirtualBox](#3-step-1--installing-virtualbox)
-4. [Step 2 — Importing the MININET-SDN virtual workstation](#4-step-2--importing-the-mininet-sdn-virtual-workstation)
-5. [Step 3 — Configuring the network in VirtualBox](#5-step-3--configuring-the-network-in-virtualbox)
-6. [Step 4 — Starting the VM and first login](#6-step-4--starting-the-vm-and-first-login)
-7. [Step 5 — Installing PuTTY and connecting via SSH](#7-step-5--installing-putty-and-connecting-via-ssh)
-8. [Step 6 — Docker Desktop and testing `docker compose`](#8-step-6--docker-desktop-and-testing-docker-compose)
-9. [Step 7 — Installing Wireshark on Windows](#9-step-7--installing-wireshark-on-windows)
-10. [Step 8 — Shared Folders (file sharing between Windows and the VM)](#10-step-8--shared-folders-file-sharing-between-windows-and-the-vm)
-11. [Step 9 — Cloning the course repository](#11-step-9--cloning-the-course-repository)
-12. [Step 10 — Full end-to-end test](#12-step-10--full-end-to-end-test)
-13. [Troubleshooting — Common problems](#13-troubleshooting--common-problems)
-14. [The cleanup script clean.ps1](#14-the-cleanup-script-cleanps1)
+1. [What runs where](#1-what-runs-where)
+2. [Hardware and software requirements](#2-hardware-and-software-requirements)
+3. [Installing VirtualBox](#3-installing-virtualbox)
+4. [Obtaining and importing MININET-SDN](#4-obtaining-and-importing-mininet-sdn)
+5. [Configuring NAT and port forwarding](#5-configuring-nat-and-port-forwarding)
+6. [First boot and component checks](#6-first-boot-and-component-checks)
+7. [Connecting through SSH](#7-connecting-through-ssh)
+8. [Using Docker inside the VM](#8-using-docker-inside-the-vm)
+9. [Capturing and inspecting traffic](#9-capturing-and-inspecting-traffic)
+10. [Transferring files](#10-transferring-files)
+11. [Obtaining the course repository](#11-obtaining-the-course-repository)
+12. [Testing the student workflow](#12-testing-the-student-workflow)
+13. [Troubleshooting](#13-troubleshooting)
+14. [Stopping your lab scenario](#14-stopping-your-lab-scenario)
 15. [References and useful links](#15-references-and-useful-links)
-16. [Appendix A — Linux host guide (alternative)](#16-appendix-a--linux-host-guide-alternative)
+16. [Linux hosts and the separate WSL route](#16-linux-hosts-and-the-separate-wsl-route)
 
 ---
 
-## 1. What you will install and why
+## 1. What runs where
 
-Throughout the semester you will work inside a **pre-built Ubuntu 24.04 LTS virtual workstation** designed specifically for the networking labs. It contains every tool you need — from the Mininet network simulator and Open vSwitch software switches to Docker Engine, Wireshark (tshark), Scapy, nmap and many more.
+The supplied workstation provides the Ubuntu environment used for Mininet, Open vSwitch, Docker Engine, packet capture and the Python networking exercises. Keep the two operating systems distinct when copying commands:
 
-The purpose of this guide is to take you from a "bare" Windows installation to a fully working environment in which you can:
-
-- connect via **SSH** (through PuTTY) to the VM
-- run lab scenarios with `docker compose up` / `docker compose down`
-- capture and analyse traffic with **Wireshark** (on Windows) or **tshark** (inside the VM)
-- transfer files between Windows and the VM via **Shared Folders**
-
-### Working architecture (simplified diagram)
-
-```
-┌──────────────────────────────────────────────────────────────┐
-│  HOST (Windows 10/11)                                        │
-│                                                              │
-│  ┌─────────────┐  ┌────────────┐  ┌────────────────────┐    │
-│  │  PuTTY      │  │ Wireshark  │  │  Shared Folder     │    │
-│  │  (SSH)      │  │ (capture)  │  │  C:\SHARED         │    │
-│  └──────┬──────┘  └──────┬─────┘  └─────────┬──────────┘    │
-│         │ port 2222      │                   │ vboxsf        │
-│  ═══════╪════════════════╪═══════════════════╪═══════════    │
-│         │       VirtualBox NAT               │               │
-│  ┌──────┴────────────────┴───────────────────┴──────────┐    │
-│  │  VM: MININET-SDN (Ubuntu 24.04)                      │    │
-│  │                                                      │    │
-│  │  user: stud / pass: stud                             │    │
-│  │  enp0s3: 10.0.2.15 (NAT)   docker0: 172.17.0.1      │    │
-│  │                                                      │    │
-│  │  ┌────────────────────────────────────────────┐      │    │
-│  │  │  Docker Engine 28.x + Compose v2           │      │    │
-│  │  │  ┌──────┐ ┌──────┐ ┌──────┐               │      │    │
-│  │  │  │ web1 │ │ web2 │ │ dns  │  ...scenarios │      │    │
-│  │  │  └──────┘ └──────┘ └──────┘               │      │    │
-│  │  └────────────────────────────────────────────┘      │    │
-│  │                                                      │    │
-│  │  Mininet 2.3 │ OVS 3.3 │ Python 3.12 (venv compnet) │    │
-│  └──────────────────────────────────────────────────────┘    │
-└──────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 2. Minimum requirements (hardware & software)
-
-| Component | Minimum | Recommended |
-|---|---|---|
-| **Processor** | Intel/AMD with VT-x/AMD-V support | Any CPU from the past 5 years |
-| **RAM** | 8 GB (of which 2 GB for the VM) | 16 GB |
-| **Free disc space** | 10 GB | 20 GB |
-| **Operating system** | Windows 10 (64-bit), build 1903+ | Windows 11 |
-| **Hardware virtualisation** | Enabled in BIOS/UEFI | — |
-
-### Checking hardware virtualisation (VT-x / AMD-V)
-
-Open **Task Manager** → the **Performance** tab → **CPU**. In the bottom-right corner you should see:
-
-```
-Virtualisation: Enabled
-```
-
-If it reads **Disabled**, you must enter BIOS/UEFI and enable the relevant option. The exact name varies by motherboard manufacturer:
-
-- **Intel**: "Intel Virtualization Technology (VT-x)"
-- **AMD**: "SVM Mode" or "AMD-V"
-
-> **Warning:** Without hardware virtualisation enabled, VirtualBox will NOT be able to run the VM.
-
-### A note on Hyper-V and WSL2
-
-If you already have **Hyper-V** or **WSL2** enabled on Windows, VirtualBox 7.x can coexist with them, though performance may be slightly reduced. There is no need to disable Hyper-V.
-
----
-
-## 3. Step 1 — Installing VirtualBox
-
-### 3.1 Download VirtualBox
-
-Go to the official downloads page:
-
-```
-https://www.virtualbox.org/wiki/Downloads
-```
-
-Click **"Windows hosts"** to download the installer (`.exe` file, roughly 105 MB).
-
-### 3.2 Run the installer
-
-1. Double-click the downloaded file (e.g. `VirtualBox-7.x.y-xxxxx-Win.exe`)
-2. Click **Next** at every step — the default configuration is perfectly adequate
-3. The installer will display a warning about temporarily disconnecting the network — click **Yes**
-4. Click **Install** and wait for it to finish
-5. Click **Finish**
-
-### 3.3 Install the Extension Pack (optional but recommended)
-
-The Extension Pack adds USB 2.0/3.0 passthrough, RDP and PXE boot support. Download it from the same page (the "All supported platforms" link), then:
-
-1. Open VirtualBox
-2. Go to **File → Tools → Extension Pack Manager** (or **File → Preferences → Extensions** on older versions)
-3. Click the **Install** button (the "+" icon) and select the downloaded `.vbox-extpack` file
-4. Accept the licence and confirm the installation
-
-### 3.4 Verification
-
-Open VirtualBox. You should see the main "Oracle VirtualBox Manager" window without any errors.
-
----
-
-## 4. Step 2 — Importing the MININET-SDN virtual workstation
-
-### 4.1 Download the `.ova` file
-
-The virtual workstation is distributed as an OVA file (Open Virtualization Appliance):
-
-```
-https://drive.google.com/file/d/1LqnyD64gzePBjYEXpIGen41mNdjBKU3x/view?usp=drive_link
-```
-
-The file is called `MININET-SDN.ova` (size: roughly 2–3 GB). Save it somewhere easy to find, for example `C:\Users\<YourName>\Downloads\`.
-
-### 4.2 Import the workstation into VirtualBox
-
-1. Open **VirtualBox**
-2. Go to **File → Import Appliance…** (or `Ctrl+I`)
-3. Click **Browse** and select the downloaded `MININET-SDN.ova` file
-4. Click **Next**
-
-You will see a screen showing the virtual machine settings. Review and adjust if necessary:
-
-| Setting | Recommended value |
+| Location | What you do there |
 |---|---|
-| **Name** | `MININET-SDN` |
-| **CPU** | 2 (or more if you have 8+ cores) |
-| **RAM** | 2048 MB (2 GB) minimum |
-| **Network** | NAT (the default) |
+| Windows host | Start VirtualBox, import the OVA on a personal PC, open PuTTY or PowerShell, inspect saved captures with Wireshark |
+| Ubuntu guest — VM console or an SSH terminal | Clone COMPNET-EN, run Python, Mininet, Docker Compose, curl and packet captures |
+| A Docker container inside the guest | Run commands explicitly introduced with `docker compose ... exec` |
+| Mininet CLI (`mininet>`) | Run commands prefixed with a Mininet host, such as `h1 ping ...` |
 
-5. Click **Finish** (or **Import**) and wait 1–3 minutes
+In the Docker exercises, **host means the Ubuntu VM that runs Docker Engine**. It does not mean Windows. In S08, both the Python backend and the host-networked nginx container use the guest's network stack.
 
-Once the import completes, the `MININET-SDN` machine will appear in the left-hand panel of VirtualBox Manager.
+The main route requires VirtualBox, an SSH client and optionally the Wireshark desktop application on Windows. Docker Desktop is not required. Its separate Docker engine does not manage the containers running inside MININET-SDN.
 
----
+## 2. Hardware and software requirements
 
-## 5. Step 3 — Configuring the network in VirtualBox
-
-The VM uses **NAT** (Network Address Translation) as its network mode. This means the VM can access the internet through the host's connection, but the host (Windows) cannot reach the VM directly — except on ports that we explicitly configure via **Port Forwarding**.
-
-### 5.1 Configuring Port Forwarding
-
-We need at least the following rules:
-
-| Purpose | Protocol | Host IP | Host Port | Guest IP | Guest Port |
-|---|---|---|---|---|---|
-| **SSH** | TCP | 127.0.0.1 | 2222 | 10.0.2.15 | 22 |
-| **Docker API** (optional) | TCP | 127.0.0.1 | 2375 | 10.0.2.15 | 2375 |
-| **HTTP test** (optional) | TCP | 127.0.0.1 | 8080 | 10.0.2.15 | 8080 |
-
-Here is how to set them up:
-
-1. In VirtualBox Manager, select the **MININET-SDN** machine (left-click on it)
-2. Click **Settings** (the cog icon) → **Network**
-3. Under **Adapter 1** (which should read "Attached to: **NAT**"), click **Advanced** (the small arrow) to expand the options
-4. Click the **Port Forwarding** button
-5. Add the rules from the table above by clicking the **+** (plus) icon on the right:
-
-   **SSH rule (required):**
-   - Name: `ssh`
-   - Protocol: `TCP`
-   - Host IP: `127.0.0.1`
-   - Host Port: `2222`
-   - Guest IP: `10.0.2.15`
-   - Guest Port: `22`
-
-   **Docker API rule (optional — useful if you want to control Docker from Windows):**
-   - Name: `docker-api`
-   - Protocol: `TCP`
-   - Host IP: `127.0.0.1`
-   - Host Port: `2375`
-   - Guest IP: `10.0.2.15`
-   - Guest Port: `2375`
-
-   **HTTP test rule (optional — useful for labs 8–11):**
-   - Name: `http-test`
-   - Protocol: `TCP`
-   - Host IP: `127.0.0.1`
-   - Host Port: `8080`
-   - Guest IP: `10.0.2.15`
-   - Guest Port: `8080`
-
-6. Click **OK** → **OK** to save
-
-> **Why port 2222 rather than 22?** Port 22 on Windows might already be occupied by another SSH service (for instance if you have OpenSSH Server installed). We use 2222 on the host to avoid conflicts; inside the VM, the SSH daemon listens on the standard port 22.
-
----
-
-## 6. Step 4 — Starting the VM and first login
-
-### 6.1 Starting the virtual machine
-
-1. In VirtualBox Manager, select **MININET-SDN**
-2. Click **Start** (the green arrow)
-3. Wait roughly 30–60 seconds until the login prompt appears
-
-### 6.2 Direct console login (for verification only)
-
-At the `mininet-vm login:` prompt, enter:
-
-```
-Login:    stud
-Password: stud
-```
-
-> **Note:** The password is NOT displayed on screen as you type it. This is normal — type it and press Enter.
-
-If you see a prompt like `stud@mininet-vm:~$`, congratulations — the VM is working.
-
-### 6.3 Quick component check
-
-Run the following commands one by one to confirm that everything is installed:
-
-```bash
-# Check the Docker version
-docker --version
-# Expected: Docker version 28.2.2, ...
-
-# Check Docker Compose
-docker compose version
-# Expected: Docker Compose version 2.37.1+...
-
-# Check Mininet
-sudo mn --version
-# Expected: 2.3.0
-
-# Check Open vSwitch
-ovs-vsctl --version
-# Expected: ovs-vsctl (Open vSwitch) 3.3.4
-
-# Check Python (the venv activates automatically at login)
-python3 --version
-# Expected: Python 3.12.3
-
-# Check key Python libraries
-python3 -c "import scapy; print('scapy OK')"
-python3 -c "import paramiko; print('paramiko OK')"
-python3 -c "import flask; print('flask OK')"
-
-# Check internet connectivity
-ping -c 3 google.com
-```
-
-> **Note:** The Python virtual environment (`compnet`) activates automatically at every login via `.bashrc`. The prompt will read `(compnet) stud@mininet-vm:~$`.
-
----
-
-## 7. Step 5 — Installing PuTTY and connecting via SSH
-
-The VirtualBox console is rather awkward (copy-paste is cumbersome and the window cannot be resized). For day-to-day work we connect to the VM over **SSH** using **PuTTY** — a free SSH client for Windows.
-
-### 7.1 Download and install PuTTY
-
-Download the MSI installer from the official site:
-
-```
-https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html
-```
-
-Choose the **64-bit MSI** version (e.g. `putty-64bit-0.82-installer.msi`). Run the installer with the default options.
-
-**Alternative:** If you prefer a more modern terminal, you can use **Windows Terminal** together with the SSH client built into Windows 10/11. The PowerShell command would be:
-
-```powershell
-ssh -p 2222 stud@127.0.0.1
-```
-
-### 7.2 Configuring the PuTTY session
-
-1. Open **PuTTY**
-2. Fill in the fields:
-   - **Host Name (or IP address):** `127.0.0.1`
-   - **Port:** `2222`
-   - **Connection type:** SSH
-3. (Optional but recommended) Save the session:
-   - In the **Saved Sessions** field type `MININET-SDN`
-   - Click **Save**
-4. Click **Open**
-
-### 7.3 First login via PuTTY
-
-On first connection PuTTY will display a warning about the host key fingerprint. Click **Accept** — this is normal the first time you connect.
-
-```
-Login as: stud
-stud@127.0.0.1's password: stud
-```
-
-You should see:
-
-```
-(compnet) stud@mininet-vm:~$
-```
-
-You now have full SSH access to the VM, with copy-paste support (right-click = paste in PuTTY).
-
-### 7.4 PuTTY tips
-
-- **Copy from PuTTY:** select text with the mouse → it is copied to the clipboard automatically
-- **Paste into PuTTY:** right-click
-- **Saved sessions:** next time, open PuTTY → double-click `MININET-SDN` in the saved sessions list
-- **Larger window:** Settings → Window → Rows/Columns (80×40 is far more comfortable than 80×24)
-- **Keep-alive:** Settings → Connection → "Seconds between keepalives" → set to `30` (prevents disconnection during inactivity)
-
----
-
-## 8. Step 6 — Docker Desktop and testing `docker compose`
-
-### Two ways to work with Docker
-
-You can work with Docker **in two ways** — choose whichever suits you best:
-
-| Option | Advantages | Disadvantages |
-|---|---|---|
-| **A) Docker ONLY inside the VM** (recommended) | Nothing to install on Windows; everything runs via SSH | You must work exclusively through the terminal |
-| **B) Docker Desktop on Windows** | Visual GUI, IDE integration | Consumes additional RAM on the host |
-
-### Option A — Docker inside the VM (recommended for this course)
-
-Docker Engine is already installed and configured in the VM. You do not need to install anything extra on Windows. All `docker compose up/down` commands are run through your SSH session (PuTTY).
-
-**Quick test** — connect via PuTTY and run:
-
-```bash
-# Check that Docker Engine responds
-docker info | head -5
-
-# Minimal test with a container
-docker run --rm hello-world
-```
-
-If you see the "Hello from Docker!" message, everything is working correctly.
-
-### Option B — Docker Desktop on Windows (optional)
-
-If you also want Docker on Windows (useful if you work on other projects):
-
-1. Download Docker Desktop from `https://www.docker.com/products/docker-desktop/`
-2. Run the installer (requires a restart)
-3. After the restart, Docker Desktop starts automatically (system tray icon)
-
-> **Important:** Docker Desktop on Windows and Docker Engine inside the VM are **separate instances**. Containers created on one do not appear on the other. For the course labs, use the Docker inside the VM.
-
----
-
-## 9. Step 7 — Installing Wireshark on Windows
-
-Wireshark is a graphical protocol analyser that you will use to inspect network traffic.
-
-### 9.1 Download and install
-
-```
-https://www.wireshark.org/download.html
-```
-
-Choose the **Windows x64 Installer** (`.exe`). During installation:
-
-1. Accept all default components
-2. **Important:** When asked about **Npcap** (the packet capture driver), tick **"Install Npcap"** — without it Wireshark cannot capture traffic
-3. Complete the installation
-
-### 9.2 Capturing traffic from the VM (via port forwarding)
-
-Wireshark on Windows captures traffic **on the host's interfaces**. To see relevant traffic from the VM:
-
-**Method 1 — Loopback capture (Npcap Loopback Adapter)**
-
-When you communicate with the VM through port forwarding (127.0.0.1:2222 etc.), the traffic passes through the loopback interface. In Wireshark:
-
-1. Open Wireshark
-2. Select the **"Adapter for loopback traffic capture"** interface (or **"Npcap Loopback Adapter"**)
-3. Apply a capture filter, for example: `tcp port 2222`
-4. Start the capture (blue button)
-5. Connect with PuTTY — you will see the SSH packets
-
-**Method 2 — Capturing from inside the VM with `tshark`**
-
-For more complex captures (traffic between Docker containers or Mininet hosts), run `tshark` directly in the VM:
-
-```bash
-# Capture traffic on the Docker interface
-sudo tshark -i docker0 -w /tmp/capture.pcap
-
-# Or capture traffic on any interface
-sudo tshark -i any -f "tcp port 8080" -w /tmp/capture_http.pcap
-```
-
-Then transfer the `.pcap` file to Windows (via Shared Folder — see Step 8) and open it with Wireshark.
-
-### 9.3 Capturing traffic from a `docker compose` scenario
-
-A practical example — you will do this frequently during the labs:
-
-```bash
-# 1. Start a scenario (e.g. lab 8 — nginx reverse proxy)
-cd ~/compnet-2025-redo-main/assets/tutorial/s8/4_nginx/
-docker compose up -d
-
-# 2. Start a tshark capture on the relevant interface
-sudo tshark -i any -f "tcp port 8080" -w /tmp/s8_nginx.pcap &
-
-# 3. Generate test traffic
-curl http://localhost:8080
-
-# 4. Stop the capture (Ctrl+C or kill %1)
-kill %1
-
-# 5. Copy the pcap file to the Shared Folder
-cp /tmp/s8_nginx.pcap /media/sf_SHARED/
-
-# 6. Tear down the scenario
-docker compose down
-```
-
-On Windows, open `C:\SHARED\s8_nginx.pcap` with Wireshark.
-
----
-
-## 10. Step 8 — Shared Folders (file sharing between Windows and the VM)
-
-VirtualBox Shared Folders allow you to access a folder on Windows directly from inside the VM. This is the simplest way to transfer files.
-
-### 10.1 Create the shared folder on Windows
-
-Create a folder on Windows. For example:
-
-```
-C:\SHARED
-```
-
-### 10.2 Configure the Shared Folder in VirtualBox
-
-1. With the VM **powered off** (or from Settings at runtime), go to **Settings → Shared Folders**
-2. Click the **+** icon (Add Share) on the right
-3. Fill in:
-   - **Folder Path:** `C:\SHARED`
-   - **Folder Name:** `SHARED` (this name will appear in Linux as the mount point)
-   - **Read-only:** NO (unticked)
-   - **Auto-mount:** YES (ticked)
-   - **Mount point:** leave blank (VirtualBox will auto-mount at `/media/sf_SHARED`)
-4. Click **OK** → **OK**
-
-### 10.3 Verification from the VM
-
-Start the VM and connect via PuTTY:
-
-```bash
-# Check that the folder is mounted
-ls -la /media/sf_SHARED/
-
-# Create a test file
-echo "hello from the VM" > /media/sf_SHARED/test.txt
-```
-
-On Windows, open `C:\SHARED` — you should see the file `test.txt`.
-
-> **Permissions note:** The user `stud` is already a member of the `vboxsf` group (verified in the VM blueprint). If you get "Permission denied", run:
-> ```bash
-> sudo usermod -aG vboxsf stud
-> ```
-> then log out and back in (or run `newgrp vboxsf`).
-
----
-
-## 11. Step 9 — Cloning the course repository
-
-The course repository contains all the materials for the labs: scenarios, Python scripts, `docker-compose.yml` files and explanations.
-
-### 11.1 Cloning with `git` (from the VM)
-
-Connect via PuTTY to the VM and run:
-
-```bash
-cd ~
-git clone https://github.com/hypothetical-andrei/compnet-2025-redo.git
-cd compnet-2025-redo
-ls -la
-```
-
-You will see the following structure:
-
-```
-compnet-2025-redo/
-├── assets/
-│   ├── course/           ← lecture materials (c1–c13)
-│   ├── tutorial/          ← lab materials (s1–s13)
-│   ├── tutorial-solve/    ← partial solutions
-│   └── tools/             ← utilities (plantuml.jar etc.)
-└── prompts/               ← content-generation prompts
-```
-
-### 11.2 Alternative — downloading as a ZIP
-
-If you have no internet access from the VM, download the archive on Windows:
-
-```
-https://github.com/hypothetical-andrei/compnet-2025-redo/archive/refs/heads/main.zip
-```
-
-Copy it to `C:\SHARED`, then from the VM:
-
-```bash
-cp /media/sf_SHARED/compnet-2025-redo-main.zip ~
-cd ~
-unzip compnet-2025-redo-main.zip
-cd compnet-2025-redo-main
-```
-
-### 11.3 Running the setup script (recommended after cloning)
-
-The VM includes a compatibility script that creates the necessary symlinks, verifies Python dependencies and patches the `docker-compose.yml` files:
-
-```bash
-cd ~
-chmod +x compnet_mininetvm_setup.sh
-./compnet_mininetvm_setup.sh --kit-root ~/compnet-2025-redo --self-test
-```
-
-If everything is in order, the output will show a series of `[OK]` entries with no major errors.
-
----
-
-## 12. Step 10 — Full end-to-end test
-
-Now we verify everything together — from SSH to Docker Compose, including a Wireshark capture.
-
-### 12.1 Preparation
-
-Make sure you are connected via PuTTY to the VM.
-
-### 12.2 Test scenario: Nginx Reverse Proxy (Lab 8)
-
-```bash
-# 1. Navigate to the scenario directory
-cd ~/compnet-2025-redo/assets/tutorial/s8/4_nginx/
-
-# 2. Start a Python HTTP server on port 8000 (the backend)
-python3 -m http.server 8000 &
-
-# 3. Start the Docker Compose scenario (nginx as reverse proxy)
-docker compose up -d
-
-# 4. Check the running containers
-docker compose ps
-
-# 5. Test with curl
-curl http://localhost:8080
-
-# 6. (Optional) Start a tshark capture
-sudo tshark -i lo -f "tcp port 8080 or tcp port 8000" -c 20
-
-# 7. Generate traffic again
-curl http://localhost:8080
-
-# 8. Tear everything down
-docker compose down
-kill %1  # stop the background Python HTTP server
-```
-
-### 12.3 What you should see
-
-- At step 4: the `seminar8_nginx` container with status `Up`
-- At step 5: the HTML content returned by the backend through the nginx reverse proxy
-- At steps 6–7: TCP packets captured by tshark showing the flow `client → nginx:8080 → backend:8000`
-
-### 12.4 Full Docker Compose up/down test (FTP scenario — Lab 9)
-
-```bash
-# Navigate to the multi-client FTP scenario
-cd ~/compnet-2025-redo/assets/tutorial/s9/3_multi-client-containers/
-
-# Start everything
-docker compose up -d
-
-# Check the containers
-docker compose ps
-# Expected: 3 containers (ftp-server, client1, client2)
-
-# Check the Docker network created
-docker network ls
-
-# Tear everything down
-docker compose down
-```
-
-If everything worked — **you are ready for the labs!**
-
----
-
-## 13. Troubleshooting — Common problems
-
-### The VM will not start: "VT-x is disabled in BIOS"
-
-**Cause:** Hardware virtualisation is not enabled in BIOS/UEFI.
-
-**Solution:**
-1. Restart your computer
-2. Enter BIOS (usually `F2`, `F10`, `Del` or `Esc` at startup)
-3. Find the "Intel Virtualization Technology" or "SVM Mode" option
-4. Enable it → Save & Exit
-
----
-
-### PuTTY: "Connection refused" at 127.0.0.1:2222
-
-**Possible causes:**
-1. The VM is not running
-2. Port forwarding is not configured correctly
-3. The SSH service inside the VM is not running
-
-**Solutions:**
-1. Check that the VM is running and has passed the login screen
-2. Double-check the Port Forwarding rules (Section 5.1)
-3. In the VirtualBox console of the VM, log in and run:
-   ```bash
-   sudo systemctl status ssh
-   # If it is not running:
-   sudo systemctl start ssh
-   sudo systemctl enable ssh
-   ```
-
----
-
-### `docker compose up` reports port conflicts
-
-**Cause:** Stale containers left over from a previous session.
-
-**Quick fix (from the VM):**
-
-```bash
-# The nuclear option — stop and remove EVERYTHING
-docker rm -f $(docker ps -aq) 2>/dev/null
-docker network prune -f
-```
-
-Or use the `clean.ps1` script on Windows (see Section 14).
-
----
-
-### `docker compose` returns "permission denied"
-
-**Cause:** The user `stud` is not in the `docker` group.
-
-**Solution:**
-
-```bash
-sudo usermod -aG docker stud
-# Then log out and back in:
-exit
-# (reconnect with PuTTY)
-```
-
----
-
-### The Shared Folder does not appear in the VM
-
-**Possible causes:**
-1. Guest Additions are not installed
-2. The folder is not configured as Auto-mount
-
-**Solutions:**
-1. Guest Additions are already included in the OVA (verified: version 7.0.16). If they are missing:
-   ```bash
-   sudo apt install virtualbox-guest-utils virtualbox-guest-x11
-   sudo reboot
-   ```
-2. Double-check the "Auto-mount" setting in VirtualBox → Settings → Shared Folders
-3. Manual mount (workaround):
-   ```bash
-   sudo mkdir -p /media/sf_SHARED
-   sudo mount -t vboxsf SHARED /media/sf_SHARED
-   ```
-
----
-
-### Wireshark on Windows cannot see the VM's traffic
-
-**Explanation:** The VM's internal traffic (between Docker containers or Mininet hosts) does not cross the physical interface of the Windows host. This traffic exists only inside the VM.
-
-**Solution:** Use `tshark` or `tcpdump` inside the VM for internal captures, then transfer the `.pcap` files to Windows via the Shared Folder:
-
-```bash
-# Capture inside the VM
-sudo tshark -i docker0 -w /tmp/capture.pcap -c 100
-
-# Transfer
-cp /tmp/capture.pcap /media/sf_SHARED/
-
-# Open on Windows: C:\SHARED\capture.pcap (double-click → Wireshark)
-```
-
----
-
-### The VM is extremely slow
-
-**Solutions:**
-1. Allocate more RAM (Settings → System → Base Memory → 3072 MB or more)
-2. Allocate more CPUs (Settings → System → Processor → 2 or more)
-3. Disable visual effects in VirtualBox: Settings → Display → Graphics Controller → VBoxVGA, Video Memory → 32 MB
-4. Run the VM **headless** (without a graphical window) — still via SSH:
-   - Right-click the VM → **Start → Headless Start**
-   - You connect exclusively through PuTTY
-
----
-
-### Error at `sudo mn --test pingall`: "Cannot find required executable …"
-
-**Cause:** Open vSwitch is not running.
-
-**Solution:**
-
-```bash
-sudo systemctl start openvswitch-switch
-sudo systemctl enable openvswitch-switch
-# Then test again:
-sudo mn --test pingall
-```
-
----
-
-### Python reports "No module named …"
-
-**Cause:** The `compnet` virtual environment is not activated.
-
-**Solution:**
-
-```bash
-# Manual activation
-source ~/venvs/compnet/bin/activate
-
-# Verification (the prompt should begin with (compnet))
-which python3
-# Expected: /home/stud/venvs/compnet/bin/python3
-```
-
-> Note: `.bashrc` should activate the venv automatically at login. If it does not, check the last section of `~/.bashrc`.
-
----
-
-## 14. The cleanup script clean.ps1
-
-When Docker containers get stuck and ports remain occupied, you can run this PowerShell script **on Windows** (if you have Docker Desktop) or the equivalent inside the VM.
-
-### 14.1 On Windows (PowerShell)
-
-Save the `clean.ps1` file and run it from PowerShell:
-
-```powershell
-# Navigate to the folder where you saved clean.ps1
-cd C:\SHARED
-
-# Allow script execution (first time only)
-Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
-
-# Run
-.\clean.ps1
-```
-
-**Script contents:**
-
-```powershell
-# clean.ps1 — Automated Docker cleanup script
-Write-Host "[INFO] Starting Docker cleanup..." -ForegroundColor Cyan
-
-# 1. Tear down the current compose project
-Write-Host " -> Docker Compose Down..." -NoNewline
-docker compose down 2>$null
-Write-Host " OK" -ForegroundColor Green
-
-# 2. Force-remove ALL containers on the VM (including stuck ones)
-Write-Host " -> Force-removing containers..." -NoNewline
-$containers = docker ps -aq
-if ($containers) {
-    docker rm -f $containers 2>$null
-    Write-Host " OK (containers removed)" -ForegroundColor Green
-} else {
-    Write-Host " OK (none found)" -ForegroundColor Gray
-}
-
-# 3. Prune unused networks (to avoid the 'network in use' error)
-Write-Host " -> Pruning networks..." -NoNewline
-docker network prune -f 2>$null
-Write-Host " OK" -ForegroundColor Green
-
-Write-Host "[DONE] All clean!" -ForegroundColor Cyan
-```
-
-### 14.2 VM equivalent (Bash)
-
-If you work exclusively via SSH inside the VM, you can create an equivalent script:
-
-```bash
-#!/bin/bash
-# clean.sh — Automated Docker cleanup script (Linux version)
-echo "[INFO] Starting Docker cleanup..."
-
-echo -n " -> Docker Compose Down..."
-docker compose down 2>/dev/null
-echo " OK"
-
-echo -n " -> Force-removing containers..."
-CONTAINERS=$(docker ps -aq)
-if [ -n "$CONTAINERS" ]; then
-    docker rm -f $CONTAINERS 2>/dev/null
-    echo " OK (containers removed)"
-else
-    echo " OK (none found)"
-fi
-
-echo -n " -> Pruning networks..."
-docker network prune -f 2>/dev/null
-echo " OK"
-
-echo "[DONE] All clean!"
-```
-
-Save it in the VM:
-
-```bash
-cat > ~/clean.sh << 'EOF'
-#!/bin/bash
-echo "[INFO] Starting Docker cleanup..."
-docker compose down 2>/dev/null
-docker rm -f $(docker ps -aq) 2>/dev/null
-docker network prune -f 2>/dev/null
-echo "[DONE] All clean!"
-EOF
-chmod +x ~/clean.sh
-```
-
-To run it: `~/clean.sh`
-
----
-
-## 15. References and useful links
-
-| Resource | URL |
+| Component | Guidance for a personal PC |
 |---|---|
-| **VM MININET-SDN** (.ova file) | `https://drive.google.com/file/d/1LqnyD64gzePBjYEXpIGen41mNdjBKU3x/view?usp=drive_link` |
-| **Course repository (GitHub)** | `https://github.com/hypothetical-andrei/compnet-2025-redo` |
-| **VirtualBox** (download) | `https://www.virtualbox.org/wiki/Downloads` |
-| **PuTTY** (download) | `https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html` |
-| **Wireshark** (download) | `https://www.wireshark.org/download.html` |
-| **Docker Desktop** (optional) | `https://www.docker.com/products/docker-desktop/` |
-| **Docker Compose docs** | `https://docs.docker.com/compose/` |
-| **Mininet docs** | `http://mininet.org/walkthrough/` |
+| Processor | Intel/AMD x86-64 with hardware virtualisation enabled |
+| RAM | 8 GB on the host; allocate at least 2 GB to the VM. 16 GB host RAM gives more room for other applications |
+| Storage | Check the virtual disk size shown during import. Allow additional free space for the 1.18 GB download, the imported disk, repository files and Docker images |
+| Operating system | A Windows installation supported by the VirtualBox release you install |
+| Network | Needed for the repository, container image pulls and any exercise that installs dependencies at startup |
 
-### VM Credentials
+On Windows, open **Task Manager → Performance → CPU** and check that **Virtualisation** is enabled. If it is disabled on a personal PC, enable Intel VT-x or AMD-V/SVM in BIOS/UEFI. On a classroom PC, contact the instructor instead of changing the machine configuration.
+
+If Hyper-V or WSL2 is already installed, consult the current VirtualBox host requirements if startup or performance problems occur. Follow the supplied VM route without altering unrelated working projects.
+
+## 3. Installing VirtualBox
+
+Skip this section when VirtualBox and MININET-SDN are already available on the classroom PC.
+
+1. Open the [official VirtualBox download page](https://www.virtualbox.org/wiki/Downloads).
+2. Download the installer for **Windows hosts** supported by your Windows version.
+3. Run the installer and retain the default components. Installation may require administrator approval and may briefly interrupt host networking.
+4. Open **Oracle VirtualBox Manager** after installation.
+
+The networking examples in this guide use NAT, SSH and shared folders. They do not require the separately licensed Extension Pack. Guest Additions inside the VM provide shared-folder support; they are a different component.
+
+## 4. Obtaining and importing MININET-SDN
+
+### 4.1 Publication status and exact file identity
+
+**Published Zenodo release — version 1.0.0:** [https://doi.org/10.5281/zenodo.24289763](https://doi.org/10.5281/zenodo.24289763).
+
+The release was published on **16 November 2026**. Open the DOI landing page and download `MININET-SDN.ova` and `SHA256SUMS.txt` into the same folder. Read the accompanying README and licence/provenance notice. Students on ASE classroom PCs can continue using the installed VM.
 
 | Field | Value |
 |---|---|
-| **User** | `stud` |
-| **Password** | `stud` |
-| **Hostname** | `mininet-vm` |
-| **Internal IP** | `10.0.2.15` (NAT) |
-| **SSH** | Port 22 (accessed on Windows via `127.0.0.1:2222`) |
+| OVA filename | `MININET-SDN.ova` |
+| Exact size of the deposited file | `1182349312` bytes — approximately 1.18 GB |
+| SHA-256 | `e2e02971bc23546e9e46914e1fcd249411afdcba281b8c21a1dfba153844dff5` |
 
----
+On **Windows PowerShell**, open the folder containing your downloaded OVA and run:
 
-## 16. Appendix A — Linux host guide (alternative)
-
-If you use **Linux** (Ubuntu/Debian/Fedora) as your host operating system instead of Windows, the installation is similar with a few differences.
-
-### Installing VirtualBox on Linux (Ubuntu/Debian)
-
-```bash
-# Add the Oracle repository
-wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -
-sudo add-apt-repository "deb [arch=amd64] https://download.virtualbox.org/virtualbox/debian $(lsb_release -cs) contrib"
-
-# Install
-sudo apt update
-sudo apt install virtualbox-7.0
-
-# Or install from the distribution's own repository:
-sudo apt install virtualbox
+```powershell
+$expected = 'e2e02971bc23546e9e46914e1fcd249411afdcba281b8c21a1dfba153844dff5'
+$actual = (Get-FileHash -LiteralPath .\MININET-SDN.ova -Algorithm SHA256).Hash
+if ($actual -ieq $expected) { 'SHA-256: MATCH' } else { throw 'SHA-256: MISMATCH' }
+(Get-Item -LiteralPath .\MININET-SDN.ova).Length
 ```
 
-### Importing the OVA on Linux
+A matching hash identifies the deposited file. Do not apply this expected hash to a later re-export: a new OVA requires its own checksum and version information.
 
-```bash
-VBoxManage import ~/Downloads/MININET-SDN.ova
+### 4.2 Import on your personal PC
+
+1. Open **VirtualBox → File → Import Appliance** (`Ctrl+I`).
+2. Select `MININET-SDN.ova` and click **Next**.
+3. Review the imported settings: name `MININET-SDN`, 2 virtual CPUs and at least 2048 MB RAM are suitable starting values. Retain the appliance's other working settings.
+4. Check the proposed disk location and available space.
+5. Click **Import** and wait until the VM appears in VirtualBox Manager.
+
+Use an existing classroom VM directly; importing another copy is unnecessary. If a VM with the same name already exists on your personal PC, distinguish the new copy before import instead of overwriting your work.
+
+## 5. Configuring NAT and port forwarding
+
+For a new personal-PC import, keep **Adapter 1 attached to NAT**. With the VM powered off, open **Settings → Network → Adapter 1 → Advanced → Port Forwarding**.
+
+| Rule | Protocol | Host IP | Host port | Guest IP | Guest port |
+|---|---|---|---|---|---|
+| `ssh` | TCP | `127.0.0.1` | `2222` | Leave blank for the NAT-assigned guest | `22` |
+| `http-test` — optional Windows browser access | TCP | `127.0.0.1` | `8080` | Leave blank for the NAT-assigned guest | `8080` |
+
+Add each missing rule with **+**, then save with **OK**. Inspect existing rules first; do not add duplicate rules to a working classroom VM. The usual NAT guest address is `10.0.2.15`, but the connection from Windows uses `127.0.0.1` and the configured host port.
+
+SSH forwarding is sufficient for the primary workflow. The HTTP rule is needed only if you want a Windows browser to reach nginx inside the guest. All curl tests below run inside the VM and do not require that HTTP rule.
+
+No Docker TCP API forwarding is needed: Docker commands run in the SSH session inside the guest.
+
+## 6. First boot and component checks
+
+Start **MININET-SDN** and wait for the console login prompt. Use the course account:
+
+```text
+Username: stud
+Password: stud
 ```
 
-### Configuring Port Forwarding from the command line
+The password is not displayed while you type. Keep the standard classroom account unchanged unless instructed otherwise.
+
+Run these checks **inside the VM**:
+
+```bash
+cat /etc/os-release
+python3 --version
+docker --version
+docker compose version
+mn --version
+ovs-vsctl --version
+command -v tshark
+command -v osken-manager
+```
+
+A version command confirms that a client program is available; it does not by itself prove that its service or an exercise works. Section 12 tests actual course scenarios.
+
+The course Python environment is normally activated at login. If the prompt does not show `(compnet)` and the environment exists, activate it:
+
+```bash
+test -f "$HOME/venvs/compnet/bin/activate" && source "$HOME/venvs/compnet/bin/activate"
+python3 -c "import scapy, paramiko, flask; print('Course Python imports: OK')"
+```
+
+Preserve the working course environment. S06 uses the installed **osken-manager** entry point. OS-Ken 4.x removed that command, so upgrading the package blindly is not a repair for a missing command. The S06 instructions explain how to check the installed environment.
+
+## 7. Connecting through SSH
+
+### 7.1 Windows built-in SSH
+
+Open **PowerShell on Windows** and run:
+
+```powershell
+ssh -p 2222 stud@127.0.0.1
+```
+
+Check that the host and port refer to your intended VM before accepting its first host-key prompt. Enter the course password. Once connected, Bash commands run inside Ubuntu even though the terminal window is on Windows.
+
+### 7.2 PuTTY alternative
+
+1. Install PuTTY from its [official download page](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html), if it is not already installed.
+2. Set **Host Name** to `127.0.0.1`, **Port** to `2222` and **Connection type** to **SSH**.
+3. Save the session as `MININET-SDN` and click **Open**.
+4. Log in as `stud` with the course password.
+
+Select text to copy in PuTTY; right-click to paste. Saved sessions make it easy to open the second terminal needed for capture exercises. In **Connection**, a keepalive interval of 30 seconds can help with idle sessions.
+
+## 8. Using Docker inside the VM
+
+Run all course Docker commands in the **Ubuntu guest**, through its console or SSH. Check the server as well as the client:
+
+```bash
+docker info --format '{{.ServerVersion}}'
+docker compose version
+docker run --rm hello-world
+```
+
+The first `hello-world` run may pull an image from the internet. A download or DNS failure is different from a stopped Docker service; retain the error message for troubleshooting.
+
+Compose files in this repository often have descriptive filenames. Always supply their actual filename, for example:
+
+```bash
+cd "$HOME/COMPNET-EN/04_SEMINARS/S08/4_nginx"
+docker compose -f S08_Part04_Config_Docker_Compose.yml config --quiet
+```
+
+The same `-f` argument is required for `up`, `ps`, `logs` and `down`. A bare `docker compose up` does not automatically select `S08_Part04_Config_Docker_Compose.yml`.
+
+If you already use Docker Desktop for another project, leave it separate. It is not needed to operate the Docker engine inside MININET-SDN.
+
+## 9. Capturing and inspecting traffic
+
+### 9.1 Wireshark on Windows
+
+Download the Windows installer from the [official Wireshark site](https://www.wireshark.org/download.html). Npcap is needed for live capture on Windows interfaces. Opening an existing capture file is a separate operation.
+
+Windows loopback capture can show the SSH connection on host port 2222. It does not expose the decrypted commands or all traffic between Mininet hosts and guest containers. Capture that internal traffic inside the VM, then transfer the saved file.
+
+### 9.2 A bounded capture using two SSH terminals
+
+First start the S08 backend and nginx scenario in **Terminal A**, following Section 12.2. Keep that terminal open. Open a second SSH session, **Terminal B**, and run:
+
+```bash
+mkdir -p "$HOME/compnet-captures"
+capture_file="$HOME/compnet-captures/s08-$(date -u +%Y%m%dT%H%M%SZ).pcapng"
+sudo tshark -i lo -a duration:20 -f 'tcp port 8080 or tcp port 8000' -w "$capture_file"
+sudo chown "$(id -u):$(id -g)" "$capture_file"
+printf 'Capture saved: %s\n' "$capture_file"
+```
+
+While Terminal B displays **Capturing on**, run in **Terminal A**:
+
+```bash
+curl --fail --show-error --max-time 5 -I http://127.0.0.1:8080/
+curl --fail --show-error --max-time 5 http://127.0.0.1:8080/
+```
+
+The capture ends after 20 seconds even if no packets arrive. Wait for completion before copying the file. The `lo` interface is appropriate here because S08 uses host networking and both test endpoints are inside the guest. For a bridge-network container exercise, select its actual bridge/interface or use `-i any`; `docker0` is not automatically the interface for every Compose network.
+
+Copy the file using Section 10 and open it with Wireshark. Look for the request to nginx on port 8080 and its separate backend request on port 8000. A capture with zero matching packets is a diagnostic result, not a successful traffic test.
+
+## 10. Transferring files
+
+### 10.1 VirtualBox Shared Folders
+
+On Windows, create `C:\SHARED`. In **VirtualBox → Settings → Shared Folders**, add:
+
+| Setting | Value |
+|---|---|
+| Folder Path | `C:\SHARED` |
+| Folder Name | `SHARED` |
+| Read-only | Unticked |
+| Auto-mount | Ticked |
+| Mount point | Leave blank |
+
+Start the VM or reopen the SSH session, then check **inside the guest**:
+
+```bash
+ls -ld /media/sf_SHARED
+printf 'hello from the VM\n' > /media/sf_SHARED/compnet-transfer-check.txt
+```
+
+The test file should appear in `C:\SHARED` on Windows. After a completed capture in Terminal B, copy its exact file:
+
+```bash
+cp -- "$capture_file" /media/sf_SHARED/
+```
+
+If the mount exists but access is denied, check `id` and the `vboxsf` group. On your own VM, `sudo usermod -aG vboxsf stud` followed by logout/login can correct a missing membership. On classroom PCs, ask the instructor before changing configuration.
+
+### 10.2 SCP alternative
+
+Shared folders are convenient but not required. In **Windows PowerShell**, copy the completed captures through the existing SSH connection:
+
+```powershell
+scp -P 2222 'stud@127.0.0.1:compnet-captures/*.pcapng' .
+```
+
+This downloads the files into the current Windows directory. PuTTY installations can use `pscp` with the same uppercase `-P` port option.
+
+## 11. Obtaining the course repository
+
+### 11.1 Git clone inside the VM
+
+For a new student copy, run **inside Ubuntu**:
+
+```bash
+cd "$HOME"
+git clone https://github.com/antonioclim/COMPNET-EN.git
+cd COMPNET-EN
+ls
+```
+
+If `COMPNET-EN` already exists, inspect that directory and your work instead of cloning over it. To update an existing Git clone, inspect `git status` and use `git pull --ff-only` only when the working copy is ready to update.
+
+The current top-level directories include:
+
+| Directory | Contents |
+|---|---|
+| `00_TOOLS/` | Utilities and alternative environment instructions |
+| `01_GUIDE_MININET-SDN/` | This guide and the VM verification helper |
+| `02_PROJECTS/` | Project specifications and supporting assets |
+| `03_LECTURES/` | Lecture materials |
+| `04_SEMINARS/` | Seminar instructions, scripts and configurations |
+| `00_APPENDIX/` | Supplementary learning and teaching materials |
+
+### 11.2 ZIP alternative
+
+On Windows, download the [current repository ZIP](https://github.com/antonioclim/COMPNET-EN/archive/refs/heads/main.zip). Put `COMPNET-EN-main.zip` in `C:\SHARED`. In the VM:
+
+```bash
+cd "$HOME"
+unzip /media/sf_SHARED/COMPNET-EN-main.zip
+```
+
+If `~/COMPNET-EN` does not already exist, normalise the extracted directory name so the later commands work unchanged:
+
+```bash
+if [ -e "$HOME/COMPNET-EN" ]; then
+    printf 'COMPNET-EN already exists; keep your existing work and select the intended copy.\n'
+else
+    mv -- "$HOME/COMPNET-EN-main" "$HOME/COMPNET-EN"
+fi
+```
+
+A ZIP checkout has no Git history. Do not run `git pull` inside it.
+
+### 11.3 Check the supplied environment
+
+From the repository root:
+
+```bash
+cd "$HOME/COMPNET-EN"
+bash 01_GUIDE_MININET-SDN/verify_mininet_vm.sh
+```
+
+The helper reads the available environment and reports missing requirements. It does not install packages or repair the VM. Keep its output if a required component is missing.
+
+No separate compatibility script is needed to find the course files. The commands below use their real paths and explicit Compose filenames. The institutional classroom deployment script is not part of the student setup route.
+
+## 12. Testing the student workflow
+
+These checks exercise specific paths. Successful results establish those paths on your machine; they do not replace the remaining seminar exercises.
+
+### 12.1 Mininet check
+
+Run in the VM, when no other Mininet exercise is active:
+
+```bash
+sudo mn --switch ovsbr --controller none --test pingall
+```
+
+This uses an OVS bridge without a remote controller and should report zero dropped pings. S06 separately tests the Os-Ken/OpenFlow controller path; follow the [S06 instructions](../04_SEMINARS/S06/README.md) for that exercise.
+
+### 12.2 S08: backend, nginx and HTTP
+
+Run this sequence in **SSH Terminal A inside the guest**. Keep the terminal open so the backend process identifier remains available for cleanup.
+
+```bash
+cd "$HOME/COMPNET-EN/04_SEMINARS/S08/4_nginx"
+ss -ltn '( sport = :8000 or sport = :8080 )'
+```
+
+If either port is already in use, identify your previous exercise before continuing. Start the backend using a new log file:
+
+```bash
+backend_log=$(mktemp /tmp/compnet-s08-backend.XXXXXX)
+python3 -m http.server 8000 --bind 127.0.0.1 --directory ../2_simple-http >"$backend_log" 2>&1 &
+backend_pid=$!
+printf 'Backend PID: %s; log: %s\n' "$backend_pid" "$backend_log"
+curl --fail --show-error --retry 5 --retry-connrefused --retry-delay 1 --max-time 5 http://127.0.0.1:8000/
+```
+
+Then start nginx with the actual configuration file:
+
+```bash
+docker compose -f S08_Part04_Config_Docker_Compose.yml config --quiet
+docker compose -f S08_Part04_Config_Docker_Compose.yml up -d
+docker compose -f S08_Part04_Config_Docker_Compose.yml ps
+curl --fail --show-error --retry 5 --retry-connrefused --retry-delay 1 --max-time 5 -I http://127.0.0.1:8080/
+curl --fail --show-error --max-time 5 http://127.0.0.1:8080/
+```
+
+Expected evidence: HTTP 200, an `X-Student-Lab: Seminar8` response header and the backend content. An `Up` container alone is insufficient. The supplied configuration uses `network_mode: host`, so nginx can reach the Python backend at the guest's `127.0.0.1:8000`.
+
+For the packet capture, keep this scenario running and follow Section 9 in Terminal B. If you configured the optional NAT HTTP rule, a Windows browser can also open `http://127.0.0.1:8080/`.
+
+When finished, run **in the same Terminal A**:
+
+```bash
+docker compose -f S08_Part04_Config_Docker_Compose.yml down
+kill "$backend_pid"
+wait "$backend_pid" 2>/dev/null || true
+```
+
+Only the backend started by this sequence and this Compose project are stopped.
+
+### 12.3 S09: one client uploads, another downloads
+
+Run in the VM:
+
+```bash
+cd "$HOME/COMPNET-EN/04_SEMINARS/S09/3_multi-client-containers"
+mkdir -p server-data server-anon client1-data client2-data
+printf 'Hello from client1\n' > client1-data/setup-check.txt
+docker compose -f S09_Part03_Config_Docker_Compose.yml config --quiet
+docker compose -f S09_Part03_Config_Docker_Compose.yml up -d
+docker compose -f S09_Part03_Config_Docker_Compose.yml ps
+```
+
+Image downloads and the FTP server's initial dependency installation require internet access unless the required artefacts are already available. Wait for FTP readiness with this bounded check:
+
+```bash
+docker compose -f S09_Part03_Config_Docker_Compose.yml exec -T client1 python - <<'PYREADY'
+import ftplib
+import time
+
+deadline = time.monotonic() + 60
+while True:
+    try:
+        with ftplib.FTP() as ftp:
+            ftp.connect('ftp-server', 2121, timeout=2)
+            ftp.login('test', '12345')
+            print('FTP login: OK')
+        break
+    except (OSError, ftplib.Error) as exc:
+        if time.monotonic() >= deadline:
+            raise SystemExit(f'FTP not ready: {exc}')
+        time.sleep(1)
+PYREADY
+```
+
+Then exercise the supplied clients:
+
+```bash
+docker compose -f S09_Part03_Config_Docker_Compose.yml exec -T client1 python S09_Part03_Script_Pyftpd_Multi_Client.py upload setup-check.txt
+docker compose -f S09_Part03_Config_Docker_Compose.yml exec -T client2 python S09_Part03_Script_Pyftpd_Multi_Client.py download setup-check.txt
+cmp client1-data/setup-check.txt client2-data/setup-check.txt && printf 'Transferred file: MATCH\n'
+docker compose -f S09_Part03_Config_Docker_Compose.yml down
+```
+
+The expected evidence is a successful upload, a successful download and `Transferred file: MATCH`. The test uses the shared container network, where both clients can resolve `ftp-server`. Publishing an FTP control port alone does not establish a working passive data path from Windows; that separate networking case is not required here.
+
+## 13. Troubleshooting
+
+### VM startup or SSH connection fails
+
+Check that the intended VM is running and that the NAT forwarding rule exists. From the VM console, inspect:
+
+```bash
+systemctl status ssh --no-pager
+```
+
+On your own VM, start the service if it is stopped:
+
+```bash
+sudo systemctl start ssh
+```
+
+Check host port conflicts before changing a working forwarding rule. On classroom PCs, retain the configuration provided by the instructor.
+
+### Docker reports permission denied or cannot connect
+
+Run inside the VM:
+
+```bash
+id
+systemctl status docker --no-pager
+docker context show
+```
+
+Use the guest's local Docker engine. On your own VM, a missing `docker` group membership can be corrected with `sudo usermod -aG docker stud`, followed by logout/login. A stopped service is a separate issue. Do not redirect Docker to a different engine to hide the original error.
+
+### Compose reports no configuration file
+
+Change to the scenario directory and include the actual filename with `-f`. For S08:
+
+```bash
+cd "$HOME/COMPNET-EN/04_SEMINARS/S08/4_nginx"
+docker compose -f S08_Part04_Config_Docker_Compose.yml config --quiet
+```
+
+### Port conflict or nginx returns 502
+
+Inspect the listeners and scenario logs:
+
+```bash
+ss -ltn '( sport = :8000 or sport = :8080 )'
+docker compose -f S08_Part04_Config_Docker_Compose.yml logs --tail 30 nginx
+curl --fail --show-error --max-time 5 http://127.0.0.1:8000/
+```
+
+A 502 response commonly means nginx cannot reach its backend. Confirm that the Python server runs in the same Ubuntu guest and inspect the backend log created in Section 12. Stop only your own conflicting exercise using Section 14.
+
+### FTP containers exist but login or transfer fails
+
+```bash
+cd "$HOME/COMPNET-EN/04_SEMINARS/S09/3_multi-client-containers"
+docker compose -f S09_Part03_Config_Docker_Compose.yml logs --tail 40 ftp-server
+```
+
+Look for a failed image/dependency download, a missing bind-mounted file or a server startup error. Retry the readiness check after resolving the cause. For the supplied scenario, run the clients inside `client1` and `client2`.
+
+### Shared folder missing or capture unavailable
+
+Confirm the VirtualBox share name `SHARED`, Auto-mount and the guest's `vboxsf` membership. Use SCP if shared folders are unavailable. Wait for the bounded capture to finish before transferring it. Select the interface where the exercise traffic actually flows; S08 loopback traffic does not use `docker0`.
+
+### Python import or osken-manager missing
+
+Activate the existing course environment and inspect its installed package:
+
+```bash
+test -f "$HOME/venvs/compnet/bin/activate" && source "$HOME/venvs/compnet/bin/activate"
+command -v python3
+command -v osken-manager
+python3 -c "from importlib.metadata import version; print(version('os-ken'))"
+```
+
+Do not replace the course environment with an unpinned upgrade. OS-Ken 4.x no longer supplies the legacy manager command. Keep the diagnostic output and use the course environment supplied with the appliance or ask the instructor to restore it.
+
+### Mininet fails
+
+Read the exact error. Check the installed tools and Open vSwitch service:
+
+```bash
+command -v mn
+command -v ovs-vsctl
+systemctl status openvswitch-switch --no-pager
+```
+
+A missing executable is not the same as a stopped service. If no other Mininet exercise is active, `sudo mn -c` can clear remnants of your failed Mininet run. Repeat the Section 12.1 check after resolving the cause.
+
+## 14. Stopping your lab scenario
+
+Run cleanup **inside the VM** with the same Compose file used to start that scenario:
+
+```bash
+cd "$HOME/COMPNET-EN/04_SEMINARS/S08/4_nginx"
+docker compose -f S08_Part04_Config_Docker_Compose.yml down
+```
+
+For S09:
+
+```bash
+cd "$HOME/COMPNET-EN/04_SEMINARS/S09/3_multi-client-containers"
+docker compose -f S09_Part03_Config_Docker_Compose.yml down
+```
+
+These commands stop and remove the selected project's containers and networks. The bind-mounted exercise files remain in their directories. Stop the separately launched S08 Python backend with its recorded PID in the original terminal, as shown in Section 12.2.
+
+For an interactive Mininet exercise, type `exit` at `mininet>` so its script can stop its topology. Stop the controller with `Ctrl+C` in the controller terminal. Use `sudo mn -c` only when no other Mininet session is active and a failed run left resources behind.
+
+There is no need to run a Windows-wide or Docker-wide cleanup script. Keep other projects and their containers intact.
+
+## 15. References and useful links
+
+| Resource | Link |
+|---|---|
+| MININET-SDN version 1.0.0 — published release | [Zenodo DOI](https://doi.org/10.5281/zenodo.24289763) |
+| Course repository | [antonioclim/COMPNET-EN](https://github.com/antonioclim/COMPNET-EN) |
+| VirtualBox downloads and documentation | [virtualbox.org](https://www.virtualbox.org/wiki/Downloads) |
+| PuTTY | [Official download page](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html) |
+| Wireshark | [Downloads](https://www.wireshark.org/download.html) |
+| Explicit Compose files | [Docker Compose CLI documentation](https://docs.docker.com/reference/cli/docker/compose/) |
+| Docker network modes | [Docker Compose networking](https://docs.docker.com/compose/how-tos/networking/) |
+| Mininet walkthrough | [mininet.org](https://mininet.org/walkthrough/) |
+| OS-Ken application API | [OpenStack documentation](https://docs.openstack.org/os-ken/latest/os_ken_app_api.html) |
+| OS-Ken manager removal in 4.x | [OS-Ken 2026.1 release notes](https://docs.openstack.org/releasenotes/os-ken/2026.1.html) |
+
+Use the version-specific appliance DOI together with the matching checksum when identifying the course image. Record the Git commit used for the exercises separately, because course materials can change independently of the archived OVA.
+
+## 16. Linux hosts and the separate WSL route
+
+### 16.1 A Linux host running VirtualBox
+
+Install a VirtualBox release supported by your Linux distribution using its documented package route or the [official Linux download instructions](https://www.virtualbox.org/wiki/Linux_Downloads). Import the same OVA through VirtualBox Manager. The guest-side commands remain the same.
+
+With a new VM powered off, the equivalent NAT SSH rule can be added from the Linux host:
 
 ```bash
 VBoxManage modifyvm "MININET-SDN" --natpf1 "ssh,tcp,127.0.0.1,2222,,22"
-VBoxManage modifyvm "MININET-SDN" --natpf1 "http-test,tcp,127.0.0.1,8080,,8080"
 ```
 
-### SSH connection (without PuTTY)
-
-Linux has a native SSH client:
+Inspect existing rules first to avoid duplicates. Connect from the Linux host:
 
 ```bash
 ssh -p 2222 stud@127.0.0.1
-# Password: stud
 ```
 
-### Wireshark on Linux
+Use SCP or a configured VirtualBox share for captures. A `vboxsf` group change, if needed, belongs **inside the guest**, where the share is mounted. Opening saved captures on the Linux host does not require a live-capture privilege change.
 
-```bash
-sudo apt install wireshark
-# When asked about setuid: answer "Yes"
-sudo usermod -aG wireshark $USER
-# Log out and back in, then:
-wireshark &
-```
+### 16.2 WSL is a separate environment
 
-### Shared Folders on Linux
+The [WSL prerequisites](../00_TOOLS/Prerequisites/Prerequisites.md) describe another course setup route. Its account, virtual environment, service addresses and installation steps must be followed as a complete route. Do not combine institutional WSL deployment settings with the VirtualBox account, ports or paths in this guide.
 
-```bash
-# After configuring via the VirtualBox GUI:
-# Add your user to the vboxsf group
-sudo usermod -aG vboxsf $USER
-# Log out and back in
-# The folder will be at: /media/sf_SHARED/
-```
-
----
-
-**Best of luck with the labs!**
-
-> If you encounter problems not covered by this guide, contact the lab instructor or open an issue on the course repository.
+For students using the supplied MININET-SDN appliance, continue with its existing guest environment and the seminar instructions.

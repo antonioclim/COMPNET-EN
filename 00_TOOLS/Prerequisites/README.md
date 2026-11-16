@@ -1,15 +1,17 @@
 # Prerequisites — Environment Setup
 
-Student-facing documentation for configuring the lab environment before the first seminar. The default stack is WSL2 + Ubuntu + Docker Engine + Portainer CE, with Wireshark and Python 3.10+ on the host. Students complete this guide during week 0; the automated verification script confirms readiness.
+Student-facing documentation for the **alternative WSL2 route**. The ASE classroom route uses the [MININET-SDN VirtualBox appliance](../../01_GUIDE_MININET-SDN/). Follow that guide and its [VM verifier](../../01_GUIDE_MININET-SDN/verify_mininet_vm.sh) when using the OVA.
+
+For the WSL alternative, Docker Engine and the course Python environment run inside Ubuntu. Wireshark runs on Windows where required. Portainer is optional and uses loopback port 9050. Passing prerequisite checks does not certify every seminar.
 
 ## File Index
 
-| File | Description | Lines |
-|---|---|---|
-| [`Prerequisites.md`](Prerequisites.md) | Full installation guide — WSL2, Ubuntu, Docker, Portainer, Wireshark, Python packages and auto-start configuration | 1158 |
-| [`Prerequisites_CHECKS.md`](Prerequisites_CHECKS.md) | Self-assessment questions per section of the main guide — understanding checks with expandable answers | 264 |
-| [`verify_lab_environment.sh`](verify_lab_environment.sh) | Automated Bash script that tests WSL2, Docker, Portainer, Python and network tools; exits with a pass/fail summary | 506 |
-| `wireshark_capture_example.png` | Screenshot used within the prerequisites guide | — |
+| File | Description |
+|---|---|
+| [`Prerequisites.md`](Prerequisites.md) | Full installation guide — WSL2, Ubuntu, Docker, Portainer, Wireshark, Python packages and auto-start configuration |
+| [`Prerequisites_CHECKS.md`](Prerequisites_CHECKS.md) | Self-assessment questions per section of the main guide — understanding checks with expandable answers |
+| [`verify_lab_environment.sh`](verify_lab_environment.sh) | Local prerequisite checks for WSL2, Docker, optional Portainer and Linux Python; no package installation or image pull |
+| `wireshark_capture_example.png` | Screenshot used within the prerequisites guide |
 
 ## Usage
 
@@ -19,7 +21,7 @@ After completing the manual setup steps in `Prerequisites.md`, run the verificat
 bash verify_lab_environment.sh
 ```
 
-The script checks: WSL2 presence, Ubuntu version, Docker Engine status, Portainer container health, Python version and key packages and network tool availability. A colour-coded summary is printed at the end. If any component reports a failure, consult the corresponding section of `Prerequisites.md` or the troubleshooting appendix therein.
+The script checks the WSL kernel, Ubuntu metadata, Docker daemon and Compose plugin, optional Portainer API, active Linux Python imports and network tools. Use `--online` only when you also want bounded HTTPS probes. Run it after activating `~/venvs/compnet-wsl`; Windows Python packages are not checked. Errors return exit 1; a wrong execution environment or invalid option returns exit 2. Subprocess prerequisite probes have a 15-second limit and a 2-second forced-stop grace, using GNU `timeout` from Ubuntu coreutils. It does not run Mininet/OpenFlow or a complete seminar.
 
 ## Design Rationale
 

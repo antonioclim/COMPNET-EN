@@ -1,145 +1,144 @@
-# Mininet-SDN — Setup Guide
+# MININET-SDN — VirtualBox lab environment
 
-The VirtualBox-based lab environment for the Computer Networks course. This directory contains a complete, step-by-step installation and configuration guide that takes a student from a bare Windows 10/11 machine to a fully operational Ubuntu 24.04 virtual workstation equipped with Docker Engine, Mininet, Open vSwitch, Wireshark, Scapy, Python 3.12 and all ancillary tools required by the course seminars and projects. An alternative WSL2-based path exists in [`00_TOOLS/Prerequisites/`](../00_TOOLS/Prerequisites/); this guide covers the VirtualBox/OVA route.
+MININET-SDN is the virtual workstation used for Networking and SDN in the
+second semester of the third-year Economic Informatics undergraduate programme
+at ASE CSIE. Antonio Clim built, configured and tested the appliance for the
+teaching laboratories. Students can import the same appliance on a compatible
+personal computer.
 
-## File Index
+## Download the lab virtual machine
 
-| File | Description | Size |
-|---|---|---|
-| [`SETUP-GUIDE-COMPNET-EN.md`](SETUP-GUIDE-COMPNET-EN.md) | Full guide in Markdown — 16 sections covering VirtualBox installation, OVA import, NAT port forwarding, SSH via PuTTY, Docker verification, Wireshark setup, shared folders, repository cloning, end-to-end testing, troubleshooting and a Linux host appendix | 965 lines |
-| [`SETUP-GUIDE-COMPNET-EN.html`](SETUP-GUIDE-COMPNET-EN.html) | Styled HTML rendering of the same guide, using IBM Plex Sans / JetBrains Mono webfonts — suitable for offline reading or printing | 1 767 lines (79 KB) |
+**Version 1.0.0:** [https://doi.org/10.5281/zenodo.24289763](https://doi.org/10.5281/zenodo.24289763)
 
-## Working Architecture
+**Publication status:** Published on 16 November 2026.
+Download `MININET-SDN.ova` and `SHA256SUMS.txt` from the
+[Zenodo release record](https://zenodo.org/records/24289763).
 
-The guide produces the following environment. The ASCII diagram below is reproduced from the Markdown guide for quick orientation:
-
-```
-┌──────────────────────────────────────────────────────────────┐
-│  HOST (Windows 10/11)                                        │
-│                                                              │
-│  ┌─────────────┐  ┌────────────┐  ┌────────────────────┐    │
-│  │  PuTTY      │  │ Wireshark  │  │  Shared Folder     │    │
-│  │  (SSH)      │  │ (capture)  │  │  C:\SHARED         │    │
-│  └──────┬──────┘  └──────┬─────┘  └─────────┬──────────┘    │
-│         │ port 2222      │                   │ vboxsf        │
-│  ═══════╪════════════════╪═══════════════════╪═══════════    │
-│         │       VirtualBox NAT               │               │
-│  ┌──────┴────────────────┴───────────────────┴──────────┐    │
-│  │  VM: MININET-SDN (Ubuntu 24.04)                      │    │
-│  │                                                      │    │
-│  │  user: stud / pass: stud                             │    │
-│  │  enp0s3: 10.0.2.15 (NAT)   docker0: 172.17.0.1      │    │
-│  │                                                      │    │
-│  │  ┌────────────────────────────────────────────┐      │    │
-│  │  │  Docker Engine 28.x + Compose v2           │      │    │
-│  │  │  ┌──────┐ ┌──────┐ ┌──────┐               │      │    │
-│  │  │  │ web1 │ │ web2 │ │ dns  │  ...scenarios │      │    │
-│  │  │  └──────┘ └──────┘ └──────┘               │      │    │
-│  │  └────────────────────────────────────────────┘      │    │
-│  │                                                      │    │
-│  │  Mininet 2.3 │ OVS 3.3 │ Python 3.12 (venv compnet) │    │
-│  └──────────────────────────────────────────────────────┘    │
-└──────────────────────────────────────────────────────────────┘
-```
-
-## Guide Structure
-
-The Markdown guide follows a linear 10-step installation sequence, plus troubleshooting and a Linux appendix:
-
-```mermaid
-flowchart LR
-    A["Step 1\nVirtualBox"] --> B["Step 2\nImport OVA"]
-    B --> C["Step 3\nNAT + Port\nForwarding"]
-    C --> D["Step 4\nFirst Boot\n+ Login"]
-    D --> E["Step 5\nPuTTY / SSH"]
-    E --> F["Step 6\nDocker\nVerification"]
-    F --> G["Step 7\nWireshark"]
-    G --> H["Step 8\nShared\nFolders"]
-    H --> I["Step 9\nClone Repo"]
-    I --> J["Step 10\nEnd-to-End\nTest"]
-    J --> K["Troubleshooting"]
-
-    style A fill:#e1f5fe,stroke:#0288d1
-    style J fill:#c8e6c9,stroke:#388e3c
-    style K fill:#fff3e0,stroke:#f57c00
-```
-
-## VM Credentials and Port Forwarding
-
-| Field | Value |
+| Item | Value |
 |---|---|
-| Username | `stud` |
-| Password | `stud` |
-| Hostname | `mininet-vm` |
-| Guest IP (NAT) | `10.0.2.15` |
-| SSH from host | `127.0.0.1:2222` → guest port `22` |
-| HTTP test (optional) | `127.0.0.1:8080` → guest port `8080` |
-| Docker API (optional) | `127.0.0.1:2375` → guest port `2375` |
+| Appliance | MININET-SDN.ova |
+| File size | 1,182,349,312 bytes (1.182 GB / 1.101 GiB) |
+| SHA-256 | e2e02971bc23546e9e46914e1fcd249411afdcba281b8c21a1dfba153844dff5 |
+| Machine-readable identity | [appliance.json](appliance.json) |
+| Checksum manifest | [SHA256SUMS.txt](SHA256SUMS.txt) |
+| Installation | [Markdown guide](SETUP-GUIDE-COMPNET-EN.md) or [HTML guide](SETUP-GUIDE-COMPNET-EN.html) |
 
-## Pedagogical Context
+The DOI identifies the virtual appliance. The course materials remain in
+[COMPNET-EN](https://github.com/antonioclim/COMPNET-EN). Use this specific appliance
+version when following instructions for the corresponding teaching environment.
 
-The guide assumes zero prior virtualisation experience and deliberately leads students through every click and command so that the working environment itself becomes a first contact with networking concepts — NAT, port forwarding, SSH tunnelling, DNS resolution and Docker networking all appear before the first seminar session begins. The VirtualBox/OVA path was chosen to provide a controlled, reproducible image; the WSL2 alternative in `00_TOOLS/Prerequisites/` trades reproducibility for lighter resource usage and tighter Windows integration.
+The [concept DOI](https://doi.org/10.5281/zenodo.24289762) represents all versions
+of the appliance. Use the version-specific DOI above with the matching checksum
+to identify the exact classroom image; the concept DOI follows the latest release.
 
-## Cross-References
+### Cite this appliance
 
-### Prerequisites
+Clim, A. (2026). *MININET-SDN: VirtualBox lab environment for computer networking
+and software-defined networking* (Version 1.0.0) [Software]. Zenodo.
+[https://doi.org/10.5281/zenodo.24289763](https://doi.org/10.5281/zenodo.24289763)
 
-No prior course material is required. The guide is self-contained and targets a clean Windows installation. Students who prefer the WSL2 path should consult `00_TOOLS/Prerequisites/Prerequisites.md` instead.
+### Verify the download
 
-### Relationship to the Rest of the Repository
+Download the OVA and SHA256SUMS.txt into the same directory. In Windows PowerShell:
 
-| Relationship | Path | Detail |
-|---|---|---|
-| Alternative setup path (WSL2) | [`../00_TOOLS/Prerequisites/`](../00_TOOLS/Prerequisites/) | Produces an equivalent Docker + Wireshark environment without VirtualBox |
-| Portainer web UI | [`../00_TOOLS/Portainer/`](../00_TOOLS/Portainer/) | Portainer runs on top of the Docker Engine configured by this guide; shares the `stud`/`stud` credential convention |
-| First seminar | [`../04_SEMINARS/S01/`](../04_SEMINARS/S01/) | S01 is the first session that exercises the installed tools (Wireshark, netcat, ping) |
-| All Docker-based seminars | [`../04_SEMINARS/S03/`](../04_SEMINARS/S03/) through [`../04_SEMINARS/S12/`](../04_SEMINARS/S12/) | Every seminar from S03 onward runs `docker compose` scenarios inside the environment this guide creates |
-| SDN firewall project | [`../02_PROJECTS/02_administration_security/`](../02_PROJECTS/02_administration_security/) | Project A01 (OpenFlow firewall) directly references the Mininet-SDN workstation |
-| Instructor notes (VM variant) | [`../00_APPENDIX/d)instructor_NOTES4sem/`](../00_APPENDIX/d%29instructor_NOTES4sem/) | Seminar outlines that assume the VM environment; 13 companion `__noMININET-SDN_` variants exist for the WSL2 path |
+~~~powershell
+$expected = ((Get-Content -LiteralPath .\SHA256SUMS.txt -TotalCount 1) -split '  ', 2)[0]
+$actual = (Get-FileHash -LiteralPath .\MININET-SDN.ova -Algorithm SHA256).Hash
+if ($actual -ieq $expected) { 'SHA-256: MATCH' } else { throw 'SHA-256: MISMATCH' }
+~~~
 
-### Downstream Dependencies
+On GNU/Linux, from that directory:
 
-The root [`README.md`](../README.md) and [`CHANGELOG.md`](../CHANGELOG.md) reference this directory (currently under the older name `01_GHID_MININET-SDN` — these links are stale and should be updated to `01_GUIDE_MININET-SDN`). No CI pipeline or Makefile target references files in this folder directly.
+~~~bash
+sha256sum -c SHA256SUMS.txt
+~~~
 
-### Suggested Learning Sequence
+## Choose the correct setup route
 
-```
-01_GUIDE_MININET-SDN/ (this folder — Week 0)
-  → 00_TOOLS/Portainer/ (optional, same week)
-  → 04_SEMINARS/S01/ (Week 1 — first hands-on session)
-  → 03_LECTURES/C01/ (Week 1 — theoretical foundations)
-```
+| Situation | Route |
+|---|---|
+| ASE classroom PC with MININET-SDN already installed | Start the existing VM and use the course repository inside it. |
+| Student's compatible personal computer | Import the OVA in VirtualBox and follow this directory's setup guide. |
+| WSL2 alternative for supported exercises | Use [00_TOOLS/Prerequisites](../00_TOOLS/Prerequisites/). That checker is separate from the VM checks. |
+| Institutional PC provisioning | The ASE deployment script is an administrator's multi-subject setup tool; it is not required for student OVA import. |
 
-## Known Issues
+Docker Engine runs **inside the VM** on the appliance route. The Windows host
+provides VirtualBox and, optionally, an SSH client and Wireshark. Installing
+Docker Desktop or the institutional WSL stack is not part of importing this OVA.
 
-The root `README.md` (lines 63, 192, 473) and `CHANGELOG.md` (lines 34, 56, 344) still reference this folder under its former Romanian name `01_GHID_MININET-SDN`. These should be updated to `01_GUIDE_MININET-SDN` to match the current filesystem.
+The course guide documents Ubuntu 24.04, x86-64, 2 vCPUs and at least 2048 MB
+guest RAM. These are the guide's configuration baseline. Host requirements,
+network settings and access instructions are in the setup guide; the compressed
+OVA size is not the amount of disk space needed after import.
 
-## Selective Clone
+## First use and prerequisite checks
 
-To download only this folder without cloning the full repository:
+1. Import the OVA using VirtualBox's Import Appliance dialogue.
+2. Use NAT. If SSH is required, forward host 127.0.0.1:2222 to guest port 22.
+3. Start the guest and use the documented lab account, stud / stud.
+4. Obtain the COMPNET-EN repository inside the guest.
+5. From the repository root, run the guest prerequisite checker:
 
-**Method A — Git sparse-checkout (requires Git 2.25+)**
+~~~bash
+bash 01_GUIDE_MININET-SDN/verify_mininet_vm.sh
+~~~
 
-```bash
-git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
+The checker reads versions, tests imports and probes access to the Docker daemon
+and the OVS service. It does not install packages, create containers, start a
+Mininet topology or request sudo. It prefers the existing course Python at
+~/venvs/compnet/bin/python3 when present. It returns 1 for required failures and 2
+for configuration warnings.
+
+A successful prerequisite check is followed by the functional exercises in the
+[setup guide](SETUP-GUIDE-COMPNET-EN.md) and [S06](../04_SEMINARS/S06/).
+The SDN route uses the course environment's osken-manager command. OS-Ken 4 removed
+that command, so an unpinned upgrade is not a substitute for the prepared course
+environment. The optional requirements file preserves the pre-4 CLI compatibility
+range; it is not a lockfile of the appliance's installed packages.
+
+For the packet-capture exercises, capture inside the guest when inspecting
+Mininet links or Docker networks. Host Wireshark does not directly expose every
+interface inside the VM.
+
+## Files in this directory
+
+| File | Purpose |
+|---|---|
+| [SETUP-GUIDE-COMPNET-EN.md](SETUP-GUIDE-COMPNET-EN.md) | Student instructions, command contexts, examples and troubleshooting |
+| [SETUP-GUIDE-COMPNET-EN.html](SETUP-GUIDE-COMPNET-EN.html) | Browser version of the installation guide |
+| [verify_mininet_vm.sh](verify_mininet_vm.sh) | Read-only guest prerequisite probes |
+| [SHA256SUMS.txt](SHA256SUMS.txt) | Integrity reference for the OVA |
+| [appliance.json](appliance.json) | Version, DOI and exact file identity |
+
+## Course connections
+
+| Material | Role |
+|---|---|
+| [S01](../04_SEMINARS/S01/) | First practical session |
+| [S05](../04_SEMINARS/S05/) | Addressing and Mininet simulation |
+| [S06](../04_SEMINARS/S06/) | Routing, OpenFlow and application traffic |
+| [C07](../03_LECTURES/C07/) | Routing theory and demonstrations |
+| [Projects](../02_PROJECTS/) | Application and SDN project briefs |
+| [Portainer setup](../00_TOOLS/Portainer/INIT_GUIDE/) | Optional container interface; use the guest's Docker daemon |
+| [Instructor notes](../00_APPENDIX/d%29instructor_NOTES4sem/) | Teaching and delivery guidance |
+
+## Provenance and distribution
+
+- Appliance author and course maintainer: ing. dr. Antonio Clim, ASE CSIE.
+- File identity: supplied by the author's PowerShell SHA-256 computation on
+  16 November 2026 and checked for consistency with the published Zenodo export.
+- The author confirmed that the appliance was built, configured and tested for
+  the ASE laboratories.
+- Third-party software retains its own licences. Course materials keep the terms
+  in [LICENCE.md](../LICENCE.md); the OVA is not a blanket relicensing of its
+  operating system and installed packages.
+
+## Obtain the teaching repository
+
+~~~bash
+git clone https://github.com/antonioclim/COMPNET-EN.git
 cd COMPNET-EN
-git sparse-checkout set 01_GUIDE_MININET-SDN
-```
+~~~
 
-**Method B — Direct download (no Git required)**
-
-Browse to the folder on GitHub:
-
-```
-https://github.com/antonioclim/COMPNET-EN/tree/main/01_GUIDE_MININET-SDN
-```
-
-To download just this directory, use a tool such as [download-directory.github.io](https://download-directory.github.io) or [gitzip](https://kinolien.github.io/gitzip/). The GitHub "Download ZIP" button downloads the entire repository.
-
-## Provenance
-
-| Field | Value |
-|---|---|
-| Author | ing. dr. Antonio Clim — ASE Bucharest, CSIE |
-| Last updated | February 2026 |
-| Generation | Manual authorship (guide content); README enriched by documentation pass v1.0 |
+For a ZIP download, use GitHub's Code → Download ZIP and follow the setup guide's
+ZIP instructions. Downloading the course repository does not download the OVA.

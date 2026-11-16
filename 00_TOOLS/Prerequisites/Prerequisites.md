@@ -1,6 +1,8 @@
 # 🖧 Computer Networks Lab — Environment Setup Guide
 
-> **Complete Documentation for Prerequisites**
+> **Alternative WSL2 setup.** The ASE classroom route uses the [MININET-SDN VirtualBox appliance](../../01_GUIDE_MININET-SDN/). Use that guide for an imported OVA; do not run the WSL installation steps inside the appliance.
+>
+> This guide prepares a separate WSL environment for suitable container-based exercises. Mininet/OpenFlow work uses the dedicated VM route unless the exercise explicitly supplies a WSL alternative.
 > Bucharest University of Economic Studies — Faculty of Cybernetics, Statistics and Economic Informatics
 > *Economic Informatics & AI in Economics and Business Programmes*
 
@@ -28,7 +30,7 @@
 
 ### 1.1 Purpose of This Guide
 
-This complete guide walks you through configuring a complete networking lab environment on Windows. By the end, you will have a fully functional containerised environment capable of:
+This guide prepares Ubuntu in WSL2 for container-based networking exercises. Its checks establish prerequisite availability; each chosen exercise still requires its own functional test. The environment supports:
 
 - **Running isolated network experiments** using Docker containers
 - **Capturing and analysing network traffic** with Wireshark
@@ -37,15 +39,7 @@ This complete guide walks you through configuring a complete networking lab envi
 
 ### 1.2 Why This Architecture?
 
-We use **WSL2 + Docker in Ubuntu** instead of Docker Desktop for several compelling reasons:
-
-| Aspect | WSL2 + Docker | Docker Desktop |
-|--------|---------------|----------------|
-| **Performance** | Native Linux kernel, faster I/O | Virtualisation overhead |
-| **Resource Usage** | Smaller memory footprint | Higher RAM consumption |
-| **Network Access** | Complete Linux network stack | Abstracted networking |
-| **Educational Value** | Real Linux environment | Windows abstraction |
-| **Cost** | Completely free | Enterprise licensing |
+This alternative places Docker Engine and the course Python environment inside Ubuntu on WSL2. Keep commands in that Linux environment so that the Docker socket, installed Python packages and exercise files refer to the same machine. Docker Desktop is a separate optional route; it is not needed for this one.
 
 ### 1.3 What You Will Install
 
@@ -53,11 +47,11 @@ We use **WSL2 + Docker in Ubuntu** instead of Docker Desktop for several compell
 |-----------|---------|---------|
 | WSL2 | 2.x | Windows Subsystem for Linux |
 | Ubuntu | 22.04 LTS | Linux distribution |
-| Docker | 28.2.2 | Container runtime |
-| Docker Compose | 1.29.x | Multi-container orchestration |
-| Portainer CE | 2.33.6 LTS | Web-based container management |
+| Docker | Version installed from the selected Ubuntu repository | Container runtime |
+| Docker Compose | v2 plugin (`docker compose`) | Multi-container orchestration |
+| Portainer CE | Optional; selected in the [Portainer guide](../Portainer/INIT_GUIDE/) | Web-based container management |
 | Wireshark | 4.4.x | Network protocol analyser |
-| Python Packages | Latest | docker, scapy, dpkt |
+| Python | 3.10+ in a Linux virtual environment | Packages for the selected exercises |
 
 ### 1.4 Time Estimate
 
@@ -105,22 +99,22 @@ We use **WSL2 + Docker in Ubuntu** instead of Docker Desktop for several compell
 
 1. **Docker containers** communicate through Docker's internal bridge network
 2. **Traffic exits** via the WSL2 virtual network interface
-3. **Wireshark on Windows** captures traffic on `vEthernet (WSL)`
-4. **Portainer** is accessible via `localhost:9000` from the Windows browser
+3. **Wireshark on Windows** can capture traffic crossing the WSL virtual interface; internal container and loopback traffic may require capture inside Linux
+4. **Portainer** is accessible via `localhost:9050` from the Windows browser
 
 ### 2.3 Port Mapping
 
 | Service | Container Port | Host Port | Access URL |
 |---------|----------------|-----------|------------|
-| Portainer | 9000 | 9000 | http://localhost:9000 |
-| Portainer HTTPS | 9443 | 9443 | https://localhost:9443 |
-| Portainer Edge | 8000 | 8000 | (Agent Communication) |
+| Portainer HTTP | 9000 | 127.0.0.1:9050 | http://localhost:9050 |
+
+The optional course setup does not publish ports 9443 or 8000. Port 9000 on the host remains available for the S10 SSH tunnel.
 
 ---
 
 ## 3. Standard Credentials
 
-> ⚠️ **Important:** Use exactly these credentials for all lab exercises to ensure consistency.
+> The following are teaching-account defaults. Preserve existing personal accounts and Portainer credentials. Shared lab credentials are used only with the local access configuration in this guide.
 
 ### 3.1 Ubuntu WSL User
 
@@ -137,7 +131,7 @@ This user is created during Ubuntu installation and has `sudo` privileges.
 |-------|-------|
 | **Username** | `stud` |
 | **Password** | `studstudstud` |
-| **Access URL** | http://localhost:9000 |
+| **Access URL** | http://localhost:9050 |
 
 > 📝 **Note:** Portainer requires a minimum 12-character password, hence `studstudstud`.
 
@@ -174,10 +168,12 @@ This user is created during Ubuntu installation and has `sudo` privileges.
 Execute the following command:
 
 ```powershell
-wsl --install
+wsl --install --no-distribution
 ```
 
-**What this command does:**
+This prepares the WSL platform without also creating an unintended default Ubuntu distribution. System-feature installation can require elevation; distribution installation in section 5 is performed under the Windows account that will use the labs. If elevation requires a different administrator account, return to your normal account before section 5.
+
+**What these commands do:**
 - Enables the WSL optional feature
 - Enables the Virtual Machine Platform feature
 - Downloads and installs the Linux kernel
@@ -198,19 +194,11 @@ Or restart manually through the Start menu.
 After restart, open PowerShell and verify:
 
 ```powershell
+wsl --set-default-version 2
 wsl --status
 ```
 
-**Expected output:**
-```
-Default Distribution: Ubuntu
-Default Version: 2
-
-Windows Subsystem for Linux was last updated on [data]
-WSL automatic updates are on.
-
-Kernel version: 5.15.x.x-microsoft-standard-WSL2
-```
+The default WSL version should be 2. There may be no installed distribution yet; section 5 installs the named course distribution. Existing distributions are preserved.
 
 ### 4.4 Checklist
 
@@ -235,7 +223,7 @@ Kernel version: 5.15.x.x-microsoft-standard-WSL2
 
 #### Step 1: Install Ubuntu from PowerShell
 
-Open PowerShell as Administrator and execute:
+Open a normal PowerShell window under the Windows account that will use the labs. Check `wsl --list --verbose` first. If `Ubuntu-22.04` already exists, use it and preserve its accounts and data. For a fresh named distribution, execute:
 
 ```powershell
 wsl --install -d Ubuntu-22.04 --web-download
@@ -259,7 +247,7 @@ Enter new UNIX username:
 
 #### Step 3: Create the User Account
 
-> ⚠️ **Critical:** Use the standard credentials!
+> For a new disposable teaching account, the laboratory convention is shown below. Preserve any existing Linux user and password.
 
 ```
 Enter new UNIX username: stud
@@ -278,10 +266,12 @@ wsl -l -v
 **Expected output:**
 ```
   NAME            STATE           VERSION
-* Ubuntu-22.04    Running         2
+  Ubuntu-22.04    Running         2
 ```
 
-### 5.3 Aderstanding the Ubuntu Environment
+Open this exact distribution with `wsl -d Ubuntu-22.04`; the default distribution can be different. Do not unregister an existing distribution to change the default.
+
+### 5.3 Understanding the Ubuntu Environment
 
 When you open Ubuntu, you are in a complete Linux environment:
 
@@ -328,30 +318,32 @@ stud@HOSTNAME:~$
 
 Either:
 - Click on "Ubuntu" in the Start menu, or
-- Type `wsl` in PowerShell
+- Type `wsl -d Ubuntu-22.04` in PowerShell
 
-#### Step 2: Updata System Packages
+#### Step 2: Refresh Package Metadata
 
 ```bash
-sudo apt update && sudo apt upgrade -y
+sudo apt update
 ```
 
 **What this does:**
 - `sudo`: Execute as superuser (administrator)
 - `apt update`: Refresh package list
-- `apt upgrade -y`: Install all available updates (`-y` = yes to all)
+No blanket system upgrade is required by this setup step.
 
 **Expected duration:** 2-5 minutes depending on internet speed.
 
 #### Step 3: Install Docker and Docker Compose
 
 ```bash
-sudo apt install -y docker.io docker-compose
+sudo apt install -y docker.io docker-compose-v2 curl python3 iproute2
 ```
 
 **Packages installed:**
 - `docker.io`: The Docker container runtime
-- `docker-compose`: Tool for defining multi-container applications
+- `docker-compose-v2`: Compose plugin invoked as `docker compose`
+
+These Ubuntu packages apply to a fresh WSL distribution. If a working Docker installation already exists, verify it first and do not mix Ubuntu packages with packages from Docker's own repository. The [Ubuntu package index](https://packages.ubuntu.com/search?keywords=docker-compose-v2) lists the plugin for supported releases; `jammy-updates` and the `universe` component must be available for Ubuntu 22.04. If the package has no installation candidate, check those configured repositories or use the [official Docker installation route](https://docs.docker.com/engine/install/ubuntu/) without combining the two package sources.
 
 #### Step 4: Add User to Docker Group
 
@@ -372,7 +364,7 @@ sudo usermod -aG docker $USER
 sudo service docker start
 ```
 
-**Note:** In WSL2, services do not start automatically by default. We will configure this later.
+**Note:** Service startup depends on whether systemd is enabled in this WSL distribution. Section 10 distinguishes the two cases.
 
 #### Step 6: Apply Group Changes
 
@@ -383,9 +375,10 @@ newgrp docker
 ```
 
 Or log out and log back in:
-```bash
-exit
-wsl
+Exit the Linux shell, then in **PowerShell** reopen the named distribution:
+
+```powershell
+wsl -d Ubuntu-22.04
 ```
 
 #### Step 7: Verify Installation
@@ -395,13 +388,13 @@ wsl
 docker --version
 
 # Check Docker Compose version
-docker-compose --version
+docker compose version
 
 # Test Docker functionality
 docker run hello-world
 ```
 
-**Expected Docker version output:**
+**Illustrative version output (your installed version can differ):**
 ```
 Docker version 28.2.2, build e6534b4
 ```
@@ -469,85 +462,19 @@ For educational purposes, Portainer provides:
 
 ### 7.3 Installation Steps
 
-#### Step 1: Create Persistent Volume
-
-Docker volumes persist data beyond the container lifecycle:
+Use the [Portainer setup guide](../Portainer/INIT_GUIDE/PORTAINER_SETUP.md) for the selected image and account. From the repository root **inside WSL**, run:
 
 ```bash
-docker volume create portainer_data
+bash 00_TOOLS/Portainer/INIT_GUIDE/portainer-init.sh
 ```
 
-**What this does:** Creates a volume named `portainer_data` that will store Portainer configuration, users and settings.
-
-#### Step 2: Deploy Portainer Container
-
-```bash
-docker run -d \
-  -p 9000:9000 \
-  --name portainer \
-  --restart=always \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  -v portainer_data:/data \
-  portainer/portainer-ce:latest
-```
-
-**Command explanation:**
-
-| Flag | Purpose |
-|------|---------|
-| `-d` | Run in detached mode (background) |
-| `-p 9000:9000` | Map container port 9000 to host |
-| `--name portainer` | Name the container "portainer" |
-| `--restart=always` | Restart container if it stops or on reboot |
-| `-v /var/run/docker.sock:...` | Give Portainer access to Docker daemon |
-| `-v portainer_data:/data` | Persist Portainer data |
-| `portainer/portainer-ce:latest` | Use latest Portainer CE image |
-
-#### Step 3: Verify Deployment
-
-```bash
-docker ps
-```
-
-**Expected output:**
-```
-CONTAINER ID   IMAGE                           COMMAND        CREATED          STATUS          PORTS                                        NAMES
-44b61d00ab18   portainer/portainer-ce:latest   "/portainer"   10 seconds ago   Up 9 seconds    8000/tcp, 9443/tcp, 0.0.0.0:9000->9000/tcp   portainer
-```
+The script binds `127.0.0.1:9050` on this Linux machine to container port 9000. It preserves existing containers, data and accounts, checks authentication and confirms local Docker access through Portainer. An absent image requires internet access; a cached image is reused without a pull. Do not run the Windows installer to manage this WSL engine.
 
 ### 7.4 Initial Portainer Setup
 
-> ⏱️ **Important:** You must complete initial setup within 5 minutes of deployment!
+After the installer succeeds, open `http://localhost:9050` in Windows and use the account confirmed by the installer. For a fresh lab account, the defaults are `stud` / `studstudstud`. A Compose-only start does not create those credentials automatically.
 
-#### Step 1: Access Portainer
-
-Open your Windows browser and navigate to:
-
-```
-http://localhost:9000
-```
-
-#### Step 2: Create Administrator Account
-
-On the initial setup screen:
-
-| Field | Value |
-|-------|-------|
-| Username | `stud` |
-| Password | `studstudstud` |
-| Confirm password | `studstudstud` |
-
-Click **"Create user"**
-
-#### Step 3: Connect to Local Docker
-
-On the "Environment Wizard" screen:
-1. Click **"Get Started"** to use the local environment
-2. Or select **"Docker"** → **"Connect"** if displayed
-
-#### Step 4: Explore the Dashboard
-
-You should now see the Portainer dashboard with your local Docker environment connected.
+If the interface works in WSL but not on Windows, check WSL localhost forwarding. If an administrator already exists, use that account rather than resetting the data volume. The [Portainer troubleshooting section](../Portainer/INIT_GUIDE/PORTAINER_SETUP.md#7-troubleshooting) describes diagnostic steps.
 
 ### 7.5 Portainer Interface Overview
 
@@ -572,7 +499,7 @@ You should now see the Portainer dashboard with your local Docker environment co
 ### 7.6 Checklist
 
 - [ ] `docker ps` shows portainer container running
-- [ ] http://localhost:9000 loads in Windows browser
+- [ ] http://localhost:9050 loads in Windows browser
 - [ ] You can log in with stud/studstudstud
 - [ ] Dashboard shows "local" Docker environment
 
@@ -596,7 +523,7 @@ We install Wireshark on Windows (not in WSL) because:
 
 1. **GUI Performance:** Native Windows application with better graphics
 2. **Interface Access:** Direct access to Windows network interfaces
-3. **WSL Traffic:** The `vEthernet (WSL)` interface captures all WSL traffic
+3. **WSL Traffic:** The `vEthernet (WSL)` interface captures traffic crossing that interface; use Linux capture tools for traffic that remains inside Linux or Docker
 4. **Integration:** Easy saving and sharing of files on Windows
 
 ### 8.3 Installation Steps
@@ -687,32 +614,47 @@ Python is widely used for network automation and analysis:
 
 ### 9.2 Prerequisites
 
-Ensure Python 3.11+ is installed on Windows:
+Install and use Python **inside Ubuntu in WSL**, where the Docker daemon runs. Packages installed in Windows Python are separate and cannot satisfy the Linux verifier.
 
-```powershell
-python --version
+```bash
+sudo apt install -y python3 python3-venv python3-pip git curl wget tcpdump netcat-openbsd iproute2
+python3 --version
 ```
 
-If not installed, download from: https://www.python.org/downloads/
+The supported baseline is Python 3.10 or later. If the selected exercise requires a newer interpreter, use its documented environment. Keep the existing MININET-SDN appliance environment unchanged.
 
 ### 9.3 Installation Steps
 
-Open PowerShell or Command Prompt:
+Create a separate Linux virtual environment and activate it before installation, verification and exercises:
 
-```powershell
-# Install Docker SDK
-pip install docker
-
-# Install network analysis packages
-pip install scapy dpkt
-
-# Verify installation
-python -c "import docker; print('Docker SDK: OK')"
-python -c "import scapy; print('Scapy: OK')"
-python -c "import dpkt; print('dpkt: OK')"
+```bash
+python3 -m venv ~/venvs/compnet-wsl
+source ~/venvs/compnet-wsl/bin/activate
+python3 -m pip install docker scapy dpkt requests flask PyYAML colorama
 ```
 
-### 9.4 Package Overview
+Exercise-dependent packages:
+
+```bash
+python3 -m pip install paramiko pyftpdlib paho-mqtt dnspython grpcio protobuf
+```
+
+Downloads require internet. These commands prepare a fresh environment and do not constitute a frozen package lock. Keep package versions with your experiment records where exact replay is required. Do not install into the system Python with `--break-system-packages` as a routine remedy.
+
+Check the active interpreter and basic imports:
+
+```bash
+which python3
+python3 -c "import docker, scapy.all, dpkt; print('Core imports: OK')"
+```
+
+After opening another WSL terminal, activate this same environment again:
+
+```bash
+source ~/venvs/compnet-wsl/bin/activate
+```
+
+### 9.4 What the Packages Do
 
 #### docker (Python Docker SDK)
 
@@ -763,69 +705,25 @@ with open('capture.pcap', 'rb') as f:
 
 ## 10. Step 7: Auto-start Configuration (Optional)
 
-### 10.1 Why Auto-start?
+Check which init system is running **inside WSL**:
 
-By default, WSL2 does not start services automatically. Every time you open Ubuntu, you would need to:
+```bash
+ps -p 1 -o comm=
+```
+
+If it reports `systemd`, enable and start the installed Docker service:
+
+```bash
+sudo systemctl enable --now docker
+```
+
+Otherwise start Docker for the current WSL session:
 
 ```bash
 sudo service docker start
 ```
 
-Configuring auto-start eliminates this manual step.
-
-### 10.2 Configuration Steps
-
-#### Step 1: Add Auto-start to Bash Profile
-
-Open Ubuntu terminal and execute:
-
-```bash
-cat >> ~/.bashrc << 'EOF'
-
-# Auto-start Docker service
-if ! pgrep -x "dockerd" > /dev/null; then
-    sudo service docker start > /dev/null 2>&1
-fi
-EOF
-```
-
-**What this does:**
-- Adds code to `~/.bashrc` (executed on every terminal open)
-- Checks if `dockerd` is running (`pgrep`)
-- If not running, starts Docker service
-
-#### Step 2: Allow Passwordless Docker Start
-
-Create a sudoers exception:
-
-```bash
-echo 'stud ALL=(ALL) NOPASSWD: /usr/sbin/service docker start' | sudo tee /etc/sudoers.d/docker-start
-sudo chmod 440 /etc/sudoers.d/docker-start
-```
-
-**What this does:**
-- Creates file `/etc/sudoers.d/docker-start`
-- Allows user `stud` to run `service docker start` without password
-- Sets secure permissions (read-only for root and sudoers)
-
-#### Step 3: Test Auto-start
-
-```powershell
-# In PowerShell, stop WSL completely
-wsl --shutdown
-
-# Reopen Ubuntu
-wsl
-
-# Docker should start automatically
-docker ps
-```
-
-### 10.3 Checklist
-
-- [ ] Docker starts automatically when you open Ubuntu
-- [ ] No password prompt for Docker service
-- [ ] `docker ps` works immediately after opening Ubuntu
+A container restart policy takes effect after the Docker daemon starts; it does not itself start WSL when Windows boots. This guide does not append repeated shell startup commands or grant passwordless sudo. See [Microsoft's WSL systemd guidance](https://learn.microsoft.com/en-us/windows/wsl/systemd) if you deliberately choose to enable systemd. Preserve any existing `/etc/wsl.conf` settings.
 
 ---
 
@@ -864,9 +762,9 @@ docker run --rm alpine ping -c 5 8.8.8.8
 
 #### Test 3: Python Integration
 
-```powershell
-# In PowerShell
-python -c "import docker; c = docker.from_env(); print(f'Containers: {len(c.containers.list())}')"
+```bash
+# Inside WSL, after activating ~/venvs/compnet-wsl
+python3 -c "import docker; c = docker.from_env(); print(f'Containers: {len(c.containers.list())}')"
 ```
 
 **Expected:** `Containers: 1` (or more)
@@ -877,50 +775,30 @@ python -c "import docker; c = docker.from_env(); print(f'Containers: {len(c.cont
 |-----------|---------|--------------|
 | WSL2 | 2.x | `wsl --status` |
 | Ubuntu | 22.04 LTS | `lsb_release -a` |
-| Docker | 28.2.2 | `docker --version` |
-| Docker Compose | 1.29.x | `docker-compose --version` |
-| Portainer | 2.33.6 LTS | http://localhost:9000 |
+| Docker | Installed version | `docker --version` |
+| Docker Compose | v2 | `docker compose version` |
+| Portainer | Selected image; optional | http://localhost:9050 |
 | Wireshark | 4.4.x | Launch application |
-| Python docker | 7.1.0 | `pip show docker` |
-| Python scapy | 2.7.0 | `pip show scapy` |
-| Python dpkt | 1.9.8 | `pip show dpkt` |
+| Python docker | Installed version | `python3 -m pip show docker` |
+| Python scapy | Installed version | `python3 -m pip show scapy` |
+| Python dpkt | Installed version | `python3 -m pip show dpkt` |
 
-### 11.3 Quick Verification Script
+### 11.3 Prerequisite Verification
 
-Create and run this verification script:
+From the repository root, inside WSL:
 
 ```bash
-#!/bin/bash
-echo "=== WSL Status ==="
-wsl.exe --status 2>/dev/null || echo "Run from Windows"
-
-echo ""
-echo "=== Ubuntu Version ==="
-lsb_release -d
-
-echo ""
-echo "=== Docker Version ==="
-docker --version
-
-echo ""
-echo "=== Docker Compose Version ==="
-docker-compose --version
-
-echo ""
-echo "=== Active Containers ==="
-docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
-
-echo ""
-echo "=== Portainer Status ==="
-docker ps --filter name=portainer --format "{{.Status}}"
-
-echo ""
-echo "=== Docker Networks ==="
-docker network ls
-
-echo ""
-echo "✅ All checks complete!"
+source ~/venvs/compnet-wsl/bin/activate
+bash 00_TOOLS/Prerequisites/verify_lab_environment.sh
 ```
+
+The default checks are local and do not pull Docker images. To request additional bounded HTTPS connectivity probes:
+
+```bash
+bash 00_TOOLS/Prerequisites/verify_lab_environment.sh --online
+```
+
+Review warnings for the chosen exercise. Passing these checks is not a complete course acceptance test. For the VirtualBox appliance use [its own verifier](../../01_GUIDE_MININET-SDN/verify_mininet_vm.sh).
 
 ---
 
@@ -976,7 +854,7 @@ echo "✅ All checks complete!"
 # Run this sequence for fast diagnosis:
 echo "1. Docker daemon:" && docker info >/dev/null 2>&1 && echo "   ✓ OK" || echo "   ✗ Not running"
 echo "2. Portainer:" && docker ps --filter name=portainer --format "   ✓ {{.Status}}" 2>/dev/null || echo "   ✗ Container absent"
-echo "3. Ports:" && ss -tlnp 2>/dev/null | grep -E ":(9000|8080)" | awk '{print "   ✓ " $4}' || echo "   ✓ Free"
+echo "3. Ports:" && ss -tlnp 2>/dev/null | grep -E ":(9050|8080)" | awk '{print "   ✓ " $4}' || echo "   ✓ Free"
 ```
 
 ---
@@ -1037,7 +915,7 @@ wsl docker ps
 
 ### 12.3 Portainer Issues
 
-#### Cannot access http://localhost:9000
+#### Cannot access http://localhost:9050
 
 1. Check if container is running:
 ```bash
@@ -1056,21 +934,13 @@ docker restart portainer
 
 #### "Portainer has already been initialised"
 
-If you missed the 5-minutes window:
+An administrator already exists. Use its actual credentials; this does not mean the volume is faulty. For an uninitialised setup that has timed out, restart the container and complete initialisation promptly:
 
 ```bash
-# Delete Portainer and volume
-docker stop portainer
-docker rm portainer
-docker volume rm portainer_data
-
-# Redeploy
-docker volume create portainer_data
-docker run -d -p 9000:9000 --name portainer --restart=always \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  -v portainer_data:/data \
-  portainer/portainer-ce:latest
+docker restart portainer
 ```
+
+Preserve `portainer_data`. Deleting it would remove users and settings and is not a routine setup repair.
 
 ### 12.4 Wireshark Issues
 
@@ -1123,7 +993,7 @@ sudo service docker stop    # Stop Docker
 
 | Service | URL |
 |---------|-----|
-| Portainer | http://localhost:9000 |
+| Portainer | http://localhost:9050 |
 | Docker Docs | https://docs.docker.com/ |
 | Wireshark Docs | https://www.wireshark.org/docs/ |
 | WSL Docs | https://learn.microsoft.com/en-us/windows/wsl/ |

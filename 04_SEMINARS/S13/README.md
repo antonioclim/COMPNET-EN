@@ -44,7 +44,7 @@ will also read `.env` automatically.
 | [`S13_Part05_Script_Defensive_Vuln_Checker.py`](S13_Part05_Script_Defensive_Vuln_Checker.py) | Script | Defensive-only fingerprinting for the lab targets (optional) |
 | [`S13_Part06_Tasks_Vuln_Enumeration.md`](S13_Part06_Tasks_Vuln_Enumeration.md) | Tasks | Enumeration exercises |
 | [`report_generator.py`](report_generator.py) | Script | Generate a single Markdown report from artefacts (optional) |
-| [`artifacts/`](artifacts/) | Folder | Generated outputs: JSON checks, notes, report.md |
+| `artifacts/` | Generated folder | Created by the exercises for JSON checks, notes and report.md |
 | [`S13_Part07_Explanation_Exploitation.md`](S13_Part07_Explanation_Exploitation.md) | Explanation | Exploitation fundamentals |
 | [`S13_Part08_Tasks_Exploitation.md`](S13_Part08_Tasks_Exploitation.md) | Tasks | Exploitation exercises |
 | [`S13_Part09_Explanation_Exploit_Script.md`](S13_Part09_Explanation_Exploit_Script.md) | Explanation | Writing exploit scripts |

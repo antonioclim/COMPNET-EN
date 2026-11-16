@@ -1,5 +1,7 @@
 # A09 — SDN IPS: dynamic blocking via OpenFlow triggered by IDS detection
 
+**Environment:** the [MININET-SDN appliance and student setup guide](../../01_GUIDE_MININET-SDN/README.md#download-the-lab-virtual-machine) provide the course VM route.
+
 ## Metadata
 - **Group:** 2
 - **Difficulty:** 5/5 (★★★★★)

@@ -1,5 +1,7 @@
 # 02_PROJECTS — RC2026 project briefs and assessment tooling
 
+**ASE lab environment:** use the [MININET-SDN appliance and setup guide](../01_GUIDE_MININET-SDN/README.md#download-the-lab-virtual-machine). The workstation provisioning script for ASE PCs is not a student prerequisite.
+
 Project specifications and shared assessment artefacts for the RC2026 Computer Networks laboratory. Students select one brief from this catalogue and implement it in their own repository, while instructors rely on the common tooling and verification index for repeatable marking across cohorts.
 
 ## File and folder index

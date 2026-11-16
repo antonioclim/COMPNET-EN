@@ -21,14 +21,14 @@ The pedagogical intent is to move from declarative claims to defensible explanat
 ### If you are a student
 
 1. Read `current-outline.md` to understand the weekly sequence.
-2. Complete the environment setup in `00_TOOLS/Prerequisites/Prerequisites.md` (or agree an alternative with your instructor).
+2. Use the [MININET-SDN virtual workstation](01_GUIDE_MININET-SDN/README.md#download-the-lab-virtual-machine) used in the ASE laboratories. The [WSL2 setup](00_TOOLS/Prerequisites/Prerequisites.md) is an alternative for the exercises that support it.
 3. Start with [S01](04_SEMINARS/S01/) and keep evidence as you work.
 
 ### If you are teaching
 
 1. Use the week-by-week map below to plan the lecture–seminar pairing.
 2. Standardise the environment early.
-   The default Windows stack is WSL2 + Ubuntu + Docker Engine + Portainer.
+   The ASE laboratory route is VirtualBox + MININET-SDN, with Docker Engine inside the guest. WSL2 + Ubuntu is a separate alternative for compatible exercises.
 3. Mark on evidence not on screenshots.
    Require submissions framed as claim → evidence → interpretation → limitation.
 
@@ -60,7 +60,7 @@ The pedagogical intent is to move from declarative claims to defensible explanat
 | --- | --- | --- |
 | `00_APPENDIX/` | Week 0 onboarding, optional bridge material, quizzes, troubleshooting notes | reduce toolchain friction and standardise baseline skills |
 | `00_TOOLS/` | PlantUML tooling, offline formatting, QA scripts | keep the kit deterministic and maintainable |
-| `01_GHID_MININET-SDN/` | Mininet-SDN setup guide (VM based) | controlled topologies for SDN and routing demonstrations |
+| `01_GUIDE_MININET-SDN/` | Mininet-SDN setup guide (VM based) | controlled topologies for SDN and routing demonstrations |
 | `02_PROJECTS/` | project briefs, marking evidence expectations, diagrams and helper tools | assessment by reproducible artefacts |
 | `03_LECTURES/` | lecture Markdown with scenarios and diagrams | conceptual model building plus short demonstrations |
 | `04_SEMINARS/` | seminar explanations, tasks, scenarios, code and Docker configs | practical work with evidence capture |
@@ -126,7 +126,7 @@ You should expand your toolchain as the seminars demand it.
 | 🧩 Node.js (optional) | formatting checks (Prettier) | if you edit Markdown or HTML |
 | 🌐 Mininet-SDN (optional) | controlled virtual topologies | SDN and routing related activities |
 
-The default Windows student stack is WSL2 + Ubuntu + Docker Engine + Portainer.
+The ASE laboratory route uses the MININET-SDN VirtualBox appliance. Students can use the same appliance on their own computers; WSL2 + Ubuntu + Docker Engine is a separate alternative for compatible exercises.
 The full installation is documented in `00_TOOLS/Prerequisites/Prerequisites.md`.
 
 ---
@@ -134,7 +134,7 @@ The full installation is documented in `00_TOOLS/Prerequisites/Prerequisites.md`
 ## Quick start pathways
 
 Choose the pathway that matches your context.
-The kit remains usable even if you do not have Mininet-SDN or Portainer.
+Socket and container exercises can use the supported alternatives below. Mininet remains required for the exercises that explicitly use its topologies; Portainer is optional.
 
 ### Pathway A: read only (no installs)
 
@@ -155,43 +155,30 @@ python -m pip install --upgrade pip
 
 Where additional Python packages are needed, the relevant seminar directory will specify them.
 
-### Pathway C: Docker labs with or without Portainer
+### Pathway C: Portainer (optional container interface)
 
-Docker is the default execution substrate for multi service labs.
-Portainer is a convenience layer.
-If you do not install it, you can still complete the labs using the Docker CLI.
-
-Minimum checks:
+Use the [Portainer setup guide](00_TOOLS/Portainer/INIT_GUIDE/PORTAINER_SETUP.md).
+For the MININET-SDN route, run the helper inside the VM:
 
 ```bash
-docker version
-docker compose version
+bash 00_TOOLS/Portainer/INIT_GUIDE/portainer-init.sh
 ```
 
-Optional Portainer (Linux, WSL2 or any host running Docker Engine):
+The local interface uses port 9050. Connect from Windows through the SSH tunnel
+in the setup guide. Port 9000 is reserved for the S10 tunnelling exercise.
 
-```bash
-docker volume create portainer_data
+### Pathway D: MININET-SDN (ASE laboratory environment)
 
-docker run -d \
-  --name portainer \
-  --restart=always \
-  -p 9000:9000 \
-  -p 9443:9443 \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  -v portainer_data:/data \
-  portainer/portainer-ce:latest
+The MININET-SDN VirtualBox appliance is used in the ASE laboratories and can also
+be imported on students' compatible computers. Run Mininet, Open vSwitch and the
+guest Docker Engine inside that VM.
 
-# open http://localhost:9000
-```
+- **Appliance version 1.0.0:** [Zenodo DOI](https://doi.org/10.5281/zenodo.24289763).
+  Published on 16 November 2026. Download the OVA and checksum manifest from the release record.
+- [File identity and checksum](01_GUIDE_MININET-SDN/README.md#download-the-lab-virtual-machine).
+- [Student setup guide](01_GUIDE_MININET-SDN/SETUP-GUIDE-COMPNET-EN.md).
+- The administrative script used to provision ASE PCs is not required on students' computers.
 
-### Pathway D: Mininet-SDN (optional)
-
-Mininet-SDN is used when you need a controlled topology that behaves like a network rather than a set of containers.
-It is primarily relevant for SDN style exercises and selected routing demonstrations.
-
-- See `01_GHID_MININET-SDN/SETUP-GUIDE-COMPNET-EN.md`.
-- On Windows, this is typically used via a VM.
 
 ---
 
@@ -471,7 +458,7 @@ Clim, A. (2025). Computer Networks — Course Kit (EN). Bucharest University of 
 .
 ├── 00_APPENDIX
 ├── 00_TOOLS
-├── 01_GHID_MININET-SDN
+├── 01_GUIDE_MININET-SDN
 ├── 02_PROJECTS
 ├── 03_LECTURES
 ├── 04_SEMINARS

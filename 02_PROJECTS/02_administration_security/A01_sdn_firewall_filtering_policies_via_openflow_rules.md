@@ -1,5 +1,7 @@
 # A01 — SDN firewall: filtering policies implemented via OpenFlow rules
 
+**Environment:** the [MININET-SDN appliance and student setup guide](../../01_GUIDE_MININET-SDN/README.md#download-the-lab-virtual-machine) provide the course VM route.
+
 ## Metadata
 - **Group:** 2
 - **Difficulty:** 4/5 (★★★★☆)

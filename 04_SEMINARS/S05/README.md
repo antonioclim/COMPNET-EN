@@ -1,5 +1,7 @@
 # S05 — IPv4/IPv6 Subnetting and Network Simulation
 
+**ASE lab environment:** use the [MININET-SDN appliance and setup guide](../../01_GUIDE_MININET-SDN/README.md#download-the-lab-virtual-machine). The workstation provisioning script for ASE PCs is not a student prerequisite.
+
 Week 5 shifts from application-layer programming to network-layer addressing. Students perform manual subnet calculations for both IPv4 (FLSM and VLSM) and IPv6 (prefix delegation and address planning), then apply these calculations inside a Mininet network simulator to configure and verify a working multi-subnet topology.
 
 ## File/Folder Index

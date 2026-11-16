@@ -12,6 +12,8 @@ often matter in real deployments:
 
 1) **Policy as data**: an explicit allowlist / blocklist (host roles).
 2) **Rule ageing**: idle/hard timeouts to prevent flow-table buildup.
+   UDP policy exceptions remain until the topology is restarted; forwarding
+   and learning entries demonstrate rule ageing.
 3) **Fallback behaviour**: a small learning-switch path for unspecified traffic,
    so the network is not “dead by default”.
 
@@ -37,9 +39,8 @@ Run
 ---
 In one terminal (controller):
 
-  # Either of the following commands may work depending on your installation.
-  osken-manager S06_Part02C_Script_SDNOS_Ken_Controller_AdvancedPolicy.py
-  ryu-manager   S06_Part02C_Script_SDNOS_Ken_Controller_AdvancedPolicy.py
+  # Use the course environment that provides osken-manager.
+  osken-manager --ofp-tcp-listen-port 6633 S06_Part02C_Script_SDNOS_Ken_Controller_AdvancedPolicy.py
 
 In another terminal (topology):
 
@@ -63,7 +64,7 @@ from typing import Dict
 
 from os_ken.base import app_manager
 from os_ken.controller import ofp_event
-from os_ken.controller.handler import MAIN_DISPATCHER, set_ev_cls
+from os_ken.controller.handler import MAIN_DISPATCHER, CONFIG_DISPATCHER, set_ev_cls
 from os_ken.lib.packet import packet
 from os_ken.lib.packet import ethernet, arp, ipv4
 from os_ken.lib.packet import ether_types
@@ -83,16 +84,17 @@ FLOW_HARD_TIMEOUT = int(os.getenv("FLOW_HARD_TIMEOUT", "300"))
 
 # Priorities: bigger number = stronger policy.
 PRIORITY_DROP = 200
+PRIORITY_UDP_EXCEPTION = 210
 PRIORITY_PERMIT = 100
 PRIORITY_L2_LEARNING = 10
 
 
-class AdvancedPolicyController(app_manager.RyuApp):
+class AdvancedPolicyController(app_manager.OSKenApp):
     OFP_VERSIONS = [ofproto_v1_3.OFP_VERSION]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.mac_to_port: Dict[str, int] = {}
+        self.mac_to_port: Dict[int, Dict[str, int]] = {}
 
     def add_flow(self, datapath, priority, match, actions, idle_timeout=0, hard_timeout=0):
         ofproto = datapath.ofproto
@@ -109,7 +111,7 @@ class AdvancedPolicyController(app_manager.RyuApp):
         )
         datapath.send_msg(mod)
 
-    @set_ev_cls(ofp_event.EventOFPSwitchFeatures, MAIN_DISPATCHER)
+    @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
     def switch_features_handler(self, ev):
         datapath = ev.msg.datapath
         parser = datapath.ofproto_parser
@@ -173,11 +175,13 @@ class AdvancedPolicyController(app_manager.RyuApp):
                 actions = [parser.OFPActionOutput(out_port)]
                 self.add_flow(
                     datapath,
-                    PRIORITY_PERMIT + 10,  # stronger than generic permit
+                    PRIORITY_UDP_EXCEPTION,  # must override the broader IPv4 drop
                     match,
                     actions,
-                    idle_timeout=FLOW_IDLE_TIMEOUT,
-                    hard_timeout=FLOW_HARD_TIMEOUT,
+                    # A policy exception must survive while the permanent drop
+                    # exists. Expiring it would silently disable allowed UDP.
+                    idle_timeout=0,
+                    hard_timeout=0,
                 )
                 self.logger.info("UDP exception installed: %s -> %s (out_port=%s)", src, dst, out_port)
 

@@ -1,5 +1,7 @@
 ### Scenario: Mininet (router triangle) — failures and asymmetric routing
 
+**ASE lab environment:** use the [MININET-SDN appliance and setup guide](../../../../01_GUIDE_MININET-SDN/README.md#download-the-lab-virtual-machine). The workstation provisioning script for ASE PCs is not a student prerequisite.
+
 #### Requirements
 - Linux
 - Mininet installed

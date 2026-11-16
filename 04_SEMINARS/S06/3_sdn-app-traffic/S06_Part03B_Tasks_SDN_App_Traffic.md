@@ -1,193 +1,143 @@
-### Tasks: TCP and UDP Traffic through the SDN Switch
+### Tasks: TCP and UDP traffic through the SDN switch
 
-These tasks build upon Stage 2 (Os-Ken controller + SDN topology).
+Continue from Part 2 with the baseline Os-Ken controller and the Mininet topology running. The topology was started from `04_SEMINARS/S06/2_sdn`, so the supplied application scripts are reached through `../3_sdn-app-traffic/`.
 
-Assumptions:
-- the Os-Ken controller is running with `index_sdn_os-ken_controller.py`
-- the Mininet SDN topology is running with `index_sdn_topo_switch.py`
+Commands prefixed with `h1`, `h2`, `h3` or `s1` run at the **Mininet CLI**. Keep the separate controller terminal open. Server processes run in the background so the Mininet CLI remains available.
 
----
+### 1. TCP permitted between h1 and h2
 
-### 1. Test TCP — Permitted between h1 and h2
+At the **Mininet CLI**, start the h2 server and record its process identifier:
 
-1. In the Mininet CLI, start the TCP server on h2:
-
-```bash
-h2 python3 S06_Part03_Script_TCP_Server.py 5000
-````
-
-2. In another Mininet terminal (or after opening a new CLI with `xterm h1`, if used), start the TCP client on h1:
-
-```bash
-h1 python3 S06_Part03_Script_TCP_Client.py 10.0.10.2 5000
+```text
+h2 sh -c 'python3 -u ../3_sdn-app-traffic/S06_Part03_Script_TCP_Server.py 5000 > /tmp/compnet-s06-tcp-h2.log 2>&1 & echo $! > /tmp/compnet-s06-tcp-h2.pid'
+h2 ss -ltn '( sport = :5000 )'
 ```
 
-3. Send a few messages (e.g. `hello`, `test`) and verify that:
+Wait until h2 shows a listener on port 5000, then run a bounded client exchange:
 
-* the server displays them
-* the client receives the echo
-
-4. Stop the client with `exit`, then stop the server with Ctrl-C.
-
----
-
-### 2. Test TCP — Blocked between h1 and h3
-
-1. From h1, attempt to connect to h3 (without running a server there — SDN blocks the traffic regardless):
-
-```bash
-h1 python3 S06_Part03_Script_TCP_Client.py 10.0.10.3 5000
+```text
+h1 sh -c 'printf "hello\nexit\n" | timeout 8s python3 -u ../3_sdn-app-traffic/S06_Part03_Script_TCP_Client.py 10.0.10.2 5000'
+h2 cat /tmp/compnet-s06-tcp-h2.log
 ```
 
-2. Observe:
+The client should connect and receive an echo of `hello`. You can also run the client interactively and type `exit` when finished. Save both client and server evidence.
 
-* you should see `Connection failed` or a time-out
-* in the Os-Ken log, drop messages for traffic towards 10.0.10.3 should appear
-* `ovs-ofctl dump-flows s1` should show the previously installed drop flow
+### 2. TCP blocked between h1 and h3
 
-Save the client output in the deliverable file.
+A failed connection to an absent server does not demonstrate an SDN policy. Start a real h3 listener first:
 
----
-
-### 3. Test UDP with h3 (Initially Blocked at IP Level)
-
-1. Start the UDP server on h3:
-
-```bash
-h3 python3 S06_Part03_Script_UDP_Server.py 6000
+```text
+h3 sh -c 'python3 -u ../3_sdn-app-traffic/S06_Part03_Script_TCP_Server.py 5000 > /tmp/compnet-s06-tcp-h3.log 2>&1 & echo $! > /tmp/compnet-s06-tcp-h3.pid'
+h3 ss -ltn '( sport = :5000 )'
+s1 ovs-ofctl -O OpenFlow13 dump-flows s1
 ```
 
-2. From h1, start the UDP client:
+After confirming the listener, attempt the blocked connection:
 
-```bash
-h1 python3 S06_Part03_Script_UDP_Client.py 10.0.10.3 6000
+```text
+h1 sh -c 'timeout 8s python3 -u ../3_sdn-app-traffic/S06_Part03_Script_TCP_Client.py 10.0.10.3 5000; printf "Client exit status: %s\n" "$?"'
+s1 ovs-ofctl -O OpenFlow13 dump-flows s1
 ```
 
-3. Attempt to send a few messages. Depending on the controller implementation:
+The deadline bounds the blocked demonstration; exit status 124 means `timeout` ended the client. A client-side connection error may end earlier. Retain the server-listener evidence and the matching drop-flow counters to distinguish the policy result from a setup failure.
 
-* if a general drop flow on `dst_ip == 10.0.10.3` exists, nothing may arrive
-* if no drop flow has been installed for this case yet, messages may pass through
+### 3. UDP initially blocked towards h3
 
-In the next step the controller will be modified explicitly to handle TCP and UDP separately.
+Start the UDP echo server on h3:
 
----
+```text
+h3 sh -c 'python3 -u ../3_sdn-app-traffic/S06_Part03_Script_UDP_Server.py 6000 > /tmp/compnet-s06-udp-h3.log 2>&1 & echo $! > /tmp/compnet-s06-udp-h3.pid'
+h3 ss -lun '( sport = :6000 )'
+```
 
-### 4. Modifying the Os-Ken Controller: Permit UDP, Block TCP towards h3
+Confirm the listener, then send a message through the baseline policy:
 
-In the file `index_sdn_os-ken_controller.py`, within the `packet_in_handler`, modify the logic so that:
+```text
+h1 sh -c 'printf "hello\nexit\n" | timeout 8s python3 -u ../3_sdn-app-traffic/S06_Part03_Script_UDP_Client.py 10.0.10.3 6000; printf "Client exit status: %s\n" "$?"'
+s1 ovs-ofctl -O OpenFlow13 dump-flows s1
+```
 
-* for TCP traffic (ip_proto = 6) towards `10.0.10.3`:
+The baseline policy drops IPv4 traffic to h3, including the first UDP packet before a drop flow has been installed. Expect no echo. The deadline prevents the client from waiting indefinitely for a blocked reply.
 
-  * install a drop flow (as before)
-* for UDP traffic (ip_proto = 17) towards `10.0.10.3`:
+### 4. Extend the baseline policy: permit UDP, retain the TCP block
 
-  * install a flow that **permits** forwarding to the h3 port
+Edit `S06_Part02C_Script_SDNOS_Ken_Controller.py` in `2_sdn/`. Implement a UDP exception for **both directions** between h1 and h3. An echo requires a request path and a reply path.
 
-Hints:
+Requirements for your change:
 
-* obtain the protocol from `ipv4_pkt.proto`
-* `parser.OFPMatch` can be used as follows:
+- Match IPv4 UDP using `eth_type=0x0800` and `ip_proto=17`.
+- Permit `10.0.10.1 → 10.0.10.3` on switch port 3.
+- Permit `10.0.10.3 → 10.0.10.1` on switch port 1.
+- Give the exception a priority greater than the baseline generic h3 drop rule, whose priority is 20.
+- Handle the current packet as well as installing the future flow, following the baseline controller's buffer/packet-out logic.
+- Keep TCP towards h3 blocked and retain ARP handling.
+
+A directional match has this form:
 
 ```python
 match = parser.OFPMatch(
     eth_type=0x0800,
-    ip_proto=17,         # UDP
-    ipv4_dst="10.0.10.3"
+    ip_proto=17,
+    ipv4_src="10.0.10.1",
+    ipv4_dst="10.0.10.3",
 )
-```
-
-* for actions, use the port to which h3 is connected (typically 3):
-
-```python
 actions = [parser.OFPActionOutput(3)]
 ```
 
-* for TCP, use `ip_proto=6` and an empty action list (`actions = []`) for drop.
+Add the corresponding reply direction, with source/destination exchanged and output port 1. Evaluate the exception before the generic h3-drop branch. Save your edited controller as part of the deliverable.
 
-After modifying the file, restart the controller:
-
-```bash
-# stop the old Os-Ken instance
-# then:
-osken-manager index_sdn_os-ken_controller.py
-```
-
-Restart the Mininet network as well if it was stopped.
-
----
-
-### 5. Re-testing UDP and TCP
-
-1. With the UDP server on h3:
+**Restart cleanly after changing the policy:** stop the application servers using Section 6 below, enter `exit` at the Mininet CLI and stop the old controller with `Ctrl+C`. In the controller terminal, run:
 
 ```bash
-h3 python3 S06_Part03_Script_UDP_Server.py 6000
+cd "$HOME/COMPNET-EN/04_SEMINARS/S06/2_sdn"
+osken-manager --ofp-listen-host 127.0.0.1 --ofp-tcp-listen-port 6633 S06_Part02C_Script_SDNOS_Ken_Controller.py
 ```
 
-2. With the UDP client on h1:
+In a second guest terminal, start a fresh topology:
 
 ```bash
-h1 python3 S06_Part03_Script_UDP_Client.py 10.0.10.3 6000
+cd "$HOME/COMPNET-EN/04_SEMINARS/S06/2_sdn"
+sudo python3 S06_Part02B_Script_SDN_Topo_Switch.py
 ```
 
-3. Send a few messages:
+A new topology prevents old drop flows from obscuring the changed policy. Restart the h3 TCP and UDP servers from Sections 2–3 and verify their listeners.
 
-* the server should now display the messages and the client should receive echo replies
-* UDP should be permitted
+### 5. Re-test the exception and inspect flows
 
-4. Retry the TCP client:
+At the new **Mininet CLI**:
 
-```bash
-h1 python3 S06_Part03_Script_TCP_Client.py 10.0.10.3 5000
+```text
+h1 sh -c 'printf "hello\nexit\n" | timeout 8s python3 -u ../3_sdn-app-traffic/S06_Part03_Script_UDP_Client.py 10.0.10.3 6000'
+h3 cat /tmp/compnet-s06-udp-h3.log
+h1 sh -c 'timeout 8s python3 -u ../3_sdn-app-traffic/S06_Part03_Script_TCP_Client.py 10.0.10.3 5000; printf "Client exit status: %s\n" "$?"'
+s1 ovs-ofctl -O OpenFlow13 dump-flows s1
 ```
 
-* this should still be blocked (SDN-level drop)
+Expected results: UDP produces an echo, TCP remains blocked and the flow table contains the UDP request/reply directions at a priority above the general drop. Check counters as well as rule presence.
 
----
+The optional advanced controller provides a separate comparison using `ALLOW_UDP_TO_H3=1`. It does not replace the required explanation of your own baseline-policy change. Restart the topology when switching controllers.
 
-### 6. Inspecting Flows after Modification
+### 6. Stop the processes you started
 
-Run:
+For each server started in the current topology, use its recorded PID at the **Mininet CLI**:
 
-```bash
-s1 ovs-ofctl dump-flows s1
+```text
+h2 sh -c 'test ! -f /tmp/compnet-s06-tcp-h2.pid || kill "$(cat /tmp/compnet-s06-tcp-h2.pid)"'
+h3 sh -c 'test ! -f /tmp/compnet-s06-tcp-h3.pid || kill "$(cat /tmp/compnet-s06-tcp-h3.pid)"'
+h3 sh -c 'test ! -f /tmp/compnet-s06-udp-h3.pid || kill "$(cat /tmp/compnet-s06-udp-h3.pid)"'
 ```
 
-Look for:
+Run only the lines corresponding to servers you started in this topology; a PID file from an older run is not a current process identifier. Then enter `exit` at `mininet>` and stop the controller with `Ctrl+C`.
 
-* a flow for UDP with ip_proto=17, dst=10.0.10.3 and action output towards the h3 port
-* a flow for TCP with ip_proto=6, dst=10.0.10.3 and empty actions (drop)
+### Final SDN deliverable
 
----
+Create `sdn_lab_output.txt` containing:
 
-### Final SDN Deliverable
+- The controller-policy modification and why each match, action and priority is needed
+- The successful h1–h2 TCP exchange
+- Listener and drop-counter evidence for the blocked h1–h3 TCP test
+- The blocked baseline UDP test and the successful UDP request/reply exchange after modification
+- Flow dumps produced with `-O OpenFlow13`
+- Eight to ten sentences comparing static routing with SDN, explaining the policy's effect on TCP/UDP and relating the observations to the actual match/action rules
 
-Combine all results from Stages 2 and 3 into a single file:
-
-```
-sdn_lab_output.txt
-```
-
-It must contain:
-
-1. Relevant output from Stage 2:
-
-   * ping h1 -> h2 (successful)
-   * ping h1 -> h3 (failed)
-   * a flow table dump
-
-2. Output from Stage 3:
-
-   * TCP client h1 -> h2 (messages successful)
-   * TCP client h1 -> h3 (failed)
-   * UDP client h1 -> h3 (successful after controller modification)
-   * a flow table dump after modification
-
-3. An explanation of 8–10 sentences describing:
-
-   * the difference between classical routing (triangle) and SDN
-   * how the Os-Ken controller influences TCP and UDP traffic
-   * how the security policy is visible in the flow table (TCP blocked, UDP permitted)
-   * what advantages SDN offers for such fine-grained (application-aware) policies
-
-This file is the deliverable to be submitted for Seminar 6.
+Submit the modified controller alongside the log. Retain unexpected results and explain their causes instead of treating any timeout as proof that the policy worked.

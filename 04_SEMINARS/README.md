@@ -1,5 +1,7 @@
 # 04_SEMINARS — Practical Laboratory Sessions
 
+**ASE lab environment:** use the [MININET-SDN appliance and setup guide](../01_GUIDE_MININET-SDN/README.md#download-the-lab-virtual-machine). The workstation provisioning script for ASE PCs is not a student prerequisite.
+
 Fourteen weekly seminars (S01–S14) form the applied spine of the COMPNET-EN course. They progress from basic network observation through socket programming and protocol design to containerised service deployment, security testing and remote procedure call frameworks. Each seminar directory contains Markdown files (Explanation, Scenario and Tasks), Python source code, Docker Compose configurations where needed and PlantUML diagram sources. Two auxiliary directories supply browser-viewable HTML renderings (`_HTMLsupport/`) and reference solutions (`_tutorial-solve/`).
 
 ## Seminar Index
@@ -11,7 +13,7 @@ Fourteen weekly seminars (S01–S14) form the applied spine of the COMPNET-EN co
 | [`S03/`](S03/) | 03 | UDP broadcast, multicast, anycast and multi-client TCP | Python sockets | 21 |
 | [`S04/`](S04/) | 04 | Custom text and binary protocols over TCP and UDP | Python struct, serialisation | 22 |
 | [`S05/`](S05/) | 05 | IPv4/IPv6 subnetting and Mininet simulation | Mininet, Python | 15 |
-| [`S06/`](S06/) | 06 | SDN, static routing and Mininet topologies | Mininet, Ryu/OpenFlow | 20 |
+| [`S06/`](S06/) | 06 | SDN, static routing and Mininet topologies | Mininet, OS-Ken/OpenFlow | 20 |
 | [`S07/`](S07/) | 07 | Packet sniffing, filtering, port scanning and IDS | Raw sockets, Python | 18 |
 | [`S08/`](S08/) | 08 | HTTP server implementation and Nginx reverse proxy | Python, Docker, Nginx | 20 |
 | [`S09/`](S09/) | 09 | FTP server, custom file transfer and containers | pyftpdlib, Docker | 23 |
@@ -114,7 +116,8 @@ Generated PNGs are written to the corresponding `assets/images/` directory.
 
 | Prerequisite | Path | Reason |
 |---|---|---|
-| Environment setup (Docker, WSL2) | [`../00_TOOLS/Prerequisites/`](../00_TOOLS/Prerequisites/) | Docker and WSL2 must be configured before running containerised scenarios (S08 onward) |
+| ASE environment (VirtualBox / MININET-SDN) | [`../01_GUIDE_MININET-SDN/`](../01_GUIDE_MININET-SDN/) | Mininet/SDN and Docker Engine inside the guest |
+| Alternative WSL2 environment | [`../00_TOOLS/Prerequisites/`](../00_TOOLS/Prerequisites/) | Use only for the exercises that support this route |
 | Portainer (for Docker GUI) | [`../00_TOOLS/Portainer/INIT_GUIDE/`](../00_TOOLS/Portainer/INIT_GUIDE/) | Optional but recommended for visual container management |
 | Python self-study | [`../00_APPENDIX/a)PYTHON_self_study_guide/`](../00_APPENDIX/a%29PYTHON_self_study_guide/) | Socket programming fluency assumed from S02 onward |
 
