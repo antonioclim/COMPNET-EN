@@ -12,9 +12,11 @@ paho-mqtt
 scapy
 grpcio
 grpcio-tools
-os-ken
+# The S06 command-line route requires osken-manager, removed in OS-Ken 4.
+# This is a compatibility bound, not a validated lockfile for the appliance.
+os-ken<4
 PyYAML
 Pillow
 
 # Mininet is usually installed as a system package (not via pip).
-# gRPC stubs (calculator_pb2*.py) are generated via grpcio-tools; see assets/tutorial/s12/*.
+# gRPC stubs (calculator_pb2*.py) are generated via grpcio-tools; see 04_SEMINARS/S12/3_grpc/.

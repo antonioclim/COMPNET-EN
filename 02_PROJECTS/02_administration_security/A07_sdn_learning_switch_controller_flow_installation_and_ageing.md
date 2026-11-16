@@ -1,5 +1,7 @@
 # A07 — SDN learning-switch controller with flow installation and ageing
 
+**Environment:** the [MININET-SDN appliance and student setup guide](../../01_GUIDE_MININET-SDN/README.md#download-the-lab-virtual-machine) provide the course VM route.
+
 ## Metadata
 - **Group:** 2
 - **Difficulty:** 4/5 (★★★★☆)

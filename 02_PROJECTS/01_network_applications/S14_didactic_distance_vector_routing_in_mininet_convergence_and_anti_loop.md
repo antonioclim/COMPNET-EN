@@ -1,5 +1,7 @@
 # S14 — Didactic distance-vector routing in Mininet with convergence and anti-loop
 
+**Environment:** the [MININET-SDN appliance and student setup guide](../../01_GUIDE_MININET-SDN/README.md#download-the-lab-virtual-machine) provide the course VM route.
+
 ## Metadata
 - **Group:** 1
 - **Difficulty:** 5/5 (★★★★★)

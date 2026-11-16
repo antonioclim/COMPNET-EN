@@ -19,10 +19,10 @@ After completing each section of **Prerequisites.md**, return here and check if 
 
 Can you answer these questions?
 
-1. **Why do we use WSL2 + Docker instead of Docker Desktop?**
+1. **What is the purpose of this WSL2 alternative?**
    <details>
    <summary>Answer</summary>
-   WSL2 + Docker offers: better performance (native Linux kernel), lower resource consumption, complete access to Linux network stack, greater educational value (real Linux environment) and is completely free.
+   This alternative keeps Docker, Python packages and exercise files in the same Linux environment. Portainer is an optional management interface. The MININET-SDN VirtualBox appliance remains the classroom route.
    </details>
 
 2. **What components will we install and in what order?**
@@ -93,7 +93,7 @@ Can you answer these questions?
 1. **What command enables WSL2?**
    <details>
    <summary>Answer</summary>
-   `wsl --install` in PowerShell as Administrator
+   `wsl --install --no-distribution` for platform preparation, then `wsl --install -d Ubuntu-22.04 --web-download` under the intended Windows user
    </details>
 
 2. **How do you verify that WSL2 is the default version?**
@@ -179,7 +179,7 @@ docker run --rm alpine echo "Test"
 2. **On which port do you access Portainer from the browser?**
    <details>
    <summary>Answer</summary>
-   http://localhost:9000
+   http://localhost:9050
    </details>
 
 📌 **Practical verification:**
@@ -197,16 +197,16 @@ docker ps | grep portainer
 
 ### ✓ Understanding Check
 
-1. **Why doesn't Docker start automatically in WSL2 after Windows restart?**
+1. **Does a container restart policy start Docker and WSL automatically after Windows restart?**
    <details>
    <summary>Answer</summary>
-   WSL2 does not have systemd enabled by default, so services do not initialise automatically at boot.
+   No. Docker must first be running inside the intended WSL distribution. Service startup depends on its init configuration; check whether PID 1 is systemd. A container restart policy does not launch WSL itself.
    </details>
 
 2. **What command manually starts Docker in WSL?**
    <details>
    <summary>Answer</summary>
-   `sudo service docker start`
+   `sudo systemctl start docker` when systemd is PID 1, otherwise `sudo service docker start`
    </details>
 
 📌 **Common confusion:** See [docs/misconceptions.md](../../00_APPENDIX/docs/misconceptions.md) — Misconception 7 (Docker auto-start).
@@ -220,14 +220,14 @@ docker ps | grep portainer
 
 Can you tick all these points?
 
-- [ ] `wsl --status` shows "Default Version: 2"
-- [ ] `docker --version` displays a version (28.x.x)
+- [ ] `wsl --list --verbose` shows VERSION 2 for the distribution actually used
+- [ ] `docker --version` and `docker compose version` report the installed versions
 - [ ] `docker ps` works without sudo
-- [ ] Portainer container appears in `docker ps`
-- [ ] Can access http://localhost:9000 from browser
-- [ ] Can login to Portainer with stud/studstudstud
+- [ ] If using optional Portainer, its container appears in `docker ps`
+- [ ] If using Portainer, can access http://localhost:9050 from the browser
+- [ ] If using Portainer, can log in with the configured account
 - [ ] Wireshark sees the "vEthernet (WSL)" interface
-- [ ] `python3 -c "import docker, scapy, dpkt"` gives no error
+- [ ] After activating the Linux virtual environment, `python3 -c "import docker, scapy, dpkt"` gives no error
 
 ### 🏁 Final Verification with Script
 

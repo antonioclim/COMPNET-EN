@@ -26,7 +26,7 @@
 #
 # Notes
 # -----
-# - Verification mode (--verify) is non-destructive and does not require sudo.
+# - Verification mode (--verify) is non-destructive; it needs permission to read OVSDB.
 # - Full reset requires sudo because it manipulates OVS and namespaces.
 
 set -euo pipefail
@@ -86,7 +86,10 @@ delete_ovs_bridges() {
   require_cmd ovs-vsctl
 
   local bridges
-  bridges=$(ovs-vsctl list-br 2>/dev/null || true)
+  if ! bridges=$(ovs-vsctl --timeout=10 list-br); then
+    log_error "Cannot read OVSDB; a failed query does not prove that it is empty."
+    return 1
+  fi
 
   if [[ -z "${bridges}" ]]; then
     log_success "No OVS bridges found"
@@ -96,7 +99,7 @@ delete_ovs_bridges() {
   while IFS= read -r br; do
     [[ -z "$br" ]] && continue
     log_info "  deleting bridge: $br"
-    ovs-vsctl --if-exists del-br "$br" 2>/dev/null || true
+    ovs-vsctl --timeout=10 --if-exists del-br "$br" || return 1
   done <<<"${bridges}"
 
   log_success "OVS bridges removed"
@@ -105,32 +108,33 @@ delete_ovs_bridges() {
 mininet_cleanup() {
   if command -v mn >/dev/null 2>&1; then
     log_info "Running standard Mininet cleanup: mn -c"
-    mn -c 2>/dev/null || true
-    log_success "Mininet cleanup complete"
+    if mn -c; then
+      log_success "Mininet cleanup complete"
+    else
+      log_warn "Mininet cleanup returned an error; inspect the output before continuing."
+    fi
   else
     log_warn "Mininet command 'mn' not found; skipped mn -c"
   fi
 }
 
 restart_ovs() {
-  log_info "Restarting Open vSwitch service (best effort)…"
-
-  # Common service names on Ubuntu/Debian.
-  if command -v systemctl >/dev/null 2>&1; then
-    systemctl restart openvswitch-switch 2>/dev/null || true
+  log_info "Restarting Open vSwitch service…"
+  local restarted=0
+  if command -v systemctl >/dev/null 2>&1 &&
+     systemctl restart openvswitch-switch; then
+    restarted=1
+  elif command -v service >/dev/null 2>&1 &&
+       service openvswitch-switch restart; then
+    restarted=1
   fi
-
-  if command -v service >/dev/null 2>&1; then
-    service openvswitch-switch restart 2>/dev/null || true
+  if [[ $restarted -ne 1 ]]; then
+    log_error "Open vSwitch restart failed; the reset is incomplete."
+    return 1
   fi
-
-  # Last resort: ask ovs-vswitchd to exit cleanly (OVS may respawn via systemd)
-  if command -v ovs-appctl >/dev/null 2>&1; then
-    ovs-appctl exit --cleanup 2>/dev/null || true
-  fi
-
+  # Do not ask ovs-vswitchd to exit after successfully starting the service.
   sleep 2
-  log_success "OVS restart attempted"
+  log_success "Open vSwitch service restarted"
 }
 
 verify_clean() {
@@ -138,7 +142,10 @@ verify_clean() {
 
   log_info "Verifying clean OVS state…"
   local bridges
-  bridges=$(ovs-vsctl list-br 2>/dev/null || true)
+  if ! bridges=$(ovs-vsctl --timeout=10 list-br); then
+    log_error "Cannot read OVSDB; a failed query does not prove that it is empty."
+    return 1
+  fi
 
   if [[ -z "${bridges}" ]]; then
     log_success "OVS is clean (no bridges)"
@@ -150,7 +157,7 @@ verify_clean() {
   if [[ $QUIET -eq 0 ]]; then
     echo ""
     log_info "Current OVS status:"
-    ovs-vsctl show || true
+    ovs-vsctl --timeout=10 show || return 1
     echo ""
   fi
 
@@ -230,7 +237,7 @@ main() {
     exit 0
   else
     echo "================================================"
-    log_warn "Reset completed with warnings — leftover bridges detected."
+    log_warn "Reset incomplete — inspect the OVS query and bridge diagnostics above."
     echo "================================================"
     exit 1
   fi

@@ -41,6 +41,9 @@
 00_TOOLS/release/create_release_zip.sh
 00_TOOLS/subnetting/subnet_quiz_generator.py
 
+# ── 01_GUIDE_MININET-SDN ────────────────────────────────────────
+01_GUIDE_MININET-SDN/verify_mininet_vm.sh
+
 # ── 02_PROJECTS ──────────────────────────────────────────────
 02_PROJECTS/00_common/assets/render.sh
 02_PROJECTS/00_common/docker/tester_base/entrypoint.sh

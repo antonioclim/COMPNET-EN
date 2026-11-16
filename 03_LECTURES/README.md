@@ -1,5 +1,7 @@
 # 03_LECTURES — Lecture Notes, Diagrams and Micro-Scenarios
 
+**ASE lab environment:** use the [MININET-SDN appliance and setup guide](../01_GUIDE_MININET-SDN/README.md#download-the-lab-virtual-machine). The workstation provisioning script for ASE PCs is not a student prerequisite.
+
 Fourteen lecture units (C01–C14) provide the theoretical spine of COMPNET-EN. Each lecture directory pairs Markdown lecture notes (maintained as slide-like documents) with reproducible diagrams (PlantUML source in `assets/puml/`, rendered PNGs in `assets/images/`) and short runnable scenarios intended to generate observable artefacts such as packet captures, logs and protocol transcripts.
 
 ## File and Folder Index

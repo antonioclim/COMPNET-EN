@@ -22,7 +22,7 @@ class SDNSimpleTopo(Topo):
     """Simple topology with a single switch and three hosts."""
     def build(self):
         # Create a single Open vSwitch
-        s1 = self.addSwitch('s1')
+        s1 = self.addSwitch('s1', protocols='OpenFlow13')
 
         # Create the hosts
         h1 = self.addHost('h1', ip='10.0.10.1/24')
@@ -65,13 +65,14 @@ def run():
         port=6633
     )
 
-    net.start()
-    info("\n=== SDN network started (h1, h2, h3, s1) ===\n")
-    info("The controller must be running on 127.0.0.1:6633 (Os-Ken).\n")
-    info("Try: h1 ping -c 3 10.0.10.2 and h1 ping -c 3 10.0.10.3\n\n")
-
-    CLI(net)
-    net.stop()
+    try:
+        net.start()
+        info("\n=== SDN network started (h1, h2, h3, s1) ===\n")
+        info("The controller must be running on 127.0.0.1:6633 (Os-Ken).\n")
+        info("Try: h1 ping -c 3 10.0.10.2 and h1 ping -c 3 10.0.10.3\n\n")
+        CLI(net)
+    finally:
+        net.stop()
 
 
 if __name__ == '__main__':

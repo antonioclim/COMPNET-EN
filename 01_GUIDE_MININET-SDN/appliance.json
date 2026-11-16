@@ -1,0 +1,14 @@
+{
+  "title": "MININET-SDN: VirtualBox Lab Environment for Computer Networking and Software-Defined Networking",
+  "version": "1.0.0",
+  "doi": "10.5281/zenodo.24289763",
+  "doi_url": "https://doi.org/10.5281/zenodo.24289763",
+  "publication_status": "reserved_draft",
+  "status_evidence_date": "2026-11-16",
+  "filename": "MININET-SDN.ova",
+  "size_bytes": 1182349312,
+  "sha256": "e2e02971bc23546e9e46914e1fcd249411afdcba281b8c21a1dfba153844dff5",
+  "author": "Antonio Clim",
+  "course_repository": "https://github.com/antonioclim/COMPNET-EN",
+  "identity_evidence": "Author-supplied FILEINFO.json and SHA256SUMS.txt; size and checksum-manifest MD5 agree with the supplied Zenodo draft export."
+}

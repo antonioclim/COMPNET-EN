@@ -824,22 +824,23 @@ body {
   <button class="toc-close" onclick="toggleToc()">✕</button>
   <div class="toc-title">Contents — 15 steps</div>
   <ol class="toc-list">
-    <li><a href="#intro" onclick="toggleToc()"><span class="toc-step-num">00</span> What you will install and why</a></li>
-    <li><a href="#reqs" onclick="toggleToc()"><span class="toc-step-num">01</span> Minimum requirements</a></li>
-    <li><a href="#vbox" onclick="toggleToc()"><span class="toc-step-num">02</span> Installing VirtualBox</a></li>
-    <li><a href="#import" onclick="toggleToc()"><span class="toc-step-num">03</span> Importing the MININET-SDN appliance</a></li>
-    <li><a href="#network" onclick="toggleToc()"><span class="toc-step-num">04</span> Network configuration (Port Forwarding)</a></li>
-    <li><a href="#firstboot" onclick="toggleToc()"><span class="toc-step-num">05</span> First boot and login</a></li>
-    <li><a href="#putty" onclick="toggleToc()"><span class="toc-step-num">06</span> PuTTY — connecting via SSH</a></li>
-    <li><a href="#docker" onclick="toggleToc()"><span class="toc-step-num">07</span> Docker and docker compose</a></li>
-    <li><a href="#wireshark" onclick="toggleToc()"><span class="toc-step-num">08</span> Wireshark — capturing traffic</a></li>
-    <li><a href="#shared" onclick="toggleToc()"><span class="toc-step-num">09</span> Shared Folders</a></li>
-    <li><a href="#repo" onclick="toggleToc()"><span class="toc-step-num">10</span> Cloning the course repository</a></li>
-    <li><a href="#test" onclick="toggleToc()"><span class="toc-step-num">11</span> Full end-to-end test</a></li>
-    <li><a href="#troubleshoot" onclick="toggleToc()"><span class="toc-step-num">12</span> Troubleshooting</a></li>
-    <li><a href="#clean" onclick="toggleToc()"><span class="toc-step-num">13</span> The cleanup script</a></li>
-    <li><a href="#linux" onclick="toggleToc()"><span class="toc-step-num">14</span> Appendix — Linux host</a></li>
-  </ol>
+<li><a href="#intro" onclick="toggleToc()"><span class="toc-step-num">01</span> What runs where</a></li>
+<li><a href="#reqs" onclick="toggleToc()"><span class="toc-step-num">02</span> Hardware and software requirements</a></li>
+<li><a href="#vbox" onclick="toggleToc()"><span class="toc-step-num">03</span> Installing VirtualBox</a></li>
+<li><a href="#import" onclick="toggleToc()"><span class="toc-step-num">04</span> Obtaining and importing MININET-SDN</a></li>
+<li><a href="#network" onclick="toggleToc()"><span class="toc-step-num">05</span> Configuring NAT and port forwarding</a></li>
+<li><a href="#firstboot" onclick="toggleToc()"><span class="toc-step-num">06</span> First boot and component checks</a></li>
+<li><a href="#putty" onclick="toggleToc()"><span class="toc-step-num">07</span> Connecting through SSH</a></li>
+<li><a href="#docker" onclick="toggleToc()"><span class="toc-step-num">08</span> Using Docker inside the VM</a></li>
+<li><a href="#wireshark" onclick="toggleToc()"><span class="toc-step-num">09</span> Capturing and inspecting traffic</a></li>
+<li><a href="#shared" onclick="toggleToc()"><span class="toc-step-num">10</span> Transferring files</a></li>
+<li><a href="#repo" onclick="toggleToc()"><span class="toc-step-num">11</span> Obtaining the course repository</a></li>
+<li><a href="#test" onclick="toggleToc()"><span class="toc-step-num">12</span> Testing the student workflow</a></li>
+<li><a href="#troubleshoot" onclick="toggleToc()"><span class="toc-step-num">13</span> Troubleshooting</a></li>
+<li><a href="#clean" onclick="toggleToc()"><span class="toc-step-num">14</span> Stopping your lab scenario</a></li>
+<li><a href="#refs" onclick="toggleToc()"><span class="toc-step-num">15</span> References and useful links</a></li>
+<li><a href="#linux" onclick="toggleToc()"><span class="toc-step-num">16</span> Linux hosts and the separate WSL route</a></li>
+</ol>
 </div>
 
 <!-- Hero -->
@@ -847,7 +848,7 @@ body {
   <div class="hero-bg"></div>
   <div class="hero-grid"></div>
   <div class="hero-content">
-    <div class="hero-badge">ASE-CSIE • Computer Networks • 2025–2026</div>
+    <div class="hero-badge">ASE-CSIE • Networking and SDN • Year 3, Semester 2</div>
     <h1>Installation &amp; setup guide for the <em>MININET-SDN workstation</em></h1>
     <p class="hero-subtitle">Everything you need to prepare your Windows host, import the virtual machine, run Docker Compose scenarios and capture traffic with Wireshark — step by step, with copy-ready commands.</p>
     <div class="hero-meta">
@@ -857,11 +858,11 @@ body {
       </span>
       <span class="hero-meta-item">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        February 2026
+        16 November 2026
       </span>
       <span class="hero-meta-item">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        ~30 min setup
+        Student workstation guide
       </span>
     </div>
   </div>
@@ -871,840 +872,347 @@ body {
 <main class="container">
 
 <!-- Step 00 -->
+<div class="prose callout info"><p><strong>Course appliance:</strong> MININET-SDN was built, configured and tested by Antonio Clim for the ASE laboratories.</p><p><strong>On an ASE classroom PC:</strong> use the existing VM and begin at <a href="#firstboot">Section 6</a>. The institutional PC deployment script is not a student prerequisite.</p><p><strong>On your own PC:</strong> follow the import route. The <a href="#import">Zenodo DOI is reserved; publication is pending</a>.</p></div>
+
 <section class="step" id="intro">
-  <div class="step-header">
-    <div class="step-number">00</div>
-    <div>
-      <h2 class="step-title">What you will install and why</h2>
-      <div class="step-title-sub">A bird's-eye view of the working environment</div>
-    </div>
-  </div>
-  <div class="prose">
-    <p>Throughout the semester you will work inside a <strong>pre-built Ubuntu 24.04 LTS virtual machine</strong> that contains every tool you need for the networking labs. It ships with the <strong>Mininet</strong> network simulator and Open vSwitch software switches, <strong>Docker Engine</strong> with Compose, <strong>tshark</strong> for packet captures, <strong>Scapy</strong> for packet crafting, <strong>nmap</strong> for scanning and a Python virtual environment packed with dozens of libraries (Flask, paramiko, gRPC, dnspython and many more).</p>
-    <p>On your Windows machine you only need a handful of free programmes: <strong>VirtualBox</strong> (the hypervisor), <strong>PuTTY</strong> (an SSH client) and <strong>Wireshark</strong> (a graphical protocol analyser). Communication between Windows and the VM relies on <em>port forwarding</em> (NAT) and <em>shared folders</em>.</p>
-    <p>The end goal: open a PuTTY terminal, navigate to a lab scenario, run <code class="inline-code">docker compose up</code>, generate traffic, capture it and analyse it visually — all within five minutes.</p>
-  </div>
-
-  <div class="arch-diagram">
-<pre>
-<span class="dim">┌──────────────────────────────────────────────────────────────────┐</span>
-<span class="dim">│</span>  <span class="label">HOST (Windows 10/11)</span>                                            <span class="dim">│</span>
-<span class="dim">│</span>                                                                  <span class="dim">│</span>
-<span class="dim">│</span>  ┌─────────────┐  ┌────────────┐  ┌────────────────────┐         <span class="dim">│</span>
-<span class="dim">│</span>  │  <span class="highlight">PuTTY</span>       │  │ <span class="highlight">Wireshark</span>  │  │  <span class="highlight">Shared Folder</span>     │         <span class="dim">│</span>
-<span class="dim">│</span>  │  (SSH)       │  │ (capture)  │  │  C:\SHARED         │         <span class="dim">│</span>
-<span class="dim">│</span>  └──────┬───── ┘  └──────┬─────┘  └─────────┬──────────┘         <span class="dim">│</span>
-<span class="dim">│</span>         │ port 2222      │                   │ vboxsf             <span class="dim">│</span>
-<span class="dim">│</span>  ═══════╪════════════════╪═══════════════════╪═════════════════   <span class="dim">│</span>
-<span class="dim">│</span>         │       VirtualBox NAT               │                    <span class="dim">│</span>
-<span class="dim">│</span>  ┌──────┴────────────────┴───────────────────┴──────────────┐     <span class="dim">│</span>
-<span class="dim">│</span>  │  <span class="label">VM: MININET-SDN (Ubuntu 24.04)</span>                          │     <span class="dim">│</span>
-<span class="dim">│</span>  │                                                          │     <span class="dim">│</span>
-<span class="dim">│</span>  │  user: <span class="highlight">stud</span> / pass: <span class="highlight">stud</span>                                │     <span class="dim">│</span>
-<span class="dim">│</span>  │  enp0s3: 10.0.2.15 (NAT)     docker0: 172.17.0.1        │     <span class="dim">│</span>
-<span class="dim">│</span>  │                                                          │     <span class="dim">│</span>
-<span class="dim">│</span>  │  ┌────────────────────────────────────────────────┐      │     <span class="dim">│</span>
-<span class="dim">│</span>  │  │  <span class="highlight">Docker Engine 28.x + Compose v2</span>                │      │     <span class="dim">│</span>
-<span class="dim">│</span>  │  │  ┌──────┐ ┌──────┐ ┌──────┐  ...scenarios     │      │     <span class="dim">│</span>
-<span class="dim">│</span>  │  │  │ web1 │ │ web2 │ │ dns  │                    │      │     <span class="dim">│</span>
-<span class="dim">│</span>  │  │  └──────┘ └──────┘ └──────┘                    │      │     <span class="dim">│</span>
-<span class="dim">│</span>  │  └────────────────────────────────────────────────┘      │     <span class="dim">│</span>
-<span class="dim">│</span>  │                                                          │     <span class="dim">│</span>
-<span class="dim">│</span>  │  <span class="highlight">Mininet 2.3</span> │ <span class="highlight">OVS 3.3</span> │ <span class="highlight">Python 3.12</span> (venv compnet)  │     <span class="dim">│</span>
-<span class="dim">│</span>  └──────────────────────────────────────────────────────────┘     <span class="dim">│</span>
-<span class="dim">└──────────────────────────────────────────────────────────────────┘</span>
-</pre>
-  </div>
+<div class="step-header"><div class="step-number">01</div><div><h2 class="step-title">What runs where</h2></div></div>
+<div class="prose">
+<p>The supplied workstation provides the Ubuntu environment used for Mininet, Open vSwitch, Docker Engine, packet capture and the Python networking exercises. Keep the two operating systems distinct when copying commands:</p>
+<div class="table-wrap"><table><thead><tr><th>Location</th><th>What you do there</th></tr></thead><tbody><tr><td>Windows host</td><td>Start VirtualBox, import the OVA on a personal PC, open PuTTY or PowerShell, inspect saved captures with Wireshark</td></tr><tr><td>Ubuntu guest — VM console or an SSH terminal</td><td>Clone COMPNET-EN, run Python, Mininet, Docker Compose, curl and packet captures</td></tr><tr><td>A Docker container inside the guest</td><td>Run commands explicitly introduced with <code>docker compose ... exec</code></td></tr><tr><td>Mininet CLI (<code>mininet&gt;</code>)</td><td>Run commands prefixed with a Mininet host, such as <code>h1 ping ...</code></td></tr></tbody></table></div>
+<p>In the Docker exercises, <strong>host means the Ubuntu VM that runs Docker Engine</strong>. It does not mean Windows. In S08, both the Python backend and the host-networked nginx container use the guest&#x27;s network stack.</p>
+<p>The main route requires VirtualBox, an SSH client and optionally the Wireshark desktop application on Windows. Docker Desktop is not required. Its separate Docker engine does not manage the containers running inside MININET-SDN.</p>
+</div>
 </section>
 
-<div class="divider"></div>
-
-<!-- Step 01 -->
 <section class="step" id="reqs">
-  <div class="step-header">
-    <div class="step-number">01</div>
-    <div>
-      <h2 class="step-title">Minimum requirements</h2>
-      <div class="step-title-sub">Hardware, software and virtualisation check</div>
-    </div>
-  </div>
-  <div class="prose">
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Component</th><th>Minimum</th><th>Recommended</th></tr></thead>
-        <tbody>
-          <tr><td><strong>Processor</strong></td><td>Intel/AMD with VT-x / AMD-V support</td><td>Any CPU from the past 5 years</td></tr>
-          <tr><td><strong>RAM</strong></td><td>8 GB (2 GB allocated to the VM)</td><td>16 GB</td></tr>
-          <tr><td><strong>Disc space</strong></td><td>10 GB free</td><td>20 GB</td></tr>
-          <tr><td><strong>OS</strong></td><td>Windows 10 x64, build 1903+</td><td>Windows 11</td></tr>
-          <tr><td><strong>Virtualisation</strong></td><td colspan="2">Enabled in BIOS / UEFI</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <h3 class="substep">Checking hardware virtualisation</h3>
-    <p>Open <strong>Task Manager</strong> (Ctrl + Shift + Esc) → <strong>Performance</strong> tab → <strong>CPU</strong>. In the bottom-right corner you should see:</p>
-
-    <div class="code-block">
-      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">Task Manager</span></div>
-      <div class="code-body"><pre>Virtualization:  Enabled</pre></div>
-    </div>
-
-    <p>If it reads <strong>Disabled</strong>, you must enter BIOS/UEFI (typically <code class="inline-code">F2</code>, <code class="inline-code">F10</code>, <code class="inline-code">Del</code> or <code class="inline-code">Esc</code> at startup) and enable the relevant option. On Intel look for <em>Intel Virtualization Technology (VT-x)</em>; on AMD look for <em>SVM Mode</em>.</p>
-
-    <div class="callout danger">
-      <div class="callout-title">⛔ No exceptions</div>
-      <p>Without hardware virtualisation enabled, VirtualBox will not be able to start the VM. Check this <strong>before</strong> everything else.</p>
-    </div>
-
-    <div class="callout info">
-      <div class="callout-title">ℹ Hyper-V and WSL2</div>
-      <p>If you already have Hyper-V or WSL2 enabled, VirtualBox 7.x can coexist with them. There is no need to disable anything — performance may be marginally lower than native but perfectly acceptable.</p>
-    </div>
-  </div>
+<div class="step-header"><div class="step-number">02</div><div><h2 class="step-title">Hardware and software requirements</h2></div></div>
+<div class="prose">
+<div class="table-wrap"><table><thead><tr><th>Component</th><th>Guidance for a personal PC</th></tr></thead><tbody><tr><td>Processor</td><td>Intel/AMD x86-64 with hardware virtualisation enabled</td></tr><tr><td>RAM</td><td>8 GB on the host; allocate at least 2 GB to the VM. 16 GB host RAM gives more room for other applications</td></tr><tr><td>Storage</td><td>Check the virtual disk size shown during import. Allow additional free space for the 1.18 GB download, the imported disk, repository files and Docker images</td></tr><tr><td>Operating system</td><td>A Windows installation supported by the VirtualBox release you install</td></tr><tr><td>Network</td><td>Needed for the repository, container image pulls and any exercise that installs dependencies at startup</td></tr></tbody></table></div>
+<p>On Windows, open <strong>Task Manager → Performance → CPU</strong> and check that <strong>Virtualisation</strong> is enabled. If it is disabled on a personal PC, enable Intel VT-x or AMD-V/SVM in BIOS/UEFI. On a classroom PC, contact the instructor instead of changing the machine configuration.</p>
+<p>If Hyper-V or WSL2 is already installed, consult the current VirtualBox host requirements if startup or performance problems occur. Follow the supplied VM route without altering unrelated working projects.</p>
+</div>
 </section>
 
-<div class="divider"></div>
-
-<!-- Step 02 -->
 <section class="step" id="vbox">
-  <div class="step-header">
-    <div class="step-number">02</div>
-    <div>
-      <h2 class="step-title">Installing VirtualBox</h2>
-      <div class="step-title-sub">The hypervisor that runs the virtual workstation</div>
-    </div>
-  </div>
-  <div class="prose">
-    <h3 class="substep">Download the installer</h3>
-    <p>Head to the official downloads page and click <strong>Windows hosts</strong> (<code class="inline-code">.exe</code> file, roughly 105 MB):</p>
-
-    <div class="code-block">
-      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">URL</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
-      <div class="code-body"><pre>https://www.virtualbox.org/wiki/Downloads</pre></div>
-    </div>
-
-    <h3 class="substep">Run the installer</h3>
-    <p>Double-click the downloaded file. Click <strong>Next</strong> at every step — the default configuration is perfectly adequate. The installer will warn you that the network will disconnect briefly while it installs its drivers — confirm with <strong>Yes</strong>. Click <strong>Finish</strong> when done.</p>
-
-    <h3 class="substep">Extension Pack (optional but recommended)</h3>
-    <p>The Extension Pack adds USB 2.0/3.0 passthrough, PXE boot and RDP support. Download it from the same page (the <em>All supported platforms</em> link), then inside VirtualBox go to <strong>File → Tools → Extension Pack Manager</strong>, click <strong>Install</strong> and select the <code class="inline-code">.vbox-extpack</code> file.</p>
-
-    <div class="callout tip">
-      <div class="callout-title">✓ Verification</div>
-      <p>Open VirtualBox. If you see the "Oracle VirtualBox Manager" window without error messages, the installation is complete.</p>
-    </div>
-  </div>
+<div class="step-header"><div class="step-number">03</div><div><h2 class="step-title">Installing VirtualBox</h2></div></div>
+<div class="prose">
+<p>Skip this section when VirtualBox and MININET-SDN are already available on the classroom PC.</p>
+<ol><li>Open the <a href="https://www.virtualbox.org/wiki/Downloads">official VirtualBox download page</a>.</li><li>Download the installer for <strong>Windows hosts</strong> supported by your Windows version.</li><li>Run the installer and retain the default components. Installation may require administrator approval and may briefly interrupt host networking.</li><li>Open <strong>Oracle VirtualBox Manager</strong> after installation.</li></ol>
+<p>The networking examples in this guide use NAT, SSH and shared folders. They do not require the separately licensed Extension Pack. Guest Additions inside the VM provide shared-folder support; they are a different component.</p>
+</div>
 </section>
 
-<div class="divider"></div>
-
-<!-- Step 03 -->
 <section class="step" id="import">
-  <div class="step-header">
-    <div class="step-number">03</div>
-    <div>
-      <h2 class="step-title">Importing the MININET-SDN appliance</h2>
-      <div class="step-title-sub">The OVA file that contains everything pre-configured</div>
-    </div>
-  </div>
-  <div class="prose">
-    <h3 class="substep">Download the OVA file</h3>
-    <p>The virtual workstation is distributed as an <strong>OVA</strong> (<em>Open Virtualization Appliance</em>) — essentially an archive containing the virtual disc, hardware settings and network configuration in a single package. Download it here:</p>
-
-    <div class="code-block">
-      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">Google Drive</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
-      <div class="code-body"><pre>https://drive.google.com/file/d/1LqnyD64gzePBjYEXpIGen41mNdjBKU3x/view?usp=drive_link</pre></div>
-    </div>
-
-    <p>Save it somewhere easy to find, for example <code class="inline-code">C:\Users\&lt;YourName&gt;\Downloads\</code>.</p>
-
-    <h3 class="substep">Import into VirtualBox</h3>
-    <ol>
-      <li>Open <strong>VirtualBox</strong></li>
-      <li>Go to <strong>File → Import Appliance…</strong> (or press <code class="inline-code">Ctrl+I</code>)</li>
-      <li>Click <strong>Browse</strong> and select the <code class="inline-code">MININET-SDN.ova</code> file</li>
-      <li>Click <strong>Next</strong></li>
-    </ol>
-
-    <p>On the settings screen, review and adjust if necessary:</p>
-
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Setting</th><th>Recommended value</th></tr></thead>
-        <tbody>
-          <tr><td><strong>Name</strong></td><td><code>MININET-SDN</code></td></tr>
-          <tr><td><strong>CPU</strong></td><td>2 (or more if you have 8+ cores)</td></tr>
-          <tr><td><strong>RAM</strong></td><td>2048 MB minimum (3072 MB ideal)</td></tr>
-          <tr><td><strong>Network</strong></td><td>NAT (the default)</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <p>Click <strong>Finish</strong> and wait one to three minutes. Once the process completes, the <code class="inline-code">MININET-SDN</code> machine will appear in the left-hand panel.</p>
-  </div>
+<div class="step-header"><div class="step-number">04</div><div><h2 class="step-title">Obtaining and importing MININET-SDN</h2></div></div>
+<div class="prose">
+<h3 class="substep">4.1 Publication status and exact file identity</h3>
+<p><strong>Reserved Zenodo DOI — publication pending:</strong> <a href="https://doi.org/10.5281/zenodo.24289763">https://doi.org/10.5281/zenodo.24289763</a>.</p>
+<p>The verified Zenodo export describes a <strong>draft</strong>. The DOI is reserved and must not yet be treated as a public download. Until publication, classroom students use the installed VM and home students use a copy supplied by the instructor. After publication, the DOI landing page will provide the release files.</p>
+<div class="table-wrap"><table><thead><tr><th>Field</th><th>Value</th></tr></thead><tbody><tr><td>OVA filename</td><td><code>MININET-SDN.ova</code></td></tr><tr><td>Exact size of the deposited file</td><td><code>1182349312</code> bytes — approximately 1.18 GB</td></tr><tr><td>SHA-256</td><td><code>e2e02971bc23546e9e46914e1fcd249411afdcba281b8c21a1dfba153844dff5</code></td></tr></tbody></table></div>
+<p>On <strong>Windows PowerShell</strong>, open the folder containing your downloaded OVA and run:</p>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">powershell</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div><div class="code-body"><pre>$expected = &#x27;e2e02971bc23546e9e46914e1fcd249411afdcba281b8c21a1dfba153844dff5&#x27;
+$actual = (Get-FileHash -LiteralPath .\MININET-SDN.ova -Algorithm SHA256).Hash
+if ($actual -ieq $expected) { &#x27;SHA-256: MATCH&#x27; } else { throw &#x27;SHA-256: MISMATCH&#x27; }
+(Get-Item -LiteralPath .\MININET-SDN.ova).Length</pre></div></div>
+<p>A matching hash identifies the deposited file. Do not apply this expected hash to a later re-export: a new OVA requires its own checksum and version information.</p>
+<h3 class="substep">4.2 Import on your personal PC</h3>
+<ol><li>Open <strong>VirtualBox → File → Import Appliance</strong> (<code>Ctrl+I</code>).</li><li>Select <code>MININET-SDN.ova</code> and click <strong>Next</strong>.</li><li>Review the imported settings: name <code>MININET-SDN</code>, 2 virtual CPUs and at least 2048 MB RAM are suitable starting values. Retain the appliance&#x27;s other working settings.</li><li>Check the proposed disk location and available space.</li><li>Click <strong>Import</strong> and wait until the VM appears in VirtualBox Manager.</li></ol>
+<p>Use an existing classroom VM directly; importing another copy is unnecessary. If a VM with the same name already exists on your personal PC, distinguish the new copy before import instead of overwriting your work.</p>
+</div>
 </section>
 
-<div class="divider"></div>
-
-<!-- Step 04 -->
 <section class="step" id="network">
-  <div class="step-header">
-    <div class="step-number">04</div>
-    <div>
-      <h2 class="step-title">Network configuration (Port Forwarding)</h2>
-      <div class="step-title-sub">How PuTTY on Windows reaches SSH inside the VM</div>
-    </div>
-  </div>
-  <div class="prose">
-    <p>The VM uses <strong>NAT</strong> (<em>Network Address Translation</em>): it can reach the internet through the host's connection, but Windows cannot initiate connections to the VM on its own. We therefore set up <strong>port forwarding</strong> rules that tell VirtualBox "redirect everything arriving on host port X to guest port Y".</p>
-
-    <h3 class="substep">Port forwarding rules</h3>
-
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Purpose</th><th>Protocol</th><th>Host IP</th><th>Host Port</th><th>Guest IP</th><th>Guest Port</th></tr></thead>
-        <tbody>
-          <tr><td><strong>SSH</strong> (required)</td><td>TCP</td><td><code>127.0.0.1</code></td><td><code>2222</code></td><td><code>10.0.2.15</code></td><td><code>22</code></td></tr>
-          <tr><td><strong>HTTP test</strong> (optional)</td><td>TCP</td><td><code>127.0.0.1</code></td><td><code>8080</code></td><td><code>10.0.2.15</code></td><td><code>8080</code></td></tr>
-          <tr><td><strong>Docker API</strong> (optional)</td><td>TCP</td><td><code>127.0.0.1</code></td><td><code>2375</code></td><td><code>10.0.2.15</code></td><td><code>2375</code></td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <h3 class="substep">Configuration steps</h3>
-    <ol>
-      <li>Select the <strong>MININET-SDN</strong> machine in VirtualBox Manager</li>
-      <li>Click <strong>Settings</strong> (the cog icon) → <strong>Network</strong></li>
-      <li>Under <strong>Adapter 1</strong> (which should read "Attached to: <strong>NAT</strong>"), click <strong>Advanced</strong> (the small arrow)</li>
-      <li>Click the <strong>Port Forwarding</strong> button</li>
-      <li>Add the rules from the table above using the <strong>+</strong> (plus) button</li>
-      <li>Click <strong>OK</strong> → <strong>OK</strong></li>
-    </ol>
-
-    <div class="callout info">
-      <div class="callout-title">ℹ Why port 2222 rather than 22?</div>
-      <p>Port 22 on Windows might already be occupied (for instance if you have OpenSSH Server installed). We use 2222 on the host to avoid conflicts; inside the VM, the SSH daemon listens on the standard port 22. In practice, <code class="inline-code">127.0.0.1:2222</code> on Windows reaches <code class="inline-code">10.0.2.15:22</code> in the VM.</p>
-    </div>
-  </div>
+<div class="step-header"><div class="step-number">05</div><div><h2 class="step-title">Configuring NAT and port forwarding</h2></div></div>
+<div class="prose">
+<p>For a new personal-PC import, keep <strong>Adapter 1 attached to NAT</strong>. With the VM powered off, open <strong>Settings → Network → Adapter 1 → Advanced → Port Forwarding</strong>.</p>
+<div class="table-wrap"><table><thead><tr><th>Rule</th><th>Protocol</th><th>Host IP</th><th>Host port</th><th>Guest IP</th><th>Guest port</th></tr></thead><tbody><tr><td><code>ssh</code></td><td>TCP</td><td><code>127.0.0.1</code></td><td><code>2222</code></td><td>Leave blank for the NAT-assigned guest</td><td><code>22</code></td></tr><tr><td><code>http-test</code> — optional Windows browser access</td><td>TCP</td><td><code>127.0.0.1</code></td><td><code>8080</code></td><td>Leave blank for the NAT-assigned guest</td><td><code>8080</code></td></tr></tbody></table></div>
+<p>Add each missing rule with <strong>+</strong>, then save with <strong>OK</strong>. Inspect existing rules first; do not add duplicate rules to a working classroom VM. The usual NAT guest address is <code>10.0.2.15</code>, but the connection from Windows uses <code>127.0.0.1</code> and the configured host port.</p>
+<p>SSH forwarding is sufficient for the primary workflow. The HTTP rule is needed only if you want a Windows browser to reach nginx inside the guest. All curl tests below run inside the VM and do not require that HTTP rule.</p>
+<p>No Docker TCP API forwarding is needed: Docker commands run in the SSH session inside the guest.</p>
+</div>
 </section>
 
-<div class="divider"></div>
-
-<!-- Step 05 -->
 <section class="step" id="firstboot">
-  <div class="step-header">
-    <div class="step-number">05</div>
-    <div>
-      <h2 class="step-title">First boot and login</h2>
-      <div class="step-title-sub">Verifying components inside the workstation</div>
-    </div>
-  </div>
-  <div class="prose">
-    <p>Select <strong>MININET-SDN</strong> in VirtualBox and click <strong>Start</strong>. Wait roughly 30–60 seconds until the login prompt appears. Enter the credentials:</p>
-
-    <div class="cred-card">
-      <div class="cred-item"><span class="cred-label">user</span> <span class="cred-value">stud</span></div>
-      <div class="cred-item"><span class="cred-label">pass</span> <span class="cred-value">stud</span></div>
-      <div class="cred-item"><span class="cred-label">hostname</span> <span class="cred-value">mininet-vm</span></div>
-    </div>
-
-    <div class="callout tip">
-      <div class="callout-title">✓ Normal: the password is invisible</div>
-      <p>When you type the password nothing appears on screen — no dots, no asterisks. This is standard Linux behaviour. Type <code class="inline-code">stud</code> and press Enter.</p>
-    </div>
-
-    <p>If you see a prompt like <code class="inline-code">(compnet) stud@mininet-vm:~$</code>, everything is working. Notice the <code class="inline-code">(compnet)</code> prefix — it means the Python virtual environment activates automatically at login.</p>
-
-    <h3 class="substep">Quick component check</h3>
-
-    <div class="code-block">
-      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
-      <div class="code-body"><pre><span class="comment"># Docker Engine</span>
-<span class="cmd">docker</span> --version
-<span class="output"># → Docker version 28.2.2, …</span>
-
-<span class="comment"># Docker Compose</span>
-<span class="cmd">docker compose</span> version
-<span class="output"># → Docker Compose version 2.37.1+…</span>
-
-<span class="comment"># Mininet</span>
-<span class="cmd">sudo mn</span> <span class="flag">--version</span>
-<span class="output"># → 2.3.0</span>
-
-<span class="comment"># Open vSwitch</span>
-<span class="cmd">ovs-vsctl</span> <span class="flag">--version</span>
-<span class="output"># → ovs-vsctl (Open vSwitch) 3.3.4</span>
-
-<span class="comment"># Python (from the venv)</span>
-<span class="cmd">python3</span> <span class="flag">--version</span>
-<span class="output"># → Python 3.12.3</span>
-
-<span class="comment"># A few key libraries</span>
-<span class="cmd">python3</span> <span class="flag">-c</span> <span class="string">"import scapy; print('scapy OK')"</span>
-<span class="cmd">python3</span> <span class="flag">-c</span> <span class="string">"import paramiko; print('paramiko OK')"</span>
-<span class="cmd">python3</span> <span class="flag">-c</span> <span class="string">"import flask; print('flask OK')"</span>
-
-<span class="comment"># Internet connectivity</span>
-<span class="cmd">ping</span> <span class="flag">-c 3</span> google.com</pre></div>
-    </div>
-  </div>
+<div class="step-header"><div class="step-number">06</div><div><h2 class="step-title">First boot and component checks</h2></div></div>
+<div class="prose">
+<p>Start <strong>MININET-SDN</strong> and wait for the console login prompt. Use the course account:</p>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">text</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div><div class="code-body"><pre>Username: stud
+Password: stud</pre></div></div>
+<p>The password is not displayed while you type. Keep the standard classroom account unchanged unless instructed otherwise.</p>
+<p>Run these checks <strong>inside the VM</strong>:</p>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div><div class="code-body"><pre>cat /etc/os-release
+python3 --version
+docker --version
+docker compose version
+mn --version
+ovs-vsctl --version
+command -v tshark
+command -v osken-manager</pre></div></div>
+<p>A version command confirms that a client program is available; it does not by itself prove that its service or an exercise works. Section 12 tests actual course scenarios.</p>
+<p>The course Python environment is normally activated at login. If the prompt does not show <code>(compnet)</code> and the environment exists, activate it:</p>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div><div class="code-body"><pre>test -f &quot;$HOME/venvs/compnet/bin/activate&quot; &amp;&amp; source &quot;$HOME/venvs/compnet/bin/activate&quot;
+python3 -c &quot;import scapy, paramiko, flask; print(&#x27;Course Python imports: OK&#x27;)&quot;</pre></div></div>
+<p>Preserve the working course environment. S06 uses the installed <strong>osken-manager</strong> entry point. OS-Ken 4.x removed that command, so upgrading the package blindly is not a repair for a missing command. The S06 instructions explain how to check the installed environment.</p>
+</div>
 </section>
 
-<div class="divider"></div>
-
-<!-- Step 06 -->
 <section class="step" id="putty">
-  <div class="step-header">
-    <div class="step-number">06</div>
-    <div>
-      <h2 class="step-title">PuTTY — connecting via SSH</h2>
-      <div class="step-title-sub">Work comfortably with copy-paste and a resizable window</div>
-    </div>
-  </div>
-  <div class="prose">
-    <p>The VirtualBox console is rather limited: copy-paste is awkward, you cannot resize the window and the font is tiny. For day-to-day work we connect to the VM over <strong>SSH</strong> using <strong>PuTTY</strong>.</p>
-
-    <h3 class="substep">Download and install</h3>
-    <p>Grab the <strong>64-bit MSI</strong> installer from the official site:</p>
-
-    <div class="code-block">
-      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">URL</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
-      <div class="code-body"><pre>https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html</pre></div>
-    </div>
-
-    <p>Run the installer with default options.</p>
-
-    <div class="callout tip">
-      <div class="callout-title">✓ Modern alternative</div>
-      <p>If you prefer something more up-to-date, you can use <strong>Windows Terminal</strong> (pre-installed on Windows 11) with the built-in SSH client: <code class="inline-code">ssh -p 2222 stud@127.0.0.1</code>. Works just as well.</p>
-    </div>
-
-    <h3 class="substep">Configuring the PuTTY session</h3>
-    <ol>
-      <li>Open PuTTY</li>
-      <li><strong>Host Name:</strong> <code class="inline-code">127.0.0.1</code></li>
-      <li><strong>Port:</strong> <code class="inline-code">2222</code></li>
-      <li><strong>Connection type:</strong> SSH</li>
-      <li>In the <strong>Saved Sessions</strong> field type <code class="inline-code">MININET-SDN</code> and click <strong>Save</strong></li>
-      <li>Click <strong>Open</strong></li>
-    </ol>
-
-    <p>On first connection PuTTY shows a warning about the host key fingerprint — confirm with <strong>Accept</strong> (this is normal). Then enter <code class="inline-code">stud</code> / <code class="inline-code">stud</code> and you are in.</p>
-
-    <h3 class="substep">Practical tips</h3>
-    <ul>
-      <li><strong>Copy from PuTTY:</strong> select text with the mouse — it is copied to the clipboard automatically</li>
-      <li><strong>Paste into PuTTY:</strong> right-click</li>
-      <li><strong>Saved sessions:</strong> next time, simply double-click <code class="inline-code">MININET-SDN</code> in the session list</li>
-      <li><strong>Larger window:</strong> Settings → Window → set 100 × 40 (far more comfortable than 80 × 24)</li>
-      <li><strong>Keep-alive:</strong> Settings → Connection → "Seconds between keepalives" → <code class="inline-code">30</code> (prevents disconnection during inactivity)</li>
-    </ul>
-  </div>
+<div class="step-header"><div class="step-number">07</div><div><h2 class="step-title">Connecting through SSH</h2></div></div>
+<div class="prose">
+<h3 class="substep">7.1 Windows built-in SSH</h3>
+<p>Open <strong>PowerShell on Windows</strong> and run:</p>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">powershell</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div><div class="code-body"><pre>ssh -p 2222 stud@127.0.0.1</pre></div></div>
+<p>Check that the host and port refer to your intended VM before accepting its first host-key prompt. Enter the course password. Once connected, Bash commands run inside Ubuntu even though the terminal window is on Windows.</p>
+<h3 class="substep">7.2 PuTTY alternative</h3>
+<ol><li>Install PuTTY from its <a href="https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html">official download page</a>, if it is not already installed.</li><li>Set <strong>Host Name</strong> to <code>127.0.0.1</code>, <strong>Port</strong> to <code>2222</code> and <strong>Connection type</strong> to <strong>SSH</strong>.</li><li>Save the session as <code>MININET-SDN</code> and click <strong>Open</strong>.</li><li>Log in as <code>stud</code> with the course password.</li></ol>
+<p>Select text to copy in PuTTY; right-click to paste. Saved sessions make it easy to open the second terminal needed for capture exercises. In <strong>Connection</strong>, a keepalive interval of 30 seconds can help with idle sessions.</p>
+</div>
 </section>
 
-<div class="divider"></div>
-
-<!-- Step 07 -->
 <section class="step" id="docker">
-  <div class="step-header">
-    <div class="step-number">07</div>
-    <div>
-      <h2 class="step-title">Docker and <code class="inline-code">docker compose</code></h2>
-      <div class="step-title-sub">Lab scenarios run inside containers</div>
-    </div>
-  </div>
-  <div class="prose">
-    <p>Many labs (from lab 8 onwards) use <strong>Docker Compose</strong> to spin up complex infrastructure from a single YAML file: web servers, load balancers, DNS resolvers, FTP clients — all interconnected in a virtual Docker network.</p>
-    <p>Good news: <strong>Docker Engine is already installed inside the VM</strong>. You do not need to install anything extra on Windows for course work. Every <code class="inline-code">docker compose up</code> / <code class="inline-code">down</code> command is executed via your PuTTY SSH session.</p>
-
-    <h3 class="substep">Quick test</h3>
-
-    <div class="code-block">
-      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash — run in PuTTY</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
-      <div class="code-body"><pre><span class="comment"># Check that Docker Engine responds</span>
-<span class="cmd">docker info</span> | head <span class="flag">-5</span>
-
-<span class="comment"># Minimal test: download and run a test container</span>
-<span class="cmd">docker run</span> <span class="flag">--rm</span> hello-world</pre></div>
-    </div>
-
-    <p>If you see the <em>"Hello from Docker!"</em> message, everything is in order. Docker pulls the <code class="inline-code">hello-world</code> image from Docker Hub, runs it and removes it immediately (<code class="inline-code">--rm</code>).</p>
-
-    <div class="callout info">
-      <div class="callout-title">ℹ Docker Desktop on Windows — is it needed?</div>
-      <p>Not for this course. Docker Desktop consumes substantial memory and adds a layer of complexity. If you need Docker on Windows for other projects, you can install it separately from <code class="inline-code">docker.com/products/docker-desktop</code>, but bear in mind that Docker Desktop and Docker Engine inside the VM are entirely separate instances — containers created on one do not appear on the other.</p>
-    </div>
-  </div>
+<div class="step-header"><div class="step-number">08</div><div><h2 class="step-title">Using Docker inside the VM</h2></div></div>
+<div class="prose">
+<p>Run all course Docker commands in the <strong>Ubuntu guest</strong>, through its console or SSH. Check the server as well as the client:</p>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div><div class="code-body"><pre>docker info --format &#x27;{{.ServerVersion}}&#x27;
+docker compose version
+docker run --rm hello-world</pre></div></div>
+<p>The first <code>hello-world</code> run may pull an image from the internet. A download or DNS failure is different from a stopped Docker service; retain the error message for troubleshooting.</p>
+<p>Compose files in this repository often have descriptive filenames. Always supply their actual filename, for example:</p>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div><div class="code-body"><pre>cd &quot;$HOME/COMPNET-EN/04_SEMINARS/S08/4_nginx&quot;
+docker compose -f S08_Part04_Config_Docker_Compose.yml config --quiet</pre></div></div>
+<p>The same <code>-f</code> argument is required for <code>up</code>, <code>ps</code>, <code>logs</code> and <code>down</code>. A bare <code>docker compose up</code> does not automatically select <code>S08_Part04_Config_Docker_Compose.yml</code>.</p>
+<p>If you already use Docker Desktop for another project, leave it separate. It is not needed to operate the Docker engine inside MININET-SDN.</p>
+</div>
 </section>
 
-<div class="divider"></div>
-
-<!-- Step 08 -->
 <section class="step" id="wireshark">
-  <div class="step-header">
-    <div class="step-number">08</div>
-    <div>
-      <h2 class="step-title">Wireshark — capturing traffic</h2>
-      <div class="step-title-sub">A graphical protocol analyser on Windows</div>
-    </div>
-  </div>
-  <div class="prose">
-    <h3 class="substep">Download and install</h3>
-    <p>Grab the <strong>Windows x64 Installer</strong> from the official site:</p>
-
-    <div class="code-block">
-      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">URL</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
-      <div class="code-body"><pre>https://www.wireshark.org/download.html</pre></div>
-    </div>
-
-    <p>During installation leave all components ticked. When asked about <strong>Npcap</strong>, make sure you tick <strong>Install Npcap</strong> — without it Wireshark cannot capture packets.</p>
-
-    <h3 class="substep">Capture strategy for VM scenarios</h3>
-    <p>One important thing to understand: traffic <em>internal</em> to the VM (between Docker containers, between Mininet hosts) <strong>does not cross</strong> the physical network interface of your Windows host. Wireshark on Windows only sees traffic that passes through port forwarding (SSH, HTTP and so on).</p>
-    <p>The practical workflow for labs is therefore two-step:</p>
-    <ol>
-      <li>Capture traffic <strong>inside the VM</strong> with <code class="inline-code">tshark</code> or <code class="inline-code">tcpdump</code>, saving a <code class="inline-code">.pcap</code> file</li>
-      <li>Transfer the file to Windows (via Shared Folder) and open it in Wireshark for visual analysis</li>
-    </ol>
-
-    <h3 class="substep">Full example — capturing from a Docker Compose scenario</h3>
-
-    <div class="code-block">
-      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash — complete capture workflow</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
-      <div class="code-body"><pre><span class="comment"># 1. Start a scenario (e.g. lab 8 — nginx reverse proxy)</span>
-<span class="cmd">cd</span> ~/compnet-2025-redo/assets/tutorial/s8/4_nginx/
-<span class="cmd">docker compose up</span> <span class="flag">-d</span>
-
-<span class="comment"># 2. Start a tshark capture in the background</span>
-<span class="cmd">sudo tshark</span> <span class="flag">-i any -f</span> <span class="string">"tcp port 8080"</span> <span class="flag">-w</span> /tmp/s8_nginx.pcap &
-
-<span class="comment"># 3. Generate test traffic</span>
-<span class="cmd">curl</span> http://localhost:8080
-
-<span class="comment"># 4. Stop the capture</span>
-<span class="cmd">kill</span> %1
-
-<span class="comment"># 5. Copy the pcap file to the Shared Folder</span>
-<span class="cmd">cp</span> /tmp/s8_nginx.pcap /media/sf_SHARED/
-
-<span class="comment"># 6. Tear down the scenario</span>
-<span class="cmd">docker compose down</span></pre></div>
-    </div>
-
-    <p>On Windows, open <code class="inline-code">C:\SHARED\s8_nginx.pcap</code> with a double-click — Wireshark picks it up automatically.</p>
-  </div>
+<div class="step-header"><div class="step-number">09</div><div><h2 class="step-title">Capturing and inspecting traffic</h2></div></div>
+<div class="prose">
+<h3 class="substep">9.1 Wireshark on Windows</h3>
+<p>Download the Windows installer from the <a href="https://www.wireshark.org/download.html">official Wireshark site</a>. Npcap is needed for live capture on Windows interfaces. Opening an existing capture file is a separate operation.</p>
+<p>Windows loopback capture can show the SSH connection on host port 2222. It does not expose the decrypted commands or all traffic between Mininet hosts and guest containers. Capture that internal traffic inside the VM, then transfer the saved file.</p>
+<h3 class="substep">9.2 A bounded capture using two SSH terminals</h3>
+<p>First start the S08 backend and nginx scenario in <strong>Terminal A</strong>, following Section 12.2. Keep that terminal open. Open a second SSH session, <strong>Terminal B</strong>, and run:</p>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div><div class="code-body"><pre>mkdir -p &quot;$HOME/compnet-captures&quot;
+capture_file=&quot;$HOME/compnet-captures/s08-$(date -u +%Y%m%dT%H%M%SZ).pcapng&quot;
+sudo tshark -i lo -a duration:20 -f &#x27;tcp port 8080 or tcp port 8000&#x27; -w &quot;$capture_file&quot;
+sudo chown &quot;$(id -u):$(id -g)&quot; &quot;$capture_file&quot;
+printf &#x27;Capture saved: %s\n&#x27; &quot;$capture_file&quot;</pre></div></div>
+<p>While Terminal B displays <strong>Capturing on</strong>, run in <strong>Terminal A</strong>:</p>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div><div class="code-body"><pre>curl --fail --show-error --max-time 5 -I http://127.0.0.1:8080/
+curl --fail --show-error --max-time 5 http://127.0.0.1:8080/</pre></div></div>
+<p>The capture ends after 20 seconds even if no packets arrive. Wait for completion before copying the file. The <code>lo</code> interface is appropriate here because S08 uses host networking and both test endpoints are inside the guest. For a bridge-network container exercise, select its actual bridge/interface or use <code>-i any</code>; <code>docker0</code> is not automatically the interface for every Compose network.</p>
+<p>Copy the file using Section 10 and open it with Wireshark. Look for the request to nginx on port 8080 and its separate backend request on port 8000. A capture with zero matching packets is a diagnostic result, not a successful traffic test.</p>
+</div>
 </section>
 
-<div class="divider"></div>
-
-<!-- Step 09 -->
 <section class="step" id="shared">
-  <div class="step-header">
-    <div class="step-number">09</div>
-    <div>
-      <h2 class="step-title">Shared Folders</h2>
-      <div class="step-title-sub">Transfer files between Windows and the VM without SCP</div>
-    </div>
-  </div>
-  <div class="prose">
-    <h3 class="substep">Create the folder on Windows</h3>
-    <p>Create a new folder on your drive, for example:</p>
-    <div class="code-block">
-      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">Windows — File Explorer</span></div>
-      <div class="code-body"><pre>C:\SHARED</pre></div>
-    </div>
-
-    <h3 class="substep">Configure in VirtualBox</h3>
-    <ol>
-      <li>With the VM powered off, go to <strong>Settings → Shared Folders</strong></li>
-      <li>Click the <strong>+</strong> icon (Add Share)</li>
-      <li>Fill in:
-        <ul>
-          <li><strong>Folder Path:</strong> <code class="inline-code">C:\SHARED</code></li>
-          <li><strong>Folder Name:</strong> <code class="inline-code">SHARED</code></li>
-          <li><strong>Read-only:</strong> unticked</li>
-          <li><strong>Auto-mount:</strong> ticked</li>
-          <li><strong>Mount point:</strong> leave blank</li>
-        </ul>
-      </li>
-      <li>Click <strong>OK</strong> → <strong>OK</strong></li>
-    </ol>
-
-    <h3 class="substep">Verification from the VM</h3>
-
-    <div class="code-block">
-      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
-      <div class="code-body"><pre><span class="comment"># Check the mount</span>
-<span class="cmd">ls</span> <span class="flag">-la</span> /media/sf_SHARED/
-
-<span class="comment"># Create a test file</span>
-<span class="cmd">echo</span> <span class="string">"hello from the VM"</span> > /media/sf_SHARED/test.txt</pre></div>
-    </div>
-
-    <p>On Windows, open <code class="inline-code">C:\SHARED</code> — you should see <code class="inline-code">test.txt</code>.</p>
-
-    <div class="callout warn">
-      <div class="callout-title">⚠ Permission denied?</div>
-      <p>The user <code class="inline-code">stud</code> is already a member of the <code class="inline-code">vboxsf</code> group. If you still get a permissions error, run <code class="inline-code">sudo usermod -aG vboxsf stud</code> then log out and back in.</p>
-    </div>
-  </div>
+<div class="step-header"><div class="step-number">10</div><div><h2 class="step-title">Transferring files</h2></div></div>
+<div class="prose">
+<h3 class="substep">10.1 VirtualBox Shared Folders</h3>
+<p>On Windows, create <code>C:\SHARED</code>. In <strong>VirtualBox → Settings → Shared Folders</strong>, add:</p>
+<div class="table-wrap"><table><thead><tr><th>Setting</th><th>Value</th></tr></thead><tbody><tr><td>Folder Path</td><td><code>C:\SHARED</code></td></tr><tr><td>Folder Name</td><td><code>SHARED</code></td></tr><tr><td>Read-only</td><td>Unticked</td></tr><tr><td>Auto-mount</td><td>Ticked</td></tr><tr><td>Mount point</td><td>Leave blank</td></tr></tbody></table></div>
+<p>Start the VM or reopen the SSH session, then check <strong>inside the guest</strong>:</p>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div><div class="code-body"><pre>ls -ld /media/sf_SHARED
+printf &#x27;hello from the VM\n&#x27; &gt; /media/sf_SHARED/compnet-transfer-check.txt</pre></div></div>
+<p>The test file should appear in <code>C:\SHARED</code> on Windows. After a completed capture in Terminal B, copy its exact file:</p>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div><div class="code-body"><pre>cp -- &quot;$capture_file&quot; /media/sf_SHARED/</pre></div></div>
+<p>If the mount exists but access is denied, check <code>id</code> and the <code>vboxsf</code> group. On your own VM, <code>sudo usermod -aG vboxsf stud</code> followed by logout/login can correct a missing membership. On classroom PCs, ask the instructor before changing configuration.</p>
+<h3 class="substep">10.2 SCP alternative</h3>
+<p>Shared folders are convenient but not required. In <strong>Windows PowerShell</strong>, copy the completed captures through the existing SSH connection:</p>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">powershell</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div><div class="code-body"><pre>scp -P 2222 &#x27;stud@127.0.0.1:compnet-captures/*.pcapng&#x27; .</pre></div></div>
+<p>This downloads the files into the current Windows directory. PuTTY installations can use <code>pscp</code> with the same uppercase <code>-P</code> port option.</p>
+</div>
 </section>
 
-<div class="divider"></div>
-
-<!-- Step 10 -->
 <section class="step" id="repo">
-  <div class="step-header">
-    <div class="step-number">10</div>
-    <div>
-      <h2 class="step-title">Cloning the course repository</h2>
-      <div class="step-title-sub">Materials for all 13 labs</div>
-    </div>
-  </div>
-  <div class="prose">
-    <div class="code-block">
-      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash — from PuTTY</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
-      <div class="code-body"><pre><span class="cmd">cd</span> ~
-<span class="cmd">git clone</span> https://github.com/hypothetical-andrei/compnet-2025-redo.git
-<span class="cmd">cd</span> compnet-2025-redo
-<span class="cmd">ls</span> <span class="flag">-la</span></pre></div>
-    </div>
-
-    <p>Repository structure:</p>
-
-    <div class="code-block">
-      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">directory layout</span></div>
-      <div class="code-body"><pre>compnet-2025-redo/
-├── assets/
-│   ├── course/           <span class="comment">← lecture materials (c1–c13)</span>
-│   ├── tutorial/          <span class="comment">← lab materials (s1–s13)</span>
-│   │   ├── s1/            <span class="comment">   ping, netcat, wireshark</span>
-│   │   ├── s2/            <span class="comment">   TCP/UDP sockets</span>
-│   │   ├── s3/            <span class="comment">   broadcast, multicast, anycast</span>
-│   │   ├── s4/            <span class="comment">   text + binary protocols</span>
-│   │   ├── s5/            <span class="comment">   IPv4/IPv6 subnetting, Mininet</span>
-│   │   ├── s6/            <span class="comment">   routing, SDN, Open vSwitch</span>
-│   │   ├── s7/            <span class="comment">   sniffing, scanning, mini-IDS</span>
-│   │   ├── s8/            <span class="comment">   HTTP, nginx reverse proxy</span>
-│   │   ├── s9/            <span class="comment">   FTP, file transfer</span>
-│   │   ├── s10/           <span class="comment">   DNS, SSH in containers</span>
-│   │   ├── s11/           <span class="comment">   load balancing with nginx</span>
-│   │   ├── s12/           <span class="comment">   gRPC, protobuf, JSON-RPC</span>
-│   │   └── s13/           <span class="comment">   penetration testing</span>
-│   ├── tutorial-solve/    <span class="comment">← partial solutions</span>
-│   └── tools/             <span class="comment">← utilities (plantuml.jar etc.)</span>
-└── prompts/               <span class="comment">← content-generation prompts</span></pre></div>
-    </div>
-
-    <h3 class="substep">Alternative: download as ZIP</h3>
-    <p>If the VM has no internet access, download the archive on Windows, place it in <code class="inline-code">C:\SHARED</code>, then from the VM:</p>
-
-    <div class="code-block">
-      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
-      <div class="code-body"><pre><span class="cmd">cp</span> /media/sf_SHARED/compnet-2025-redo-main.zip ~
-<span class="cmd">cd</span> ~
-<span class="cmd">unzip</span> compnet-2025-redo-main.zip
-<span class="cmd">cd</span> compnet-2025-redo-main</pre></div>
-    </div>
-
-    <h3 class="substep">Compatibility script (recommended)</h3>
-    <p>The VM includes a script that creates necessary symlinks, verifies Python dependencies and patches <code class="inline-code">docker-compose.yml</code> files where pip dependencies are missing:</p>
-
-    <div class="code-block">
-      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
-      <div class="code-body"><pre><span class="cmd">cd</span> ~
-<span class="cmd">chmod</span> <span class="flag">+x</span> compnet_mininetvm_setup.sh
-<span class="cmd">./compnet_mininetvm_setup.sh</span> <span class="flag">--kit-root</span> ~/compnet-2025-redo <span class="flag">--self-test</span></pre></div>
-    </div>
-  </div>
+<div class="step-header"><div class="step-number">11</div><div><h2 class="step-title">Obtaining the course repository</h2></div></div>
+<div class="prose">
+<h3 class="substep">11.1 Git clone inside the VM</h3>
+<p>For a new student copy, run <strong>inside Ubuntu</strong>:</p>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div><div class="code-body"><pre>cd &quot;$HOME&quot;
+git clone https://github.com/antonioclim/COMPNET-EN.git
+cd COMPNET-EN
+ls</pre></div></div>
+<p>If <code>COMPNET-EN</code> already exists, inspect that directory and your work instead of cloning over it. To update an existing Git clone, inspect <code>git status</code> and use <code>git pull --ff-only</code> only when the working copy is ready to update.</p>
+<p>The current top-level directories include:</p>
+<div class="table-wrap"><table><thead><tr><th>Directory</th><th>Contents</th></tr></thead><tbody><tr><td><code>00_TOOLS/</code></td><td>Utilities and alternative environment instructions</td></tr><tr><td><code>01_GUIDE_MININET-SDN/</code></td><td>This guide and the VM verification helper</td></tr><tr><td><code>02_PROJECTS/</code></td><td>Project specifications and supporting assets</td></tr><tr><td><code>03_LECTURES/</code></td><td>Lecture materials</td></tr><tr><td><code>04_SEMINARS/</code></td><td>Seminar instructions, scripts and configurations</td></tr><tr><td><code>00_APPENDIX/</code></td><td>Supplementary learning and teaching materials</td></tr></tbody></table></div>
+<h3 class="substep">11.2 ZIP alternative</h3>
+<p>On Windows, download the <a href="https://github.com/antonioclim/COMPNET-EN/archive/refs/heads/main.zip">current repository ZIP</a>. Put <code>COMPNET-EN-main.zip</code> in <code>C:\SHARED</code>. In the VM:</p>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div><div class="code-body"><pre>cd &quot;$HOME&quot;
+unzip /media/sf_SHARED/COMPNET-EN-main.zip</pre></div></div>
+<p>If <code>~/COMPNET-EN</code> does not already exist, normalise the extracted directory name so the later commands work unchanged:</p>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div><div class="code-body"><pre>if [ -e &quot;$HOME/COMPNET-EN&quot; ]; then
+    printf &#x27;COMPNET-EN already exists; keep your existing work and select the intended copy.\n&#x27;
+else
+    mv -- &quot;$HOME/COMPNET-EN-main&quot; &quot;$HOME/COMPNET-EN&quot;
+fi</pre></div></div>
+<p>A ZIP checkout has no Git history. Do not run <code>git pull</code> inside it.</p>
+<h3 class="substep">11.3 Check the supplied environment</h3>
+<p>From the repository root:</p>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div><div class="code-body"><pre>cd &quot;$HOME/COMPNET-EN&quot;
+bash 01_GUIDE_MININET-SDN/verify_mininet_vm.sh</pre></div></div>
+<p>The helper reads the available environment and reports missing requirements. It does not install packages or repair the VM. Keep its output if a required component is missing.</p>
+<p>No separate compatibility script is needed to find the course files. The commands below use their real paths and explicit Compose filenames. The institutional classroom deployment script is not part of the student setup route.</p>
+</div>
 </section>
 
-<div class="divider"></div>
-
-<!-- Step 11 -->
 <section class="step" id="test">
-  <div class="step-header">
-    <div class="step-number">11</div>
-    <div>
-      <h2 class="step-title">Full end-to-end test</h2>
-      <div class="step-title-sub">Everything together: SSH → Docker Compose → tshark → Wireshark</div>
-    </div>
-  </div>
-  <div class="prose">
-    <p>The moment of truth. Connect via PuTTY and work through these two scenarios.</p>
+<div class="step-header"><div class="step-number">12</div><div><h2 class="step-title">Testing the student workflow</h2></div></div>
+<div class="prose">
+<p>These checks exercise specific paths. Successful results establish those paths on your machine; they do not replace the remaining seminar exercises.</p>
+<h3 class="substep">12.1 Mininet check</h3>
+<p>Run in the VM, when no other Mininet exercise is active:</p>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div><div class="code-body"><pre>sudo mn --switch ovsbr --controller none --test pingall</pre></div></div>
+<p>This uses an OVS bridge without a remote controller and should report zero dropped pings. S06 separately tests the Os-Ken/OpenFlow controller path; follow the <a href="../04_SEMINARS/S06/README.md">S06 instructions</a> for that exercise.</p>
+<h3 class="substep">12.2 S08: backend, nginx and HTTP</h3>
+<p>Run this sequence in <strong>SSH Terminal A inside the guest</strong>. Keep the terminal open so the backend process identifier remains available for cleanup.</p>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div><div class="code-body"><pre>cd &quot;$HOME/COMPNET-EN/04_SEMINARS/S08/4_nginx&quot;
+ss -ltn &#x27;( sport = :8000 or sport = :8080 )&#x27;</pre></div></div>
+<p>If either port is already in use, identify your previous exercise before continuing. Start the backend using a new log file:</p>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div><div class="code-body"><pre>backend_log=$(mktemp /tmp/compnet-s08-backend.XXXXXX)
+python3 -m http.server 8000 --bind 127.0.0.1 --directory ../2_simple-http &gt;&quot;$backend_log&quot; 2&gt;&amp;1 &amp;
+backend_pid=$!
+printf &#x27;Backend PID: %s; log: %s\n&#x27; &quot;$backend_pid&quot; &quot;$backend_log&quot;
+curl --fail --show-error --retry 5 --retry-connrefused --retry-delay 1 --max-time 5 http://127.0.0.1:8000/</pre></div></div>
+<p>Then start nginx with the actual configuration file:</p>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div><div class="code-body"><pre>docker compose -f S08_Part04_Config_Docker_Compose.yml config --quiet
+docker compose -f S08_Part04_Config_Docker_Compose.yml up -d
+docker compose -f S08_Part04_Config_Docker_Compose.yml ps
+curl --fail --show-error --retry 5 --retry-connrefused --retry-delay 1 --max-time 5 -I http://127.0.0.1:8080/
+curl --fail --show-error --max-time 5 http://127.0.0.1:8080/</pre></div></div>
+<p>Expected evidence: HTTP 200, an <code>X-Student-Lab: Seminar8</code> response header and the backend content. An <code>Up</code> container alone is insufficient. The supplied configuration uses <code>network_mode: host</code>, so nginx can reach the Python backend at the guest&#x27;s <code>127.0.0.1:8000</code>.</p>
+<p>For the packet capture, keep this scenario running and follow Section 9 in Terminal B. If you configured the optional NAT HTTP rule, a Windows browser can also open <code>http://127.0.0.1:8080/</code>.</p>
+<p>When finished, run <strong>in the same Terminal A</strong>:</p>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div><div class="code-body"><pre>docker compose -f S08_Part04_Config_Docker_Compose.yml down
+kill &quot;$backend_pid&quot;
+wait &quot;$backend_pid&quot; 2&gt;/dev/null || true</pre></div></div>
+<p>Only the backend started by this sequence and this Compose project are stopped.</p>
+<h3 class="substep">12.3 S09: one client uploads, another downloads</h3>
+<p>Run in the VM:</p>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div><div class="code-body"><pre>cd &quot;$HOME/COMPNET-EN/04_SEMINARS/S09/3_multi-client-containers&quot;
+mkdir -p server-data server-anon client1-data client2-data
+printf &#x27;Hello from client1\n&#x27; &gt; client1-data/setup-check.txt
+docker compose -f S09_Part03_Config_Docker_Compose.yml config --quiet
+docker compose -f S09_Part03_Config_Docker_Compose.yml up -d
+docker compose -f S09_Part03_Config_Docker_Compose.yml ps</pre></div></div>
+<p>Image downloads and the FTP server&#x27;s initial dependency installation require internet access unless the required artefacts are already available. Wait for FTP readiness with this bounded check:</p>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div><div class="code-body"><pre>docker compose -f S09_Part03_Config_Docker_Compose.yml exec -T client1 python - &lt;&lt;&#x27;PYREADY&#x27;
+import ftplib
+import time
 
-    <h3 class="substep">Scenario A — Nginx Reverse Proxy (Lab 8)</h3>
-
-    <div class="code-block">
-      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash — full test</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
-      <div class="code-body"><pre><span class="comment"># 1. Navigate to the scenario</span>
-<span class="cmd">cd</span> ~/compnet-2025-redo/assets/tutorial/s8/4_nginx/
-
-<span class="comment"># 2. Start a Python HTTP server on port 8000 (the backend)</span>
-<span class="cmd">python3</span> <span class="flag">-m</span> http.server 8000 &
-
-<span class="comment"># 3. Start the nginx container (reverse proxy)</span>
-<span class="cmd">docker compose up</span> <span class="flag">-d</span>
-
-<span class="comment"># 4. Check container status</span>
-<span class="cmd">docker compose ps</span>
-
-<span class="comment"># 5. Test with curl</span>
-<span class="cmd">curl</span> http://localhost:8080
-
-<span class="comment"># 6. Tear everything down</span>
-<span class="cmd">docker compose down</span>
-<span class="cmd">kill</span> %1</pre></div>
-    </div>
-
-    <h3 class="substep">Scenario B — Multi-client FTP (Lab 9)</h3>
-
-    <div class="code-block">
-      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash — docker compose with multiple containers</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
-      <div class="code-body"><pre><span class="cmd">cd</span> ~/compnet-2025-redo/assets/tutorial/s9/3_multi-client-containers/
-
-<span class="comment"># Start everything (3 containers: ftp-server, client1, client2)</span>
-<span class="cmd">docker compose up</span> <span class="flag">-d</span>
-
-<span class="comment"># Check</span>
-<span class="cmd">docker compose ps</span>
-<span class="cmd">docker network ls</span>
-
-<span class="comment"># Tear down</span>
-<span class="cmd">docker compose down</span></pre></div>
-    </div>
-
-    <div class="callout tip">
-      <div class="callout-title">✓ Success!</div>
-      <p>If both scenarios ran without errors — containers started, curl received a response, everything shut down cleanly — <strong>you are ready for the labs</strong>.</p>
-    </div>
-  </div>
+deadline = time.monotonic() + 60
+while True:
+    try:
+        with ftplib.FTP() as ftp:
+            ftp.connect(&#x27;ftp-server&#x27;, 2121, timeout=2)
+            ftp.login(&#x27;test&#x27;, &#x27;12345&#x27;)
+            print(&#x27;FTP login: OK&#x27;)
+        break
+    except (OSError, ftplib.Error) as exc:
+        if time.monotonic() &gt;= deadline:
+            raise SystemExit(f&#x27;FTP not ready: {exc}&#x27;)
+        time.sleep(1)
+PYREADY</pre></div></div>
+<p>Then exercise the supplied clients:</p>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div><div class="code-body"><pre>docker compose -f S09_Part03_Config_Docker_Compose.yml exec -T client1 python S09_Part03_Script_Pyftpd_Multi_Client.py upload setup-check.txt
+docker compose -f S09_Part03_Config_Docker_Compose.yml exec -T client2 python S09_Part03_Script_Pyftpd_Multi_Client.py download setup-check.txt
+cmp client1-data/setup-check.txt client2-data/setup-check.txt &amp;&amp; printf &#x27;Transferred file: MATCH\n&#x27;
+docker compose -f S09_Part03_Config_Docker_Compose.yml down</pre></div></div>
+<p>The expected evidence is a successful upload, a successful download and <code>Transferred file: MATCH</code>. The test uses the shared container network, where both clients can resolve <code>ftp-server</code>. Publishing an FTP control port alone does not establish a working passive data path from Windows; that separate networking case is not required here.</p>
+</div>
 </section>
 
-<div class="divider"></div>
-
-<!-- Step 12 -->
 <section class="step" id="troubleshoot">
-  <div class="step-header">
-    <div class="step-number">12</div>
-    <div>
-      <h2 class="step-title">Troubleshooting</h2>
-      <div class="step-title-sub">Common problems and their solutions</div>
-    </div>
-  </div>
-  <div class="prose"><p>Click on each problem to reveal the solution:</p></div>
-
-  <div class="trouble-item" onclick="this.classList.toggle('open')">
-    <div class="trouble-q"><span class="trouble-icon">!</span>VM will not start: "VT-x is disabled in BIOS"<span class="trouble-arrow">▸</span></div>
-    <div class="trouble-a"><p>Hardware virtualisation is not enabled. Restart your machine, enter BIOS (<code class="inline-code">F2</code>, <code class="inline-code">F10</code>, <code class="inline-code">Del</code> or <code class="inline-code">Esc</code> at startup), find <em>Intel Virtualization Technology</em> (or <em>SVM Mode</em> on AMD), enable it, save and exit.</p></div>
-  </div>
-
-  <div class="trouble-item" onclick="this.classList.toggle('open')">
-    <div class="trouble-q"><span class="trouble-icon">!</span>PuTTY: "Connection refused" at 127.0.0.1:2222<span class="trouble-arrow">▸</span></div>
-    <div class="trouble-a"><p>Three possible causes: the VM is not running, port forwarding is misconfigured or the SSH service inside the VM is not active. Check in order: (1) make sure the VM has reached the login prompt; (2) verify the rules under Settings → Network → Port Forwarding; (3) in the VirtualBox console run <code class="inline-code">sudo systemctl start ssh && sudo systemctl enable ssh</code>.</p></div>
-  </div>
-
-  <div class="trouble-item" onclick="this.classList.toggle('open')">
-    <div class="trouble-q"><span class="trouble-icon">!</span><code class="inline-code">docker compose up</code> reports port conflicts<span class="trouble-arrow">▸</span></div>
-    <div class="trouble-a">
-      <p>Stale containers from a previous session are still running. Quick fix:</p>
-      <div class="code-block">
-        <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span><button class="code-copy" onclick="event.stopPropagation(); copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
-        <div class="code-body"><pre><span class="cmd">docker rm</span> <span class="flag">-f</span> $(docker ps <span class="flag">-aq</span>) 2>/dev/null
-<span class="cmd">docker network prune</span> <span class="flag">-f</span></pre></div>
-      </div>
-      <p>Or use the <code class="inline-code">clean.sh</code> script described in the next section.</p>
-    </div>
-  </div>
-
-  <div class="trouble-item" onclick="this.classList.toggle('open')">
-    <div class="trouble-q"><span class="trouble-icon">!</span><code class="inline-code">docker compose</code> returns "permission denied"<span class="trouble-arrow">▸</span></div>
-    <div class="trouble-a"><p>The user <code class="inline-code">stud</code> is not in the <code class="inline-code">docker</code> group. Run <code class="inline-code">sudo usermod -aG docker stud</code>, then log out and back in (close PuTTY and reconnect).</p></div>
-  </div>
-
-  <div class="trouble-item" onclick="this.classList.toggle('open')">
-    <div class="trouble-q"><span class="trouble-icon">!</span>Shared Folder does not appear in the VM<span class="trouble-arrow">▸</span></div>
-    <div class="trouble-a">
-      <p>Guest Additions are already included in the OVA (v7.0.16). Just make sure you ticked <strong>Auto-mount</strong> during configuration. As a manual workaround:</p>
-      <div class="code-block">
-        <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span><button class="code-copy" onclick="event.stopPropagation(); copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
-        <div class="code-body"><pre><span class="cmd">sudo mkdir</span> <span class="flag">-p</span> /media/sf_SHARED
-<span class="cmd">sudo mount</span> <span class="flag">-t</span> vboxsf SHARED /media/sf_SHARED</pre></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="trouble-item" onclick="this.classList.toggle('open')">
-    <div class="trouble-q"><span class="trouble-icon">!</span>Wireshark on Windows cannot see VM traffic<span class="trouble-arrow">▸</span></div>
-    <div class="trouble-a"><p>This is expected — internal traffic (Docker, Mininet) exists only inside the VM. Capture it with <code class="inline-code">sudo tshark -i docker0 -w /tmp/capture.pcap</code>, copy the file to <code class="inline-code">/media/sf_SHARED/</code> and open it on Windows.</p></div>
-  </div>
-
-  <div class="trouble-item" onclick="this.classList.toggle('open')">
-    <div class="trouble-q"><span class="trouble-icon">!</span>The VM is extremely slow<span class="trouble-arrow">▸</span></div>
-    <div class="trouble-a"><p>Allocate more RAM (Settings → System → 3072 MB), more CPUs (2–4) and start the VM in <strong>Headless</strong> mode (right-click the VM → Start → Headless Start) — you lose the graphical window and work exclusively through PuTTY, which saves a considerable amount of resources.</p></div>
-  </div>
-
-  <div class="trouble-item" onclick="this.classList.toggle('open')">
-    <div class="trouble-q"><span class="trouble-icon">!</span>Python: "No module named …"<span class="trouble-arrow">▸</span></div>
-    <div class="trouble-a"><p>The <code class="inline-code">compnet</code> virtual environment is not activated. Activate it manually with <code class="inline-code">source ~/venvs/compnet/bin/activate</code>. The prompt must begin with <code class="inline-code">(compnet)</code>. Verify with <code class="inline-code">which python3</code> — it should return <code class="inline-code">/home/stud/venvs/compnet/bin/python3</code>.</p></div>
-  </div>
-
-  <div class="trouble-item" onclick="this.classList.toggle('open')">
-    <div class="trouble-q"><span class="trouble-icon">!</span>Error at <code class="inline-code">sudo mn --test pingall</code><span class="trouble-arrow">▸</span></div>
-    <div class="trouble-a"><p>Open vSwitch is probably not running. Start it with <code class="inline-code">sudo systemctl start openvswitch-switch && sudo systemctl enable openvswitch-switch</code>, then try again.</p></div>
-  </div>
+<div class="step-header"><div class="step-number">13</div><div><h2 class="step-title">Troubleshooting</h2></div></div>
+<div class="prose">
+<h3 class="substep">VM startup or SSH connection fails</h3>
+<p>Check that the intended VM is running and that the NAT forwarding rule exists. From the VM console, inspect:</p>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div><div class="code-body"><pre>systemctl status ssh --no-pager</pre></div></div>
+<p>On your own VM, start the service if it is stopped:</p>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div><div class="code-body"><pre>sudo systemctl start ssh</pre></div></div>
+<p>Check host port conflicts before changing a working forwarding rule. On classroom PCs, retain the configuration provided by the instructor.</p>
+<h3 class="substep">Docker reports permission denied or cannot connect</h3>
+<p>Run inside the VM:</p>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div><div class="code-body"><pre>id
+systemctl status docker --no-pager
+docker context show</pre></div></div>
+<p>Use the guest&#x27;s local Docker engine. On your own VM, a missing <code>docker</code> group membership can be corrected with <code>sudo usermod -aG docker stud</code>, followed by logout/login. A stopped service is a separate issue. Do not redirect Docker to a different engine to hide the original error.</p>
+<h3 class="substep">Compose reports no configuration file</h3>
+<p>Change to the scenario directory and include the actual filename with <code>-f</code>. For S08:</p>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div><div class="code-body"><pre>cd &quot;$HOME/COMPNET-EN/04_SEMINARS/S08/4_nginx&quot;
+docker compose -f S08_Part04_Config_Docker_Compose.yml config --quiet</pre></div></div>
+<h3 class="substep">Port conflict or nginx returns 502</h3>
+<p>Inspect the listeners and scenario logs:</p>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div><div class="code-body"><pre>ss -ltn &#x27;( sport = :8000 or sport = :8080 )&#x27;
+docker compose -f S08_Part04_Config_Docker_Compose.yml logs --tail 30 nginx
+curl --fail --show-error --max-time 5 http://127.0.0.1:8000/</pre></div></div>
+<p>A 502 response commonly means nginx cannot reach its backend. Confirm that the Python server runs in the same Ubuntu guest and inspect the backend log created in Section 12. Stop only your own conflicting exercise using Section 14.</p>
+<h3 class="substep">FTP containers exist but login or transfer fails</h3>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div><div class="code-body"><pre>cd &quot;$HOME/COMPNET-EN/04_SEMINARS/S09/3_multi-client-containers&quot;
+docker compose -f S09_Part03_Config_Docker_Compose.yml logs --tail 40 ftp-server</pre></div></div>
+<p>Look for a failed image/dependency download, a missing bind-mounted file or a server startup error. Retry the readiness check after resolving the cause. For the supplied scenario, run the clients inside <code>client1</code> and <code>client2</code>.</p>
+<h3 class="substep">Shared folder missing or capture unavailable</h3>
+<p>Confirm the VirtualBox share name <code>SHARED</code>, Auto-mount and the guest&#x27;s <code>vboxsf</code> membership. Use SCP if shared folders are unavailable. Wait for the bounded capture to finish before transferring it. Select the interface where the exercise traffic actually flows; S08 loopback traffic does not use <code>docker0</code>.</p>
+<h3 class="substep">Python import or osken-manager missing</h3>
+<p>Activate the existing course environment and inspect its installed package:</p>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div><div class="code-body"><pre>test -f &quot;$HOME/venvs/compnet/bin/activate&quot; &amp;&amp; source &quot;$HOME/venvs/compnet/bin/activate&quot;
+command -v python3
+command -v osken-manager
+python3 -c &quot;from importlib.metadata import version; print(version(&#x27;os-ken&#x27;))&quot;</pre></div></div>
+<p>Do not replace the course environment with an unpinned upgrade. OS-Ken 4.x no longer supplies the legacy manager command. Keep the diagnostic output and use the course environment supplied with the appliance or ask the instructor to restore it.</p>
+<h3 class="substep">Mininet fails</h3>
+<p>Read the exact error. Check the installed tools and Open vSwitch service:</p>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div><div class="code-body"><pre>command -v mn
+command -v ovs-vsctl
+systemctl status openvswitch-switch --no-pager</pre></div></div>
+<p>A missing executable is not the same as a stopped service. If no other Mininet exercise is active, <code>sudo mn -c</code> can clear remnants of your failed Mininet run. Repeat the Section 12.1 check after resolving the cause.</p>
+</div>
 </section>
 
-<div class="divider"></div>
-
-<!-- Step 13 -->
 <section class="step" id="clean">
-  <div class="step-header">
-    <div class="step-number">13</div>
-    <div>
-      <h2 class="step-title">The cleanup script</h2>
-      <div class="step-title-sub">When containers get stuck and ports stay occupied</div>
-    </div>
-  </div>
-  <div class="prose">
-    <p>Sometimes, if you close PuTTY without running <code class="inline-code">docker compose down</code>, containers remain active and hold on to their ports. The following scripts sort that out.</p>
-
-    <h3 class="substep">On Windows — clean.ps1 (PowerShell)</h3>
-    <p>Useful if you have Docker Desktop on Windows. Save the file and run it:</p>
-
-    <div class="code-block">
-      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">powershell — clean.ps1</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
-      <div class="code-body"><pre><span class="comment"># clean.ps1 — Automated Docker cleanup script</span>
-Write-Host <span class="string">"[INFO] Starting Docker cleanup..."</span> -ForegroundColor Cyan
-
-<span class="comment"># 1. Tear down the current compose project</span>
-Write-Host <span class="string">" -> Docker Compose Down..."</span> -NoNewline
-docker compose down 2>$null
-Write-Host <span class="string">" OK"</span> -ForegroundColor Green
-
-<span class="comment"># 2. Force-remove ALL containers</span>
-Write-Host <span class="string">" -> Force-removing containers..."</span> -NoNewline
-$containers = docker ps -aq
-if ($containers) {
-    docker rm -f $containers 2>$null
-    Write-Host <span class="string">" OK (containers removed)"</span> -ForegroundColor Green
-} else {
-    Write-Host <span class="string">" OK (none found)"</span> -ForegroundColor Gray
-}
-
-<span class="comment"># 3. Prune unused networks</span>
-Write-Host <span class="string">" -> Pruning networks..."</span> -NoNewline
-docker network prune -f 2>$null
-Write-Host <span class="string">" OK"</span> -ForegroundColor Green
-
-Write-Host <span class="string">"[DONE] All clean!"</span> -ForegroundColor Cyan</pre></div>
-    </div>
-
-    <p>Running from PowerShell:</p>
-    <div class="code-block">
-      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">powershell</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
-      <div class="code-body"><pre>Set-ExecutionPolicy <span class="flag">-Scope</span> CurrentUser <span class="flag">-ExecutionPolicy</span> RemoteSigned
-.\clean.ps1</pre></div>
-    </div>
-
-    <h3 class="substep">Inside the VM — clean.sh (Bash)</h3>
-    <p>The version for direct use over SSH:</p>
-
-    <div class="code-block">
-      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash — one-liner creation</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
-      <div class="code-body"><pre><span class="cmd">cat</span> > ~/clean.sh << 'EOF'
-<span class="comment">#!/bin/bash</span>
-echo <span class="string">"[INFO] Starting Docker cleanup..."</span>
-docker compose down 2>/dev/null
-docker rm -f $(docker ps -aq) 2>/dev/null
-docker network prune -f 2>/dev/null
-echo <span class="string">"[DONE] All clean!"</span>
-EOF
-<span class="cmd">chmod</span> <span class="flag">+x</span> ~/clean.sh</pre></div>
-    </div>
-
-    <p>Then, whenever you need it: <code class="inline-code">~/clean.sh</code></p>
-  </div>
+<div class="step-header"><div class="step-number">14</div><div><h2 class="step-title">Stopping your lab scenario</h2></div></div>
+<div class="prose">
+<p>Run cleanup <strong>inside the VM</strong> with the same Compose file used to start that scenario:</p>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div><div class="code-body"><pre>cd &quot;$HOME/COMPNET-EN/04_SEMINARS/S08/4_nginx&quot;
+docker compose -f S08_Part04_Config_Docker_Compose.yml down</pre></div></div>
+<p>For S09:</p>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div><div class="code-body"><pre>cd &quot;$HOME/COMPNET-EN/04_SEMINARS/S09/3_multi-client-containers&quot;
+docker compose -f S09_Part03_Config_Docker_Compose.yml down</pre></div></div>
+<p>These commands stop and remove the selected project&#x27;s containers and networks. The bind-mounted exercise files remain in their directories. Stop the separately launched S08 Python backend with its recorded PID in the original terminal, as shown in Section 12.2.</p>
+<p>For an interactive Mininet exercise, type <code>exit</code> at <code>mininet&gt;</code> so its script can stop its topology. Stop the controller with <code>Ctrl+C</code> in the controller terminal. Use <code>sudo mn -c</code> only when no other Mininet session is active and a failed run left resources behind.</p>
+<p>There is no need to run a Windows-wide or Docker-wide cleanup script. Keep other projects and their containers intact.</p>
+</div>
 </section>
-
-<div class="divider"></div>
-
-<!-- Step 14 -->
-<section class="step" id="linux">
-  <div class="step-header">
-    <div class="step-number">14</div>
-    <div>
-      <h2 class="step-title">Appendix — Linux host</h2>
-      <div class="step-title-sub">Key differences if you are not on Windows</div>
-    </div>
-  </div>
-  <div class="prose">
-    <p>If your host runs Linux (Ubuntu, Debian, Fedora), the steps are largely identical. Here is a summary of the differences:</p>
-
-    <h3 class="substep">Installing VirtualBox</h3>
-    <div class="code-block">
-      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash — Ubuntu / Debian</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
-      <div class="code-body"><pre><span class="cmd">sudo apt update</span>
-<span class="cmd">sudo apt install</span> virtualbox</pre></div>
-    </div>
-
-    <h3 class="substep">Importing the OVA and configuring port forwarding from the command line</h3>
-    <div class="code-block">
-      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
-      <div class="code-body"><pre><span class="cmd">VBoxManage import</span> ~/Downloads/MININET-SDN.ova
-<span class="cmd">VBoxManage modifyvm</span> <span class="string">"MININET-SDN"</span> <span class="flag">--natpf1</span> <span class="string">"ssh,tcp,127.0.0.1,2222,,22"</span>
-<span class="cmd">VBoxManage modifyvm</span> <span class="string">"MININET-SDN"</span> <span class="flag">--natpf1</span> <span class="string">"http,tcp,127.0.0.1,8080,,8080"</span></pre></div>
-    </div>
-
-    <h3 class="substep">SSH (no PuTTY needed)</h3>
-    <div class="code-block">
-      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
-      <div class="code-body"><pre><span class="cmd">ssh</span> <span class="flag">-p</span> 2222 stud@127.0.0.1</pre></div>
-    </div>
-
-    <h3 class="substep">Wireshark</h3>
-    <div class="code-block">
-      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
-      <div class="code-body"><pre><span class="cmd">sudo apt install</span> wireshark
-<span class="comment"># When asked about setuid: answer "Yes"</span>
-<span class="cmd">sudo usermod</span> <span class="flag">-aG</span> wireshark $USER
-<span class="comment"># Log out and back in, then:</span>
-<span class="cmd">wireshark</span> &</pre></div>
-    </div>
-  </div>
-</section>
-
-<!-- References -->
-<div class="divider"></div>
 
 <section class="step" id="refs">
-  <div class="step-header">
-    <div class="step-number">★</div>
-    <div><h2 class="step-title">References and useful links</h2></div>
-  </div>
-  <div class="prose">
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Resource</th><th>URL</th></tr></thead>
-        <tbody>
-          <tr><td>VM MININET-SDN (.ova)</td><td><a href="https://drive.google.com/file/d/1LqnyD64gzePBjYEXpIGen41mNdjBKU3x/view?usp=drive_link" target="_blank">Google Drive</a></td></tr>
-          <tr><td>Course repository (GitHub)</td><td><a href="https://github.com/hypothetical-andrei/compnet-2025-redo" target="_blank">github.com/hypothetical-andrei/compnet-2025-redo</a></td></tr>
-          <tr><td>VirtualBox</td><td><a href="https://www.virtualbox.org/wiki/Downloads" target="_blank">virtualbox.org/wiki/Downloads</a></td></tr>
-          <tr><td>PuTTY</td><td><a href="https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html" target="_blank">chiark.greenend.org.uk/~sgtatham/putty</a></td></tr>
-          <tr><td>Wireshark</td><td><a href="https://www.wireshark.org/download.html" target="_blank">wireshark.org/download.html</a></td></tr>
-          <tr><td>Docker Compose docs</td><td><a href="https://docs.docker.com/compose/" target="_blank">docs.docker.com/compose</a></td></tr>
-          <tr><td>Mininet walkthrough</td><td><a href="http://mininet.org/walkthrough/" target="_blank">mininet.org/walkthrough</a></td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
+<div class="step-header"><div class="step-number">15</div><div><h2 class="step-title">References and useful links</h2></div></div>
+<div class="prose">
+<div class="table-wrap"><table><thead><tr><th>Resource</th><th>Link</th></tr></thead><tbody><tr><td>MININET-SDN DOI — reserved, publication pending</td><td><a href="https://doi.org/10.5281/zenodo.24289763">Zenodo DOI</a></td></tr><tr><td>Course repository</td><td><a href="https://github.com/antonioclim/COMPNET-EN">antonioclim/COMPNET-EN</a></td></tr><tr><td>VirtualBox downloads and documentation</td><td><a href="https://www.virtualbox.org/wiki/Downloads">virtualbox.org</a></td></tr><tr><td>PuTTY</td><td><a href="https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html">Official download page</a></td></tr><tr><td>Wireshark</td><td><a href="https://www.wireshark.org/download.html">Downloads</a></td></tr><tr><td>Explicit Compose files</td><td><a href="https://docs.docker.com/reference/cli/docker/compose/">Docker Compose CLI documentation</a></td></tr><tr><td>Docker network modes</td><td><a href="https://docs.docker.com/compose/how-tos/networking/">Docker Compose networking</a></td></tr><tr><td>Mininet walkthrough</td><td><a href="https://mininet.org/walkthrough/">mininet.org</a></td></tr><tr><td>OS-Ken application API</td><td><a href="https://docs.openstack.org/os-ken/latest/os_ken_app_api.html">OpenStack documentation</a></td></tr><tr><td>OS-Ken manager removal in 4.x</td><td><a href="https://docs.openstack.org/releasenotes/os-ken/2026.1.html">OS-Ken 2026.1 release notes</a></td></tr></tbody></table></div>
+<p>Use the version-specific appliance DOI together with the matching checksum when identifying the course image. A reserved DOI becomes a public record only after publication.</p>
+</div>
+</section>
+
+<section class="step" id="linux">
+<div class="step-header"><div class="step-number">16</div><div><h2 class="step-title">Linux hosts and the separate WSL route</h2></div></div>
+<div class="prose">
+<h3 class="substep">16.1 A Linux host running VirtualBox</h3>
+<p>Install a VirtualBox release supported by your Linux distribution using its documented package route or the <a href="https://www.virtualbox.org/wiki/Linux_Downloads">official Linux download instructions</a>. Import the same OVA through VirtualBox Manager. The guest-side commands remain the same.</p>
+<p>With a new VM powered off, the equivalent NAT SSH rule can be added from the Linux host:</p>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div><div class="code-body"><pre>VBoxManage modifyvm &quot;MININET-SDN&quot; --natpf1 &quot;ssh,tcp,127.0.0.1,2222,,22&quot;</pre></div></div>
+<p>Inspect existing rules first to avoid duplicates. Connect from the Linux host:</p>
+<div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div><div class="code-body"><pre>ssh -p 2222 stud@127.0.0.1</pre></div></div>
+<p>Use SCP or a configured VirtualBox share for captures. A <code>vboxsf</code> group change, if needed, belongs <strong>inside the guest</strong>, where the share is mounted. Opening saved captures on the Linux host does not require a live-capture privilege change.</p>
+<h3 class="substep">16.2 WSL is a separate environment</h3>
+<p>The <a href="../00_TOOLS/Prerequisites/Prerequisites.md">WSL prerequisites</a> describe another course setup route. Its account, virtual environment, service addresses and installation steps must be followed as a complete route. Do not combine institutional WSL deployment settings with the VirtualBox account, ports or paths in this guide.</p>
+<p>For students using the supplied MININET-SDN appliance, continue with its existing guest environment and the seminar instructions.</p>
+</div>
 </section>
 
 <!-- Footer -->
 <footer class="footer">
-  <p>Setup Guide — Computer Networks — ASE-CSIE — 2025–2026</p>
-  <p>ing. dr. Antonio Clim &middot; <a href="https://github.com/hypothetical-andrei/compnet-2025-redo">Course repository on GitHub</a></p>
+  <p>Setup Guide — Networking and SDN — ASE-CSIE — 16 November 2026</p>
+  <p>ing. dr. Antonio Clim &middot; <a href="https://github.com/antonioclim/COMPNET-EN">Course repository on GitHub</a></p>
 </footer>
 
 </main>
@@ -1716,18 +1224,37 @@ EOF
 
 <!-- JavaScript -->
 <script>
-function copyCode(btn) {
-  const block = btn.closest('.code-block');
-  const pre = block.querySelector('.code-body pre');
+async function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('.code-body pre');
   const text = pre.textContent;
-  navigator.clipboard.writeText(text).then(() => {
-    btn.classList.add('copied');
-    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Copied!';
-    setTimeout(() => {
-      btn.classList.remove('copied');
-      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy';
-    }, 2000);
-  });
+  const original = btn.innerHTML;
+  let copied = false;
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      copied = true;
+    }
+  } catch (_) { /* Fall back when clipboard access is unavailable. */ }
+  if (!copied) {
+    const area = document.createElement('textarea');
+    area.value = text;
+    area.style.position = 'fixed';
+    area.style.opacity = '0';
+    document.body.appendChild(area);
+    area.select();
+    try { copied = document.execCommand('copy'); } catch (_) { copied = false; }
+    area.remove();
+  }
+  btn.classList.toggle('copied', copied);
+  btn.textContent = copied ? 'Copied!' : 'Select code and copy';
+  if (!copied) {
+    const range = document.createRange();
+    range.selectNodeContents(pre);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }
+  setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = original; }, 2000);
 }
 
 function toggleToc() {
