@@ -33,6 +33,15 @@ Native Windows, VirtualBox, WSL, Docker and appliance acceptance were not run as
 part of this source revision. The author's existing classroom testing of the OVA
 is recorded separately from these checks. Existing licence terms are unchanged.
 
+### Publication follow-up — 16 November 2026
+
+The subsequent Zenodo record export confirms publication of appliance version
+1.0.0 under DOI `10.5281/zenodo.24289763`. It also explicitly identifies the
+concept DOI `10.5281/zenodo.24289762`. All four release files retain the same
+identifiers, sizes and stored checksums as the checked final draft. Current
+download instructions and appliance metadata now reflect the published state;
+the earlier preparation entry above records the state before publication.
+
 ---
 
 Originally prepared on 25 February 2026. Extended on 28 February 2026.

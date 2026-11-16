@@ -174,7 +174,7 @@ be imported on students' compatible computers. Run Mininet, Open vSwitch and the
 guest Docker Engine inside that VM.
 
 - **Appliance version 1.0.0:** [Zenodo DOI](https://doi.org/10.5281/zenodo.24289763).
-  The DOI is reserved; the Zenodo deposit is awaiting publication.
+  Published on 16 November 2026. Download the OVA and checksum manifest from the release record.
 - [File identity and checksum](01_GUIDE_MININET-SDN/README.md#download-the-lab-virtual-machine).
 - [Student setup guide](01_GUIDE_MININET-SDN/SETUP-GUIDE-COMPNET-EN.md).
 - The administrative script used to provision ASE PCs is not required on students' computers.

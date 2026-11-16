@@ -10,9 +10,9 @@ personal computer.
 
 **Version 1.0.0:** [https://doi.org/10.5281/zenodo.24289763](https://doi.org/10.5281/zenodo.24289763)
 
-**Publication status:** DOI reserved; the Zenodo deposit is awaiting publication.
-The DOI is not yet a public download. The release documentation will be updated
-when the record is published.
+**Publication status:** Published on 16 November 2026.
+Download `MININET-SDN.ova` and `SHA256SUMS.txt` from the
+[Zenodo release record](https://zenodo.org/records/24289763).
 
 | Item | Value |
 |---|---|
@@ -26,6 +26,18 @@ when the record is published.
 The DOI identifies the virtual appliance. The course materials remain in
 [COMPNET-EN](https://github.com/antonioclim/COMPNET-EN). Use this specific appliance
 version when following instructions for the corresponding teaching environment.
+
+The [concept DOI](https://doi.org/10.5281/zenodo.24289762) represents all versions
+of the appliance. Use the version-specific DOI above with the matching checksum
+to identify the exact classroom image; the concept DOI follows the latest release.
+
+### Cite this appliance
+
+Clim, A. (2026). *MININET-SDN: VirtualBox lab environment for computer networking
+and software-defined networking* (Version 1.0.0) [Software]. Zenodo.
+[https://doi.org/10.5281/zenodo.24289763](https://doi.org/10.5281/zenodo.24289763)
+
+### Verify the download
 
 Download the OVA and SHA256SUMS.txt into the same directory. In Windows PowerShell:
 
@@ -114,7 +126,7 @@ interface inside the VM.
 
 - Appliance author and course maintainer: ing. dr. Antonio Clim, ASE CSIE.
 - File identity: supplied by the author's PowerShell SHA-256 computation on
-  16 November 2026 and checked for consistency with the Zenodo draft export.
+  16 November 2026 and checked for consistency with the published Zenodo export.
 - The author confirmed that the appliance was built, configured and tested for
   the ASE laboratories.
 - Third-party software retains its own licences. Course materials keep the terms

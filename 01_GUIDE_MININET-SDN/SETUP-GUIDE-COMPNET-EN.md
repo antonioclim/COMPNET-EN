@@ -11,7 +11,7 @@ The MININET-SDN appliance was built, configured and tested by Antonio Clim for t
 
 **On an ASE classroom PC:** use the existing MININET-SDN VM. Start at Section 6, check the available connection and continue to Section 11. The institutional deployment script used to prepare classroom PCs is not a student prerequisite.
 
-**On your own PC:** follow the installation and import steps below. The Zenodo DOI has been reserved; publication is pending. See Section 4 for the current download status.
+**On your own PC:** download version 1.0.0 from Zenodo and follow the installation and import steps below. Section 4 provides the release link and checksum.
 
 ## Contents
 
@@ -78,9 +78,9 @@ The networking examples in this guide use NAT, SSH and shared folders. They do n
 
 ### 4.1 Publication status and exact file identity
 
-**Reserved Zenodo DOI — publication pending:** [https://doi.org/10.5281/zenodo.24289763](https://doi.org/10.5281/zenodo.24289763).
+**Published Zenodo release — version 1.0.0:** [https://doi.org/10.5281/zenodo.24289763](https://doi.org/10.5281/zenodo.24289763).
 
-The verified Zenodo export describes a **draft**. The DOI is reserved and must not yet be treated as a public download. Until publication, classroom students use the installed VM and home students use a copy supplied by the instructor. After publication, the DOI landing page will provide the release files.
+The release was published on **16 November 2026**. Open the DOI landing page and download `MININET-SDN.ova` and `SHA256SUMS.txt` into the same folder. Read the accompanying README and licence/provenance notice. Students on ASE classroom PCs can continue using the installed VM.
 
 | Field | Value |
 |---|---|
@@ -551,7 +551,7 @@ There is no need to run a Windows-wide or Docker-wide cleanup script. Keep other
 
 | Resource | Link |
 |---|---|
-| MININET-SDN DOI — reserved, publication pending | [Zenodo DOI](https://doi.org/10.5281/zenodo.24289763) |
+| MININET-SDN version 1.0.0 — published release | [Zenodo DOI](https://doi.org/10.5281/zenodo.24289763) |
 | Course repository | [antonioclim/COMPNET-EN](https://github.com/antonioclim/COMPNET-EN) |
 | VirtualBox downloads and documentation | [virtualbox.org](https://www.virtualbox.org/wiki/Downloads) |
 | PuTTY | [Official download page](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html) |
@@ -562,7 +562,7 @@ There is no need to run a Windows-wide or Docker-wide cleanup script. Keep other
 | OS-Ken application API | [OpenStack documentation](https://docs.openstack.org/os-ken/latest/os_ken_app_api.html) |
 | OS-Ken manager removal in 4.x | [OS-Ken 2026.1 release notes](https://docs.openstack.org/releasenotes/os-ken/2026.1.html) |
 
-Use the version-specific appliance DOI together with the matching checksum when identifying the course image. A reserved DOI becomes a public record only after publication.
+Use the version-specific appliance DOI together with the matching checksum when identifying the course image. Record the Git commit used for the exercises separately, because course materials can change independently of the archived OVA.
 
 ## 16. Linux hosts and the separate WSL route
 
