@@ -1,0 +1,775 @@
+{
+  "schema_version": 1,
+  "recorded_date": "2026-11-17",
+  "timezone": "Europe/Bucharest",
+  "repository": "antonioclim/COMPNET-EN",
+  "phase": "F6",
+  "native_item": "N06",
+  "status": "PARTIAL_NATIVE_PRINT_REPAIR_VERIFIED_FULL_X03_REMAINS_OPEN",
+  "source_base_commit": "efe829c5bec7e80078e5b88e81151dcc4d94f1d5",
+  "source_base_tree": "e67b8b63eab2234f2cd7bd31379ab17a2c19c1e1",
+  "workbook_path": "02_PROJECTS/RC2026_VERIFICATION_INDEX.xlsx",
+  "baseline_workbook_sha256": "0832263c17ded112cf8bb9479b074ab4bfcbb5647db4a4b52f720e7c27707ef9",
+  "tested_repaired_workbook_sha256": "08128be05a3860c0e60661f271b6b1790a0ecfeb3237e38f894cf4c544970e67",
+  "tested_repaired_workbook_bytes": 191657,
+  "integration_identity_rule": "The retest executed the exact repaired workbook artifact before integration. The integration receipt verifies that published workbook bytes match this hash. No future whole-commit native run is claimed.",
+  "runtime": {
+    "application": "LibreOfficeDev",
+    "actual_version_stdout": "LibreOfficeDev 26.8.0.0.alpha0 2c87e51eeaa2b413ff4ae097b2705eea1995d8e5",
+    "execution_mode": "Native headless Calc engine via the installed soffice wrapper",
+    "isolated_profiles": [
+      "F6_NATIVE/retest/profiles/version",
+      "F6_NATIVE/retest/profiles/pdf",
+      "F6_NATIVE/retest/profiles/xlsx"
+    ],
+    "profiles_preserved_as_evidence": true,
+    "runtime_files": [
+      {
+        "path": "/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/override/soffice",
+        "bytes": 570,
+        "sha256": "35c5a2736f68e6370a7b9fe5082e66bc438c1a8de11261d6c4bc847073ced45b"
+      },
+      {
+        "path": "/opt/codex/runtimes/codex-primary-runtime/dependencies/native/libreoffice-headless/libreoffice/program/soffice.bin",
+        "bytes": 16072,
+        "sha256": "d905a74dc92eaccb22481ba2de1345666a074a5f0d48322aaad1b6dc8a9e1e40"
+      }
+    ],
+    "no_installation_or_macro_UNO_authoring": true,
+    "GUI_executed": false,
+    "Microsoft_Excel_executed": false
+  },
+  "baseline_native_execution": [
+    {
+      "receipt": {
+        "path": "F6_NATIVE/workbook/logs/version.json",
+        "bytes": 1087,
+        "sha256": "03cdba569c015c2256b79fcc46d36e4763ab5daff4dfc382dbe3be8124fd214e"
+      },
+      "actual_execution": {
+        "step": "version",
+        "command": [
+          "/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/override/soffice",
+          "-env:UserInstallation=file:///workspace/scratch/7cc3f017cace/F6_NATIVE/workbook/profiles/version",
+          "--headless",
+          "--nologo",
+          "--norestore",
+          "--version"
+        ],
+        "timeout_seconds": 20,
+        "started_at_utc": "2026-11-17T20:57:47.666765+00:00",
+        "cwd": "/workspace/scratch/7cc3f017cace/F6_NATIVE/workbook",
+        "environment_overrides": {
+          "LC_ALL": "C.UTF-8"
+        },
+        "pid": 5,
+        "returncode": 0,
+        "status": "PROCESS_EXITED",
+        "cleanup": {
+          "active_owned_group_members_initial": [],
+          "active_owned_group_members_final": [],
+          "direct_child_reaped": true
+        },
+        "returncode_after_cleanup": 0,
+        "finished_at_utc": "2026-11-17T20:57:47.832929+00:00",
+        "streams": {
+          "version.stdout.txt": {
+            "bytes": 73,
+            "sha256": "6d49d29516f9fb3b3f02bf33238f0beae9980c1743128ce831deddcfb69bce89"
+          },
+          "version.stderr.txt": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        }
+      }
+    },
+    {
+      "receipt": {
+        "path": "F6_NATIVE/workbook/logs/help.json",
+        "bytes": 1075,
+        "sha256": "cda1d05dc30905c9609a31ae168f64ae365aa0879f755db4f752fd54d6ced0f1"
+      },
+      "actual_execution": {
+        "step": "help",
+        "command": [
+          "/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/override/soffice",
+          "-env:UserInstallation=file:///workspace/scratch/7cc3f017cace/F6_NATIVE/workbook/profiles/help",
+          "--headless",
+          "--nologo",
+          "--norestore",
+          "--help"
+        ],
+        "timeout_seconds": 20,
+        "started_at_utc": "2026-11-17T20:57:58.222898+00:00",
+        "cwd": "/workspace/scratch/7cc3f017cace/F6_NATIVE/workbook",
+        "environment_overrides": {
+          "LC_ALL": "C.UTF-8"
+        },
+        "pid": 5,
+        "returncode": 0,
+        "status": "PROCESS_EXITED",
+        "cleanup": {
+          "active_owned_group_members_initial": [],
+          "active_owned_group_members_final": [],
+          "direct_child_reaped": true
+        },
+        "returncode_after_cleanup": 0,
+        "finished_at_utc": "2026-11-17T20:57:58.389498+00:00",
+        "streams": {
+          "help.stdout.txt": {
+            "bytes": 11696,
+            "sha256": "34275de380e3c9c85d331b0f2744fa0866b8b06969038bded22fe32ba62634c3"
+          },
+          "help.stderr.txt": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        }
+      }
+    },
+    {
+      "receipt": {
+        "path": "F6_NATIVE/workbook/logs/pdf.json",
+        "bytes": 1291,
+        "sha256": "17e771d2ea96be9b65cf0263881617e14b15f70e7af7c004616215bd04eb46c9"
+      },
+      "actual_execution": {
+        "step": "pdf",
+        "command": [
+          "/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/override/soffice",
+          "-env:UserInstallation=file:///workspace/scratch/7cc3f017cace/F6_NATIVE/workbook/profiles/pdf",
+          "--headless",
+          "--nologo",
+          "--norestore",
+          "--convert-to",
+          "pdf:calc_pdf_Export",
+          "--outdir",
+          "/workspace/scratch/7cc3f017cace/F6_NATIVE/workbook/pdf",
+          "/workspace/scratch/7cc3f017cace/F6_NATIVE/workbook/input/RC2026_VERIFICATION_INDEX_acceptance_copy.xlsx"
+        ],
+        "timeout_seconds": 90,
+        "started_at_utc": "2026-11-17T20:58:08.128799+00:00",
+        "cwd": "/workspace/scratch/7cc3f017cace/F6_NATIVE/workbook",
+        "environment_overrides": {
+          "LC_ALL": "C.UTF-8"
+        },
+        "pid": 5,
+        "returncode": 0,
+        "status": "PROCESS_EXITED",
+        "cleanup": {
+          "active_owned_group_members_initial": [],
+          "active_owned_group_members_final": [],
+          "direct_child_reaped": true
+        },
+        "returncode_after_cleanup": 0,
+        "finished_at_utc": "2026-11-17T20:58:23.096572+00:00",
+        "streams": {
+          "pdf.stdout.txt": {
+            "bytes": 266,
+            "sha256": "70e3fecc20f7988f054f0f3960e7de3ba8f43b37bd549490b11fbf699091c82e"
+          },
+          "pdf.stderr.txt": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        }
+      }
+    },
+    {
+      "receipt": {
+        "path": "F6_NATIVE/workbook/logs/xlsx.json",
+        "bytes": 1304,
+        "sha256": "66f59a5a49d73093f9340b5879ab7af267a18fb877ce92927c336a3733bc90c3"
+      },
+      "actual_execution": {
+        "step": "xlsx",
+        "command": [
+          "/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/override/soffice",
+          "-env:UserInstallation=file:///workspace/scratch/7cc3f017cace/F6_NATIVE/workbook/profiles/xlsx",
+          "--headless",
+          "--nologo",
+          "--norestore",
+          "--convert-to",
+          "xlsx:Calc MS Excel 2007 XML",
+          "--outdir",
+          "/workspace/scratch/7cc3f017cace/F6_NATIVE/workbook/xlsx",
+          "/workspace/scratch/7cc3f017cace/F6_NATIVE/workbook/input/RC2026_VERIFICATION_INDEX_acceptance_copy.xlsx"
+        ],
+        "timeout_seconds": 90,
+        "started_at_utc": "2026-11-17T20:58:34.983700+00:00",
+        "cwd": "/workspace/scratch/7cc3f017cace/F6_NATIVE/workbook",
+        "environment_overrides": {
+          "LC_ALL": "C.UTF-8"
+        },
+        "pid": 5,
+        "returncode": 0,
+        "status": "PROCESS_EXITED",
+        "cleanup": {
+          "active_owned_group_members_initial": [],
+          "active_owned_group_members_final": [],
+          "direct_child_reaped": true
+        },
+        "returncode_after_cleanup": 0,
+        "finished_at_utc": "2026-11-17T20:58:50.693135+00:00",
+        "streams": {
+          "xlsx.stdout.txt": {
+            "bytes": 275,
+            "sha256": "0bbd1291673a3cd116e7b4fa2607d25d62a3cb186639ee56e9d0c1f94c3d8421"
+          },
+          "xlsx.stderr.txt": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        }
+      }
+    }
+  ],
+  "retest_native_execution": [
+    {
+      "receipt": {
+        "path": "F6_NATIVE/retest/logs/version.json",
+        "bytes": 1083,
+        "sha256": "f13d72957a4aac23628530b362b5436b26e6df83e19cf1b1cd19d53985b2bbb7"
+      },
+      "actual_execution": {
+        "step": "version",
+        "command": [
+          "/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/override/soffice",
+          "-env:UserInstallation=file:///workspace/scratch/7cc3f017cace/F6_NATIVE/retest/profiles/version",
+          "--headless",
+          "--nologo",
+          "--norestore",
+          "--version"
+        ],
+        "timeout_seconds": 20,
+        "started_at_utc": "2026-11-17T21:10:57.842980+00:00",
+        "cwd": "/workspace/scratch/7cc3f017cace/F6_NATIVE/retest",
+        "environment_overrides": {
+          "LC_ALL": "C.UTF-8"
+        },
+        "pid": 5,
+        "returncode": 0,
+        "status": "PROCESS_EXITED",
+        "cleanup": {
+          "active_owned_group_members_initial": [],
+          "active_owned_group_members_final": [],
+          "direct_child_reaped": true
+        },
+        "returncode_after_cleanup": 0,
+        "finished_at_utc": "2026-11-17T21:10:58.060129+00:00",
+        "streams": {
+          "version.stdout.txt": {
+            "bytes": 73,
+            "sha256": "6d49d29516f9fb3b3f02bf33238f0beae9980c1743128ce831deddcfb69bce89"
+          },
+          "version.stderr.txt": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        }
+      }
+    },
+    {
+      "receipt": {
+        "path": "F6_NATIVE/retest/logs/pdf.json",
+        "bytes": 1288,
+        "sha256": "2421d6440ffc5854664285a772f0be580e2d66c4b2947ddad876f90ccfaf078a"
+      },
+      "actual_execution": {
+        "step": "pdf",
+        "command": [
+          "/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/override/soffice",
+          "-env:UserInstallation=file:///workspace/scratch/7cc3f017cace/F6_NATIVE/retest/profiles/pdf",
+          "--headless",
+          "--nologo",
+          "--norestore",
+          "--convert-to",
+          "pdf:calc_pdf_Export",
+          "--outdir",
+          "/workspace/scratch/7cc3f017cace/F6_NATIVE/retest/pdf",
+          "/workspace/scratch/7cc3f017cace/F6_NATIVE/retest/input/RC2026_VERIFICATION_INDEX_layout_repaired_copy.xlsx"
+        ],
+        "timeout_seconds": 90,
+        "started_at_utc": "2026-11-17T21:11:00.130120+00:00",
+        "cwd": "/workspace/scratch/7cc3f017cace/F6_NATIVE/retest",
+        "environment_overrides": {
+          "LC_ALL": "C.UTF-8"
+        },
+        "pid": 5,
+        "returncode": 0,
+        "status": "PROCESS_EXITED",
+        "cleanup": {
+          "active_owned_group_members_initial": [],
+          "active_owned_group_members_final": [],
+          "direct_child_reaped": true
+        },
+        "returncode_after_cleanup": 0,
+        "finished_at_utc": "2026-11-17T21:11:18.553455+00:00",
+        "streams": {
+          "pdf.stdout.txt": {
+            "bytes": 272,
+            "sha256": "86669d21fb99fa66b20707bd74baea324654ef1e7bdf23b361f8caf8ae577c0d"
+          },
+          "pdf.stderr.txt": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        }
+      }
+    },
+    {
+      "receipt": {
+        "path": "F6_NATIVE/retest/logs/xlsx.json",
+        "bytes": 1301,
+        "sha256": "806e84186f5d1eab03f3e8800bc5c02b981e41de94bde40122a13c3304467056"
+      },
+      "actual_execution": {
+        "step": "xlsx",
+        "command": [
+          "/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/override/soffice",
+          "-env:UserInstallation=file:///workspace/scratch/7cc3f017cace/F6_NATIVE/retest/profiles/xlsx",
+          "--headless",
+          "--nologo",
+          "--norestore",
+          "--convert-to",
+          "xlsx:Calc MS Excel 2007 XML",
+          "--outdir",
+          "/workspace/scratch/7cc3f017cace/F6_NATIVE/retest/xlsx",
+          "/workspace/scratch/7cc3f017cace/F6_NATIVE/retest/input/RC2026_VERIFICATION_INDEX_layout_repaired_copy.xlsx"
+        ],
+        "timeout_seconds": 90,
+        "started_at_utc": "2026-11-17T21:11:40.784637+00:00",
+        "cwd": "/workspace/scratch/7cc3f017cace/F6_NATIVE/retest",
+        "environment_overrides": {
+          "LC_ALL": "C.UTF-8"
+        },
+        "pid": 5,
+        "returncode": 0,
+        "status": "PROCESS_EXITED",
+        "cleanup": {
+          "active_owned_group_members_initial": [],
+          "active_owned_group_members_final": [],
+          "direct_child_reaped": true
+        },
+        "returncode_after_cleanup": 0,
+        "finished_at_utc": "2026-11-17T21:11:55.876230+00:00",
+        "streams": {
+          "xlsx.stdout.txt": {
+            "bytes": 281,
+            "sha256": "8dd531a4c6e8b64df506a73aa155b2fe27efd34194013db3e5f044a13a95842e"
+          },
+          "xlsx.stderr.txt": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        }
+      }
+    }
+  ],
+  "actual_workbook_conversion_count": 4,
+  "outputs": {
+    "baseline": {
+      "PDF": {
+        "path": "pdf/RC2026_VERIFICATION_INDEX_acceptance_copy.pdf",
+        "bytes": 2967363,
+        "sha256": "95944d9cb112ec553ab3ef7b22f82cb1e4fbea082f7874c7907dc1d28345ef55",
+        "pages": 231,
+        "page_size_points": [
+          595.304,
+          841.89
+        ],
+        "native_filter": "calc_pdf_Export"
+      },
+      "XLSX": {
+        "path": "xlsx/RC2026_VERIFICATION_INDEX_acceptance_copy.xlsx",
+        "bytes": 140610,
+        "sha256": "3f27d3ccbbe69f090901711b1ea2f977c4f21f316f4ed48580fdd4896a65489a",
+        "native_filter": "Calc MS Excel 2007 XML"
+      }
+    },
+    "retest": {
+      "pdf": {
+        "path": "F6_NATIVE/retest/pdf/RC2026_VERIFICATION_INDEX_layout_repaired_copy.pdf",
+        "bytes": 3131824,
+        "sha256": "9dc18a64513e66cdb2642fae5f44bc2531ae0334cbf3f49a5b57f267bc0d4b22",
+        "pages": 419,
+        "page_size": "A4 portrait (595.304 x 841.89 pt)",
+        "creator": "Calc",
+        "producer": "LibreOfficeDev 26.8.0.0.alpha0",
+        "inherited_author_metadata": "openpyxl",
+        "author_metadata_note": "The inherited Author field is preserved source metadata, not the engine used for this export."
+      },
+      "xlsx_roundtrip": {
+        "path": "F6_NATIVE/retest/xlsx/RC2026_VERIFICATION_INDEX_layout_repaired_copy.xlsx",
+        "bytes": 141036,
+        "sha256": "5620956ea6279ddac2d725b1501ff2094beb14cda5dc0c035f4116f9c27216b0",
+        "role": "Native roundtrip evidence only; not a repaired source and not for repository integration."
+      }
+    }
+  },
+  "baseline_acceptance": [
+    {
+      "id": "X01",
+      "status": "PARTIAL",
+      "observed": "Native Calc import and both exports completed; output retains 32 sheets/order/visibility.",
+      "remaining": "GUI open/repair dialogue observations and Microsoft Excel opening were not performed."
+    },
+    {
+      "id": "X02",
+      "status": "NOT_RUN",
+      "observed": "No interactive worksheet inspection at normal zoom.",
+      "remaining": "Native GUI readability, symbol and link interaction remain open; PDF defects are recorded under X03."
+    },
+    {
+      "id": "X03",
+      "status": "FAIL",
+      "observed": "Actual native PDF has clipped text and fragmented criterion/evidence/status context on the pages visually inspected by root. Successful file conversion is not print-layout acceptance.",
+      "visual_evidence": "BASELINE_VISUAL_REVIEW.json",
+      "observed_pages_1_based": [
+        1,
+        2,
+        3,
+        4,
+        6,
+        7,
+        8,
+        9,
+        231
+      ],
+      "remaining": "Native GUI Print Preview and an all-sheet successful export/visual acceptance have not been established."
+    },
+    {
+      "id": "X04",
+      "status": "NOT_RUN",
+      "observed": "No status value was entered or changed in a native application.",
+      "remaining": "Dropdown values, save/reopen after actual native input and validation interaction remain open."
+    },
+    {
+      "id": "X05",
+      "status": "NOT_RUN",
+      "observed": "No student submission or criterion-to-student-evidence acceptance was performed.",
+      "remaining": "Exact MUST/NF/PCAP evidence mapping remains separate."
+    },
+    {
+      "id": "X06",
+      "status": "NOT_RUN",
+      "observed": "Structural sheet and ID preservation is recorded separately; actual link activation and S/A Flex instruction acceptance were not performed.",
+      "remaining": "Native navigation and canonical brief/instruction checks remain open; the roundtrip link-context change is retained as a separate observation."
+    }
+  ],
+  "retest_acceptance": [
+    {
+      "id": "X01",
+      "status": "PARTIAL",
+      "observed": "Native Calc import and PDF/XLSX export succeeded; the native XLSX output retains all 32 sheets/order/visibility.",
+      "remaining": "GUI opening/repair dialogues and native Microsoft Excel opening were not observed."
+    },
+    {
+      "id": "X02",
+      "status": "NOT_RUN",
+      "observed": "No native GUI worksheet inspection at normal zoom. PDF visual evidence is scoped under X03.",
+      "remaining": "Interactive readability, symbols, navigation and link use remain open."
+    },
+    {
+      "id": "X03",
+      "status": "FAIL",
+      "substatus": "PARTIAL_NATIVE_PRINT_REPAIR_VERIFIED",
+      "observed_vertical_repair": "PASS_OBSERVED_SAMPLES_ONLY",
+      "complete_acceptance": "FAIL_REMAINING_HORIZONTAL_PAGINATION_AND_HEADERS",
+      "visual_evidence": {
+        "path": "F6_NATIVE/retest/NATIVE_VISUAL_REVIEW.json",
+        "bytes": 7798,
+        "sha256": "702f96b5ce657b00cc9e7f5b4f8c4b69a6f362ade173ece61b30627dba6823bf"
+      },
+      "pages_reviewed_1_based": [
+        1,
+        2,
+        3,
+        4,
+        6,
+        7,
+        10,
+        11,
+        14,
+        15,
+        156,
+        160,
+        315,
+        319,
+        405,
+        409,
+        419
+      ],
+      "all_pages_or_sheets_visually_accepted": false,
+      "remaining": [
+        "Horizontal pagination separates project/criterion IDs from evidence, commands and status.",
+        "Merged title/metadata/section bands are clipped across horizontal print blocks.",
+        "Column headings and criterion identity are not repeated on continuation pages.",
+        "The page count increased from 231 to 419 after providing adequate row height; print pagination remains unfinished.",
+        "Interactive workbook navigation, validation dropdowns, editable status, saving/reopening and GUI print preview remain unexecuted."
+      ]
+    },
+    {
+      "id": "X04",
+      "status": "NOT_RUN",
+      "observed": "No assessment status was entered or altered using a native spreadsheet application. Static preservation of validation rules is separate.",
+      "remaining": "Actual dropdown interaction, status input and native save/close/reopen after editing remain open."
+    },
+    {
+      "id": "X05",
+      "status": "NOT_RUN",
+      "observed": "No student evidence or criterion-to-submission acceptance was executed.",
+      "remaining": "Exact MUST/NF/PCAP evidence mapping remains separate."
+    },
+    {
+      "id": "X06",
+      "status": "NOT_RUN",
+      "observed": "Sheet/ID/link preservation was compared read-only; actual workbook navigation and S/A Flex acceptance were not performed.",
+      "remaining": "Native link activation and canonical brief/instruction acceptance remain open."
+    }
+  ],
+  "source_layout_changes": {
+    "row_height_changes": 1330,
+    "wrap_enable_changes": 0,
+    "column_width_changes": [
+      {
+        "sheet": "RULES",
+        "min": "1",
+        "max": "1",
+        "before": "130",
+        "after": "92"
+      }
+    ],
+    "row_changes_by_sheet": {
+      "RULES": 12,
+      "INDEX": 31,
+      "A01": 40,
+      "A02": 40,
+      "A03": 40,
+      "A04": 40,
+      "A05": 41,
+      "A06": 43,
+      "A07": 39,
+      "A08": 39,
+      "A09": 41,
+      "A10": 40,
+      "S01": 49,
+      "S02": 49,
+      "S03": 46,
+      "S04": 44,
+      "S05": 44,
+      "S06": 45,
+      "S07": 45,
+      "S08": 46,
+      "S09": 45,
+      "S10": 46,
+      "S11": 46,
+      "S12": 46,
+      "S13": 45,
+      "S14": 44,
+      "S15": 45,
+      "S16": 40,
+      "S17": 39,
+      "S18": 40,
+      "S19": 40,
+      "S20": 40
+    },
+    "wrap_changes_by_sheet": {}
+  },
+  "structural_preservation": {
+    "counts": {
+      "worksheets": 32,
+      "nonempty_cells": 7290,
+      "criterion_ID_cells": 1102,
+      "validation_cells": 1102,
+      "formula_records": 5,
+      "relationship_hyperlinks": 25
+    },
+    "styles_xml_byte_identical": true,
+    "document_provenance_parts_byte_identical": true,
+    "all_recorded_non_layout_checks_preserved": true,
+    "independent_checks": 21,
+    "native_acceptance_equivalent": false
+  },
+  "native_roundtrip_compatibility_observation": {
+    "values_and_criterion_IDs_preserved": true,
+    "formula_texts_preserved": true,
+    "validation_list_memberships_preserved": true,
+    "formula_attribute_normalisation": "aca=false added to five formulas",
+    "validation_normalisation": "formula2=0 added to list validations",
+    "relationship_hyperlinks_rewritten_to_input_copy_context": 25,
+    "hyperlink_activation_executed": false,
+    "roundtrip_output_integrated": false
+  },
+  "visual_review": {
+    "baseline_pdf_pages": 231,
+    "baseline_sample_pages": [
+      1,
+      2,
+      3,
+      4,
+      6,
+      7,
+      8,
+      9,
+      231
+    ],
+    "retest_pdf_pages": 419,
+    "retest_sample_pages": [
+      1,
+      2,
+      3,
+      4,
+      6,
+      7,
+      10,
+      11,
+      14,
+      15,
+      156,
+      160,
+      315,
+      319,
+      405,
+      409,
+      419
+    ],
+    "observed_vertical_clipping_repair": "PASS_OBSERVED_SAMPLES_ONLY",
+    "complete_X03": "FAIL_REMAINING_HORIZONTAL_PAGINATION_AND_HEADERS",
+    "all_pages_reviewed": false,
+    "all_32_sheets_accepted": false,
+    "native_GUI_print_preview_executed": false
+  },
+  "evidence_path_base": "Workspace-relative paths retained inside the F6 continuation dossier; absolute command paths are historical execution provenance.",
+  "evidence_files": [
+    {
+      "path": "F6_NATIVE/workbook/PROTOCOL_WORKBOOK_NATIVE.json",
+      "bytes": 5535,
+      "sha256": "47caaed6f7b306a70bfcc5c8755197cddd154e6c60fa509b6cdd11a7c2649cdd"
+    },
+    {
+      "path": "F6_NATIVE/workbook/PROTOCOL_FREEZE.json",
+      "bytes": 453,
+      "sha256": "5c6d5d948e19ec891e6df5b05c952ed951b15142e5107ba55e1a07ad2ee41701"
+    },
+    {
+      "path": "F6_NATIVE/workbook/WORKBOOK_NATIVE_RESULTS.json",
+      "bytes": 21497,
+      "sha256": "53ca3301834f47f42700ee13201ce0d8a4d7cbac261a1d0dd5e643dbaee43fd1"
+    },
+    {
+      "path": "F6_NATIVE/workbook/BASELINE_VISUAL_REVIEW.json",
+      "bytes": 4464,
+      "sha256": "8c2537871e5004d2bec7d8495574e2ee20350a797881eadf962e56d51cf02ded"
+    },
+    {
+      "path": "F6_NATIVE/workbook/ROUNDTRIP_COMPARISON.json",
+      "bytes": 918471,
+      "sha256": "d6d6cd819607c67d65f2f6e5a21225f83c8bf832e24fc0b76c93660189b1da81"
+    },
+    {
+      "path": "F6_NATIVE/retest/PROTOCOL_WORKBOOK_NATIVE.json",
+      "bytes": 8315,
+      "sha256": "e43c7f95d6b2998c8da0c4b72bb4f8bf5b0223d9c2c4aacf82127e6331148449"
+    },
+    {
+      "path": "F6_NATIVE/retest/PROTOCOL_FREEZE.json",
+      "bytes": 660,
+      "sha256": "5e88e5742d5e364bfa8610c2776f5b3446abf75f337fe9b4a1acc3e4341bc609"
+    },
+    {
+      "path": "F6_NATIVE/retest/WORKBOOK_RETEST_RESULTS.json",
+      "bytes": 29149,
+      "sha256": "e7e36f68b94e694508b3bf2b4c394758c7969355bd369829e3c119ac4204ba75"
+    },
+    {
+      "path": "F6_NATIVE/retest/NATIVE_VISUAL_REVIEW.json",
+      "bytes": 7798,
+      "sha256": "702f96b5ce657b00cc9e7f5b4f8c4b69a6f362ade173ece61b30627dba6823bf"
+    },
+    {
+      "path": "F6_NATIVE/retest/ROUNDTRIP_COMPARISON.json",
+      "bytes": 918827,
+      "sha256": "174be0d32b6ea7bb6b175fd47a28723b883f828f9e093834d88c549b6cb7ab4c"
+    },
+    {
+      "path": "F6_NATIVE/retest/INDEPENDENT_SOURCE_COMPARISON.json",
+      "bytes": 9682,
+      "sha256": "eb147ed01f40a135652a80ac31b65d9c26997a751429ae629aa805180adb529d"
+    },
+    {
+      "path": "F6_NATIVE/WORKBOOK_LAYOUT_PRESERVATION.json",
+      "bytes": 2721,
+      "sha256": "1e5cc0d3c23b91e2286d124bf4b42e66ce24f162e3e012e73e70a2b9cd681117"
+    },
+    {
+      "path": "F6_NATIVE/remediation/outputs/f6_workbook_layout_r2/NON_LAYOUT_PRESERVATION.json",
+      "bytes": 280227,
+      "sha256": "4b3be768ec269bcf387d7f52eb75fce43c334698d703db5ef3e3cec9e1cd7045"
+    },
+    {
+      "path": "F6_NATIVE/remediation/outputs/f6_workbook_layout_r2/CHANGE_MANIFEST.json",
+      "bytes": 419484,
+      "sha256": "37b812aea493183595ffbce676b97dc444266ef5740383094125895ffab1eac8"
+    },
+    {
+      "path": "F6_NATIVE/remediation/repair_workbook_layout.mjs",
+      "bytes": 11085,
+      "sha256": "ae1e5c3842e4f2645a33d3fd9e50136a9e88460430ea83cf99da676209684e3f"
+    },
+    {
+      "path": "F6_NATIVE/remediation/workbook_layout_support.py",
+      "bytes": 15761,
+      "sha256": "9eb3adcc17660b1950a54e39214d6302407d35b5539795fc6e5d17294fba259e"
+    },
+    {
+      "path": "F6_NATIVE/workbook/run_native_workbook.py",
+      "bytes": 4602,
+      "sha256": "0568a0b326bbc240737b656d79d046bfa8dea9e6089b81b25f0298d779f13c9c"
+    },
+    {
+      "path": "F6_NATIVE/retest/run_native_workbook.py",
+      "bytes": 4602,
+      "sha256": "0568a0b326bbc240737b656d79d046bfa8dea9e6089b81b25f0298d779f13c9c"
+    },
+    {
+      "path": "F6_NATIVE/workbook/compare_native_outputs.py",
+      "bytes": 15735,
+      "sha256": "eac4374565f03eab00a9152a1b6455fb7ea558acc0bf13f431b3a1208048417b"
+    },
+    {
+      "path": "F6_NATIVE/browser/INDEPENDENT_REVIEW_AFTER_CORRECTIONS.json",
+      "bytes": 6756,
+      "sha256": "d549c963872a82c54a36f5cf67e376cbbc285702d4adcc1936c88b553c03a049"
+    }
+  ],
+  "licence_boundary": {
+    "F3_R14_status": "resolved_author_approved_policy_applied",
+    "workbook_category": "C",
+    "category_C_membership_unchanged": true,
+    "one_category_C_workbook_layout_changed": true,
+    "other_83_category_C_files_byte_identical_required": true,
+    "rights_and_third_party_terms_preserved": true,
+    "policy_category_list_standard_texts_and_author_approval_unchanged": true
+  },
+  "unexecuted_native_gates_closed": 0,
+  "all_native_release_gates_passed": false,
+  "native_browser_acceptance_executed": false,
+  "OVA_requested_or_downloaded": false,
+  "VM_network_or_LMS_acceptance_claimed": false,
+  "Kotlin_N08_rerun": false,
+  "merge_main_tag_release_or_Zenodo_action": false,
+  "blank_successor_forms": {
+    "browser_rows": 101,
+    "workbook_rows": 32,
+    "status": "NOT_RUN"
+  },
+  "limitations": [
+    "Horizontal pagination separates project/criterion IDs from evidence, commands and status.",
+    "Merged title/metadata/section bands are clipped across horizontal print blocks.",
+    "Column headings and criterion identity are not repeated on continuation pages.",
+    "The page count increased from 231 to 419 after providing adequate row height; print pagination remains unfinished.",
+    "Interactive workbook navigation, validation dropdowns, editable status, saving/reopening and GUI print preview remain unexecuted."
+  ]
+}

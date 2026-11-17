@@ -707,7 +707,7 @@
         "02_PROJECTS/00_common/README_STANDARD_RC2026.md": "7072e54cc9e81fd83818583dd4be683b52da926fc2bd30bfe78bea5792583d85",
         "02_PROJECTS/01_network_applications/README.md": "c6f15af3f3dba9c1086ccd261bd0ec00f3b6e927e412f776c2e84a5762d9db60",
         "02_PROJECTS/COURSE_SEMINAR_MAPPING.md": "f0f8f6e513935e929f4b3e4f95d028f51741be6ee2a5fdd8ee921fa0a2793973",
-        "02_PROJECTS/RC2026_VERIFICATION_INDEX.xlsx": "0832263c17ded112cf8bb9479b074ab4bfcbb5647db4a4b52f720e7c27707ef9",
+        "02_PROJECTS/RC2026_VERIFICATION_INDEX.xlsx": "08128be05a3860c0e60661f271b6b1790a0ecfeb3237e38f894cf4c544970e67",
         "02_PROJECTS/README.md": "76fe7e660ecf6efb34664307f64c1c158b8658d76cf2aa4938b575c7b7629681"
       }
     },
@@ -758,7 +758,7 @@
       ],
       "candidate_path_sha256": {
         "02_PROJECTS/01_network_applications/S14_didactic_distance_vector_routing_in_mininet_convergence_and_anti_loop.md": "eb496298b39fa42a8dc3cd3b8dbf4a6a3358941fa989075d63b5f46715654b40",
-        "02_PROJECTS/RC2026_VERIFICATION_INDEX.xlsx": "0832263c17ded112cf8bb9479b074ab4bfcbb5647db4a4b52f720e7c27707ef9"
+        "02_PROJECTS/RC2026_VERIFICATION_INDEX.xlsx": "08128be05a3860c0e60661f271b6b1790a0ecfeb3237e38f894cf4c544970e67"
       }
     },
     {
@@ -5941,7 +5941,7 @@
         "02_PROJECTS/00_common/tools/pcap_rules/S20.json": "90b9f66127f889d9422529d4090cc95ae7887c9a4fcef2b4a1b5ef9e6e81924e",
         "02_PROJECTS/00_common/tools/validate_pcap.py": "0e39a363bfde0ff767e05571fef78e4591ab6e9cc7992b14b568c8278d870aba",
         "02_PROJECTS/01_network_applications/S06_tcp_pub_sub_broker_topics_and_deterministic_routing.md": "91eaae5419f3b5b68ccbad4a07ad46a232a865c8f3ff836d48240bff3382d07b",
-        "02_PROJECTS/RC2026_VERIFICATION_INDEX.xlsx": "0832263c17ded112cf8bb9479b074ab4bfcbb5647db4a4b52f720e7c27707ef9"
+        "02_PROJECTS/RC2026_VERIFICATION_INDEX.xlsx": "08128be05a3860c0e60661f271b6b1790a0ecfeb3237e38f894cf4c544970e67"
       }
     },
     {
@@ -6019,7 +6019,7 @@
         "02_PROJECTS/00_common/tools/pcap_rules/A07.json": "b0236b6220507ce6264b197fcd35d9cc7a0894a0197ce8f6970f30a26f2fa099",
         "02_PROJECTS/00_common/tools/pcap_rules/A08.json": "c895931686a2c0418e26915802a37e88390a15155500689a838f903d1f98cbce",
         "02_PROJECTS/00_common/tools/pcap_rules/A09.json": "0555a1056d6ed7b27d74da091170527a8c87fc17cd4a9aca71ea1599816917d6",
-        "02_PROJECTS/RC2026_VERIFICATION_INDEX.xlsx": "0832263c17ded112cf8bb9479b074ab4bfcbb5647db4a4b52f720e7c27707ef9"
+        "02_PROJECTS/RC2026_VERIFICATION_INDEX.xlsx": "08128be05a3860c0e60661f271b6b1790a0ecfeb3237e38f894cf4c544970e67"
       }
     },
     {
@@ -6067,7 +6067,7 @@
         }
       ],
       "candidate_path_sha256": {
-        "02_PROJECTS/RC2026_VERIFICATION_INDEX.xlsx": "0832263c17ded112cf8bb9479b074ab4bfcbb5647db4a4b52f720e7c27707ef9"
+        "02_PROJECTS/RC2026_VERIFICATION_INDEX.xlsx": "08128be05a3860c0e60661f271b6b1790a0ecfeb3237e38f894cf4c544970e67"
       }
     },
     {
@@ -6113,7 +6113,7 @@
         }
       ],
       "candidate_path_sha256": {
-        "02_PROJECTS/RC2026_VERIFICATION_INDEX.xlsx": "0832263c17ded112cf8bb9479b074ab4bfcbb5647db4a4b52f720e7c27707ef9"
+        "02_PROJECTS/RC2026_VERIFICATION_INDEX.xlsx": "08128be05a3860c0e60661f271b6b1790a0ecfeb3237e38f894cf4c544970e67"
       }
     },
     {
@@ -6214,7 +6214,7 @@
         "02_PROJECTS/01_network_applications/assets/puml/fig-S11-architecture.puml": "aae2e0b18031895260d794def6cb4d0235c9c2daec680e87023fd3e5cc081a9f",
         "02_PROJECTS/02_administration_security/A01_sdn_firewall_filtering_policies_via_openflow_rules.md": "f312b6c1156167c6d133b44477f0715c4a8db163bcc35c101875619ce653921a",
         "02_PROJECTS/02_administration_security/A09_sdn_ips_dynamic_blocking_via_openflow_triggered_by_ids_detection.md": "01eaf3ce872d520e8e92a723bad21d51f3eb21fdcffa859ef1fbf2c9eff52a51",
-        "02_PROJECTS/RC2026_VERIFICATION_INDEX.xlsx": "0832263c17ded112cf8bb9479b074ab4bfcbb5647db4a4b52f720e7c27707ef9"
+        "02_PROJECTS/RC2026_VERIFICATION_INDEX.xlsx": "08128be05a3860c0e60661f271b6b1790a0ecfeb3237e38f894cf4c544970e67"
       }
     },
     {
@@ -7323,7 +7323,7 @@
       "candidate_path_sha256": {
         "02_PROJECTS/01_network_applications/S03_http11_socket_server_no_framework_static_files.md": "d94190269f3cc515cf1b0fa346596f7437f9f9a15801df22cc0aaaa5d2bef0f5",
         "02_PROJECTS/01_network_applications/S08_minimal_email_system_smtp_delivery_and_pop3_retrieval.md": "83b04a6b528df94be18e262c1f9a90d7adb5d883c7310468728da446380efa6e",
-        "02_PROJECTS/RC2026_VERIFICATION_INDEX.xlsx": "0832263c17ded112cf8bb9479b074ab4bfcbb5647db4a4b52f720e7c27707ef9"
+        "02_PROJECTS/RC2026_VERIFICATION_INDEX.xlsx": "08128be05a3860c0e60661f271b6b1790a0ecfeb3237e38f894cf4c544970e67"
       }
     },
     {
@@ -11914,5 +11914,71 @@
         "04_SEMINARS/S14/assets/render.sh": "083d8b804b554cde004f9e5659a9d8f6fffedfffab2c2f77e3b643ff545cae0d"
       }
     }
-  ]
+  ],
+  "native_workbook_acceptance": {
+    "date": "2026-11-17",
+    "timezone": "Europe/Bucharest",
+    "source_base_commit": "efe829c5bec7e80078e5b88e81151dcc4d94f1d5",
+    "source_base_tree": "e67b8b63eab2234f2cd7bd31379ab17a2c19c1e1",
+    "status": "PARTIAL_NATIVE_PRINT_REPAIR_VERIFIED_FULL_X03_REMAINS_OPEN",
+    "attestation": "00_TOOLS/qa/evidence/libreoffice/2026-11-17/N06_ATTESTATION.json",
+    "attestation_sha256": "768e6c8a300ce0a26e554b0a72412c9e41372172b20f87212ef32dbf1168c0ed",
+    "workbook_path": "02_PROJECTS/RC2026_VERIFICATION_INDEX.xlsx",
+    "prior_workbook_sha256": "0832263c17ded112cf8bb9479b074ab4bfcbb5647db4a4b52f720e7c27707ef9",
+    "current_workbook_sha256": "08128be05a3860c0e60661f271b6b1790a0ecfeb3237e38f894cf4c544970e67",
+    "native_execution_identity": "Exact repaired workbook bytes before integration; published-byte equivalence must be verified separately.",
+    "native_runtime": "LibreOfficeDev 26.8.0.0.alpha0 2c87e51eeaa2b413ff4ae097b2705eea1995d8e5",
+    "acceptance_statuses": {
+      "X01": "PARTIAL",
+      "X02": "NOT_RUN",
+      "X03": "FAIL",
+      "X04": "NOT_RUN",
+      "X05": "NOT_RUN",
+      "X06": "NOT_RUN"
+    },
+    "observed_vertical_clipping_repair": "PASS_OBSERVED_SAMPLES_ONLY",
+    "complete_X03": "FAIL_REMAINING_HORIZONTAL_PAGINATION_AND_HEADERS",
+    "prior_failed_native_result_retained": true,
+    "native_roundtrip_output_integrated": false,
+    "updated_current_workbook_hash_finding_ids": [
+      "F1-017",
+      "F1-018",
+      "F3-P01",
+      "F3-P02",
+      "F3-P03",
+      "F3-P04",
+      "F3-P05",
+      "F3-P23"
+    ],
+    "all_203_finding_statuses_and_historical_owner_records_preserved": true,
+    "F3_R14_complete_record_preserved": true,
+    "finding_hash_provenance": "The eight workbook candidate hashes are current. Other finding snapshots remain historical, including F3-R14 candidate_path_sha256 for REMEDIATION_v1.5.0.md at efe829c5; current F6 document hashes follow.",
+    "current_F6_document_sha256": {
+      "00_TOOLS/qa/REMEDIATION_v1.5.0.md": "dbef7ef17fe89827adff9d69cd85deb3e4791134dec829094853c7c7fe06db12",
+      "00_TOOLS/qa/N06_LIBREOFFICE_ACCEPTANCE.md": "0343312e525bc664fd8b998e34afeaab67b44e93e1aee32c2e3552be2b966194",
+      "00_TOOLS/qa/evidence/libreoffice/2026-11-17/N06_ATTESTATION.json": "768e6c8a300ce0a26e554b0a72412c9e41372172b20f87212ef32dbf1168c0ed"
+    },
+    "layout_preservation_aggregate_sha256": "1e5cc0d3c23b91e2286d124bf4b42e66ce24f162e3e012e73e70a2b9cd681117",
+    "all_native_release_gates_passed": false,
+    "unexecuted_native_gates_closed": 0,
+    "licence_policy_category_C_membership_and_approval_unchanged": true,
+    "category_C_workbook_layout_change": true,
+    "other_category_C_paths_unchanged": 83,
+    "current_administrative_category_counts": {
+      "A": 944,
+      "B": 320,
+      "C": 84
+    },
+    "prior_application_category_counts_retained_as_history": {
+      "A": 942,
+      "B": 320,
+      "C": 84
+    },
+    "approved_base_category_counts_unchanged": {
+      "A": 939,
+      "B": 320,
+      "C": 84
+    },
+    "merge_main_tag_release_or_Zenodo_action": false
+  }
 }
