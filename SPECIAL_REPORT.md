@@ -1,3 +1,11 @@
+> **Dated public-material comparison — 17 November 2026.**
+> The [new descriptive report](00_APPENDIX/docs/comparison/2026-11-17/README.md)
+> supplies a separate 18-unit, 180-cell evidence corpus. The historical text
+> and scores below are preserved; their original derivation remains unverified.
+> Use the new report for its explicitly dated claims and evidence limits.
+> Current candidate-branch integration is recorded separately in the
+> [integration note](00_TOOLS/qa/F3_R15_INTEGRATION.md).
+
 # Computer Networks Teaching Materials at Selected Universities
 ## A Comparative Analysis — Second Edition
 

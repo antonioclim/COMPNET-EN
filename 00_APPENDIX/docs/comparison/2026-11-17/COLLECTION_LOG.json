@@ -1,0 +1,1851 @@
+{
+  "schema_version": 1,
+  "queries_and_retrievals": {
+    "us": {
+      "query_log.json": [
+        {
+          "unit_id": "U04",
+          "query_class": "BROAD",
+          "query": "CMU 15-441 15-641 computer-networks.github.io course",
+          "domains": [
+            "cmu.edu",
+            "computer-networks.github.io",
+            "github.com"
+          ],
+          "recency_days": 730,
+          "accessed_at_utc": "2026-11-17T16:14:43.858Z",
+          "method": "system1_search_query",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_query01.json",
+          "scope_note": "Search used to route to primary sources; search snippets are not substituted for a successful direct course-page inspection."
+        },
+        {
+          "unit_id": "U05",
+          "query_class": "BROAD",
+          "query": "Princeton COS 461 feamster COS461-Public course 2017",
+          "domains": [
+            "princeton.edu",
+            "github.com"
+          ],
+          "recency_days": null,
+          "accessed_at_utc": "2026-11-17T16:14:43.858Z",
+          "method": "system1_search_query",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_query01.json",
+          "scope_note": "Search used to route to primary sources; search snippets are not substituted for a successful direct course-page inspection."
+        }
+      ],
+      "retrieval_log.json": [
+        {
+          "label": "us_berkeley_head",
+          "kind": "repo_head",
+          "requested": {
+            "url": "https://api.github.com/repos/berkeley-cs168/textbook/commits?per_page=1"
+          },
+          "accessed_at_utc": "2026-11-17T16:15:14.793Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_berkeley_head.json",
+          "raw_artifact_sha256": "008d40809e088feac4e09896aa161e331b5d9d04cae2d81f524cc1da33297782"
+        },
+        {
+          "label": "us_berkeley_index",
+          "kind": "repo_file",
+          "requested": {
+            "repository_full_name": "berkeley-cs168/textbook",
+            "ref": "0b8208742d31df7fc3d53a0cd94fdd4e04f8d47e",
+            "path": "index.md"
+          },
+          "accessed_at_utc": "2026-11-17T16:18:06.567Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_berkeley_index.json",
+          "raw_artifact_sha256": "392807b21e702db8c79fbf7814944fc009a62c9f91f3ec3e9191446b6dd665ec"
+        },
+        {
+          "label": "us_berkeley_projects",
+          "kind": "web_click",
+          "requested": {
+            "click": [
+              {
+                "ref_id": "turn325204044view0",
+                "id": 13
+              },
+              {
+                "ref_id": "turn325204044view0",
+                "id": 14
+              }
+            ],
+            "response_length": "long"
+          },
+          "accessed_at_utc": "2026-11-17T16:16:05.157Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_berkeley_projects.json",
+          "raw_artifact_sha256": "edaf96cbc33d5613e01ee5ac323f8c4df73f6ab14befc657527a4de8e5abfc24"
+        },
+        {
+          "label": "us_berkeley_tree",
+          "kind": "repo_tree",
+          "requested": {
+            "url": "https://api.github.com/repos/berkeley-cs168/textbook/git/trees/c76ce7638ba557e4dd12ee1983d98f106b77eae5?recursive=1"
+          },
+          "accessed_at_utc": "2026-11-17T16:16:05.157Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_berkeley_tree.json",
+          "raw_artifact_sha256": "1957bf7d9e9640dfa26124f5b60777aa7428b3441a22f87e162617b266fbd4b9"
+        },
+        {
+          "label": "us_cmu_head",
+          "kind": "repo_head",
+          "requested": {
+            "url": "https://api.github.com/repos/computer-networks/cmu-tcp/commits?per_page=1"
+          },
+          "accessed_at_utc": "2026-11-17T16:16:05.157Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_cmu_head.json",
+          "raw_artifact_sha256": "5ea7e88b3e3c92bffd862f654b90755556217f0bcf2b81c5d7f20dcbf7e365c2"
+        },
+        {
+          "label": "us_cmu_license",
+          "kind": "repo_file",
+          "requested": {
+            "repository_full_name": "computer-networks/cmu-tcp",
+            "ref": "05ca46cc98a799465ccd5cbe371f1cb34d822aa8",
+            "path": "LICENSE"
+          },
+          "accessed_at_utc": "2026-11-17T16:17:09.248Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_cmu_license.json",
+          "raw_artifact_sha256": "19d4ffa186f63cf2161016854675ea809d98d0ab764050e846929c6c74eb2e65"
+        },
+        {
+          "label": "us_cmu_makefile",
+          "kind": "repo_file",
+          "requested": {
+            "repository_full_name": "computer-networks/cmu-tcp",
+            "ref": "05ca46cc98a799465ccd5cbe371f1cb34d822aa8",
+            "path": "project-2_15-441/Makefile"
+          },
+          "accessed_at_utc": "2026-11-17T16:17:09.248Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_cmu_makefile.json",
+          "raw_artifact_sha256": "1990510ffdedc45805e60bae6b615d9e794d9f7184560d3607ecf95f666c7d94"
+        },
+        {
+          "label": "us_cmu_readme",
+          "kind": "repo_file",
+          "requested": {
+            "repository_full_name": "computer-networks/cmu-tcp",
+            "ref": "05ca46cc98a799465ccd5cbe371f1cb34d822aa8",
+            "path": "README.md"
+          },
+          "accessed_at_utc": "2026-11-17T16:16:40.892Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_cmu_readme.json",
+          "raw_artifact_sha256": "6b62b7968175c41dac3559495ccdf16fadb6dbc17413fc5a9ec430249961c976"
+        },
+        {
+          "label": "us_cmu_tree",
+          "kind": "repo_tree",
+          "requested": {
+            "url": "https://api.github.com/repos/computer-networks/cmu-tcp/git/trees/6bbe1fb06eecd6c7376e815f44ca2d0ea10ab07b?recursive=1"
+          },
+          "accessed_at_utc": "2026-11-17T16:16:40.892Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_cmu_tree.json",
+          "raw_artifact_sha256": "05aa8c13c274bb09ecab84364596a671b16b7809e8018b342b04baf0339d0720"
+        },
+        {
+          "label": "us_course_followups",
+          "kind": "web_open",
+          "requested": {
+            "open": [
+              {
+                "ref_id": "https://fa26.cs168.io/"
+              },
+              {
+                "ref_id": "https://computer-networks.github.io/fa22/"
+              },
+              {
+                "ref_id": "https://www.cs.princeton.edu/courses/archive/spring17/cos461/"
+              }
+            ],
+            "response_length": "long"
+          },
+          "accessed_at_utc": "2026-11-17T16:15:14.793Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_course_followups.json",
+          "raw_artifact_sha256": "b2e5fd2199048288911a8b7982c569c38cc5a1bc4022cac88ff86cbc0818f3b7"
+        },
+        {
+          "label": "us_initial_pages",
+          "kind": "web_open",
+          "requested": {
+            "open": [
+              {
+                "ref_id": "https://cs144.github.io/"
+              },
+              {
+                "ref_id": "https://textbook.cs168.io/"
+              },
+              {
+                "ref_id": "https://computer-networks.github.io/"
+              }
+            ],
+            "response_length": "long"
+          },
+          "accessed_at_utc": "2026-11-17T16:14:16.130Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_initial_pages.json",
+          "raw_artifact_sha256": "149b5ab0436f4667b46cc45a1ed4e85c7129cc3ff9be416c70ccdddc3d199b6e"
+        },
+        {
+          "label": "us_jhu_a1",
+          "kind": "repo_file",
+          "requested": {
+            "repository_full_name": "xinjin/course-net-assignment",
+            "ref": "bcf5825d7147fb34ff00fd2a27776b88563292c8",
+            "path": "assignment1/README.md"
+          },
+          "accessed_at_utc": "2026-11-17T16:17:09.248Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_jhu_a1.json",
+          "raw_artifact_sha256": "e06c6d3b453acf6f885b940d5d47866c579dd483c5e9b623adab5c2a32a26550"
+        },
+        {
+          "label": "us_jhu_a1_makefile",
+          "kind": "repo_file",
+          "requested": {
+            "repository_full_name": "xinjin/course-net-assignment",
+            "ref": "bcf5825d7147fb34ff00fd2a27776b88563292c8",
+            "path": "assignment1/client_server/Makefile"
+          },
+          "accessed_at_utc": "2026-11-17T16:17:09.248Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_jhu_a1_makefile.json",
+          "raw_artifact_sha256": "7462ab393cb07bbd246d3b77c9ec507d4513d7f3d3c0909c77fc0f9705a2bd49"
+        },
+        {
+          "label": "us_jhu_a3",
+          "kind": "repo_file",
+          "requested": {
+            "repository_full_name": "xinjin/course-net-assignment",
+            "ref": "bcf5825d7147fb34ff00fd2a27776b88563292c8",
+            "path": "assignment3/README.md"
+          },
+          "accessed_at_utc": "2026-11-17T16:17:09.248Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_jhu_a3.json",
+          "raw_artifact_sha256": "85b0c61f9f4bb6f8ffe0a1af8d1bef80fabff022202dd5463d034f8676bde43d"
+        },
+        {
+          "label": "us_jhu_assign_head",
+          "kind": "repo_head",
+          "requested": {
+            "url": "https://api.github.com/repos/xinjin/course-net-assignment/commits?per_page=1"
+          },
+          "accessed_at_utc": "2026-11-17T16:16:05.157Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_jhu_assign_head.json",
+          "raw_artifact_sha256": "c964b54b4de2a9bf326c230a33f774ede4f36bc0bad77d957ce28126552a1b09"
+        },
+        {
+          "label": "us_jhu_assign_readme",
+          "kind": "repo_file",
+          "requested": {
+            "repository_full_name": "xinjin/course-net-assignment",
+            "ref": "bcf5825d7147fb34ff00fd2a27776b88563292c8",
+            "path": "README.md"
+          },
+          "accessed_at_utc": "2026-11-17T16:16:40.892Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_jhu_assign_readme.json",
+          "raw_artifact_sha256": "4a86a6ee0d2ce81bf2a0147aa680c2d27c5a15314bb23f8a2aed7f9d6abcc22d"
+        },
+        {
+          "label": "us_jhu_assign_tree",
+          "kind": "repo_tree",
+          "requested": {
+            "url": "https://api.github.com/repos/xinjin/course-net-assignment/git/trees/861b8142a32bfe8cbda5b4da756a10c54e1e5cea?recursive=1"
+          },
+          "accessed_at_utc": "2026-11-17T16:16:40.892Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_jhu_assign_tree.json",
+          "raw_artifact_sha256": "cfcdcfa553617272c9e3c5a7ec91b7dd5aec68687af6a0fcbb255b43c5d31562"
+        },
+        {
+          "label": "us_jhu_head",
+          "kind": "repo_head",
+          "requested": {
+            "url": "https://api.github.com/repos/xinjin/course-net/commits?per_page=1"
+          },
+          "accessed_at_utc": "2026-11-17T16:14:43.858Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_jhu_head.json",
+          "raw_artifact_sha256": "86dde264a0c0aac9832e067c64b893a7562c0b74b0572d04581df7984ce6c986"
+        },
+        {
+          "label": "us_jhu_meta",
+          "kind": "repo_metadata",
+          "requested": {
+            "repository_full_name": "xinjin/course-net"
+          },
+          "accessed_at_utc": "2026-11-17T16:14:16.131Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_jhu_meta.json",
+          "raw_artifact_sha256": "84cf96932a3a6a90624013164d9658771bafdec2f8f35ebe8888f1296f9cb25b"
+        },
+        {
+          "label": "us_jhu_readme",
+          "kind": "repo_file",
+          "requested": {
+            "repository_full_name": "xinjin/course-net",
+            "ref": "957e70bddcafea1486aca9b13561e2d60410caf5",
+            "path": "README.md"
+          },
+          "accessed_at_utc": "2026-11-17T16:15:14.793Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_jhu_readme.json",
+          "raw_artifact_sha256": "23e9df44264b519bb1694dd874935cd64cec655d0e846f10c82f5b35478934ef"
+        },
+        {
+          "label": "us_jhu_tree",
+          "kind": "repo_tree",
+          "requested": {
+            "url": "https://api.github.com/repos/xinjin/course-net/git/trees/f5a24acdaa062b45767818803d9fcd52b5e0d917?recursive=1"
+          },
+          "accessed_at_utc": "2026-11-17T16:15:14.793Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_jhu_tree.json",
+          "raw_artifact_sha256": "fdfcb21c6a0a5d693304dc45f42f129d424aa7ff3f7f78040bcde81695b09ff8"
+        },
+        {
+          "label": "us_michigan_a1",
+          "kind": "repo_file",
+          "requested": {
+            "repository_full_name": "mosharaf/eecs489",
+            "ref": "802624d99898a295a487a5e23d2ef1061d70f2df",
+            "path": "Assignments/a1-sockets-mininet/README.md"
+          },
+          "accessed_at_utc": "2026-11-17T16:16:05.157Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_michigan_a1.json",
+          "raw_artifact_sha256": "c43b86290c8d5747739e7bc9969386d68d2b1d786eb68dbc403ab7772650d934"
+        },
+        {
+          "label": "us_michigan_assignments",
+          "kind": "repo_file",
+          "requested": {
+            "repository_full_name": "mosharaf/eecs489",
+            "ref": "802624d99898a295a487a5e23d2ef1061d70f2df",
+            "path": "Assignments/README.md"
+          },
+          "accessed_at_utc": "2026-11-17T16:16:05.157Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_michigan_assignments.json",
+          "raw_artifact_sha256": "43dfac970435e836de2641c9a161c9e80a10f546793623f32bbeb03b67aa1ad5"
+        },
+        {
+          "label": "us_michigan_cmake",
+          "kind": "repo_file",
+          "requested": {
+            "repository_full_name": "mosharaf/eecs489",
+            "ref": "802624d99898a295a487a5e23d2ef1061d70f2df",
+            "path": "Assignments/a1-sockets-mininet/cpp/CMakeLists.txt"
+          },
+          "accessed_at_utc": "2026-11-17T16:16:40.892Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_michigan_cmake.json",
+          "raw_artifact_sha256": "af92acded0bf08626d958a307494a126c8d2bb138e77611371974d2c9f868c75"
+        },
+        {
+          "label": "us_michigan_head",
+          "kind": "repo_head",
+          "requested": {
+            "url": "https://api.github.com/repos/mosharaf/eecs489/commits?per_page=1"
+          },
+          "accessed_at_utc": "2026-11-17T16:14:43.858Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_michigan_head.json",
+          "raw_artifact_sha256": "85068df347e5c7c1faa18e27dabc5fdd07e70e68735d102d3fa91038f92c56a5"
+        },
+        {
+          "label": "us_michigan_meta",
+          "kind": "repo_metadata",
+          "requested": {
+            "repository_full_name": "mosharaf/eecs489"
+          },
+          "accessed_at_utc": "2026-11-17T16:14:16.131Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_michigan_meta.json",
+          "raw_artifact_sha256": "bb64236a4036d83c36d38abfe6731cfcbce835251dbd5505ca67f40371b17040"
+        },
+        {
+          "label": "us_michigan_pox_license",
+          "kind": "repo_file",
+          "requested": {
+            "repository_full_name": "mosharaf/eecs489",
+            "ref": "802624d99898a295a487a5e23d2ef1061d70f2df",
+            "path": "Assignments/a4-static-router/py/pox/LICENSE"
+          },
+          "accessed_at_utc": "2026-11-17T16:17:09.248Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_michigan_pox_license.json",
+          "raw_artifact_sha256": "2af3a5991b0e7ba41db2426c05b93d392c761d892263a99d4e8bf7db72f177f0"
+        },
+        {
+          "label": "us_michigan_readme",
+          "kind": "repo_file",
+          "requested": {
+            "repository_full_name": "mosharaf/eecs489",
+            "ref": "802624d99898a295a487a5e23d2ef1061d70f2df",
+            "path": "README.md"
+          },
+          "accessed_at_utc": "2026-11-17T16:15:14.793Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_michigan_readme.json",
+          "raw_artifact_sha256": "6e527855a31cbd921b7d42b9643fb0a6a5eb00532f2324cfa9863775f7651a41"
+        },
+        {
+          "label": "us_michigan_tree",
+          "kind": "repo_tree",
+          "requested": {
+            "url": "https://api.github.com/repos/mosharaf/eecs489/git/trees/ef4578fdd01af40923c33a295508c094e7e16655?recursive=1"
+          },
+          "accessed_at_utc": "2026-11-17T16:15:14.793Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_michigan_tree.json",
+          "raw_artifact_sha256": "835f03e2f6d01a7934d20a2048d5fcce5c49fb5306592e623390ce8ff8cf5578"
+        },
+        {
+          "label": "us_princeton_a1",
+          "kind": "repo_file",
+          "requested": {
+            "repository_full_name": "feamster/COS461-Public",
+            "ref": "4befeaaa2b8ccf3f1884c9239de85629fc442a5b",
+            "path": "assignments/assignment1/README.md"
+          },
+          "accessed_at_utc": "2026-11-17T16:16:05.157Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_princeton_a1.json",
+          "raw_artifact_sha256": "d3df914df7fe81d1b76996600d5699406c0e8d8a64df2828f7c5ae9397448f28"
+        },
+        {
+          "label": "us_princeton_a5",
+          "kind": "repo_file",
+          "requested": {
+            "repository_full_name": "feamster/COS461-Public",
+            "ref": "4befeaaa2b8ccf3f1884c9239de85629fc442a5b",
+            "path": "assignments/assignment5/README.md"
+          },
+          "accessed_at_utc": "2026-11-17T16:16:40.892Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_princeton_a5.json",
+          "raw_artifact_sha256": "03f751609ef773702ab59147badcdc1335f1a55af86781ad20fe6f2599f800b3"
+        },
+        {
+          "label": "us_princeton_head",
+          "kind": "repo_head",
+          "requested": {
+            "url": "https://api.github.com/repos/feamster/COS461-Public/commits?per_page=1"
+          },
+          "accessed_at_utc": "2026-11-17T16:14:43.858Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_princeton_head.json",
+          "raw_artifact_sha256": "5bbd52dd06c36451031a7c80f0a2ed02c5cf0989bab3a5411bade409b4c7603d"
+        },
+        {
+          "label": "us_princeton_makefile",
+          "kind": "repo_file",
+          "requested": {
+            "repository_full_name": "feamster/COS461-Public",
+            "ref": "4befeaaa2b8ccf3f1884c9239de85629fc442a5b",
+            "path": "assignments/assignment5/Makefile"
+          },
+          "accessed_at_utc": "2026-11-17T16:17:09.248Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_princeton_makefile.json",
+          "raw_artifact_sha256": "153dbd2b50663fd8012439aad0f149fdd42f99723bb288562799f34aec6ae324"
+        },
+        {
+          "label": "us_princeton_meta",
+          "kind": "repo_metadata",
+          "requested": {
+            "repository_full_name": "PrincetonUniversity/COS461-Public"
+          },
+          "accessed_at_utc": "2026-11-17T16:14:16.131Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_princeton_meta.json",
+          "raw_artifact_sha256": "ae7383ec3544e2e1eafe08292808496ecede096ba77a8ac5c3563bcc90615567"
+        },
+        {
+          "label": "us_princeton_readme",
+          "kind": "repo_file",
+          "requested": {
+            "repository_full_name": "feamster/COS461-Public",
+            "ref": "4befeaaa2b8ccf3f1884c9239de85629fc442a5b",
+            "path": "README.md"
+          },
+          "accessed_at_utc": "2026-11-17T16:15:14.793Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_princeton_readme.json",
+          "raw_artifact_sha256": "f886d5e99aedf08bd52dcbb100527f228b984060151506f9325f05262bed1c89"
+        },
+        {
+          "label": "us_princeton_tree",
+          "kind": "repo_tree",
+          "requested": {
+            "url": "https://api.github.com/repos/feamster/COS461-Public/git/trees/bafbb9c8041849023005bea9ef09ff35d72fcfe0?recursive=1"
+          },
+          "accessed_at_utc": "2026-11-17T16:15:14.793Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_princeton_tree.json",
+          "raw_artifact_sha256": "e34b5a2310fba5c6c8e4e1869203be300fd3e081903fee6c24d1cb2cbd43d6eb"
+        },
+        {
+          "label": "us_query01",
+          "kind": "search_queries",
+          "requested": {
+            "system1_search_query": [
+              {
+                "q": "CMU 15-441 15-641 computer-networks.github.io course",
+                "domains": [
+                  "cmu.edu",
+                  "computer-networks.github.io",
+                  "github.com"
+                ],
+                "recency": 730
+              },
+              {
+                "q": "Princeton COS 461 feamster COS461-Public course 2017",
+                "domains": [
+                  "princeton.edu",
+                  "github.com"
+                ]
+              }
+            ],
+            "response_length": "long"
+          },
+          "accessed_at_utc": "2026-11-17T16:14:43.858Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_query01.json",
+          "raw_artifact_sha256": "6caf71a8b8d3c1ef4e9d2686e5677e7548be7e56797e9cb5fff3e8d6adce80dc"
+        },
+        {
+          "label": "us_stanford_berkeley_route",
+          "kind": "web_click",
+          "requested": {
+            "click": [
+              {
+                "ref_id": "turn595309825view0",
+                "id": 23
+              },
+              {
+                "ref_id": "turn595309825view1",
+                "id": 64
+              },
+              {
+                "ref_id": "turn595309825view1",
+                "id": 73
+              }
+            ],
+            "response_length": "long"
+          },
+          "accessed_at_utc": "2026-11-17T16:14:43.858Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_stanford_berkeley_route.json",
+          "raw_artifact_sha256": "eaceebab33a6d0d5bc4e3f5e0905223fd02623bca537d71ae594c7622fbcbf10"
+        },
+        {
+          "label": "us_stanford_cmake",
+          "kind": "repo_file",
+          "requested": {
+            "repository_full_name": "CS144/imp",
+            "ref": "837d45af2ce837c4ff9cb29bfd2cfaff2578a6a5",
+            "path": "CMakeLists.txt"
+          },
+          "accessed_at_utc": "2026-11-17T16:16:40.892Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_stanford_cmake.json",
+          "raw_artifact_sha256": "295dd57c30a323907c3a562274e21c7768e938e7c37ce59738ec24c680b5ebeb"
+        },
+        {
+          "label": "us_stanford_head",
+          "kind": "repo_head",
+          "requested": {
+            "url": "https://api.github.com/repos/CS144/imp/commits?per_page=1"
+          },
+          "accessed_at_utc": "2026-11-17T16:15:14.793Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_stanford_head.json",
+          "raw_artifact_sha256": "a50fc88b3c9216644d24c436316e5044747e00e1b01194d68a12442d7190a00f"
+        },
+        {
+          "label": "us_stanford_readme",
+          "kind": "repo_file",
+          "requested": {
+            "repository_full_name": "CS144/imp",
+            "ref": "837d45af2ce837c4ff9cb29bfd2cfaff2578a6a5",
+            "path": "README.md"
+          },
+          "accessed_at_utc": "2026-11-17T16:16:40.892Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_stanford_readme.json",
+          "raw_artifact_sha256": "27cf3c0af6267eca6091ccc6c17839f25044f88d760798dd324d189c61a587da"
+        },
+        {
+          "label": "us_stanford_tests",
+          "kind": "repo_file",
+          "requested": {
+            "repository_full_name": "CS144/imp",
+            "ref": "837d45af2ce837c4ff9cb29bfd2cfaff2578a6a5",
+            "path": "tests/CMakeLists.txt"
+          },
+          "accessed_at_utc": "2026-11-17T16:16:40.892Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_stanford_tests.json",
+          "raw_artifact_sha256": "62bb396e6fea5fbab7bbee4a072c855b6d4514df9128f2b47bb6cfdf15fba8fc"
+        },
+        {
+          "label": "us_stanford_tree",
+          "kind": "repo_tree",
+          "requested": {
+            "url": "https://api.github.com/repos/CS144/imp/git/trees/0bbc89999e8fd75ef6e63e4698ae254a1b78dbf9?recursive=1"
+          },
+          "accessed_at_utc": "2026-11-17T16:16:05.157Z",
+          "raw_artifact_path": "F3_R15_COMPARISON/collection/us/raw/us_stanford_tree.json",
+          "raw_artifact_sha256": "1008545aba31f592f2b52ed5d503adb75c02d3e01ce73f81e8e9da2f1fc0c7b2"
+        }
+      ],
+      "failures.json": [
+        {
+          "source_id": "US013",
+          "url": "https://www.cs.princeton.edu/courses/archive/spring17/cos461/",
+          "accessed_at_utc": "2026-11-17T16:15:14.793Z",
+          "failure": "https://www.cs.princeton.edu/courses/archive/spring17/cos461/: (403) Forbidden",
+          "resolution": "Retained as failure; no inference of feature absence."
+        },
+        {
+          "source_id": "US016",
+          "url": "https://computer-networks.github.io/",
+          "accessed_at_utc": "2026-11-17T16:14:16.130Z",
+          "failure": "https://computer-networks.github.io/: (404) Not Found",
+          "resolution": "Retained as failure; no inference of feature absence."
+        }
+      ]
+    },
+    "frameworks": {
+      "search_and_access_log.json": {
+        "protocol_sha256": "a036146226cc907d48d4e450e20acf6fa287bedbac541a2eaf717b02b0aa8c21",
+        "collection_date_utc": "2026-11-17",
+        "queries": [
+          {
+            "unit_id": "U15",
+            "kind": "broad_1",
+            "query": "site.imperial.ac.uk computing computer networks course module",
+            "raw_path": "collection/frameworks/raw/INITIAL_ROUTING.json",
+            "access_time_interval_utc": [
+              "2026-11-17T16:14:06Z",
+              "2026-11-17T16:15:02Z"
+            ],
+            "note": "Exact timestamp not separately captured in initial batch; interval retained rather than inventing precision. Query string preserved as issued."
+          },
+          {
+            "unit_id": "U16",
+            "kind": "broad_1",
+            "query": "site.tum.de \"Advanced Computer Networks\"",
+            "raw_path": "collection/frameworks/raw/INITIAL_ROUTING.json",
+            "access_time_interval_utc": [
+              "2026-11-17T16:14:06Z",
+              "2026-11-17T16:15:02Z"
+            ],
+            "note": "Exact timestamp not separately captured in initial batch; interval retained."
+          },
+          {
+            "unit_id": "U15",
+            "kind": "targeted_clarification_1",
+            "query": "site:imperial.ac.uk/computing \"Networks\" \"course\" \"50005\" \"70041\"",
+            "raw_path": "collection/frameworks/raw/FW_WEB_NEXT_1.json",
+            "accessed_at_utc": "2026-11-17T16:17:48.147Z",
+            "note": "Clarifies two plausible institutional identities; ambiguity remains."
+          }
+        ],
+        "broad_query_counts": {
+          "U02": 0,
+          "U09": 0,
+          "U10": 0,
+          "U15": 1,
+          "U16": 1
+        },
+        "clarification_query_counts": {
+          "U02": 0,
+          "U09": 0,
+          "U10": 0,
+          "U15": 1,
+          "U16": 0
+        },
+        "inspected_substantive_artifacts": {
+          "U02": 7,
+          "U09": 7,
+          "U10": 7,
+          "U15": 2,
+          "U16": 8
+        },
+        "artifact_count_rule": "Unique successfully inspected primary artifacts. Failed access attempts are preserved separately and were not substantively inspected; follow-up excerpts from the same PDF do not add an artifact. All TUM directory indexes are conservatively counted.",
+        "failed_attempt_source_ids": [
+          "FW008",
+          "FW009",
+          "FW026",
+          "FW027"
+        ],
+        "routing_records": [
+          {
+            "path": "collection/frameworks/raw/FW_BRANCH_U02.json",
+            "sha256": "cbc8c8e9f7a0d45584a6270e69195e349fbfe3d8b720f1bbaec6e6b71a36a20e",
+            "hash_layer": "tool-returned JSON wrapper"
+          },
+          {
+            "path": "collection/frameworks/raw/FW_BRANCH_U09.json",
+            "sha256": "bf820d2bac3c07473aff7b101379a892a98c28370acd023b4bfebd02bc16f1bb",
+            "hash_layer": "tool-returned JSON wrapper"
+          },
+          {
+            "path": "collection/frameworks/raw/FW_BRANCH_U10.json",
+            "sha256": "1bc3dc73c4fbf129dd2838dd0ea5deb4012ad3f7c738c2a80f873b8ec8357005",
+            "hash_layer": "tool-returned JSON wrapper"
+          },
+          {
+            "path": "collection/frameworks/raw/FW_TREE_U02.json",
+            "sha256": "7c2c37e7f56cd3b67781d46895da7016d01efcbf7be4b320f16b14db63c95cb7",
+            "hash_layer": "tool-returned JSON wrapper"
+          },
+          {
+            "path": "collection/frameworks/raw/FW_TREE_U09.json",
+            "sha256": "ae5b00d5950aeba31ed8fb0bb4772bbc49061932d5863e65e2d8274775e67396",
+            "hash_layer": "tool-returned JSON wrapper"
+          },
+          {
+            "path": "collection/frameworks/raw/FW_TREE_U10.json",
+            "sha256": "5fde07a071bc7232ec5e5431175166de626edf80ec861d41f3f9d0225907fd12",
+            "hash_layer": "tool-returned JSON wrapper"
+          },
+          {
+            "path": "collection/frameworks/raw/INITIAL_ROUTING.json",
+            "sha256": "371c39659d6da6426d4a100aa4dbacad5accb6a602ec3cd30f007e8416c8e77e",
+            "hash_layer": "tool-returned JSON wrapper"
+          }
+        ],
+        "protocol_deviations": [],
+        "unexpected_retrieval_variation": {
+          "unit_id": "U16",
+          "source_id": "FW034",
+          "detail": "A continuation request to the same public PDF returned a different document revision. Eight artifact URLs were inspected, with two revisions observed at this one URL. This was not a planned additional artifact or opportunistic sample expansion. Both responses are retained and coding uses observed common features."
+        },
+        "auxiliaries": "INGInious is named within the CNP3 ecosystem, not added as an independent course observation. Kathara not collected for this bounded assignment.",
+        "execution": "No retrieved software, tests, notebook, browser application, VM or network experiment executed. No login, external writes, CI triggers or OVA/appliance downloads.",
+        "distribution": "raw/ contains full responses for inspection only and must be excluded from distribution. Provenance, concise paraphrases and public links are distributable study outputs."
+      }
+    },
+    "asia_other": {
+      "collection_log.json": [
+        {
+          "id": "AO001",
+          "unit_ids": [
+            "U07"
+          ],
+          "kind": "substantive",
+          "url": "https://omscs.gatech.edu/cs-6250-computer-networks",
+          "args": {
+            "open": [
+              {
+                "ref_id": "https://omscs.gatech.edu/cs-6250-computer-networks"
+              }
+            ],
+            "response_length": "long"
+          },
+          "tool": "web",
+          "accessed_at_utc": "2026-11-17T16:14:48.603Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO001.json"
+        },
+        {
+          "id": "AO002",
+          "unit_ids": [
+            "U13",
+            "U14",
+            "U17"
+          ],
+          "kind": "routing_search",
+          "url": null,
+          "args": {
+            "system1_search_query": [
+              {
+                "q": "site:ece.illinois.edu ECE 438 communication networks course"
+              },
+              {
+                "q": "site:mit.edu \"6.5820\" computer networks course"
+              },
+              {
+                "q": "site:comp.nus.edu.sg \"CS2105\" course syllabus"
+              }
+            ],
+            "response_length": "long"
+          },
+          "tool": "web",
+          "accessed_at_utc": "2026-11-17T16:14:49.041Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO002.json"
+        },
+        {
+          "id": "AO003",
+          "unit_ids": [
+            "U08"
+          ],
+          "kind": "routing_metadata",
+          "url": "https://api.github.com/repos/ANLAB-KAIST/KENSv3",
+          "tool": "github",
+          "accessed_at_utc": "2026-11-17T16:14:48.372Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO003.json"
+        },
+        {
+          "id": "AO004",
+          "unit_ids": [
+            "U12"
+          ],
+          "kind": "routing_metadata",
+          "url": "https://api.github.com/repos/henryhxu/CSCI4430",
+          "tool": "github",
+          "accessed_at_utc": "2026-11-17T16:14:48.411Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO004.json"
+        },
+        {
+          "id": "AO005",
+          "unit_ids": [
+            "U07"
+          ],
+          "kind": "substantive",
+          "url": "https://omscs.gatech.edu/cs-6250-computer-networks",
+          "tool": "web",
+          "args": {
+            "click": [
+              {
+                "ref_id": "turn685808900view0",
+                "id": 5
+              }
+            ],
+            "response_length": "long"
+          },
+          "accessed_at_utc": "2026-11-17T16:15:17.632Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO005.json"
+        },
+        {
+          "id": "AO006",
+          "unit_ids": [
+            "U13"
+          ],
+          "kind": "substantive",
+          "url": "https://ece.illinois.edu/academics/courses/ece438",
+          "tool": "web",
+          "args": {
+            "open": [
+              {
+                "ref_id": "https://ece.illinois.edu/academics/courses/ece438"
+              }
+            ],
+            "response_length": "long"
+          },
+          "accessed_at_utc": "2026-11-17T16:15:17.205Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO006.json"
+        },
+        {
+          "id": "AO007",
+          "unit_ids": [
+            "U14"
+          ],
+          "kind": "routing_search",
+          "tool": "web",
+          "args": {
+            "system1_search_query": [
+              {
+                "q": "site:mit.edu \"6.5820\" syllabus project 2026"
+              }
+            ],
+            "response_length": "long"
+          },
+          "accessed_at_utc": "2026-11-17T16:15:17.209Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO007.json"
+        },
+        {
+          "id": "AO008",
+          "unit_ids": [
+            "U17"
+          ],
+          "kind": "routing_search",
+          "tool": "web",
+          "args": {
+            "system1_search_query": [
+              {
+                "q": "site:comp.nus.edu.sg CS2105 2026 assignments course website"
+              }
+            ],
+            "response_length": "long"
+          },
+          "accessed_at_utc": "2026-11-17T16:15:17.564Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO008.json"
+        },
+        {
+          "id": "AO009",
+          "unit_ids": [
+            "U08"
+          ],
+          "kind": "routing_metadata",
+          "url": "https://api.github.com/repos/ANLAB-KAIST/KENSv3/branches/master",
+          "tool": "github",
+          "accessed_at_utc": "2026-11-17T16:15:16.734Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO009.json"
+        },
+        {
+          "id": "AO010",
+          "unit_ids": [
+            "U12"
+          ],
+          "kind": "routing_metadata",
+          "url": "https://api.github.com/repos/henryhxu/CSCI4430/branches/2025_fall",
+          "tool": "github",
+          "accessed_at_utc": "2026-11-17T16:15:17.463Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO010.json"
+        },
+        {
+          "id": "AO011",
+          "unit_ids": [
+            "U08"
+          ],
+          "kind": "routing_metadata",
+          "url": "https://api.github.com/repos/ANLAB-KAIST/KENSv3/git/trees/b474d67a53a4c81034ad020399c91a4dd90c101c?recursive=1",
+          "tool": "github",
+          "accessed_at_utc": "2026-11-17T16:17:05.235Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO011.json"
+        },
+        {
+          "id": "AO012",
+          "unit_ids": [
+            "U12"
+          ],
+          "kind": "routing_metadata",
+          "url": "https://api.github.com/repos/henryhxu/CSCI4430/git/trees/0cb0db7171a9b145f91b0e806cf942e87fbf3f15?recursive=1",
+          "tool": "github",
+          "accessed_at_utc": "2026-11-17T16:17:05.301Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO012.json"
+        },
+        {
+          "id": "AO013",
+          "unit_ids": [
+            "U13"
+          ],
+          "kind": "substantive",
+          "url": "https://ece438-fall26.notion.site",
+          "tool": "web",
+          "args": {
+            "open": [
+              {
+                "ref_id": "https://ece438-fall26.notion.site"
+              }
+            ],
+            "response_length": "long"
+          },
+          "accessed_at_utc": "2026-11-17T16:17:05.605Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO013.json"
+        },
+        {
+          "id": "AO014",
+          "unit_ids": [
+            "U14"
+          ],
+          "kind": "routing_search_clarification",
+          "tool": "web",
+          "args": {
+            "system1_search_query": [
+              {
+                "q": "site:mit.edu \"6.5820\" \"6.829\" syllabus"
+              }
+            ],
+            "response_length": "long"
+          },
+          "accessed_at_utc": "2026-11-17T16:17:05.682Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO014.json"
+        },
+        {
+          "id": "AO015",
+          "unit_ids": [
+            "U17"
+          ],
+          "kind": "substantive",
+          "url": "https://www.comp.nus.edu.sg/cug/soc-sched/",
+          "tool": "web",
+          "args": {
+            "open": [
+              {
+                "ref_id": "https://www.comp.nus.edu.sg/cug/soc-sched/"
+              }
+            ],
+            "response_length": "long"
+          },
+          "accessed_at_utc": "2026-11-17T16:17:05.973Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO015.json"
+        },
+        {
+          "id": "AO016",
+          "unit_ids": [
+            "U17"
+          ],
+          "kind": "substantive",
+          "url": "https://www.comp.nus.edu.sg/~cs2105/",
+          "tool": "web",
+          "args": {
+            "open": [
+              {
+                "ref_id": "https://www.comp.nus.edu.sg/~cs2105/"
+              }
+            ],
+            "response_length": "long"
+          },
+          "accessed_at_utc": "2026-11-17T16:17:07.036Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO016.json"
+        },
+        {
+          "id": "AO017",
+          "unit_ids": [
+            "U08"
+          ],
+          "kind": "substantive",
+          "url": "https://api.github.com/repos/ANLAB-KAIST/KENSv3/git/blobs/68c3634ffb916136e5dffd26124d4d7e0e17a51c",
+          "tool": "github",
+          "git_path": "README.md",
+          "git_blob": "68c3634ffb916136e5dffd26124d4d7e0e17a51c",
+          "git_commit": "7dfa45c6356a02b1ba330b6e900a759fdebd9809",
+          "accessed_at_utc": "2026-11-17T16:17:43.806Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO017.json"
+        },
+        {
+          "id": "AO018",
+          "unit_ids": [
+            "U08"
+          ],
+          "kind": "substantive",
+          "url": "https://api.github.com/repos/ANLAB-KAIST/KENSv3/git/blobs/9fd5ec6b20667332a6a27507c99aca57f871b1c0",
+          "tool": "github",
+          "git_path": "LICENSE",
+          "git_blob": "9fd5ec6b20667332a6a27507c99aca57f871b1c0",
+          "git_commit": "7dfa45c6356a02b1ba330b6e900a759fdebd9809",
+          "accessed_at_utc": "2026-11-17T16:17:43.514Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO018.json"
+        },
+        {
+          "id": "AO019",
+          "unit_ids": [
+            "U08"
+          ],
+          "kind": "substantive",
+          "url": "https://api.github.com/repos/ANLAB-KAIST/KENSv3/git/blobs/ec6969badd5750e89b051c0b4ee140db4299bfa5",
+          "tool": "github",
+          "git_path": "CMakeLists.txt",
+          "git_blob": "ec6969badd5750e89b051c0b4ee140db4299bfa5",
+          "git_commit": "7dfa45c6356a02b1ba330b6e900a759fdebd9809",
+          "accessed_at_utc": "2026-11-17T16:17:43.470Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO019.json"
+        },
+        {
+          "id": "AO020",
+          "unit_ids": [
+            "U08"
+          ],
+          "kind": "substantive",
+          "url": "https://api.github.com/repos/ANLAB-KAIST/KENSv3/git/blobs/3d584a65e166032704019506b0f1882cd55e1d17",
+          "tool": "github",
+          "git_path": ".clang-format",
+          "git_blob": "3d584a65e166032704019506b0f1882cd55e1d17",
+          "git_commit": "7dfa45c6356a02b1ba330b6e900a759fdebd9809",
+          "accessed_at_utc": "2026-11-17T16:17:43.465Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO020.json"
+        },
+        {
+          "id": "AO021",
+          "unit_ids": [
+            "U08"
+          ],
+          "kind": "substantive",
+          "url": "https://api.github.com/repos/ANLAB-KAIST/KENSv3/git/blobs/876095275da3ba56bc03b07561ca6eba1a18985b",
+          "tool": "github",
+          "git_path": "Dockerfile",
+          "git_blob": "876095275da3ba56bc03b07561ca6eba1a18985b",
+          "git_commit": "7dfa45c6356a02b1ba330b6e900a759fdebd9809",
+          "accessed_at_utc": "2026-11-17T16:17:44.067Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO021.json"
+        },
+        {
+          "id": "AO022",
+          "unit_ids": [
+            "U08"
+          ],
+          "kind": "substantive",
+          "url": "https://api.github.com/repos/ANLAB-KAIST/KENSv3/git/blobs/48ffa3f6f413b3e21ad17f6cdcf39fe72f29f6cc",
+          "tool": "github",
+          "git_path": ".github/workflows/test-linux.yml",
+          "git_blob": "48ffa3f6f413b3e21ad17f6cdcf39fe72f29f6cc",
+          "git_commit": "7dfa45c6356a02b1ba330b6e900a759fdebd9809",
+          "accessed_at_utc": "2026-11-17T16:17:43.496Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO022.json"
+        },
+        {
+          "id": "AO023",
+          "unit_ids": [
+            "U12"
+          ],
+          "kind": "substantive",
+          "url": "https://api.github.com/repos/henryhxu/CSCI4430/git/blobs/6956fa53585ead9e7e38a4fa7221cb6f0e4f493e",
+          "tool": "github",
+          "git_path": "README.md",
+          "git_blob": "6956fa53585ead9e7e38a4fa7221cb6f0e4f493e",
+          "git_commit": "aac3e1e9a785c138da5d1ac8954470102571b522",
+          "accessed_at_utc": "2026-11-17T16:17:43.481Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO023.json"
+        },
+        {
+          "id": "AO024",
+          "unit_ids": [
+            "U12"
+          ],
+          "kind": "substantive",
+          "url": "https://api.github.com/repos/henryhxu/CSCI4430/git/blobs/b68b320cdb0426f7b2b9ce9df6c7e9ebc4546b59",
+          "tool": "github",
+          "git_path": "LICENSE",
+          "git_blob": "b68b320cdb0426f7b2b9ce9df6c7e9ebc4546b59",
+          "git_commit": "aac3e1e9a785c138da5d1ac8954470102571b522",
+          "accessed_at_utc": "2026-11-17T16:17:43.452Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO024.json"
+        },
+        {
+          "id": "AO025",
+          "unit_ids": [
+            "U12"
+          ],
+          "kind": "substantive",
+          "url": "https://api.github.com/repos/henryhxu/CSCI4430/git/blobs/6824b06d0260cba54702d49d6446cdb7e9a47d8b",
+          "tool": "github",
+          "git_path": "assignment/assignment-1/README.md",
+          "git_blob": "6824b06d0260cba54702d49d6446cdb7e9a47d8b",
+          "git_commit": "aac3e1e9a785c138da5d1ac8954470102571b522",
+          "accessed_at_utc": "2026-11-17T16:17:43.461Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO025.json"
+        },
+        {
+          "id": "AO026",
+          "unit_ids": [
+            "U12"
+          ],
+          "kind": "substantive",
+          "url": "https://api.github.com/repos/henryhxu/CSCI4430/git/blobs/725d7bfa1fedd61e0c415efcad9238b968efe1c0",
+          "tool": "github",
+          "git_path": "assignment/assignment-2/README.md",
+          "git_blob": "725d7bfa1fedd61e0c415efcad9238b968efe1c0",
+          "git_commit": "aac3e1e9a785c138da5d1ac8954470102571b522",
+          "accessed_at_utc": "2026-11-17T16:17:43.483Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO026.json"
+        },
+        {
+          "id": "AO027",
+          "unit_ids": [
+            "U08"
+          ],
+          "kind": "substantive",
+          "url": "https://github.com/ANLAB-KAIST/KENSv3/wiki",
+          "tool": "web",
+          "args": {
+            "open": [
+              {
+                "ref_id": "https://github.com/ANLAB-KAIST/KENSv3/wiki"
+              }
+            ],
+            "response_length": "long"
+          },
+          "accessed_at_utc": "2026-11-17T16:18:19.587Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO027.json"
+        },
+        {
+          "id": "AO028",
+          "unit_ids": [
+            "U13"
+          ],
+          "kind": "substantive",
+          "url": "https://ece438-fall26.notion.site/",
+          "tool": "web",
+          "args": {
+            "click": [
+              {
+                "ref_id": "turn902220404view0",
+                "id": 25
+              }
+            ],
+            "response_length": "long"
+          },
+          "accessed_at_utc": "2026-11-17T16:18:19.459Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO028.json"
+        },
+        {
+          "id": "AO029",
+          "unit_ids": [
+            "U13"
+          ],
+          "kind": "substantive",
+          "url": "https://ece438-fall26.notion.site/",
+          "tool": "web",
+          "args": {
+            "click": [
+              {
+                "ref_id": "turn902220404view0",
+                "id": 32
+              }
+            ],
+            "response_length": "long"
+          },
+          "accessed_at_utc": "2026-11-17T16:18:21.821Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO029.json"
+        },
+        {
+          "id": "AO030",
+          "unit_ids": [
+            "U13"
+          ],
+          "kind": "substantive",
+          "url": "https://ece438-fall26.notion.site/",
+          "tool": "web",
+          "args": {
+            "click": [
+              {
+                "ref_id": "turn902220404view0",
+                "id": 23
+              }
+            ],
+            "response_length": "long"
+          },
+          "accessed_at_utc": "2026-11-17T16:18:19.363Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO030.json"
+        },
+        {
+          "id": "AO031",
+          "unit_ids": [
+            "U14"
+          ],
+          "kind": "substantive",
+          "url": "https://student.mit.edu/catalog/m6a.html",
+          "tool": "web",
+          "args": {
+            "open": [
+              {
+                "ref_id": "https://student.mit.edu/catalog/m6a.html"
+              }
+            ],
+            "response_length": "long"
+          },
+          "accessed_at_utc": "2026-11-17T16:18:19.655Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO031.json"
+        },
+        {
+          "id": "AO032",
+          "unit_ids": [
+            "U14"
+          ],
+          "kind": "substantive",
+          "url": "https://eecsis.mit.edu/numbering.html",
+          "tool": "web",
+          "args": {
+            "open": [
+              {
+                "ref_id": "https://eecsis.mit.edu/numbering.html"
+              }
+            ],
+            "response_length": "long"
+          },
+          "accessed_at_utc": "2026-11-17T16:18:19.227Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO032.json"
+        },
+        {
+          "id": "AO033",
+          "unit_ids": [
+            "U17"
+          ],
+          "kind": "routing_search_clarification",
+          "tool": "web",
+          "args": {
+            "system1_search_query": [
+              {
+                "q": "\"CS2105\" \"2025/2026\" site:nus.edu.sg"
+              }
+            ],
+            "response_length": "long"
+          },
+          "accessed_at_utc": "2026-11-17T16:18:19.481Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO033.json"
+        },
+        {
+          "id": "AO034",
+          "unit_ids": [
+            "U13"
+          ],
+          "kind": "substantive",
+          "url": "https://ece438-fall26.notion.site/MP0_Fall2026-pdf-3ce51930a1af8040a9dcf8bc86608436?pvs=21",
+          "tool": "web",
+          "args": {
+            "click": [
+              {
+                "ref_id": "turn434082525view0",
+                "id": 0
+              }
+            ],
+            "response_length": "long"
+          },
+          "accessed_at_utc": "2026-11-17T16:19:01.255Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO034.json"
+        },
+        {
+          "id": "AO035",
+          "unit_ids": [
+            "U13"
+          ],
+          "kind": "substantive",
+          "url": "https://ece438-fall26.notion.site/MP1_Fall2026-pdf-3d551930a1af80258ecfe6e2d3a189ad?pvs=21",
+          "tool": "web",
+          "args": {
+            "click": [
+              {
+                "ref_id": "turn840756642view0",
+                "id": 0
+              }
+            ],
+            "response_length": "long"
+          },
+          "accessed_at_utc": "2026-11-17T16:19:00.312Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO035.json"
+        },
+        {
+          "id": "AO036",
+          "unit_ids": [
+            "U14"
+          ],
+          "kind": "same_artifact_navigation",
+          "same_artifact_as": "AO031",
+          "url": "https://student.mit.edu/catalog/m6a.html",
+          "tool": "web",
+          "args": {
+            "find": [
+              {
+                "ref_id": "turn335121464view0",
+                "pattern": "6.5820"
+              }
+            ],
+            "response_length": "long"
+          },
+          "accessed_at_utc": "2026-11-17T16:19:00.382Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO036.json"
+        },
+        {
+          "id": "AO037",
+          "unit_ids": [
+            "U17"
+          ],
+          "kind": "substantive",
+          "url": "https://blog.nus.edu.sg/cs2105/about-cs2105-3/",
+          "tool": "web",
+          "args": {
+            "open": [
+              {
+                "ref_id": "https://blog.nus.edu.sg/cs2105/about-cs2105-3/"
+              }
+            ],
+            "response_length": "long"
+          },
+          "accessed_at_utc": "2026-11-17T16:19:00.201Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO037.json"
+        },
+        {
+          "id": "AO038",
+          "unit_ids": [
+            "U17"
+          ],
+          "kind": "substantive",
+          "url": "https://blog.nus.edu.sg/cs2105/readings/",
+          "tool": "web",
+          "args": {
+            "open": [
+              {
+                "ref_id": "https://blog.nus.edu.sg/cs2105/readings/"
+              }
+            ],
+            "response_length": "long"
+          },
+          "accessed_at_utc": "2026-11-17T16:19:00.081Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO038.json"
+        },
+        {
+          "id": "AO039",
+          "unit_ids": [
+            "U17"
+          ],
+          "kind": "substantive",
+          "url": "https://www.comp.nus.edu.sg/~ooiwt/cs2105/1314s2/a1.pdf",
+          "tool": "web",
+          "args": {
+            "open": [
+              {
+                "ref_id": "https://www.comp.nus.edu.sg/~ooiwt/cs2105/1314s2/a1.pdf"
+              }
+            ],
+            "response_length": "long"
+          },
+          "accessed_at_utc": "2026-11-17T16:19:00.164Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO039.json"
+        },
+        {
+          "id": "AO040",
+          "unit_ids": [
+            "U08"
+          ],
+          "kind": "same_artifact_retry",
+          "same_artifact_as": "AO027",
+          "url": "https://github.com/ANLAB-KAIST/KENSv3/wiki",
+          "tool": "github",
+          "accessed_at_utc": "2026-11-17T16:19:00.148Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO040.json"
+        },
+        {
+          "id": "AO041",
+          "unit_ids": [
+            "U13"
+          ],
+          "kind": "substantive",
+          "url": "https://saksham.web.illinois.edu/",
+          "tool": "web",
+          "args": {
+            "open": [
+              {
+                "ref_id": "https://saksham.web.illinois.edu/"
+              }
+            ],
+            "response_length": "long"
+          },
+          "accessed_at_utc": "2026-11-17T16:19:54.362Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO041.json"
+        },
+        {
+          "id": "AO042",
+          "unit_ids": [
+            "U17"
+          ],
+          "kind": "substantive",
+          "url": "https://www.comp.nus.edu.sg/programmes/ug/focus/nds/",
+          "tool": "web",
+          "args": {
+            "open": [
+              {
+                "ref_id": "https://www.comp.nus.edu.sg/programmes/ug/focus/nds/"
+              }
+            ],
+            "response_length": "long"
+          },
+          "accessed_at_utc": "2026-11-17T16:19:54.321Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO042.json"
+        },
+        {
+          "id": "AO043",
+          "unit_ids": [
+            "U12"
+          ],
+          "kind": "substantive",
+          "url": "https://api.github.com/repos/henryhxu/CSCI4430/git/blobs/bbbefee93b3cb57216f55f82cda312eb09676320",
+          "tool": "github",
+          "git_path": "assignment/assignment-2/cpp/CMakeLists.txt",
+          "git_blob": "bbbefee93b3cb57216f55f82cda312eb09676320",
+          "git_commit": "aac3e1e9a785c138da5d1ac8954470102571b522",
+          "accessed_at_utc": "2026-11-17T16:19:53.985Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO043.json"
+        },
+        {
+          "id": "AO044",
+          "unit_ids": [
+            "U17"
+          ],
+          "kind": "same_artifact_navigation",
+          "same_artifact_as": "AO015",
+          "url": "https://www.comp.nus.edu.sg/cug/soc-sched/",
+          "tool": "web",
+          "args": {
+            "find": [
+              {
+                "ref_id": "turn546528599view0",
+                "pattern": "CS2105"
+              }
+            ],
+            "response_length": "long"
+          },
+          "accessed_at_utc": "2026-11-17T16:20:52.741Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO044.json"
+        },
+        {
+          "id": "AO045",
+          "unit_ids": [
+            "U08"
+          ],
+          "kind": "substantive_reused",
+          "url": "https://pure.kaist.ac.kr/en/publications/an-educational-networking-framework-for-full-layer-implementation/",
+          "tool": "web_reused_from_root",
+          "accessed_at_utc": "2026-11-17T16:14:56.628Z",
+          "artifact_path": "/workspace/scratch/7cc3f017cace/F3_R15_COMPARISON/collection/asia_other/raw/AO045.json",
+          "original_artifact_path": "collection/root/raw/publication_search.json"
+        }
+      ]
+    },
+    "root": {
+      "search_log.json": [
+        {
+          "kind": "publication_verification",
+          "query": "An Open Platform to Teach How the Internet Practically Works 3402420",
+          "sources": "official ETH/ACM domains",
+          "raw": "collection/root/raw/publication_search.json",
+          "accessed_at_utc": "2026-11-17T16:14:56.628Z"
+        },
+        {
+          "kind": "publication_verification",
+          "query": "Individualizing Cybersecurity Lab Exercises with Labtainers 2018",
+          "sources": "official NPS/IEEE domains",
+          "raw": "collection/root/raw/publication_search.json",
+          "accessed_at_utc": "2026-11-17T16:14:56.628Z"
+        },
+        {
+          "kind": "publication_verification",
+          "query": "An Educational Networking Framework for Full Layer Implementation and Testing 2677304",
+          "sources": "official KAIST/ACM domains",
+          "raw": "collection/root/raw/publication_search.json",
+          "accessed_at_utc": "2026-11-17T16:14:56.628Z"
+        },
+        {
+          "kind": "publication_verification",
+          "query": "SEED: A Suite of Instructional Laboratories for Computer Security Education 1348716",
+          "sources": "official author/ACM domains; non-primary results excluded",
+          "raw": "collection/root/raw/publication_search.json",
+          "accessed_at_utc": "2026-11-17T16:14:56.628Z"
+        },
+        {
+          "kind": "publication_clarification",
+          "query": "SEED: A Suite of Instructional Laboratories for Computer Security Education 1348716",
+          "sources": "official author/ACM domains; author publication list recovered",
+          "raw": "collection/root/raw/context_and_seed_search.json",
+          "accessed_at_utc": "2026-11-17T16:15:19.241Z"
+        },
+        {
+          "kind": "anchor_exact_name",
+          "query": "\"COMPNET-EN\" \"Clim\" research evaluation",
+          "sources": "bounded exact-name query; non-primary self-report mirror excluded",
+          "raw": "collection/root/raw/context_and_seed_search.json",
+          "accessed_at_utc": "2026-11-17T16:15:19.241Z"
+        }
+      ],
+      "publication_metadata.json": [
+        {
+          "doi": "10.1145/3402413.3402420",
+          "url": "https://api.crossref.org/works/10.1145/3402413.3402420",
+          "accessed_at_utc": "2026-11-17T16:16:32.643171+00:00",
+          "final_url": "https://api.crossref.org/works/10.1145/3402413.3402420",
+          "status": "success",
+          "artifact_path": "F3_R15_COMPARISON/collection/root/raw/crossref_1.json",
+          "artifact_sha256": "8cd83033bd5d9148f4af0c3ad1aa46ea3963dd4946e7881b02c0e3e48f9c2b34",
+          "hash_layer": "http_response_body_bytes",
+          "title": [
+            "An Open Platform to Teach How the Internet Practically Works"
+          ],
+          "authors": [
+            {
+              "given": "Thomas",
+              "family": "Holterbach",
+              "sequence": "first",
+              "affiliation": [
+                {
+                  "name": "ETH Zurich"
+                }
+              ],
+              "role": [
+                {
+                  "vocabulary": "crossref",
+                  "role": "author"
+                }
+              ]
+            },
+            {
+              "given": "Tobias",
+              "family": "Bü",
+              "sequence": "additional",
+              "affiliation": [
+                {
+                  "name": "ETH Zurich"
+                }
+              ],
+              "role": [
+                {
+                  "vocabulary": "crossref",
+                  "role": "author"
+                }
+              ]
+            },
+            {
+              "given": "Tino",
+              "family": "Rellstab",
+              "sequence": "additional",
+              "affiliation": [
+                {
+                  "name": "ETH Zurich"
+                }
+              ],
+              "role": [
+                {
+                  "vocabulary": "crossref",
+                  "role": "author"
+                }
+              ]
+            },
+            {
+              "given": "Laurent",
+              "family": "Vanbever",
+              "sequence": "additional",
+              "affiliation": [
+                {
+                  "name": "ETH Zurich"
+                }
+              ],
+              "role": [
+                {
+                  "vocabulary": "crossref",
+                  "role": "author"
+                }
+              ]
+            }
+          ],
+          "container_title": [
+            "ACM SIGCOMM Computer Communication Review"
+          ],
+          "volume": "50",
+          "issue": "2",
+          "page": "45-52",
+          "article_number": null,
+          "published": {
+            "date-parts": [
+              [
+                2020,
+                5,
+                22
+              ]
+            ]
+          },
+          "type": "journal-article"
+        },
+        {
+          "doi": "10.1109/MSP.2018.1870862",
+          "url": "https://api.crossref.org/works/10.1109/MSP.2018.1870862",
+          "accessed_at_utc": "2026-11-17T16:16:32.643809+00:00",
+          "final_url": "https://api.crossref.org/works/10.1109/MSP.2018.1870862",
+          "status": "success",
+          "artifact_path": "F3_R15_COMPARISON/collection/root/raw/crossref_2.json",
+          "artifact_sha256": "45cbafb4342aa530d481eefda63ca071f11b0aaa10e0dd5eb87aa68f4a547041",
+          "hash_layer": "http_response_body_bytes",
+          "title": [
+            "Individualizing Cybersecurity Lab Exercises with Labtainers"
+          ],
+          "authors": [
+            {
+              "given": "Michael F.",
+              "family": "Thompson",
+              "sequence": "first",
+              "affiliation": [
+                {
+                  "name": "Naval Postgraduate School"
+                }
+              ],
+              "role": [
+                {
+                  "vocabulary": "crossref",
+                  "role": "author"
+                }
+              ]
+            },
+            {
+              "given": "Cynthia E.",
+              "family": "Irvine",
+              "sequence": "additional",
+              "affiliation": [
+                {
+                  "name": "Naval Postgraduate School"
+                }
+              ],
+              "role": [
+                {
+                  "vocabulary": "crossref",
+                  "role": "author"
+                }
+              ]
+            }
+          ],
+          "container_title": [
+            "IEEE Security &amp; Privacy"
+          ],
+          "volume": "16",
+          "issue": "2",
+          "page": "91-95",
+          "article_number": null,
+          "published": {
+            "date-parts": [
+              [
+                2018,
+                3
+              ]
+            ]
+          },
+          "type": "journal-article"
+        },
+        {
+          "doi": "10.1145/2676723.2677304",
+          "url": "https://api.crossref.org/works/10.1145/2676723.2677304",
+          "accessed_at_utc": "2026-11-17T16:16:32.644360+00:00",
+          "final_url": "https://api.crossref.org/works/10.1145/2676723.2677304",
+          "status": "success",
+          "artifact_path": "F3_R15_COMPARISON/collection/root/raw/crossref_3.json",
+          "artifact_sha256": "1c3ba1f924d2126810effb4af005eac3954bfebdcfefc134a7c7e6aa09cc9935",
+          "hash_layer": "http_response_body_bytes",
+          "title": [
+            "An Educational Networking Framework for Full Layer Implementation and Testing"
+          ],
+          "authors": [
+            {
+              "given": "Keunhong",
+              "family": "Lee",
+              "sequence": "first",
+              "affiliation": [
+                {
+                  "name": "KAIST, Daejeon, South Korea"
+                }
+              ],
+              "role": [
+                {
+                  "vocabulary": "crossref",
+                  "role": "author"
+                }
+              ]
+            },
+            {
+              "given": "Joongi",
+              "family": "Kim",
+              "sequence": "additional",
+              "affiliation": [
+                {
+                  "name": "KAIST, Daejeon, South Korea"
+                }
+              ],
+              "role": [
+                {
+                  "vocabulary": "crossref",
+                  "role": "author"
+                }
+              ]
+            },
+            {
+              "given": "Sue",
+              "family": "Moon",
+              "sequence": "additional",
+              "affiliation": [
+                {
+                  "name": "KAIST, Daejeon, South Korea"
+                }
+              ],
+              "role": [
+                {
+                  "vocabulary": "crossref",
+                  "role": "author"
+                }
+              ]
+            }
+          ],
+          "container_title": [
+            "Proceedings of the 46th ACM Technical Symposium on Computer Science Education"
+          ],
+          "volume": null,
+          "issue": null,
+          "page": "663-668",
+          "article_number": null,
+          "published": {
+            "date-parts": [
+              [
+                2015,
+                2,
+                24
+              ]
+            ]
+          },
+          "type": "proceedings-article"
+        },
+        {
+          "doi": "10.1145/1348713.1348716",
+          "url": "https://api.crossref.org/works/10.1145/1348713.1348716",
+          "accessed_at_utc": "2026-11-17T16:16:32.644904+00:00",
+          "status": "failed",
+          "error": "HTTP Error 429: Too Many Requests"
+        }
+      ],
+      "publication_seed_metadata_retry.json": {
+        "doi": "10.1145/1348713.1348716",
+        "url": "https://api.crossref.org/works/10.1145/1348713.1348716",
+        "accessed_at_utc": "2026-11-17T16:18:28.458545+00:00",
+        "retry_after_previous_429": "One sequential retry 115.8 seconds after the first request timestamp; no repeated immediate retries.",
+        "final_url": "https://api.crossref.org/works/10.1145/1348713.1348716",
+        "status": "success",
+        "artifact_path": "F3_R15_COMPARISON/collection/root/raw/crossref_seed_after_interval.json",
+        "artifact_sha256": "78095c4dae970c040f90c0b6b76a5946e80639597f91f02cd249a3dcbb32c324",
+        "hash_layer": "http_response_body_bytes",
+        "title": [
+          "SEED"
+        ],
+        "authors": [
+          {
+            "given": "Wenliang",
+            "family": "Du",
+            "sequence": "first",
+            "affiliation": [
+              {
+                "name": "Syracuse University"
+              }
+            ],
+            "role": [
+              {
+                "vocabulary": "crossref",
+                "role": "author"
+              }
+            ]
+          },
+          {
+            "given": "Ronghua",
+            "family": "Wang",
+            "sequence": "additional",
+            "affiliation": [
+              {
+                "name": "Syracuse University"
+              }
+            ],
+            "role": [
+              {
+                "vocabulary": "crossref",
+                "role": "author"
+              }
+            ]
+          }
+        ],
+        "container_title": [
+          "Journal on Educational Resources in Computing"
+        ],
+        "volume": "8",
+        "issue": "1",
+        "page": "1-24",
+        "article_number": null,
+        "published": {
+          "date-parts": [
+            [
+              2008,
+              3
+            ]
+          ]
+        },
+        "type": "journal-article"
+      }
+    }
+  },
+  "root_confirmation": [
+    {
+      "working_path": "collection/root/raw/root_confirmation.json",
+      "sha256": "f2fe2e40fe08a1e55c8660ed67ae4cb6e93f899eb05be8dbfb058a4dae6795a6",
+      "hash_layer": "tool_response_json_wrapper",
+      "accessed_at_utc": "2026-11-17 16:27:56 UTC",
+      "scope": "Root verification of already-collected pages, no corpus expansion",
+      "new_sampling_units": 0
+    },
+    {
+      "working_path": "collection/root/raw/root_confirmation_details.json",
+      "sha256": "97c35364ff609efb2fe49156f084624c2327eeb77bf815f1eb1833de9f4e6810",
+      "hash_layer": "tool_response_json_wrapper",
+      "accessed_at_utc": "2026-11-17 16:28:17 UTC",
+      "scope": "Root verification of already-collected source details",
+      "new_sampling_units": 0
+    },
+    {
+      "working_path": "collection/root/raw/root_final_source_details.json",
+      "sha256": "06018c6b68a1332357c796c75ad47e80e7f5ce1287d331386740ab309989ab94",
+      "hash_layer": "tool_response_json_wrapper",
+      "accessed_at_utc": "2026-11-17 16:34:36 UTC",
+      "scope": "Final source-locator verification within already collected pages",
+      "new_sampling_units": 0
+    }
+  ],
+  "paths_are_inspection_records_not_distributed_files": true,
+  "scope_note": "Repeated opens/finds for root confirmation concern already sampled URLs. Publication metadata verification is separately logged.",
+  "unexpected_variation": {
+    "unit_id": "U16",
+    "source_id": "FW034",
+    "detail": "A continuation request to the same public PDF returned a different document revision. Eight artifact URLs were inspected, with two revisions observed at this one URL. This was not a planned additional artifact or opportunistic sample expansion. Both responses are retained and coding uses observed common features."
+  }
+}

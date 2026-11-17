@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "frozen_at_utc": "2026-11-17T16:38:01.854037+00:00",
+  "base_commit": "8fb6afcd89eb3fa27b909941f96eff4276df8f29",
+  "study_file_sha256": {
+    "COLLECTION_LOG.json": "dfcb2b0a66895547701810481ac62e8af79453db5e16b79e1e0ff83ca1e67e61",
+    "CORPUS.json": "c8289dbb7a61aa864bd68dca5ece0925d51567285ffa42baf03ce5b72fd26a13",
+    "INTEGRATION_NOTES.json": "721d7a171b379a27bd1097836ee5b552cf707f8748de19889e7b382aac23329b",
+    "PROTOCOL.md": "a036146226cc907d48d4e450e20acf6fa287bedbac541a2eaf717b02b0aa8c21",
+    "PROTOCOL_FREEZE.json": "5ee9d393563c34e8b68e64fa8cbd81204d000a8a85b5525939aed650f37d7c2e",
+    "PUBLICATIONS.json": "f30f7ba88ab5983077f9b4362f870094a7f145931f45e396d4496b6cb0f41939",
+    "README.md": "9fe7cdc9c40a272208d332e5b10bf7acd3f09027144f9b60dfcd9b88dccf3603",
+    "SOURCES.json": "6d3f673d679b81948c76e3e448bd7bacdcfa0e5af288dfe2c0ee746c8587a5bd",
+    "SOURCES.md": "30ca006dfaec4b9e427e73116567ca1907bc00df97443b8d72d8257b76ff5323",
+    "VALIDATION.json": "24cb5dffbbf007f7c05b1100cae8600b39062101fbb199528996143f314be333"
+  },
+  "input_record_sha256": {
+    "collection/root/units.json": "260f749da9e13512589a9bce317f788ca745160de2023220a72a488a55e25dc3",
+    "collection/root/sources.json": "f8824827c7d9be23d2b2ccef5b059c28f160df3a2c71ac97da0aaa84a9f9d5d3",
+    "collection/us/units.json": "15b89d9d364e8a3fa1e21e05d0d181c68d09adc913632ba592fbc43af205a547",
+    "collection/us/sources.json": "247be1da0bcc1089a804ea8b229a1c68c2f39494be6ac8f2d3e978ed29da00a2",
+    "collection/frameworks/units.json": "3d75c703b148c26a4a62917b46ba4d6ae4ec5c8aca12bb957931330579ffe234",
+    "collection/frameworks/sources.json": "4ca222350c1cebd7dfc7fa436656149d205c5fb0393a09552d67c0d81058503f",
+    "collection/asia_other/units.json": "68986808f43cd796b9d233a2c5cb380f0895aa17b9a0a040dc1447745671cc68",
+    "collection/asia_other/sources.json": "18a10e2ace6231517c3f1d5d2c329319a54c1c22f19b774bd35913321be8038b",
+    "collection/root/publication_sources.json": "a64807a839ffdcef7e5d4345f08c7fa72ec76b8bfeee4cf3ad6c61178b478f68",
+    "collection/root/auxiliary_sources.json": "39a6466b29f961296161aa740454ec9dd91bc83eca49f0bb66d4da68a3c2ae83"
+  },
+  "self_hash_policy": "This manifest excludes itself. The phase package manifest hashes this file.",
+  "claim": "Frozen concise study outputs; not a complete archived copy of all external sources."
+}

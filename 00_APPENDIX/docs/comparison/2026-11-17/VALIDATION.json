@@ -1,0 +1,130 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "started_at_utc": "2026-11-17T16:38:01.162708+00:00",
+  "completed_at_utc": "2026-11-17T16:38:01.852746+00:00",
+  "scope": "New dated documentary corpus and local review changes only; no product test rerun or native acceptance",
+  "structural_provenance": {
+    "status": "PASS",
+    "summary": {
+      "units": 18,
+      "distinct_units": 18,
+      "expected_units": 18,
+      "cells": 180,
+      "expected_cells": 180,
+      "cell_status_counts": {
+        "DOCUMENTED": 111,
+        "NOT_IDENTIFIED": 22,
+        "MIXED": 42,
+        "ACCESS_LIMITED": 5
+      },
+      "source_registries": 6,
+      "source_records": 146,
+      "distinct_source_ids": 146,
+      "source_records_by_group": {
+        "root": 17,
+        "us": 49,
+        "frameworks": 35,
+        "asia_other": 45
+      },
+      "cell_source_reference_occurrences": 350,
+      "unreferenced_registry_source_count": 39,
+      "source_artifact_hash_checks": 146,
+      "source_raw_response_hash_checks": 45,
+      "source_supplementary_capture_hash_checks": 1,
+      "additional_metadata_hash_checks": 57,
+      "hash_check_occurrences": 249,
+      "unique_hashed_artifact_paths": 190,
+      "git_blob_checks": 58,
+      "git_blob_matches": 58,
+      "max_claim_words": 20,
+      "not_identified_cells": 22,
+      "source_acquisition_time_min_utc": "2026-11-17T16:14:16.130000+00:00",
+      "source_acquisition_time_max_utc": "2026-11-17T16:27:56+00:00",
+      "acquisition_timestamp_occurrences_checked": 535,
+      "inherited_F5_execution_records": 1,
+      "errors": 0,
+      "warnings": 0
+    },
+    "validator_sha256": "7c0a43a21c9ff1d91dce24b065d1465cb397acf65f2a090bbe05f20c2f13f369",
+    "full_record_sha256": "ca3c7892ffe774292a43d5385b4f0d3c8febcfed04cf3fc559d0afe363a8844d",
+    "limits": [
+      "A byte hash verifies the acquired local artifact, not the truth, completeness or continued availability of a remote source.",
+      "Tool JSON/text hashes are never treated as original webpage or PDF hashes. Git blob SHA-1 is recomputed only for explicitly decoded blob bytes.",
+      "Reference existence and declared unit scope are checked; semantic entailment of all 180 claims is not certified by this validator.",
+      "NOT_IDENTIFIED cells have references and scope text checked structurally; wording adequacy still needs source review.",
+      "Metadata timestamp occurrences include repeated snapshots and are not independent acquisitions. Content publication/commit dates are not treated as retrieval dates.",
+      "Initial frameworks routing queries retain UTC intervals rather than invented exact timestamps; interval bounds are checked against the freeze.",
+      "The frameworks collector records two revisions at one mutable TUM PDF URL. This validator verifies retained capture hashes, not remote PDF immutability.",
+      "Prior F5 execution is inherited evidence, not new comparative-phase execution, native browser acceptance or VM acceptance.",
+      "No network retrieval, collected software execution or human inter-rater reliability assessment is performed.",
+      "Full raw source material is read only as needed for byte verification and limited inherited-event metadata; no raw text or credentials are emitted."
+    ]
+  },
+  "semantic_reviews": [
+    {
+      "record": "CROSS_REVIEW_ASIA_ANCHOR.json",
+      "status": "PASS_WITH_RESOLVED_CORRECTIONS",
+      "sha256": "eccca0df2640810503a77ba69591dfb987d933622dee58f67a5f85760265cbba",
+      "scope": "60 Asia cells, 10 anchor cells and four publication records"
+    },
+    {
+      "record": "PATCH_REVIEW.json",
+      "status": "PASS",
+      "sha256": "6027cf70d33aa05ed1ea06449478b324b34512a4474e4990b3e648b5d4bca649",
+      "scope": "Assembled report, unit scope, historical preservation and local diff"
+    }
+  ],
+  "integrated_traceability": {
+    "units": 18,
+    "cells": 180,
+    "source_records": 146,
+    "cell_source_reference_occurrences": 350,
+    "report_source_links": 73,
+    "report_source_links_resolved": true,
+    "group_unit_copies_exact": true
+  },
+  "preservation": {
+    "historical_suffix_bytes_exact": true,
+    "historical_source_sha256": "33ecbecf179322234e8d3b09339b06d6da838d5f80e4ac335128d7ffa0b1d3db",
+    "prefix_bytes_added": 374,
+    "registry_families": 203,
+    "only_changed_finding_ids": [
+      "F3-R15"
+    ],
+    "other_finding_records_unchanged": 202,
+    "registry_top_level_unchanged": true,
+    "licence_bytes_unchanged": true,
+    "ci_bytes_unchanged": true,
+    "native_release_gates_passed": false
+  },
+  "markdown_relative_links": {
+    "command": [
+      "python",
+      "00_TOOLS/qa/check_markdown_links.py"
+    ],
+    "exit_code": 0,
+    "stdout": "Markdown link check passed: 416 files scanned, 2442 targets checked.\n",
+    "stderr": ""
+  },
+  "git_diff_whitespace": {
+    "command": [
+      "git",
+      "diff",
+      "--check"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "patch_application_proof": "Generated after this study freeze and recorded separately in the phase dossier; no external write authorised by this record.",
+  "execution_limits": {
+    "product_pytest_rerun": false,
+    "new_ci_run": false,
+    "external_code_executed": false,
+    "browser_native_acceptance": false,
+    "vm_or_ova_accessed": false,
+    "remote_write": false
+  },
+  "distribution": "External raw content is excluded. Source hashes were checked in the working evidence environment; distributed-dossier validation checks manifests and references, not unavailable raw bytes."
+}

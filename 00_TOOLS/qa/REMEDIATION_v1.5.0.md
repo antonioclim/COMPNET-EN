@@ -83,9 +83,14 @@ and [release packaging](../release/README.md).
 4. **Student interfaces and exports.** Native browser keyboard/clipboard/layout
    checks, Moodle/QTI import and Excel/LibreOffice workbook interaction remain.
    Kotlin examples also require compilation with an available Kotlin toolchain.
-5. **Comparative study.** F3-R15 has been made more cautious, but its historical
-   scores are not a new reproducible comparative evaluation. A new comparison
-   needs a defined corpus, inclusion method and archived source evidence.
+5. **Comparative study.** A separately dated [public-material comparison](../../00_APPENDIX/docs/comparison/2026-11-17/README.md)
+   now supplies a frozen protocol, 18 identified units, 180 factual cells and
+   dated source provenance. This dated documentary update supports its new
+   bounded claims. F3-R15 remains partially open because the historical score
+   derivation and February source captures are still unverified. The old text
+   and unfavourable results are preserved; no new numerical ranking is supplied.
+   The [integration note](F3_R15_INTEGRATION.md) distinguishes this candidate
+   update from the frozen comparison phase and preserves acceptance identities.
 6. **Publication.** Review the exact candidate commit and its CI results before
    approving integration and creating v1.5.0. The v1.4.0 tag is the preserved
    baseline and must not be moved to the candidate.

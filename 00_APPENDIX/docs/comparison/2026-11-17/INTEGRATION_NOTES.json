@@ -1,0 +1,574 @@
+{
+  "historical_report_sha256": "33ecbecf179322234e8d3b09339b06d6da838d5f80e4ac335128d7ffa0b1d3db",
+  "historical_scores_and_text_preserved": true,
+  "missing_later_f4_chat_response": "unrecovered; no substitute labelled chronologically latest",
+  "current_observations": {
+    "us": [
+      {
+        "id": "US-C01",
+        "unit_ids": [
+          "U03"
+        ],
+        "historical_locator": "SPECIAL_REPORT.md §3.5, paragraph beginning Berkeley CS168's open textbook (line 350 in pinned candidate)",
+        "historical_claim_summary": "The textbook is described as professionally edited.",
+        "new_observation": "The live landing and immutable index.md explicitly describe beta notes that have not been proofread.",
+        "source_ids": [
+          "US015",
+          "US002"
+        ],
+        "interpretation": "The historical editorial-quality characterisation is not supported for the currently observed text. This does not assert that the entire textbook is incorrect."
+      },
+      {
+        "id": "US-C02",
+        "unit_ids": [
+          "U03"
+        ],
+        "historical_locator": "SPECIAL_REPORT.md §2.3 feature table, Berkeley Explicit Pedagogy cell; §3.7 scope of interactivity",
+        "historical_claim_summary": "The feature table marks explicit pedagogy absent; interactivity discussion focuses on the textbook.",
+        "new_observation": "Fall 2026 Project 2 documents ten stages, per-stage tests, prediction-observation questions and browser-controlled network visualisation.",
+        "source_ids": [
+          "US003"
+        ],
+        "interpretation": "The observed course has explicit scaffolding and project interaction. This is not a claim that the textbook embeds quizzes, nor proof of the February 2026 state."
+      },
+      {
+        "id": "US-C03",
+        "unit_ids": [
+          "U01"
+        ],
+        "historical_locator": "SPECIAL_REPORT.md §3.2, paragraph identifying Minnow and modern C++20; §2.2 Full visibility descriptor",
+        "historical_claim_summary": "The historical comparison names Minnow/C++20 and labels the public material Full.",
+        "new_observation": "Fall 2026 checkpoint 0 names Imp/C++23. Imp README states that most tests require the Stanford submission server.",
+        "source_ids": [
+          "US042",
+          "US047"
+        ],
+        "interpretation": "Version and visibility must be qualified. This temporal change does not establish that the older Minnow statement was false when written."
+      },
+      {
+        "id": "US-C04",
+        "unit_ids": [
+          "U06",
+          "U11",
+          "U05"
+        ],
+        "historical_locator": "SPECIAL_REPORT.md §2.2 and final Courses Analysed table: Michigan Fall 2025, JHU Spring 2019/2019, Princeton ~2020",
+        "historical_claim_summary": "The seed locators are labelled with those historical edition/date descriptors.",
+        "new_observation": "Observed sources identify Michigan Winter 2025, JHU Fall 2020 and Princeton Fall 2021 assignments; each repository is pinned separately.",
+        "source_ids": [
+          "US033",
+          "US027",
+          "US025",
+          "US035"
+        ],
+        "interpretation": "These are corrections to descriptors of the snapshots actually observed now. They cannot reconstruct what the author accessed in February 2026."
+      },
+      {
+        "id": "US-C05",
+        "unit_ids": [
+          "U05",
+          "U11"
+        ],
+        "historical_locator": "SPECIAL_REPORT.md §2.2 separate Princeton/JHU rows and §3.9 visibility of adoption/reuse evidence",
+        "historical_claim_summary": "Separate institution rows do not identify shared assignment provenance.",
+        "new_observation": "JHU assignment 1 and assignment 3 explicitly acknowledge Princeton-origin exercises.",
+        "source_ids": [
+          "US017",
+          "US019"
+        ],
+        "interpretation": "This is additional provenance, not a contradiction of every historical claim. These artefacts are not independent inventions, and the acknowledgements do not prove learning effectiveness."
+      }
+    ],
+    "frameworks": [
+      {
+        "unit_id": "U02",
+        "kind": "technical_correction",
+        "historical_locator": "SPECIAL_REPORT.md section 3.4",
+        "historical_summary": "Historical discussion treats an autonomous system as a container unit.",
+        "current_observation": "Pinned README specifies one container for each network component, with multiple components located in autonomous systems.",
+        "source_ids": [
+          "FW001"
+        ],
+        "limit": "A current primary-source correction, not reconstruction of the historical dataset."
+      },
+      {
+        "unit_id": "U02",
+        "kind": "venue_correction",
+        "historical_locator": "SPECIAL_REPORT.md section 3.4",
+        "historical_summary": "Historical prose mentions a SIGCOMM Education Workshop paper.",
+        "current_observation": "Institutional record identifies CCR 50(2), DOI 10.1145/3402413.3402420, and a separate Best of CCR presentation.",
+        "source_ids": [
+          "FW007"
+        ],
+        "limit": "Publication is not itself proof of current-snapshot pedagogical effectiveness."
+      },
+      {
+        "unit_id": "U09",
+        "kind": "current_notice_scope",
+        "historical_locator": "Current inspected sources; not a historical legal correction",
+        "historical_summary": null,
+        "current_observation": "Notices differ in the inspected README and book sources: CC BY-SA 3.0 versus CC BY 3.0. No precedence rule was found in those sources.",
+        "source_ids": [
+          "FW010",
+          "FW012",
+          "FW013"
+        ],
+        "limit": "MIXED records the observed notices; no legal conflict, ownership or licence-precedence determination."
+      },
+      {
+        "unit_id": "U09",
+        "kind": "current_ci_scope",
+        "historical_locator": "SPECIAL_REPORT.md comparative tables mentioning Travis CI",
+        "historical_summary": "Historical table names Travis CI.",
+        "current_observation": "Pinned source additionally includes a GitHub Actions Pages workflow; neither old badge nor configuration establishes a successful current run.",
+        "source_ids": [
+          "FW010",
+          "FW014"
+        ],
+        "limit": "No workflow history queried or new CI run triggered."
+      },
+      {
+        "unit_id": "U15",
+        "kind": "visibility_correction_with_identity_limit",
+        "historical_locator": "SPECIAL_REPORT.md visibility table",
+        "historical_summary": "Imperial Networks described as not found/not public.",
+        "current_observation": "Indexed institutional module descriptors are public and provide teaching/assessment details, but the legacy module cannot be uniquely identified.",
+        "source_ids": [
+          "FW024",
+          "FW025",
+          "FW026",
+          "FW027"
+        ],
+        "limit": "Cannot conclude that any particular full coursework is public or substitute a candidate for the original unit."
+      },
+      {
+        "unit_id": "U16",
+        "kind": "dated_visibility_update",
+        "historical_locator": "SPECIAL_REPORT.md visibility table, WS 25/26 row",
+        "historical_summary": "Historical row characterises access as SSH-authenticated Git/Moodle and behind authentication.",
+        "current_observation": "WS 2026/27 public portal exposes course material and router-project/Jupyter instructions; execution repositories and infrastructure have enrolment gates.",
+        "source_ids": [
+          "FW028",
+          "FW029",
+          "FW033",
+          "FW034"
+        ],
+        "limit": "Different observed edition: not a direct refutation or recovery of WS 25/26 or February 2026 availability."
+      },
+      {
+        "unit_id": "U16",
+        "kind": "mutable_source_revision",
+        "historical_locator": "Two current captures of the same public instructions.pdf URL",
+        "historical_summary": null,
+        "current_observation": "The initial response states a 29 October update; a later response states a 16 November update. Both captures and retrieval times are retained.",
+        "source_ids": [
+          "FW034"
+        ],
+        "limit": "No immutable PDF identity claimed; dates are not silently merged into one edition."
+      },
+      {
+        "unit_id": "U10",
+        "kind": "framework_scope_qualification",
+        "historical_locator": "SPECIAL_REPORT.md section 3.4",
+        "historical_summary": "Labtainers is classified as a framework rather than a complete semester course kit.",
+        "current_observation": "That unit-type distinction is retained. Current manuals separately document instructor assessment and optional formative quizzes.",
+        "source_ids": [
+          "FW020",
+          "FW021",
+          "FW022"
+        ],
+        "limit": "Do not infer absence of quizzes or instructor material from the framework classification; no complete lecture-course equivalence claimed."
+      },
+      {
+        "unit_id": "U10",
+        "kind": "edition_boundary",
+        "historical_locator": "Current README and GitHub head",
+        "historical_summary": null,
+        "current_observation": "README distribution label and abbreviated embedded commit are distinct from the inspected full repository head.",
+        "source_ids": [
+          "FW017"
+        ],
+        "limit": "Date format of 09/11/2026 is unspecified; no silent interpretation or snapshot equivalence."
+      }
+    ],
+    "asia_other": {
+      "scope": "Five dated updates to current interpretation; not reconstruction or falsification of the February 2026 observations. Historical text and scores remain unchanged.",
+      "historical_source": "SPECIAL_REPORT.md at candidate 8fb6afcd89eb3fa27b909941f96eff4276df8f29",
+      "historical_sha256": "33ecbecf179322234e8d3b09339b06d6da838d5f80e4ac335128d7ffa0b1d3db",
+      "corrections": [
+        {
+          "unit_id": "U07",
+          "historical_location": "Visibility table and final source table; Georgia Tech row",
+          "dated_update": "Official landing page now links a Fall 2026 sample syllabus with a calendar, five regular-semester projects, guided tutorials and graded web participation.",
+          "source_ids": [
+            "AO001",
+            "AO005"
+          ],
+          "limit": "Sample syllabus only; Canvas content, executable graders and native environments were not inspected. This does not establish what was publicly available in February."
+        },
+        {
+          "unit_id": "U13",
+          "historical_location": "Visibility table and final source table; UIUC row",
+          "dated_update": "ECE438 is resolved as cross-listed CS/ECE438. The institution-indexed Fall 2026 Notion site provides a dated calendar and assessment structure.",
+          "source_ids": [
+            "AO002",
+            "AO006",
+            "AO013",
+            "AO041"
+          ],
+          "limit": "MP0/MP1 attachment routes returned 404. The faculty homepage confirms affiliation and earlier teaching, but does not independently list Fall 2026."
+        },
+        {
+          "unit_id": "U14",
+          "historical_location": "Visibility table; MIT row",
+          "dated_update": "Official Fall 2026 catalogue identifies graduate 6.5820 with undergraduate 6.5821; the current identity is distinguishable from the 2002 OCW course.",
+          "source_ids": [
+            "AO014",
+            "AO031",
+            "AO032",
+            "AO036"
+          ],
+          "limit": "Current detailed handouts were not recovered. The incidental 2002 OCW mirror result was excluded from current coding; its licence and environment were not transferred."
+        },
+        {
+          "unit_id": "U17",
+          "historical_location": "Visibility table; NUS row",
+          "dated_update": "Official institutional schedule documents CS2105 in AY2026/27. Detailed recovered assignment evidence remains explicitly Semester 2 AY2013/14.",
+          "source_ids": [
+            "AO015",
+            "AO044",
+            "AO042",
+            "AO039"
+          ],
+          "limit": "Current course-root retrieval failed and two archived blog pages returned 502. Historical code practices and grading are not represented as current. CS3103 remains separate."
+        },
+        {
+          "unit_id": "U08",
+          "historical_location": "Visibility table and code-quality/workflow discussion; KAIST row",
+          "dated_update": "Captured KENSv3 head is dated March 2026. Its tree lists seven workflow files; representative Linux CI config and exact build blobs are now fixed.",
+          "source_ids": [
+            "AO009",
+            "AO011",
+            "AO019",
+            "AO020",
+            "AO021",
+            "AO022"
+          ],
+          "limit": "Only one workflow's contents were inspected and no workflow ran. The 2015 research record concerns KENSv2; predecessor separation already present historically is preserved."
+        }
+      ],
+      "additional_component_boundary": {
+        "unit_id": "U12",
+        "note": "CUHK Fall 2025 README lists three assignments, while the captured tree contains only assignment-1 and assignment-2. The ESTR individual project is a separate requirement.",
+        "source_ids": [
+          "AO023",
+          "AO012"
+        ],
+        "limit": "Do not equate two public directories with the course's full assignment count or infer that the third assignment was not taught."
+      },
+      "distribution": "Distribute the concise coding and provenance, not raw full pages, papers or response bodies. Raw files are working inspection evidence.",
+      "actions": {
+        "external_code_executed": false,
+        "remote_writes": false,
+        "workflow_runs_triggered": false,
+        "login_attempts": false,
+        "ova_requested_or_downloaded": false,
+        "virtual_machine_started": false,
+        "candidate_modified": false
+      },
+      "integration_amendments": [
+        {
+          "unit_id": "U12",
+          "cell": "C9",
+          "old_status": "DOCUMENTED",
+          "new_status": "NOT_IDENTIFIED",
+          "reason": "Apply the same upstream-provenance rule as U06/U11. Credits to Michigan do not document CUHK-specific publication, downstream adoption or outcomes.",
+          "preserved_in": "U12.provenance_observations",
+          "cross_unit_evidence": "AO023 author-reported reuse of unspecified Michigan materials supports U06.C9 MIXED.",
+          "limits": "No whole-course or exact w25-snapshot adoption; no independent permission or outcome verification.",
+          "new_retrieval": false
+        },
+        {
+          "unit_id": "U08",
+          "cell": "C9",
+          "old_wording": "publication evaluates KENSv2",
+          "new_wording": "publication describes KENSv2",
+          "reason": "Align wording with the inspected institutional metadata/abstract; full-paper evaluation was not performed.",
+          "status_unchanged": "MIXED",
+          "limits_preserved": "DOI 10.1145/2676723.2677304; publication is not evidence of current-version or COMPNET effectiveness.",
+          "source_ids": [
+            "AO017",
+            "AO045"
+          ],
+          "new_retrieval": false
+        },
+        {
+          "unit_ids": [
+            "U08",
+            "U13"
+          ],
+          "change": "Add AO011 to U08.C8 references for its seven-workflow-file limitation; attach root same-URL confirmation metadata to AO013.",
+          "reason": "Make the exact count source and supplementary MP0 support explicit.",
+          "original_ao013_statement_present": true,
+          "scope": "Claims and statuses unchanged; one workflow substantively inspected. No new distinct artefact or retrieval by this agent."
+        }
+      ]
+    }
+  },
+  "integration_amendments": {
+    "us/CROSS_GROUP_AMENDMENT.json": {
+      "amended_at_utc": "2026-11-17T16:30:38.775590+00:00",
+      "authority": "Parent explicitly authorised the cross-group C9 amendment after source review.",
+      "no_new_retrieval": true,
+      "source_data_of_other_group_modified": false,
+      "candidate_modified": false,
+      "prior_freeze_file": "DATA_FREEZE_PRE_INTEGRATION_20261117T162532Z.json",
+      "prior_freeze_sha256": "301cbb5f74442a7c2f4bda6f5cf91310192482e939c212aae79408677927bd86",
+      "before_units_sha256": "09ad5dc51ffbb432da043731cb5913c1ad22865f0375f0d56aa74d2b47f9923a",
+      "after_units_sha256": "15b89d9d364e8a3fa1e21e05d0d181c68d09adc913632ba592fbc43af205a547",
+      "unit_id": "U06",
+      "criterion": "C9",
+      "previous_cell": {
+        "status": "NOT_IDENTIFIED",
+        "claim": "No publication evaluating this unit, external adoption statement or measured learning outcomes were identified in inspected materials.",
+        "source_ids": [
+          "US033",
+          "US028",
+          "US027"
+        ],
+        "limitations": "Inspected W25 course/assignment READMEs, selected CMake and component licence. Wisconsin attribution is upstream provenance, not evidence of external adoption of the Michigan unit. No separate literature survey."
+      },
+      "amended_cell": {
+        "status": "MIXED",
+        "claim": "CUHK reports reusing Michigan course materials; no whole-course adoption or learning-outcome evidence was established.",
+        "source_ids": [
+          "AO023"
+        ],
+        "limitations": "Author-reported reuse of unspecified materials, not the exact w25 snapshot; permission was not independently verified. Incoming Wisconsin provenance remains separate."
+      },
+      "relationship": {
+        "from_unit_id": "U06",
+        "to_unit_id": "U12",
+        "relationship": "author_reported_reuse_of_unspecified_course_materials",
+        "source_id": "AO023",
+        "scope": "CUHK README credits borrowing Michigan networking course materials with permission.",
+        "exact_upstream_revision_identified": false,
+        "whole_course_adoption_claimed": false,
+        "permission_independently_verified": false,
+        "learning_outcomes_established": false
+      },
+      "external_evidence": {
+        "source_id": "AO023",
+        "registry": "collection/asia_other/sources.json",
+        "artifact_path": "collection/asia_other/raw/AO023_decoded_git_blob.txt",
+        "artifact_sha256": "9c9f9cafc351e0b8aeedd38f447f0e1b3fa1f93be90550e107dc759b9fef47b2",
+        "git_commit": "aac3e1e9a785c138da5d1ac8954470102571b522",
+        "git_blob": "6956fa53585ead9e7e38a4fa7221cb6f0e4f493e",
+        "hash_layer": "decoded_git_blob_bytes",
+        "source_hash_and_blob_identity_verified": true
+      },
+      "scope": "New downstream reuse evidence from the other collected group changes U06 C9; earlier upstream credit alone still does not support C9."
+    },
+    "asia_other/INTEGRATION_AMENDMENT_SOURCE_REFERENCES.json": {
+      "amended_at_utc": "2026-11-17T16:34:34.760820+00:00",
+      "reason": "Root cross-review requested explicit same-URL supplementary provenance and exact workflow-count citation.",
+      "u08_c8": {
+        "old_cell": {
+          "status": "DOCUMENTED",
+          "claim": "Linux workflow configures GCC/Ubuntu builds and reliable/unreliable solution tests; CMake selects GoogleTest 1.16.0.",
+          "source_ids": [
+            "AO019",
+            "AO022"
+          ],
+          "limitations": "No workflow run inspected or triggered. Tree lists seven workflow files; only one was inspected substantively."
+        },
+        "new_cell": {
+          "status": "DOCUMENTED",
+          "claim": "Linux workflow configures GCC/Ubuntu builds and reliable/unreliable solution tests; CMake selects GoogleTest 1.16.0.",
+          "source_ids": [
+            "AO019",
+            "AO022",
+            "AO011"
+          ],
+          "limitations": "No workflow run inspected or triggered. Tree lists seven workflow files; only one was inspected substantively."
+        }
+      },
+      "ao013_supplementary_capture": {
+        "artifact_path": "collection/root/raw/root_confirmation.json",
+        "artifact_sha256": "f2fe2e40fe08a1e55c8660ed67ae4cb6e93f899eb05be8dbfb058a4dae6795a6",
+        "hash_layer": "tool_response_json_with_access_metadata",
+        "accessed_at_utc": "2026-11-17 16:27:56 UTC",
+        "web_ref": "turn652010990view3",
+        "url": "https://ece438-fall26.notion.site/",
+        "method": "read-only same-URL confirmation already collected by root",
+        "supports": "MP0 setup/socket exercise is explicitly ungraded",
+        "original_capture_also_contains_statement": true,
+        "new_distinct_artefact": false
+      },
+      "original_ao013_statement_present": true,
+      "original_ao013_raw_sha256": "89ccf6dea130856eb03c832e1643d6c2f3dbf4e1b07fa7370c7849eaf225ded3",
+      "file_hashes": {
+        "units.json": {
+          "old_sha256": "7d2c135eae7ebea91722abf17093bd60b90e0741c1a6b016cf2cc17441cd8b67",
+          "new_sha256": "68986808f43cd796b9d233a2c5cb380f0895aa17b9a0a040dc1447745671cc68"
+        },
+        "sources.json": {
+          "old_sha256": "65f6aaac18de3dc690c4a8bf18d7447a761c8174e88b9326955f027f6b29aa4f",
+          "new_sha256": "18a10e2ace6231517c3f1d5d2c329319a54c1c22f19b774bd35913321be8038b"
+        },
+        "COLLECTION_QA.json": {
+          "old_sha256": "4320352d07f39f47c4ed009e7a6926a15f33bc29b0313fba197c141d319dba8e",
+          "new_sha256": "2d078edffd366ff527472f0b48181832a2ac92926efcdfd333c08015faed409a"
+        },
+        "CORRECTIONS_AND_LIMITS.json": {
+          "old_sha256": "6894b429a0a4c5c1740428e98a192aacdf36233eaac481416f0cc24886f9289d",
+          "new_sha256": "92c6906a9fa8c0864dc4d4da37681e871247cccc991941ef6a01ad8f8001691e"
+        },
+        "build_provenance.py": {
+          "old_sha256": "ed21af66bc8f8540180107b873bd58b7f679074e14e1f55a0172e163aa4928d9",
+          "new_sha256": "956bd56e02a047f0da181058fc604ad77911180584722da048b6c42e48a88453"
+        }
+      },
+      "verification": {
+        "status": "PASS",
+        "source_records": 45,
+        "all_artifact_and_raw_hashes_match": true,
+        "supplementary_capture_hash_matches": true,
+        "new_distinct_artefacts": 0,
+        "new_retrieval_by_this_agent": false,
+        "candidate_modified": false,
+        "repository_review_modified": false
+      }
+    },
+    "asia_other/INTEGRATION_AMENDMENT_U08_C9_WORDING.json": {
+      "amended_at_utc": "2026-11-17T16:30:51.214089+00:00",
+      "unit_id": "U08",
+      "cell": "C9",
+      "reason": "Root integration review requested descriptive publication wording, aligned with metadata/abstract-only inspection.",
+      "old_cell": {
+        "status": "MIXED",
+        "claim": "README reports CS341 use; the identifiable SIGCSE 2015 publication evaluates KENSv2, not this KENSv3 snapshot.",
+        "source_ids": [
+          "AO017",
+          "AO045"
+        ],
+        "limitations": "DOI 10.1145/2676723.2677304; publication is not evidence of current-version or COMPNET effectiveness."
+      },
+      "new_cell": {
+        "status": "MIXED",
+        "claim": "README reports CS341 use; the identifiable SIGCSE 2015 publication describes KENSv2, not this KENSv3 snapshot.",
+        "source_ids": [
+          "AO017",
+          "AO045"
+        ],
+        "limitations": "DOI 10.1145/2676723.2677304; publication is not evidence of current-version or COMPNET effectiveness."
+      },
+      "full_paper_evaluation": "not_performed",
+      "file_hashes": {
+        "units.json": {
+          "old_sha256": "62031fc0067365e987fecf2f60c75ff113b1cdd31adbd7b828f552e3fbe1cc51",
+          "new_sha256": "7d2c135eae7ebea91722abf17093bd60b90e0741c1a6b016cf2cc17441cd8b67"
+        },
+        "sources.json": {
+          "old_sha256": "4887801143d36bb1289dd39a9a7a6126a78e55d1c89e0f12a86b2ef313c78af7",
+          "new_sha256": "65f6aaac18de3dc690c4a8bf18d7447a761c8174e88b9326955f027f6b29aa4f"
+        },
+        "COLLECTION_QA.json": {
+          "old_sha256": "b38ac34a2136f36a7755d09754da216447d3c9188ce6adf7f1d9bb431bead3fc",
+          "new_sha256": "4320352d07f39f47c4ed009e7a6926a15f33bc29b0313fba197c141d319dba8e"
+        },
+        "CORRECTIONS_AND_LIMITS.json": {
+          "old_sha256": "a61b552f2192ee31ab36f47fe3656fe795d1fc89cdb875add3605f98b86c0ead",
+          "new_sha256": "6894b429a0a4c5c1740428e98a192aacdf36233eaac481416f0cc24886f9289d"
+        },
+        "build_provenance.py": {
+          "old_sha256": "25f84d302e39b87b495c0e6da1867a133d5554d69bdd05101151e47bb2ec14f2",
+          "new_sha256": "ed21af66bc8f8540180107b873bd58b7f679074e14e1f55a0172e163aa4928d9"
+        }
+      },
+      "verification": {
+        "status": "PASS",
+        "all_45_source_artifact_and_raw_hashes_match": true,
+        "u12_provenance_amendment_preserved": true,
+        "new_retrieval": false,
+        "other_groups_modified": false,
+        "candidate_modified": false
+      }
+    },
+    "asia_other/INTEGRATION_AMENDMENT_U12_C9.json": {
+      "amended_at_utc": "2026-11-17T16:29:40.966766+00:00",
+      "reason": "Root integration review: distinguish upstream material provenance from the evaluated unit’s own research and downstream use.",
+      "unit_id": "U12",
+      "cell": "C9",
+      "old_cell": {
+        "status": "DOCUMENTED",
+        "claim": "README acknowledges adapting Michigan networking materials with permission.",
+        "source_ids": [
+          "AO023"
+        ],
+        "limitations": "Author-reported material reuse, not independently verified permission or measured learning outcomes."
+      },
+      "new_cell": {
+        "status": "NOT_IDENTIFIED",
+        "claim": "No CUHK-specific publication, downstream adoption or learning-outcome evidence identified in the inspected course README and assignment guides.",
+        "source_ids": [
+          "AO023",
+          "AO025",
+          "AO026"
+        ],
+        "limitations": "Upstream Michigan credits establish material provenance, not research or downstream adoption of CUHK's own offering."
+      },
+      "source_relation": {
+        "source_id": "AO023",
+        "reporting_unit": "U12",
+        "upstream_unit": "U06",
+        "support": "Qualified author-reported reuse of unspecified Michigan materials; U06.C9 MIXED",
+        "limits": [
+          "Not whole-course adoption",
+          "Not adoption of exact w25 snapshot",
+          "No independent permission verification",
+          "No outcome verification"
+        ]
+      },
+      "file_hashes": {
+        "units.json": {
+          "old_sha256": "beb74ec1452abdb229e88fb6dd9b4d928820936f568937aa50425045e9da526d",
+          "new_sha256": "62031fc0067365e987fecf2f60c75ff113b1cdd31adbd7b828f552e3fbe1cc51"
+        },
+        "sources.json": {
+          "old_sha256": "a83f6770c5d2f6dd9977408b33a551e5d409498681ba7991e27aa38104752b95",
+          "new_sha256": "4887801143d36bb1289dd39a9a7a6126a78e55d1c89e0f12a86b2ef313c78af7"
+        },
+        "COLLECTION_QA.json": {
+          "old_sha256": "fc684d937c891e23ceaf5993fa928e53cfdaf09f75f5d4785cf25ee13bf6e1fc",
+          "new_sha256": "b38ac34a2136f36a7755d09754da216447d3c9188ce6adf7f1d9bb431bead3fc"
+        },
+        "CORRECTIONS_AND_LIMITS.json": {
+          "old_sha256": "81b496b45a1697f6682096fb471beade55434ef0b8f608d53433c11899d97385",
+          "new_sha256": "a61b552f2192ee31ab36f47fe3656fe795d1fc89cdb875add3605f98b86c0ead"
+        },
+        "build_provenance.py": {
+          "old_sha256": "468523ea25039073d75cd9aea32f2f4ca3c89ceb6c6f9c02f8b14967f5c7de6f",
+          "new_sha256": "25f84d302e39b87b495c0e6da1867a133d5554d69bdd05101151e47bb2ec14f2"
+        }
+      },
+      "verification": {
+        "status": "PASS",
+        "units": 6,
+        "cells": 60,
+        "source_records": 45,
+        "all_artifact_and_raw_hashes_match": true,
+        "historical_report_unchanged": true,
+        "new_retrieval": false,
+        "other_groups_modified": false,
+        "candidate_modified": false
+      }
+    }
+  },
+  "gate_status": {
+    "F3-R15": "partial_historical_score_provenance_unresolved_current_corpus_supplied",
+    "F3-R14": "open_author_decision_pending",
+    "native_acceptance": "pending_actual_environments",
+    "remote_write": "none"
+  }
+}

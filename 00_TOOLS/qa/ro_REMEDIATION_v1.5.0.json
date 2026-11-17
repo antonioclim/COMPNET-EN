@@ -8570,31 +8570,56 @@
         ".github/workflows/ci.yml",
         "SPECIAL_REPORT.md"
       ],
-      "status": "partial_comparative_evidence_reconstruction_required",
+      "status": "partial_historical_score_provenance_unresolved_current_corpus_supplied",
       "owner_records": [
         {
           "area": "root",
           "id": "F3-R15",
           "title": "Raportul comparativ depăşeşte ceea ce permit dovezile reproductibile prezentate",
-          "scope_status": "partial_evidence_reconstruction_required",
+          "scope_status": "current_dated_claims_traced_historical_scoring_unverified",
           "inspected_assigned_paths": [
             ".github/workflows/ci.yml",
             "SPECIAL_REPORT.md"
           ],
           "paths": [
             ".github/workflows/ci.yml",
-            "SPECIAL_REPORT.md"
+            "SPECIAL_REPORT.md",
+            "00_APPENDIX/docs/comparison/2026-11-17/README.md"
           ],
-          "concrete_fixes": "Qualify unsupported universal/comparative claims, expose corpus/method limitations and describe actual CI; preserve historical scores as historical.",
-          "actual_verification": "Source corpus count and current workflow compared; three erroneous academic records corrected against primary sources.",
-          "remaining_native_gates_or_cross_scope": "A reproducible new comparative corpus, dated evidence and score derivation are not supplied; finding remains partially open.",
+          "concrete_fixes": "Add a separate 17 November 2026 descriptive comparison, frozen protocol, 18-unit/180-cell corpus and dated provenance; link it without rewriting historical text or scores.",
+          "actual_verification": "Every factual cell has source identifiers and limitations; collected artefact hashes and decoded Git blob identities checked; bibliography metadata corroborated; see comparison/2026-11-17/VALIDATION.json for exact checks.",
+          "remaining_native_gates_or_cross_scope": "Historical selection/access records and original numerical score derivation remain unverified. New corpus does not validate historical scores, licence terms or native release acceptance.",
           "outside_owned_scope_paths": [],
-          "limitations": "No OVA, Docker, Mininet, Windows, WSL, native browser, LMS or desktop spreadsheet acceptance in this phase. Shared final evidence may supersede earlier probe counts."
+          "limitations": "Bounded public document sample, mixed editions and unit types; authenticated content excluded; no external software execution or new CI run. No independent human-rating or learning-outcome study."
         }
       ],
       "candidate_path_sha256": {
         ".github/workflows/ci.yml": "2bd27e55c910b49a231d72f715c1ce0b925a36c5c8aed2669b59899463e36da7",
-        "SPECIAL_REPORT.md": "33ecbecf179322234e8d3b09339b06d6da838d5f80e4ac335128d7ffa0b1d3db"
+        "SPECIAL_REPORT.md": "9e6ae425fdb6876eadad9c1516d22bd686285906cf4868b78472a00e82d5dae2",
+        "00_APPENDIX/docs/comparison/2026-11-17/README.md": "9fe7cdc9c40a272208d332e5b10bf7acd3f09027144f9b60dfcd9b88dccf3603",
+        "00_TOOLS/qa/F3_R15_INTEGRATION.md": "d5f8cedc2d18bcb71b6312b49ff1785a0446e5846ba43d4ca55daf3b7aca0068"
+      },
+      "local_documentary_update": {
+        "date": "2026-11-17",
+        "published_base_commit": "8fb6afcd89eb3fa27b909941f96eff4276df8f29",
+        "status": "unpublished_local_patch",
+        "new_scores_computed": false,
+        "historical_report_bytes_preserved_after_pointer": true
+      },
+      "candidate_integration": {
+        "prepared_date": "2026-11-17",
+        "base_candidate_commit": "8fb6afcd89eb3fa27b909941f96eff4276df8f29",
+        "target_branch": "audit/v1.5.0-remediation",
+        "scope": "documentation_only",
+        "identity": "The Git commit containing this update; exact remote commit/tree and CI events are recorded in the external integration receipt.",
+        "integration_note": "00_TOOLS/qa/F3_R15_INTEGRATION.md",
+        "frozen_comparison_manifest_sha256": "489b9d0320e53d161964b231b345f11f5bae5b50f1d621efb207493131f368c4",
+        "comparison_anchor_commit_unchanged": "8fb6afcd89eb3fa27b909941f96eff4276df8f29",
+        "local_documentary_update_is_prior_phase_record": true,
+        "historical_score_provenance_verified": false,
+        "native_release_acceptance_completed": false,
+        "licence_decision_received": false,
+        "release_created": false
       }
     },
     {
