@@ -1,0 +1,15 @@
+{
+  "retrieved_at_utc": "2026-11-17 19:03:25 UTC",
+  "repository": "JetBrains/kotlin",
+  "release_url": "https://github.com/JetBrains/kotlin/releases/tag/v2.4.21",
+  "tag": "v2.4.21",
+  "published_at": "2026-10-08T09:25:15Z",
+  "asset": {
+    "id": 621287401,
+    "name": "kotlin-compiler-2.4.21.zip",
+    "size": 89733618,
+    "digest": "sha256:7cc140e76daf416a0424a5557f99afd7ca89ebd463ea1101261e3e01c33e75cd",
+    "url": "https://github.com/JetBrains/kotlin/releases/download/v2.4.21/kotlin-compiler-2.4.21.zip"
+  },
+  "ova": false
+}

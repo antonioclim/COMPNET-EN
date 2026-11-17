@@ -1,0 +1,689 @@
+{
+  "schema_version": 1,
+  "started_at_utc": "2026-11-17T19:17:00.476491+00:00",
+  "status": "PASS",
+  "expected_candidate_commit": "7c79582c5750e9b94b1d7d34d269f080e91a32d3",
+  "expected_candidate_tree": "355b2399aec344c63be855cf800c901c92ec4677",
+  "expected_source_sha256": "7e83baf7bdced69fce7db7d1ec74fee4742fbbcbc1b07eb6d0f4ee906acb1b5f",
+  "repository": "antonioclim/COMPNET-EN",
+  "timeouts_seconds": {
+    "metadata": 20,
+    "compile": 60,
+    "startup": 12,
+    "socket": 3,
+    "cleanup_term": 3,
+    "cleanup_kill": 2
+  },
+  "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "scope": "Kotlin/JVM Rosetta TCP echo component; IPv4 loopback only",
+  "Kotlin_Native_tested": false,
+  "Kotlin_binary_parser_exists_in_source": false,
+  "source_repository_modified": false,
+  "OVA_accessed": false,
+  "VM_Docker_Mininet_Windows_browser_workbook_LMS_acceptance": "NOT_RUN",
+  "checks": {
+    "K01": {
+      "status": "PASS",
+      "meaning": "Exact extraction and clean pinned checkout"
+    },
+    "K02": {
+      "status": "PASS",
+      "meaning": "Both Kotlin/JVM wrappers compile",
+      "compiler_command_statuses": [
+        "PASS",
+        "PASS"
+      ]
+    },
+    "K03": {
+      "status": "PASS",
+      "sent_bytes": 0,
+      "received_eof": true,
+      "server_alive_after_client": true,
+      "variant": "exact_8080"
+    },
+    "K04": {
+      "status": "PASS",
+      "sent_bytes": 6144,
+      "received_bytes": 6144,
+      "payload_sha256": "988ad1e27179852c841c332fd3faf59f04d4a5db5001600ccf9248d48a3542c7",
+      "echo_sha256": "988ad1e27179852c841c332fd3faf59f04d4a5db5001600ccf9248d48a3542c7",
+      "application_write_sizes": [
+        3,
+        997,
+        997,
+        997,
+        997,
+        997,
+        997,
+        159
+      ],
+      "first_three_echoed_before_rest_sent": true,
+      "received_eof": true,
+      "TCP_segment_or_read_boundaries_claimed": false,
+      "variant": "exact_8080"
+    },
+    "K05": {
+      "status": "PASS",
+      "sent_bytes": 22,
+      "echo_sha256": "6c06eb7d923edd9d64fe06b6d07e5d7d798c56306b8c58b085df1ce8f0cb2ac8",
+      "received_eof": true,
+      "server_alive_after_client": true,
+      "variant": "exact_8080"
+    },
+    "K06": {
+      "status": "PASS",
+      "meaning": "Derived high TCP socket port, not unsigned parsing"
+    },
+    "K07": {
+      "status": "PASS",
+      "meaning": "Direct children reaped and no active owned-group members remain",
+      "details": [
+        {
+          "pid": 143,
+          "owned_session": true,
+          "signals": [
+            "SIGTERM"
+          ],
+          "status": "PASS",
+          "group_members_before": [
+            {
+              "pid": 143,
+              "state": "S",
+              "parent_pid": 5,
+              "process_group": 143,
+              "session": 143,
+              "active": true
+            }
+          ],
+          "returncode": 143,
+          "direct_child_reaped": true,
+          "group_members_after": [],
+          "active_group_members_remaining": 0,
+          "nonchild_descendants_reaped_by_harness": false,
+          "process_started": true,
+          "reason": "Intentional cleanup of this invocation's bounded teaching-server process"
+        },
+        {
+          "pid": 216,
+          "owned_session": true,
+          "signals": [
+            "SIGTERM"
+          ],
+          "status": "PASS",
+          "group_members_before": [
+            {
+              "pid": 216,
+              "state": "S",
+              "parent_pid": 5,
+              "process_group": 216,
+              "session": 216,
+              "active": true
+            }
+          ],
+          "returncode": 143,
+          "direct_child_reaped": true,
+          "group_members_after": [],
+          "active_group_members_remaining": 0,
+          "nonchild_descendants_reaped_by_harness": false,
+          "process_started": true,
+          "reason": "Intentional cleanup of this invocation's bounded teaching-server process"
+        }
+      ]
+    }
+  },
+  "variants": [
+    {
+      "name": "exact_8080",
+      "port": 8080,
+      "endpoint": "127.0.0.1:8080",
+      "status": "PASS",
+      "derived": false,
+      "source_transformation": "None",
+      "body_sha256": "4339065722c25a414bd1f106d282221ee847aa07aa907102491a1161176fe4fc",
+      "body_bytes": 351,
+      "wrapper": {
+        "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/exact_8080/RosettaKotlinAudit.kt",
+        "bytes": 396,
+        "sha256": "7db14d004dd18a82f3326f74d9e36c9dd5013b03c1af02c4294db2c7a766aefd"
+      },
+      "wrapper_prefix_bytes": 43,
+      "body_preserved_byte_for_byte": true,
+      "cases": {
+        "empty_client": {
+          "status": "PASS",
+          "sent_bytes": 0,
+          "received_eof": true,
+          "server_alive_after_client": true
+        },
+        "fragmented_echo": {
+          "status": "PASS",
+          "sent_bytes": 6144,
+          "received_bytes": 6144,
+          "payload_sha256": "988ad1e27179852c841c332fd3faf59f04d4a5db5001600ccf9248d48a3542c7",
+          "echo_sha256": "988ad1e27179852c841c332fd3faf59f04d4a5db5001600ccf9248d48a3542c7",
+          "application_write_sizes": [
+            3,
+            997,
+            997,
+            997,
+            997,
+            997,
+            997,
+            159
+          ],
+          "first_three_echoed_before_rest_sent": true,
+          "received_eof": true,
+          "TCP_segment_or_read_boundaries_claimed": false
+        },
+        "following_client": {
+          "status": "PASS",
+          "sent_bytes": 22,
+          "echo_sha256": "6c06eb7d923edd9d64fe06b6d07e5d7d798c56306b8c58b085df1ce8f0cb2ac8",
+          "received_eof": true,
+          "server_alive_after_client": true
+        }
+      },
+      "ownership_observations": [
+        {
+          "pid": 143,
+          "port": 8080,
+          "observed_at_utc": "2026-11-17T19:17:08.577224+00:00",
+          "listeners": [
+            {
+              "table": "tcp",
+              "local_address_hex": "00000000:1F90",
+              "inode": "1565973",
+              "owned": true
+            }
+          ],
+          "owned_listener": true,
+          "foreign_listener": false
+        },
+        {
+          "pid": 143,
+          "port": 8080,
+          "observed_at_utc": "2026-11-17T19:17:08.578975+00:00",
+          "listeners": [
+            {
+              "table": "tcp",
+              "local_address_hex": "00000000:1F90",
+              "inode": "1565973",
+              "owned": true
+            }
+          ],
+          "owned_listener": true,
+          "foreign_listener": false
+        },
+        {
+          "pid": 143,
+          "port": 8080,
+          "observed_at_utc": "2026-11-17T19:17:08.587205+00:00",
+          "listeners": [
+            {
+              "table": "tcp",
+              "local_address_hex": "00000000:1F90",
+              "inode": "1565973",
+              "owned": true
+            }
+          ],
+          "owned_listener": true,
+          "foreign_listener": false
+        },
+        {
+          "pid": 143,
+          "port": 8080,
+          "observed_at_utc": "2026-11-17T19:17:08.589728+00:00",
+          "listeners": [
+            {
+              "table": "tcp",
+              "local_address_hex": "00000000:1F90",
+              "inode": "1565973",
+              "owned": true
+            }
+          ],
+          "owned_listener": true,
+          "foreign_listener": false
+        }
+      ],
+      "cleanup": {
+        "pid": 143,
+        "owned_session": true,
+        "signals": [
+          "SIGTERM"
+        ],
+        "status": "PASS",
+        "group_members_before": [
+          {
+            "pid": 143,
+            "state": "S",
+            "parent_pid": 5,
+            "process_group": 143,
+            "session": 143,
+            "active": true
+          }
+        ],
+        "returncode": 143,
+        "direct_child_reaped": true,
+        "group_members_after": [],
+        "active_group_members_remaining": 0,
+        "nonchild_descendants_reaped_by_harness": false,
+        "process_started": true,
+        "reason": "Intentional cleanup of this invocation's bounded teaching-server process"
+      },
+      "compilation": {
+        "argv": [
+          "/workspace/scratch/7cc3f017cace/N08_KOTLIN/toolchain/kotlinc/bin/kotlinc",
+          "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/exact_8080/RosettaKotlinAudit.kt",
+          "-include-runtime",
+          "-d",
+          "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/exact_8080/rosetta-kotlin.jar"
+        ],
+        "started_at_utc": "2026-11-17T19:17:03.341224+00:00",
+        "timeout_seconds": 60,
+        "status": "PASS",
+        "returncode": 0,
+        "cleanup": {
+          "pid": 84,
+          "owned_session": true,
+          "signals": [],
+          "status": "PASS",
+          "group_members_before": [],
+          "returncode": 0,
+          "direct_child_reaped": true,
+          "group_members_after": [],
+          "active_group_members_remaining": 0,
+          "nonchild_descendants_reaped_by_harness": false
+        },
+        "stdout": {
+          "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/exact_8080/compile.stdout.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/exact_8080/compile.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "duration_seconds": 5.122077
+      },
+      "jar": {
+        "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/exact_8080/rosetta-kotlin.jar",
+        "bytes": 5679794,
+        "sha256": "59a5cec8cb0088f43092aeb3b6d8cf48baf3afac9083ba061eb14e93002e24a5"
+      },
+      "port_preflight": {
+        "status": "PASS",
+        "method": "IPv4 wildcard bind without listen/connect"
+      },
+      "runtime_command": {
+        "argv": [
+          "/usr/lib/jvm/java-21-openjdk-amd64/bin/java",
+          "-Djava.net.preferIPv4Stack=true",
+          "-jar",
+          "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/exact_8080/rosetta-kotlin.jar"
+        ],
+        "started_at_utc": "2026-11-17T19:17:08.470606+00:00",
+        "pid": 143,
+        "target": "Kotlin/JVM; not Kotlin/Native"
+      },
+      "runtime_stdout": {
+        "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/exact_8080/runtime.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "runtime_stderr": {
+        "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/exact_8080/runtime.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "finished_at_utc": "2026-11-17T19:17:08.944599+00:00"
+    },
+    {
+      "name": "derived_50081",
+      "port": 50081,
+      "endpoint": "127.0.0.1:50081",
+      "status": "PASS",
+      "derived": true,
+      "source_transformation": "Only ServerSocket(8080) -> ServerSocket(50081)",
+      "body_sha256": "ccea5a8a5ea28484cb597339f1a31e324930fe79b41dc7668fef8e446aa15eae",
+      "body_bytes": 352,
+      "wrapper": {
+        "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/derived_50081/RosettaKotlinAudit.kt",
+        "bytes": 397,
+        "sha256": "d2b1e8fdee7896ceae1c1184c445ea5dac0041a735d3e52d1135adf3c9ff9e3a"
+      },
+      "wrapper_prefix_bytes": 43,
+      "body_preserved_byte_for_byte": true,
+      "cases": {
+        "empty_client": {
+          "status": "PASS",
+          "sent_bytes": 0,
+          "received_eof": true,
+          "server_alive_after_client": true
+        },
+        "fragmented_echo": {
+          "status": "PASS",
+          "sent_bytes": 6144,
+          "received_bytes": 6144,
+          "payload_sha256": "988ad1e27179852c841c332fd3faf59f04d4a5db5001600ccf9248d48a3542c7",
+          "echo_sha256": "988ad1e27179852c841c332fd3faf59f04d4a5db5001600ccf9248d48a3542c7",
+          "application_write_sizes": [
+            3,
+            997,
+            997,
+            997,
+            997,
+            997,
+            997,
+            159
+          ],
+          "first_three_echoed_before_rest_sent": true,
+          "received_eof": true,
+          "TCP_segment_or_read_boundaries_claimed": false
+        },
+        "following_client": {
+          "status": "PASS",
+          "sent_bytes": 22,
+          "echo_sha256": "6c06eb7d923edd9d64fe06b6d07e5d7d798c56306b8c58b085df1ce8f0cb2ac8",
+          "received_eof": true,
+          "server_alive_after_client": true
+        }
+      },
+      "ownership_observations": [
+        {
+          "pid": 216,
+          "port": 50081,
+          "observed_at_utc": "2026-11-17T19:17:13.290818+00:00",
+          "listeners": [
+            {
+              "table": "tcp",
+              "local_address_hex": "00000000:C3A1",
+              "inode": "1562964",
+              "owned": true
+            }
+          ],
+          "owned_listener": true,
+          "foreign_listener": false
+        },
+        {
+          "pid": 216,
+          "port": 50081,
+          "observed_at_utc": "2026-11-17T19:17:13.292385+00:00",
+          "listeners": [
+            {
+              "table": "tcp",
+              "local_address_hex": "00000000:C3A1",
+              "inode": "1562964",
+              "owned": true
+            }
+          ],
+          "owned_listener": true,
+          "foreign_listener": false
+        },
+        {
+          "pid": 216,
+          "port": 50081,
+          "observed_at_utc": "2026-11-17T19:17:13.297212+00:00",
+          "listeners": [
+            {
+              "table": "tcp",
+              "local_address_hex": "00000000:C3A1",
+              "inode": "1562964",
+              "owned": true
+            }
+          ],
+          "owned_listener": true,
+          "foreign_listener": false
+        },
+        {
+          "pid": 216,
+          "port": 50081,
+          "observed_at_utc": "2026-11-17T19:17:13.300210+00:00",
+          "listeners": [
+            {
+              "table": "tcp",
+              "local_address_hex": "00000000:C3A1",
+              "inode": "1562964",
+              "owned": true
+            }
+          ],
+          "owned_listener": true,
+          "foreign_listener": false
+        }
+      ],
+      "cleanup": {
+        "pid": 216,
+        "owned_session": true,
+        "signals": [
+          "SIGTERM"
+        ],
+        "status": "PASS",
+        "group_members_before": [
+          {
+            "pid": 216,
+            "state": "S",
+            "parent_pid": 5,
+            "process_group": 216,
+            "session": 216,
+            "active": true
+          }
+        ],
+        "returncode": 143,
+        "direct_child_reaped": true,
+        "group_members_after": [],
+        "active_group_members_remaining": 0,
+        "nonchild_descendants_reaped_by_harness": false,
+        "process_started": true,
+        "reason": "Intentional cleanup of this invocation's bounded teaching-server process"
+      },
+      "compilation": {
+        "argv": [
+          "/workspace/scratch/7cc3f017cace/N08_KOTLIN/toolchain/kotlinc/bin/kotlinc",
+          "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/derived_50081/RosettaKotlinAudit.kt",
+          "-include-runtime",
+          "-d",
+          "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/derived_50081/rosetta-kotlin.jar"
+        ],
+        "started_at_utc": "2026-11-17T19:17:08.945151+00:00",
+        "timeout_seconds": 60,
+        "status": "PASS",
+        "returncode": 0,
+        "cleanup": {
+          "pid": 162,
+          "owned_session": true,
+          "signals": [],
+          "status": "PASS",
+          "group_members_before": [],
+          "returncode": 0,
+          "direct_child_reaped": true,
+          "group_members_after": [],
+          "active_group_members_remaining": 0,
+          "nonchild_descendants_reaped_by_harness": false
+        },
+        "stdout": {
+          "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/derived_50081/compile.stdout.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/derived_50081/compile.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "duration_seconds": 4.231138
+      },
+      "jar": {
+        "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/derived_50081/rosetta-kotlin.jar",
+        "bytes": 5679796,
+        "sha256": "820619a94eee355bbb49cbb8f6d63aa69b84a73f2789de0461a36e6f129d1a76"
+      },
+      "port_preflight": {
+        "status": "PASS",
+        "method": "IPv4 wildcard bind without listen/connect"
+      },
+      "runtime_command": {
+        "argv": [
+          "/usr/lib/jvm/java-21-openjdk-amd64/bin/java",
+          "-Djava.net.preferIPv4Stack=true",
+          "-jar",
+          "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/derived_50081/rosetta-kotlin.jar"
+        ],
+        "started_at_utc": "2026-11-17T19:17:13.184649+00:00",
+        "pid": 216,
+        "target": "Kotlin/JVM; not Kotlin/Native"
+      },
+      "runtime_stdout": {
+        "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/derived_50081/runtime.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "runtime_stderr": {
+        "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/derived_50081/runtime.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "finished_at_utc": "2026-11-17T19:17:13.655170+00:00"
+    }
+  ],
+  "protocol": {
+    "document": {
+      "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/PROTOCOL_N08.md",
+      "bytes": 10410,
+      "sha256": "7befb3aeecb21edf245482f67bae258d7ff88a89ee48aa871b5cc88f2c6ed306"
+    },
+    "freeze": {
+      "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/PROTOCOL_FREEZE.json",
+      "bytes": 2925,
+      "sha256": "3c7316616aaa3bdc73b53de4c5fa8fc5dc058e14791fedfe9d2d71fb74561ff8"
+    },
+    "frozen_at_utc": "2026-11-17T19:15:20Z"
+  },
+  "git": {
+    "commit": "7c79582c5750e9b94b1d7d34d269f080e91a32d3",
+    "tree": "355b2399aec344c63be855cf800c901c92ec4677",
+    "status": ""
+  },
+  "source": {
+    "path": "/workspace/scratch/7cc3f017cace/F3_R15_INTEGRATION/repository/00_APPENDIX/a)PYTHON_self_study_guide/comparisons/ROSETTA_STONE.md",
+    "bytes": 7606,
+    "sha256": "7e83baf7bdced69fce7db7d1ec74fee4742fbbcbc1b07eb6d0f4ee906acb1b5f",
+    "repository_relative_path": "00_APPENDIX/a)PYTHON_self_study_guide/comparisons/ROSETTA_STONE.md"
+  },
+  "extracted_fragment": {
+    "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/EXTRACTED_KOTLIN_BODY.kt",
+    "bytes": 351,
+    "sha256": "4339065722c25a414bd1f106d282221ee847aa07aa907102491a1161176fe4fc",
+    "source_fence_count": 1,
+    "source_first_line": 92,
+    "source_byte_start": 3263,
+    "source_byte_end": 3614,
+    "body_changed": false,
+    "standalone_program": false
+  },
+  "tools": {
+    "kotlinc_launcher": {
+      "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/toolchain/kotlinc/bin/kotlinc",
+      "bytes": 3120,
+      "sha256": "7082c4cdf466d4a8c0879eccd2bbd0011204ff10267a7eba921c08982201ec92"
+    },
+    "java_executable": {
+      "path": "/usr/lib/jvm/java-21-openjdk-amd64/bin/java",
+      "bytes": 14384,
+      "sha256": "1a7e0b17c39003c75b457d686775ccb032e56fa9c8afe3c492d8eb3715e8951a"
+    },
+    "compiler_environment_overrides": {
+      "JAVACMD": "/usr/lib/jvm/java-21-openjdk-amd64/bin/java",
+      "JAVA_HOME": "/usr/lib/jvm/java-21-openjdk-amd64"
+    },
+    "java_version": {
+      "command": {
+        "argv": [
+          "/usr/lib/jvm/java-21-openjdk-amd64/bin/java",
+          "-version"
+        ],
+        "started_at_utc": "2026-11-17T19:17:00.588786+00:00",
+        "timeout_seconds": 20,
+        "status": "PASS",
+        "returncode": 0,
+        "cleanup": {
+          "pid": 12,
+          "owned_session": true,
+          "signals": [],
+          "status": "PASS",
+          "group_members_before": [],
+          "returncode": 0,
+          "direct_child_reaped": true,
+          "group_members_after": [],
+          "active_group_members_remaining": 0,
+          "nonchild_descendants_reaped_by_harness": false
+        },
+        "stdout": {
+          "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/java_version.stdout.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/java_version.stderr.log",
+          "bytes": 181,
+          "sha256": "0fc83381287ccbc8623d257bce2b0d03997ba0e85ff4492d38b409aea37a8aa9"
+        },
+        "duration_seconds": 0.097964
+      },
+      "text": "openjdk version \"21.0.13\" 2026-10-20\nOpenJDK Runtime Environment (build 21.0.13+9-1-deb13u2-Debian)\nOpenJDK 64-Bit Server VM (build 21.0.13+9-1-deb13u2-Debian, mixed mode, sharing)\n"
+    },
+    "kotlinc_version": {
+      "command": {
+        "argv": [
+          "/workspace/scratch/7cc3f017cace/N08_KOTLIN/toolchain/kotlinc/bin/kotlinc",
+          "-version"
+        ],
+        "started_at_utc": "2026-11-17T19:17:00.686883+00:00",
+        "timeout_seconds": 20,
+        "status": "PASS",
+        "returncode": 0,
+        "cleanup": {
+          "pid": 29,
+          "owned_session": true,
+          "signals": [],
+          "status": "PASS",
+          "group_members_before": [],
+          "returncode": 0,
+          "direct_child_reaped": true,
+          "group_members_after": [],
+          "active_group_members_remaining": 0,
+          "nonchild_descendants_reaped_by_harness": false
+        },
+        "stdout": {
+          "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/kotlinc_version.stdout.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/kotlinc_version.stderr.log",
+          "bytes": 58,
+          "sha256": "8b9433e04ce88a8a4fedbf6ee1c7ba746af3202394a977225fe2e19aad89845d"
+        },
+        "duration_seconds": 2.583179
+      },
+      "text": "info: kotlinc-jvm 2.4.21 (JRE 21.0.13+9-1-deb13u2-Debian)\n"
+    },
+    "compiler_jar": {
+      "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/toolchain/kotlinc/lib/kotlin-compiler.jar",
+      "bytes": 60184521,
+      "sha256": "dc96436fac5160a39a071f3b82d7683f2912bbbf19fe7e26be66533c045a824e"
+    }
+  },
+  "finished_at_utc": "2026-11-17T19:17:13.655541+00:00",
+  "verdict": "PASS_KOTLIN_JVM_FRAGMENT_SCOPE_ONLY",
+  "native_release_gates_all_passed": false,
+  "F6_full_acceptance_completed": false,
+  "check_counts": {
+    "PASS": 7,
+    "FAIL": 0,
+    "BLOCKED": 0,
+    "ERROR": 0,
+    "NOT_RUN": 0
+  },
+  "report_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/N08_KOTLIN_RESULTS.json"
+}

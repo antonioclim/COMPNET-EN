@@ -1,0 +1,208 @@
+{
+  "schema_version": 1,
+  "tested_commit": "7c79582c5750e9b94b1d7d34d269f080e91a32d3",
+  "streams_and_command_records": [
+    {
+      "execution_relative_path": "derived_50081/compile.command.json",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/derived_50081/compile.command.json",
+      "bytes": 1222,
+      "sha256": "7b053eb1b7aeecd99b98672ed515633289098cbc4187b08cb60c5da65c378fc2",
+      "encoding": "UTF-8",
+      "text": "{\n  \"argv\": [\n    \"/workspace/scratch/7cc3f017cace/N08_KOTLIN/toolchain/kotlinc/bin/kotlinc\",\n    \"/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/derived_50081/RosettaKotlinAudit.kt\",\n    \"-include-runtime\",\n    \"-d\",\n    \"/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/derived_50081/rosetta-kotlin.jar\"\n  ],\n  \"started_at_utc\": \"2026-11-17T19:17:08.945151+00:00\",\n  \"timeout_seconds\": 60,\n  \"status\": \"PASS\",\n  \"returncode\": 0,\n  \"cleanup\": {\n    \"pid\": 162,\n    \"owned_session\": true,\n    \"signals\": [],\n    \"status\": \"PASS\",\n    \"group_members_before\": [],\n    \"returncode\": 0,\n    \"direct_child_reaped\": true,\n    \"group_members_after\": [],\n    \"active_group_members_remaining\": 0,\n    \"nonchild_descendants_reaped_by_harness\": false\n  },\n  \"stdout\": {\n    \"path\": \"/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/derived_50081/compile.stdout.log\",\n    \"bytes\": 0,\n    \"sha256\": \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"\n  },\n  \"stderr\": {\n    \"path\": \"/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/derived_50081/compile.stderr.log\",\n    \"bytes\": 0,\n    \"sha256\": \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"\n  },\n  \"duration_seconds\": 4.231138\n}\n"
+    },
+    {
+      "execution_relative_path": "derived_50081/compile.stderr.log",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/derived_50081/compile.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "encoding": "UTF-8",
+      "text": ""
+    },
+    {
+      "execution_relative_path": "derived_50081/compile.stdout.log",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/derived_50081/compile.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "encoding": "UTF-8",
+      "text": ""
+    },
+    {
+      "execution_relative_path": "derived_50081/runtime.stderr.log",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/derived_50081/runtime.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "encoding": "UTF-8",
+      "text": ""
+    },
+    {
+      "execution_relative_path": "derived_50081/runtime.stdout.log",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/derived_50081/runtime.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "encoding": "UTF-8",
+      "text": ""
+    },
+    {
+      "execution_relative_path": "exact_8080/compile.command.json",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/exact_8080/compile.command.json",
+      "bytes": 1209,
+      "sha256": "adbc688b439b1350ac2cf7f0713a880eddbb16834e81cba4e4ee1d23c7d5ea64",
+      "encoding": "UTF-8",
+      "text": "{\n  \"argv\": [\n    \"/workspace/scratch/7cc3f017cace/N08_KOTLIN/toolchain/kotlinc/bin/kotlinc\",\n    \"/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/exact_8080/RosettaKotlinAudit.kt\",\n    \"-include-runtime\",\n    \"-d\",\n    \"/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/exact_8080/rosetta-kotlin.jar\"\n  ],\n  \"started_at_utc\": \"2026-11-17T19:17:03.341224+00:00\",\n  \"timeout_seconds\": 60,\n  \"status\": \"PASS\",\n  \"returncode\": 0,\n  \"cleanup\": {\n    \"pid\": 84,\n    \"owned_session\": true,\n    \"signals\": [],\n    \"status\": \"PASS\",\n    \"group_members_before\": [],\n    \"returncode\": 0,\n    \"direct_child_reaped\": true,\n    \"group_members_after\": [],\n    \"active_group_members_remaining\": 0,\n    \"nonchild_descendants_reaped_by_harness\": false\n  },\n  \"stdout\": {\n    \"path\": \"/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/exact_8080/compile.stdout.log\",\n    \"bytes\": 0,\n    \"sha256\": \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"\n  },\n  \"stderr\": {\n    \"path\": \"/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/exact_8080/compile.stderr.log\",\n    \"bytes\": 0,\n    \"sha256\": \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"\n  },\n  \"duration_seconds\": 5.122077\n}\n"
+    },
+    {
+      "execution_relative_path": "exact_8080/compile.stderr.log",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/exact_8080/compile.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "encoding": "UTF-8",
+      "text": ""
+    },
+    {
+      "execution_relative_path": "exact_8080/compile.stdout.log",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/exact_8080/compile.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "encoding": "UTF-8",
+      "text": ""
+    },
+    {
+      "execution_relative_path": "exact_8080/runtime.stderr.log",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/exact_8080/runtime.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "encoding": "UTF-8",
+      "text": ""
+    },
+    {
+      "execution_relative_path": "exact_8080/runtime.stdout.log",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/exact_8080/runtime.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "encoding": "UTF-8",
+      "text": ""
+    },
+    {
+      "execution_relative_path": "git_commit.command.json",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/git_commit.command.json",
+      "bytes": 1029,
+      "sha256": "217b1d43613861474ae6bd1f5a0544b3928229af3c2063d69c6f0cce4605a21e",
+      "encoding": "UTF-8",
+      "text": "{\n  \"argv\": [\n    \"/usr/local/bin/git\",\n    \"-C\",\n    \"/workspace/scratch/7cc3f017cace/F3_R15_INTEGRATION/repository\",\n    \"rev-parse\",\n    \"HEAD\"\n  ],\n  \"started_at_utc\": \"2026-11-17T19:17:00.480673+00:00\",\n  \"timeout_seconds\": 20,\n  \"status\": \"PASS\",\n  \"returncode\": 0,\n  \"cleanup\": {\n    \"pid\": 7,\n    \"owned_session\": true,\n    \"signals\": [],\n    \"status\": \"PASS\",\n    \"group_members_before\": [],\n    \"returncode\": 0,\n    \"direct_child_reaped\": true,\n    \"group_members_after\": [],\n    \"active_group_members_remaining\": 0,\n    \"nonchild_descendants_reaped_by_harness\": false\n  },\n  \"stdout\": {\n    \"path\": \"/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/git_commit.stdout.log\",\n    \"bytes\": 41,\n    \"sha256\": \"028ca967a048f56f8601926c969637b60c686d4e68701d5db84b79ab75b91ff1\"\n  },\n  \"stderr\": {\n    \"path\": \"/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/git_commit.stderr.log\",\n    \"bytes\": 0,\n    \"sha256\": \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"\n  },\n  \"duration_seconds\": 0.00908\n}\n"
+    },
+    {
+      "execution_relative_path": "git_commit.stderr.log",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/git_commit.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "encoding": "UTF-8",
+      "text": ""
+    },
+    {
+      "execution_relative_path": "git_commit.stdout.log",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/git_commit.stdout.log",
+      "bytes": 41,
+      "sha256": "028ca967a048f56f8601926c969637b60c686d4e68701d5db84b79ab75b91ff1",
+      "encoding": "UTF-8",
+      "text": "7c79582c5750e9b94b1d7d34d269f080e91a32d3\n"
+    },
+    {
+      "execution_relative_path": "git_status.command.json",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/git_status.command.json",
+      "bytes": 1062,
+      "sha256": "bd53a965ea299b2551217018a8d66e8db2fa2a508529b832df0d464270efb7d9",
+      "encoding": "UTF-8",
+      "text": "{\n  \"argv\": [\n    \"/usr/local/bin/git\",\n    \"-C\",\n    \"/workspace/scratch/7cc3f017cace/F3_R15_INTEGRATION/repository\",\n    \"status\",\n    \"--porcelain\",\n    \"--untracked-files=all\"\n  ],\n  \"started_at_utc\": \"2026-11-17T19:17:00.493859+00:00\",\n  \"timeout_seconds\": 20,\n  \"status\": \"PASS\",\n  \"returncode\": 0,\n  \"cleanup\": {\n    \"pid\": 9,\n    \"owned_session\": true,\n    \"signals\": [],\n    \"status\": \"PASS\",\n    \"group_members_before\": [],\n    \"returncode\": 0,\n    \"direct_child_reaped\": true,\n    \"group_members_after\": [],\n    \"active_group_members_remaining\": 0,\n    \"nonchild_descendants_reaped_by_harness\": false\n  },\n  \"stdout\": {\n    \"path\": \"/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/git_status.stdout.log\",\n    \"bytes\": 0,\n    \"sha256\": \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"\n  },\n  \"stderr\": {\n    \"path\": \"/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/git_status.stderr.log\",\n    \"bytes\": 0,\n    \"sha256\": \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"\n  },\n  \"duration_seconds\": 0.093335\n}\n"
+    },
+    {
+      "execution_relative_path": "git_status.stderr.log",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/git_status.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "encoding": "UTF-8",
+      "text": ""
+    },
+    {
+      "execution_relative_path": "git_status.stdout.log",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/git_status.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "encoding": "UTF-8",
+      "text": ""
+    },
+    {
+      "execution_relative_path": "git_tree.command.json",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/git_tree.command.json",
+      "bytes": 1033,
+      "sha256": "a1bfeed30bd3bab218526c0ea8382a4039a2427ae45ca360720160aad3cfe29a",
+      "encoding": "UTF-8",
+      "text": "{\n  \"argv\": [\n    \"/usr/local/bin/git\",\n    \"-C\",\n    \"/workspace/scratch/7cc3f017cace/F3_R15_INTEGRATION/repository\",\n    \"rev-parse\",\n    \"HEAD^{tree}\"\n  ],\n  \"started_at_utc\": \"2026-11-17T19:17:00.489926+00:00\",\n  \"timeout_seconds\": 20,\n  \"status\": \"PASS\",\n  \"returncode\": 0,\n  \"cleanup\": {\n    \"pid\": 8,\n    \"owned_session\": true,\n    \"signals\": [],\n    \"status\": \"PASS\",\n    \"group_members_before\": [],\n    \"returncode\": 0,\n    \"direct_child_reaped\": true,\n    \"group_members_after\": [],\n    \"active_group_members_remaining\": 0,\n    \"nonchild_descendants_reaped_by_harness\": false\n  },\n  \"stdout\": {\n    \"path\": \"/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/git_tree.stdout.log\",\n    \"bytes\": 41,\n    \"sha256\": \"34992683680f1af23e3ec4608d608ea5dc804d468da427d74b855b9c6202803c\"\n  },\n  \"stderr\": {\n    \"path\": \"/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/git_tree.stderr.log\",\n    \"bytes\": 0,\n    \"sha256\": \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"\n  },\n  \"duration_seconds\": 0.003817\n}\n"
+    },
+    {
+      "execution_relative_path": "git_tree.stderr.log",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/git_tree.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "encoding": "UTF-8",
+      "text": ""
+    },
+    {
+      "execution_relative_path": "git_tree.stdout.log",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/git_tree.stdout.log",
+      "bytes": 41,
+      "sha256": "34992683680f1af23e3ec4608d608ea5dc804d468da427d74b855b9c6202803c",
+      "encoding": "UTF-8",
+      "text": "355b2399aec344c63be855cf800c901c92ec4677\n"
+    },
+    {
+      "execution_relative_path": "java_version.command.json",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/java_version.command.json",
+      "bytes": 969,
+      "sha256": "0c5a2b923dd3fbc3990eff121be3c21d02ca2b5908796e3e9b6ced45cfbd3dfb",
+      "encoding": "UTF-8",
+      "text": "{\n  \"argv\": [\n    \"/usr/lib/jvm/java-21-openjdk-amd64/bin/java\",\n    \"-version\"\n  ],\n  \"started_at_utc\": \"2026-11-17T19:17:00.588786+00:00\",\n  \"timeout_seconds\": 20,\n  \"status\": \"PASS\",\n  \"returncode\": 0,\n  \"cleanup\": {\n    \"pid\": 12,\n    \"owned_session\": true,\n    \"signals\": [],\n    \"status\": \"PASS\",\n    \"group_members_before\": [],\n    \"returncode\": 0,\n    \"direct_child_reaped\": true,\n    \"group_members_after\": [],\n    \"active_group_members_remaining\": 0,\n    \"nonchild_descendants_reaped_by_harness\": false\n  },\n  \"stdout\": {\n    \"path\": \"/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/java_version.stdout.log\",\n    \"bytes\": 0,\n    \"sha256\": \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"\n  },\n  \"stderr\": {\n    \"path\": \"/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/java_version.stderr.log\",\n    \"bytes\": 181,\n    \"sha256\": \"0fc83381287ccbc8623d257bce2b0d03997ba0e85ff4492d38b409aea37a8aa9\"\n  },\n  \"duration_seconds\": 0.097964\n}\n"
+    },
+    {
+      "execution_relative_path": "java_version.stderr.log",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/java_version.stderr.log",
+      "bytes": 181,
+      "sha256": "0fc83381287ccbc8623d257bce2b0d03997ba0e85ff4492d38b409aea37a8aa9",
+      "encoding": "UTF-8",
+      "text": "openjdk version \"21.0.13\" 2026-10-20\nOpenJDK Runtime Environment (build 21.0.13+9-1-deb13u2-Debian)\nOpenJDK 64-Bit Server VM (build 21.0.13+9-1-deb13u2-Debian, mixed mode, sharing)\n"
+    },
+    {
+      "execution_relative_path": "java_version.stdout.log",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/java_version.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "encoding": "UTF-8",
+      "text": ""
+    },
+    {
+      "execution_relative_path": "kotlinc_version.command.json",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/kotlinc_version.command.json",
+      "bytes": 1003,
+      "sha256": "729083eb0ca16d8e10e86b6cf468e1bf2084aac20ffe7e6b566cfa3d36c74add",
+      "encoding": "UTF-8",
+      "text": "{\n  \"argv\": [\n    \"/workspace/scratch/7cc3f017cace/N08_KOTLIN/toolchain/kotlinc/bin/kotlinc\",\n    \"-version\"\n  ],\n  \"started_at_utc\": \"2026-11-17T19:17:00.686883+00:00\",\n  \"timeout_seconds\": 20,\n  \"status\": \"PASS\",\n  \"returncode\": 0,\n  \"cleanup\": {\n    \"pid\": 29,\n    \"owned_session\": true,\n    \"signals\": [],\n    \"status\": \"PASS\",\n    \"group_members_before\": [],\n    \"returncode\": 0,\n    \"direct_child_reaped\": true,\n    \"group_members_after\": [],\n    \"active_group_members_remaining\": 0,\n    \"nonchild_descendants_reaped_by_harness\": false\n  },\n  \"stdout\": {\n    \"path\": \"/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/kotlinc_version.stdout.log\",\n    \"bytes\": 0,\n    \"sha256\": \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"\n  },\n  \"stderr\": {\n    \"path\": \"/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/kotlinc_version.stderr.log\",\n    \"bytes\": 58,\n    \"sha256\": \"8b9433e04ce88a8a4fedbf6ee1c7ba746af3202394a977225fe2e19aad89845d\"\n  },\n  \"duration_seconds\": 2.583179\n}\n"
+    },
+    {
+      "execution_relative_path": "kotlinc_version.stderr.log",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/kotlinc_version.stderr.log",
+      "bytes": 58,
+      "sha256": "8b9433e04ce88a8a4fedbf6ee1c7ba746af3202394a977225fe2e19aad89845d",
+      "encoding": "UTF-8",
+      "text": "info: kotlinc-jvm 2.4.21 (JRE 21.0.13+9-1-deb13u2-Debian)\n"
+    },
+    {
+      "execution_relative_path": "kotlinc_version.stdout.log",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/kotlinc_version.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "encoding": "UTF-8",
+      "text": ""
+    }
+  ],
+  "method": "Decode each original UTF-8 stream/command file and assert an exact encode/decode round trip; hashes identify the original bytes.",
+  "original_paths_are_provenance": true
+}

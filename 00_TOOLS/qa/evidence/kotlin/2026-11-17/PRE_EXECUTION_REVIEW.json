@@ -1,0 +1,25 @@
+{
+  "recorded_at_utc": "2026-11-17T19:16:59.970136+00:00",
+  "reviewer": "/root/kotlin_toolchain_inventory",
+  "recorded_by": "/root",
+  "verdict": "NO_MATERIAL_FINDINGS_AFTER_PREEXECUTION_CORRECTIONS",
+  "reviewed_sha256": {
+    "probe_kotlin.py": "fc90a248212151d4bcdfd7380f2488909f88481c612a4e5b893478a4acd0574e",
+    "PROTOCOL_N08.md": "7befb3aeecb21edf245482f67bae258d7ff88a89ee48aa871b5cc88f2c6ed306",
+    "PROTOCOL_FREEZE.json": "3c7316616aaa3bdc73b53de4c5fa8fc5dc058e14791fedfe9d2d71fb74561ff8"
+  },
+  "method": "Read-only inspection; no harness functions, Kotlin compilation or dynamic probes were executed by the reviewer.",
+  "corrections_verified": [
+    "Persistent interruption prevents subsequent compilation and retains partial results",
+    "Owned process-group cleanup checks remaining active members and only reaps direct children",
+    "Any observed foreign listener blocks connection",
+    "Explicit protocol directory permits publication without modifying executed code"
+  ],
+  "source_contract_verified": [
+    "Exact source hash and one Kotlin fence",
+    "Original8080 and separately derived50081",
+    "Empty first client, staged6144-byte echo and following client",
+    "First3bytes echoed before remainder is sent; no TCP segment-boundary claim"
+  ],
+  "root_review": "Read script and protocol; source and frozen identities match. Native outcome remains NOT_RUN before first invocation."
+}

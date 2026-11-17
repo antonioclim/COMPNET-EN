@@ -1,0 +1,40 @@
+{
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "java_path": "/usr/lib/jvm/java-21-openjdk-amd64/bin/java",
+  "compiler_asset_sha256": "7cc140e76daf416a0424a5557f99afd7ca89ebd463ea1101261e3e01c33e75cd",
+  "version_commands": [
+    {
+      "command": [
+        "/usr/bin/java",
+        "-version"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "openjdk version \"21.0.13\" 2026-10-20\nOpenJDK Runtime Environment (build 21.0.13+9-1-deb13u2-Debian)\nOpenJDK 64-Bit Server VM (build 21.0.13+9-1-deb13u2-Debian, mixed mode, sharing)\n"
+    },
+    {
+      "command": [
+        "/workspace/scratch/7cc3f017cace/N08_KOTLIN/toolchain/kotlinc/bin/kotlinc",
+        "-version"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "info: kotlinc-jvm 2.4.21 (JRE 21.0.13+9-1-deb13u2-Debian)\n"
+    },
+    {
+      "command": [
+        "/usr/bin/java",
+        "-m",
+        "jdk.compiler/com.sun.tools.javac.Main",
+        "-version"
+      ],
+      "exit_code": 0,
+      "stdout": "javac 21.0.13\n",
+      "stderr": ""
+    }
+  ],
+  "compiler_previously_installed": false,
+  "installed_in_isolated_phase_directory": true,
+  "system_configuration_modified": false,
+  "no_compilation_or_snippet_execution_yet": true
+}

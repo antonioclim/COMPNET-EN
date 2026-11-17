@@ -8521,7 +8521,39 @@
         }
       ],
       "candidate_path_sha256": {
-        "00_APPENDIX/a)PYTHON_self_study_guide/comparisons/ROSETTA_STONE.md": "7e83baf7bdced69fce7db7d1ec74fee4742fbbcbc1b07eb6d0f4ee906acb1b5f"
+        "00_APPENDIX/a)PYTHON_self_study_guide/comparisons/ROSETTA_STONE.md": "7e83baf7bdced69fce7db7d1ec74fee4742fbbcbc1b07eb6d0f4ee906acb1b5f",
+        "00_TOOLS/qa/check_kotlin_rosetta.py": "fc90a248212151d4bcdfd7380f2488909f88481c612a4e5b893478a4acd0574e",
+        "00_TOOLS/qa/N08_KOTLIN_ACCEPTANCE.md": "b47321e375bf4a1ac989528f51f090e541e55ef0e84bf3ff9b36909489dc768b",
+        "00_TOOLS/qa/evidence/kotlin/2026-11-17/N08_ATTESTATION.json": "4ce812da23653a750034d63f58e17cc6635be7fabed83363a2160bc1a1bb9986",
+        "00_TOOLS/qa/evidence/kotlin/2026-11-17/N08_KOTLIN_RESULTS.json": "0949411bb81912cc5baecde2c7bd7fd50bd9f790679131105090519bc7c1721c",
+        "00_TOOLS/qa/evidence/kotlin/2026-11-17/PROTOCOL_N08.md": "7befb3aeecb21edf245482f67bae258d7ff88a89ee48aa871b5cc88f2c6ed306",
+        "00_TOOLS/qa/evidence/kotlin/2026-11-17/PROTOCOL_FREEZE.json": "3c7316616aaa3bdc73b53de4c5fa8fc5dc058e14791fedfe9d2d71fb74561ff8"
+      },
+      "dated_kotlin_acceptance": {
+        "date_utc": "2026-11-17",
+        "gate": "N08",
+        "status": "verified_kotlin_jvm_fragment_scope",
+        "tested_commit": "7c79582c5750e9b94b1d7d34d269f080e91a32d3",
+        "tested_tree": "355b2399aec344c63be855cf800c901c92ec4677",
+        "attestation": "00_TOOLS/qa/evidence/kotlin/2026-11-17/N08_ATTESTATION.json",
+        "attestation_sha256": "4ce812da23653a750034d63f58e17cc6635be7fabed83363a2160bc1a1bb9986",
+        "raw_report_sha256": "0949411bb81912cc5baecde2c7bd7fd50bd9f790679131105090519bc7c1721c",
+        "executed_harness_sha256": "fc90a248212151d4bcdfd7380f2488909f88481c612a4e5b893478a4acd0574e",
+        "published_harness": "00_TOOLS/qa/check_kotlin_rosetta.py",
+        "summary": "00_TOOLS/qa/N08_KOTLIN_ACCEPTANCE.md",
+        "result": "PASS_KOTLIN_JVM_FRAGMENT_SCOPE_ONLY",
+        "criteria_passed": 7,
+        "compilations_passed": 2,
+        "client_scenarios_passed": 6,
+        "counts_are_nested_not_additive": true,
+        "current_kotlin_gate": "Closed within the frozen Linux/Kotlin-JVM echo component scope, with exact8080 and separately derived50081 evidence.",
+        "prior_owner_records_retained_as_historical": true,
+        "historical_compiler_unavailable_statement_superseded_by_this_dated_result": true,
+        "source_fragment_changed": false,
+        "other_languages_rerun": false,
+        "execution_on_evidence_publication_commit_claimed": false,
+        "Kotlin_binary_parser_claimed": false,
+        "native_release_gates_all_passed": false
       }
     },
     {

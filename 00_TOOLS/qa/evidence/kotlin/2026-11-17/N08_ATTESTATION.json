@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "prepared_at_utc": "2026-11-17T19:20:31.996038+00:00",
+  "repository": "antonioclim/COMPNET-EN",
+  "gate": "N08",
+  "finding": "F3-R13",
+  "tested_commit": "7c79582c5750e9b94b1d7d34d269f080e91a32d3",
+  "tested_tree": "355b2399aec344c63be855cf800c901c92ec4677",
+  "result": "PASS_KOTLIN_JVM_FRAGMENT_SCOPE_ONLY",
+  "scope": "Actual Kotlin/JVM compilation and IPv4 loopback execution of the Rosetta echo fragment: exact port 8080 and a one-literal derivation on port 50081; empty, fragmented-binary and following-client/EOF scenarios.",
+  "raw_report_path": "00_TOOLS/qa/evidence/kotlin/2026-11-17/N08_KOTLIN_RESULTS.json",
+  "raw_report_sha256": "0949411bb81912cc5baecde2c7bd7fd50bd9f790679131105090519bc7c1721c",
+  "executed_harness_sha256": "fc90a248212151d4bcdfd7380f2488909f88481c612a4e5b893478a4acd0574e",
+  "published_harness_path": "00_TOOLS/qa/check_kotlin_rosetta.py",
+  "source_path": "00_APPENDIX/a)PYTHON_self_study_guide/comparisons/ROSETTA_STONE.md",
+  "source_sha256": "7e83baf7bdced69fce7db7d1ec74fee4742fbbcbc1b07eb6d0f4ee906acb1b5f",
+  "execution_started_at_utc": "2026-11-17T19:17:00.476491+00:00",
+  "execution_finished_at_utc": "2026-11-17T19:17:13.655541+00:00",
+  "protocol_frozen_at_utc": "2026-11-17T19:15:20Z",
+  "protocol_sha256": "7befb3aeecb21edf245482f67bae258d7ff88a89ee48aa871b5cc88f2c6ed306",
+  "freeze_sha256": "3c7316616aaa3bdc73b53de4c5fa8fc5dc058e14791fedfe9d2d71fb74561ff8",
+  "counts": {
+    "criteria_passed": 7,
+    "compilations_passed": 2,
+    "client_scenarios_passed": 6,
+    "counting_note": "These are nested descriptions of one bounded probe, not 15 independent tests."
+  },
+  "variants": [
+    {
+      "name": "exact_8080",
+      "port": 8080,
+      "body_sha256": "4339065722c25a414bd1f106d282221ee847aa07aa907102491a1161176fe4fc",
+      "body_changed_from_publication": false,
+      "transformation": "None",
+      "compilation_exit_code": 0,
+      "client_cases": {
+        "empty_client": "PASS",
+        "fragmented_echo": "PASS",
+        "following_client": "PASS"
+      },
+      "cleanup_status": "PASS",
+      "active_owned_group_members_remaining": 0
+    },
+    {
+      "name": "derived_50081",
+      "port": 50081,
+      "body_sha256": "ccea5a8a5ea28484cb597339f1a31e324930fe79b41dc7668fef8e446aa15eae",
+      "body_changed_from_publication": true,
+      "transformation": "Only ServerSocket(8080) -> ServerSocket(50081)",
+      "compilation_exit_code": 0,
+      "client_cases": {
+        "empty_client": "PASS",
+        "fragmented_echo": "PASS",
+        "following_client": "PASS"
+      },
+      "cleanup_status": "PASS",
+      "active_owned_group_members_remaining": 0
+    }
+  ],
+  "toolchain": {
+    "target": "Kotlin/JVM",
+    "compiler": "2.4.21",
+    "JVM": "OpenJDK 21.0.13",
+    "official_asset_receipt": "00_TOOLS/qa/evidence/kotlin/2026-11-17/OFFICIAL_COMPILER_ASSET.json",
+    "download_integrity_receipt": "00_TOOLS/qa/evidence/kotlin/2026-11-17/COMPILER_DOWNLOAD.json"
+  },
+  "review": {
+    "pre_execution": "00_TOOLS/qa/evidence/kotlin/2026-11-17/PRE_EXECUTION_REVIEW.json",
+    "post_execution": "00_TOOLS/qa/evidence/kotlin/2026-11-17/POST_EXECUTION_REVIEW.json",
+    "post_execution_sha256": "91233755b7d550494512efc62af84ca9fa7c767cf28fae31d6e5cd126ffb2074",
+    "method": "Separate read-only inspection and retained-artifact checks; not a second native execution."
+  },
+  "finding_status_interpretation": "N08 is verified within the stated Kotlin/JVM component scope. Historical F3-R13 owner records remain historical; no result is attributed to a future evidence-publication commit.",
+  "course_source_changed": false,
+  "Kotlin_binary_parser_added_or_tested": false,
+  "other_languages_rerun": false,
+  "Kotlin_Native_tested": false,
+  "native_release_gates_all_passed": false,
+  "F6_full_acceptance_completed": false,
+  "OVA_requested_or_accessed": false,
+  "licence_decision_approved_or_applied": false,
+  "remaining_scopes": [
+    "VM/host routes",
+    "Windows",
+    "Docker/Mininet/OVS",
+    "real capture/transfer",
+    "native browser",
+    "native workbook",
+    "LMS import/use",
+    "author licence decision",
+    "F3-R15 historical source/score provenance"
+  ]
+}

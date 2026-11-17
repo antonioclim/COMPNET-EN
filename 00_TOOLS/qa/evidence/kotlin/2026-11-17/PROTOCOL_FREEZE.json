@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "protocol_id": "N08-KOTLIN-JVM-2026-11-17-v1",
+  "status": "PRE_COMPILATION_FROZEN",
+  "frozen_at_utc": "2026-11-17T19:15:20Z",
+  "protocol": {
+    "path": "PROTOCOL_N08.md",
+    "sha256": "7befb3aeecb21edf245482f67bae258d7ff88a89ee48aa871b5cc88f2c6ed306",
+    "intended_repository_path": "00_TOOLS/qa/evidence/kotlin/2026-11-17/PROTOCOL_N08.md"
+  },
+  "harness": {
+    "path": "probe_kotlin.py",
+    "sha256": "fc90a248212151d4bcdfd7380f2488909f88481c612a4e5b893478a4acd0574e",
+    "intended_repository_path": "00_TOOLS/qa/check_kotlin_rosetta.py",
+    "syntax_check": "PASS_AST_ONLY",
+    "functions_executed_during_preparation": false,
+    "git_mode_intended": "100644"
+  },
+  "candidate_commit": "7c79582c5750e9b94b1d7d34d269f080e91a32d3",
+  "candidate_tree": "355b2399aec344c63be855cf800c901c92ec4677",
+  "source_path": "00_APPENDIX/a)PYTHON_self_study_guide/comparisons/ROSETTA_STONE.md",
+  "source_sha256": "7e83baf7bdced69fce7db7d1ec74fee4742fbbcbc1b07eb6d0f4ee906acb1b5f",
+  "compiler_target": "Kotlin/JVM",
+  "compiler_version": "2.4.21",
+  "coordinator_reported_java_version": "OpenJDK 21.0.13",
+  "coordinator_verified_distribution": {
+    "bytes": 89733618,
+    "sha256": "7cc140e76daf416a0424a5557f99afd7ca89ebd463ea1101261e3e01c33e75cd",
+    "independently_downloaded_by_harness_author": false
+  },
+  "fixed_ports": [8080, 50081],
+  "first_compilation_performed_at_freeze": false,
+  "snippet_execution_performed_at_freeze": false,
+  "prior_activity_scope": "Read-only source/historical contract review, coordinator toolchain acquisition/version inspection and harness AST syntax check only",
+  "after_execution_protocol_changes_require_a_new_version": true,
+  "pre_execution_amendments": [
+    {
+      "superseded_freeze_at_utc": "2026-11-17T19:09:37Z",
+      "superseded_harness_sha256": "a96ea62401143ac890b4a1a492ffe3873c62157663fbab2bed5a5307c835d94f",
+      "reason": "Record an entered client case as FAIL/BLOCKED/ERROR when that case raises; do not leave it incorrectly NOT_RUN.",
+      "source_and_matrix_changed": false,
+      "harness_author_performed_compilation_or_execution": false
+    },
+    {
+      "superseded_freeze_at_utc": "2026-11-17T19:10:48Z",
+      "superseded_harness_sha256": "d3c6fd6b05f2b55a7746b44f9f62b402884467e0e45f7fbaadc9fee1984161ba",
+      "superseded_protocol_sha256": "7de4e0948f8f42a3038cb2fdb68f558d45280fec713b8e7b89d9015b5816b09f",
+      "reason": "Explicit protocol directory for repository publication; persistent interruption stop with retained partial variant; fail-closed on any observed foreign listener; verify absence of active owned-group members after direct-child cleanup.",
+      "source_and_test_matrix_changed": false,
+      "harness_author_performed_compilation_or_execution": false,
+      "coordinator_confirmed_no_compilation_yet": true
+    }
+  ],
+  "OVA_accessed": false,
+  "repository_modified_during_preparation": false
+}

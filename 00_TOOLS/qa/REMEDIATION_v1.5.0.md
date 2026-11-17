@@ -49,7 +49,7 @@ the author can trace each correction to the agreed audit record.
 | Evidence | What it establishes | What it does not establish |
 |---|---|---|
 | Source inventory, hashes, syntax and reference checks | File identity, parseability, recorded modes and checked targets | Successful deployment or pedagogical completeness |
-| Native Python/C/Java/Node component probes | The exercised implementation behaviour in this Linux environment | Equivalent behaviour in every guest, OS or complete lab |
+| Native Python/C/Java/Node probes and the separately dated Kotlin/JVM probe | The exercised implementation behaviour in each recorded Linux environment | Equivalent behaviour in every guest, OS or complete lab |
 | Test doubles and DOM models | The explicitly modelled protocol/control contracts | Real SSH/MQTT service acceptance or native browser accessibility |
 | PlantUML generation and visual inspection | Renderability and reviewed diagram content | The network behaviour depicted in a diagram |
 | OOXML checks and workbook preview | Workbook structure, tables, values and inspected rendering | Excel/LibreOffice interaction, recalculation or dropdown acceptance |
@@ -82,7 +82,9 @@ and [release packaging](../release/README.md).
    their evidence; do not treat a parser or mock result as a substitute.
 4. **Student interfaces and exports.** Native browser keyboard/clipboard/layout
    checks, Moodle/QTI import and Excel/LibreOffice workbook interaction remain.
-   Kotlin examples also require compilation with an available Kotlin toolchain.
+   The separate [N08 Kotlin/JVM record](N08_KOTLIN_ACCEPTANCE.md) now verifies
+   compilation and the bounded Rosetta echo/EOF scenarios on its pinned
+   Linux/JVM input. This result does not close the interface/export gates.
 5. **Comparative study.** A separately dated [public-material comparison](../../00_APPENDIX/docs/comparison/2026-11-17/README.md)
    now supplies a frozen protocol, 18 identified units, 180 factual cells and
    dated source provenance. This dated documentary update supports its new
