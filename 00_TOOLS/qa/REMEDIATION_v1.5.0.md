@@ -67,25 +67,37 @@ Bash and Node.js 24 must also be available. The gate does not install or start
 Docker, Mininet, VirtualBox or a browser. See [CI details](../../00_APPENDIX/docs/ci_setup.md)
 and [release packaging](../release/README.md).
 
+## Licence policy decision applied
+
+On 17 November 2026 Antonio Clim explicitly approved the reconciled Option A
+and authorised its application on the candidate branch. **F3-R14 is resolved
+for the approved licence policy.** The [decision and application record](LICENCE_DECISION_PENDING.md)
+preserves the actual approval, exact policy hashes and earlier pending history.
+CC BY-NC-SA 4.0 applies to Category A and GPL-3.0-or-later to Category B;
+Category C remains the exact 84-path list, subject to existing grants and
+third-party terms. The three added policy documents have their applicable
+notices; their administrative inventory labels do not override those terms.
+The approved 1,343-path classification is A939/B320/C84; this application adds
+three administrative paths. It does not establish new native environment
+acceptance or close the environment, comparative-history or publication gates
+below. Earlier component results retain their recorded source identities.
+
 ## Remaining release gates
 
-1. **Author decision on reuse terms.** F3-R14 remains open. Read the
-   [prepared licence decision](LICENCE_DECISION_PENDING.md). `LICENCE.md` has not
-   been amended by the technical remediation.
-2. **Appliance and host routes.** Import/boot, host-to-guest SSH, the VM Python
+1. **Appliance and host routes.** Import/boot, host-to-guest SSH, the VM Python
    environments, native Windows PowerShell and the supported WSL/Desktop routes
    require acceptance in their actual environments. The institutional provisioning
    script was not present in this repository and is outside the inspected source.
-3. **Complete network labs.** Docker builds/start-up, DNS/FTP/mail/MQTT stacks,
+2. **Complete network labs.** Docker builds/start-up, DNS/FTP/mail/MQTT stacks,
    packet capture with tshark, Mininet/OVS/OpenFlow and the integration lab require
    their native end-to-end probes. Use the corrected scenario READMEs and preserve
    their evidence; do not treat a parser or mock result as a substitute.
-4. **Student interfaces and exports.** Native browser keyboard/clipboard/layout
+3. **Student interfaces and exports.** Native browser keyboard/clipboard/layout
    checks, Moodle/QTI import and Excel/LibreOffice workbook interaction remain.
    The separate [N08 Kotlin/JVM record](N08_KOTLIN_ACCEPTANCE.md) now verifies
    compilation and the bounded Rosetta echo/EOF scenarios on its pinned
    Linux/JVM input. This result does not close the interface/export gates.
-5. **Comparative study.** A separately dated [public-material comparison](../../00_APPENDIX/docs/comparison/2026-11-17/README.md)
+4. **Comparative study.** A separately dated [public-material comparison](../../00_APPENDIX/docs/comparison/2026-11-17/README.md)
    now supplies a frozen protocol, 18 identified units, 180 factual cells and
    dated source provenance. This dated documentary update supports its new
    bounded claims. F3-R15 remains partially open because the historical score
@@ -93,7 +105,7 @@ and [release packaging](../release/README.md).
    and unfavourable results are preserved; no new numerical ranking is supplied.
    The [integration note](F3_R15_INTEGRATION.md) distinguishes this candidate
    update from the frozen comparison phase and preserves acceptance identities.
-6. **Publication.** Review the exact candidate commit and its CI results before
+5. **Publication.** Review the exact candidate commit and its CI results before
    approving integration and creating v1.5.0. The v1.4.0 tag is the preserved
    baseline and must not be moved to the candidate.
 

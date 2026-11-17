@@ -13,7 +13,7 @@
   },
   "policy": "Original Romanian audit identifiers and acceptance criteria are preserved. Evidence records state exactly which native components, models and structural checks ran. A source change does not imply complete native acceptance.",
   "all_native_release_gates_passed": false,
-  "author_licence_decision_received": false,
+  "author_licence_decision_received": true,
   "remote_release_created_by_this_phase": false,
   "findings": [
     {
@@ -8566,7 +8566,7 @@
         "LICENCE.md",
         "README.md"
       ],
-      "status": "open_author_licence_decision_required",
+      "status": "resolved_author_approved_policy_applied",
       "owner_records": [
         {
           "area": "root",
@@ -8588,8 +8588,55 @@
         }
       ],
       "candidate_path_sha256": {
-        "LICENCE.md": "eb8559db78b8a20dbe3fca5c01c6e25ac5496b9a632071f4c32069662bce53b9",
-        "README.md": "d08598856427853dd4b2fd4ed2586f1b5a7919f524a207ae231fa3494f21b4c7"
+        "LICENCE.md": "01d26ac36ec105e8396df18ede04fab4aae1462ad1eb1b027ad9193b036cd5d2",
+        "README.md": "e16a90a5472dad81bc5585dcae26d1cafde2ba011ebd751aadcc7980df23b42a",
+        "00_TOOLS/qa/LICENCE_DECISION_PENDING.md": "a484ae6de809256b3a54737666ef997dcbe2ffaef82b5130f4dd6f53e4482339",
+        "00_TOOLS/qa/REMEDIATION_v1.5.0.md": "21c0723d9971feaf27ffa289dac218dd84b3239763a378502bec1ec03e43d46f",
+        "LICENCE_CATEGORY_C.txt": "f9f2ec5eb1d276ebc1355b65418c980cd0aa1e7fc719d2d9cfecb5a512cb8daf",
+        "LICENSES/CC-BY-NC-SA-4.0.txt": "e66c269d4819aaab34b49ef5220c4ddab6756f21bb5180761a4eb8561f2b7bbd",
+        "LICENSES/GPL-3.0-or-later.txt": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"
+      },
+      "owner_records_are_historical": true,
+      "licence_policy_application": {
+        "date": "2026-11-17",
+        "timezone": "Europe/Bucharest",
+        "status": "resolved_author_approved_policy_applied",
+        "option": "A",
+        "author_approval_received": true,
+        "approval_source": "Actual user message in the current project conversation, preserved verbatim in author_approval_original_ro and referenced by the decision record.",
+        "approval_text_utf8_lf_sha256": "6db4bf349b4c55d30b3a385f89b0a17d31a11ff19355597621f7e7f966aada44",
+        "author_approval_original_ro": "Aprob Opțiunea A reconciliată pentru COMPNET-EN, în forma integrală livrată în dosarul F3-R14 din 17 noiembrie 2026, pentru candidatul `932b27a7`, cu clasificarea A939/B320/C84 și lista exactă C84.\n\nConfirm păstrarea CC BY-NC-SA 4.0 pentru categoria A și GPL-3.0-or-later pentru categoria B, în limita drepturilor pe care le dețin sau sunt autorizat să le acord, cu păstrarea drepturilor deja acordate și a termenilor terților. Accept eliminarea restricțiilor suplimentare incompatibile cu licențele standard și a obligației automate de coautorat la pragul de 20%, conform textului propus.\n\nAutorizez aplicarea patchului verificat, actualizarea concordantă a evidenței deciziei și a registrului F3-R14, verificările aferente și integrarea pe ramura `audit/v1.5.0-remediation`. Această aprobare nu include merge în `main`, tag sau release `v1.5.0`, modificarea Zenodo ori închiderea acceptanțelor native neexecutate.\n",
+        "decision_record": "00_TOOLS/qa/LICENCE_DECISION_PENDING.md",
+        "approved_base_commit": "932b27a7962ad577892e0ee120f640fbc335e90c",
+        "approved_base_tree": "1f4232d60c0470c333a020f5af60b8b9c919b1a0",
+        "approved_dossier_sha256": "3ad5acf5beabd8ec5c0cc3a43d51a996f2f6c4dcde0f77adabcfb79bdc599608",
+        "approved_policy_sha256": "01d26ac36ec105e8396df18ede04fab4aae1462ad1eb1b027ad9193b036cd5d2",
+        "approved_patch_sha256": "5620256534e23c851c1444a76b4c34aba2f63995703f089301ef83eb748e9b33",
+        "approved_category_list_sha256": "f9f2ec5eb1d276ebc1355b65418c980cd0aa1e7fc719d2d9cfecb5a512cb8daf",
+        "approved_base_category_counts": {
+          "A": 939,
+          "B": 320,
+          "C": 84
+        },
+        "resulting_source_path_count": 1346,
+        "resulting_administrative_category_counts": {
+          "A": 942,
+          "B": 320,
+          "C": 84
+        },
+        "standard_texts_relicensed_by_administrative_labels": false,
+        "existing_grants_and_third_party_terms_preserved": true,
+        "copyright_ownership_certified": false,
+        "original_owner_record_preserved_as_history": true,
+        "prior_status": "open_author_licence_decision_required",
+        "prior_candidate_path_sha256": {
+          "LICENCE.md": "eb8559db78b8a20dbe3fca5c01c6e25ac5496b9a632071f4c32069662bce53b9",
+          "README.md": "d08598856427853dd4b2fd4ed2586f1b5a7919f524a207ae231fa3494f21b4c7"
+        },
+        "verification_scope": "Exact approved policy bytes, reserved-path list, concordant records and source identity; the integration receipt records the actual resulting commit and checks.",
+        "new_native_acceptance_probe_executed": false,
+        "all_native_release_gates_passed": false,
+        "merge_tag_release_or_Zenodo_change_authorised": false
       }
     },
     {

@@ -441,9 +441,17 @@ Do not point these exercises at public infrastructure.
 
 ## Licence and permitted use
 
-Consult [LICENCE.md](LICENCE.md) for the author’s licensing terms. The v1.5.0 audit identified conflicting category and reuse provisions in that document; the author’s policy decision is pending. This README does not grant, withdraw or restate permissions. The conflicting summary table has been removed to avoid adding another interpretation. See [the licence decision record](00_TOOLS/qa/LICENCE_DECISION_PENDING.md).
+The author approved Option A for the v1.5.0 candidate on 17 November 2026.
+[LICENCE.md](LICENCE.md) defines Category A educational content under CC BY-NC-SA
+4.0, Category B source code and configuration under GPL-3.0-or-later and the
+reserved Category C paths in [LICENCE_CATEGORY_C.txt](LICENCE_CATEGORY_C.txt).
+Component-specific third-party terms and permissions already granted take
+precedence. The applicable licence governs attribution and reuse; the policy
+adds no commercial restriction, research-citation condition or automatic
+co-authorship obligation to GPL-covered material. See the
+[author decision and application record](00_TOOLS/qa/LICENCE_DECISION_PENDING.md).
 
-### Citation format (required by the licence)
+### Suggested academic citation
 
 ```text
 Clim, A. (2025). Computer Networks — Course Kit (EN). Bucharest University of Economic Studies (ASE), Faculty of Economic Cybernetics, Statistics and Informatics (CSIE). https://github.com/antonioclim/COMPNET-EN
