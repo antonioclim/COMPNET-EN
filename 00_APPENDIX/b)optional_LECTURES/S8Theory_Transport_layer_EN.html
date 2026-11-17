@@ -530,10 +530,10 @@
       <p><strong>Quick check:</strong> DNS primarily uses port 53 over UDP. Why might DNS sometimes switch to TCP on the same port?</p>
       <div class="quiz-option" onclick="checkQuiz(this, false)">TCP is faster for short queries</div>
       <div class="quiz-option" onclick="checkQuiz(this, false)">UDP cannot carry DNS packets</div>
-      <div class="quiz-option" onclick="checkQuiz(this, true)">When the response exceeds 512 bytes (e.g. zone transfers or DNSSEC), TCP handles the larger payload reliably</div>
+      <div class="quiz-option" onclick="checkQuiz(this, true)">When UDP replies are truncated, the client can retry over TCP; AXFR also uses TCP</div>
       <div class="quiz-option" onclick="checkQuiz(this, false)">The DNS standard requires TCP for all queries since 2020</div>
       <div class="quiz-feedback">
-        <strong>Correct.</strong> Standard DNS responses fit within a single UDP datagram (historically capped at 512 bytes). Zone transfers (AXFR) and large DNSSEC-signed responses exceed this limit, so TCP is used for segmentation and reliable reassembly. The server listens on port 53 for both protocols.
+        <strong>Correct.</strong> The original DNS UDP payload limit was 512 bytes; EDNS supports a larger advertised size. Truncation signals TCP fallback, and AXFR uses TCP. DNS-over-TCP uses a two-byte length prefix per DNS message; it is not an unlimited message format.
       </div>
     </div>
   </div>
@@ -668,7 +668,7 @@
 <section class="slide" data-slide="15">
   <div class="slide-content">
     <h2>TCP Flags: Controlling the Connection</h2>
-    <p class="animate-in">The TCP header contains nine single-bit flags, each signalling a specific control action:</p>
+    <p class="animate-in">The RFC 9293 base TCP header defines eight control flags, each signalling a specific control action:</p>
     <div class="grid-3 animate-in delay-1">
       <div class="card" style="border-top:3px solid #0ea5e9;">
         <h4>Connection lifecycle</h4>
@@ -679,14 +679,14 @@
       <div class="card" style="border-top:3px solid #10b981;">
         <h4>Data control</h4>
         <p><strong>ACK</strong> &mdash; acknowledgement field is valid.</p>
-        <p><strong>PSH</strong> &mdash; push to application immediately.</p>
+        <p><strong>PSH</strong> &mdash; request prompt delivery without defining message boundaries.</p>
         <p><strong>URG</strong> &mdash; urgent data present (rare).</p>
       </div>
       <div class="card" style="border-top:3px solid #f59e0b;">
         <h4>Congestion signals</h4>
         <p><strong>ECE</strong> &mdash; congestion echo.</p>
         <p><strong>CWR</strong> &mdash; congestion window reduced.</p>
-        <p><strong>NS</strong> &mdash; nonce concealment (experimental).</p>
+        <p>Historical NS belonged to the ECN nonce experiment, not the eight-flag RFC 9293 baseline.</p>
       </div>
     </div>
     <div class="insight-box animate-in delay-2">
@@ -916,7 +916,7 @@
 <section class="slide" data-slide="24">
   <div class="slide-content">
     <h2>SACK &mdash; Selective Acknowledgement</h2>
-    <p class="animate-in">Without SACK, TCP acknowledgements are <em>cumulative</em>: an ACK for byte 5000 means &ldquo;I have received all bytes up to 5000.&rdquo; If bytes 5001&ndash;6000 are lost but 6001&ndash;8000 arrive, the sender must retransmit <em>everything</em> from 5001 onwards&mdash;even the data that arrived safely.</p>
+    <p class="animate-in">TCP acknowledgements are cumulative: ACK 5000 means the next expected byte is 5000, so all earlier bytes have arrived. If bytes 5000–5999 are missing but 6000–7999 arrive, SACK can report the later received range. Without SACK the sender has less information; it does not follow that it must retransmit every later byte.</p>
     <div class="diagram-container animate-in delay-1">
       <svg viewBox="0 0 750 150" style="max-width:95%;" role="img" aria-label="SACK vs cumulative ACK comparison">
         <text x="375" y="20" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">Data stream with a gap (bytes 5001&#x2013;6000 lost)</text>
@@ -1139,7 +1139,7 @@
     <div class="insight-box animate-in delay-1">
       <p>TLS is strictly speaking not a transport-layer protocol&mdash;it operates <em>above</em> TCP (or UDP, in the case of DTLS). However, it is tightly coupled to transport semantics. HTTPS is simply HTTP running through a TLS tunnel over TCP port 443.</p>
     </div>
-    <p class="animate-in delay-2">TLS consists of several sub-protocols: the <strong>Handshake Protocol</strong> (key exchange, authentication), the <strong>Record Protocol</strong> (encryption of application data), the <strong>Alert Protocol</strong> (error signalling) and the <strong>Change Cipher Spec</strong> protocol (TLS 1.2 only; removed in TLS 1.3).</p>
+    <p class="animate-in delay-2">TLS consists of several sub-protocols: the <strong>Handshake Protocol</strong> (key exchange, authentication), the <strong>Record Protocol</strong> (encryption of application data), the <strong>Alert Protocol</strong> (error signalling) and the <strong>Change Cipher Spec</strong> mechanism (functional in TLS 1.2; TLS 1.3 may send compatibility CCS records that do not change keys).</p>
   </div>
 </section>
 
@@ -1624,13 +1624,16 @@ server.close()
       const feedback = container.querySelector('.quiz-feedback');
 
       options.forEach(opt => {
-        opt.style.pointerEvents = 'none';
+        opt.classList.remove('correct', 'incorrect');
+        // Keep options active so learners can retry after feedback.
         if (opt === element) {
           opt.classList.add(isCorrect ? 'correct' : 'incorrect');
+        } else if (!isCorrect && (opt.getAttribute('onclick') || '').includes('true')) {
+          opt.classList.add('correct');
         }
       });
 
-      if (isCorrect && feedback) {
+      if (feedback) {
         feedback.classList.add('show');
       }
     }
@@ -1658,6 +1661,7 @@ server.close()
 
     // Keyboard navigation
     document.addEventListener('keydown', (e) => {
+      if (e.target && e.target.closest && e.target.closest('input, textarea, select, button, [contenteditable="true"]')) return;
       if (e.key === 'ArrowRight' || e.key === ' ') {
         e.preventDefault();
         changeSlide(1);

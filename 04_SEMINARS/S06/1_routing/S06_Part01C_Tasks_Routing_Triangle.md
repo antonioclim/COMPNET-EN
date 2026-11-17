@@ -26,7 +26,7 @@ Confirm that every interface has the correct address.
 
 ```
 
-r1 ip route add 10.0.3.0/30 via 10.0.12.2
+r1 ip route replace 10.0.3.0/30 via 10.0.12.2
 
 ```
 
@@ -34,7 +34,7 @@ or the alternative route:
 
 ```
 
-r1 ip route add 10.0.3.0/30 via 10.0.13.2
+r1 ip route replace 10.0.3.0/30 via 10.0.13.2
 
 ```
 
@@ -42,8 +42,8 @@ r1 ip route add 10.0.3.0/30 via 10.0.13.2
 
 ```
 
-r2 ip route add 10.0.1.0/30 via 10.0.12.1
-r2 ip route add 10.0.3.0/30 via 10.0.23.2
+r2 ip route replace 10.0.1.0/30 via 10.0.12.1
+r2 ip route replace 10.0.3.0/30 via 10.0.23.2
 
 ```
 
@@ -51,8 +51,8 @@ r2 ip route add 10.0.3.0/30 via 10.0.23.2
 
 ```
 
-r3 ip route add 10.0.1.0/30 via 10.0.13.1
-r3 ip route add 10.0.12.0/30 via 10.0.23.1
+r3 ip route replace 10.0.1.0/30 via 10.0.13.1
+r3 ip route replace 10.0.12.0/30 via 10.0.23.1
 
 ```
 
@@ -98,7 +98,7 @@ r1 ip route del 10.0.3.0/30
 
 ```
 
-r1 ip route add 10.0.3.0/30 via 10.0.13.2
+r1 ip route replace 10.0.3.0/30 via 10.0.13.2
 
 ```
 
@@ -146,3 +146,5 @@ It must include:
   - why traceroute displays the path in the observed order
 
 This file will be uploaded as proof of exercise completion.
+
+The supplied topology preconfigures the baseline routes. Inspect `ip route` first; `replace` deliberately changes an existing route. Record the table before and after each change.

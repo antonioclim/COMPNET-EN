@@ -47,6 +47,10 @@ The topic enforces an FTP-like control-plane/data-plane separation: the control 
 - **Protocol/default ports (E2):** TCP: control 5021/TCP; data 60000–60100/TCP (passive; configurable; the default is used in automated tests).
 - The Flex component must work with the default values (without manual reconfiguration) so that it can be integrated into automated tests.
 
+### Interpretation and complementary evidence
+
+The [E2 capture and semantic-evidence matrix](../00_common/E2_CAPTURE_EVIDENCE_MATRIX.md#s02) maps every capture rule to its generating action and the complementary application evidence.
+
 ### Deliverables
 - `flex/` directory with sources plus build/run instructions (avoid exotic dependencies where possible).
 - `docs/FLEX.md` with:
@@ -136,7 +140,7 @@ The topic enforces an FTP-like control-plane/data-plane separation: the control 
 - The negotiated data port and the moment the data channel closes are identified.
 
 ### Automatic PCAP criteria (E2)
-These criteria are **deterministic** and can be verified automatically with `tshark`.
+These capture checks are reproducible with `tshark`. Frame counts are smoke checks; they do not replace the application tests or prove complete project acceptance.
 - Official rules: `tools/pcap_rules/S02.json`
 - In the catalogue (template): `00_common/tools/pcap_rules/S02.json` and `00_common/tools/validate_pcap.py` (copy into the student repository).
 
@@ -144,12 +148,12 @@ These criteria are **deterministic** and can be verified automatically with `tsh
 
 | ID | tshark filter (`-Y`) | Condition | What it validates |
 |---:|---|---:|---|
-| R1 | `tcp.dstport==5021 && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | Handshake on the control channel. |
-| R2 | `tcp.port==5021 && frame contains "USER"` | `>= 1` | Authentication on the control channel (USER). |
-| R3 | `tcp.port==5021 && (frame contains "PASV" || frame contains "227")` | `>= 1` | Passive-mode negotiation (PASV/227). |
-| R4 | `tcp.dstport>=60000 && tcp.dstport<=60100 && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | Handshake on the data channel (port in the passive range). |
-| R5 | `tcp.port>=60000 && tcp.port<=60100 && tcp.len>0` | `>= 1` | Actual data transfer (payload) on the data channel. |
-| R6 | `tcp.port==5021 && (frame contains "SHA-256" || frame contains "HASH")` | `>= 1` | Checksum reporting (SHA‑256) after the transfer. |
+| R1 | `tcp.dstport==5021 && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | SYN attempt to the control channel. |
+| R2 | `tcp.port==5021 && frame contains "USER"` | `>= 1` | USER bytes are present on the control transport; successful authentication requires the corresponding response. |
+| R3 | `tcp.port==5021 && (frame contains "PASV" \|\| frame contains "227")` | `>= 1` | PASV or 227 bytes are present; verify the parsed passive endpoint separately. |
+| R4 | `tcp.dstport>=60000 && tcp.dstport<=60100 && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | SYN attempt to a port in the passive range. |
+| R5 | `tcp.port>=60000 && tcp.port<=60100 && tcp.len>0` | `>= 1` | Payload-bearing TCP segment in the passive port range; verify the transferred file separately. |
+| R6 | `tcp.port==5021 && (frame contains "SHA-256" \|\| frame contains "HASH")` | `>= 1` | SHA-256 or HASH bytes are present; compare full digests to establish integrity. |
 
 ### Deliverables
 - Docker Compose with `ftp_server` and `tester`.

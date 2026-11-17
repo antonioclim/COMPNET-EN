@@ -28,7 +28,8 @@ package "Docker Network" as net #F5F5F5 {
 sender --> smtp : "HELO, MAIL FROM\nRCPT TO, DATA"
 smtp --> mdir : store message\n(unique filename)
 mdir --> pop3 : read mailbox
-pop3 --> reader : "LIST, RETR, DELE"
+reader --> pop3 : "LIST, RETR, DELE"
+pop3 --> reader : "status and message data"
 
 tester -up-> smtp : E2: SMTP session\n+ PCAP
 tester -up-> pop3 : E3: POP3 retrieval

@@ -7,23 +7,20 @@ skinparam sequenceMessageAlign center
 
 title Pseudo-FTP — passive_get sequence
 
-participant "Client\n(pseudo_ftp_client.py)" as C #FFE0B2
-participant "Server\n(pseudo_ftp_server.py)" as S #C8E6C9
+participant "Client\n(S09_Part02C client)" as C #FFE0B2
+participant "Server\n(S09_Part02B server)" as S #C8E6C9
 participant "Server data\nlistener" as SL #FFF9C4
 
-C -> S : <color:#1565C0>"passive_get filename"</color>\n(control connection :3333)
+C -> S : passive_get filename + LF\n(control connection :3333)
 
 S -> S : open FILE_ROOT/filename
 S -> S : bind() + listen()\non ephemeral port Q
-activate SL
 
-S --> C : <color:#FF9800>str(Q)</color>\n(port number on control connection)
+S --> C : framed "PORT Q"\n(control connection)
 
-C -> SL : <color:#43A047>connect(server_ip, Q)</color>\n(data connection)
-SL -> C : send(1-byte length + content)
-deactivate SL
-
-S --> C : "done!"\n(control connection)
+C -> SL : connect(server_ip, Q)\n(data connection)
+SL -> C : sendall(1-byte length + content)
+S --> C : framed "done!"\n(control connection; client consumes it)
 
 C -> C : save to ./client-temp/filename
 
@@ -31,6 +28,8 @@ legend bottom
   Passive mode: the server opens a temporary listener.
   The client connects to the server on the announced port.
   This mirrors real FTP PASV/passive transfer behaviour.
-  Works through NAT because the client initiates both connections.
+  NAT still requires a reachable published data port.
+  The supplied pseudo-FTP baseline runs on one host.
+  Control replies use byte-count + LF + payload; data reads are exact.
 endlegend
 @enduml

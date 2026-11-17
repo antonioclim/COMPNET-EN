@@ -18,7 +18,7 @@ Estimated duration: ~30–35 minutes out of 80.
 1. Start the example server:
 
 ```bash
-python3 index_text-proto_tcp-server_example.py
+python3 S04_Part01A_Example_Text_Proto_TCP_Server.py
 ````
 
 You should see:
@@ -30,7 +30,7 @@ You should see:
 2. In another terminal, start the example client:
 
 ```bash
-python3 index_text-proto_tcp-client_example.py
+python3 S04_Part01B_Example_Text_Proto_TCP_Client.py
 ```
 
 3. At the `connected>` prompt, try:
@@ -47,7 +47,7 @@ Note the following:
 
 * the format of commands (command, key, resource…);
 * the server responses (text message);
-* the fact that the protocol does **not** close the connection on `exit` – the client simply stops sending commands.
+* the fact that `exit` is local: the client sends no frame and closes its connection.
 
 ---
 
@@ -59,13 +59,13 @@ Use `print` (if you wish) or simply reason through the following:
 
   * `"TOTAL_LENGTH command key [resource...]"` as a string,
   * encoded in UTF-8,
-  * TOTAL_LENGTH is the total character count of the entire line.
+  * TOTAL_LENGTH is the total UTF-8 byte count, including its own ASCII digits and the separator. The helper solves N = len(str(N)) + 1 + len(payload.encode("utf-8")); maximum complete frame: 65536 bytes.
 
 * The server:
 
-  * reads the first fragment,
+  * reads ASCII digits through the first space,
   * extracts `TOTAL_LENGTH` (the first value),
-  * continues reading until exactly `TOTAL_LENGTH` characters have been collected,
+  * reads exactly the remaining bytes; surplus bytes stay in the socket for the next frame,
   * parses and executes the command.
 
 In the mini-spec, note explicitly:
@@ -112,7 +112,7 @@ Observe:
 
 ### 5. Student Task – Extending the Protocol (the `count` Command)
 
-1. Open `index_text-proto_tcp-server_template.py`.
+1. Open `S04_Part01C_Template_Text_Proto_TCP_Server.py`.
 
 2. Implement:
 
@@ -142,13 +142,13 @@ framed with `build_framed_response()`.
 4. Start the template server:
 
 ```bash
-python3 index_text-proto_tcp-server_template.py
+python3 S04_Part01C_Template_Text_Proto_TCP_Server.py
 ```
 
 5. Run the example client:
 
 ```bash
-python3 index_text-proto_tcp-client_example.py
+python3 S04_Part01B_Example_Text_Proto_TCP_Client.py
 ```
 
 Test sequences such as:

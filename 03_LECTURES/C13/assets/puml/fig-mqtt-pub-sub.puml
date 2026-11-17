@@ -24,15 +24,15 @@ broker --> subB : SUBACK
 
 pub -> broker : PUBLISH\ntopic: sensors/temperature\npayload: 27.5
 
-broker -[#43A047]-> subA : DELIVER\npayload: 27.5
-broker -[#1565C0]-> subB : DELIVER\npayload: 27.5
+broker -[#43A047]-> subA : PUBLISH\npayload: 27.5
+broker -[#1565C0]-> subB : PUBLISH\npayload: 27.5
 
 == DECOUPLED OPERATION ==
 
 pub -> broker : PUBLISH\ntopic: sensors/temperature\npayload: 31.2
 
-broker -[#43A047]-> subA : DELIVER\npayload: 31.2
-broker -[#1565C0]-> subB : DELIVER\npayload: 31.2
+broker -[#43A047]-> subA : PUBLISH\npayload: 31.2
+broker -[#1565C0]-> subB : PUBLISH\npayload: 31.2
 
 legend right
 The broker matches topics and routes

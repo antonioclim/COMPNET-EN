@@ -28,6 +28,7 @@ def main():
     )
 
     # Enable an anonymous user as well, with read-only access.
+    os.makedirs('./nobody', exist_ok=True)
     authorizer.add_anonymous('./nobody')
 
     # Handler that will manage FTP connections

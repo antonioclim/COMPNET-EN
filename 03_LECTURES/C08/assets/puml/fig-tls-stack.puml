@@ -30,6 +30,7 @@ legend right
   transport layers. It encrypts data before
   handing it to TCP (or DTLS to UDP).
   The application sees a secure channel;
-  the network sees only ciphertext.
+  payload is encrypted; network observers still see
+  addressing, timing, sizes and some handshake metadata.
 endlegend
 @enduml

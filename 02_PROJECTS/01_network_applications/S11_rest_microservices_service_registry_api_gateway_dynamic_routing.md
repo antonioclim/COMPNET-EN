@@ -47,6 +47,10 @@ The project aims for a minimal set of mechanisms that appear in real systems: a 
 - **Protocol/default ports (E2):** TCP+UDP: gateway 8080/TCP; microservices 5101, 5102/TCP; registry 8500/TCP; discovery 239.10.11.12:5111/UDP.
 - The Flex component must work with the default values (without manual reconfiguration) so that it can be integrated into automated tests.
 
+### Interpretation and complementary evidence
+
+The [E2 capture and semantic-evidence matrix](../00_common/E2_CAPTURE_EVIDENCE_MATRIX.md#s11) maps every capture rule to its generating action and the complementary application evidence.
+
 ### Deliverables
 - `flex/` directory with sources plus build/run instructions (avoid exotic dependencies where possible).
 - `docs/FLEX.md` with:
@@ -135,7 +139,7 @@ The project aims for a minimal set of mechanisms that appear in real systems: a 
 - One example of registration or heartbeat message towards the registry is included.
 
 ### Automatic PCAP criteria (E2)
-These criteria are **deterministic** and can be verified automatically with `tshark`.
+These capture checks are reproducible with `tshark`. Frame counts are smoke checks; they do not replace the application tests or prove complete project acceptance.
 - Official rules: `tools/pcap_rules/S11.json`
 - In the catalogue (template): `00_common/tools/pcap_rules/S11.json` and `00_common/tools/validate_pcap.py` (copy into the student repository).
 
@@ -143,11 +147,11 @@ These criteria are **deterministic** and can be verified automatically with `tsh
 
 | ID | tshark filter (`-Y`) | Condition | What it validates |
 |---:|---|---:|---|
-| R1 | `udp.dstport==5111 && ip.dst==239.10.11.12` | `>= 1` | At least one UDP multicast announcement (service discovery). |
-| R2 | `tcp.dstport==8080 && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | Handshake to the API Gateway. |
-| R3 | `tcp.port==8080 && frame contains "GET "` | `>= 1` | HTTP request to the gateway. |
-| R4 | `tcp.port==8080 && frame contains "HTTP/1.1 200"` | `>= 1` | 200 response through the gateway. |
-| R5 | `(tcp.port==5101 || tcp.port==5102) && frame contains "HTTP/1.1"` | `>= 1` | The gateway communicates with at least one microservice (HTTP upstream). |
+| R1 | `udp.dstport==5111 && ip.dst==239.10.11.12` | `>= 1` | A UDP frame addressed to the discovery multicast group is present; decode its service announcement. |
+| R2 | `tcp.dstport==8080 && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | SYN connection attempt to the API Gateway. |
+| R3 | `tcp.port==8080 && frame contains "GET "` | `>= 1` | HTTP request-marker bytes are present on the gateway transport. |
+| R4 | `tcp.port==8080 && frame contains "HTTP/1.1 200"` | `>= 1` | HTTP 200 marker bytes are present on the gateway transport. |
+| R5 | `(tcp.port==5101 \|\| tcp.port==5102) && frame contains "HTTP/1.1"` | `>= 1` | A payload-bearing frame on a microservice port is present; correlate the gateway-to-service exchange. |
 
 ### Deliverables
 - Docker Compose with `registry`, `gateway`, at least two microservices and `tester`.

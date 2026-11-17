@@ -21,7 +21,9 @@ tc -> ts : ACK
 tc -> ts : "Hello" (bidirectional stream)
 ts --> tc : "Reply"
 tc -> ts : FIN
-ts --> tc : FIN-ACK
+ts --> tc : ACK (acknowledges client FIN)
+ts -> tc : FIN
+tc --> ts : ACK (acknowledges server FIN)
 
 == TCP CONNECTION CLOSED ==
 

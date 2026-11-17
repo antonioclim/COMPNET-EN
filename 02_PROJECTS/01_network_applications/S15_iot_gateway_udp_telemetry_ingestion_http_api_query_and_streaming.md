@@ -24,6 +24,10 @@ In the demo you follow the full flow: two sensors send values, the gateway colle
 
 The IoT gateway combines two traffic types with different properties: UDP for ingestion (losses, duplicates) and HTTP/TCP for querying (request/response with status codes). In E1 you define clearly what “accepted measurement” means: mandatory fields, valid ranges, deduplication rules (timestamp/sequence) and per-sensor limits. To avoid amplification effects, it is recommended that UDP ingestion remains predominantly unidirectional and any acknowledgements are rare and conditional (for example only for messages marked as configuration).
 
+### Canonical telemetry fields
+
+Every datagram begins with the four ASCII bytes `IOT1`. Its JSON or TLV payload represents `device_id` (non-empty identifier), `ts` (timestamp), `seq` (non-negative sequence number) and `value` (measurement). `sensor_id` is not a second mandatory identifier. E1 fixes timestamp units, numeric ranges, TLV tags if used and the policy for duplicate/out-of-order sequence numbers. The examples use JSON with `ts` in Unix seconds.
+
 ## Learning objectives
 - Define a UDP telemetry protocol with validation and limits
 - Implement a per-sensor bounded queue (ring buffer) for the latest N values
@@ -46,6 +50,13 @@ The IoT gateway combines two traffic types with different properties: UDP for in
 ### Contract (interface) — fixed for assessment
 - **Protocol/default ports (E2):** UDP+HTTP: ingest 5515/UDP; API 8080/TCP.
 - The Flex component must work with the default values (without manual reconfiguration) so that it can be integrated into automated tests.
+
+### Interpretation and complementary evidence
+
+The [E2 capture and semantic-evidence matrix](../00_common/E2_CAPTURE_EVIDENCE_MATRIX.md#s15) maps every capture rule to its generating action and the complementary application evidence.
+
+- Decode the payload after IOT1 with the E1 JSON/TLV schema and demonstrate device_id, ts, seq and value.
+- Correlate seq values with deduplication/out-of-order tests; presence of the ASCII word seq is not a binary-format requirement.
 
 ### Deliverables
 - `flex/` directory with sources plus build/run instructions (avoid exotic dependencies where possible).
@@ -71,7 +82,7 @@ The IoT gateway combines two traffic types with different properties: UDP for in
 - `udp` — UDP telemetry traffic
 - `udp.length < 200` — short datagrams typical of telemetry
 - `http.request.method == "GET"` — HTTP requests to the gateway
-- `frame contains "sensor_id"` — marker for an identification field in JSON telemetry
+- `frame contains "device_id"` — marker for an identification field in JSON telemetry
 - `udp.checksum_bad == 1` — datagrams with an invalid checksum (if present)
 
 ### Guiding questions
@@ -86,17 +97,17 @@ The IoT gateway combines two traffic types with different properties: UDP for in
 
 ## Functional requirements
 ### MUST (mandatory)
-- The gateway listens on UDP and receives telemetry from sensors in a documented format (mandatory fields: `sensor_id`, `ts`, `value`).
+- The gateway listens on UDP and receives telemetry from sensors in a documented format (mandatory fields: `device_id`, `ts`, `seq`, `value`).
 - Validation: refuse malformed datagrams, impossible values (by defined rules) and payload above a limit.
 - Local storage: the latest N measurements per sensor in a bounded structure (ring buffer), with N configurable.
-- HTTP API exposing at least: list of available sensors and `GET /latest?sensor_id=...` (or equivalent), returning deterministic JSON.
+- HTTP API exposing at least: list of available sensors and `GET /latest?device_id=...` (or equivalent), returning deterministic JSON.
 - Automated tests send UDP telemetry then verify via HTTP that data are present and correct.
 - UDP telemetry has a deterministic format and starts with ASCII magic `IOT1` plus JSON or TLV; includes mandatory `device_id` and `seq` (monotonic) for deduplication.
 - API exposes a streaming endpoint (recommended: SSE) for live metrics, with a documented backpressure policy.
 
 ### SHOULD (recommended)
 - Deduplication and out-of-order handling: ignore packets older than the last measurement for the same sensor, based on `ts` or `seq`.
-- Simple streaming endpoint (SSE or long-poll) that provides near real-time updates to a client.
+- Reconnection and backpressure stress tests for the mandatory SSE/long-poll streaming endpoint.
 - Rate limiting per sensor to prevent flooding and keep the demo stable.
 
 ### MAY (optional)
@@ -107,7 +118,7 @@ The IoT gateway combines two traffic types with different properties: UDP for in
 - Separation between control plane (HTTP) and data plane (UDP). Separate logs for ingestion and API.
 - Timeouts and limits for HTTP; for UDP limit processing queues and avoid blocking.
 - YAML configuration: UDP port, HTTP port, N, validation rules, rate limits.
-- Logs include `sensor_id` and refusal reason for invalid datagrams, without logging full payload if it is large.
+- Logs include `device_id` and refusal reason for invalid datagrams, without logging full payload if it is large.
 - Testability: use a deterministic simulator in E2 to reproduce telemetry sequences.
 
 ## E1 — Documentation and planning
@@ -134,7 +145,7 @@ The IoT gateway combines two traffic types with different properties: UDP for in
 - Mention the filters used for UDP and for HTTP.
 
 ### Automatic PCAP criteria (E2)
-These criteria are **deterministic** and can be verified automatically with `tshark`.
+These capture checks are reproducible with `tshark`. Frame counts are smoke checks; they do not replace the application tests or prove complete project acceptance.
 - Official rules: `tools/pcap_rules/S15.json`
 - In the catalogue (template): `00_common/tools/pcap_rules/S15.json` and `00_common/tools/validate_pcap.py` (copy into the student repository).
 
@@ -142,11 +153,11 @@ These criteria are **deterministic** and can be verified automatically with `tsh
 
 | ID | tshark filter (`-Y`) | Condition | What it validates |
 |---:|---|---:|---|
-| R1 | `udp.dstport==5515 && frame contains "IOT1"` | `>= 3` | At least 3 telemetry datagrams (magic IOT1). |
-| R2 | `tcp.dstport==8080 && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | Handshake to the HTTP API. |
-| R3 | `tcp.port==8080 && frame contains "GET /"` | `>= 1` | At least one HTTP query for metrics (GET). |
-| R4 | `tcp.port==8080 && frame contains "HTTP/1.1 200"` | `>= 1` | 200 response for the API query. |
-| R5 | `udp.dstport==5515 && frame contains "seq"` | `>= 1` | Telemetry contains a sequence field (deduplication/out-of-order handling). |
+| R1 | `udp.dstport==5515 && udp.payload[0:4]==49:4f:54:31` | `>= 3` | At least three UDP datagrams beginning with the four-byte IOT1 prefix. |
+| R2 | `tcp.dstport==8080 && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | SYN connection attempt to the HTTP API. |
+| R3 | `tcp.port==8080 && frame contains "GET /"` | `>= 1` | GET marker bytes are present on the HTTP API transport; assert the decoded query result. |
+| R4 | `tcp.port==8080 && frame contains "HTTP/1.1 200"` | `>= 1` | HTTP 200 marker bytes are present on the HTTP API transport. |
+| R5 | `udp.dstport==5515 && udp.payload[0:4]==49:4f:54:31 && udp.length>12` | `>= 1` | Telemetry contains bytes after IOT1. The E1 JSON/TLV decoder and tests verify device_id, ts, seq and value. |
 
 ### Deliverables
 - Docker Compose with `iot_gateway` and `tester`.
@@ -156,7 +167,7 @@ These criteria are **deterministic** and can be verified automatically with `tsh
 ## E3 — Completion plus demo plus testing
 - All MUST requirements implemented plus demonstrable deduplication/out-of-order handling and rate limiting.
 - Tests for invalid datagrams, unknown sensor and high telemetry volume.
-- Mininet demo: two sensors send values, a client queries and (optional) receives a live stream.
+- Mininet demo: two sensors send values, a client queries and receives the mandatory live stream.
 - Documented refactoring and a mini security audit for input validation and limits.
 
 ## Mininet topology and demo scenario

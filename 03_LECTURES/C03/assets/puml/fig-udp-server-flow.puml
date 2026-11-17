@@ -10,8 +10,8 @@ title UDP server flow (recvfrom / sendto)
 
 start
 
-#E3F2FD:socket(AF_INET, SOCK_DGRAM);
-#E3F2FD:bind((host, port));
+:socket(AF_INET, SOCK_DGRAM); <<#E3F2FD>>
+:bind((host, port)); <<#E3F2FD>>
 
 note right
   No listen() or accept() —
@@ -20,13 +20,13 @@ note right
 end note
 
 repeat
-  #BBDEFB:data, addr = recvfrom(buffer_size);
+  :data, addr = recvfrom(buffer_size); <<#BBDEFB>>
   note right: blocks until a\ndatagram arrives
-  #FFF9C4:process(data);
-  #C8E6C9:sendto(response, addr);
+  :process(data); <<#FFF9C4>>
+  :sendto(response, addr); <<#C8E6C9>>
 repeat while (server running?)
 
-#FFCDD2:close(socket);
+:close(socket); <<#FFCDD2>>
 
 stop
 

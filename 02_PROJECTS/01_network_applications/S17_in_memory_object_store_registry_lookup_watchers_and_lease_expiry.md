@@ -45,6 +45,10 @@ This project is worth adding because it is conceptually different from the exist
 - **Protocol/default ports (E2):** TCP: 5017/TCP.
 - The Flex component must work with the default values without manual reconfiguration so that it can be integrated into automated tests.
 
+### Interpretation and complementary evidence
+
+The [E2 capture and semantic-evidence matrix](../00_common/E2_CAPTURE_EVIDENCE_MATRIX.md#s17) maps every capture rule to its generating action and the complementary application evidence.
+
 ### Deliverables
 - `flex/` directory with sources plus build and run instructions.
 - `docs/FLEX.md` with:
@@ -137,11 +141,11 @@ This project is worth adding because it is conceptually different from the exist
 
 | ID | tshark filter (`-Y`) | Condition | What it validates |
 |---:|---|---:|---|
-| R1 | `tcp.dstport==5017 && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | Handshake to the object-store service. |
-| R2 | `tcp.port==5017 && frame contains "PUBLISH"` | `>= 1` | Publication of a keyed object. |
-| R3 | `tcp.port==5017 && frame contains "GET"` | `>= 1` | Retrieval request for a key. |
-| R4 | `tcp.port==5017 && (frame contains "OBJECT" || frame contains "FETCH" || frame contains "VALUE")` | `>= 1` | Brokered retrieval result appears in payload. |
-| R5 | `tcp.port==5017 && (frame contains "LEASE" || frame contains "HEARTBEAT" || frame contains "EXPIRED" || frame contains "REMOVED")` | `>= 1` | Lease or cleanup semantics are observable. |
+| R1 | `tcp.dstport==5017 && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | SYN connection attempt to the object-store service. |
+| R2 | `tcp.port==5017 && frame contains "PUBLISH"` | `>= 1` | PUBLISH marker bytes are present; assert the keyed object state. |
+| R3 | `tcp.port==5017 && frame contains "GET"` | `>= 1` | GET marker bytes are present; decode the requested key. |
+| R4 | `tcp.port==5017 && (frame contains "OBJECT" \|\| frame contains "FETCH" \|\| frame contains "VALUE")` | `>= 1` | An OBJECT/FETCH/VALUE marker is present; verify the brokered result. |
+| R5 | `tcp.port==5017 && (frame contains "LEASE" \|\| frame contains "HEARTBEAT" \|\| frame contains "EXPIRED" \|\| frame contains "REMOVED")` | `>= 1` | A lease/heartbeat/expiry/removal marker is present; assert timing, cleanup and notification separately. |
 
 ### Deliverables
 - Docker Compose with `object_registry` and `tester` plus optional client containers.

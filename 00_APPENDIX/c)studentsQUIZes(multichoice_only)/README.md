@@ -7,20 +7,20 @@ Student-facing revision bank organised by teaching week. Each Markdown file cont
 | Name | Description | Metric |
 |---|---|---|
 | [`README.md`](README.md) | Orientation for the weekly question bank | — |
-| [`COMPnet_W01_Questions.md`](COMPnet_W01_Questions.md) | Week 01 questions (network basics) | 271 lines, 16 questions |
-| [`COMPnet_W02_Questions.md`](COMPnet_W02_Questions.md) | Week 02 questions (models, sockets and transport basics) | 602 lines, 35 questions |
-| [`COMPnet_W03_Questions.md`](COMPnet_W03_Questions.md) | Week 03 questions (network programming, TCP/UDP patterns) | 823 lines, 49 questions |
-| [`COMPnet_W04_Questions.md`](COMPnet_W04_Questions.md) | Week 04 questions (framing, bytes and protocol parsing) | 1,170 lines, 75 questions |
-| [`COMPnet_W05_Questions.md`](COMPnet_W05_Questions.md) | Week 05 questions (IP addressing and subnetting) | 801 lines, 47 questions |
-| [`COMPnet_W06_Questions.md`](COMPnet_W06_Questions.md) | Week 06 questions (NAT, ARP, DHCP, ICMP and neighbour discovery) | 1,126 lines, 77 questions |
-| [`COMPnet_W07_Questions.md`](COMPnet_W07_Questions.md) | Week 07 questions (routing concepts and tools) | 730 lines, 46 questions |
-| [`COMPnet_W08_Questions.md`](COMPnet_W08_Questions.md) | Week 08 questions (transport protocols and socket behaviour) | 787 lines, 55 questions |
-| [`COMPnet_W09_Questions.md`](COMPnet_W09_Questions.md) | Week 09 questions (session and presentation concepts) | 723 lines, 53 questions |
-| [`COMPnet_W10_Questions.md`](COMPnet_W10_Questions.md) | Week 10 questions (application protocols and HTTP concepts) | 728 lines, 52 questions |
-| [`COMPnet_W11_Questions.md`](COMPnet_W11_Questions.md) | Week 11 questions (FTP, DNS and SSH) | 1,218 lines, 60 questions |
-| [`COMPnet_W12_Questions.md`](COMPnet_W12_Questions.md) | Week 12 questions (email protocols and mail security basics) | 1,237 lines, 61 questions |
-| [`COMPnet_W13_Questions.md`](COMPnet_W13_Questions.md) | Week 13 questions (IoT and network security topics) | 1,699 lines, 86 questions |
-| [`COMPnet_W14_Questions.md`](COMPnet_W14_Questions.md) | Week 14 questions (integrated recap and exam revision) | 1,549 lines, 79 questions |
+| [`COMPnet_W01_Questions.md`](COMPnet_W01_Questions.md) | Week 01 questions (network basics) | 16 questions |
+| [`COMPnet_W02_Questions.md`](COMPnet_W02_Questions.md) | Week 02 questions (models, sockets and transport basics) | 35 questions |
+| [`COMPnet_W03_Questions.md`](COMPnet_W03_Questions.md) | Week 03 questions (network programming, TCP/UDP patterns) | 49 questions |
+| [`COMPnet_W04_Questions.md`](COMPnet_W04_Questions.md) | Week 04 questions (framing, bytes and protocol parsing) | 75 questions |
+| [`COMPnet_W05_Questions.md`](COMPnet_W05_Questions.md) | Week 05 questions (IP addressing and subnetting) | 47 questions |
+| [`COMPnet_W06_Questions.md`](COMPnet_W06_Questions.md) | Week 06 questions (NAT, ARP, DHCP, ICMP and neighbour discovery) | 77 questions |
+| [`COMPnet_W07_Questions.md`](COMPnet_W07_Questions.md) | Week 07 questions (routing concepts and tools) | 46 questions |
+| [`COMPnet_W08_Questions.md`](COMPnet_W08_Questions.md) | Week 08 questions (transport protocols and socket behaviour) | 55 questions |
+| [`COMPnet_W09_Questions.md`](COMPnet_W09_Questions.md) | Week 09 questions (session and presentation concepts) | 53 questions |
+| [`COMPnet_W10_Questions.md`](COMPnet_W10_Questions.md) | Week 10 questions (application protocols and HTTP concepts) | 52 questions |
+| [`COMPnet_W11_Questions.md`](COMPnet_W11_Questions.md) | Week 11 questions (FTP, DNS and SSH) | 60 questions |
+| [`COMPnet_W12_Questions.md`](COMPnet_W12_Questions.md) | Week 12 questions (email protocols and mail security basics) | 61 questions |
+| [`COMPnet_W13_Questions.md`](COMPnet_W13_Questions.md) | Week 13 questions (IoT and network security topics) | 86 questions |
+| [`COMPnet_W14_Questions.md`](COMPnet_W14_Questions.md) | Week 14 questions (integrated recap and exam revision) | 79 questions |
 
 Total size: 791 questions across 14 weeks.
 
@@ -43,7 +43,9 @@ apply again"]
 - Students: work through the week’s lecture and lab, then attempt the corresponding `COMPnet_WNN_Questions.md` file without looking at the answers.
 - Instructors: extract questions into an LMS question bank or use them as in-class checks.
 
-The files are Markdown sources. They are not automatically imported by the repository tooling.
+The files are Markdown sources. They are not automatically imported by the repository tooling. Question numbers and historical source identifiers are retained for traceability. A self-contained hypothetical design exercise defines its own contract; it must not be treated as an executable description of the supplied laboratory files. In particular, S04 uses LF-independent total-length text framing, a one-byte binary length prefix and its documented UDP message model. Validate the supplied scripts using the seminar instructions.
+
+For LMS use, configure the question type, the correct choice or formula, tolerance and random-value ranges explicitly. Preview the resulting question in the target LMS before assigning it; the Markdown feedback is not a verified Moodle import package.
 
 ## Design Notes
 

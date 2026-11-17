@@ -1,4 +1,4 @@
-# Computer Networks Teaching Materials at Top Universities
+# Computer Networks Teaching Materials at Selected Universities
 ## A Comparative Analysis — Second Edition
 
 ---
@@ -6,7 +6,7 @@
 <div align="center">
 
 **Comparative Study: Computer Networks Curricula**  
-*Top 50 QS/THE/ARWU Faculties vs. the COMPNET-EN / ASE-CSIE Course Kit*
+*Exploratory comparison of selected public materials with the COMPNET-EN / ASE-CSIE course kit*
 
 ---
 
@@ -17,9 +17,31 @@
 
 ---
 
+## Audit correction and interpretation — 17 November 2026
+
+This is an exploratory author assessment, not a validated ranking or a systematic
+review. Its February 2026 opinions, scores and adverse findings are retained as a
+historical record. The unchanged original is available in the
+[v1.4.0 baseline](https://github.com/antonioclim/COMPNET-EN/blob/v1.4.0/SPECIAL_REPORT.md).
+
+The source table names 13 entries, while the original narrative claimed 17 courses.
+It does not supply the ranking edition, an operational inclusion rule, immutable
+source snapshots or a search log sufficient to reproduce that selection. Dates
+in that table are historical author-reported dates, not access dates established
+by the v1.5.0 audit. The 1–10 scores lack an independently applied scoring rubric
+and should be read as opinions. Absence from the listed public material does not
+establish absence from a course, institution or the wider literature.
+
+The sections below correct identified bibliographic errors, distinguish current
+CI from historical audit checks and qualify unsupported exclusivity/absence
+claims. They do not manufacture a missing comparative dataset. Rebuilding the
+external-source corpus with dated evidence is still required before this report
+can support comparative research claims. Licence interpretation also remains
+subject to the [author's pending decision](00_TOOLS/qa/LICENCE_DECISION_PENDING.md).
+
 ## Disclaimer and Conflict of Interest
 
-This report was written by one of the authors of the COMPNET-EN materials. The conflict of interest is therefore structural, not incidental, and no amount of careful phrasing eliminates it. What can be done — and what this second edition attempts more rigorously than the first — is to ground every claim in publicly verifiable artefacts: URLs, file counts, commit histories, and published papers. Where a claim cannot be independently verified, it is marked as such.
+This report was written by one of the authors of the COMPNET-EN materials. The conflict of interest is therefore structural, not incidental, and no amount of careful phrasing eliminates it. What can be done — and what this second edition attempts more rigorously than the first — is to ground every claim in publicly verifiable artefacts: URLs, file counts, commit histories, and published papers. The audit correction above identifies important gaps in that aim; the historical comparison is not fully independently reproducible.
 
 The reader who wants to check the data should start at `https://github.com/antonioclim/COMPNET-EN` (the kit under evaluation), then visit the repositories and course pages listed in Section 2. Every factual assertion in this document is intended to be falsifiable against those sources.
 
@@ -39,9 +61,9 @@ This second edition also attempts to correct a methodological weakness of the fi
 
 ### 1.2. Scope and Methodology
 
-We examined **17 networking courses** from institutions ranked in the QS World University Rankings, Times Higher Education, and ARWU top 50 for Computer Science. The analysis is restricted to materials that are **publicly accessible** as of February 2026 — GitHub repositories, course websites, open educational platforms, and published papers. No materials behind login walls (Canvas, Moodle, Courseworks) were included.
+The original narrative described **17 networking courses**, but only 13 entries are identified in the final source table and some links are too general to reproduce a course-level inspection. The intended scope was public GitHub repositories, course websites, open educational platforms and papers available in February 2026. The claimed Top 50 selection cannot be reconstructed without a ranking edition and inclusion rule. Authenticated course material was outside the stated scope.
 
-**Reproducibility note:** Every URL cited in this report was accessed between 25 and 28 February 2026. The reader can verify all claims by visiting the cited sources. Where a repository has a commit history, the relevant commit date is noted. Where a course website may have changed since our access, the limitation is acknowledged.
+**Historical access claim:** the original author reported access between 25 and 28 February 2026. This repository does not contain the corresponding access log and source snapshots; the present audit does not certify that retrospective claim. A live URL permits a new inspection, not exact reproduction of its historical contents.
 
 **Evaluation criteria (unchanged from v1.0, extended with C8–C10):**
 
@@ -120,7 +142,7 @@ The following table documents what we could and could not access:
 | 🇭🇰 CUHK | CSCI 4430 | `henryhxu/CSCI4430` (54 ⭐, 863 commits) | ✅ Full | Fall 2025 |
 | 🇷🇴 ASE-CSIE | COMPNET-EN | `antonioclim/COMPNET-EN` | ✅ Full | Feb 2026 |
 
-**Observation.** Of the 17 external courses examined, only roughly half (9–10) offer substantial publicly inspectable materials. MIT 6.5820 — often cited as a benchmark — has no current public materials beyond OCW archives from over two decades ago. Imperial College London has no publicly accessible networking course materials whatsoever. TU München distributes via SSH-authenticated Git and Moodle. These are not lesser courses; they are simply courses whose quality we cannot independently evaluate.
+**Historical observation, limited to the recorded sources.** The original inspection reported substantial public material for roughly half of its intended sample. The listed sources do not establish the absence of current MIT or Imperial networking material across the web. Restricted-access examples illustrate a visibility limitation; they do not support a judgement that those courses lack the corresponding resources.
 
 This means the comparison that follows is inherently biased towards courses that *choose transparency*. The reader should weight conclusions accordingly.
 
@@ -181,7 +203,7 @@ Topic coverage reveals a more interesting picture than raw week counts. The foll
 | Email Protocols | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ✅ |
 | FTP | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ✅ |
 
-**Observation.** COMPNET-EN covers the broadest range of application-layer protocols among the courses examined. IoT/MQTT and gRPC appear in none of the other 17 courses. Email protocols (SMTP/POP3/IMAP) appear only in UCLouvain's textbook. This breadth comes at a cost: where Stanford allocates 3–4 weeks to incrementally building a TCP implementation, COMPNET-EN necessarily treats each topic at lesser depth. The trade-off is real, and whether breadth or depth is preferable depends on the programme's objectives.
+**Observation.** COMPNET-EN includes IoT/MQTT, gRPC and email protocols. The original comparison did not identify equivalent coverage in several of its listed public sources, but its incomplete corpus cannot support an exhaustive breadth ranking or a claim that other courses omit these topics. This breadth comes at a cost: where Stanford allocates 3–4 weeks to incrementally building a TCP implementation, COMPNET-EN necessarily treats each topic at lesser depth. The trade-off is real, and whether breadth or depth is preferable depends on the programme's objectives.
 
 ### 3.2. Dimension C2: Code Quality
 
@@ -290,7 +312,7 @@ GA Tech ────┼─────────┼────⚫────
 
 **NPS Labtainers** is the closest structural parallel to COMPNET-EN's Docker philosophy: every lab is containerised, distributed via Docker Hub, and operated through a unified CLI. It offers over 50 labs covering networking and security. However, Labtainers is a *lab framework*, not a complete course kit with integrated lectures, quizzes, projects, and instructor notes.
 
-**COMPNET-EN's 18 Docker Compose labs spanning the full 14-week semester, with a unified `lab_runner` and Portainer integration, is — to the best of our knowledge and based on publicly verifiable evidence — unmatched among semester-long undergraduate networking courses.** The external frameworks that come closest — Kathará (Roma Tre / Télécom Paris, used at KTH, UCLouvain) and Containerlab — are standalone tools, not integrated course kits.
+**COMPNET-EN combines semester materials, registered Compose labs, `lab_runner` and Portainer guidance. The available comparison does not establish that this combination is unmatched.** The external frameworks that come closest — Kathará (Roma Tre / Télécom Paris, used at KTH, UCLouvain) and Containerlab — are standalone tools, not integrated course kits.
 
 ### 3.5. Dimension C5: Documentation
 
@@ -371,42 +393,33 @@ CMU 15-441          ▓▓▓▓▓▓                            3 large multi-
 
 ### 3.7. Dimension C7: Interactive Elements
 
-The first edition identified interactive HTML presentations as a differentiator. This remains true in the second edition: COMPNET-EN provides 101 HTML files across `04_SEMINARS/_HTMLsupport/` and `00_APPENDIX/b)optional_LECTURES/`, plus 10 HTML slide decks in the Python self-study guide.
+The first edition identified interactive HTML presentations as a differentiator. This remains true in the second edition: The audited v1.4.0 repository contains 101 HTML files in total, including the ten Python slide decks, fourteen optional lecture decks and the Mininet setup guide. These are file counts, not evidence that every interactive behaviour has passed native-browser acceptance.
 
-Among the 17 external courses examined, **UCLouvain's Sphinx-based ebook** is the closest parallel — it renders as an interactive web document with embedded exercises. Berkeley CS168's textbook (`textbook.cs168.io`) is web-based but read-only, without embedded quizzes or interactive elements. All other courses distribute materials as PDFs, PPTs, Google Slides, or pre-recorded video.
+Among the 17 external courses examined, **UCLouvain's Sphinx-based ebook** is the closest parallel — it renders as an interactive web document with embedded exercises. Berkeley CS168's textbook (`textbook.cs168.io`) is web-based but read-only, without embedded quizzes or interactive elements. The other formats recorded in the original comparison include PDFs, presentations and video; this list does not establish that those courses lack interactive material elsewhere.
 
-The claim from the first edition — that interactive HTML presentations with embedded quizzes and keyboard navigation remain a largely unexploited niche — still holds.
+Interactive presentations remain a design choice of this kit. Establishing how widely that choice is used requires a reproducible external-source survey.
 
 ### 3.8. Dimension C8: Quality Assurance and CI/CD
 
 This dimension is new to the second edition and reflects what is arguably COMPNET-EN's most distinctive infrastructure investment.
 
-**COMPNET-EN's CI/CD pipeline** (`.github/workflows/ci.yml`) runs on every push and pull request:
+**Current v1.5.0 candidate CI** (`.github/workflows/ci.yml`) and local release
+packaging use the same entry point: `python 00_TOOLS/qa/run_checks.py`.
+The gate parses Python, checks executable permissions without first repairing
+them, checks local Markdown links, runs the lexical integrity and PlantUML target
+checks and executes the repository's collected Python regression tests.
+Dependencies are installed from `00_TOOLS/qa/requirements.txt`.
 
-1. Executable permissions normalisation from manifest (`apply_permissions.sh`)
-2. Executable permissions verification (`check_executability.sh`)
-3. Markdown relative link checking across 391 files, 2 231 targets (`check_markdown_links.py`)
-4. Language and lexical integrity check — UTF-8 token validation, Romanian leakage control (`check_integrity.py`)
-5. PlantUML figure target validation (`check_fig_targets.py --puml-only`)
+The existing `QA_AUDIT_REPORT.md` is a historical audit document. Its Compose,
+dependency and inventory observations are not automatically recurring CI checks.
+The current gate does not start Docker, Mininet, VirtualBox or a native browser
+and cannot establish acceptance in those environments. In particular, it does
+not prove Compose service readiness merely by passing Python tests.
 
-The **QA Audit Report** (`QA_AUDIT_REPORT.md`) additionally documents:
-- Docker Compose YAML parse validation for all 28 config files
-- `depends_on: service_healthy` sanity checks for all registered labs
-- Python-image dependency risk scanning (detecting runtime failures from missing packages)
-- Archive hygiene: no `__pycache__` or `.pyc` artefacts shipped
-
-Among all courses examined, the closest parallel is **KAIST CS341**, which has 4 GitHub Actions workflows testing builds on Linux, WSL, and macOS. **UCLouvain's ebook** uses Travis CI for automated builds. **No other networking course** in the sample shows evidence of CI/CD in its public repository. Stanford, CMU, Princeton, Georgia Tech, Michigan, Johns Hopkins, Berkeley, and CUHK have no visible CI/CD.
-
-| QA Feature | COMPNET-EN | KAIST | UCLouvain | NPS | All Others |
-|:-----------|:----------:|:-----:|:---------:|:---:|:----------:|
-| CI pipeline on push/PR | ✅ | ✅ | ✅ | regression | ❌ |
-| Markdown link validation | ✅ (2 231 targets) | ❌ | ❌ | ❌ | ❌ |
-| Docker Compose coherence | ✅ | ❌ | ❌ | ❌ | ❌ |
-| Executable permission control | ✅ (96 manifest entries) | ❌ | ❌ | ❌ | ❌ |
-| Lexical integrity / leakage | ✅ | ❌ | ❌ | ❌ | ❌ |
-| Figure target validation | ✅ | ❌ | ❌ | ❌ | ❌ |
-
-This level of QA automation for *teaching materials* (as distinct from code) is, to our knowledge, without precedent in the courses examined.
+The previous cross-institution CI comparison is an author observation with an
+incomplete source corpus. No claim of unprecedented QA or universal absence of
+CI in other courses is supported here. See [CI setup](00_APPENDIX/docs/ci_setup.md)
+for the executable workflow and its limits.
 
 ### 3.9. Dimension C9: Academic Validation (Where COMPNET-EN Loses)
 
@@ -416,43 +429,33 @@ This is the dimension that the first edition ignored and that the second edition
 
 | Course | Publication | Venue | Year |
 |:-------|:-----------|:------|:----:|
-| ETH Zürich mini-Internet | "An Open Platform to Teach How the Internet Practically Works" | ACM SIGCOMM Education Workshop | 2020 |
-| KAIST KENSv3 | "Teaching Networking by Building Protocol Stacks" | ACM SIGCSE (predecessor work) | 2015 |
+| ETH Zürich mini-Internet | "An Open Platform to Teach How the Internet Practically Works" | ACM SIGCOMM Computer Communication Review, 50(2); also presented as Best of CCR at SIGCOMM | 2020 |
+| KAIST KENSv2 (predecessor to KENSv3) | "An Educational Networking Framework for Full Layer Implementation and Testing" | ACM SIGCSE, pp. 663–668 | 2015 |
 | NPS Labtainers | "Individualizing Cybersecurity Lab Exercises with Labtainers" | IEEE Security & Privacy | 2018 |
 | NPS Labtainers | Conference demonstration | ACM SIGCSE | 2021 |
 | UCLouvain IPMininet | Multiple publications on INGInious and IPMininet | Various | 2014–2024 |
-| SEED Labs (Du, Syracuse) | "SEED: A Suite of Instructional Laboratories" | ACM Journal on Educational Resources | 2011+ |
+| SEED Labs (Du & Wang) | "SEED: A Suite of Instructional Laboratories for Computer Security Education" | ACM Journal on Educational Resources in Computing, 8(1), Article 3 | 2008 |
 
-**COMPNET-EN has zero peer-reviewed publications, zero documented adoption beyond ASE-CSIE Bucharest, and limited external community engagement.** No GitHub stars/forks data suggests significant external usage. No conference presentation has described its approach. No measurable learning outcomes have been published.
+**The source corpus attached to this report does not document peer-reviewed evaluation of COMPNET-EN, adoption beyond ASE-CSIE or measured learning outcomes.** No reproducible literature/adoption search log or dated repository-metrics dataset is supplied, so this is an evidence gap, not a demonstrated universal absence of publications, presentations or use.
 
-This matters because, without external validation, the pedagogical claims made in this report — and in the kit's own documentation — rest entirely on the authors' assertions. The recently adopted multi-licence model (CC BY-NC-SA 4.0 for documentation, GPL-3.0 for code — see Section 3.10) removes the licensing barrier to external replication that existed in the first edition, but replication itself has not yet occurred.
+This matters because, without external validation, the pedagogical claims made in this report — and in the kit's own documentation — rest entirely on the authors' assertions. The declared multi-licence model is discussed in Section 3.10, but its internal conflicts remain unresolved. Neither licensing clarity nor external replication can be inferred from the existing text alone.
 
 > *Self-criticism:* This is the single largest weakness of the COMPNET-EN project. Infrastructure without validation is engineering; validated infrastructure is scholarship. The transition from the first to the second requires work that has not yet been done.
 
 ### 3.10. Dimension C10: Licensing, Ecosystem, and Adoption
 
-The value of a course kit is a function not only of its contents but of who can use it, adapt it, and build upon it. As of February 2026, COMPNET-EN has adopted a **multi-licence model** structurally aligned with UCLouvain CNP3:
+`LICENCE.md` declares CC BY-NC-SA 4.0 for educational content,
+GPL-3.0-or-later for code and reserved rights for assessment material. It also
+contains overlapping instructor-material categories and additional commercial-use
+and co-authorship provisions. The v1.5.0 audit therefore does not treat the reuse
+policy as resolved or rank its openness against other projects.
 
-- **Category A (documentation, lectures, seminars, guides, diagrams, HTML presentations):** CC BY-NC-SA 4.0 — any institution may use, adapt, and translate for non-commercial teaching, provided attribution and ShareAlike conditions are met.
-- **Category B (Python scripts, shell scripts, Dockerfiles, Compose configs, CI workflows, QA tools, lab_runner):** GPL-3.0-or-later — standard open-source copyleft; modifications must be published under the same licence.
-- **Category C (quiz banks, formative quizzes, solution templates, PCAP validation rules, instructor outlines):** All Rights Reserved — access by bilateral agreement, protecting assessment integrity.
-
-An additional clause requires co-authorship when materials constitute more than 20% of a derived published work.
-
-| Course/Framework | Licence Model | Non-Commercial Teaching | Adaptation Permitted | Institutional Adoption (documented) |
-|:-----------------|:-------------|:-----------------------:|:--------------------:|:-----------------------------------:|
-| NPS Labtainers | Public domain | ✅ | ✅ | Military + civilian; NSF-funded |
-| SEED Labs (Syracuse) | Open | ✅ | ✅ | 1 180+ institutions worldwide |
-| UCLouvain CNP3 ecosystem | CC BY-SA (ebook), GPL (exercises) | ✅ | ✅ | Multiple European universities |
-| Kathará | GPL-3.0 | ✅ | ✅ | Roma Tre, Télécom Paris, KTH, UCLouvain |
-| ETH mini-Internet | Apache-2.0 | ✅ | ✅ | Workshops, NANOG presentations |
-| Stanford CS144 | — (no explicit licence) | ⚠️ | ⚠️ | Global self-study community (PKUFlyingPig fork) |
-| KAIST KENSv3 | MIT | ✅ | ✅ | 151 GitHub stars |
-| **COMPNET-EN** | **CC BY-NC-SA / GPL-3.0 / Reserved** | **✅** | **✅ (A+B)** | **ASE-CSIE Bucharest (elsewhere not yet documented)** |
-
-**What changed and why.** The first edition of this report identified the then-restrictive CC BY-NC-ND 4.0 licence as a structural impediment to community growth. That licence has since been replaced. COMPNET-EN now uses a tri-category model comparable in openness to UCLouvain, Kathará, and SEED Labs — the three projects with the strongest documented adoption trajectories. The non-commercial clause (NC in CC BY-NC-SA) is more restrictive than UCLouvain's CC BY-SA or NPS's public domain, but it is the same constraint applied by many OER projects and does not prevent academic adoption.
-
-**What has not changed.** The licence is a structural prerequisite for community growth, not a guarantee of it. No documented adoption outside ASE-CSIE Bucharest exists yet. No GitHub fork or star data suggests significant external usage. The licence change removes a barrier; whether the materials prove useful enough for others to invest in adapting them is a question that only time and the quality of the kit itself can answer.
+The [pending decision record](00_TOOLS/qa/LICENCE_DECISION_PENDING.md) preserves
+the issue and provides concrete alternatives for the author. The original
+comparison and its adoption figures remain available in v1.4.0; they are not
+repeated as current verified measurements. External adoption remains
+**undocumented in the evidence supplied with this report**, which is different
+from proving that no adoption exists.
 
 ---
 
@@ -462,15 +465,15 @@ An additional clause requires co-authorship when materials constitute more than 
 
 **What they do brilliantly:** The 8-checkpoint TCP/IP stack build is the gold standard for networking project pedagogy. The narrative coherence — each lab extending the previous one — creates a sense of architectural accumulation that discrete weekly projects cannot replicate. Code quality enforcement (clang-format, clang-tidy, sanitisers) is exemplary.
 
-**What they lack publicly:** No Docker infrastructure (VM image only). No explicit pedagogical methodology documentation. No formative assessment tools. No instructor guides.
+**Not identified in the original source selection (not an exhaustive absence claim):** No Docker infrastructure (VM image only). No explicit pedagogical methodology documentation. No formative assessment tools. No instructor guides.
 
 **Lesson for COMPNET-EN:** A single deep, narratively coherent project can teach more about TCP than fifteen separate briefs. The roadmap should consider a "capstone track" option alongside the existing catalogue.
 
 ### 4.2. ETH Zürich: The Infrastructure and Validation Model
 
-**What they do brilliantly:** The mini-Internet project is unique in requiring class-wide cooperation at Internet scale. Each group operates a real AS. And critically, they *published the approach* at SIGCOMM'20, providing academic validation that others can cite and replicate.
+**What they do brilliantly:** The mini-Internet project is unique in requiring class-wide cooperation at Internet scale. Each group operates a real AS. And critically, they *published the approach* in ACM SIGCOMM Computer Communication Review in 2020 and presented it as a Best of CCR paper at SIGCOMM, providing academic validation that others can cite and replicate.
 
-**What they lack publicly:** No explicit pedagogical scaffolding. No interactive presentations. No formative quizzes. Limited documentation beyond the project itself.
+**Not identified in the original source selection (not an exhaustive absence claim):** No explicit pedagogical scaffolding. No interactive presentations. No formative quizzes. Limited documentation beyond the project itself.
 
 **Lesson for COMPNET-EN:** Publication matters. The mini-Internet project is influential not only because it is good but because it is *documented in a peer-reviewed venue*.
 
@@ -478,7 +481,7 @@ An additional clause requires co-authorship when materials constitute more than 
 
 **What they do brilliantly:** The complete ecosystem — open textbook (3rd edition, 4th in progress), INGInious auto-graded exercises with PCAP field validation, IPMininet for topology creation, C socket exercises, network trace problems, over 40 GitHub repositories in the `cnp3` organisation — demonstrates what long-term sustained investment in open educational resources can achieve.
 
-**What they lack:** Docker-native weekly labs. Interactive HTML presentations. Weekly quiz banks. The ebook is comprehensive but static (Sphinx rendering, no embedded interactivity).
+**Scope distinction:** the CNP3 ecosystem includes INGInious interactive, auto-graded exercises as well as Sphinx-rendered textbook content. The original report does not establish the absence of interactivity from that ecosystem. A like-for-like comparison should distinguish textbook, presentation and assessment functions.
 
 **Lesson for COMPNET-EN:** Building an ecosystem takes years of consistent effort across textbook, tooling, and grading infrastructure. COMPNET-EN has the *breadth* but not yet the *longevity* or *external validation*.
 
@@ -494,7 +497,7 @@ An additional clause requires co-authorship when materials constitute more than 
 
 **What they do brilliantly:** The three multi-week projects (Mixnet, TCP, HTTP+video) are technically ambitious and industry-relevant. The custom Wireshark dissector and AWS EC2 testing infrastructure demonstrate serious investment. Recent offerings (Fall 2024) added a privacy-preserving mix network project — a contemporary topic that no other course in the sample addresses.
 
-**What they lack publicly:** No CI/CD. No Docker for most work (custom VMs). No formative assessment tools visible. No instructor guides.
+**Not identified in the original source selection (not an exhaustive absence claim):** No CI/CD. No Docker for most work (custom VMs). No formative assessment tools visible. No instructor guides.
 
 **Lesson for COMPNET-EN:** The Wireshark dissector idea is excellent — building custom protocol decoders forces students to think at the wire level. COMPNET-EN's PCAP tools (`pcap_stats.py`, `pcap_tshark_summary.py`) could evolve in this direction.
 
@@ -504,7 +507,7 @@ An additional clause requires co-authorship when materials constitute more than 
 
 ### 5.1. Evaluation Matrix
 
-Scoring 1–10 per dimension, evaluated by the author with acknowledged bias. Scores reflect only what is publicly verifiable. "N/V" = not verifiable from public sources.
+Historical author scores on a 1–10 scale are retained below, including unfavourable scores. They are not recomputed or validated by the audit: the original evidence matrix, calibration rules and independent ratings are absent. "N/V" means not verified by the original author from the selected public sources. The total is not a research result or a current ranking.
 
 | Course | C1 | C2 | C3 | C4 | C5 | C6 | C7 | C8 | C9 | C10 | TOTAL |
 |:-------|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:---:|:-----:|
@@ -523,7 +526,7 @@ Scoring 1–10 per dimension, evaluated by the author with acknowledged bias. Sc
 
 ### 5.2. Findings that Changed from the First Edition
 
-1. **C1 (Comprehensiveness) raised from 7 to 8.** The first edition evaluated a kit that covered standard networking topics across 14 weeks but lacked IoT/MQTT, gRPC/modern RPC, and the 39 runnable micro-scenarios now embedded in lecture directories. The current kit is the broadest in the sample — no other course covers both IoT/MQTT and gRPC. The score does not reach 9 or 10 because Berkeley CS168 (17 weeks) and ETH Zürich (15 weeks, deeper per-topic) remain ahead in either duration or depth.
+1. **C1 (Comprehensiveness) raised from 7 to 8.** The first edition evaluated a kit that covered standard networking topics across 14 weeks but lacked IoT/MQTT, gRPC/modern RPC, and the 39 runnable micro-scenarios now embedded in lecture directories. The kit includes both IoT/MQTT and gRPC; an exclusive breadth claim is not established by the recorded corpus. The score does not reach 9 or 10 because Berkeley CS168 (17 weeks) and ETH Zürich (15 weeks, deeper per-topic) remain ahead in either duration or depth.
 
 2. **C2 (Code Quality) lowered from 7 to 6.** The first edition was generous. Without strict Python linting in CI, the score cannot match Stanford (10) or CMU (9). The `ruff.toml` exists but is not enforced.
 
@@ -535,23 +538,30 @@ Scoring 1–10 per dimension, evaluated by the author with acknowledged bias. Sc
 
 6. **C6 (Projects) adjusted from 9 to 8.** The 25 project briefs with E1/E2/E3 gates and PCAP validation rules are substantial, but honest comparison with Stanford's TCP stack build and CMU's multi-week systems projects requires acknowledging the depth gap.
 
-7. **C8 (Quality Assurance) is a new dimension — scored 10.** No other course in the sample maintains a CI/CD pipeline that validates Markdown links (2 231 targets), Docker Compose coherence, executable permissions from a manifest, lexical integrity, and PlantUML figure targets on every push. KAIST CS341 is the closest with 4 GitHub Actions workflows, but their scope is build verification, not content quality assurance.
+7. **C8 (Quality Assurance) was scored 10 by the original author.** This score is retained as historical opinion. Compose coherence was not an every-push check in the inspected workflow. Section 3.8 now describes the actual shared gate; the cross-course exclusivity claim is withdrawn pending a reproducible comparison.
 
-8. **C9 (Academic Validation) is a new dimension — scored 2.** COMPNET-EN has zero peer-reviewed publications, zero documented adoption beyond ASE-CSIE Bucharest, and no conference presentations describing its approach. Compare this to ETH Zürich (SIGCOMM'20), KAIST (SIGCSE'15), NPS Labtainers (IEEE S&P'18, SIGCSE'21), and UCLouvain (multiple venues, 2014–2024). The asymmetry between C8 (10) and C9 (2) is itself a finding: engineering excellence and scholarly validation are independent dimensions.
+8. **C9 (Academic Validation) is a new dimension — scored 2.** The supplied corpus does not document peer-reviewed evaluation, external adoption or conference presentations describing COMPNET-EN; it does not demonstrate their universal absence. Compare this to ETH Zürich (SIGCOMM'20), KAIST (SIGCSE'15), NPS Labtainers (IEEE S&P'18, SIGCSE'21), and UCLouvain (multiple venues, 2014–2024). The asymmetry between C8 (10) and C9 (2) is itself a finding: engineering excellence and scholarly validation are independent dimensions.
 
-9. **C10 (Licensing) raised from 3 to 7.** The adoption of a multi-licence model (CC BY-NC-SA / GPL-3.0 / Reserved) replaces the CC BY-NC-ND 4.0 licence that the first edition flagged as a growth constraint. The new structure is comparable to UCLouvain and Kathará. The score remains below NPS (public domain, 10) and UCLouvain (CC BY-SA, 9) because the NC clause and the co-authorship requirement introduce frictions that fully permissive licences do not, and because no external adoption has yet been documented under the new terms.
+9. **C10 (Licensing) was raised from 3 to 7 by the original author.** That
+historical opinion is retained in the matrix. The current audit identified
+conflicting terms and overlapping categories, so the score must not be used as
+evidence that the licensing barrier has been resolved.
 
-### 5.3. Main Conclusions
+### 5.3. Qualified conclusions
 
-1. **COMPNET-EN occupies a distinctive niche.** It is arguably the most infrastructure-complete, pedagogically explicit, and operationally detailed single-repository networking course kit that is publicly accessible. This is a verifiable claim: the reader can check the file counts, the CI pipeline, the QA report, and the documentation against any other course in the sample.
-
-2. **No single course excels across all dimensions.** Stanford dominates project depth and code quality. ETH Zürich dominates infrastructure ambition and academic validation. UCLouvain dominates ecosystem breadth and formative assessment. NPS dominates lab variety and assessment integrity. Berkeley dominates textbook quality. COMPNET-EN dominates operational completeness, QA automation, and pedagogical documentation. The landscape is fragmented.
-
-3. **The validation gap is the critical weakness.** Without peer-reviewed publication, documented learning outcomes, and multi-institutional adoption, COMPNET-EN's claims rest on self-assessment. This report is itself an instance of the problem: a self-evaluation cannot substitute for external review.
-
-4. **The licence model is now structurally aligned with the field.** The adoption of a multi-licence model (CC BY-NC-SA for documentation, GPL-3.0 for code, all-rights-reserved for examination materials) removes the licensing barrier identified in the first edition. COMPNET-EN now uses a structure comparable to UCLouvain CNP3, Kathará, and SEED Labs — the three projects with the strongest documented adoption trajectories. Whether the materials attract external adoption remains an open question, but the licence is no longer the obstacle.
-
-5. **The breadth-versus-depth trade-off is real.** COMPNET-EN covers IoT/MQTT, gRPC, email protocols, SDN, load balancing, and security across 14 weeks. No other course in the sample matches this breadth. But no other course in the sample sacrifices as much depth per topic, either. The design philosophy prioritises survey completeness over implementation mastery.
+1. COMPNET-EN combines lectures, practical examples, diagrams, project briefs,
+   quizzes and operational tools in one repository. Their presence is directly
+   inspectable; comparative superiority is not established by file counts.
+2. The original case studies suggest useful design alternatives: sustained
+   systems projects, shared network infrastructure, integrated assessment and
+   companion textbooks. The historical scores express the author's priorities.
+3. Evidence of learning effectiveness and independent evaluation remains a gap
+   in the supplied corpus. Self-assessment cannot substitute for those studies.
+4. The licence policy requires an explicit author decision before its reuse
+   conditions can be described coherently.
+5. The breadth-versus-depth trade-off remains a useful design question. The kit
+   covers IoT/MQTT, gRPC, email, SDN, load balancing and security in fourteen weeks;
+   comparisons of achieved student mastery require outcome data.
 
 ### 5.4. Limitations of This Analysis
 
@@ -577,7 +587,9 @@ Scoring 1–10 per dimension, evaluated by the author with acknowledged bias. Sc
 | CMU 15-441 | Build custom Wireshark dissectors for student protocols | Low |
 | Berkeley CS168 | Develop a companion open textbook or integrate with existing open textbooks | Long-term |
 
-### 6.2. Proposed Roadmap
+### 6.2. Historical proposed roadmap
+
+The following dates were proposed in the original report. They are not a record of completed work, accepted publications, funded activity or approved institutional commitments.
 
 ```
 2026 Q1–Q2  ─────► Enforce Python linting in CI (ruff strict, mypy)
@@ -608,7 +620,7 @@ Thanks are also owed to the open-source communities behind Docker, Wireshark, Pl
 
 ### Courses Analysed
 
-| # | University | Course | Primary Public URL | Last Verified |
+| # | University | Course | Primary Public URL | Historical date claimed |
 |:-:|:-----------|:-------|:-------------------|:-------------:|
 | 1 | Stanford | CS144 | `cs144.github.io` / `github.com/CS144` | Dec 2025 |
 | 2 | ETH Zürich | 227-0120-00L | `github.com/nsg-ethz/mini_internet_project` | Dec 2025 |
@@ -626,11 +638,12 @@ Thanks are also owed to the open-source communities behind Docker, Wireshark, Pl
 
 ### Peer-Reviewed Publications Referenced
 
-- Holterbach, T. et al. (2020). "An Open Platform to Teach How the Internet Practically Works." *ACM SIGCOMM Education Workshop*.
-- Thompson, M. F. et al. (2018). "Individualizing Cybersecurity Lab Exercises with Labtainers." *IEEE Security & Privacy*, 16(2).
-- Du, W. (2011+). "SEED: A Suite of Instructional Laboratories for Computer Security Education." *ACM Journal on Educational Resources in Computing*.
-- Brown, N. C. C. & Wilson, G. (2018). "Ten Quick Tips for Teaching Programming." *PLOS Computational Biology*.
-- Mazur, E. (1997). *Peer Instruction: A User's Manual*. Prentice Hall.
+- Holterbach, T., Bühler, T., Rellstab, T., & Vanbever, L. (2020). An open platform to teach how the Internet practically works. *ACM SIGCOMM Computer Communication Review, 50*(2). https://doi.org/10.1145/3402413.3402420
+- Thompson, M. F., & Irvine, C. E. (2018). Individualizing cybersecurity lab exercises with Labtainers. *IEEE Security & Privacy, 16*(2), 91–95. https://doi.org/10.1109/MSP.2018.1870862
+- Du, W., & Wang, R. (2008). SEED: A suite of instructional laboratories for computer security education. *ACM Journal on Educational Resources in Computing, 8*(1), Article 3. https://doi.org/10.1145/1348713.1348716
+- Lee, K., Kim, J., & Moon, S. (2015). An educational networking framework for full layer implementation and testing. In *Proceedings of the 46th ACM Technical Symposium on Computer Science Education* (pp. 663–668). ACM. https://doi.org/10.1145/2676723.2677304
+- Brown, N. C. C., & Wilson, G. (2018). Ten quick tips for teaching programming. *PLOS Computational Biology, 14*(4), e1006023. https://doi.org/10.1371/journal.pcbi.1006023
+- Mazur, E. (1997). *Peer instruction: A user's manual*. Prentice Hall. https://mazur.harvard.edu/publications/peer-instruction-users-manual
 - Parsons, D. & Haden, P. (2006). "Parson's Programming Puzzles: A Fun and Effective Learning Tool for First Programming Courses." *Australasian Computing Education Conference*.
 
 ### Frameworks and Tools Referenced
@@ -652,8 +665,8 @@ Thanks are also owed to the open-source communities behind Docker, Wireshark, Pl
 
 ---
 
-*Last updated: 28 February 2026*  
-*Document version: 2.0*  
+*Historical report: 28 February 2026; audit corrections: 17 November 2026*<br>
+*Document version: 2.0 with v1.5.0 audit corrections*<br>
 *Kit version: v13.05.00*  
 *Repository: `github.com/antonioclim/COMPNET-EN`*
 

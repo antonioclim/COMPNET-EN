@@ -6,8 +6,11 @@ services:
       - ./ftp:/app
       - ./data:/data
     command: ["python", "ftp_server.py"]
+    environment:
+      FTP_MASQUERADE_ADDRESS: 172.29.112.2
     networks:
-      - net_server
+      net_server:
+        ipv4_address: 172.29.113.10
     healthcheck:
       test:
         - CMD
@@ -20,14 +23,18 @@ services:
       start_period: 3s
 
   natfw:
-    image: debian:stable-slim
-    privileged: true
+    build: ./natfw
+    cap_add: [NET_ADMIN]
+    sysctls:
+      net.ipv4.ip_forward: "1"
     volumes:
       - ./natfw:/natfw
     command: ["bash", "/natfw/setup.sh"]
     networks:
-      - net_client
-      - net_server
+      net_client:
+        ipv4_address: 172.29.112.2
+      net_server:
+        ipv4_address: 172.29.113.2
     healthcheck:
       test:
         - CMD-SHELL
@@ -47,10 +54,18 @@ services:
         condition: service_healthy
       ftp:
         condition: service_healthy
+    environment:
+      FTP_HOST: natfw
     command: ["python", "ftp_client.py"]
     networks:
       - net_client
 
 networks:
   net_client:
+    ipam:
+      config:
+        - subnet: 172.29.112.0/24
   net_server:
+    ipam:
+      config:
+        - subnet: 172.29.113.0/24

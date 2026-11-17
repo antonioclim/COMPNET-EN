@@ -25,6 +25,7 @@ def main():
     authorizer.add_anonymous("./nobody")
 
     handler = FTPHandler
+    handler.passive_ports = range(30000, 30010)
     handler.authorizer = authorizer
 
     server = FTPServer(("0.0.0.0", 2121), handler)

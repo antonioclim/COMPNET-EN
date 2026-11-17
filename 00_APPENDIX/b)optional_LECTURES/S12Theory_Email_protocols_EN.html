@@ -113,7 +113,7 @@ Click here to reset your password immediately.</div>
 <div class="quiz-option" onclick="checkQuiz(this,true,'q5')">C) MX record &mdash; specifies the mail exchanger for a domain</div>
 <div class="quiz-option" onclick="checkQuiz(this,false,'q5')">D) PTR record &mdash; maps an IP to a hostname</div>
 </div>
-<div class="quiz-feedback correct" id="q5-correct">Exactly right. MX (Mail Exchanger) records tell the sending server which host accepts email for the target domain. Without MX records, email delivery would require hard-coded server addresses &mdash; an approach that cannot scale.</div>
+<div class="quiz-feedback correct" id="q5-correct">Exactly right. MX (Mail Exchanger) records tell the sending server which host accepts email for the target domain. When MX is absent, SMTP can use an implicit MX pointing to the domain itself and its address records. An explicit null MX instead declares that the domain accepts no mail.</div>
 <div class="quiz-feedback incorrect" id="q5-incorrect">Not quite. A records resolve hostnames to IPs, CNAME creates aliases, PTR performs reverse lookups. For email routing, the sending MTA queries the <strong>MX record</strong> of the recipient&rsquo;s domain (recall Week 11: DNS record types).</div>
 </div></div>
 
@@ -303,6 +303,7 @@ Subject: Meeting tomorrow</div>
 <h2 class="delay-1">Sending Email with Python</h2>
 <p class="delay-1">The <code>smtplib</code> module wraps SMTP commands into a clean, Pythonic API.</p>
 <div class="code-block delay-2" data-lang="python"><span class="keyword">import</span> smtplib
+<span class="keyword">import</span> ssl
 <span class="keyword">from</span> email.mime.text <span class="keyword">import</span> MIMEText
 
 <span class="comment"># Build the message object</span>
@@ -320,7 +321,7 @@ msg[<span class="string">"To"</span>]      = <span class="string">"bob@receiver.
     <span class="string">"smtp.sender.com"</span>,
     <span class="number">587</span>
 ) <span class="keyword">as</span> server:
-    server.starttls()
+    server.starttls(context=ssl.create_default_context())
     server.login(<span class="string">"alice"</span>, <span class="string">"password"</span>)
     server.send_message(msg)
 
@@ -443,7 +444,7 @@ msg[<span class="string">"To"</span>]      = <span class="string">"bob@receiver.
 <div class="card" style="border-left:4px solid var(--accent-warm);"><h4><code>\Flagged</code></h4><p class="text-muted">Marked important / starred.</p></div>
 <div class="card danger-left"><h4><code>\Deleted</code></h4><p class="text-muted">Marked for removal (EXPUNGE).</p></div>
 <div class="card purple-left"><h4><code>\Draft</code></h4><p class="text-muted">Work-in-progress composition.</p></div>
-<div class="card"><h4><code>\Recent</code></h4><p class="text-muted">Arrived since last session.</p></div>
+<div class="card"><h4><code>\Recent</code></h4><p class="text-muted">Legacy IMAP4rev1 recent-arrival flag; removed in IMAP4rev2.</p></div>
 </div></div>
 
 <!-- SLIDE 23 -->
@@ -703,11 +704,15 @@ JVBERi0xLjQKJcOkw7zD...
 <h2 class="delay-1">Reading Email with Python</h2>
 <p class="delay-1">The <code>imaplib</code> module provides low-level IMAP access. Compare with <code>smtplib</code> from slide 16.</p>
 <div class="code-block delay-2" data-lang="python"><span class="keyword">import</span> imaplib
+<span class="keyword">import</span> ssl
+<span class="keyword">from</span> email.parser <span class="keyword">import</span> BytesParser
+<span class="keyword">from</span> email.policy <span class="keyword">import</span> default
 
 <span class="comment"># Connect over TLS</span>
 mail = imaplib.IMAP4_SSL(
     <span class="string">"imap.example.com"</span>,
-    <span class="number">993</span>
+    <span class="number">993</span>,
+    ssl_context=ssl.create_default_context()
 )
 
 <span class="comment"># Authenticate</span>
@@ -731,7 +736,11 @@ status, msg_ids = mail.search(
         mid,
         <span class="string">"(RFC822)"</span>
     )
-    <span class="builtin">print</span>(data[<span class="number">0</span>][<span class="number">1</span>].decode(<span class="string">"utf-8"</span>))
+    message = BytesParser(policy=default).parsebytes(data[0][1])
+    <span class="builtin">print</span>(message.get("Subject"))
+    body = message.get_body(preferencelist=("plain",))
+    <span class="keyword">if</span> body is not None:
+        <span class="builtin">print</span>(body.get_content())
 
 mail.logout()</div>
 </div>
@@ -874,14 +883,35 @@ function changeSlide(d){var n=currentSlide+d;if(n>=1&&n<=totalSlides){currentSli
 function goToSlide(n){currentSlide=n;updateSlide();toggleTOC();}
 function toggleTOC(){document.getElementById('tocModal').classList.toggle('show');}
 function toggleFullscreen(){if(!document.fullscreenElement)document.documentElement.requestFullscreen();else document.exitFullscreen();}
-document.addEventListener('keydown',function(e){if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();changeSlide(1);}else if(e.key==='ArrowLeft')changeSlide(-1);else if(e.key==='f'||e.key==='F')toggleFullscreen();else if(e.key==='t'||e.key==='T')toggleTOC();else if(e.key==='Home'){currentSlide=1;updateSlide();}else if(e.key==='End'){currentSlide=totalSlides;updateSlide();}else if(e.key==='Escape')document.getElementById('tocModal').classList.remove('show');});
+document.addEventListener('keydown',function(e){
+      if (e.target && e.target.closest && e.target.closest('input, textarea, select, button, [contenteditable="true"]')) return;if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();changeSlide(1);}else if(e.key==='ArrowLeft')changeSlide(-1);else if(e.key==='f'||e.key==='F')toggleFullscreen();else if(e.key==='t'||e.key==='T')toggleTOC();else if(e.key==='Home'){currentSlide=1;updateSlide();}else if(e.key==='End'){currentSlide=totalSlides;updateSlide();}else if(e.key==='Escape')document.getElementById('tocModal').classList.remove('show');});
 function checkQuiz(el,ok,id){var c=el.closest('.quiz-container');c.querySelectorAll('.quiz-option').forEach(function(o){o.classList.remove('correct','incorrect');});el.classList.add(ok?'correct':'incorrect');c.querySelectorAll('.quiz-feedback').forEach(function(f){f.classList.remove('show');});c.querySelector('.quiz-feedback.'+(ok?'correct':'incorrect')).classList.add('show');}
 function toggleReveal(btn){var ct=btn.nextElementSibling;ct.classList.toggle('show');btn.textContent=ct.classList.contains('show')?'\u25B2 Hide':'\u25BC Reveal';}
 var smtpCodes={220:'220 \u2014 Service ready. The server greets you.',221:'221 \u2014 Closing connection. Sent after QUIT.',250:'250 \u2014 Requested action completed.',251:'251 \u2014 User not local; will forward.',354:'354 \u2014 Start mail input. End with a lone dot.',421:'421 \u2014 Service not available. Try later.',450:'450 \u2014 Mailbox temporarily unavailable.',451:'451 \u2014 Local error in processing.',452:'452 \u2014 Insufficient storage.',500:'500 \u2014 Syntax error, command unrecognised.',501:'501 \u2014 Syntax error in parameters.',502:'502 \u2014 Command not implemented.',503:'503 \u2014 Bad sequence of commands.',550:'550 \u2014 Mailbox unavailable. Permanent failure.',551:'551 \u2014 User not local.',552:'552 \u2014 Exceeded storage allocation.',553:'553 \u2014 Mailbox name not allowed.',554:'554 \u2014 Transaction failed.'};
 function lookupSMTPCode(){var i=document.getElementById('smtpCodeInput'),r=document.getElementById('smtpCodeResult'),c=parseInt(i.value);if(isNaN(c)||c<200||c>599){r.textContent='Enter a valid 3-digit code (200\u2013599).';r.style.borderLeft='';return;}if(smtpCodes[c])r.textContent=smtpCodes[c];else{var cat=Math.floor(c/100),cats={2:'Success',3:'Intermediate',4:'Temporary failure',5:'Permanent failure'};r.textContent=c+' \u2014 No specific entry. Category '+cat+'xx: '+(cats[cat]||'Unknown')+'.';}var colours={2:'var(--success)',3:'var(--accent)',4:'var(--accent-warm)',5:'var(--danger)'};r.style.borderLeft='4px solid '+(colours[Math.floor(c/100)]||'var(--border)');}
 function evaluateScenario(btn,proto,expl){document.querySelectorAll('.scenario-btn').forEach(function(b){b.classList.remove('selected');});btn.classList.add('selected');var r=document.getElementById('scenarioResult'),lbl=proto==='imap'?'IMAP':'POP3',clr=proto==='imap'?'var(--success)':'var(--accent)';r.innerHTML='<strong style="color:'+clr+'">Recommendation: '+lbl+'</strong><br/>'+expl;}
 function buildMIME(){var s=document.getElementById('mimeSelect'),r=document.getElementById('mimeResult'),m={plain:'MIME-Version: 1.0\nContent-Type: text/plain; charset=utf-8\nContent-Transfer-Encoding: 7bit\n\n(plain text body)',html:'MIME-Version: 1.0\nContent-Type: text/html; charset=utf-8\nContent-Transfer-Encoding: quoted-printable\n\n<html><body>...</body></html>',alt:'MIME-Version: 1.0\nContent-Type: multipart/alternative;\n boundary="----=_alt"\n\n------=_alt\nContent-Type: text/plain; charset=utf-8\n\n(plain text version)\n\n------=_alt\nContent-Type: text/html; charset=utf-8\n\n<html>...</html>\n------=_alt--',attach:'MIME-Version: 1.0\nContent-Type: multipart/mixed;\n boundary="----=_mix"\n\n------=_mix\nContent-Type: text/plain; charset=utf-8\n\nDocument attached below.\n\n------=_mix\nContent-Type: application/pdf\nContent-Disposition: attachment;\n filename="report.pdf"\nContent-Transfer-Encoding: base64\n\nJVBERi0xLjQK...\n------=_mix--',complex:'MIME-Version: 1.0\nContent-Type: multipart/mixed;\n boundary="----=_outer"\n\n------=_outer\nContent-Type: multipart/related;\n boundary="----=_rel"\n\n------=_rel\nContent-Type: text/html; charset=utf-8\n\n<html><body><img src="cid:logo123"/></body></html>\n\n------=_rel\nContent-Type: image/png\nContent-ID: <logo123>\nContent-Transfer-Encoding: base64\n\niVBORw0KGgo...\n------=_rel--\n\n------=_outer\nContent-Type: application/pdf\nContent-Disposition: attachment;\n filename="report.pdf"\nContent-Transfer-Encoding: base64\n\nJVBERi0xLjQK...\n------=_outer--'};r.textContent=m[s.value]||'Select a scenario to see the MIME structure.';}
-function analyseHeaders(){var i=document.getElementById('headerInput').value,r=document.getElementById('headerResult');if(!i.trim()){r.innerHTML='Paste headers above to see analysis.';return;}var a=[];var fm=i.match(/^From:\s*(.+)$/mi);if(fm)a.push('<strong>From:</strong> '+fm[1].replace(/</g,'&lt;').replace(/>/g,'&gt;'));var tm=i.match(/^To:\s*(.+)$/mi);if(tm)a.push('<strong>To:</strong> '+tm[1].replace(/</g,'&lt;').replace(/>/g,'&gt;'));var sm=i.match(/^Subject:\s*(.+)$/mi);if(sm)a.push('<strong>Subject:</strong> '+sm[1]);var rc=(i.match(/^Received:/gmi)||[]).length;a.push('<strong>Received hops:</strong> '+rc+' (trace bottom-to-top)');var sp=i.match(/spf=(pass|fail|softfail|neutral)/i);if(sp){var c=sp[1].toLowerCase()==='pass'?'var(--success)':'var(--danger)';a.push('<strong>SPF:</strong> <span style="color:'+c+';font-weight:700">'+sp[1]+'</span>');}var dk=i.match(/dkim=(pass|fail)/i);if(dk){var c2=dk[1].toLowerCase()==='pass'?'var(--success)':'var(--danger)';a.push('<strong>DKIM:</strong> <span style="color:'+c2+';font-weight:700">'+dk[1]+'</span>');}var dm2=i.match(/dmarc=(pass|fail)/i);if(dm2){var c3=dm2[1].toLowerCase()==='pass'?'var(--success)':'var(--danger)';a.push('<strong>DMARC:</strong> <span style="color:'+c3+';font-weight:700">'+dm2[1]+'</span>');}r.innerHTML=a.length?a.join('<br/>'):'No recognised headers found.';}
+function analyseHeaders() {
+  const raw = document.getElementById('headerInput').value;
+  const result = document.getElementById('headerResult');
+  result.replaceChildren();
+  const unfolded = raw.split(/\r?\n\r?\n/, 1)[0].replace(/\r?\n[ \t]+/g, ' ');
+  const headers = unfolded.split(/\r?\n/).map(line => {
+    const colon = line.indexOf(':');
+    return colon > 0 ? [line.slice(0, colon).toLowerCase(), line.slice(colon + 1).trim()] : null;
+  }).filter(Boolean);
+  const add = text => { const p = document.createElement('p'); p.textContent = text; result.append(p); };
+  if (!raw.trim()) { add('Paste message headers above.'); return; }
+  for (const key of ['from', 'to', 'subject']) {
+    for (const [name, value] of headers) if (name === key) add(name + ': ' + value);
+  }
+  add('Received fields: ' + headers.filter(([name]) => name === 'received').length + ' (read the trace from bottom to top).');
+  for (const [name, value] of headers) {
+    if (name === 'authentication-results') add('Unverified Authentication-Results claim: ' + value);
+  }
+  add('Pasted text cannot verify SPF, DKIM signatures or DMARC. Authentication-Results is trustworthy only when inserted by a receiver you trust within its documented trust boundary. A Subject mentioning pass is not authentication evidence.');
+}
+
 updateSlide();
 
 </script>

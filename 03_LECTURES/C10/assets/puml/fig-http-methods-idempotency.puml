@@ -10,11 +10,11 @@ title HTTP Methods — Safety, Idempotency and Cacheability
 
 card "**GET**\nRetrieve a resource\n\nSafe: Yes\nIdempotent: Yes\nCacheable: Yes" as GET #C8E6C9
 
-card "**POST**\nCreate / submit\n\nSafe: No\nIdempotent: No\nCacheable: No" as POST #FFCDD2
+card "**POST**\nCreate / submit\n\nSafe: No\nIdempotent: Not guaranteed\nCacheable: Under explicit HTTP conditions" as POST #FFCDD2
 
 card "**PUT**\nFull replacement\n\nSafe: No\nIdempotent: Yes\nCacheable: No" as PUT #BBDEFB
 
-card "**PATCH**\nPartial update\n\nSafe: No\nIdempotent: No*\nCacheable: No" as PATCH #FFF9C4
+card "**PATCH**\nPartial update\n\nSafe: No\nIdempotent: Not guaranteed*\nCacheable: Under RFC 5789 conditions" as PATCH #FFF9C4
 
 card "**DELETE**\nRemove a resource\n\nSafe: No\nIdempotent: Yes\nCacheable: No" as DELETE #FFE0B2
 
@@ -27,9 +27,13 @@ PATCH -[hidden]right-> DELETE
 DELETE -[hidden]right-> OPTIONS
 
 legend bottom
-  Safe: no side effects on the server.
-  Idempotent: repeated calls produce the same result.
-  *PATCH is not guaranteed idempotent by specification.
+  Safe: the client does not request a state-changing effect.
+  Logging and similar incidental side effects are permitted.
+  Idempotent: repeating an identical request has the same
+  intended server effect as making it once; responses may differ.
+  *PATCH can be designed to be idempotent, but the method does not guarantee it.
+  PATCH caching requires explicit freshness and a matching Content-Location;
+  the stored representation can answer subsequent GET/HEAD, not PATCH.
   Proxies and load balancers may retry idempotent methods automatically.
 endlegend
 @enduml

@@ -5,6 +5,10 @@
 | **Dashboard** | `http://localhost:9050` |
 | **Login** | `stud` / `studstudstud` |
 
+These are the course defaults for a new instance. Keep existing personal
+credentials. For the OVA, open Portainer through the documented SSH tunnel and
+run lab commands in the guest. See [environment routes](../../../00_APPENDIX/docs/environment_routes.md).
+
 In this seminar you work from two viewpoints at once: the **attacker** (nmap from the scanner container) and the **administrator** (Portainer dashboard). Keep both open side by side.
 
 ---
@@ -19,9 +23,11 @@ After `docker compose up`, open Portainer and fill in this table **without scann
 | | | | |
 | | | | |
 
-Navigate to **Networks** → **pentestnet** to get the IPs.
+Open `dvwa` and follow its actual network link to get the declared IPs. The Compose
+key `pentestnet` normally becomes a project-prefixed Docker network name.
 
-As an administrator, you already know every service, every port and every IP. What advantage does an attacker need to overcome?
+As an administrator, you can read the declared images, addresses and mappings.
+Which of those claims still needs a runtime service or reachability check?
 
 > `__________________________________________________________`
 
@@ -29,15 +35,18 @@ As an administrator, you already know every service, every port and every IP. Wh
 
 ### P2 — Service Readiness Check
 
-Before scanning, verify that each target is healthy:
+Before scanning, compare startup logs with a protocol-level response. A log line
+or a running container alone does not establish service readiness:
 
-| Target | What to look for in Portainer Logs | Ready? |
-|---|---|:---:|
-| DVWA | Apache startup message | Y / N |
-| WebGoat | "Started WebGoat" (may take 30–60 s) | Y / N |
-| vsftpd | FTP daemon start confirmation | Y / N |
+| Target | Supporting startup log | Required protocol check | Ready? |
+|---|---|---|:---:|
+| DVWA | Apache startup message | HTTP response from its configured host port | Y / N |
+| WebGoat | "Started WebGoat" (startup time varies) | HTTP response from its configured host port | Y / N |
+| vsftpd | Available daemon startup/error output | FTP greeting from its configured host port | Y / N |
 
-If a service is not ready, wait 30 seconds and check again.
+Use the `.env` overrides if present, rather than assuming the default host ports.
+If a service is not ready, inspect the observed error and listener; a longer wait
+does not repair a failed startup command or an incorrect mapping.
 
 ---
 
@@ -55,7 +64,9 @@ If a service is not ready, wait 30 seconds and check again.
    ```bash
    nmap -sT -p 1-1000 172.20.0.10
    ```
-   Is the wider scan more or less visible in the logs?  → `____`
+   Is the wider scan more or less visible in the available logs? Record **no application-log entry** if that is what you observe.  → `____`
+
+   Then run `curl -v http://172.20.0.10/` from the scanner. Compare its application log entry with the scan and save a packet capture for transport evidence. A TCP connect scan need not send HTTP, and Docker logs may not include a service’s file-based logs.
 
 4. What does this tell you about the trade-off between scan thoroughness and stealth?
 
@@ -70,7 +81,7 @@ Examine `vsftpd_vuln` in Portainer:
 1. List all published port mappings:  → `____`
 2. Which port is unusual for an FTP server?  → `____`
 3. Can you tell from Portainer alone that this port exists and is open?  → Yes / No
-4. If you were the administrator and saw port 6200 published alongside port 21, would that raise a concern? Why?
+4. Does the 6200 mapping prove that a process is listening? Record a listener/reachability check before and after the authorised local exercise. If you saw this mapping alongside port 21, what would you investigate and why?
 
 > `__________________________________________________________`
 

@@ -18,7 +18,7 @@ package "Derived Values" as derived #E8F5E9 {
     card "Hosts\n.1 … .254\n(254 usable)" as hosts #C8E6C9
 }
 
-addr -[#1565C0]-> mask : determines
+addr -[#1565C0]-> net : AND with mask
 prefix -[#1565C0]-> mask : /24 = 24 ones
 mask -[#43A047]-> net : AND with address
 mask -[#43A047]-> bcast : OR host bits to 1

@@ -83,7 +83,7 @@ By deploying DNS, SSH and port forwarding as containers, the seminar isolates ea
 ```bash
 git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
 cd COMPNET-EN
-git sparse-checkout set 04_SEMINARS/S10
+git sparse-checkout set 04_SEMINARS/S10 00_TOOLS
 ```
 
 **Method B — Direct download**

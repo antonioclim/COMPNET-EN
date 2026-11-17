@@ -1,5 +1,6 @@
 import socket
 import threading
+from text_framing import encode_frame, read_frame
 
 HOST = "127.0.0.1"
 PORT = 3333
@@ -53,9 +54,7 @@ def build_framed_response(payload: str) -> str:
     Build a response with a length header, in the form:
         "<MESSAGE_LENGTH> <PAYLOAD>"
     """
-    payload_length = len(payload)
-    message_length = len(str(payload_length)) + 1 + payload_length
-    return f"{message_length} {payload}"
+    return encode_frame(payload).decode("utf-8")
 
 
 def process_command(data: str) -> str:
@@ -135,45 +134,25 @@ def process_command(data: str) -> str:
 
 
 def handle_client(client: socket.socket):
+    """Read complete frames as bytes, then decode once; accept pipelined frames."""
     with client:
-        while True:
-            if client is None:
-                break
-
-            data = client.recv(BUFFER_SIZE)
-            if not data:
-                break
-
-            string_data = data.decode("utf-8")
-            full_data = string_data
-
-            try:
-                message_length = int(string_data.split(" ")[0])
-            except ValueError:
-                # Invalid header -> send error and close.
-                error_response = build_framed_response("ERR invalid length header")
-                client.sendall(error_response.encode("utf-8"))
-                break
-
-            remaining = message_length - len(string_data)
-
-            while remaining > 0:
-                data = client.recv(BUFFER_SIZE)
-                if not data:
+        try:
+            while True:
+                frame = read_frame(client)
+                if frame is None:
                     break
-                string_data = data.decode("utf-8")
-                full_data += string_data
-                remaining -= len(string_data)
+                response = process_command(frame.decode("utf-8"))
+                client.sendall(response.encode("utf-8"))
+        except (OSError, EOFError, ValueError) as exc:
+            print(f"[PROTOCOL ERROR] {exc}")
 
-            response = process_command(full_data)
-            client.sendall(response.encode("utf-8"))
 
 
 def accept_loop(server: socket.socket):
     while is_running:
         client, addr = server.accept()
         print(f"[CONNECT] {addr} has connected")
-        client_thread = threading.Thread(target=handle_client, args=(client,))
+        client_thread = threading.Thread(target=handle_client, args=(client,), daemon=True)
         client_thread.start()
 
 

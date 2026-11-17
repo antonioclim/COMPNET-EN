@@ -13,7 +13,34 @@ Observe DNS caching behaviour and the operational effect of TTL.
 - How TTL influences propagation
 
 ## Run
-docker compose up --build
+From this scenario directory, use a subnet that does not overlap another running lab: this stack reserves `172.29.111.0/24`; authoritative BIND is `172.29.111.10`, and Unbound uses it as a stub-zone upstream. Docker's resolver service name is resolved to an IP before dnspython receives it.
+
+```bash
+docker compose up -d --build auth resolver
+docker compose run --rm client
+```
+
+The zone has TTL 30 seconds. To observe an address change, start a longer query run in terminal 1:
+
+```bash
+docker compose run --rm client python query.py --repeat 25 --interval 2
+```
+
+After the first answer, in terminal 2 in this same directory, change only the demonstration record and increment its serial, then reload the authoritative service by restarting it:
+
+```bash
+python3 - <<'PY'
+from pathlib import Path
+path = Path('auth/zones/example.zone')
+s = path.read_text()
+assert 'www IN  A   10.0.0.42' in s, 'Restore the initial zone before repeating this step'
+s = s.replace('1  ; serial', '2  ; serial').replace('www IN  A   10.0.0.42', 'www IN  A   10.0.0.43')
+path.write_text(s)
+PY
+docker compose restart auth
+```
+
+Observe the cached old address and decreasing TTL, followed by the new address after expiry. Do not restart the resolver during this measurement, because that clears the cache. Restore `.42` with a higher serial before another run. Cleanup: `docker compose down`.
 
 ## Questions
 - Why DNS changes are not instantaneous
@@ -23,7 +50,7 @@ docker compose up --build
 
 | Name | Lines |
 |------|-------|
-| `docker-compose.yml` | 25 |
+| `docker-compose.yml` | 46 |
 | `auth/` | 1 files |
 | `client/` | 2 files |
 | `resolver/` | 1 files |

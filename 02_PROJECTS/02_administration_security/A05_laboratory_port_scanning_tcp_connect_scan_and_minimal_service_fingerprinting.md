@@ -113,7 +113,7 @@ Port scanning is framed as laboratory inventory, not as a general-purpose tool. 
 - Include filters for SYN and for fingerprinting payload.
 
 ### Automatic PCAP criteria (E2)
-These criteria are **deterministic** and can be verified automatically with `tshark`.
+These capture checks are reproducible with `tshark`. Frame counts are smoke checks; they do not replace the application tests or prove complete project acceptance.
 - Official rules: `tools/pcap_rules/A05.json`
 - In the catalogue (template): `00_common/tools/pcap_rules/A05.json` and `00_common/tools/validate_pcap.py` (copy into the student repository).
 
@@ -122,9 +122,13 @@ These criteria are **deterministic** and can be verified automatically with `tsh
 | ID | tshark filter (`-Y`) | Condition | What it validates |
 |---:|---|---:|---|
 | R1 | `tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 20` | At least 20 SYN packets (port scan). |
-| R2 | `tcp.flags.syn==1 && tcp.flags.ack==1` | `>= 1` | At least one SYN-ACK (open port). |
+| R2 | `tcp.flags.syn==1 && tcp.flags.ack==1` | `>= 1` | At least one SYN‑ACK (open port). |
 | R3 | `tcp.flags.reset==1` | `>= 1` | At least one RST (closed port). |
-| R4 | `tcp.len>0 && (frame contains "SSH" || frame contains "HTTP" || frame contains "Server:")` | `>= 1` | Minimal fingerprinting (banner/header). |
+| R4 | `tcp.len>0 && (frame contains "SSH" \|\| frame contains "HTTP" \|\| frame contains "Server:")` | `>= 1` | Minimal fingerprinting (banner/header). |
+
+### Interpretation and complementary evidence
+
+The [E2 capture and semantic-evidence matrix](../00_common/E2_CAPTURE_EVIDENCE_MATRIX.md#a05) maps every capture rule to its generating action and the complementary application evidence.
 
 ### Deliverables
 - Docker Compose with `scanner` and `tester` that run the scenario and write `artifacts/pcap/traffic_e2.pcap`.

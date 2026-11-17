@@ -34,7 +34,9 @@ note right of ART #FFCDD2 : 10.0.0.254 → cc:cc (poisoned)
 == STEP 3 — MITIGATION ==
 
 EX -> SH : ./apply_mitigation.sh
-SH -> MN : block attacker MAC (OVS/iptables)
+SH -> MN : block attacker MAC (OVS rule)
+SH -> MN : replace victim ARP entry with verified gateway MAC
+SH -> ART : verify victim neighbour table before connectivity test
 EX -> SH : ping h1 → h2
 SH -> MN : traffic reaches gateway again
 SH -> ART : save ARP table dump (after)

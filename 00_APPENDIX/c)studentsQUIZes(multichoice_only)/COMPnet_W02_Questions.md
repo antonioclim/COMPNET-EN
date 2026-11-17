@@ -58,18 +58,20 @@ A student instructor recommends using ss instead of netstat for socket inspectio
 
 ### Q4. `N01.T00.Q14` — Evaluating Socket Timeout Design / Evaluarea designului de timeout al socket-ului
 
-*[Multiple Choice — Alegere multiplă]*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-The ex_1_02_tcp_server_client.py exercise in the Week 1 lab uses a blocking recv(1024) without a timeout. A colleague proposes adding socket.settimeout(5) to both server and client. Which statement best evaluates this proposal? [Exercițiul ex_1_02_tcp_server_client.py din laboratorul Săptămânii 1 folosește un recv(1024) blocant fără timeout. Un coleg propune adăugarea socket.settimeout(5) atât la server, cât și la client. Care afirmație evaluează cel mai bine această propunere?]
+A TCP client sends no data and leaves its connection open. How should a server choose an idle receive timeout? [Un client TCP nu trimite date și lasă conexiunea deschisă. Cum trebuie ales timeout-ul de inactivitate pentru recepție?]
 
-- **a)** Server timeout is beneficial (prevents hang on client disconnect), but client timeout should be calibrated independently — a fixed 5 s may be too short under server load [Timeout-ul serverului este benefic (previne blocarea la deconectarea clientului), dar timeout-ul clientului ar trebui calibrat independent — 5 s fixe pot fi prea puțin sub sarcină]
-- **b)** The proposal is entirely correct — both server and client should always share the same timeout value to ensure symmetrical behaviour across the connection [Propunerea este complet corectă — atât serverul, cât și clientul ar trebui să partajeze întotdeauna aceeași valoare de timeout pentru comportament simetric]
-- **c)** Timeouts should never be added to socket code because they cause socket.timeout exceptions that crash the programme if not caught in a try-except block [Timeout-urile nu ar trebui niciodată adăugate la codul de socket deoarece cauzează excepții socket.timeout care opresc programul dacă nu sunt prinse]
-- **d)** The proposal is unnecessary because TCP's built-in keepalive mechanism automatically detects dead connections and closes them within seconds on loopback [Propunerea este inutilă deoarece mecanismul keepalive TCP detectează automat conexiunile moarte și le închide în câteva secunde pe loopback]
+- **a)** Choose and handle it according to the application contract; calibrate the client response timeout separately. [Alegeți și tratați timeout-ul conform contractului aplicației; calibrați separat timeout-ul de răspuns al clientului.]
+- **b)** Always use the same five-second timeout for accept, receive and every client operation. [Folosiți întotdeauna același timeout de cinci secunde pentru accept, recepție și toate operațiile clientului.]
+- **c)** A timeout is unnecessary because an idle TCP connection always closes within seconds. [Timeout-ul este inutil deoarece o conexiune TCP inactivă se închide mereu în câteva secunde.]
+- **d)** Treat every timeout as proof that the peer has crashed. [Tratați orice timeout ca dovadă că procesul corespondent s-a oprit.]
 
-> 💡 **Feedback:**
-> *A 5-second timeout on the server's accept/recv is beneficial — it prevents indefinite hangs when clients disconnect unexpectedly. However, applying the same timeout to the client is risky if the server takes longer than 5 seconds to respond under load. The correct approach differentiates: server timeout prevents resource leaks; client timeout should be calibrated to expected response time. [Un timeout de 5 secunde pe accept/recv la server este benefic — previne blocările indefinite. Dar aplicarea aceluiași timeout la client este riscantă dacă serverul necesită mai mult timp sub sarcină.]*
+<details><summary>💡 Feedback</summary>
 
+**Correct answer / Răspuns corect: a.** An idle or unreachable peer can leave a blocking receive waiting. A graceful peer shutdown instead yields EOF after buffered data. A timeout is a policy decision and must be handled; it is not a unique diagnosis of peer failure. [Un corespondent inactiv sau inaccesibil poate lăsa recepția blocată. O închidere grațioasă produce EOF după datele deja recepționate. Timeout-ul este o decizie a aplicației și trebuie tratat; nu demonstrează în mod unic defectarea corespondentului.]
+
+</details>
 
 ---
 
@@ -245,7 +247,7 @@ When a TCP server calls sock.accept(), what does it return? [Când un server TCP
 
 *[Multiple Choice — Alegere multiplă]*
 
-Ten clients connect simultaneously to a server. Each request takes 100 ms to process. What is the approximate total time until all clients receive responses for an iterative server vs. a threaded server? [Zece clienți se conectează simultan la un server. Fiecare cerere necesită 100 ms pentru procesare. Care este timpul total aproximativ până când toți clienții primesc răspunsuri pentru un server iterativ versus un server cu fire de execuție?]
+Ten clients connect simultaneously to a server. Each request spends 100 ms waiting for independent I/O, all ten workers can overlap this wait, and scheduling and network overhead are negligible. What is the approximate total time until all clients receive responses for an iterative server vs. a threaded server? [Zece clienți se conectează simultan la un server. Fiecare cerere petrece 100 ms așteptând I/O independent, cei zece workeri pot suprapune așteptarea, iar overhead-ul de planificare și rețea este neglijabil. Care este timpul total aproximativ până când toți clienții primesc răspunsuri pentru un server iterativ versus un server cu fire de execuție?]
 
 - **a)** Iterative: \~1000 ms; Threaded: \~100 ms [Iterativ: \~1000 ms; Cu fire: \~100 ms]
 - **b)** Iterative: \~100 ms; Threaded: \~100 ms [Iterativ: \~100 ms; Cu fire: \~100 ms]
@@ -254,7 +256,6 @@ Ten clients connect simultaneously to a server. Each request takes 100 ms to pro
 
 > 💡 **Feedback:**
 > *An iterative server processes clients one at a time (10 x 100 ms = 1000 ms total). A threaded server handles all 10 in parallel, completing in approximately 100 ms plus minor thread overhead. A common misconception (Misconception #4) is that threading always improves performance; for a single short-lived client, threading adds unnecessary overhead. [Un server iterativ procesează clienții pe rând (10 x 100 ms = 1000 ms total). Un server cu fire de execuție gestionează toți cei 10 în paralel, finalizând în aproximativ 100 ms plus overhead minor de fire. O concepție greșită frecventă (Concepția greșită nr. 4) este că firele de execuție îmbunătățesc întotdeauna performanța; pentru un singur client cu cerere scurtă, firele adaugă overhead inutil.]*
-
 
 ---
 
@@ -440,18 +441,20 @@ In Python, what is the correct sequence of method calls to set up a TCP server s
 
 ### Q26. `N02.S01.Q01` — Socket option to allow immediate rebind after restart / Opțiunea de socket pentru reconectare imediată după repornire
 
-*[Multiple Choice — Alegere multiplă]*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-Which socket option should be set on a server socket to allow immediate rebinding to a port that is still in TIME_WAIT state after a previous server instance was stopped? [Care opțiune de socket trebuie setată pe un socket de server pentru a permite reconectarea imediată la un port aflat încă în starea TIME_WAIT după oprirea unei instanțe anterioare a serverului?]
+Which socket option is commonly set before bind() to support server-address reuse under the operating system’s reuse rules? [Ce opțiune este setată frecvent înainte de bind() pentru reutilizarea adresei serverului conform regulilor sistemului de operare?]
 
 - **a)** SO_REUSEADDR
 - **b)** SO_KEEPALIVE
 - **c)** SO_BROADCAST
 - **d)** SO_LINGER
 
-> 💡 **Feedback:**
-> *SO_REUSEADDR allows binding to a port in TIME_WAIT state, preventing the common "Address already in use" error during development and server restarts. Without this option, you must wait approximately 60 seconds (the TIME_WAIT duration) before the port becomes available again. A common misconception (Misconception #10) is that close() immediately frees the port; in reality, TIME_WAIT persists to handle delayed packets from the old connection. [SO_REUSEADDR permite asocierea la un port aflat în starea TIME_WAIT, prevenind eroarea frecventă „Address already in use" în timpul dezvoltării și repornirilor de server. Fără această opțiune, trebuie să așteptați aproximativ 60 de secunde (durata TIME_WAIT) înainte ca portul să devină disponibil. O concepție greșită frecventă (Concepția greșită nr. 10) este că close() eliberează imediat portul; în realitate, TIME_WAIT persistă pentru a gestiona pachetele întârziate de la vechea conexiune.]*
+<details><summary>💡 Feedback</summary>
 
+**Correct answer / Răspuns corect: a.** SO_REUSEADDR can help a restarting server rebind when old TCP connections retain state. TIME_WAIT belongs to a connection, not a listening port. This option does not guarantee every bind succeeds or override an active listener; details and timeout durations vary by OS and configuration. [SO_REUSEADDR poate ajuta un server repornit când conexiunile TCP vechi păstrează stare. TIME_WAIT aparține unei conexiuni, nu portului listenerului. Opțiunea nu garantează orice bind și nu înlocuiește un listener activ; regulile și duratele depind de sistem și configurație.]
+
+</details>
 
 ---
 
@@ -459,7 +462,7 @@ Which socket option should be set on a server socket to allow immediate rebindin
 
 *[Multiple Choice — Alegere multiplă]*
 
-What is the correct order of socket API calls to set up a TCP server that accepts connections? [Care este ordinea corectă a apelurilor API socket pentru a configura un server TCP care acceptă conexiuni?]
+What is the explicit socket-call sequence used to bind the lab TCP server to a chosen local address and port before accepting connections? [Care este secvența explicită folosită pentru a lega serverul TCP de laborator la adresa și portul local alese înainte de acceptarea conexiunilor?]
 
 - **a)** socket() → bind() → listen() → accept()
 - **b)** socket() → listen() → bind() → accept()
@@ -467,8 +470,7 @@ What is the correct order of socket API calls to set up a TCP server that accept
 - **d)** socket() → connect() → listen() → accept()
 
 > 💡 **Feedback:**
-> *A TCP server must create a socket, bind it to a local address, call listen() to mark it as passive, then accept() to extract pending connections from the queue. Calling listen() before bind() would fail because the socket has no local address yet. A common error is inserting connect() instead of listen(), confusing the server-side and client-side API flows. [Un server TCP trebuie să creeze un socket, să-l asocieze la o adresă locală prin bind(), să apeleze listen() pentru a-l marca ca pasiv, apoi accept() pentru a extrage conexiunile în așteptare din coadă. Apelarea listen() înainte de bind() ar eșua deoarece socket-ul nu are încă o adresă locală. O eroare frecventă este inserarea connect() în locul listen(), confundând fluxurile API pe partea de server și pe partea de client.]*
-
+> *A TCP server must create a socket, bind it to a local address, call listen() to mark it as passive, then accept() to extract pending connections from the queue. On Linux, listen() on an unbound Internet socket may implicitly bind an ephemeral port; explicit bind() selects the required laboratory endpoint. A common error is inserting connect() instead of listen(), confusing the server-side and client-side API flows. [Un server TCP trebuie să creeze un socket, să-l asocieze la o adresă locală prin bind(), să apeleze listen() pentru a-l marca ca pasiv, apoi accept() pentru a extrage conexiunile în așteptare din coadă. Pe Linux, listen() pe un socket Internet nelegat poate face implicit bind la un port efemer; bind() explicit selectează endpointul cerut de laborator. O eroare frecventă este inserarea connect() în locul listen(), confundând fluxurile API pe partea de server și pe partea de client.]*
 
 ---
 
@@ -559,33 +561,37 @@ Calling sock.bind(("0.0.0.0", 12345)) on a TCP server socket causes packets to b
 
 ### Q33. `N02.S04.Q08` — Closing a socket immediately frees the port / Închiderea unui socket eliberează imediat portul
 
-*[True/False — Adevărat/Fals]*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-After calling sock.close() on a TCP server socket, the port is immediately available for another process to bind to. [După apelarea sock.close() pe un socket de server TCP, portul este imediat disponibil pentru ca alt proces să facă bind la el.]
+Does closing the listening TCP socket always guarantee that a new process can immediately bind the same endpoint? [Închiderea socketului TCP de ascultare garantează întotdeauna că alt proces poate face imediat bind la același endpoint?]
 
-- **a)** True / Adevărat
-- **b)** False / Fals
+- **a)** No: accepted sockets, other bindings and address-reuse rules can still matter. [Nu: socketurile acceptate, alte legări și regulile de reutilizare a adresei pot conta.]
+- **b)** Yes: close removes every connection owned by the process. [Da: close elimină toate conexiunile procesului.]
+- **c)** No: every listening socket itself enters TIME_WAIT for exactly 60 seconds. [Nu: fiecare socket de ascultare intră el însuși în TIME_WAIT exact 60 de secunde.]
 
-> 💡 **Feedback:**
-> *False. TCP sockets enter TIME_WAIT state (typically 60 seconds) after closing to handle any delayed packets still in transit. Use SO_REUSEADDR to allow rebinding during development, or wait for the timeout to expire. This is a critical practical issue (Misconception #10): students frequently encounter "Address already in use" when restarting servers during development, and the solution is to set SO_REUSEADDR before calling bind(). [Fals. Socket-urile TCP intră în starea TIME_WAIT (de obicei 60 de secunde) după închidere pentru a gestiona pachetele întârziate aflate încă în tranzit. Utilizați SO_REUSEADDR pentru a permite reconectarea în timpul dezvoltării, sau așteptați expirarea timeout-ului. Aceasta este o problemă practică critică (Concepția greșită nr. 10): studenții întâlnesc frecvent eroarea „Address already in use" la repornirea serverelor în timpul dezvoltării, iar soluția este setarea SO_REUSEADDR înainte de apelul bind().]*
+<details><summary>💡 Feedback</summary>
 
+**Correct answer / Răspuns corect: a.** A listener is not an established TCP connection and does not itself enter TIME_WAIT. TIME_WAIT belongs to particular connections, usually at the active closer. SO_REUSEADDR can help server restarts when platform rules permit; it does not override an active listener. [Un listener nu este o conexiune TCP stabilită și nu intră el însuși în TIME_WAIT. TIME_WAIT aparține unor conexiuni, de regulă la capătul care închide activ. SO_REUSEADDR poate ajuta repornirea conform regulilor platformei, dar nu înlocuiește un listener activ.]
+
+</details>
 
 ---
 
 ### Q34. `N02.S03.Q02` — TCP vs UDP minimum packet count for single exchange / Numărul minim de pachete TCP versus UDP pentru un singur schimb
 
-*[Multiple Choice — Alegere multiplă]*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-A client sends one message and receives one response, then disconnects. Approximately how many minimum packets would be visible in Wireshark for TCP vs. UDP? [Un client trimite un mesaj și primește un răspuns, apoi se deconectează. Aproximativ câte pachete minime ar fi vizibile în Wireshark pentru TCP versus UDP?]
+For one request and one response, what can be concluded about captured TCP and UDP packet counts without further assumptions? [Pentru o cerere și un răspuns, ce se poate concluziona despre numărul pachetelor TCP și UDP capturate fără alte ipoteze?]
 
-- **a)** TCP: \~10 packets; UDP: 2 packets [TCP: \~10 pachete; UDP: 2 pachete]
-- **b)** TCP: 2 packets; UDP: 2 packets [TCP: 2 pachete; UDP: 2 pachete]
-- **c)** TCP: \~10 packets; UDP: \~10 packets [TCP: \~10 pachete; UDP: \~10 pachete]
-- **d)** TCP: 3 packets; UDP: 2 packets [TCP: 3 pachete; UDP: 2 pachete]
+- **a)** TCP has no universal fixed count; unfragmented UDP contributes two application datagrams if both are delivered. [TCP nu are un număr universal fix; UDP nefragmentat contribuie două datagrame ale aplicației dacă ambele sunt livrate.]
+- **b)** TCP always produces exactly ten packets. [TCP produce întotdeauna exact zece pachete.]
+- **c)** TCP always produces exactly three packets including the response. [TCP produce întotdeauna exact trei pachete incluzând răspunsul.]
 
-> 💡 **Feedback:**
-> *TCP requires approximately 10 packets (3 handshake + 2 data + 2 ACKs + 3 teardown), while UDP requires only 2 packets (one request datagram, one response datagram) with no setup or teardown overhead. This stark difference illustrates why UDP is preferred for simple query-response protocols like DNS. A common error is underestimating TCP's overhead by forgetting the handshake and teardown phases. [TCP necesită aproximativ 10 pachete (3 handshake + 2 date + 2 confirmări ACK + 3 terminare), în timp ce UDP necesită doar 2 pachete (o datagramă de cerere, o datagramă de răspuns) fără overhead de stabilire sau terminare. Această diferență marcantă ilustrează de ce UDP este preferat pentru protocoale simple de tip cerere-răspuns precum DNS. O eroare frecventă este subestimarea overhead-ului TCP prin uitarea fazelor de handshake și terminare.]*
+<details><summary>💡 Feedback</summary>
 
+**Correct answer / Răspuns corect: a.** TCP counts depend on handshake and close choices, segmentation, ACK combination, retransmissions and capture point. UDP has no transport handshake; fragmentation and unrelated ARP/DNS traffic can increase a capture total. [Numărul TCP depinde de stabilire și închidere, segmentare, combinarea ACK-urilor, retransmisii și punctul capturii. UDP nu are handshake de transport; fragmentarea și traficul ARP/DNS pot crește totalul capturii.]
+
+</details>
 
 ---
 

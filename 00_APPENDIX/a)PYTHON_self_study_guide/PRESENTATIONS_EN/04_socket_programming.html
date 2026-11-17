@@ -133,7 +133,11 @@
         .flow-step { background: var(--bg-tertiary); padding: 0.75rem 1.5rem; border-radius: 8px; font-family: var(--font-mono); font-size: 0.9rem; border: 1px solid var(--border-color); }
         .flow-step.highlight { background: rgba(0, 212, 170, 0.2); border-color: var(--accent-primary); color: var(--accent-primary); }
         .flow-arrow { color: var(--text-muted); }
-    </style>
+    button.quiz-option {width:100%;color:inherit;font:inherit;text-align:left;}
+button.quiz-option:focus-visible,.page-dot:focus-visible {outline:3px solid var(--accent-primary);outline-offset:3px;}
+button.page-dot {border:0;padding:0;}
+code,.file-name {overflow-wrap:anywhere;}
+</style>
 </head>
 <body>
     <div class="progress-container"><div class="progress-bar" role="progressbar" id="progressBar"></div></div>
@@ -147,6 +151,7 @@
         <!-- Slide 1: Title -->
         <div class="slide active title-slide" data-slide="1">
             <div class="slide-content">
+                <p class="simulation-note">Interactive outputs are prewritten demonstrations. Run the canonical scripts in the VM or supported Linux environment using <a href="../CANONICAL_LAB_MAP.md">the lab map</a>.</p>
                 <div class="python-logo">🔌</div>
                 <h1>Socket Programming</h1>
                 <p class="lead">TCP and UDP — The Foundation of Network Communication</p>
@@ -344,7 +349,7 @@
 
                 <div class="code-container">
                     <div class="code-header">
-                        <span class="code-filename">🐍 server_tcp.py (from 02roWSL/src/exercises/)</span>
+                        <span class="code-filename">🐍 server_tcp.py — standalone one-chunk teaching example; save this snippet to run it</span>
                         <div class="code-actions">
                             <button class="btn-code btn-run" onclick="simulateRun(this, 'output1')">▶ Simulate</button>
                             <button class="btn-code btn-copy" onclick="copyCode(this)">📋 Copy</button>
@@ -378,7 +383,7 @@
             <span class="cmt"># Receive data</span>
             data = conn.<span class="fn">recv</span>(<span class="num">1024</span>)
             <span class="kw">if</span> <span class="kw">not</span> data:
-                <span class="kw">break</span>
+                <span class="kw">continue</span>  <span class="cmt"># Close this client; keep accepting</span>
 
             <span class="fn">print</span>(<span class="str">f"📩 Received: </span>{data.<span class="fn">decode</span>(<span class="str">'utf-8'</span>)}<span class="str">"</span>)
 
@@ -612,8 +617,8 @@ sock.close()              <span class="cmt"># Never reached!</span></pre>
                             <div class="step-number">2</div>
                             <div class="step-content">
                                 <h4>Terminal 1: Start the server</h4>
-                                <p><code>cd /mnt/d/NETWORKING/netROwsl/02roWSL</code></p>
-                                <p><code>python3 src/exercises/ex_2_01_tcp.py --mode server</code></p>
+                                <p><code>cd $HOME/COMPNET-EN</code></p>
+                                <p><code>python3 "00_APPENDIX/a)PYTHON_self_study_guide/examples/01_socket_tcp.py" server 9090</code></p>
                                 <p class="step-why">🎯 What you will see: "TCP Server listening on..."</p>
                             </div>
                         </div>
@@ -622,7 +627,7 @@ sock.close()              <span class="cmt"># Never reached!</span></pre>
                             <div class="step-number">3</div>
                             <div class="step-content">
                                 <h4>Terminal 2: Run the client</h4>
-                                <p><code>python3 src/exercises/ex_2_01_tcp.py --mode client --message "Test"</code></p>
+                                <p><code>python3 "00_APPENDIX/a)PYTHON_self_study_guide/examples/01_socket_tcp.py" client 127.0.0.1 9090 "Test"</code></p>
                                 <p class="step-why">🎯 What you will see: The sent message and the server response</p>
                             </div>
                         </div>
@@ -666,22 +671,22 @@ sock.close()              <span class="cmt"># Never reached!</span></pre>
                     </div>
 
                     <div class="quiz-options">
-                        <div class="quiz-option" onclick="selectOption(this, 'quiz1')">
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this, 'quiz1')">
                             <span class="option-marker">A</span>
                             <span><code>socket.SOCK_DGRAM</code></span>
-                        </div>
-                        <div class="quiz-option" onclick="selectOption(this, 'quiz1')" data-correct="true">
+                        </button>
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this, 'quiz1')" data-correct="true">
                             <span class="option-marker">B</span>
                             <span><code>socket.SOCK_STREAM</code></span>
-                        </div>
-                        <div class="quiz-option" onclick="selectOption(this, 'quiz1')">
+                        </button>
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this, 'quiz1')">
                             <span class="option-marker">C</span>
                             <span><code>socket.SOCK_RAW</code></span>
-                        </div>
-                        <div class="quiz-option" onclick="selectOption(this, 'quiz1')">
+                        </button>
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this, 'quiz1')">
                             <span class="option-marker">D</span>
                             <span><code>socket.SOCK_TCP</code></span>
-                        </div>
+                        </button>
                     </div>
 
                     <div class="quiz-actions">
@@ -693,7 +698,7 @@ sock.close()              <span class="cmt"># Never reached!</span></pre>
                     <div class="hint-box" id="quiz1-hint2"><div class="hint-level">Hint 2/3</div><p>SOCK_STREAM = TCP, SOCK_DGRAM = UDP. There is no SOCK_TCP.</p></div>
                     <div class="hint-box" id="quiz1-hint3"><div class="hint-level">Hint 3/3</div><p>Answer: SOCK_STREAM because TCP provides a "stream" of bytes.</p></div>
 
-                    <div class="feedback-box" id="quiz1-feedback"></div>
+                    <div class="feedback-box" role="status" aria-live="polite" id="quiz1-feedback"></div>
                 </div>
             </div>
         </div>
@@ -712,22 +717,22 @@ sock.close()              <span class="cmt"># Never reached!</span></pre>
                     </div>
 
                     <div class="quiz-options">
-                        <div class="quiz-option" onclick="selectOption(this, 'quiz2')">
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this, 'quiz2')">
                             <span class="option-marker">A</span>
                             <span>socket → listen → bind → accept</span>
-                        </div>
-                        <div class="quiz-option" onclick="selectOption(this, 'quiz2')" data-correct="true">
+                        </button>
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this, 'quiz2')" data-correct="true">
                             <span class="option-marker">B</span>
                             <span>socket → bind → listen → accept</span>
-                        </div>
-                        <div class="quiz-option" onclick="selectOption(this, 'quiz2')">
+                        </button>
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this, 'quiz2')">
                             <span class="option-marker">C</span>
                             <span>socket → accept → bind → listen</span>
-                        </div>
-                        <div class="quiz-option" onclick="selectOption(this, 'quiz2')">
+                        </button>
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this, 'quiz2')">
                             <span class="option-marker">D</span>
                             <span>socket → connect → listen → accept</span>
-                        </div>
+                        </button>
                     </div>
 
                     <div class="quiz-actions">
@@ -739,7 +744,7 @@ sock.close()              <span class="cmt"># Never reached!</span></pre>
                     <div class="hint-box" id="quiz2-hint2"><div class="hint-level">Hint 2/3</div><p>listen() marks the socket as passive. accept() comes after listen().</p></div>
                     <div class="hint-box" id="quiz2-hint3"><div class="hint-level">Hint 3/3</div><p>connect() is for the CLIENT, not the server. The server does bind → listen → accept.</p></div>
 
-                    <div class="feedback-box" id="quiz2-feedback"></div>
+                    <div class="feedback-box" role="status" aria-live="polite" id="quiz2-feedback"></div>
                 </div>
 
                 <div class="quiz-container" id="quiz3" style="margin-top: 1.5rem;">
@@ -753,22 +758,22 @@ sock.close()              <span class="cmt"># Never reached!</span></pre>
                     </div>
 
                     <div class="quiz-options">
-                        <div class="quiz-option" onclick="selectOption(this, 'quiz3')">
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this, 'quiz3')">
                             <span class="option-marker">A</span>
                             <span>Creates a socket and connects it automatically</span>
-                        </div>
-                        <div class="quiz-option" onclick="selectOption(this, 'quiz3')">
+                        </button>
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this, 'quiz3')">
                             <span class="option-marker">B</span>
                             <span>Creates a socket that cannot be closed</span>
-                        </div>
-                        <div class="quiz-option" onclick="selectOption(this, 'quiz3')" data-correct="true">
+                        </button>
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this, 'quiz3')" data-correct="true">
                             <span class="option-marker">C</span>
                             <span>Creates a socket and guarantees it closes when leaving the block</span>
-                        </div>
-                        <div class="quiz-option" onclick="selectOption(this, 'quiz3')">
+                        </button>
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this, 'quiz3')">
                             <span class="option-marker">D</span>
                             <span>Creates a persistent socket between sessions</span>
-                        </div>
+                        </button>
                     </div>
 
                     <div class="quiz-actions">
@@ -780,7 +785,7 @@ sock.close()              <span class="cmt"># Never reached!</span></pre>
                     <div class="hint-box" id="quiz3-hint2"><div class="hint-level">Hint 2/3</div><p>It is equivalent to try-finally where the finally block calls close().</p></div>
                     <div class="hint-box" id="quiz3-hint3"><div class="hint-level">Hint 3/3</div><p>Even if an exception occurs, with guarantees that socket.close() is called.</p></div>
 
-                    <div class="feedback-box" id="quiz3-feedback"></div>
+                    <div class="feedback-box" role="status" aria-live="polite" id="quiz3-feedback"></div>
                 </div>
             </div>
         </div>
@@ -837,7 +842,7 @@ sock.close()              <span class="cmt"># Never reached!</span></pre>
                     <span class="callout-icon">🌐</span>
                     <div class="callout-content">
                         <h4>Where can you find these patterns?</h4>
-                        <p><code>02roWSL/src/apps/</code> contains complete examples of servers and clients that you can study.</p>
+                        <p><code>00_APPENDIX/a)PYTHON_self_study_guide/examples/</code> contains complete examples of servers and clients that you can study.</p>
                     </div>
                 </div>
             </div>
@@ -903,13 +908,13 @@ sock.close()              <span class="cmt"># Never reached!</span></pre>
 
                 <div class="grid-2">
                     <div class="card">
-                        <h3>📁 02roWSL — TCP/UDP Basics</h3>
-                        <p><strong>ex_2_01_tcp.py</strong></p>
+                        <h3>📁 04_SEMINARS/S02 — TCP/UDP Basics</h3>
+                        <p><strong>00_APPENDIX/a)PYTHON_self_study_guide/examples/01_socket_tcp.py</strong></p>
                         <ul style="color: var(--text-secondary); font-size: 0.95rem;">
                             <li>Complete TCP server and client</li>
                             <li>Echo server pattern</li>
                         </ul>
-                        <p><strong>ex_2_02_udp.py</strong></p>
+                        <p><strong>04_SEMINARS/S02/S02_Part07_Example_UDP_Server.py</strong></p>
                         <ul style="color: var(--text-secondary); font-size: 0.95rem;">
                             <li>UDP server and client</li>
                             <li>sendto() and recvfrom()</li>
@@ -917,13 +922,13 @@ sock.close()              <span class="cmt"># Never reached!</span></pre>
                     </div>
 
                     <div class="card">
-                        <h3>📁 03roWSL — Advanced</h3>
-                        <p><strong>ex_3_01_udp_broadcast.py</strong></p>
+                        <h3>📁 04_SEMINARS/S03 — Advanced</h3>
+                        <p><strong>04_SEMINARS/S03/4_udp-broadcast/S03_Part04A_Example_UDP_Broad_Sender.py</strong></p>
                         <ul style="color: var(--text-secondary); font-size: 0.95rem;">
                             <li>UDP Broadcast</li>
                             <li>SO_BROADCAST option</li>
                         </ul>
-                        <p><strong>ex_3_02_udp_multicast.py</strong></p>
+                        <p><strong>04_SEMINARS/S03/5_udp-multicast/S03_Part05A_Example_UDP_Multicast_Sender.py</strong></p>
                         <ul style="color: var(--text-secondary); font-size: 0.95rem;">
                             <li>Multicast groups</li>
                             <li>IP_ADD_MEMBERSHIP</li>
@@ -931,8 +936,8 @@ sock.close()              <span class="cmt"># Never reached!</span></pre>
                     </div>
 
                     <div class="card">
-                        <h3>📁 04roWSL — Protocols</h3>
-                        <p><strong>binary_proto_server.py</strong></p>
+                        <h3>📁 04_SEMINARS/S04 — Protocols</h3>
+                        <p><strong>04_SEMINARS/S04/2_binary-proto_tcp/S04_Part02A_Example_Binary_Proto_TCP_Server.py</strong></p>
                         <ul style="color: var(--text-secondary); font-size: 0.95rem;">
                             <li>Custom binary protocol</li>
                             <li>Header + payload</li>
@@ -940,11 +945,11 @@ sock.close()              <span class="cmt"># Never reached!</span></pre>
                     </div>
 
                     <div class="card">
-                        <h3>📁 src/apps/ — Complete Apps</h3>
+                        <h3>📁 Canonical examples and exercises</h3>
                         <ul style="color: var(--text-secondary); font-size: 0.95rem;">
-                            <li>Fully working complete examples</li>
-                            <li>Reference code (do not modify)</li>
-                            <li>Patterns to follow</li>
+                            <li>Read each seminar README for launch commands and dependencies</li>
+                            <li>Modify the supplied template for the assigned task</li>
+                            <li>Compare behaviour with the complete example</li>
                         </ul>
                     </div>
                 </div>
@@ -1006,7 +1011,9 @@ sock.close()              <span class="cmt"># Never reached!</span></pre>
         document.addEventListener('DOMContentLoaded', () => {
             updateUI();
             createPageDots();
+            goToSlide(currentSlide);
             document.addEventListener('keydown', (e) => {
+                if (e.target.closest('input, textarea, select, button, a, [contenteditable=true]')) return;
                 if (e.key === 'ArrowRight' || e.key === ' ') {
                     e.preventDefault();
                     nextSlide();
@@ -1019,7 +1026,9 @@ sock.close()              <span class="cmt"># Never reached!</span></pre>
         function createPageDots() {
             const container = document.getElementById('pageDots');
             for (let i = 1; i <= totalSlides; i++) {
-                const dot = document.createElement('div');
+                const dot = document.createElement('button');
+                dot.type = 'button';
+                dot.setAttribute('aria-label', `Go to slide ${i}`);
                 dot.className = 'page-dot' + (i === 1 ? ' active' : '');
                 dot.onclick = () => goToSlide(i);
                 container.appendChild(dot);
@@ -1037,17 +1046,16 @@ sock.close()              <span class="cmt"># Never reached!</span></pre>
         }
 
         function goToSlide(n) {
-            if (n < 1 || n > totalSlides || n === currentSlide) return;
-            const currentEl = document.querySelector(`.slide[data-slide="${currentSlide}"]`);
-            const nextEl = document.querySelector(`.slide[data-slide="${n}"]`);
-            currentEl.classList.remove('active');
-            currentEl.classList.add('exit');
-            setTimeout(() => {
-                currentEl.classList.remove('exit');
-                nextEl.classList.add('active');
-                currentSlide = n;
-                updateUI();
-            }, 100);
+            if (!Number.isInteger(n) || n < 1 || n > totalSlides) return;
+            currentSlide = n;
+            document.querySelectorAll('.slide').forEach(slide => {
+                const active = Number(slide.dataset.slide) === n;
+                slide.classList.remove('exit');
+                slide.classList.toggle('active', active);
+                slide.inert = !active;
+                slide.setAttribute('aria-hidden', String(!active));
+            });
+            updateUI();
         }
 
         function nextSlide() {
@@ -1069,19 +1077,31 @@ sock.close()              <span class="cmt"># Never reached!</span></pre>
             }, 800);
         }
 
-        function copyCode(btn) {
-            const code = btn.closest('.code-container').querySelector('pre').textContent;
-            navigator.clipboard.writeText(code);
-            const orig = btn.textContent;
-            btn.textContent = '✓ Copied!';
-            setTimeout(() => btn.textContent = orig, 1500);
+        async function copyCode(btn) {
+            const pre = btn.closest('.code-container').querySelector('pre');
+            const original = btn.textContent;
+            try {
+                await navigator.clipboard.writeText(pre.textContent);
+                btn.textContent = 'Copied!';
+            } catch (_) {
+                const range = document.createRange();
+                range.selectNodeContents(pre);
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+                btn.textContent = 'Selected: copy manually';
+            }
+            setTimeout(() => { btn.textContent = original; }, 2000);
         }
 
         function selectOption(el, quizId) {
-            document.getElementById(quizId).querySelectorAll('.quiz-option').forEach(o => {
-                o.classList.remove('selected', 'correct', 'incorrect');
+            const container = document.getElementById(quizId);
+            container.querySelectorAll('.quiz-option').forEach(option => {
+                option.classList.remove('selected', 'correct', 'incorrect');
+                option.setAttribute('aria-pressed', 'false');
             });
             el.classList.add('selected');
+            el.setAttribute('aria-pressed', 'true');
             document.getElementById(`${quizId}-feedback`).classList.remove('visible');
         }
 

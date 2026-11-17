@@ -17,7 +17,7 @@ start
 repeat
     :Take the largest remaining\nrequirement;
 
-    :Find the smallest prefix\nthat fits (round up to\nnext power of two + 2);
+    :Find the smallest prefix\nthat fits (round H + 2 up\nto a power of two);
 
     :Allocate from the current\nfree position;
 

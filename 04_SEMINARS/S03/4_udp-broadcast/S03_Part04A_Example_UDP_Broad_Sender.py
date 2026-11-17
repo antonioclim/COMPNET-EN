@@ -21,7 +21,7 @@ def main():
 
     # The message can be given on the command line or a default is used.
     # Example:
-    #   python3 index_udp-broadcast_sender_example.py "Hello, broadcast!"
+    #   python3 S03_Part04A_Example_UDP_Broad_Sender.py "Hello, broadcast!"
     if len(sys.argv) >= 2:
         base_message = sys.argv[1]
     else:

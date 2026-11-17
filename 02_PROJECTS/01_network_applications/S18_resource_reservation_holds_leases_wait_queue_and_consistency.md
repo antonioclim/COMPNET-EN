@@ -45,6 +45,10 @@ The most important design decision is that the server is the only authority for 
 - **Protocol/default ports (E2):** TCP: 5018/TCP.
 - The Flex component must work with the default values without manual reconfiguration so that it can be integrated into automated tests.
 
+### Interpretation and complementary evidence
+
+The [E2 capture and semantic-evidence matrix](../00_common/E2_CAPTURE_EVIDENCE_MATRIX.md#s18) maps every capture rule to its generating action and the complementary application evidence.
+
 ### Deliverables
 - `flex/` directory with sources plus build and run instructions.
 - `docs/FLEX.md` with:
@@ -138,11 +142,11 @@ The most important design decision is that the server is the only authority for 
 
 | ID | tshark filter (`-Y`) | Condition | What it validates |
 |---:|---|---:|---|
-| R1 | `tcp.dstport==5018 && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | Handshake to the reservation service. |
-| R2 | `tcp.port==5018 && frame contains "HOLD"` | `>= 1` | At least one hold request appears in payload. |
-| R3 | `tcp.port==5018 && (frame contains "BUSY" || frame contains "OVERLAP" || frame contains "REJECT")` | `>= 1` | Overlapping request is refused deterministically. |
-| R4 | `tcp.port==5018 && frame contains "CONFIRM"` | `>= 1` | Promotion from hold to reservation is visible. |
-| R5 | `tcp.port==5018 && (frame contains "EXPIRED" || frame contains "RELEASED" || frame contains "CANCELLED")` | `>= 1` | Hold release semantics are observable. |
+| R1 | `tcp.dstport==5018 && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | SYN connection attempt to the reservation service. |
+| R2 | `tcp.port==5018 && frame contains "HOLD"` | `>= 1` | HOLD marker bytes are present; verify resource, owner and interval. |
+| R3 | `tcp.port==5018 && (frame contains "BUSY" \|\| frame contains "OVERLAP" \|\| frame contains "REJECT")` | `>= 1` | A BUSY/OVERLAP/REJECT marker is present; assert that the original hold is preserved. |
+| R4 | `tcp.port==5018 && frame contains "CONFIRM"` | `>= 1` | CONFIRM marker bytes are present; assert the reservation state. |
+| R5 | `tcp.port==5018 && (frame contains "EXPIRED" \|\| frame contains "RELEASED" \|\| frame contains "CANCELLED")` | `>= 1` | An expiry/release/cancellation marker is present; assert the actual state transition and timing. |
 
 ### Deliverables
 - Docker Compose with `reservation_service` and `tester` plus optional interactive clients.

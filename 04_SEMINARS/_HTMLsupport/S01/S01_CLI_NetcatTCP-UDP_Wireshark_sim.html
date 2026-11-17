@@ -689,19 +689,34 @@ function wsToggle(){wsOn=!wsOn;const b=$('ws-cb'),cf=$('ws-cf'),sb=['ws-bh','ws-
   }else{b.innerHTML='▶ Start';b.className='capture-off';cf.disabled=false;sb.forEach(i=>$(i).disabled=true);
     if(wsNoise){clearInterval(wsNoise);wsNoise=null;}}}
 function wsClear(){wsAll=[];wsVis=[];wsSel=null;wsRP();wsRD();}
-function wsPC(pk){if(!wsCF)return true;const f=wsCF.toLowerCase();
-  if(f.includes('tcp')&&pk.protocol==='TCP'){const m=f.match(/(\d+)/);return!m||pk.port==m[1];}
-  if(f.includes('udp')&&pk.protocol==='UDP'){const m=f.match(/(\d+)/);return!m||pk.port==m[1];}return false;}
+function wsPC(pk){
+  const f=wsCF.trim().toLowerCase();
+  if(!f)return true;
+  const m=f.match(/^(tcp|udp)(?: port (\d+))?$/);
+  if(!m){$('ws-cf').setCustomValidity('Supported: tcp, udp, tcp port N, udp port N');$('ws-cf').reportValidity();return false;}
+  $('ws-cf').setCustomValidity('');
+  return pk.protocol===m[1].toUpperCase() && (!m[2] || [Number(pk.sourcePort),Number(pk.destPort),Number(pk.port)].includes(Number(m[2])));
+}
 function wsAP(d){if(!wsPC(d))return;wsT+=(Math.random()*.05)+.001;
   wsAll.push({id:wsPid++,time:wsT.toFixed(6),source:d.source||'127.0.0.1',dest:d.dest||'127.0.0.1',
-    protocol:d.protocol,length:d.length||64,info:d.info,port:d.port,streamId:d.streamId||0,details:d.details||{}});
+    protocol:d.protocol,length:d.length||64,info:d.info,port:d.port,sourcePort:d.sourcePort,destPort:d.destPort,streamId:d.streamId||0,details:d.details||{}});
   wsDF2($('ws-df')?$('ws-df').value:'');}
-function wsDF2(f){wsDF=f;if(!f)wsVis=[...wsAll];
-  else{const fl=f.toLowerCase();wsVis=wsAll.filter(p=>{
-    if(fl.includes('tcp')&&p.protocol==='TCP')return true;if(fl.includes('udp')&&p.protocol==='UDP')return true;
-    if(fl.includes('eq 0')&&p.streamId===0)return true;
-    if(fl.includes('port')){const m=fl.match(/(\d+)/);return m&&(p.info.includes(m[1])||p.port==m[1]);}return false;});}
-  wsRP();}
+function wsDF2(f){
+  wsDF=f;
+  const expression=f.trim().toLowerCase();
+  const m=expression.match(/^(tcp|udp)(?:\.(port|stream)\s*(?:==|eq)\s*(\d+))?$/);
+  const input=$('ws-df');
+  if(expression && (!m || (m[2]==='stream' && m[1]!=='tcp'))){
+    input.setCustomValidity('Supported: tcp, udp, tcp.port == N, udp.port == N, tcp.stream eq N');
+    input.reportValidity(); wsVis=[];
+  }else{
+    input.setCustomValidity('');
+    wsVis=wsAll.filter(p=>!expression || (p.protocol===m[1].toUpperCase() &&
+      (!m[2] || (m[2]==='stream' ? p.streamId===Number(m[3]) :
+        [Number(p.sourcePort),Number(p.destPort),Number(p.port)].includes(Number(m[3]))))));
+  }
+  wsRP();
+}
 function wsRP(){const t=$('ws-pb');if(!t)return;
   t.innerHTML=wsVis.map(p=>{let c=p.protocol==='TCP'?'tcp':p.protocol==='UDP'?'udp':'other';if(wsSel===p.id)c='selected';
     return`<tr class="${c}" onclick="wsSP(${p.id})"><td class="col-no">${p.id}</td><td class="col-time">${p.time}</td>
@@ -712,10 +727,10 @@ function wsSP(id){wsSel=id;wsRP();wsRD();}
 function wsRD(){const db=$('ws-db');if(!db)return;const pk=wsAll.find(p=>p.id===wsSel);
   if(!pk){db.innerHTML=`<div class="empty"><svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><p>Select a packet to inspect its headers.</p></div>`;return;}
   const pn=pk.protocol==='TCP'?'Transmission Control Protocol':'User Datagram Protocol';
-  let h=`<div class="detail-line"><span class="lbl">Frame ${pk.id}:</span> ${pk.length} bytes on wire (${pk.length*8} bits)</div>
+  let h=`<div class="detail-line"><span class="lbl">Frame ${pk.id}:</span> ${pk.length} simulated Ethernet bytes, excluding FCS (${pk.length*8} bits)</div>
 <div class="detail-line"><span class="lbl">Ethernet II, Src:</span> 00:00:00_00:00:00 <span class="lbl">Dst:</span> 00:00:00_00:00:00</div>
 <div class="detail-line"><span class="lbl">IPv4, Src:</span> ${esc(pk.source)} <span class="lbl">Dst:</span> ${esc(pk.dest)}</div>
-<div class="detail-line"><span class="lbl">${pn}, Src Port:</span> ${pk.port?'High':'?'} <span class="lbl">Dst Port:</span> ${pk.port||'?'}</div>`;
+<div class="detail-line"><span class="lbl">${pn}, Src Port:</span> ${pk.sourcePort||'?'} <span class="lbl">Dst Port:</span> ${pk.destPort||pk.port||'?'}</div>`;
   const d=pk.details;if(d.flags||d.seq!==undefined||d.payload){h+=`<div class="sub">`;
     if(d.flags)h+=`<div class="flag">Flags: ${esc(d.flags)}</div>`;
     if(d.seq!==undefined)h+=`<div class="dim">Seq: ${d.seq}</div>`;
@@ -723,14 +738,14 @@ function wsRD(){const db=$('ws-db');if(!db)return;const pk=wsAll.find(p=>p.id===
     if(d.payload)h+=`<div class="payload-box"><div class="payload-label">Payload (ASCII)</div><div class="payload-data">${esc(d.payload)}</div></div>`;
     h+=`</div>`;}db.innerHTML=h;}
 function wsHS(){if(!wsOn){alert('Start Capture first!');return;}const p=9300;
-  wsAP({protocol:'TCP',port:p,length:74,info:`56230 → ${p} [SYN] Seq=0 Win=65535 Len=0 MSS=1460`,details:{flags:'0x002 (SYN)',seq:0,ack:0}});
-  setTimeout(()=>wsAP({protocol:'TCP',port:p,length:74,info:`${p} → 56230 [SYN, ACK] Seq=0 Ack=1 Win=65535 Len=0`,details:{flags:'0x012 (SYN, ACK)',seq:0,ack:1}}),120);
-  setTimeout(()=>wsAP({protocol:'TCP',port:p,length:66,info:`56230 → ${p} [ACK] Seq=1 Ack=1 Win=65535 Len=0`,details:{flags:'0x010 (ACK)',seq:1,ack:1}}),240);}
+  wsAP({protocol:'TCP',port:p,sourcePort:56230,destPort:p,length:74,info:`56230 → ${p} [SYN] Seq=0 Win=65535 Len=0 MSS=1460`,details:{flags:'0x002 (SYN)',seq:0,ack:0}});
+  setTimeout(()=>wsAP({protocol:'TCP',port:p,sourcePort:p,destPort:56230,length:74,info:`${p} → 56230 [SYN, ACK] Seq=0 Ack=1 Win=65535 Len=0`,details:{flags:'0x012 (SYN, ACK)',seq:0,ack:1}}),120);
+  setTimeout(()=>wsAP({protocol:'TCP',port:p,sourcePort:56230,destPort:p,length:60,info:`56230 → ${p} [ACK] Seq=1 Ack=1 Win=65535 Len=0`,details:{flags:'0x010 (ACK)',seq:1,ack:1}}),240);}
 function wsData(){if(!wsOn)return;const p=9300;
-  wsAP({protocol:'TCP',port:p,length:79,info:`56230 → ${p} [PSH, ACK] Seq=1 Ack=1 Len=13 [Data: "Hello World"]`,details:{flags:'0x018 (PSH, ACK)',payload:'Hello World',seq:1,ack:1}});
-  setTimeout(()=>wsAP({protocol:'TCP',port:p,length:66,info:`${p} → 56230 [ACK] Seq=1 Ack=14 Len=0`,details:{flags:'0x010 (ACK)',seq:1,ack:14}}),150);}
+  wsAP({protocol:'TCP',port:p,sourcePort:56230,destPort:p,length:65,info:`56230 → ${p} [PSH, ACK] Seq=1 Ack=1 Len=11 [Data: "Hello World"]`,details:{flags:'0x018 (PSH, ACK)',payload:'Hello World',seq:1,ack:1}});
+  setTimeout(()=>wsAP({protocol:'TCP',port:p,sourcePort:p,destPort:56230,length:60,info:`${p} → 56230 [ACK] Seq=1 Ack=12 Len=0`,details:{flags:'0x010 (ACK)',seq:1,ack:12}}),150);}
 function wsUDP(){if(!wsOn)return;const p=9301;
-  wsAP({protocol:'UDP',port:p,length:60,info:`Src:45882 → Dst:${p} Len=12`,details:{payload:'UDP Payload Data',flags:'None (UDP)'}});}
+  wsAP({protocol:'UDP',port:p,sourcePort:45882,destPort:p,length:60,info:`Src:45882 → Dst:${p} Payload=16 UDP-length=24`,details:{payload:'UDP Payload Data',flags:'None (UDP)'}});}
 
 // ── INIT ───────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded',()=>{

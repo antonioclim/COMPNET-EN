@@ -59,13 +59,16 @@ from urllib.request import Request, urlopen
 _ENV = load_local_env()
 
 def _env_int(key: str, default: int) -> int:
-    raw = os.getenv(key) or _ENV.get(key)
+    raw = os.environ[key] if key in os.environ else _ENV.get(key)
     if raw is None:
         return default
     try:
-        return int(raw)
-    except ValueError:
-        return default
+        value = int(raw)
+        if not 1 <= value <= 65535:
+            raise ValueError
+        return value
+    except ValueError as exc:
+        raise ValueError(f"{key} must be a port in 1..65535; received {raw!r}") from exc
 
 DVWA_PORT = _env_int("DVWA_HOST_PORT", 8888)
 WEBGOAT_PORT = _env_int("WEBGOAT_HOST_PORT", 8080)

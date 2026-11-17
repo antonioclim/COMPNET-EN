@@ -1,0 +1,4 @@
+# Shared CI/release QA dependencies; lab dependencies are separate.
+pytest==8.4.2
+PyYAML==6.0.3
+-r ../../03_LECTURES/tests/requirements.txt

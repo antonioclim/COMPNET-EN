@@ -14,7 +14,7 @@ h1 --- s1 --- h2
 The h1-s1 and/or s1-h2 link has artificial loss (e.g. 20%)
 
 ### How to run
-- sudo ./run.sh
+- `bash run.sh 20` (the script invokes the system Python with sudo)
 
 The script:
 - starts Mininet with the topology and loss
@@ -27,19 +27,17 @@ The script:
 - TCP: the receiver reports the full line count
 
 ### Useful parameters
-In topo.py you can modify:
-- loss (e.g. 5, 10, 20)
-- delay (optional)
+Set loss using `bash run.sh 5`, `bash run.sh 10` or `bash run.sh 20`. The runner now imports `build` from `topo.py`; optional link-delay changes belong in that function. Loss is applied separately on both links, so it is not a single end-to-end loss percentage. The UDP sender and receiver agree on sequence 0–199; missing packets at either edge are included.
 
 ## Files
 
 | Name | Lines |
 |------|-------|
-| `run.sh` | 50 |
+| `run.sh` | 42 |
 | `tcp_receiver.py` | 29 |
 | `tcp_sender.py` | 20 |
 | `topo.py` | 33 |
-| `udp_receiver.py` | 43 |
+| `udp_receiver.py` | 45 |
 | `udp_sender.py` | 16 |
 
 ## Cross-References

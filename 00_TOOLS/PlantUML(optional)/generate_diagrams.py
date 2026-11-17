@@ -57,7 +57,7 @@ from urllib.error import URLError, HTTPError
 
 # Configuration
 DEFAULT_PLANTUML_JAR = "plantuml.jar"
-PLANTUML_SERVER = "http://www.plantuml.com/plantuml"
+PLANTUML_SERVER = "https://www.plantuml.com/plantuml"
 DOCKER_IMAGE = "plantuml/plantuml:latest"
 SUPPORTED_FORMATS = ["png", "svg", "eps", "pdf", "txt"]
 
@@ -131,7 +131,7 @@ def check_plantuml_jar(jar_path: Path) -> bool:
             timeout=30
         )
         return result.returncode == 0
-    except subprocess.SubprocessError:
+    except (subprocess.SubprocessError, OSError):
         return False
 
 
@@ -143,12 +143,17 @@ def generate_with_jar(
     verbose: bool = False
 ) -> Tuple[bool, str]:
     """Generate diagram using local PlantUML JAR."""
-    output_file = output_dir / puml_file.with_suffix(f'.{fmt}').name
+    puml_file = puml_file.resolve()
+    output_dir = output_dir.resolve()
+    jar_path = jar_path.resolve()
+    output_dir.mkdir(parents=True, exist_ok=True)
+    suffix = 'atxt' if fmt == 'txt' else fmt
+    output_file = output_dir / puml_file.with_suffix(f'.{suffix}').name
     
     try:
         cmd = [
             'java', '-jar', str(jar_path),
-            f'-t{fmt}',
+            f'-t{fmt}', '-charset', 'UTF-8', '-failfast2',
             '-o', str(output_dir),
             str(puml_file)
         ]
@@ -223,7 +228,8 @@ def generate_with_docker(
     verbose: bool = False
 ) -> Tuple[bool, str]:
     """Generate diagram using Docker PlantUML image."""
-    output_file = output_dir / puml_file.with_suffix(f'.{fmt}').name
+    suffix = 'atxt' if fmt == 'txt' else fmt
+    output_file = output_dir / puml_file.with_suffix(f'.{suffix}').name
     
     try:
         # Mount the directory containing the file
@@ -266,11 +272,9 @@ def detect_method(jar_path: Path) -> Optional[str]:
     """Auto-detect the best available generation method."""
     if check_plantuml_jar(jar_path):
         return "jar"
-    if check_java() and jar_path.exists():
-        return "jar"
     if check_docker():
         return "docker"
-    # HTTP is always available as fallback
+    # HTTP is the fallback; generation still requires network/server availability.
     return "http"
 
 
@@ -350,6 +354,12 @@ def main():
     )
     
     args = parser.parse_args()
+    args.source_dir = args.source_dir.resolve()
+    args.jar_path = args.jar_path.resolve()
+    if args.output_dir is not None:
+        args.output_dir = args.output_dir.resolve()
+    if args.parallel < 1:
+        parser.error('--parallel must be at least 1')
     
     # Validate source directory
     if not args.source_dir.exists():
@@ -381,6 +391,8 @@ def main():
                 print("\nOr use --method http for online generation")
             elif not check_java():
                 print("Error: Java is not installed or not in PATH")
+            else:
+                print(f"Error: JAR validation failed: {args.jar_path}")
             sys.exit(1)
         
         if method == 'docker' and not check_docker():
@@ -393,8 +405,10 @@ def main():
     if args.dry_run:
         print("\n=== DRY RUN - No files will be generated ===\n")
         for puml_file in puml_files:
-            output_dir = args.output_dir or puml_file.parent
-            output_file = output_dir / puml_file.with_suffix(f'.{args.format}').name
+            output_dir = (args.output_dir / puml_file.relative_to(args.source_dir).parent
+                          if args.output_dir else puml_file.parent)
+            suffix = 'atxt' if args.format == 'txt' and method in {'jar', 'docker'} else args.format
+            output_file = output_dir / puml_file.with_suffix(f'.{suffix}').name
             print(f"  {puml_file} -> {output_file}")
         sys.exit(0)
     
@@ -406,7 +420,8 @@ def main():
     # Prepare work items
     work_items = []
     for puml_file in puml_files:
-        output_dir = args.output_dir or puml_file.parent
+        output_dir = (args.output_dir / puml_file.relative_to(args.source_dir).parent
+                      if args.output_dir else puml_file.parent)
         output_dir.mkdir(parents=True, exist_ok=True)
         work_items.append((
             puml_file, output_dir, method, args.jar_path, args.format, args.verbose

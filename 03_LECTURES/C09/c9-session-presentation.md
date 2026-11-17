@@ -16,7 +16,7 @@ By the end of the lecture, students should be able to:
 ### Where we are in the architecture
 - So far:
   - L3: addressing and routing
-  - L4: transport (TCP, UDP and TLS)
+  - L4: transport (TCP and UDP); TLS adds a secure channel above TCP
 - Today:
   - L5: session (conceptual)
   - L6: presentation (conceptual)
@@ -51,9 +51,9 @@ It does not define:
 ---
 
 ### Connection vs session
-- Connection (L4):
-  - a technical delivery mechanism (TCP, UDP)
-  - exists while the socket is open
+- Transport connection:
+  - TCP maintains connection state between endpoints
+  - UDP sockets provide datagrams; an open socket is not necessarily a connection
 - Session (L5):
   - the logical context of an interaction
   - can survive across multiple connections

@@ -73,7 +73,7 @@ Progressing from a library-based FTP server to a custom implementation and then 
 ```bash
 git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
 cd COMPNET-EN
-git sparse-checkout set 04_SEMINARS/S09
+git sparse-checkout set 04_SEMINARS/S09 00_TOOLS
 ```
 
 **Method B — Direct download**

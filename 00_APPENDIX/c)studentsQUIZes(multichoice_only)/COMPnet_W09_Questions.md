@@ -119,17 +119,22 @@
 
 ---
 
-### Q9. `Multiple Choice`
-**Variable-Length Data Encoding Approaches / Abordări de codificare a datelor cu lungime variabilă**
+### Q9. — Variable-Length Data Encoding Approaches / Abordări de codificare a datelor cu lungime variabilă
 
-> A developer needs to transmit variable-length strings over a binary protocol. Which approach correctly handles arbitrary-length data in a Presentation Layer encoding scheme? [Un dezvoltator trebuie să transmită șiruri de caractere cu lungime variabilă printr-un protocol binar. Care abordare gestionează corect datele cu lungime arbitrară într-o schemă de codificare a Stratului prezentare?]
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-- **a)  Length-prefixed: a 4-byte integer indicating string length, then that many UTF-8 bytes [Cu prefix de lungime: un întreg pe 4 octeți indicând lungimea șirului, apoi acel număr de octeți UTF-8]**
-- **b)  Fixed-width: pad all strings to 256 bytes regardless of actual length [Lățime fixă: completarea tuturor șirurilor la 256 de octeți indiferent de lungimea reală]**
-- **c)  Delimiter-based: end every string with the reserved byte 0xFF, which cannot appear inside payload data [Bazat pe delimitator: terminarea fiecărui șir cu octetul rezervat 0xFF, care nu poate apărea în datele utile]**
-- **d)  Implicit-length: the receiver infers the string length from the TCP segment size [Lungime implicită: receptorul deduce lungimea șirului din dimensiunea segmentului TCP]**
+A protocol must encode arbitrary byte strings, including every possible byte value, up to 1 MiB. It forbids delimiters and padding. Which design meets these constraints? [Un protocol trebuie să codifice șiruri arbitrare de octeți, inclusiv orice valoare de octet, până la 1 MiB. Nu permite delimitatori sau completare. Ce proiectare respectă cerințele?]
 
-> 💡 **Feedback:** Length-prefixed encoding (e.g., a 4-byte length field followed by that many bytes of UTF-8 data) is the standard Presentation Layer approach for variable-length data. A common misconception is that inferring message length from the TCP segment size works — but TCP is a byte stream with no message boundaries, so segment sizes are unreliable indicators of application message length. [Codificarea cu prefix de lungime (de ex. un câmp de 4 octeți indicând lungimea, urmat de acel număr de octeți de date UTF-8) este abordarea standard a Stratului prezentare pentru date cu lungime variabilă. O concepție greșită frecventă este că lungimea mesajului poate fi dedusă din dimensiunea segmentului TCP — dar TCP este un flux de octeți fără delimitarea mesajelor, deci dimensiunile segmentelor nu sunt indicatori fiabili ai lungimii mesajelor aplicației.]
+- **a)** A four-byte unsigned length in a specified byte order, followed by exactly that many bytes, with a 1 MiB receiver limit [O lungime fără semn pe patru octeți în ordinea specificată, urmată de exact acel număr de octeți, cu limită de 1 MiB la receptor]
+- **b)** Pad every payload to exactly 256 bytes [Completează orice payload până la exact 256 de octeți]
+- **c)** Append unescaped 0xFF as the only delimiter [Adaugă 0xFF ne-escapat drept unic delimitator]
+- **d)** Infer the message length from the TCP segment size [Deduce lungimea mesajului din dimensiunea segmentului TCP]
+
+<details><summary>💡 Feedback</summary>
+
+**Correct answer / Răspuns corect: a.** The explicit contract makes length-prefixing the unique valid choice here. Delimiter protocols can also be valid when their alphabet or escaping rules guarantee an unambiguous delimiter; 0xFF does not occur in valid UTF-8, so the earlier UTF-8-only wording admitted another answer. A four-byte field is bounded, not an unlimited-length encoding. [Contractul explicit face prefixul de lungime unica opțiune validă aici. Și delimitatorii pot fi corecți dacă alfabetul sau regulile de escapare garantează delimitarea neambiguă; 0xFF nu apare în UTF-8 valid, deci formularea anterioară limitată la UTF-8 admitea alt răspuns. Un câmp pe patru octeți este limitat, nu o codificare de lungime nelimitată.]
+
+</details>
 
 ---
 
@@ -361,7 +366,7 @@
 - **a)  true**
 - **b)  false**
 
-> 💡 **Feedback:** True. CRC-32 reliably detects all single-bit errors, all double-bit errors, and all burst errors shorter than 32 bits. It is purpose-built for accidental error detection at the Presentation Layer. A common misconception is that CRC-32 also provides security against intentional tampering, but it only addresses random transmission errors. [Adevărat. CRC-32 detectează fiabil toate erorile de un singur bit, toate erorile de doi biți și toate erorile de tip rafală mai scurte de 32 de biți. Este construit special pentru detecția erorilor accidentale la Stratul prezentare. O concepție greșită frecventă este că CRC-32 oferă și securitate împotriva falsificării intenționate, dar abordează doar erorile aleatoare de transmisie.]
+> 💡 **Feedback:** True for the standard CRC-32 polynomial used by zlib: all single-bit errors are detected. A degree 32 CRC also detects every burst of length at most 32 bits. Multi-bit guarantees depend on the generator and protected length. CRC is used at several layers and provides no cryptographic authenticity. [Adevărat pentru polinomul CRC-32 standard folosit de zlib: toate erorile de un bit sunt detectate. Un CRC de grad 32 detectează și orice rafală de lungime cel mult 32 de biți. Garanțiile pentru mai mulți biți depind de polinom și lungimea protejată. CRC este folosit la mai multe niveluri și nu oferă autenticitate criptografică.]
 
 ---
 
@@ -427,12 +432,12 @@
 ### Q31. `True / False`
 **Closing FTP Control Channel Immediately Stops Data Transfer / Închiderea canalului de control FTP oprește imediat transferul de date**
 
-> If the FTP control connection is closed during an active file download, the data transfer stops immediately. [Dacă conexiunea de control FTP este închisă în timpul unei descărcări active de fișier, transferul de date se oprește imediat.]
+> Closing the FTP control TCP connection automatically closes the separate data TCP connection at the transport layer, at the same instant. [Închiderea conexiunii TCP de control FTP închide automat conexiunea TCP separată de date la nivel de transport, în același moment.]
 
-- **a)  true**
-- **b)  false**
+- **a) true**
+- **b) false**
 
-> 💡 **Feedback:** False. The data channel is a separate TCP connection with its own state. Closing the control channel does not immediately terminate an in-progress data transfer, though you lose the ability to receive the 226 completion confirmation or issue an ABOR command. A common misconception is that closing the control channel kills all associated connections, but TCP connections are independent at the transport level. [Fals. Canalul de date este o conexiune TCP separată cu propria stare. Închiderea canalului de control nu termină imediat un transfer de date în curs, deși pierdeți capacitatea de a primi confirmarea de finalizare 226 sau de a emite o comandă ABOR. O concepție greșită frecventă este că închiderea canalului de control oprește toate conexiunile asociate, dar conexiunile TCP sunt independente la nivelul de transport.]
+> 💡 **Feedback:** False. TCP connections are independent. However, this does not guarantee that an FTP server will let the transfer continue: RFC 959 permits the server to abort a transfer when control closes without a command; orderly QUIT during a transfer has different handling. Application policy and event timing determine the observable behaviour. [Fals. Conexiunile TCP sunt independente. Aceasta nu garantează însă continuarea transferului FTP: RFC 959 permite serverului să anuleze transferul când controlul se închide fără comandă; QUIT ordonat în timpul transferului are alt tratament. Politica aplicației și temporizarea evenimentelor determină comportamentul observabil.]
 
 ---
 
@@ -450,17 +455,22 @@
 
 ---
 
-### Q33. `Multiple Choice`
-**When Session Layer Becomes Active in a Wireshark Capture / Când devine activ Stratul sesiune într-o captură Wireshark**
+### Q33. — When Session Layer Becomes Active in a Wireshark Capture / Când devine activ Stratul sesiune într-o captură Wireshark
 
-> In a Wireshark capture of an FTP connection, you observe: Packet 1–3: TCP three-way handshake; Packet 4: "220 FTP Server Ready"; Packet 5: "USER test". At which packet does Session Layer activity begin? [Într-o captură Wireshark a unei conexiuni FTP, observați: Pachetele 1–3: handshake TCP în trei pași; Pachetul 4: «220 FTP Server Ready»; Pachetul 5: «USER test». La care pachet începe activitatea Stratului sesiune?]
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-- **a)  Packet 5 — when the USER command initiates authentication [Pachetul 5 — când comanda USER inițiază autentificarea]**
-- **b)  Packet 1 — when the TCP SYN initiates the connection [Pachetul 1 — când TCP SYN inițiază conexiunea]**
-- **c)  Packet 3 — when the TCP three-way handshake completes [Pachetul 3 — când se completează handshake-ul TCP în trei pași]**
-- **d)  Packet 4 — when the FTP server sends its welcome banner [Pachetul 4 — când serverul FTP trimite banner-ul de întâmpinare]**
+A trace shows TCP SYN/SYN-ACK/ACK, then an FTP 220 greeting, then USER test. Which is the first listed FTP application-protocol message? [O captură arată TCP SYN/SYN-ACK/ACK, apoi salutul FTP 220, apoi USER test. Care este primul mesaj FTP de aplicație din listă?]
 
-> 💡 **Feedback:** The TCP handshake (packets 1–3) is Transport Layer. The server banner (packet 4) is still transport-level data delivery. Session Layer activity begins with the USER command (packet 5), which initiates the authentication dialogue. A common misconception is that the TCP handshake constitutes session establishment, but TCP only establishes a transport connection — the session begins when application-level authentication starts. [Handshake-ul TCP (pachetele 1–3) este la Stratul de transport. Banner-ul serverului (pachetul 4) este încă livrare de date la nivel de transport. Activitatea Stratului sesiune începe cu comanda USER (pachetul 5), care inițiază dialogul de autentificare. O concepție greșită frecventă este că handshake-ul TCP constituie stabilirea sesiunii, dar TCP stabilește doar o conexiune de transport — sesiunea începe când pornește autentificarea la nivel de aplicație.]
+- **a)** The220 greeting [Salutul220]
+- **b)** The TCP SYN [SYN-ul TCP]
+- **c)** Only USER test counts as application data [Doar USER test este date de aplicație]
+- **d)** None: FTP is a TCP control flag [Niciunul: FTP este un fanion de control TCP]
+
+<details><summary>💡 Feedback</summary>
+
+**Correct answer / Răspuns corect: a.** FTP greeting and commands are application messages carried by TCP. Session/presentation functions can be discussed conceptually, but there is no separate OSI-session packet whose universal start can be inferred from USER. Transport delivery does not turn a 220 FTP greeting into transport-layer control. [Salutul și comenzile FTP sunt mesaje de aplicație transportate prin TCP. Funcțiile de sesiune/prezentare pot fi discutate conceptual, dar nu există un pachet separat OSI-sesiune al cărui început universal să fie dedus din USER. Transportul nu transformă salutul FTP 220 în control la nivel de transport.]
+
+</details>
 
 ---
 
@@ -495,7 +505,7 @@
 ### Q36. `Multiple Choice`
 **Correct recv_exactly Implementation / Implementarea corectă a funcției recv_exactly**
 
-> Which implementation correctly receives exactly n bytes from a TCP socket, handling partial reads? [Care implementare primește corect exact n octeți de la un socket TCP, gestionând citirile parțiale?]
+> Which implementation correctly receives exactly n bytes from a TCP socket, handling partial reads and raising an error on premature EOF? [Care implementare primește corect exact n octeți de la un socket TCP, gestionând citirile parțiale și semnalând EOF prematur prin eroare?]
 
 - **a)  Loop calling sock.recv(n - len(data)) until n bytes are accumulated, raising on empty recv [Iterare apelând sock.recv(n - len(data)) până la n octeți acumulați, eroare la recv gol]**
 - **b)  A single call to sock.recv(n) which always returns exactly n bytes [Un singur apel la sock.recv(n) care returnează întotdeauna exact n octeți]**
@@ -506,18 +516,28 @@
 
 ---
 
-### Q37. `Multiple Choice`
-**Output of struct.pack("&lt;H", 0x1234) / Rezultatul struct.pack("&lt;H", 0x1234)**
+### Q37. — Output of struct.pack("&lt; H", 0x1234) / Rezultatul struct.pack("&lt; H", 0x1234)
 
-> What byte sequence does the following Python code produce? [Ce secvență de octeți produce următorul cod Python?]import struct
-data = struct.pack("
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-- **a)  34 12**
-- **b)  12 34**
-- **c)  00 12 34**
-- **d)  34 12 00 00**
+What bytes does this complete Python example produce? [Ce octeți produce acest exemplu Python complet?]
 
-> 💡 **Feedback:** The format "
+```python
+import struct
+data = struct.pack("<H", 0x1234)
+print(data.hex(" "))
+```
+
+- **a)** 34 12
+- **b)** 12 34
+- **c)** 00 12 34
+- **d)** 34 12 00 00
+
+<details><summary>💡 Feedback</summary>
+
+**Correct answer / Răspuns corect: a.** The < prefix specifies little-endian standard sizes and H is an unsigned two-byte integer. The low byte0x34 precedes 0x12, independently of native byte order. [Prefixul < specifică little-endian cu dimensiuni standard, iar H este un întreg fără semn pe doi octeți. Octetul inferior0x34 precedă 0x12, independent de ordinea nativă.]
+
+</details>
 
 ---
 
@@ -549,20 +569,24 @@ data = struct.pack("
 
 ---
 
-### Q40. `Multiple Choice`
-**CRC-32 Mask in Python / Masca CRC-32 în Python**
+### Q40. — CRC-32 Mask in Python / Masca CRC-32 în Python
 
-> When computing CRC-32 in Python with zlib.crc32(data) , why is the result masked with & 0xFFFFFFFF ? [Când se calculează CRC-32 în Python cu zlib.crc32(data) , de ce se aplică masca & 0xFFFFFFFF asupra rezultatului?]
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-- **a)  To ensure the result is unsigned 32-bit, since some platforms return a signed integer [Pentru a asigura un rezultat fără semn pe 32 de biți, deoarece unele platforme returnează un întreg cu semn]**
-- **b)  To truncate the CRC from 64 bits to 32 bits for efficiency [Pentru a trunchia CRC-ul de la 64 biți la 32 biți pentru eficiență]**
-- **c)  To add cryptographic security to the checksum [Pentru a adăuga securitate criptografică sumei de control]**
-- **d)  To convert the CRC-32 checksum from big-endian network order to little-endian host format [Pentru a converti suma de control CRC-32 din ordinea de rețea big-endian în formatul little-endian al gazdei]**
+For Python 3 zlib.crc32(data), what effect does &0xFFFFFFFF have on the returned checksum? [Pentru zlib.crc32(data) în Python 3, ce efect are &0xFFFFFFFF asupra sumei returnate?]
 
-> 💡 **Feedback:** On some Python versions, zlib.crc32() may return a signed integer. Masking with 0xFFFFFFFF ensures a consistent unsigned 32-bit result across all platforms. A common misconception is that this mask adds cryptographic security or performs byte-order conversion — it is purely a cross-platform compatibility measure. [Pe unele versiuni Python, zlib.crc32() poate returna un întreg cu semn. Mascarea cu 0xFFFFFFFF asigură un rezultat consistent fără semn pe 32 de biți pe toate platformele. O concepție greșită frecventă este că această mască adaugă securitate criptografică sau efectuează conversia ordinii octeților — este pur și simplu o măsură de compatibilitate între platforme.]
+- **a)** It leaves the already unsigned 32-bit result unchanged; it remains useful in code also supporting old Python 2 behaviour [Lasă neschimbat rezultatul deja fără semn pe 32 de biți; rămâne util în cod care acceptă și comportamentul vechi Python 2]
+- **b)** It converts the checksum to little-endian bytes [Convertește suma în octeți little-endian]
+- **c)** It adds cryptographic authentication [Adaugă autentificare criptografică]
+- **d)** It doubles the checksum width [Dublează lățimea sumei]
+
+<details><summary>💡 Feedback</summary>
+
+**Correct answer / Răspuns corect: a.** Python documentation states that crc32 returns an unsigned value since Python 3.0. The mask is redundant for a normal Python 3 result; masking an integer does not serialise it or provide a secret key. [Documentația Python precizează că crc32 returnează o valoare fără semn începând cu Python 3.0. Masca este redundantă pentru rezultatul normal Python 3; mascarea unui întreg nu îl serializează și nu introduce o cheie secretă.]
+
+</details>
 
 ---
-
 
 ## §3.  Numerical (Răspuns numeric)   (13 questions)
 
@@ -721,3 +745,12 @@ data = struct.pack("
 > 💡 **Feedback:** Header = 2+1+1+4+4 = 12 bytes. Payload = 5 bytes ("Hello"). Total = 12 + 5 = (...) bytes. A common misconception is to assume padding is added to align the total to a power of 2, but binary protocols typically use exact sizes without padding. [Antet = 2+1+1+4+4 = 12 octeți. Sarcină utilă = 5 octeți («Hello»). Total = 12 + 5 = (...) octeți. O concepție greșită frecventă este presupunerea că se adaugă spațiere (padding) pentru a alinia totalul la o putere a lui 2, dar protocoalele binare folosesc de obicei dimensiuni exacte fără padding.]
 
 ---
+
+
+## Repository context and reference points
+
+Canonical practical material: [S09](../../04_SEMINARS/S09/README.md) — FTP and the custom pseudo-FTP exercises. Code-tracing models explicitly introduced in this question pool are self-contained exercises, not promises of additional files or features in that seminar. [Material practic canonic: S09. Modelele de trasare introduse explicit sunt exerciții autonome, nu promisiuni de fișiere sau funcții suplimentare în seminar.]
+
+Protocol semantics: RFC 959, *File Transfer Protocol*. https://doi.org/10.17487/RFC0959
+
+Python3 checksum and encoding API: [zlib](https://docs.python.org/3/library/zlib.html) and [struct](https://docs.python.org/3/library/struct.html).

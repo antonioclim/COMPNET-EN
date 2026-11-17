@@ -25,6 +25,6 @@ docker compose -f docker-compose.yml -f docker-compose.tls.yml up --build
 Inside the `client` container you can verify the chain:
 
 ```bash
-python client/smoke_test.py --tls --cafile /client/certs/ca.crt
+python smoke_test.py --tls --cafile /client/certs/ca.crt
 ```
 

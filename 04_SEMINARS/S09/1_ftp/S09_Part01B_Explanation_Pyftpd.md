@@ -43,7 +43,7 @@ Key permissions:
 - `f` – rename
 - `m` – mkdir
 - `w` – write
-- `M` – create directories
+- `M` – change file permissions (SITE CHMOD)
 - `T` – change timestamp
 
 ---

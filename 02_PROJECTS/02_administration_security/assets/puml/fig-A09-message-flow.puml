@@ -29,7 +29,7 @@ note right of C : R1: tcp.port==6653 >= 1
 == PHASE 2 — BLOCKING ==
 
 C -> C : validate + whitelist check
-C -> SW : flow-mod: match src=h1_ip\naction=drop, priority=500\nidle_timeout=30
+C -> SW : flow-mod: match src=h1_ip\naction=drop, priority=500\nhard_timeout=30
 note right of C : R2: tcp.port==6653\n&& tcp.len>0 >= 5
 
 ATK -[#E53935]> SW : SYN → port 25
@@ -40,13 +40,15 @@ note right of SW #FFCDD2 : no traffic reaches victim
 
 == PHASE 3 — LEGITIMATE TRAFFIC (contrast) ==
 
-VIC -[#43A047]> SW : ICMP ping → h1
-SW -[#43A047]> ATK : forwarded (return allowed)
-note right of SW : R4: icmp || tcp >= 1
+IDS -[#43A047]> SW : benign ICMP request h3 → h2
+SW -[#43A047]> VIC : forwarded
+VIC -[#43A047]> SW : ICMP echo reply h2 → h3
+SW -[#43A047]> IDS : reply delivered
+note right of SW : R4: echo reply h2 → h3
 
 == PHASE 4 — EXPIRY AND RECOVERY ==
 
-... idle_timeout expires (30 s) ...
+... hard_timeout expires (30 s since installation) ...
 SW -> SW : block rule removed
 ATK -> SW : SYN → port 80
 SW -> VIC : forwarded again

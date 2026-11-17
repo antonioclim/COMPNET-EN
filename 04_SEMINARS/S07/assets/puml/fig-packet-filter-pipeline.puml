@@ -14,7 +14,7 @@ start
 
 if (Ethertype ==\n0x0800 ?) then (yes — IPv4)
 else (no)
-    #ECEFF1:Ignore\n(non-IPv4);
+    :Ignore\n(non-IPv4); <<#ECEFF1>>
     stop
 endif
 
@@ -31,10 +31,10 @@ endif
 :Call passes_filter()\nwith extracted fields;
 
 if (Filter\naccepts?) then (yes)
-    #C8E6C9:Display packet\n(src:port → dst:port, proto);
+    :Display packet\n(src:port → dst:port, proto); <<#C8E6C9>>
     stop
 else (no)
-    #FFCDD2:Silently drop\n(not displayed);
+    :Silently drop\n(not displayed); <<#FFCDD2>>
     stop
 endif
 

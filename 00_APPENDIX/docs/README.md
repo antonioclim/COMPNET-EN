@@ -1,5 +1,8 @@
 # docs — Pedagogical and Process Notes
 
+
+The code-tracing examples are self-contained teaching scenarios. For files and wire protocols used in the actual COMPNET-EN seminars, use the unit README and the canonical Python lab map; a toy JSON or text example does not redefine the S04 protocol.
+
 Teaching support documents used alongside the COMPNET lectures, seminars and projects: learning objectives, misconceptions, revision strategy, pair programming guidance and practical troubleshooting.
 
 ## File and Folder Index

@@ -7,31 +7,56 @@
       "id": "R1",
       "filter": "tcp.dstport==5020 && tcp.flags.syn==1 && tcp.flags.ack==0",
       "condition": ">= 1",
-      "description": "Handshake to the object service."
+      "description": "SYN connection attempt to the object service."
     },
     {
       "id": "R2",
-      "filter": "tcp.port==5020 && (frame contains \"QUERY\" || frame contains \"GET\")",
+      "filter": "tcp.dstport==5020 && tcp.len>0",
       "condition": ">= 1",
-      "description": "A selection or retrieval request appears in payload."
+      "description": "Complete QUERY/GET command lines in the request direction after TCP reassembly and retransmission removal.",
+      "measurement": "tcp_commands",
+      "commands": [
+        "QUERY",
+        "GET"
+      ]
     },
     {
       "id": "R3",
-      "filter": "tcp.port==5020 && frame contains \"UPDATE\"",
+      "filter": "tcp.dstport==5020 && tcp.len>0",
       "condition": ">= 1",
-      "description": "Update operation is visible in the session."
+      "description": "Complete UPDATE command lines in the request direction after TCP reassembly and retransmission removal.",
+      "measurement": "tcp_commands",
+      "commands": [
+        "UPDATE"
+      ]
     },
     {
       "id": "R4",
-      "filter": "tcp.port==5020 && (frame contains \"NOTIFY\" || frame contains \"CHANGED\" || frame contains \"UPDATED\")",
+      "filter": "tcp.srcport==5020 && tcp.len>0",
       "condition": ">= 1",
-      "description": "Change notification is visible to another client."
+      "description": "Complete NOTIFY/CHANGED/UPDATED command lines in the response direction after TCP reassembly and retransmission removal.",
+      "measurement": "tcp_commands",
+      "commands": [
+        "NOTIFY",
+        "CHANGED",
+        "UPDATED"
+      ]
     },
     {
       "id": "R5",
-      "filter": "tcp.port==5020 && frame contains \"DELETE\"",
+      "filter": "tcp.dstport==5020 && tcp.len>0",
       "condition": ">= 1",
-      "description": "Delete operation is visible in the session."
+      "description": "Complete DELETE command lines in the request direction after TCP reassembly and retransmission removal.",
+      "measurement": "tcp_commands",
+      "commands": [
+        "DELETE"
+      ]
     }
+  ],
+  "manual_checks": [
+    "The supplied command counter uses LF/CRLF framing. If E1 selects JSON or binary framing, supply and test the corresponding decoder in the student validator; do not replace logical counts with frame counts.",
+    "Correlate client identities, topics/keys and request IDs with pytest assertions to prove the required application behaviour.",
+    "R1 R2: Assert identity, version and subscription state.",
+    "R3 R4 R5: Assert the exact changed/deleted key and version, recipient and deterministic absent-key response. Include the restart-persistence smoke test required by the E2 Deliverables; repeat the complete persistence demonstration at E3."
   ]
 }

@@ -24,7 +24,7 @@ partition "Lookup logic" #F5F5F5 {
         if (Default route\n0.0.0.0/0 exists?) then (yes)
             :Forward via\ndefault gateway;
         else (no)
-            #FFCDD2:Drop packet\n(destination unreachable);
+            :Drop packet\n(destination unreachable); <<#FFCDD2>>
             stop
         endif
     endif

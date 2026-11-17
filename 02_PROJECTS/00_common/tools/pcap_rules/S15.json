@@ -5,33 +5,39 @@
   "rules": [
     {
       "id": "R1",
-      "filter": "udp.dstport==5515 && frame contains \"IOT1\"",
+      "filter": "udp.dstport==5515 && udp.payload[0:4]==49:4f:54:31",
       "condition": ">= 3",
-      "description": "At least 3 telemetry datagrams (magic IOT1)."
+      "description": "At least three UDP datagrams beginning with the four-byte IOT1 prefix."
     },
     {
       "id": "R2",
       "filter": "tcp.dstport==8080 && tcp.flags.syn==1 && tcp.flags.ack==0",
       "condition": ">= 1",
-      "description": "Handshake to the HTTP API."
+      "description": "SYN connection attempt to the HTTP API."
     },
     {
       "id": "R3",
       "filter": "tcp.port==8080 && frame contains \"GET /\"",
       "condition": ">= 1",
-      "description": "At least one HTTP query for metrics (GET)."
+      "description": "GET marker bytes are present on the HTTP API transport; assert the decoded query result."
     },
     {
       "id": "R4",
       "filter": "tcp.port==8080 && frame contains \"HTTP/1.1 200\"",
       "condition": ">= 1",
-      "description": "200 response for the API query."
+      "description": "HTTP 200 marker bytes are present on the HTTP API transport."
     },
     {
       "id": "R5",
-      "filter": "udp.dstport==5515 && frame contains \"seq\"",
+      "filter": "udp.dstport==5515 && udp.payload[0:4]==49:4f:54:31 && udp.length>12",
       "condition": ">= 1",
-      "description": "Telemetry contains a sequence field (deduplication/out-of-order handling)."
+      "description": "Telemetry contains bytes after IOT1. The E1 JSON/TLV decoder and tests verify device_id, ts, seq and value."
     }
+  ],
+  "manual_checks": [
+    "Decode the payload after IOT1 with the E1 JSON/TLV schema and demonstrate device_id, ts, seq and value.",
+    "Correlate seq values with deduplication/out-of-order tests; presence of the ASCII word seq is not a binary-format requirement.",
+    "R1 R5: Decode device_id, ts, seq and value and test invalid prefix, duplicate/out-of-order data and bounds.",
+    "R2 R3 R4: Assert that the returned device, sequence and value match the injected measurement; demonstrate the mandatory E3 stream separately."
   ]
 }

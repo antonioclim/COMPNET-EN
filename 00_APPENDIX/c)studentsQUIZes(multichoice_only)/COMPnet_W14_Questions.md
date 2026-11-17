@@ -168,20 +168,18 @@ TCP is connection-oriented with reliability through ACKs and retransmissions. UD
 ---
 
 ### Q9. `N14.C02.Q03`
-**TCP Four-Way Termination Count / Numărul de pachete la terminarea TCP**
 
-*Multiple Choice*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> How many packets are exchanged during a graceful TCP connection termination? [Câte pachete se schimbă în timpul terminării grațioase a unei conexiuni TCP?]
+Assume an ordinary graceful TCP close with separate FIN and ACK segments in each direction, no combined FIN+ACK response, no retransmissions and no application data. How many segments does this stated sequence contain? [Presupuneți o închidere TCP grațioasă obișnuită cu segmente FIN și ACK separate în fiecare sens, fără răspuns combinat FIN+ACK, fără retransmisii și fără date de aplicație. Câte segmente conține secvența dată?]
 
-- **a)** 4 (FIN, ACK, FIN, ACK) [4 (FIN, ACK, FIN, ACK)]
-- **b)** 2 (FIN, ACK) [2 (FIN, ACK)]
-- **c)** 3 — FIN, ACK, FIN-ACK exchange in total [3 — schimb FIN, ACK, FIN-ACK în total]
-- **d)** 1 (RST) [1 (RST)]
+- **a)** 4
+- **b)** 2
+- **c)** 1
 
 <details><summary>💡 Feedback</summary>
 
-Graceful termination uses four packets: FIN from initiator, ACK from receiver, FIN from receiver, ACK from initiator. Each side independently closes its half of the connection. [Terminarea grațioasă folosește patru pachete: FIN de la inițiator, ACK de la receptor, FIN de la receptor, ACK de la inițiator. Fiecare parte își închide independent jumătatea de conexiune.]
+**Correct answer / Răspuns corect: a.** The stated sequence is FIN, ACK, FIN, ACK. This is not a universal packet count: ACK and FIN can be combined and retransmissions can add packets. Each direction closes independently. [Secvența dată este FIN, ACK, FIN, ACK. Numărul nu este universal: ACK și FIN pot fi combinate, iar retransmisiile pot adăuga pachete. Fiecare sens se închide independent.]
 
 </details>
 
@@ -342,20 +340,18 @@ Health checks run periodically. During the detection interval, the LB may still 
 ---
 
 ### Q18. `N14.C04.Q03`
-**Reverse Proxy Forwarding Headers / Antetele de redirecționare ale proxy-ului invers**
 
-*Multiple Choice*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> The Week 14 load balancer adds X-Forwarded-For and X-Real-IP headers. Why are these necessary? [Echilibratorul de sarcină din săptămâna 14 adaugă antetele X-Forwarded-For și X-Real-IP. De ce sunt acestea necesare?]
+A trusted reverse proxy sets X-Forwarded-For and X-Real-IP before forwarding HTTP requests. What purpose can these headers serve? [Un reverse proxy de încredere setează X-Forwarded-For și X-Real-IP înaintea redirecționării cererilor HTTP. Ce rol pot avea antetele?]
 
-- **a)** To preserve the original client IP address, which would otherwise be replaced by the proxy's address [Pentru a păstra adresa IP originală a clientului, care altfel ar fi înlocuită cu adresa proxy-ului]
-- **b)** X-Forwarded-For and X-Real-IP headers preserve the original client IP address, allowing backend servers to identify the true source of each proxied request [Antetele X-Forwarded-For și X-Real-IP păstrează adresa IP originală a clientului, permițând serverelor backend să identifice sursa reală a fiecărei cereri proximate]
-- **c)** To authenticate the load balancer identity to the backend application servers [Pentru a autentifica identitatea echilibratorului de sarcină la serverele backend]
-- **d)** To specify which load balancing algorithm should be applied to the request [Pentru a specifica ce algoritm de echilibrare a sarcinii ar trebui aplicat cererii]
+- **a)** Carry client-address information to the backend, which sees the proxy as its connection peer. [Transmit informația despre adresa clientului către backend, care vede proxy-ul drept corespondent al conexiunii.]
+- **b)** Cryptographically authenticate every original client. [Autentifică criptografic fiecare client original.]
+- **c)** Select the load-balancing algorithm automatically. [Selectează automat algoritmul de echilibrare.]
 
 <details><summary>💡 Feedback</summary>
 
-When a reverse proxy forwards a request, the backend sees the proxy's IP as the source. X-Forwarded-For preserves the original client IP through the forwarding chain. [Când un proxy invers redirecționează o cerere, backend-ul vede IP-ul proxy-ului ca sursă. X-Forwarded-For păstrează IP-ul original al clientului prin lanțul de redirecționare.]
+**Correct answer / Răspuns corect: a.** These headers convey application metadata, not cryptographic proof. Trust them only from controlled proxy paths with a defined overwrite/append policy; arbitrary client-supplied values can be forged. [Antetele transmit metadate ale aplicației, nu dovezi criptografice. Acordați încredere numai căilor proxy controlate cu politică definită de suprascriere/adăugare; valorile furnizate arbitrar de client pot fi falsificate.]
 
 </details>
 
@@ -542,20 +538,18 @@ Comprehensive monitoring requires multiple data sources: /lb-status for traffic 
 ---
 
 ### Q28. `N14.C02.Q06`
-**Connection Refused vs Timeout / Connection Refused vs Timeout**
 
-*Multiple Choice*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> A student runs nc -zv localhost 9999 and receives 'Connection refused'. What can they definitively conclude? [Un student execută nc -zv localhost 9999 și primește 'Connection refused'. Ce poate concluziona cu certitudine?]
+A TCP connection attempt receives an active reset/refusal. Which conclusion is supported? [O tentativă de conectare TCP primește un reset/refuz activ. Ce concluzie este susținută?]
 
-- **a)** The host is reachable but no service listens on port 9999 [Gazda este accesibilă, dar niciun serviciu nu ascultă pe portul 9999]
-- **b)** A firewall rule is actively blocking TCP traffic to port 9999 [O regulă de firewall blochează activ traficul TCP către portul 9999]
-- **c)** The network path between client and server is completely broken [Calea de rețea între client și server este complet întreruptă]
-- **d)** The DNS resolution failed and the hostname could not be resolved [Rezoluția DNS a eșuat și numele gazdei nu a putut fi rezolvat]
+- **a)** The attempted connection was refused; an absent listener or an explicit firewall rejection can both cause this. [Conexiunea încercată a fost refuzată; lipsa listenerului sau respingerea firewall explicită pot produce ambele rezultatul.]
+- **b)** There is certainly no firewall on the path. [Sigur nu există firewall pe cale.]
+- **c)** The connection was gracefully closed after successful application processing. [Conexiunea a fost închisă grațios după procesarea reușită a aplicației.]
 
 <details><summary>💡 Feedback</summary>
 
-'Connection refused' means a TCP RST was received, confirming network reachability. Firewall blocking would cause timeout, not refusal. DNS failure produces a different error message. ['Connection refused' înseamnă că s-a primit un TCP RST, confirmând accesibilitatea rețelei. Blocarea de firewall ar cauza timeout, nu refuz. Eșecul DNS produce un mesaj de eroare diferit.]
+**Correct answer / Răspuns corect: a.** RST in response to SYN is active refusal, not a successful handshake. A firewall configured with tcp-reset can produce the same observation as an endpoint without a listener. Further evidence identifies the cause. [RST ca răspuns la SYN este refuz activ, nu handshake reușit. Un firewall configurat cu tcp-reset poate produce aceeași observație ca un endpoint fără listener. Dovezi suplimentare identifică cauza.]
 
 </details>
 
@@ -602,40 +596,36 @@ localhost resolution depends on /etc/hosts and system config. If it resolves to 
 ---
 
 ### Q31. `N14.C02.Q04`
-**RST Flag After SYN Meaning / Semnificația RST după SYN**
 
-*Multiple Choice*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> In a Wireshark capture you observe a TCP RST packet sent from a server immediately after a client's SYN. What does this indicate? [Într-o captură Wireshark observați un pachet TCP RST trimis de server imediat după SYN-ul clientului. Ce indică acest lucru?]
+A TCP connection attempt receives an active reset/refusal. Which conclusion is supported? [O tentativă de conectare TCP primește un reset/refuz activ. Ce concluzie este susținută?]
 
-- **a)** No service is listening on the destination port; the connection is refused [Niciun serviciu nu ascultă pe portul destinație; conexiunea este refuzată]
-- **b)** The connection was established and then immediately terminated by the server application due to resource exhaustion [Conexiunea a fost stabilită și apoi terminată imediat de aplicația server din cauza epuizării resurselor]
-- **c)** The connection was established and is now being gracefully terminated [Conexiunea a fost stabilită și este acum terminată grațios]
-- **d)** The server acknowledges the SYN and requests a data retransmission [Serverul confirmă SYN-ul și solicită o retransmisie de date]
+- **a)** The attempted connection was refused; an absent listener or an explicit firewall rejection can both cause this. [Conexiunea încercată a fost refuzată; lipsa listenerului sau respingerea firewall explicită pot produce ambele rezultatul.]
+- **b)** There is certainly no firewall on the path. [Sigur nu există firewall pe cale.]
+- **c)** The connection was gracefully closed after successful application processing. [Conexiunea a fost închisă grațios după procesarea reușită a aplicației.]
 
 <details><summary>💡 Feedback</summary>
 
-TCP RST in response to SYN means no service listens on that port, producing 'Connection refused'. Firewall blocking causes timeout (no response at all). Receiving RST confirms the host is reachable. [TCP RST ca răspuns la SYN înseamnă că niciun serviciu nu ascultă pe acel port, producând eroarea 'Connection refused'. Blocarea de firewall cauzează timeout (niciun răspuns). Primirea RST confirmă că gazda este accesibilă.]
+**Correct answer / Răspuns corect: a.** RST in response to SYN is active refusal, not a successful handshake. A firewall configured with tcp-reset can produce the same observation as an endpoint without a listener. Further evidence identifies the cause. [RST ca răspuns la SYN este refuz activ, nu handshake reușit. Un firewall configurat cu tcp-reset poate produce aceeași observație ca un endpoint fără listener. Dovezi suplimentare identifică cauza.]
 
 </details>
 
 ---
 
 ### Q32. `N14.T00.Q02`
-**Scenario: Wireshark Packet Analysis / Scenariu: Analiza pachetelor Wireshark**
 
-*Multiple Choice*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> You capture 30 seconds of traffic and apply tcp.flags.syn == 1 && tcp.flags.ack == 0. You see 10 packets. What can you conclude? [Capturați 30 de secunde de trafic și aplicați tcp.flags.syn == 1 && tcp.flags.ack == 0. Vedeți 10 pachete. Ce puteți concluziona?]
+The display filter `tcp.flags.syn == 1 && tcp.flags.ack == 0` matches ten captured packets. What can be concluded from that count alone? [Filtrul de afișare `tcp.flags.syn == 1 && tcp.flags.ack == 0` potrivește zece pachete capturate. Ce se poate concluziona doar din acest număr?]
 
-- **a)** 10 new TCP connections were initiated during the capture period [10 conexiuni TCP noi au fost inițiate în perioada de captură]
-- **b)** 10 HTTP requests were completed successfully through the load balancer [10 cereri HTTP au fost completate cu succes prin echilibratorul de sarcină]
-- **c)** 10 packets were dropped by the firewall before reaching any destination [10 pachete au fost eliminate de firewall înainte de a ajunge la orice destinație]
-- **d)** The network experienced 10 connection errors and all were retransmitted [Rețeaua a experimentat 10 erori de conexiune și toate au fost retransmise]
+- **a)** Ten observed segments have SYN set and ACK clear; some may be retransmissions of the same attempt. [Zece segmente observate au SYN setat și ACK nesetat; unele pot fi retransmisii ale aceleiași tentative.]
+- **b)** Exactly ten distinct connections were successfully established. [Exact zece conexiuni distincte au fost stabilite cu succes.]
+- **c)** Exactly ten HTTP requests completed. [Exact zece cereri HTTP s-au finalizat.]
 
 <details><summary>💡 Feedback</summary>
 
-SYN-only packets (SYN=1, ACK=0) represent the first packet of each new TCP connection. 10 such packets = 10 connection attempts. Each may carry multiple HTTP requests via keep-alive. [Pachetele doar SYN (SYN=1, ACK=0) reprezintă primul pachet al fiecărei conexiuni TCP noi. 10 astfel de pachete = 10 încercări de conexiune. Fiecare poate transporta mai multe cereri HTTP prin keep-alive.]
+**Correct answer / Răspuns corect: a.** Count attempts or established connections only after considering retransmissions, endpoint tuples, sequence numbers and completion of handshakes. A SYN count alone is not a count of successful sessions. [Numărați tentative sau conexiuni stabilite numai după examinarea retransmisiilor, tuplelor de endpoint, numerelor de secvență și finalizării handshake-urilor. Numărul SYN singur nu reprezintă numărul sesiunilor reușite.]
 
 </details>
 
@@ -686,20 +676,19 @@ Docker networks provide isolation. The client reaches app1 only through the load
 ---
 
 ### Q35. `N14.S01.Q03`
-**Listing Running Containers / Listarea containerelor active**
 
-*Multiple Choice*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> Which command shows only the Week 14 running containers with their status and ports? [Ce comandă afișează doar containerele active din săptămâna 14 cu starea și porturile lor?]
+For an example deployment started with Compose project name week14, which command lists only its running containers, including status and published ports? [Pentru o implementare exemplu pornită cu numele de proiect Compose week14, ce comandă listează numai containerele sale active, inclusiv starea și porturile publicate?]
 
-- **a)** docker ps — lists all currently running containers with their names, status, port mappings and image information in a formatted table [listează toate containerele active cu numele, starea, mapările de porturi și informațiile despre imagine într-un tabel formatat]
-- **b)** docker ps -a — shows all containers including stopped ones, not filtered [docker ps -a — afișează toate containerele inclusiv cele oprite, nefiltrat]
-- **c)** docker images | grep week14 — lists images, not running containers [docker images | grep week14 — listează imaginile, nu containerele active]
-- **d)** docker network inspect week14_backend_net — shows network details only [docker network inspect week14_backend_net — afișează doar detaliile rețelei]
+- **a)** `docker ps --filter label=com.docker.compose.project=week14`
+- **b)** `docker ps -a`
+- **c)** `docker images`
+- **d)** `docker network ls`
 
 <details><summary>💡 Feedback</summary>
 
-The --filter flag narrows docker ps output. Using name=week14 shows only containers whose names match the prefix, with their status and port mappings. [Fanionul --filter restrânge rezultatul docker ps. Folosind name=week14 se afișează doar containerele ale căror nume corespund prefixului, cu starea și mapările de porturi.]
+**Correct answer / Răspuns corect: a.** Compose applies the project label. Filtering by its exact value identifies the project without relying on a partial name match. This item supplies an example project name; it does not imply that S14 includes a deployable compose stack. [Compose aplică eticheta proiectului. Filtrarea după valoarea exactă identifică proiectul fără a depinde de potrivirea parțială a numelui. Itemul furnizează un nume exemplu; nu implică existența unui stack compose executabil în S14.]
 
 </details>
 
@@ -804,60 +793,54 @@ Systematic troubleshooting starts with identifying which component is failing. S
 ---
 
 ### Q41. `N14.S03.Q02`
-**Docker Logs for Debugging / Logurile Docker pentru depanare**
 
-*Multiple Choice*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> To view the last 50 log lines from the load balancer container in real-time, which command is correct? [Pentru a vizualiza ultimele 50 de linii de log de la containerul echilibratorului de sarcină în timp real, care comandă este corectă?]
+A running example container is named week14_lb and logs to stdout/stderr. Which command prints up to its last 50 log lines and then follows new output? [Un container exemplu activ se numește week14_lb și scrie loguri la stdout/stderr. Ce comandă afișează până la ultimele 50 de linii și apoi urmărește ieșirea nouă?]
 
-- **a)** docker logs week14_lb — displays the load balancer container output showing proxy routing decisions, backend selections and error messages [afișează ieșirea containerului echilibratorului arătând deciziile de rutare proxy, selecțiile backend și mesajele de eroare]
-- **b)** docker logs week14_lb > lb.log — redirects to file, no real-time following [docker logs week14_lb > lb.log — redirecționează în fișier, fără urmărire în timp real]
-- **c)** docker inspect week14_lb — shows container config, not application logs [docker inspect week14_lb — afișează configurația containerului, nu logurile aplicației]
-- **d)** docker exec week14_lb cat /var/log/syslog — checks system log, not app output [docker exec week14_lb cat /var/log/syslog — verifică logul de sistem, nu output-ul aplicației]
+- **a)** `docker logs --tail 50 -f week14_lb`
+- **b)** `docker logs week14_lb`
+- **c)** `docker inspect week14_lb`
 
 <details><summary>💡 Feedback</summary>
 
-The -f flag follows the log output in real time (like tail -f). The --tail N flag limits initial output to the last N lines. Both combined provide real-time monitoring with reasonable context. [Fanionul -f urmărește output-ul logului în timp real (precum tail -f). Fanionul --tail N limitează output-ul inițial la ultimele N linii. Ambele combinate asigură monitorizare în timp real cu context rezonabil.]
+**Correct answer / Răspuns corect: a.** --tail 50 bounds the initial history; -f follows subsequent output. The command shows what the application actually emits, not guaranteed backend-selection or security events. [--tail 50 limitează istoricul inițial; -f urmărește ieșirea ulterioară. Comanda arată ce emite efectiv aplicația, nu evenimente garantate de selecție backend sau securitate.]
 
 </details>
 
 ---
 
 ### Q42. `N14.S03.Q03`
-**Testing Backend Health Directly / Testarea directă a sănătății backend-ului**
 
-*Multiple Choice*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> To verify that backend app1 is responding correctly, bypassing the load balancer, which curl command is appropriate? [Pentru a verifica că backend-ul app1 răspunde corect, ocolind echilibratorul de sarcină, care comandă curl este adecvată?]
+An example backend listens on container port 8001 and is published as `127.0.0.1:8001:8001`. The load balancer is published on 8080. From that Docker host, which command explicitly uses the backend’s published endpoint? [Un backend exemplu ascultă pe portul 8001 în container și este publicat ca `127.0.0.1:8001:8001`. Load balancerul este publicat pe 8080. De pe gazda Docker, ce comandă folosește explicit endpointul publicat al backendului?]
 
-- **a)** curl http://localhost:8001/health — sends a direct GET request to Backend 1 bypassing the load balancer, confirming backend availability independently [trimite o cerere GET directă către Backend 1 ocolind echilibratorul, confirmând disponibilitatea backend-ului independent]
-- **b)** curl http://localhost:8080/health — goes through the load balancer, not direct [curl http://localhost:8080/health — trece prin echilibratorul de sarcină, nu direct]
-- **c)** curl http://172.20.0.2:8001/health — container IP unreachable from host directly [curl http://172.20.0.2:8001/health — IP-ul containerului inaccesibil direct de la gazdă]
-- **d)** curl http://localhost:9090/health — connects to the TCP echo server instead [curl http://localhost:9090/health — se conectează la serverul TCP echo în schimb]
+- **a)** `curl http://127.0.0.1:8001/health`
+- **b)** `curl http://127.0.0.1:8080/health`
+- **c)** `curl http://127.0.0.1:9090/health`
 
 <details><summary>💡 Feedback</summary>
 
-Port 8001 is mapped directly to app1 (8001:8001). Port 8002 maps to app2 (8002:8001). Using these host ports bypasses the load balancer for direct testing. [Portul 8001 este mapat direct la app1 (8001:8001). Portul 8002 se mapează la app2 (8002:8001). Folosirea acestor porturi gazdă ocolește echilibratorul de sarcină pentru testare directă.]
+**Correct answer / Răspuns corect: a.** The supplied host mapping bypasses the load balancer. Whether a container IP is directly reachable depends on platform and routing: a native Linux daemon host often can reach its bridge subnet, while a Docker Desktop physical host has a different path. EXPOSE alone does not publish a port. [Maparea dată pe gazdă ocolește load balancerul. Accesibilitatea directă a IP-ului containerului depinde de platformă și rutare: gazda daemonului Linux nativ poate adesea ajunge la subrețeaua bridge, în timp ce gazda fizică Docker Desktop are altă cale. EXPOSE singur nu publică porturi.]
 
 </details>
 
 ---
 
 ### Q43. `N14.S03.Q04`
-**Port Conflict Resolution / Rezolvarea conflictelor de porturi**
 
-*Multiple Choice*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> A container fails to start with 'address already in use' on port 8080. What diagnostic command identifies the conflicting process? [Un container nu reușește să pornească cu 'address already in use' pe portul 8080. Ce comandă de diagnosticare identifică procesul conflictual?]
+On the Linux host reporting a TCP bind conflict on port 8080, which command queries listening sockets and their process information for that exact port? [Pe gazda Linux care raportează un conflict bind TCP pe 8080, ce comandă interoghează socketurile de ascultare și informațiile proceselor pentru portul exact?]
 
-- **a)** netstat -tlnp | grep  or ss -tlnp | grep  — identifies the process occupying a specific port, showing PID and program name for resolution [identifică procesul care ocupă un port specific, afișând PID-ul și numele programului pentru rezolvare]
-- **b)** docker ps | grep 8080 — shows Docker containers but not non-Docker processes [docker ps | grep 8080 — afișează containerele Docker, dar nu procesele non-Docker]
-- **c)** ping localhost — tests network connectivity, irrelevant to port conflicts [ping localhost — testează conectivitatea rețelei, irelevant pentru conflictele de porturi]
-- **d)** docker network ls — lists Docker networks, unrelated to port binding issues [docker network ls — listează rețelele Docker, fără legătură cu problemele de legare a porturilor]
+- **a)** `sudo ss -ltnp 'sport = :8080'`
+- **b)** `ping localhost`
+- **c)** `docker network ls`
 
 <details><summary>💡 Feedback</summary>
 
-ss -tlnp shows all TCP listening sockets with process names. Grep for the specific port reveals which process (Docker or otherwise) is already bound to it. [ss -tlnp afișează toate socket-urile TCP care ascultă cu numele proceselor. Grep pentru portul specific dezvăluie ce proces (Docker sau altul) este deja legat de acesta.]
+**Correct answer / Răspuns corect: a.** The ss filter avoids an empty grep pattern or a substring match such as 18080. Process information requires sufficient permission. Docker publication may also be implemented through forwarding rules, so inspect Docker port mappings if the socket query does not explain the conflict. [Filtrul ss evită un pattern grep gol sau o potrivire parțială precum 18080. Informațiile procesului necesită permisiuni suficiente. Publicarea Docker poate folosi și reguli de redirecționare, deci inspectați mapările Docker dacă interogarea socketurilor nu explică conflictul.]
 
 </details>
 
@@ -982,60 +965,71 @@ The parser splits each header line on ": " (colon-space). For "X-Backend: app1",
 ---
 
 ### Q50. `N14.S05.Q03`
-**Socket Connection to Unreachable Host / Conexiune socket către gazdă inaccesibilă**
 
-*Multiple Choice*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> In code tracing exercise T1, calling connect_to_server("10.255.255.1", 80) where the IP is unreachable results in: [În exercițiul de trasare T1, apelul connect_to_server("10.255.255.1", 80) unde IP-ul este inaccesibil rezultă în:]
+A TCP socket with a five-second timeout attempts an address that is unreachable in the current environment. What outcome is guaranteed by the word unreachable alone? [Un socket TCP cu timeout de cinci secunde încearcă o adresă inaccesibilă în mediul curent. Ce rezultat este garantat numai de termenul inaccesibil?]
 
-- **a)** "timeout" — the socket.timeout exception is caught after 5 seconds ["timeout" — excepția socket.timeout este capturată după 5 secunde]
-- **b)** "connected" — the connection succeeds despite the unreachable IP address ["connected" — conexiunea reușește în ciuda adresei IP inaccesibile]
-- **c)** "refused" — a ConnectionRefusedError is raised by the operating system ["refused" — o excepție ConnectionRefusedError este ridicată de sistemul de operare]
-- **d)** "error: Network is unreachable" — an OSError exception occurs immediately ["error: Network is unreachable" — o excepție OSError apare imediat]
+- **a)** No unique error: the call may fail immediately with a routing error or wait until a timeout, depending on the path. [Nicio eroare unică: apelul poate eșua imediat cu o eroare de rutare sau poate aștepta până la timeout, în funcție de cale.]
+- **b)** It always waits exactly five seconds and raises socket.timeout. [Așteaptă întotdeauna exact cinci secunde și ridică socket.timeout.]
+- **c)** It always succeeds because private addresses are reachable. [Reușește întotdeauna deoarece adresele private sunt accesibile.]
 
 <details><summary>💡 Feedback</summary>
 
-An unreachable IP causes no response. With sock.settimeout(5), a socket.timeout exception fires after 5 seconds. The except clause catches it and returns 'timeout'. [Un IP inaccesibil nu cauzează niciun răspuns. Cu sock.settimeout(5), excepția socket.timeout se declanșează după 5 secunde. Clauza except o capturează și returnează 'timeout'.]
+**Correct answer / Răspuns corect: a.** The address literal does not specify routing, neighbour reachability or firewall responses. A deterministic code-tracing question must supply the returned errno or exception rather than assume it from an IP address. [Literalul adresei nu specifică rutarea, accesibilitatea vecinilor sau răspunsurile firewall. Un item determinist de trasare trebuie să furnizeze errno-ul sau excepția, nu să le presupună dintr-o adresă IP.]
 
 </details>
 
 ---
 
 ### Q51. `N14.S05.Q04`
-**Packet Counter analyse_traffic Output / Rezultatul contorului de pachete analyse_traffic**
 
-*Multiple Choice*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> Given the T5 code tracing with 5 packets (3 HTTP on port 80, 1 HTTPS on port 443, 1 UDP/DNS on port 53), what is result["http"]? [Dat fiind trasarea codului T5 cu 5 pachete (3 HTTP pe portul 80, 1 HTTPS pe portul 443, 1 UDP/DNS pe portul 53), care este result["http"]?]
+For the self-contained code below, what is `result["http"]`? [Pentru codul autonom de mai jos, care este `result["http"]`?]
 
-- **a)** result["by_port"][80] equals 3, since three packets in the input list have dst_port=80 and the counter accumulates each occurrence in the dictionary [result["by_port"][80] este egal cu 3, deoarece trei pachete din lista de intrare au dst_port=80 și contorul acumulează fiecare apariție în dicționar]
-- **b)** 5 — all packets regardless of protocol type are counted in the HTTP field [5 — toate pachetele indiferent de tipul protocolului sunt numărate în câmpul HTTP]
-- **c)** 4 — both HTTP and HTTPS packets are counted together as HTTP traffic [4 — atât pachetele HTTP, cât și HTTPS sunt numărate împreună ca trafic HTTP]
-- **d)** 0 — the function only counts TCP and UDP protocols, not application-layer HTTP [0 — funcția numără doar protocoalele TCP și UDP, nu HTTP de la stratul aplicație]
+```python
+packets = [{"http": True}, {"http": True}, {"http": True},
+           {"http": False}, {"udp": True}]
+result = {"http": sum(bool(pkt.get("http")) for pkt in packets)}
+```
+
+
+- **a)** 3
+- **b)** 5
+- **c)** 4
+- **d)** 0
 
 <details><summary>💡 Feedback</summary>
 
-The analyse_traffic function checks pkt.get("http") for each packet. Only packets where this key is truthy increment stats["http"]. The HTTPS packet has http=False. [Funcția analyse_traffic verifică pkt.get("http") pentru fiecare pachet. Doar pachetele unde această cheie este adevărată incrementează stats["http"]. Pachetul HTTPS are http=False.]
+**Correct answer / Răspuns corect: a.** Exactly three values are truthy. This counts the supplied semantic flag; port 80 alone would not prove HTTP traffic. [Exact trei valori sunt adevărate. Codul numără indicatorul semantic dat; portul 80 singur nu ar demonstra trafic HTTP.]
 
 </details>
 
 ---
 
 ### Q52. `N14.S05.Q05`
-**Container Health Check Logic / Logica verificării de sănătate a containerului**
 
-*Multiple Choice*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> In code tracing T4, what does check_container("app99") return for a non-existent container? [În trasarea codului T4, ce returnează check_container("app99") pentru un container inexistent?]
+The following self-contained trace receives empty stdout from a successful container query. What is result? [Următoarea trasare autonomă primește stdout gol de la o interogare de container reușită. Care este result?]
 
-- **a)** result1["running"] is True and result1["ip"] is "172.20.0.2" because the container is active and has a network IP assigned by Docker [result1["running"] este True și result1["ip"] este "172.20.0.2" deoarece containerul este activ și are un IP de rețea atribuit de Docker]
-- **b)** {"name": "app99", "running": True, "ip": "0.0.0.0"} [{"name": "app99", "running": True, "ip": "0.0.0.0"}]
-- **c)** An empty dictionary {} because the function returns early on error [Un dicționar gol {} deoarece funcția returnează devreme la eroare]
-- **d)** A subprocess.CalledProcessError exception is raised and not caught [O excepție subprocess.CalledProcessError este ridicată și nu este capturată]
+```python
+name = "app99"
+stdout = ""
+result = {"name": name, "running": False, "ip": None}
+if stdout.strip():
+    result["running"] = True
+```
+
+
+- **a)** `{"name": "app99", "running": False, "ip": None}`
+- **b)** `{"name": "app99", "running": True, "ip": "0.0.0.0"}`
+- **c)** `{}`
 
 <details><summary>💡 Feedback</summary>
 
-docker ps -q -f name=app99 returns empty stdout (no matching container). The if ps_result.stdout.strip() check is False, so running stays False and ip stays None. [docker ps -q -f name=app99 returnează stdout gol (niciun container corespunzător). Verificarea if ps_result.stdout.strip() este False, deci running rămâne False și ip rămâne None.]
+**Correct answer / Răspuns corect: a.** The condition is false, so neither initial value changes. Query failure is a different case and must be handled separately; a name substring filter also does not prove exact identity. [Condiția este falsă, deci valorile inițiale nu se schimbă. Eșecul interogării reprezintă alt caz și trebuie tratat separat; filtrarea prin subșir de nume nu demonstrează identitatea exactă.]
 
 </details>
 
@@ -1214,16 +1208,14 @@ Backend.mark_failure() sets healthy=False when consecutive_failures >= (...). [B
 ---
 
 ### Q63. `N14.D03.Q08`
-**Total Distinct Networks in Week 14 / Total rețele distincte în săptămâna 14**
 
-*Numerical*
+*Numerical / Numeric*
 
-> How many distinct Docker networks are defined in the Week 14 docker-compose.yml (not counting the default)? [Câte rețele Docker distincte sunt definite în docker-compose.yml din săptămâna 14 (fără cea implicită)?]
-
+An independent example Compose configuration explicitly declares `backend_net` with subnet `172.20.0.0/24` and `frontend_net` with subnet `172.21.0.0/24`, and no other networks. How many named networks are declared? [O configurație Compose exemplu independentă declară explicit `backend_net` cu subrețeaua `172.20.0.0/24` și `frontend_net` cu `172.21.0.0/24`, fără alte rețele. Câte rețele denumite sunt declarate?]
 
 <details><summary>💡 Feedback</summary>
 
-Two networks: backend_net (17(...).(...)0.0.0/(...)4) and frontend_net (17(...).(...)1.0.0/(...)4). [Două rețele: backend_net (17(...).(...)0.0.0/(...)4) și frontend_net (17(...).(...)1.0.0/(...)4).]
+**2**. The two literal subnet strings are complete and distinct. This question supplies its configuration assumptions and does not refer to an absent Week 14 compose file. [Cele două șiruri literale de subrețea sunt complete și distincte. Itemul furnizează ipotezele de configurație și nu trimite la un fișier compose Week 14 absent.]
 
 </details>
 

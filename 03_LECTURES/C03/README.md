@@ -1,6 +1,6 @@
 # C03 — Introduction to Network Application Programming
 
-Week 3 shifts from observation to construction. Students learn to write TCP and UDP clients and servers using Python sockets, handle multiple concurrent connections, implement application-level framing over a byte-stream transport and build reliability atop unreliable datagrams. Four executable scenarios demonstrate progressively complex patterns: raw ICMP with Scapy, TCP message framing, multi-client TCP concurrency and UDP session management with application-level acknowledgements.
+Week 3 shifts from observation to construction. Students learn to write TCP and UDP clients and servers using Python sockets, handle multiple concurrent connections, implement application-level framing over a byte-stream transport and distinguish transport guarantees from application acknowledgements. Five executable scenarios cover raw ICMP with Scapy, TCP message framing, multi-client TCP concurrency, UDP session IDs and acknowledgements, and a TCP tunnel that preserves half-close.
 
 ## File and Folder Index
 
@@ -11,9 +11,10 @@ Week 3 shifts from observation to construction. Students learn to write TCP and 
 | [`assets/images/`](assets/images/) | Rendered PNG output | .gitkeep |
 | [`assets/render.sh`](assets/render.sh) | Diagram rendering script | — |
 | [`assets/scenario-scapy-icmp/`](assets/scenario-scapy-icmp/) | ICMP ping with Scapy | 2 files |
-| [`assets/scenario-tcp-framing/`](assets/scenario-tcp-framing/) | TCP message framing (length-prefix) | 3 files |
+| [`assets/scenario-tcp-framing/`](assets/scenario-tcp-framing/) | TCP message framing (newline-delimited) | 3 files |
 | [`assets/scenario-tcp-multiclient/`](assets/scenario-tcp-multiclient/) | Multi-client TCP server | 3 files |
 | [`assets/scenario-udp-session-ack/`](assets/scenario-udp-session-ack/) | UDP with session IDs and ACKs | 3 files |
+| [`assets/scenario-tcp-tunnel/`](assets/scenario-tcp-tunnel/) | Bidirectional TCP forwarding and half-close | 3 files |
 
 ## Visual Overview
 
@@ -29,7 +30,7 @@ graph LR
     style D fill:#fff3e0,stroke:#f57c00
 ```
 
-The four scenarios form a progression: from raw packet crafting (L3) through reliable byte-stream framing (L4/TCP) to application-level reliability over datagrams (L4/UDP).
+The first four scenarios form a progression: from raw packet crafting (L3) through reliable byte-stream framing (L4/TCP) to session IDs and acknowledgement counters over datagrams (L4/UDP). The UDP example does not retransmit or deduplicate and therefore does not guarantee delivery. The additional tunnel scenario exercises bidirectional stream forwarding, EOF propagation and bounded error cleanup.
 
 ## PlantUML Diagrams
 
@@ -100,7 +101,7 @@ The socket programming patterns introduced here recur in every later scenario th
 ```bash
 git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
 cd COMPNET-EN
-git sparse-checkout set 03_LECTURES/C03
+git sparse-checkout set 03_LECTURES/C03 00_TOOLS
 ```
 
 **Method B — Direct download**

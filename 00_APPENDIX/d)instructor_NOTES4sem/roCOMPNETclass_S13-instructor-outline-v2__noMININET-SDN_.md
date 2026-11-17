@@ -114,7 +114,7 @@ Pe tablă sau slide, notezi:
 
 > *▸ „Fără să scanați — doar din Compose: câte porturi vă așteptați să fie deschise pe `.12`?"*
 
-Răspunsuri așteptate: 21 și 6200. „De ce 6200? Ce ar putea fi?" — lași suspensia.
+Mappingurile declară 21 şi 6200; numărul porturilor OPEN nu poate fi dedus fără testul listenerelor. „Ce observaţie confirmă că un serviciu ascultă pe 6200?"
 
 > **Epifanie urmărită:** Porturile sunt interfețe ale funcțiilor expuse — fiecare port e o decizie de design (sau o greșeală).
 
@@ -246,11 +246,11 @@ print('Done.')
 
 > *▸ „Ce se întâmplă dacă pun timeout-ul la 0.01 secunde?"*
 
-Răspuns: false negatives — porturi raportate ca „closed" înainte ca serverul să răspundă.
+Răspuns: rezultate neconcludente/timeout; un cod nenul nu înseamnă întotdeauna CLOSED.
 
 ### Întrebări (închid bucla)
 
-> *▸ „De ce nu detectează versiunile? [nu trimite probe de fingerprinting] De ce nu funcționează pentru UDP? [`connect_ex()` e specific TCP]"*
+> *▸ „De ce nu detectează versiunile? [nu trimite probe de fingerprinting] De ce nu funcționează pentru UDP? [scannerul foloseşte SOCK_STREAM; un connect_ex UDP nu verifică dacă există un serviciu remote]"*
 
 > **Epifanie urmărită:** Scannerele sunt politici de măsurare: ce trimiți, cât aștepți, cum clasifici răspunsul.
 
@@ -313,13 +313,13 @@ Scanning-ul are o „semnătură" de trafic vizibilă în captură. Analiza de p
 Deschizi un netshoot dedicat capturii (🟠 PS#3, sau refolosești):
 
 ```powershell
-docker run --rm -it --name s13cap --network s13pentest_pentestnet -v ${PWD}:/lab nicolaka/netshoot bash
+docker run --rm -it --name s13cap --network container:dvwa -v ${PWD}:/lab nicolaka/netshoot bash
 ```
 
 În container (`s13cap`):
 
 ```bash
-tcpdump -i eth0 -w /lab/s13_scan_demo.pcap &
+tcpdump -i eth0 -w /lab/s13_scan_demo.pcap
 ```
 
 2. În celălalt netshoot (🟢 PS#2), rulezi un scan scurt:
@@ -328,12 +328,12 @@ tcpdump -i eth0 -w /lab/s13_scan_demo.pcap &
 nmap -sV -p 21,80 172.20.0.10
 ```
 
-3. Oprești tcpdump (`Ctrl+C` sau `kill %1`).
+3. Oprești tcpdump cu `Ctrl+C` în terminalul dedicat şi aştepţi scrierea fişierului.
 
 4. Deschizi `s13_scan_demo.pcap` în Wireshark pe Windows și arăți:
 
    - Filtru de afișare: `tcp.flags.syn == 1 && tcp.flags.ack == 0` (SYN-urile de inițializare)
-   - „Fan-out" — multe SYN-uri către porturi diferite într-un interval scurt
+   - două porturi distincte probate în acelaşi interval; acest test scurt ilustrează scanarea, fără a demonstra un prag IDS
 
 > *▸ „Un IDS (Intrusion Detection System) caută exact acest pattern: multe SYN-uri de la aceeași sursă. Asta e «semnătura» unui scan."*
 
@@ -359,7 +359,7 @@ nmap -sV -p 21,80 172.20.0.10
 - **Stage 2:** `S13_Part04_Tasks_Scanning.md` — nmap complet, scanner Python, comparație, reflecție.
 - **Stage 3:** `S13_Part06_Tasks_Vuln_Enumeration.md` — NSE, fingerprinting curl, banner FTP, CVE.
 
-> **Notă:** Task-ul de Stage 3 cere și `nikto`. Studenții pot: (a) rula `docker run --rm -it frapsoft/nikto -h http://172.20.0.10:8888` din PowerShell, sau (b) se limita la nmap NSE + curl manual (rezultate echivalente pentru scopul exercițiului).
+> **Notă:** Task-ul de Stage 3 cere și `nikto`. Studenții pot: (a) rula `docker run --rm -it --network s13pentest_pentestnet frapsoft/nikto -h http://dvwa:80` din PowerShell, sau (b) se limita la nmap NSE + curl manual (rezultate echivalente pentru scopul exercițiului).
 
 > **Etapele 4–5** (exploitation, script Python de exploit) sunt disponibile ca lectură ghidată și exercițiu opțional, cu respectarea cadrului etic.
 

@@ -13,7 +13,7 @@ rectangle "NRZ (Non-Return-to-Zero)\nHigh = 1, Low = 0\nNo transition within bit
 
 rectangle "NRZI (NRZ Inverted)\nTransition at start = 1\nNo transition = 0\nBetter for runs of 1s" as nrzi #BBDEFB
 
-rectangle "Manchester\nMid-bit transition encodes data\nHigh-to-low = 1, Low-to-high = 0\nSelf-clocking, but doubles bandwidth" as man #BBDEFB
+rectangle "Manchester\nMid-bit transition encodes data\nIEEE 802.3 convention:\nLow-to-high = 1, High-to-low = 0\nSelf-clocking, but doubles bandwidth" as man #BBDEFB
 
 bits -down-> nrz : encode
 bits -down-> nrzi : encode

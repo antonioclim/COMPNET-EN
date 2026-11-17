@@ -44,80 +44,16 @@ docker pull python:3.12-slim
 docker pull nicolaka/netshoot
 ```
 
-### Pre-creare server JSON-RPC
+### Verificare server JSON-RPC inclus
 
-Serverul JSON-RPC minimal nu există în kit — trebuie creat o singură dată. Cel mai simplu: creează-l direct pe host (fișierul e montat în container prin `-v`).
-
-Într-un PowerShell, în directorul kitului:
-
-```powershell
-cd .\04_SEMINARS\S12\1_jsonrpc
-```
-
-Creează fișierul `jsonrpc_server_minimal.py` cu editorul preferat (VS Code, Notepad++, etc.) — conținutul complet:
-
-```python
-from http.server import BaseHTTPRequestHandler, HTTPServer
-import json
-import ast, operator
-
-BIN_OPS = {
-    ast.Add: operator.add, ast.Sub: operator.sub,
-    ast.Mult: operator.mul, ast.Div: operator.truediv,
-    ast.Pow: operator.pow, ast.Mod: operator.mod,
-    ast.FloorDiv: operator.floordiv,
-}
-UNARY_OPS = {ast.UAdd: operator.pos, ast.USub: operator.neg}
-
-def safe_eval(expr: str):
-    node = ast.parse(expr, mode="eval").body
-    def _eval(n):
-        if isinstance(n, ast.Constant) and isinstance(n.value, (int, float)):
-            return n.value
-        if isinstance(n, ast.BinOp) and type(n.op) in BIN_OPS:
-            return BIN_OPS[type(n.op)](_eval(n.left), _eval(n.right))
-        if isinstance(n, ast.UnaryOp) and type(n.op) in UNARY_OPS:
-            return UNARY_OPS[type(n.op)](_eval(n.operand))
-        raise ValueError("Unsupported expression.")
-    return _eval(node)
-
-class Handler(BaseHTTPRequestHandler):
-    def do_POST(self):
-        length = int(self.headers.get("Content-Length", "0"))
-        body = self.rfile.read(length).decode("utf-8", errors="replace")
-        try:
-            req = json.loads(body)
-            method, params = req.get("method"), req.get("params", [])
-            req_id = req.get("id")
-            if method != "evaluate":
-                raise ValueError(f"Unknown method: {method}")
-            expr = params[0] if params else ""
-            result = safe_eval(expr)
-            resp = {"jsonrpc": "2.0", "id": req_id, "result": result}
-            print(f"[JSONRPC-SERVER] evaluate({expr}) -> {result}")
-        except Exception as e:
-            resp = {"jsonrpc": "2.0", "id": None,
-                    "error": {"code": -32602, "message": str(e)}}
-            print("[JSONRPC-SERVER] error:", e)
-        data = json.dumps(resp).encode("utf-8")
-        self.send_response(200)
-        self.send_header("Content-Type", "application/json")
-        self.send_header("Content-Length", str(len(data)))
-        self.end_headers()
-        self.wfile.write(data)
-
-def main():
-    host, port = "0.0.0.0", 8080
-    print(f"[JSONRPC-SERVER] listening on http://{host}:{port}")
-    HTTPServer((host, port), Handler).serve_forever()
-
-if __name__ == "__main__":
-    main()
-```
+Fișierul canonic `04_SEMINARS/S12/1_jsonrpc/S12_Part01_Script_JSONRPC_Server.py`
+este inclus. Nu crea alt server și nu instala requests pentru această demonstrație:
+serverul și clientul JSON-RPC folosesc biblioteca standard Python. Pornirea în
+container și endpointul `http://s12-server:8080/` sunt date complet în Bloc C.
 
 ### Pre-editare URL-uri (opțional)
 
-1. În `1_jsonrpc/S12_Part01_Script_JSONRPC_Client.py`, schimbă `URL = "https://api.mathjs.org/v4/"` în `URL = "http://s12-server:8080/"`.
+1. În `1_jsonrpc/S12_Part01_Script_JSONRPC_Client.py`, foloseşte `JSONRPC_URL=http://s12-server:8080/` la lansarea clientului în container.
 2. În `3_grpc/S12_Part03_Script_g_RPC_Client.py`, schimbă `GRPC_TARGET = "localhost:50051"` în `GRPC_TARGET = "s12-server:50051"`.
 
 Dacă preferi să editezi în fața studenților (ca moment pedagogic), fă-o de pe host — fișierele sunt montate cu `-v`.
@@ -165,7 +101,7 @@ result = server.Add(AddRequest(a=2, b=3))
 **Fă (într-o fereastră PowerShell):**
 
 ```powershell
-cd cale\catre\compnet-2025-redo\04_SEMINARS\S12
+cd cale\catre\COMPNET-EN\04_SEMINARS\S12
 docker network create compnet-s12 2>$null
 ```
 
@@ -187,15 +123,14 @@ docker run --rm -it --name s12-server --network compnet-s12 `
 În container:
 
 ```bash
-pip install --no-cache-dir requests 2>/dev/null
 cd 1_jsonrpc
-python jsonrpc_server_minimal.py
+python S12_Part01_Script_JSONRPC_Server.py --host 0.0.0.0 --port 8080
 ```
 
 Ar trebui să apară:
 
 ```text
-[JSONRPC-SERVER] listening on http://0.0.0.0:8080
+JSON-RPC endpoint: http://0.0.0.0:8080/
 ```
 
 > *▸ „Evaluarea expresiei e deliberat restricționată — scopul e să vedem protocolul, nu să facem un calculator de producție."*
@@ -210,23 +145,14 @@ docker run --rm -it --name s12-client --network compnet-s12 `
 În container:
 
 ```bash
-pip install --no-cache-dir requests 2>/dev/null
 cd 1_jsonrpc
 ```
 
-**Editare URL (dacă n-ai făcut-o dinainte):** pe host, în editorul preferat, în fișierul `1_jsonrpc/S12_Part01_Script_JSONRPC_Client.py`, schimbă:
+Setează endpointul în shell-ul containerului client, fără a modifica fișierul:
 
-```python
-URL = "https://api.mathjs.org/v4/"
+```bash
+export JSONRPC_URL=http://s12-server:8080/
 ```
-
-în:
-
-```python
-URL = "http://s12-server:8080/"
-```
-
-Fișierul e montat — modificarea e vizibilă imediat în container.
 
 ### C.3 Rulezi clientul 🟢
 
@@ -240,7 +166,7 @@ python S12_Part01_Script_JSONRPC_Client.py
 
 **Observație:**
 - 🟢 CLIENT: payload JSON vizibil + `evaluate(2+3) = 5`
-- 🔵 SERVER: `[JSONRPC-SERVER] evaluate(2+3) -> 5`
+- 🔵 SERVER: `o linie de acces HTTP pentru POST, cu status 200; rezultatul se verifică în corpul răspunsului`
 
 **Explicație:**
 
@@ -258,10 +184,10 @@ python S12_Part01_Script_JSONRPC_Client.py
 docker run --rm --net=container:s12-server `
     --cap-add NET_ADMIN --cap-add NET_RAW `
     -v ${PWD}:/work -w /work nicolaka/netshoot `
-    tcpdump -i any -w s12_jsonrpc.pcap tcp port 8080 -c 60
+    tcpdump -i any -w s12_jsonrpc.pcap tcp port 8080
 ```
 
-Rulează clientul încă o dată (din 🟢) în timp ce tcpdump capturează. Apoi deschide `s12_jsonrpc.pcap` în Wireshark (de pe host — fișierul e în directorul montat):
+Rulează clientul încă o dată (din 🟢) în timp ce tcpdump capturează. Oprește tcpdump cu Ctrl+C și așteaptă finalizarea scrierii. Apoi deschide `s12_jsonrpc.pcap` în Wireshark (de pe host — fișierul e în directorul montat):
 
 - Display filter: `tcp.port == 8080`
 - Right click pe un pachet → **Follow → TCP Stream**
@@ -462,8 +388,8 @@ Rulează clientul din 🟢, apoi deschide `s12_grpc.pcap` în Wireshark:
 | Container server 🔵 | `docker run --rm -it --name s12-server --network compnet-s12 -v ${PWD}:/work -w /work python:3.12-slim bash` |
 | Container client 🟢 | `docker run --rm -it --name s12-client --network compnet-s12 -v ${PWD}:/work -w /work python:3.12-slim bash` |
 | Install dependențe (în container) | `pip install --no-cache-dir requests grpcio grpcio-tools` |
-| Server JSON-RPC | `python jsonrpc_server_minimal.py` (din `1_jsonrpc/`) |
-| Client JSON-RPC | `python S12_Part01_Script_JSONRPC_Client.py` (din `1_jsonrpc/`) |
+| Server JSON-RPC | `python S12_Part01_Script_JSONRPC_Server.py --host 0.0.0.0 --port 8080` (din `1_jsonrpc/`) |
+| Client JSON-RPC | `JSONRPC_URL=http://s12-server:8080/ python S12_Part01_Script_JSONRPC_Client.py` (din `1_jsonrpc/`) |
 | Codegen protobuf | `python -m grpc_tools.protoc -I../2_protobuf --python_out=. --grpc_python_out=. ../2_protobuf/S12_Part02_Config_Calculator.proto` (din `3_grpc/`) |
 | Server gRPC | `python S12_Part03_Script_g_RPC_Server.py` (din `3_grpc/`) |
 | Client gRPC | `python S12_Part03_Script_g_RPC_Client.py` (din `3_grpc/`) |
@@ -480,7 +406,7 @@ Rulează clientul din 🟢, apoi deschide `s12_grpc.pcap` în Wireshark:
 
 | Fișier | Valoare originală | Valoare Docker |
 |---|---|---|
-| `S12_Part01_Script_JSONRPC_Client.py` → `URL` | `https://api.mathjs.org/v4/` | `http://s12-server:8080/` |
+| Variabila de mediu `JSONRPC_URL` | `http://127.0.0.1:8000/` | `http://s12-server:8080/` |
 | `S12_Part03_Script_g_RPC_Client.py` → `GRPC_TARGET` | `localhost:50051` | `s12-server:50051` |
 
 ### Fișiere generate de codegen

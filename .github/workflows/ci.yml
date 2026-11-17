@@ -11,80 +11,22 @@ jobs:
   qa:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: 'pip'
-
-      - name: Show tool versions
-        run: |
-          python --version
-          pip --version
-          bash --version | head -n 1
-
-      - name: Normalise executable permissions from manifest
-        run: bash 00_TOOLS/qa/apply_permissions.sh
-
-      - name: Check executable permissions
-        run: bash 00_TOOLS/qa/check_executability.sh
-
-      - name: Run Markdown link checker
-        run: python 00_TOOLS/qa/check_markdown_links.py
-
-      - name: Run language & lexical integrity check (teaching corpus)
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          import shutil
-          import subprocess
-          import sys
-          import tempfile
-
-          src = Path('.').resolve()
-          ignored_names = {
-              '.git',
-              '.github',
-              '__pycache__',
-              '.pytest_cache',
-              '.mypy_cache',
-              'node_modules',
-              '.venv',
-              'venv',
-          }
-
-          with tempfile.TemporaryDirectory(prefix='compnet-integrity-') as td:
-              dst = Path(td) / 'repo'
-
-              def ignore(path, names):
-                  ignored = {name for name in names if name in ignored_names}
-                  if Path(path).resolve() == src:
-                      ignored.add('CHANGELOG.md')
-                  return ignored
-
-              shutil.copytree(src, dst, ignore=ignore)
-              subprocess.run([sys.executable, '00_TOOLS/qa/check_integrity.py'], cwd=dst, check=True)
-
-          print('Integrity check passed on teaching corpus (root CHANGELOG.md intentionally excluded as an audit delta document).')
-          PY
-
-      - name: Validate lecture figure targets
-        run: python 00_TOOLS/qa/check_fig_targets.py --puml-only
-
-      - name: Run pytest (if present)
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          if find . -type f \( -name 'test_*.py' -o -name '*_test.py' \) -print -quit | grep -q .; then
-            python -m pip install --upgrade pip
-            python -m pip install 'pytest<9' pyyaml
-            PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -q
-          else
-            echo 'No pytest tests detected, skipping.'
-          fi
+          cache-dependency-path: |
+            00_TOOLS/qa/requirements.txt
+            03_LECTURES/tests/requirements.txt
+      - name: Set up Node for HTML control-logic tests
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install QA dependencies
+        run: python -m pip install -r 00_TOOLS/qa/requirements.txt
+      - name: Check source and component regressions
+        run: python 00_TOOLS/qa/run_checks.py

@@ -500,20 +500,18 @@ Simple devices are prime targets because they often lack authentication, encrypt
 ---
 
 ### Q26. `N13.C05.Q05`
-**Authentication versus encryption priority / Prioritatea autentificării față de criptare**
 
-*Multiple Choice*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> According to IoT security best practices, which security measure should be prioritised first? [Conform celor mai bune practici de securitate IoT, care măsură de securitate ar trebui prioritizată prima?]
+An IoT service has default credentials and transmits sensitive data without transport encryption. What is a defensible remediation plan? [Un serviciu IoT are credențiale implicite și transmite date sensibile fără criptare de transport. Care este un plan de remediere justificat?]
 
-- **a)** Network monitoring — detecting attacks is more effective than preventing them [Monitorizarea rețelei — detectarea atacurilor este mai eficientă decât prevenirea lor]
-- **b)** TLS encryption — protecting data in transit is the most fundamental security layer [Criptarea TLS — protecția datelor în tranzit este cel mai fundamental strat de securitate]
-- **c)** Strong authentication — it prevents unauthorised access regardless of encryption state [Autentificarea puternică — previne accesul neautorizat indiferent de starea criptării]
-- **d)** Firmware updates — keeping software current eliminates all known vulnerability classes [Actualizări de firmware — menținerea software-ului la zi elimină toate clasele de vulnerabilități cunoscute]
+- **a)** Address authentication, authorisation and transport protection according to exposure and impact; coordinate the controls. [Tratați autentificarea, autorizarea și protecția transportului în funcție de expunere și impact; coordonați controalele.]
+- **b)** Always postpone encryption because authentication is universally more important. [Amânați mereu criptarea deoarece autentificarea este universal mai importantă.]
+- **c)** Enable TLS and keep every default credential. [Activați TLS și păstrați orice credențială implicită.]
 
 <details><summary>💡 Feedback</summary>
 
-Authentication prevents unauthorised access, which is more critical than protecting data in transit. An encrypted channel with default password gives an attacker encrypted access. OWASP ranks weak passwords (I1) above insecure data transfer (I7). [Autentificarea previne accesul neautorizat, ceea ce este mai critic decât protecția datelor în tranzit. Un canal criptat cu parolă implicită oferă atacatorului acces criptat. OWASP clasează parolele slabe (I1) peste transferul nesigur de date (I7).]
+**Correct answer / Răspuns corect: a.** A category’s position in the OWASP IoT Top 10 2018 is not a deployment-specific remediation schedule. TLS does not fix default credentials, and strong credentials alone do not protect a plaintext channel. [Poziția unei categorii în OWASP IoT Top 10 2018 nu reprezintă un calendar de remediere specific implementării. TLS nu repară credențialele implicite, iar credențialele puternice singure nu protejează un canal în clar.]
 
 </details>
 
@@ -698,25 +696,18 @@ The + wildcard matches exactly one level. factory/line1/status has exactly one l
 ---
 
 ### Q36. `N13.T00.Q05`
-**OWASP IoT vulnerability prioritisation / Prioritizarea vulnerabilităților OWASP IoT**
 
-*Multiple Choice*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> During a security audit, you discover:
-> (a) the MQTT broker accepts anonymous connections,
-> (b) firmware updates are unsigned,
-> (c) the device web interface has a SQL injection flaw. Using OWASP IoT Top 10 ranking, which should be remediated first? [În timpul unui audit de securitate, descoperiți: (a) brokerul MQTT acceptă conexiuni anonime,
-> (b) actualizările de firmware sunt nesemnate,
-> (c) interfața web a dispozitivului are o vulnerabilitate de injecție SQL. Folosind clasamentul OWASP IoT Top 10, care ar trebui remediată prima?]
+An audit finds anonymous MQTT access, unsigned firmware updates and SQL injection. What further information is needed before choosing a remediation order? [Un audit identifică acces MQTT anonim, actualizări firmware nesemnate și injecție SQL. Ce informații suplimentare sunt necesare înaintea ordonării remedierilor?]
 
-- **a)** Unsigned firmware updates (I5 — enables persistent compromise through malicious updates) [Actualizări de firmware nesemnate (I5 — permite compromiterea persistentă prin actualizări malițioase)]
-- **b)** SQL injection in the web interface (I3 — exploitable remotely with immediate data breach risk) [Injecție SQL în interfața web (I3 — exploatabilă de la distanță cu risc imediat de breșă de date)]
-- **c)** Anonymous MQTT access (I1 — Weak Passwords is the top-ranked OWASP IoT vulnerability) [Accesul MQTT anonim (I1 — Parolele slabe este vulnerabilitatea OWASP IoT de rang cel mai înalt)]
-- **d)** All three should be fixed simultaneously since they present equal risk levels [Toate trei ar trebui reparate simultan deoarece prezintă niveluri de risc egale]
+- **a)** Exposure, exploitability, affected assets, impact, active exploitation and feasible containment. [Expunere, exploatabilitate, active afectate, impact, exploatare activă și posibilități de limitare.]
+- **b)** Only the numeric ordering of the OWASP category identifiers. [Numai ordinea numerică a identificatorilor categoriilor OWASP.]
+- **c)** None: all three necessarily have identical risk. [Niciuna: toate trei au obligatoriu risc identic.]
 
 <details><summary>💡 Feedback</summary>
 
-OWASP ranks I1 (weak authentication) highest. Anonymous MQTT access is an I1 issue. SQL injection maps to I3 and unsigned firmware to I5. I1 takes priority. [OWASP clasează I1 (autentificare slabă) cel mai sus. Accesul MQTT anonim este o problemă I1. Injecția SQL corespunde I3 iar firmware-ul nesemnat I5. I1 are prioritate.]
+**Correct answer / Răspuns corect: a.** The facts given do not determine one universal first fix. Use the category list to avoid omissions, then prioritise the actual risks and dependencies. Anonymous access can be intentional in some systems; its impact depends on permissions and exposure. [Faptele date nu determină universal prima remediere. Lista categoriilor ajută la evitarea omisiunilor; apoi prioritizați riscurile și dependențele reale. Accesul anonim poate fi intenționat în unele sisteme; impactul depinde de permisiuni și expunere.]
 
 </details>
 
@@ -863,20 +854,18 @@ Port scanning legality depends on authorisation. In this lab, all containers are
 ---
 
 ### Q44. `N13.S01.Q05`
-**Expected open ports in Week 13 lab / Porturile deschise așteptate în laboratorul Săptămânii 13**
 
-*Multiple Choice*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> When scanning the Week 13 Docker lab from the host (IoT broker + pentest services running), how many host ports are expected to be open? [La scanarea laboratorului Docker din Săptămâna 13 de pe gazdă (broker IoT + servicii de pentest pornite), câte porturi gazdă se așteaptă să fie deschise?]
+Does the number of published ports in the S13 pentest compose file prove the number of successful TCP connections in a scan? [Numărul porturilor publicate în fișierul compose de pentest S13 dovedește numărul conexiunilor TCP reușite într-o scanare?]
 
-- **a)** 4 — ports 1883, 2121, 8080, and 8888 but not the backdoor port on 6200 [4 — porturile 1883, 2121, 8080 și 8888, dar nu portul backdoor 6200]
-- **b)** 7 — including SSH on port 22 and MySQL on port 3306 in addition to lab services [7 — incluzând SSH pe portul 22 și MySQL pe portul 3306 pe lângă serviciile de laborator]
-- **c)** 5 — ports 1883 (MQTT), 2121 (FTP), 6200 (backdoor), 8080 (WebGoat), and 8888 (DVWA) [5 — porturile 1883 (MQTT), 2121 (FTP), 6200 (backdoor), 8080 (WebGoat) și 8888 (DVWA)]
-- **d)** 3 — only 1883 (MQTT), 8080 (WebGoat), and 8888 (DVWA) are accessible [3 — doar 1883 (MQTT), 8080 (WebGoat) și 8888 (DVWA) sunt accesibile]
+- **a)** No. A mapping does not prove that its service is listening or ready; measure from the stated namespace. [Nu. O mapare nu dovedește că serviciul ascultă sau este pregătit; măsurați din namespace-ul precizat.]
+- **b)** Yes. Every published port is necessarily open. [Da. Orice port publicat este obligatoriu deschis.]
+- **c)** Yes, and publishing 6200 automatically starts its listener. [Da, iar publicarea lui 6200 pornește automat listenerul.]
 
 <details><summary>💡 Feedback</summary>
 
-Count only the host-exposed ports (the left side of the mappings) from the Week 13 compose files. In COMPnet, those are 1883 (MQTT broker), 8888 (DVWA), 8080 (WebGoat), 2121 (FTP), and 6200 (backdoor). [Numărați doar porturile expuse pe gazdă (partea stângă a mapărilor) din fișierele compose din Săptămâna 13. În COMPnet, acestea sunt 1883 (broker MQTT), 8888 (DVWA), 8080 (WebGoat), 2121 (FTP) și 6200 (backdoor).]
+**Correct answer / Răspuns corect: a.** The supplied pentest compose defines four host mappings by default: 8888, 8080, 2121 and 6200, all on 127.0.0.1. It does not include an MQTT broker. The 6200 listener is conditional, and startup or filtering can change observations. Record actual results. [Compose-ul de pentest distribuit definește implicit patru mapări pe gazdă: 8888, 8080, 2121 și 6200, toate pe 127.0.0.1. Nu include broker MQTT. Listenerul 6200 este condițional, iar pornirea sau filtrarea pot schimba observațiile. Înregistrați rezultatele reale.]
 
 </details>
 
@@ -922,19 +911,19 @@ Plaintext MQTT reveals topic strings, payload content (sensor data, commands), a
 
 ---
 
-### Q47. `N13.S03.Q01`
-**Mosquitto anonymous access in lab / Accesul anonim Mosquitto în laborator**
+### Q47. `N13.S03.Q01` — Explicit Mosquitto setting / Setare Mosquitto explicită
 
-*True / False*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> The Mosquitto broker in the Week 13 laboratory is configured with allow_anonymous true, permitting connections without credentials. [Brokerul Mosquitto din laboratorul Săptămânii 13 este configurat cu allow_anonymous true, permițând conexiuni fără credențiale.]
+In an independent Mosquitto configuration, a listener explicitly has `allow_anonymous true`. What does that setting permit? [Într-o configurație Mosquitto independentă, un listener are explicit `allow_anonymous true`. Ce permite setarea?]
 
-- **a)** true
-- **b)** false
+- **a)** Clients may connect to that listener without username/password authentication, subject to the remaining configuration. [Clienții se pot conecta la listener fără autentificare cu utilizator/parolă, sub rezerva restului configurației.]
+- **b)** All MQTT traffic is automatically encrypted. [Tot traficul MQTT este criptat automat.]
+- **c)** The S13 pentest compose automatically creates two Mosquitto listeners. [Compose-ul de pentest S13 creează automat două listenere Mosquitto.]
 
 <details><summary>💡 Feedback</summary>
 
-The mosquitto.conf file explicitly sets allow_anonymous true for both listeners (1883 and 8883). This is intentional for educational purposes to demonstrate the risk. [Fișierul mosquitto.conf setează explicit allow_anonymous true pentru ambele ascultătoare (1883 și 8883). Aceasta este intenționat în scopuri educaționale pentru a demonstra riscul.]
+**Correct answer / Răspuns corect: a.** This is a supplied hypothetical configuration, not a mosquitto.conf shipped in S13. Check listener scope and authorisation separately; anonymous access is not equivalent to unrestricted access. [Aceasta este o configurație ipotetică dată, nu un mosquitto.conf distribuit în S13. Verificați separat domeniul listenerului și autorizarea; accesul anonim nu este echivalent cu acces nerestricționat.]
 
 </details>
 
@@ -954,27 +943,26 @@ The mosquitto.conf file explicitly sets allow_anonymous true for both listeners 
 
 <details><summary>💡 Feedback</summary>
 
-In COMPnet, the pentest lab uses network pentestnet with subnet 172.20.0.0/24 (see docker-compose.pentest.yml). [În COMPnet, laboratorul de pentest folosește rețeaua pentestnet cu subrețeaua 172.20.0.0/24 (vezi docker-compose.pentest.yml).]
+In COMPnet, the pentest lab uses network pentestnet with subnet 172.20.0.0/24 (see S13_Part02_Config_Docker_Compose_Pentest.yml). [În COMPnet, laboratorul de pentest folosește rețeaua pentestnet cu subrețeaua 172.20.0.0/24 (vezi S13_Part02_Config_Docker_Compose_Pentest.yml).]
 
 </details>
 
 ---
 
-### Q49. `N13.S03.Q03`
-**Mosquitto broker IP in lab network / Adresa IP a brokerului Mosquitto în rețeaua de laborator**
+### Q49. `N13.S03.Q03` — DVWA container address / Adresa containerului DVWA
 
-*Multiple Choice*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> What static IP address is assigned to the DVWA container in the Week 13 pentest Docker network? [Ce adresă IP statică este atribuită containerului DVWA în rețeaua Docker de pentest din Săptămâna 13?]
+What static address is assigned to DVWA in `S13_Part02_Config_Docker_Compose_Pentest.yml`? [Ce adresă statică este atribuită DVWA în `S13_Part02_Config_Docker_Compose_Pentest.yml`?]
 
-- **a)** 172.20.0.12 [172.20.0.12]
-- **b)** 172.20.0.11 [172.20.0.11]
-- **c)** 172.20.0.1 [172.20.0.1]
-- **d)** 172.20.0.1 [172.20.0.1]
+- **a)** 172.20.0.10
+- **b)** 172.20.0.11
+- **c)** 172.20.0.12
+- **d)** 172.20.0.1
 
 <details><summary>💡 Feedback</summary>
 
-The pentest compose assigns 172.20.0.10 to the DVWA service (172.20.0.11 for WebGoat, 172.20.0.12 for vsftpd). [Fișierul de compose pentru pentest atribuie 172.20.0.10 serviciului DVWA (172.20.0.11 pentru WebGoat, 172.20.0.12 pentru vsftpd).]
+**Correct answer / Răspuns corect: a.** DVWA uses .10, WebGoat .11 and vsftpd .12 in the container network. A host-side request uses the published host endpoint, not necessarily this container IP. [DVWA folosește .10, WebGoat .11 și vsftpd .12 în rețeaua containerelor. O cerere de pe gazdă folosește endpointul publicat, nu neapărat acest IP al containerului.]
 
 </details>
 
@@ -1041,20 +1029,18 @@ socket.SOCK_STREAM creates a TCP socket. SOCK_DGRAM is for UDP datagrams. SOCK_R
 ---
 
 ### Q53. `N13.S04.Q02`
-**ThreadPoolExecutor for concurrent scanning / ThreadPoolExecutor pentru scanare concurentă**
 
-*Multiple Choice*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> In the Week 13 port scanner, which Python class from concurrent.futures enables parallel port scanning with a thread pool? [În scanerul de porturi din Săptămâna 13, ce clasă Python din concurrent.futures permite scanarea paralelă a porturilor cu un pool de fire de execuție?]
+The supplied S13 simple scanner iterates sequentially. Which concurrent.futures class could a student use for an optional extension that overlaps I/O waits using a thread pool? [Scannerul simplu S13 distribuit iterează secvențial. Ce clasă concurrent.futures ar putea folosi studentul pentru o extensie opțională care suprapune așteptările I/O cu un pool de fire?]
 
-- **a)** AsyncioExecutor [AsyncioExecutor]
-- **b)** ProcessPoolExecutor [ProcessPoolExecutor]
-- **c)** ThreadPoolExecutor [ThreadPoolExecutor]
-- **d)** MultiThreadQueue [MultiThreadQueue]
+- **a)** ThreadPoolExecutor
+- **b)** AsyncioExecutor
+- **c)** MultiThreadQueue
 
 <details><summary>💡 Feedback</summary>
 
-ThreadPoolExecutor manages a pool of threads, submitting scan tasks concurrently. ProcessPoolExecutor would use processes, which is less efficient for I/O-bound socket operations. [ThreadPoolExecutor gestionează un pool de fire de execuție, trimițând sarcini de scanare concurent. ProcessPoolExecutor ar folosi procese, ceea ce este mai puțin eficient pentru operațiuni de socket limitate de I/O.]
+**Correct answer / Răspuns corect: a.** ThreadPoolExecutor manages worker threads. This is an extension proposal; the baseline scanner does not currently use it. Bound concurrency and retain the authorised target scope. [ThreadPoolExecutor gestionează fire worker. Aceasta este o propunere de extensie; scannerul de bază nu o folosește în prezent. Limitați concurența și păstrați domeniul țintelor autorizate.]
 
 </details>
 
@@ -1101,20 +1087,18 @@ The subscription sensors/# matches sensors/temp and sensors/humidity but NOT wea
 ---
 
 ### Q56. `N13.S04.Q06`
-**Protocol detection for TLS traffic on port 8883 / Detectarea protocolului pentru trafic TLS pe portul 8883**
 
-*Multiple Choice*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> In the code tracing exercise T4, when detect_protocol receives a packet with dst_port=8883 and payload starting with byte 0x16, what protocol does it return? [În exercițiul de trasare a codului T4, când detect_protocol primește un pachet cu dst_port=8883 și payload-ul începând cu octetul 0x16, ce protocol returnează?]
+A packet is addressed to TCP 8883 and its payload begins with 0x16. What can a simple port-and-byte heuristic reasonably report? [Un pachet este adresat TCP 8883 și payloadul începe cu 0x16. Ce poate raporta rezonabil o euristică simplă bazată pe port și octet?]
 
-- **a)** MQTT-like [MQTT-like]
-- **b)** HTTPS [HTTPS]
-- **c)** MQTT-TLS [MQTT-TLS]
-- **d)** MQTT [MQTT]
+- **a)** A candidate TLS record on a conventional MQTT-over-TLS port; further decoding is needed. [Un candidat de înregistrare TLS pe portul convențional MQTT-over-TLS; este necesară decodare suplimentară.]
+- **b)** Proved MQTT application content and verified encryption. [Conținut de aplicație MQTT dovedit și criptare verificată.]
+- **c)** The sensor password and topic are known. [Parola senzorului și topicul sunt cunoscute.]
 
 <details><summary>💡 Feedback</summary>
 
-Port 8883 matches MQTT_PORTS, and byte 0x16 is the TLS handshake record type. The function returns MQTT-TLS for TLS traffic on MQTT ports. [Portul 8883 se potrivește cu MQTT_PORTS, iar octetul 0x16 este tipul de înregistrare handshake TLS. Funcția returnează MQTT-TLS pentru traficul TLS pe porturile MQTT.]
+**Correct answer / Răspuns corect: a.** 0x16 is a TLS handshake record content-type value, but one byte and a port do not validate a record or identify the encrypted application. No absent detect_protocol/T4 implementation is required to answer this conceptual item. [0x16 este valoarea tipului de conținut pentru o înregistrare TLS handshake, dar un octet și un port nu validează înregistrarea și nu identifică aplicația criptată. Itemul conceptual nu necesită o implementare detect_protocol/T4 absentă.]
 
 </details>
 
@@ -1181,20 +1165,18 @@ The display filter mqtt.msgtype == 3 selects PUBLISH messages. MQTT message type
 ---
 
 ### Q60. `N13.S02.Q02`
-**TLS handshake display filter / Filtru de afișare pentru handshake TLS**
 
-*Multiple Choice*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> Which Wireshark display filter captures TLS handshake packets? [Ce filtru de afișare Wireshark captează pachetele de handshake TLS?]
+Which Wireshark display filter selects messages that Wireshark has actually decoded as TLS handshake messages? [Ce filtru de afișare Wireshark selectează mesajele pe care Wireshark le-a decodat efectiv drept handshake TLS?]
 
-- **a)** tls.version >= 0x0303 [tls.version >= 0x0303]
-- **b)** tls.handshake (captures all handshake messages) [tls.handshake (capturează toate mesajele de handshake)]
-- **c)** ssl.record.content_type == 22 [ssl.record.content_type == 22]
-- **d)** tcp.port == 8883 and tls [tcp.port == 8883 and tls]
+- **a)** `tls.handshake`
+- **b)** `udp.port == 8883`
+- **c)** `tcp port 8883`
 
 <details><summary>💡 Feedback</summary>
 
-The filter tls.handshake isolates handshake-phase packets including ClientHello, ServerHello, and certificate exchanges. This works regardless of port. [Filtrul tls.handshake izolează pachetele din faza de handshake, inclusiv ClientHello, ServerHello și schimbul de certificate. Funcționează indiferent de port.]
+**Correct answer / Răspuns corect: a.** Use tls.handshake for decoded handshake fields. In TLS 1.3, handshake messages after ServerHello, including Certificate when sent, are encrypted; without suitable session secrets those messages are not exposed as decoded handshake fields. A display filter does not itself decrypt or capture traffic. [Folosiți tls.handshake pentru câmpuri handshake decodate. În TLS 1.3, mesajele după ServerHello, inclusiv Certificate când este trimis, sunt criptate; fără secrete de sesiune potrivite nu apar drept câmpuri handshake decodate. Filtrul de afișare nu decriptează și nu capturează singur traficul.]
 
 </details>
 
@@ -1221,20 +1203,18 @@ The BPF filter tcp port 1883 captures all TCP packets to/from port 1883. BPF cap
 ---
 
 ### Q62. `N13.S04.Q05`
-**Python settimeout method / Metoda settimeout din Python**
 
-*Multiple Choice*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> In the port scanner code, which method configures the socket timeout for distinguishing between closed and filtered ports? [În codul scanerului de porturi, care metodă configurează timeout-ul socket-ului pentru a distinge între porturile închise și filtrate?]
+Which call sets a 0.5-second timeout on an existing Python socket? [Ce apel setează un timeout de 0,5 secunde pe un socket Python existent?]
 
-- **a)** socket.setdefaulttimeout(timeout) [socket.setdefaulttimeout(timeout)]
-- **b)** sock.settimeout(timeout) [sock.settimeout(timeout)]
-- **c)** sock.timeout = timeout [sock.timeout = timeout]
-- **d)** sock.configure(timeout=timeout) [sock.configure(timeout=timeout)]
+- **a)** `sock.settimeout(0.5)`
+- **b)** `sock.timeout = 0.5`
+- **c)** `sock.configure(timeout=0.5)`
 
 <details><summary>💡 Feedback</summary>
 
-sock.settimeout(timeout) configures the socket's blocking timeout. When connect_ex() exceeds this duration, a socket.timeout exception is raised, classified as filtered. [sock.settimeout(timeout) configurează timeout-ul de blocare al socket-ului. Când connect_ex() depășește această durată, se ridică o excepție socket.timeout, clasificată ca filtrat.]
+**Correct answer / Răspuns corect: a.** settimeout configures timeout-mode operations. connect_ex can return a timeout-related errno; handle return codes and possible exceptions. A timeout does not uniquely identify a filtered port. [settimeout configurează operațiile în mod timeout. connect_ex poate întoarce un errno legat de timeout; tratați codurile de retur și excepțiile posibile. Timeout-ul nu identifică unic un port filtrat.]
 
 </details>
 
@@ -1308,17 +1288,15 @@ QoS 2: PUBLISH + PUBREC + PUBREL + PUBCOMP = (...). [QoS 2: PUBLISH + PUBREC + P
 
 ---
 
-### Q67. `N13.D03.Q05`
-**Expected open ports in lab scan / Porturile deschise așteptate în scanare**
+### Q67. `N13.D03.Q05` — Declared host mappings / Mapări declarate pe gazdă
 
-*Numerical*
+*Numerical / Numeric*
 
-> How many host ports report as OPEN when scanning the Week 13 Docker setups from the host? Enter the count. [Câte porturi de pe gazdă raportează ca DESCHISE la scanarea setup-urilor Docker din Săptămâna 13, de pe gazdă? Introduceți numărul.]
-
+With no environment overrides, how many **host port mappings** are declared in the supplied S13 pentest compose file? Count mappings, not successful scan results. [Fără suprascrieri prin mediu, câte **mapări de porturi pe gazdă** sunt declarate în compose-ul de pentest S13 distribuit? Numărați mapările, nu rezultatele reușite ale scanării.]
 
 <details><summary>💡 Feedback</summary>
 
-Consider the host port mappings for the Week 13 services: 1883, 2121, 6200, 8080, 8888. [Luați în calcul mapările de porturi pe gazdă pentru serviciile din Săptămâna 13: 1883, 2121, 6200, 8080, 8888.]
+**4**: 8888→80, 8080→8080, 2121→21 and 6200→6200, each bound to 127.0.0.1. A mapping does not guarantee a listening service. [Fiecare mapare este legată la 127.0.0.1. O mapare nu garantează un serviciu care ascultă.]
 
 </details>
 
@@ -1381,13 +1359,13 @@ Ports 22, 188(...), and 8888 are open. Ports 80 and 9999 are closed. Total open:
 
 *Drag & Drop into Text*
 
-> Arrange the mosquitto_sub command for TLS-encrypted subscription: [Aranjați comanda mosquitto_sub pentru abonare criptată cu TLS:]
+> Independent scenario: a configured MQTT/TLS broker is reachable as localhost:8883 and its trusted CA file is ./ca.crt. Arrange the subscription command: [Scenariu independent: un broker MQTT/TLS configurat este accesibil la localhost:8883, iar fișierul CA de încredere este ./ca.crt. Aranjați comanda de abonare:]
 
 ```
 [[1]] -h localhost -p [[2]] --cafile [[3]] -t "iot/#" -v
 ```
 
-📋 Available choices / Variante disponibile: mosquitto_sub  |  8883  |  docker/configs/certs/ca.crt  |  mosquitto_pub  |  1883  |  server.key
+📋 Available choices / Variante disponibile: mosquitto_sub  |  8883  |  ./ca.crt  |  mosquitto_pub  |  1883  |  server.key
 
 
 <details><summary>💡 Feedback</summary>
@@ -1416,7 +1394,7 @@ error = sock.[[3]]((host, port))
 
 <details><summary>💡 Feedback</summary>
 
-SOCK_STREAM for TCP, settimeout for timeout, connect_ex for non-blocking connect. [SOCK_STREAM pentru TCP, settimeout pentru timeout, connect_ex pentru conectare neblocantă.]
+SOCK_STREAM selects TCP, settimeout(0.5) selects timeout mode and connect_ex returns connection error codes. This call can wait up to the timeout; it is not automatically non-blocking. [SOCK_STREAM selectează TCP, settimeout(0.5) selectează modul timeout, iar connect_ex returnează coduri de eroare ale conectării. Apelul poate aștepta până la timeout; nu devine automat neblocant.]
 
 </details>
 
@@ -1466,41 +1444,38 @@ create_default_context creates the context, load_verify_locations loads the CA, 
 ---
 
 ### Q75. `N13.D05.Q07`
-**Build docker network inspect command / Construiți comanda docker network inspect**
 
-*Drag & Drop into Text*
+*Drag and Drop / Trageți și plasați*
 
-> Complete the Docker command to inspect the Week 13 network: [Completați comanda Docker pentru a inspecta rețeaua Săptămânii 13:]
+Assume the S13 compose stack was started with `docker compose -p s13pentest -f S13_Part02_Config_Docker_Compose_Pentest.yml up -d`. Complete the command for its generated network name. [Presupuneți pornirea stackului cu comanda dată. Completați comanda pentru numele generat al rețelei.]
 
-```
+```bash
 [[1]] [[2]] [[3]] [[4]]
 ```
 
-📋 Available choices / Variante disponibile: docker  |  network  |  inspect  |  pentestnet  |  compose  |  ls  |  bridge  |  dockerd
-
+Choices / Variante: `docker`, `network`, `inspect`, `s13pentest_pentestnet`, `compose`, `ls`, `pentestnet`.
 
 <details><summary>💡 Feedback</summary>
 
-docker network inspect pentestnet displays network configuration details. [docker network inspect pentestnet afișează detaliile configurării rețelei.]
+`docker network inspect s13pentest_pentestnet`. Compose prefixes the logical network name with the chosen project name unless an explicit network name overrides it. For another project name, inspect the actual network with `docker network ls`. [Compose prefixează numele logic cu proiectul ales, dacă nu există un nume explicit suprascris. Pentru alt proiect inspectați rețeaua reală cu `docker network ls`.]
 
 </details>
 
 ---
 
-### Q76. `N13.D05.Q08`
-**Complete Wireshark combined lab filter / Completați filtrul combinat de laborator Wireshark**
+### Q76. `N13.D05.Q08` — S13 host-port filter / Filtrul porturilor S13 pe gazdă
 
-*Drag & Drop into Text*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> Build a Wireshark display filter for all Week 13 lab traffic: [Construiți un filtru de afișare Wireshark pentru tot traficul laboratorului Săptămâna 13:]
-> tcp.port in {[[1]], [[2]], [[3]], [[4]], [[5]]}
+With the default S13 host mappings, which Wireshark display filter selects candidate TCP traffic on their host ports? [Cu mapările implicite S13 pe gazdă, ce filtru de afișare Wireshark selectează traficul TCP candidat pe porturile gazdei?]
 
-📋 Available choices / Variante disponibile: 1883  |  2121  |  6200  |  8080  |  8888  |  9000  |  443  |  80  |  8443  |  8883
-
+- **a)** `tcp.port == 8888 || tcp.port == 8080 || tcp.port == 2121 || tcp.port == 6200`
+- **b)** `tcp.port == 1883`
+- **c)** `udp.port == 8888 || udp.port == 6200`
 
 <details><summary>💡 Feedback</summary>
 
-The five relevant host ports in Week 13 are 1883, 2121, 6200, 8080, 8888 (MQTT broker + pentest services). [Cele cinci porturi relevante pe gazdă în Săptămâna 13 sunt 1883, 2121, 6200, 8080, 8888 (broker MQTT + servicii de pentest).]
+**Correct answer / Răspuns corect: a.** These are four mapped host ports, not a claim of four active listeners. A capture inside the container network instead uses container ports 80, 8080, 21 and conditionally 6200. Adapt to environment overrides and the chosen capture point. [Acestea sunt patru porturi mapate pe gazdă, nu afirmația existenței a patru listenere active. O captură în rețeaua containerelor folosește porturile 80, 8080, 21 și condițional 6200. Adaptați la suprascrierile de mediu și la punctul capturii.]
 
 </details>
 
@@ -1644,19 +1619,19 @@ PUBLISH, PUBREC, PUBREL, PUBCOMP. [PUBLISH, PUBREC, PUBREL, PUBCOMP.]
 
 ---
 
-### Q84. `N13.D10.Q07`
-**Security priority ordering / Ordinea de prioritate a securității**
+### Q84. `N13.D10.Q07` — Risk-based priorities / Priorități bazate pe risc
 
-*Gap Select*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> IoT security priorities: first implement [[1]], then [[2]], then [[3]], and finally monitoring. [Prioritățile securității IoT: mai întâi implementați ___, apoi ___, apoi ___ și în final monitorizarea.]
+Which statement gives a defensible IoT security priority principle? [Ce afirmație oferă un principiu justificat de prioritizare a securității IoT?]
 
-📋 Available choices / Variante disponibile: authentication  |  encryption  |  authorisation  |  monitoring  |  encryption  |  authentication
-
+- **a)** Prioritise by demonstrated risk and dependencies, while planning authentication, authorisation, encryption, updates and monitoring together. [Prioritizați după riscul demonstrat și dependențe, planificând împreună autentificarea, autorizarea, criptarea, actualizările și monitorizarea.]
+- **b)** Always finish authentication, then authorisation, then encryption, and only then consider monitoring. [Finalizați mereu autentificarea, apoi autorizarea, apoi criptarea și abia apoi luați în calcul monitorizarea.]
+- **c)** The numeric OWASP category is the only input required. [Categoria numerică OWASP este singura informație necesară.]
 
 <details><summary>💡 Feedback</summary>
 
-authentication, authorisation (ACLs), encryption (TLS). [autentificarea, autorizarea (ACL-uri), criptarea (TLS).]
+**Correct answer / Răspuns corect: a.** A category catalogue supports coverage, not a universal implementation sequence. Controls are complementary, and urgent containment can precede a permanent fix. [Catalogul de categorii susține acoperirea, nu o secvență universală de implementare. Controalele sunt complementare, iar limitarea urgentă poate preceda remedierea permanentă.]
 
 </details>
 

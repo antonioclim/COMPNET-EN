@@ -13,11 +13,11 @@ start
 if (Method == CONNECT?) then (yes)
     :Extract target host:port;
     if (Host on blacklist?) then (yes)
-        #FFCDD2:Return 403 Forbidden;
+        :Return 403 Forbidden; <<#FFCDD2>>
         :Log: BLOCKED (CONNECT);
         stop
     else (no)
-        #C8E6C9:Return 200 Connection Established;
+        :Return 200 Connection Established; <<#C8E6C9>>
         :Bidirectional tunnel\n(no inspection);
         stop
     endif
@@ -26,7 +26,7 @@ else (no — HTTP)
 endif
 
 if (URL on blacklist?) then (yes)
-    #FFCDD2:Return 403 Forbidden;
+    :Return 403 Forbidden; <<#FFCDD2>>
     :Log: BLOCKED;
     stop
 else (no)
@@ -40,14 +40,14 @@ if (Origin reachable?) then (yes)
     :Receive origin response;
 
     if (Content-Type blocked?) then (yes)
-        #FFCDD2:Return 403 Forbidden;
+        :Return 403 Forbidden; <<#FFCDD2>>
         :Log: BLOCKED (content-type);
     else (no)
-        #C8E6C9:Forward response to client;
+        :Forward response to client; <<#C8E6C9>>
         :Log: status, duration, size;
     endif
 else (no)
-    #FFCDD2:Return 502 Bad Gateway;
+    :Return 502 Bad Gateway; <<#FFCDD2>>
     :Log: upstream unreachable;
 endif
 

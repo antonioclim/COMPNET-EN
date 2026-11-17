@@ -95,9 +95,9 @@ Observe:
 - detailed log with IP, port, text and number of bytes,
 - implement the protocol:
 
-  - `ping` → `PONG`
-  - `upper:...` → the part after `upper:` in uppercase
-  - anything else → `UNKNOWN COMMAND`
+  - every LF-terminated request → `OK: ` followed by the uppercase original bytes and LF
+  - e.g. `hello` → `OK: HELLO`
+  - the scaffold rejects incomplete or oversized lines (1024-byte request limit)
 
 3. Run the template server:
 
@@ -142,9 +142,8 @@ python3 S02_Part05_Template_TCP_Client.py
 
 Send at least 5 messages:
 
-- two `ping`,
-- two `upper:...`,
-- one random text (e.g., `abc`).
+- `hello`, `network`, `TCP`, `port 12345` and `abc`;
+- check the `OK: ` prefix, uppercase payload and LF on each reply.
 
 ---
 
@@ -197,3 +196,10 @@ These files will demonstrate that you understand:
 - how TCP works at code level,
 - how TCP traffic looks in Wireshark (handshake, payload and teardown),
 - how TCP differs from UDP (next stage).
+
+### Optional protocol extension
+
+After completing the base `OK: uppercase` task, you may replace its response logic
+with a command parser: `ping` → `PONG`, `upper:text` → `TEXT`, anything else →
+`UNKNOWN COMMAND`. Preserve LF framing. Label this extension separately in your
+log; it is not the behaviour of the unmodified example or the base template.

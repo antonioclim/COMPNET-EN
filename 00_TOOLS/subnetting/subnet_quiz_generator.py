@@ -62,8 +62,9 @@ def _random_ipv4_network(rng: random.Random) -> ipaddress.IPv4Network:
 
     # Pick a random *subnet* of the chosen pool with the chosen prefix.
     # We do this by selecting a random subnet index.
-    subnets = list(pool.subnets(new_prefix=prefix))
-    return rng.choice(subnets)
+    count = 1 << (prefix - pool.prefixlen)
+    address = int(pool.network_address) + rng.randrange(count) * (1 << (32 - prefix))
+    return ipaddress.IPv4Network((address, prefix))
 
 
 def _ipv4_netmask(prefix: int) -> str:
@@ -152,6 +153,10 @@ def allocate_vlsm(base: ipaddress.IPv4Network, reqs: List[VlsmRequirement]) -> L
     """
     if not base.is_private:
         raise ValueError("Base network must be private for this generator.")
+    if not reqs or len({r.name for r in reqs}) != len(reqs):
+        raise ValueError("Supply non-empty requirements with unique segment names.")
+    if any(not isinstance(r.hosts, int) or isinstance(r.hosts, bool) or r.hosts < 1 for r in reqs):
+        raise ValueError("Each segment must require a positive integer host count.")
 
     # Sort by decreasing hosts.
     reqs_sorted = sorted(reqs, key=lambda r: r.hosts, reverse=True)
@@ -190,11 +195,10 @@ def allocate_vlsm(base: ipaddress.IPv4Network, reqs: List[VlsmRequirement]) -> L
 
 def generate_vlsm_scenario(rng: random.Random) -> Tuple[ipaddress.IPv4Network, List[VlsmRequirement], List[VlsmAllocation]]:
     """
-    Generate a small VLSM scenario: base /24 or /23 and 3–4 subnets.
+    Generate 3–4 subnets and a private base large enough for every allocation.
     """
     base_pool = rng.choice(PRIVATE_POOLS)
     base_prefix = rng.choice([23, 24, 25])
-    base = rng.choice(list(base_pool.subnets(new_prefix=base_prefix)))
 
     # 3–4 requirements; keep within plausible lab sizes.
     names = ["LAN_A", "LAN_B", "LAN_C", "DMZ"]
@@ -205,6 +209,12 @@ def generate_vlsm_scenario(rng: random.Random) -> Tuple[ipaddress.IPv4Network, L
         hosts = rng.choice([6, 10, 14, 20, 30, 50, 60, 100])
         reqs.append(VlsmRequirement(name=names[i], hosts=hosts))
 
+    needed = sum(1 << (32 - _smallest_prefix_for_hosts(r.hosts)) for r in reqs)
+    required_prefix = 32 - (needed - 1).bit_length()
+    base_prefix = min(base_prefix, required_prefix)
+    count = 1 << (base_prefix - base_pool.prefixlen)
+    address = int(base_pool.network_address) + rng.randrange(count) * (1 << (32 - base_prefix))
+    base = ipaddress.IPv4Network((address, base_prefix))
     allocs = allocate_vlsm(base, reqs)
     return base, reqs, allocs
 

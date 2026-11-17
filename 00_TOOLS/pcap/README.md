@@ -34,4 +34,6 @@ Generate a tiny demo capture using `tcpdump` (requires sudo) and local traffic.
 bash 00_TOOLS/pcap/capture_demo.sh --mixed
 ```
 
-Output is written under `00_TOOLS/pcap/artifacts/`.
+Output is written under `00_TOOLS/pcap/artifacts/`. The script checks sudo access in the foreground, captures only local loopback traffic and requires a readable capture with at least one packet before reporting success. It stops the capture on interruption.
+
+The pure statistics parser supports both byte orders and both classic-PCAP timestamp resolutions. Unsupported link types and corrupt lengths are errors; truncated records retain the complete-record counts and return a non-zero status. The tshark summary also returns non-zero if any requested analysis fails.

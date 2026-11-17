@@ -89,7 +89,7 @@
     <header class="bg-slate-900 border-b border-slate-700 h-14 flex items-center justify-between px-6 shrink-0 z-20">
         <div class="flex items-center gap-3">
             <div class="w-8 h-8 rounded bg-gradient-to-br from-blue-500 to-yellow-500 flex items-center justify-center font-bold text-white text-xs">Py</div>
-            <h1 class="font-bold text-lg text-slate-100">Python <span class="text-blue-400 font-mono">http.server</span> Lab</h1>
+            <h1 class="font-bold text-lg text-slate-100">Python <span class="text-blue-400 font-mono">http.server</span> Lab</h1><p role="note">This page simulates requests. Its code checklist detects text patterns only; run the Python server and test /student with curl to verify behaviour.</p>
         </div>
         <div class="flex items-center gap-4">
             <div class="px-3 py-1 rounded bg-slate-800 border border-slate-700 text-xs text-slate-400 font-mono">
@@ -347,7 +347,7 @@ createApp({
             { id: 5, desc: 'Test /student using curl', done: false }
         ]);
 
-        // Smart Detection of Code Changes
+        // Lexical checklist only: this browser does not execute Python.
         const codeContainsStudentEndpoint = computed(() => {
             // Check for key elements of the solution in the code string
             const hasPath = codeContent.value.includes('if self.path == "/student"') || codeContent.value.includes('elif self.path == "/student"');

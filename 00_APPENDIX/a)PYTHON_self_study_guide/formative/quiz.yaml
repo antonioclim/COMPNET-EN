@@ -8,11 +8,12 @@ metadata:
   course: "Computer Networks"
   estimated_time: "25-35 minutes"
   passing_score: 70
-  total_questions: 30
+  total_questions: 31
 
 questions:
   # --- Basic Syntax ---
   - id: syn_01
+    target_background: [all]
     section: basic_syntax
     type: multiple_choice
     difficulty: basic
@@ -27,6 +28,7 @@ questions:
     explanation: "Python uses dynamic typing — no type declaration needed. Just assign: port = 8080"
 
   - id: syn_02
+    target_background: [all]
     section: basic_syntax
     type: multiple_choice
     difficulty: basic
@@ -41,6 +43,7 @@ questions:
     explanation: "Python uses 'def' keyword for functions. Parameters don't require type annotations."
 
   - id: syn_03
+    target_background: [all]
     section: basic_syntax
     type: multiple_choice
     difficulty: basic
@@ -59,6 +62,7 @@ questions:
     explanation: "Python uses indentation for code blocks, not braces. Correct: if x > 5: followed by indented block."
 
   - id: syn_04
+    target_background: [all]
     section: basic_syntax
     type: fill_blank
     difficulty: basic
@@ -68,6 +72,7 @@ questions:
     explanation: "range(n) generates numbers 0, 1, 2, ..., n-1."
 
   - id: syn_05
+    target_background: [javascript]
     section: basic_syntax
     type: multiple_choice
     difficulty: intermediate
@@ -75,14 +80,15 @@ questions:
     stem: "In Python, what does '==' compare?"
     options:
       a: "Identity (same object in memory)"
-      b: "Value equality (like JavaScript's ===)"
+      b: "Value equality, including equality between some numeric types"
       c: "Loose equality with type coercion"
       d: "Reference equality"
     correct: b
-    explanation: "Python's == is value equality (no type coercion). For identity, use 'is'."
+    explanation: "Python's == invokes value equality: True == 1 and 1 == 1.0 are true, but '1' == 1 is false. It is not JavaScript ===. For identity, use 'is'."
 
   # --- Bytes and Strings ---
   - id: bytes_01
+    target_background: [all]
     section: bytes_and_strings
     type: multiple_choice
     difficulty: intermediate
@@ -98,6 +104,7 @@ questions:
     explanation: "Python sockets require bytes, not strings. Fix: sock.send(b'Hello') or sock.send('Hello'.encode('utf-8'))"
 
   - id: bytes_02
+    target_background: [all]
     section: bytes_and_strings
     type: multiple_choice
     difficulty: basic
@@ -112,6 +119,7 @@ questions:
     explanation: "b\"...\" creates a bytes object directly."
 
   - id: bytes_03
+    target_background: [all]
     section: bytes_and_strings
     type: fill_blank
     difficulty: intermediate
@@ -121,20 +129,22 @@ questions:
     explanation: ".decode() converts bytes → string. .encode() converts string → bytes."
 
   - id: bytes_04
+    target_background: [c]
     section: bytes_and_strings
     type: multiple_choice
     difficulty: intermediate
     bloom_level: analyze
-    stem: "What is Python's equivalent of C's htons(8080) for packing a port?"
+    stem: "Which struct call serialises port 8080 as exactly two bytes in network byte order?"
     options:
       a: "htons(8080)"
       b: "socket.htons(8080)"
       c: "struct.pack('!H', 8080)"
-      d: "int.to_bytes(8080, 2, 'big')"
+      d: "struct.pack('!I', 8080)"
     correct: c
-    explanation: "struct.pack('!H', 8080) packs as network byte order. '!' = network order, 'H' = unsigned short."
+    explanation: "struct.pack('!H', 8080) produces two big-endian bytes. socket.htons returns an integer, not bytes. (8080).to_bytes(2, 'big') is an equivalent serialisation outside struct."
 
   - id: bytes_05
+    target_background: [all]
     section: bytes_and_strings
     type: multiple_choice
     difficulty: advanced
@@ -151,6 +161,7 @@ questions:
 
   # --- Socket Programming ---
   - id: sock_01
+    target_background: [all]
     section: socket_programming
     type: multiple_choice
     difficulty: basic
@@ -165,6 +176,7 @@ questions:
     explanation: "SOCK_STREAM = TCP (reliable, ordered). SOCK_DGRAM = UDP (unreliable)."
 
   - id: sock_02
+    target_background: [all]
     section: socket_programming
     type: multiple_choice
     difficulty: intermediate
@@ -172,13 +184,14 @@ questions:
     stem: "What does SO_REUSEADDR do?"
     options:
       a: "Enables encryption"
-      b: "Allows reusing the port immediately after server stops"
+      b: "Allows some address reuse, including typical TCP TIME_WAIT rebinding on Linux"
       c: "Sets non-blocking mode"
       d: "Enables broadcasting"
     correct: b
-    explanation: "SO_REUSEADDR allows rebinding to a port in TIME_WAIT state (no 60s wait)."
+    explanation: "SO_REUSEADDR relaxes bind address-reuse checks subject to OS rules; it does not override a conflicting active listener or guarantee a fixed wait time."
 
   - id: sock_03
+    target_background: [all]
     section: socket_programming
     type: multiple_choice
     difficulty: intermediate
@@ -193,6 +206,7 @@ questions:
     explanation: "TCP Server: socket() → bind() → listen() → accept(). Mnemonic: BLA = Bind, Listen, Accept"
 
   - id: sock_04
+    target_background: [all]
     section: socket_programming
     type: multiple_choice
     difficulty: intermediate
@@ -200,13 +214,14 @@ questions:
     stem: "Difference between send() and sendall()?"
     options:
       a: "send() is for TCP, sendall() is for UDP"
-      b: "send() may send partial data, sendall() sends everything"
+      b: "send() may accept a prefix; sendall() loops until all bytes are accepted locally or an error occurs"
       c: "sendall() is faster"
       d: "They are identical"
     correct: b
     explanation: "send() might send fewer bytes (returns count). sendall() keeps sending until complete."
 
   - id: sock_05
+    target_background: [all]
     section: socket_programming
     type: fill_blank
     difficulty: intermediate
@@ -216,12 +231,14 @@ questions:
     explanation: "recvfrom() returns (data, address) tuple — needed for UDP since it's connectionless."
 
   - id: sock_06
+    target_background: [all]
     section: socket_programming
     type: multiple_choice
     difficulty: intermediate
     bloom_level: analyze
     stem: |
-      What happens when this runs?
+      On Linux with net.ipv4.ip_unprivileged_port_start=1024, port 80 free,
+      no root privileges and no CAP_NET_BIND_SERVICE, what happens here?
       server = socket.socket()
       server.bind(('0.0.0.0', 80))
     options:
@@ -230,15 +247,16 @@ questions:
       c: "Syntax error"
       d: "Address already in use"
     correct: b
-    explanation: "Ports 0-1023 require root/admin. Use ports >= 1024 for development."
+    explanation: "Under the stated Linux policy, bind raises PermissionError. Thresholds and privileges vary by OS and container configuration; a successful bind would not yet call listen()."
 
   - id: sock_07
+    target_background: [all]
     section: socket_programming
     type: multiple_choice
     difficulty: advanced
     bloom_level: evaluate
     stem: |
-      Why might this code lose data?
+      Assume the received bytes decode correctly. Why can treating this read as one complete application message be wrong?
       data = sock.recv(1024)
       process(data.decode())
     options:
@@ -251,11 +269,12 @@ questions:
 
   # --- Error Handling ---
   - id: err_01
+    target_background: [all]
     section: error_handling
     type: multiple_choice
     difficulty: basic
     bloom_level: remember
-    stem: "Exception raised when a connection is refused?"
+    stem: "Which most specific built-in exception reports a refused TCP connection?"
     options:
       a: "socket.error"
       b: "ConnectionRefusedError"
@@ -265,6 +284,7 @@ questions:
     explanation: "ConnectionRefusedError — server not listening or firewall blocked."
 
   - id: err_02
+    target_background: [java, kotlin]
     section: error_handling
     type: multiple_choice
     difficulty: intermediate
@@ -279,6 +299,7 @@ questions:
     explanation: "Python has NO checked exceptions. All can propagate without declaration."
 
   - id: err_03
+    target_background: [all]
     section: error_handling
     type: fill_blank
     difficulty: basic
@@ -292,6 +313,7 @@ questions:
     explanation: "Python uses 'except' (not 'catch' like Java/JS)."
 
   - id: err_04
+    target_background: [java, kotlin]
     section: error_handling
     type: multiple_choice
     difficulty: intermediate
@@ -306,6 +328,7 @@ questions:
     explanation: "The 'with' statement (context manager) guarantees cleanup."
 
   - id: err_05
+    target_background: [all]
     section: error_handling
     type: multiple_choice
     difficulty: intermediate
@@ -324,6 +347,7 @@ questions:
 
   # --- Python Idioms ---
   - id: idiom_01
+    target_background: [all]
     section: python_idioms
     type: multiple_choice
     difficulty: intermediate
@@ -338,6 +362,7 @@ questions:
     explanation: "Both are valid. list(range(...)) is simpler; list comprehension is better for filtering."
 
   - id: idiom_02
+    target_background: [all]
     section: python_idioms
     type: multiple_choice
     difficulty: intermediate
@@ -352,6 +377,7 @@ questions:
     explanation: "Python dicts use brackets: config['key']. Dot notation is for object attributes."
 
   - id: idiom_03
+    target_background: [all]
     section: python_idioms
     type: fill_blank
     difficulty: intermediate
@@ -361,6 +387,7 @@ questions:
     explanation: "f-strings (Python 3.6+) allow inline expressions with f\"...{var}...\" syntax."
 
   - id: idiom_04
+    target_background: [all]
     section: python_idioms
     type: multiple_choice
     difficulty: intermediate
@@ -375,6 +402,7 @@ questions:
     explanation: "Empty containers are 'falsy'. 'if not packets:' is idiomatic."
 
   - id: idiom_05
+    target_background: [all]
     section: python_idioms
     type: multiple_choice
     difficulty: advanced
@@ -390,6 +418,7 @@ questions:
 
   # --- Debugging ---
   - id: debug_01
+    target_background: [all]
     section: debugging
     type: multiple_choice
     difficulty: intermediate
@@ -404,6 +433,7 @@ questions:
     explanation: "'logging' module provides levels (DEBUG, INFO, WARNING, ERROR) and can be disabled."
 
   - id: debug_02
+    target_background: [all]
     section: debugging
     type: fill_blank
     difficulty: basic
@@ -413,6 +443,7 @@ questions:
     explanation: "settimeout(seconds) makes blocking operations time out."
 
   - id: debug_03
+    target_background: [all]
     section: debugging
     type: multiple_choice
     difficulty: advanced
@@ -429,6 +460,7 @@ questions:
     explanation: "recv() is blocking by default. Use settimeout() or non-blocking mode."
 
   - id: debug_04
+    target_background: [all]
     section: debugging
     type: multiple_choice
     difficulty: intermediate

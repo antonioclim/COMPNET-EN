@@ -307,6 +307,7 @@
 </main>
 
 <script>
+    function escapeText(value) { const element = document.createElement('span'); element.textContent = String(value); return element.innerHTML; }
     // --- IP Math Utilities ---
 
     function ipToInt(ip) {
@@ -323,16 +324,17 @@
     }
 
     function getMask(cidr) {
-        return -1 << (32 - cidr);
+        if (!Number.isInteger(cidr) || cidr < 0 || cidr > 32) throw new Error("Invalid prefix");
+        return cidr === 0 ? 0 : (0xffffffff << (32 - cidr)) >>> 0;
     }
 
     // --- Analysis Logic ---
 
     function analyzeIP() {
         const ipStr = document.getElementById('ipInput').value;
-        const cidr = parseInt(document.getElementById('cidrInput').value);
+        const cidr = Number(document.getElementById('cidrInput').value);
 
-        if(!validateIP(ipStr)) {
+        if(!validateIP(ipStr) || !Number.isInteger(cidr) || cidr < 0 || cidr > 32) {
             alert("Invalid IP Address");
             return;
         }
@@ -343,11 +345,11 @@
         const bcastInt = (netInt | (~maskInt)) >>> 0;
 
         const total = Math.pow(2, 32 - cidr);
-        const usable = total > 2 ? total - 2 : 0;
+        const usable = cidr >= 31 ? total : total - 2; // /31 point-to-point; /32 host route
 
         // Update UI Text
         document.getElementById('resNet').innerText = `${intToIp(netInt)}/${cidr}`;
-        document.getElementById('resBcast').innerText = intToIp(bcastInt);
+        document.getElementById('resBcast').innerText = cidr >= 31 ? 'Not used for /31 point-to-point or /32' : intToIp(bcastInt);
         document.getElementById('resMask').innerText = intToIp(maskInt);
         document.getElementById('resTotal').innerText = total.toLocaleString();
         document.getElementById('resUsable').innerText = usable.toLocaleString();
@@ -390,7 +392,7 @@
 
     function validateIP(ip) {
         const parts = ip.split('.');
-        return parts.length === 4 && parts.every(p => !isNaN(parseInt(p)) && parseInt(p) >= 0 && parseInt(p) <= 255);
+        return parts.length === 4 && parts.every(p => /^\d{1,3}$/.test(p) && Number(p) <= 255);
     }
 
     // --- VLSM Logic ---
@@ -409,7 +411,7 @@
             const div = document.createElement('div');
             div.className = 'req-item';
             div.innerHTML = `
-                <span>${req.name}: ${req.needed} hosts</span>
+                <span>${escapeText(req.name)}: ${req.needed} hosts</span>
                 <span class="req-remove" onclick="removeReq(${idx})">×</span>
             `;
             list.appendChild(div);
@@ -444,12 +446,18 @@
         // Get Base Network
         const ipStr = document.getElementById('ipInput').value;
         const cidrStr = document.getElementById('cidrInput').value;
-        const baseIpInt = ipToInt(ipStr);
-        const baseCidr = parseInt(cidrStr);
+        const baseCidr = Number(cidrStr);
 
         // Validations
         const baseTotalHosts = Math.pow(2, 32 - baseCidr);
 
+        if (!validateIP(ipStr) || !Number.isInteger(baseCidr) || baseCidr < 0 || baseCidr > 30 ||
+            requirements.some(r => !Number.isSafeInteger(r.needed) || r.needed < 1 || r.needed > 4294967294)) {
+            alert("Use a valid IPv4 base prefix /0../30 and positive integer host requirements"); return;
+        }
+        const baseIpInt = (ipToInt(ipStr) & getMask(baseCidr)) >>> 0;
+        const demand = requirements.reduce((sum, r) => sum + 2 ** Math.ceil(Math.log2(r.needed + 2)), 0);
+        if (demand > baseTotalHosts) { alert("No allocation: requirements exceed the base network capacity"); return; }
         // 1. Sort requirements descending (Crucial for VLSM)
         const sortedReqs = [...requirements].sort((a, b) => b.needed - a.needed);
 
@@ -467,10 +475,10 @@
             // Find power of 2
             // needed + 2 (net + bcast)
             let power = 0;
-            while ((1 << power) < (req.needed + 2)) {
+            while ((2 ** power) < (req.needed + 2)) {
                 power++;
             }
-            const allocSize = 1 << power;
+            const allocSize = 2 ** power;
             const newCidr = 32 - power;
 
             // Check overflow
@@ -487,7 +495,7 @@
             // Row
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${req.name}</td>
+                <td>${escapeText(req.name)}</td>
                 <td>${req.needed}</td>
                 <td>${allocSize} (/ ${newCidr})</td>
                 <td><strong>${netAddr}/${newCidr}</strong></td>

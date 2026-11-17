@@ -22,7 +22,7 @@ You will introduce explicit filtering policies: blocking selected URLs (blacklis
 
 In Mininet, the proxy is placed between clients and an origin server controlled by the team. The PCAP capture must show the two distinct conversations: client–proxy and proxy–origin, including the `Host` header differences and how the response is returned.
 
-A forward proxy has two operating modes: for plain HTTP it can rewrite and retransmit the request towards the origin while for HTTPS it must implement the `CONNECT` method correctly and behave as a bidirectional tunnel (without decryption). A component that can be assessed deterministically is logging: for each request you record timestamp, client, target host, status and size and on blocking you also log the applied rule. In Phase 0 and E2, the PCAP must highlight the difference between a standard proxy request and a CONNECT flow (separate handshake followed by opaque payload).
+A forward proxy has two operating modes: for plain HTTP it can rewrite and retransmit the request towards the origin while for HTTPS it must implement the `CONNECT` method correctly and behave as a bidirectional tunnel (without decryption). A component that can be assessed deterministically is logging: for each request you record timestamp, client, target host, status and size and on blocking you also log the applied rule. Phase 0 compares HTTP forwarding with CONNECT. E2 requires HTTP forwarding; E3 adds the mandatory Flex CONNECT exchange (separate handshake followed by opaque payload).
 
 ## Learning objectives
 - Implement the full request–response path through a forward proxy
@@ -46,6 +46,10 @@ A forward proxy has two operating modes: for plain HTTP it can rewrite and retra
 ### Contract (interface) — fixed for assessment
 - **Protocol/default ports (E2):** TCP: proxy 3128/TCP; origin (in `tester`) 8080/TCP.
 - The Flex component must work with the default values (without manual reconfiguration) so that it can be integrated into automated tests.
+
+### Interpretation and complementary evidence
+
+The [E2 capture and semantic-evidence matrix](../00_common/E2_CAPTURE_EVIDENCE_MATRIX.md#s04) maps every capture rule to its generating action and the complementary application evidence.
 
 ### Deliverables
 - `flex/` directory with sources plus build/run instructions (avoid exotic dependencies where possible).
@@ -98,10 +102,10 @@ A forward proxy has two operating modes: for plain HTTP it can rewrite and retra
 - Concurrency: at least 10 clients can issue requests simultaneously without deadlocks.
 - Header management: the proxy adds `Via` and preserves `Host` correctly towards the upstream.
 - Simple cache for small static resources with configurable TTL and evidence in logs (hit/miss).
-- Support `CONNECT` (tunnel) as an E3 extension; in E2 only HTTP forwarding is required.
+- Additional CONNECT concurrency and half-close stress tests beyond the mandatory E3 Flex exchange.
 
 ### MAY (optional)
-- `CONNECT` support for TCP tunnelling only, without TLS decryption.
+- Configurable per-target allowlists for the mandatory E3 CONNECT tunnel.
 - Rate limiting per client with 429 on exceedance.
 
 ## Non-functional requirements
@@ -135,7 +139,7 @@ A forward proxy has two operating modes: for plain HTTP it can rewrite and retra
 - The analysis includes the filters used and an example of a full URL in the request.
 
 ### Automatic PCAP criteria (E2)
-These criteria are **deterministic** and can be verified automatically with `tshark`.
+These capture checks are reproducible with `tshark`. Frame counts are smoke checks; they do not replace the application tests or prove complete project acceptance.
 - Official rules: `tools/pcap_rules/S04.json`
 - In the catalogue (template): `00_common/tools/pcap_rules/S04.json` and `00_common/tools/validate_pcap.py` (copy into the student repository).
 
@@ -143,10 +147,10 @@ These criteria are **deterministic** and can be verified automatically with `tsh
 
 | ID | tshark filter (`-Y`) | Condition | What it validates |
 |---:|---|---:|---|
-| R1 | `tcp.dstport==3128 && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | Client → proxy handshake. |
-| R2 | `tcp.port==3128 && frame contains "GET "` | `>= 1` | HTTP request to the proxy. |
-| R3 | `tcp.dstport==8080 && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | Proxy initiates a connection to the origin server. |
-| R4 | `tcp.port==3128 && frame contains "HTTP/1.1 200"` | `>= 1` | Proxy forwards a 200 response to the client. |
+| R1 | `tcp.dstport==3128 && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | SYN attempt to the proxy. |
+| R2 | `tcp.port==3128 && frame contains "GET "` | `>= 1` | HTTP request-marker bytes are present on the proxy transport. |
+| R3 | `tcp.dstport==8080 && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | SYN attempt on an origin-service port; correlate the proxy source. |
+| R4 | `tcp.port==3128 && frame contains "HTTP/1.1 200"` | `>= 1` | HTTP 200 marker bytes are present on the proxy transport; correlate the complete client response. |
 
 ### Deliverables
 - Docker Compose with `http_proxy` plus `origin_server` plus `tester`.
@@ -154,7 +158,7 @@ These criteria are **deterministic** and can be verified automatically with `tsh
 - `artifacts/pcap/traffic_e2.pcap` and a completed `docs/E2_pcap_analysis.md`.
 
 ## E3 — Completion plus demo plus testing
-- All MUST requirements implemented plus demonstrable concurrency in Mininet.
+- All MUST requirements implemented plus demonstrable concurrency in Mininet and the mandatory E3 Flex CONNECT exchange.
 - Additional tests for filters (Content-Type), upstream timeouts and invalid requests.
 - Mininet demo with two clients issuing requests simultaneously, one to a blocked URL.
 - Documented refactoring and a mini security audit (URL validation, timeouts and limits).
@@ -199,7 +203,7 @@ The catalogue includes a reference template: `00_common/docker/tester_base/`.
 - Validate the PCAP and stop the stack.
 
 ## Notes
-- For the mandatory part use plain HTTP only; CONNECT tunnelling is optional.
+- E2 uses plain HTTP. E3 must support CONNECT tunnelling for the Flex acceptance threshold; TLS interception is outside scope.
 - Filtering must be deterministic and testable rather than based on subjective interpretation.
 - If caching is implemented document the invalidation policy precisely.
 

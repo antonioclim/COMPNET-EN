@@ -47,6 +47,10 @@ File synchronisation is assessed on two axes: correctness (what “same state”
 - **Protocol/default ports (E2):** TCP: 5010/TCP.
 - The Flex component must work with the default values (without manual reconfiguration) so that it can be integrated into automated tests.
 
+### Interpretation and complementary evidence
+
+The [E2 capture and semantic-evidence matrix](../00_common/E2_CAPTURE_EVIDENCE_MATRIX.md#s10) maps every capture rule to its generating action and the complementary application evidence.
+
 ### Deliverables
 - `flex/` directory with sources plus build/run instructions (avoid exotic dependencies where possible).
 - `docs/FLEX.md` with:
@@ -135,7 +139,7 @@ File synchronisation is assessed on two axes: correctness (what “same state”
 - A filter that isolates control messages versus payload is mentioned.
 
 ### Automatic PCAP criteria (E2)
-These criteria are **deterministic** and can be verified automatically with `tshark`.
+These capture checks are reproducible with `tshark`. Frame counts are smoke checks; they do not replace the application tests or prove complete project acceptance.
 - Official rules: `tools/pcap_rules/S10.json`
 - In the catalogue (template): `00_common/tools/pcap_rules/S10.json` and `00_common/tools/validate_pcap.py` (copy into the student repository).
 
@@ -143,11 +147,11 @@ These criteria are **deterministic** and can be verified automatically with `tsh
 
 | ID | tshark filter (`-Y`) | Condition | What it validates |
 |---:|---|---:|---|
-| R1 | `tcp.dstport==5010 && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | Handshake to the synchronisation service. |
-| R2 | `tcp.port==5010 && frame contains "MANIFEST"` | `>= 1` | Manifest transfer/request. |
-| R3 | `tcp.port==5010 && (frame contains "SHA256" || frame contains "sha256")` | `>= 1` | A SHA-256 hash appears in the manifest or response. |
-| R4 | `tcp.port==5010 && (frame contains "PUSH" || frame contains "PULL" || frame contains "GET" || frame contains "PUT")` | `>= 1` | At least one synchronisation operation (push/pull). |
-| R5 | `tcp.port==5010 && (tcp.flags.fin==1 || tcp.flags.reset==1)` | `>= 1` | Controlled session closure. |
+| R1 | `tcp.dstport==5010 && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | SYN connection attempt to the synchronisation service. |
+| R2 | `tcp.port==5010 && frame contains "MANIFEST"` | `>= 1` | Manifest marker bytes are present; decode and correlate the complete manifest separately. |
+| R3 | `tcp.port==5010 && (frame contains "SHA256" \|\| frame contains "sha256")` | `>= 1` | SHA-256 marker bytes are present; verify the full digest and file contents separately. |
+| R4 | `tcp.port==5010 && (frame contains "PUSH" \|\| frame contains "PULL" \|\| frame contains "GET" \|\| frame contains "PUT")` | `>= 1` | Push/pull operation marker bytes are present; assert the actual synchronisation result. |
+| R5 | `tcp.port==5010 && (tcp.flags.fin==1 \|\| tcp.flags.reset==1)` | `>= 1` | FIN/RST transport-closure frames are present; verify the application closure reason. |
 
 ### Deliverables
 - Docker Compose with `sync_peer` (or client/server) and `tester`.
@@ -199,7 +203,7 @@ The catalogue includes a reference template: `00_common/docker/tester_base/`.
 
 ## Notes
 - Delta encoding is not required. Full-file transfer is acceptable if the transfer decision is correct.
-- The conflict policy must be deterministic and must not lose data (rename, suffix, conflicts folder).
+- The conflict policy must be deterministic. Document which version wins under last-writer-wins or prefer-server; retaining the losing version in a conflicts folder is recommended. Rename/keep-both remains an allowed policy.
 - For deletions, document clearly whether the project propagates delete or only reports it.
 
 ### Typical pitfalls

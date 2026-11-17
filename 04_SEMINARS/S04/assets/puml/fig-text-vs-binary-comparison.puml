@@ -19,9 +19,9 @@ together {
 together {
     package "Binary Protocol (Part 2)" as binpkg #E3F2FD {
         rectangle "Framing\n[LEN_BYTE] [pickled data]\nSingle byte length prefix" as bf #BBDEFB
-        rectangle "Encoding\nPython pickle\nNot human-readable" as be #BBDEFB
-        rectangle "Debugging\nRequires deserialiser\nOpaque in Wireshark" as bd #BBDEFB
-        rectangle "Overhead\nCompact (1 B header)\nMax message: 255 bytes" as bo #BBDEFB
+        rectangle "Encoding\nPython pickle\nSome strings remain readable" as be #BBDEFB
+        rectangle "Debugging\nRequires deserialiser\nInspect raw bytes or decode" as bd #BBDEFB
+        rectangle "Overhead\n1 B framing + pickle metadata\nMax message: 255 bytes" as bo #BBDEFB
     }
 }
 
@@ -35,7 +35,7 @@ bd -[hidden]down-> bo
 
 legend bottom
   Text protocols excel at debuggability and interoperability.
-  Binary protocols are more compact and support structured objects.
+  Binary formats can support structured objects; size depends on the encoding.
   The choice depends on the use case: diagnostics favour text,
   performance-critical systems favour binary (protobuf, gRPC).
 endlegend

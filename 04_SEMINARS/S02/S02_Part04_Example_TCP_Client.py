@@ -16,9 +16,10 @@ def main():
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         sock.connect((host, port))
-        sock.sendall(message.encode())
+        sock.sendall(message.encode("utf-8") + b"\n")
 
-        data = sock.recv(1024)
+        with sock.makefile("rb") as reader:
+            data = reader.readline(8193)
 
     print(f"[CLIENT] Sent: {message}")
     print(f"[CLIENT] Received: {data.decode(errors='replace')}")

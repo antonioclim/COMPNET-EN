@@ -9,7 +9,7 @@
       "id": "R1",
       "filter": "tcp.dstport==5443 && tcp.flags.syn==1 && tcp.flags.ack==0",
       "condition": ">= 1",
-      "description": "TCP handshake to the TLS service."
+      "description": "SYN attempt to the TLS service; correlate the complete transport handshake separately."
     },
     {
       "id": "R2",
@@ -25,15 +25,22 @@
     },
     {
       "id": "R4",
-      "filter": "tls.handshake.type==11 || tls.handshake.certificate",
+      "filter": "tcp.port==5443 && (tls.handshake.type==11 || tls.record.content_type==23)",
       "condition": ">= 1",
-      "description": "Server certificate transmitted."
+      "description": "Visible Certificate (TLS 1.2) or encrypted TLS record (TLS 1.3). Certificate validation is established by the client tests, not this smoke check."
     },
     {
       "id": "R5",
-      "filter": "tcp.port==5443 && tcp.len>0",
-      "condition": ">= 3",
-      "description": "Application traffic over TLS (data-bearing segments)."
+      "filter": "tcp.port==5443 && tls.record.content_type==23",
+      "condition": ">= 1",
+      "description": "Encrypted TLS record is present. TLS 1.3 also encrypts handshake messages, so application delivery requires the separate request/response test."
     }
+  ],
+  "manual_checks": [
+    "Provide a passing test in which the client validates the server certificate and a test rejecting an untrusted certificate.",
+    "Provide a passing application request/response assertion with correlated client/server logs. A handshake-only capture is insufficient for project acceptance.",
+    "Optional: decrypt this local test with --tls-keylog PATH. Do not commit session secrets or downgrade TLS to make Certificate visible.",
+    "R1 R2 R3 R4: Record TLS version and a passing validation test, plus rejection of an untrusted certificate. TLS 1.3 encrypts Certificate after ServerHello.",
+    "R5: Assert the application result and correlate client/server logs. A handshake-only encrypted record cannot establish application delivery; optional key logging is local-test evidence."
   ]
 }

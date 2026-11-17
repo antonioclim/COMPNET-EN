@@ -1,4 +1,4 @@
-$TTL 5
+$TTL 30
 @   IN  SOA ns1.example.test. admin.example.test. (
         1  ; serial
         5  ; refresh
@@ -7,5 +7,5 @@ $TTL 5
         5  ; minimum
 )
     IN  NS  ns1.example.test.
-ns1 IN  A   10.0.0.10
+ns1 IN  A   172.29.111.10
 www IN  A   10.0.0.42

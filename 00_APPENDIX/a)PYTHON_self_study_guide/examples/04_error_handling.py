@@ -114,7 +114,10 @@ def connect_with_retry(
             sock.connect((host, port))
             
             logger.info(f"Connected successfully to {host}:{port}")
-            return sock
+            # Transfer ownership to the caller before the finally block.
+            connected = sock
+            sock = None
+            return connected
             
         except socket.timeout:
             logger.warning(f"Attempt {attempt}: Connection timed out after {timeout}s")

@@ -35,7 +35,7 @@ Week 0 serves as the **foundation layer** for the entire course. Students must m
 | LO0.2 | Distinguish Docker images from containers | Understand (2) | Quiz Q3, Q10 |
 | LO0.3 | Apply port mapping between host and containers | Apply (3) | Quiz Q4-Q5 |
 | LO0.4 | Convert between bytes and strings in Python | Apply (3) | Quiz Q6-Q7, Code Tracing |
-| LO0.5 | Create and configure basic TCP sockets | Apply (3) | Quiz Q8-Q9, Parsons P1-P3 |
+| LO0.5 | Create and configure basic TCP sockets | Apply (3) | Quiz Q8-Q9, Parsons P1/P2/P4/P5 |
 
 ---
 
@@ -45,13 +45,15 @@ Week 0 serves as the **foundation layer** for the entire course. Students must m
 
 | LO ID | Theory Source | Practice Artefact | Assessment | Parsons | Misconceptions |
 |-------|---------------|-------------------|------------|---------|----------------|
-| LO0.1 | Prerequisites.md §4-7 | verify_lab_environment.sh | Quiz Q1, Q2; Peer Q1-Q2 | — | #1, #2, #7 |
-| LO0.2 | Prerequisites.md §2.1 | docker commands demo | Quiz Q3, Q10; Peer Q3 | — | #3, #4 |
-| LO0.3 | Prerequisites.md §2.3 | Portainer setup | Quiz Q4, Q5; Peer Q4-Q5 | — | #5, #6 |
-| LO0.4 | PYTHON_GUIDE §3 | 02_bytes_vs_str.py | Quiz Q6, Q7; Tracing T2 | P2 | #9, #10 |
-| LO0.5 | PYTHON_GUIDE §4 | 01_socket_tcp.py | Quiz Q8, Q9; Tracing T1, T3 | P1, P3, P4, P5 | #11, #12 |
+| LO0.1 | Prerequisites.md §4-7 | verify_lab_environment.sh | Quiz Q1, Q2; Peer Q1, Q5 | — | #1, #2, #7 |
+| LO0.2 | Prerequisites.md §2.1 | docker commands demo | Quiz Q3, Q10; Peer Q2 | — | #3, #4 |
+| LO0.3 | Prerequisites.md §2.3 | Portainer setup | Quiz Q4, Q5; Peer Q3, Q4 | — | #5, #6 |
+| LO0.4 | PYTHON_GUIDE §3 | 02_bytes_vs_str.py | Quiz Q6, Q7; Tracing T2 | P2, P3 | #9, #10 |
+| LO0.5 | PYTHON_GUIDE §4 | 01_socket_tcp.py | Quiz Q8, Q9; Tracing T1, T3 | P1, P2, P4, P5 | #11, #12 |
 
 ### Assessment Coverage Matrix
+
+A tick identifies a directly assessed concept. “secondary” identifies supporting context, not an independent demonstration of the objective. Parsons P3 primarily assesses decoding and invalid byte sequences; the surrounding receive loop supplies socket context.
 
 | Assessment Item | LO0.1 | LO0.2 | LO0.3 | LO0.4 | LO0.5 |
 |-----------------|-------|-------|-------|-------|-------|
@@ -67,15 +69,15 @@ Week 0 serves as the **foundation layer** for the entire course. Students must m
 | Quiz Q10 | | ✓ | | | |
 | Parsons P1 | | | | | ✓ |
 | Parsons P2 | | | | ✓ | ✓ |
-| Parsons P3 | | | | | ✓ |
+| Parsons P3 | | | | ✓ | secondary |
 | Parsons P4 | | | | | ✓ |
 | Parsons P5 | | | | | ✓ |
 | Code Tracing T1 | | | | | ✓ |
 | Code Tracing T2 | | | | ✓ | |
 | Code Tracing T3 | | | | | ✓ |
-| Peer Instruction Q1-Q2 | ✓ | | | | |
-| Peer Instruction Q3 | | ✓ | | | |
-| Peer Instruction Q4-Q5 | | | ✓ | | |
+| Peer Instruction Q1, Q5 | ✓ | | | | |
+| Peer Instruction Q2 | | ✓ | | | |
+| Peer Instruction Q3, Q4 | | | ✓ | | |
 
 ---
 
@@ -83,7 +85,7 @@ Week 0 serves as the **foundation layer** for the entire course. Students must m
 
 ### LO0.1: Configure WSL2 + Docker Environment
 
-**Description:** Students can independently set up a complete lab environment consisting of WSL2, Ubuntu 22.04, Docker Engine and Portainer on a Windows machine.
+**Description:** Students can configure the selected lab environment and verify Docker and Portainer. The original WSL2 route below remains an alternative; the course’s prepared VirtualBox OVA is the primary route. Use [environment routes](environment_routes.md) to select one daemon and its matching endpoint.
 
 **Bloom Level:** Apply (Level 3)
 
@@ -91,12 +93,12 @@ Week 0 serves as the **foundation layer** for the entire course. Students must m
 - [ ] WSL2 installed and running (`wsl --status` shows version 2)
 - [ ] Ubuntu 22.04 installed with user `stud`
 - [ ] Docker Engine running (`docker ps` works without sudo)
-- [ ] Portainer accessible at `http://localhost:9000`
+- [ ] Portainer accessible at `http://localhost:9050`
 
 **Linked Artefacts:**
-- 📚 Theory: `../00_TOOLS/Prerequisites/Prerequisites.md` sections 4-7
-- 🔬 Practice: `../00_TOOLS/Prerequisites/verify_lab_environment.sh`
-- ✅ Assessment: `formative/quiz.yaml` Q1, Q2; `docs/peer_instruction.md` Q1-Q2
+- 📚 Theory: `../../00_TOOLS/Prerequisites/Prerequisites.md` sections 4-7
+- 🔬 Practice: `../../00_TOOLS/Prerequisites/verify_lab_environment.sh`
+- ✅ Assessment: `formative/quiz.yaml` Q1, Q2; `docs/peer_instruction.md` Q1, Q5
 - ❌ Misconceptions: #1 (WSL emulation), #2 (Docker Desktop required), #7 (auto-start)
 
 **Verification Command:**
@@ -109,7 +111,7 @@ Week 0 serves as the **foundation layer** for the entire course. Students must m
 
 ### LO0.2: Distinguish Images from Containers
 
-**Description:** Students can correctly differentiate between Docker images (read-only templates) and containers (running instances) and understand their lifecycle relationship.
+**Description:** Students can correctly differentiate between Docker images (read-only templates) and containers (instances that may be running or stopped) and understand their lifecycle relationship.
 
 **Bloom Level:** Understand (Level 2)
 
@@ -119,9 +121,9 @@ Week 0 serves as the **foundation layer** for the entire course. Students must m
 - [ ] Understands that multiple containers can share one image
 
 **Linked Artefacts:**
-- 📚 Theory: `../00_TOOLS/Prerequisites/Prerequisites.md` section 2.1
+- 📚 Theory: `../../00_TOOLS/Prerequisites/Prerequisites.md` section 2.1
 - 🔬 Practice: Docker commands (`docker images`, `docker ps -a`)
-- ✅ Assessment: `formative/quiz.yaml` Q3, Q10; `docs/peer_instruction.md` Q3
+- ✅ Assessment: `formative/quiz.yaml` Q3, Q10; `docs/peer_instruction.md` Q2
 - ❌ Misconceptions: #3 (container = image), #4 (stop deletes data)
 
 **Verification Command:**
@@ -145,9 +147,9 @@ docker ps -a
 - [ ] Knows about localhost isolation in containers
 
 **Linked Artefacts:**
-- 📚 Theory: `../00_TOOLS/Prerequisites/Prerequisites.md` section 2.3
-- 🔬 Practice: Portainer setup with `-p 9000:9000`
-- ✅ Assessment: `formative/quiz.yaml` Q4, Q5; `docs/peer_instruction.md` Q4-Q5
+- 📚 Theory: `../../00_TOOLS/Prerequisites/Prerequisites.md` section 2.3
+- 🔬 Practice: Portainer setup with `-p 127.0.0.1:9050:9000`
+- ✅ Assessment: `formative/quiz.yaml` Q4, Q5; `docs/peer_instruction.md` Q3, Q4
 - ❌ Misconceptions: #5 (ports auto-exposed), #6 (localhost is global)
 
 **Verification Command:**
@@ -171,9 +173,9 @@ curl http://localhost:8080
 - [ ] Can use `errors='replace'` for safe decoding
 
 **Linked Artefacts:**
-- 📚 Theory: `PYTHON_self_study_guide/PYTHON_NETWORKING_GUIDE.md` section 3
-- 🔬 Practice: `PYTHON_self_study_guide/examples/02_bytes_vs_str.py`
-- ✅ Assessment: `formative/quiz.yaml` Q6, Q7; `docs/code_tracing.md` T2; `docs/parsons_problems.md` P2
+- 📚 Theory: `a)PYTHON_self_study_guide/PYTHON_NETWORKING_GUIDE.md` section 3
+- 🔬 Practice: `a)PYTHON_self_study_guide/examples/02_bytes_vs_str.py`
+- ✅ Assessment: `formative/quiz.yaml` Q6, Q7; `docs/code_tracing.md` T2; `docs/parsons_problems.md` P2, P3
 - ❌ Misconceptions: #9 (encode/decode direction), #10 (UTF-8 safety)
 
 **Verification Code:**
@@ -199,9 +201,9 @@ assert text == back
 - [ ] Can use struct.pack with network byte order (`!`)
 
 **Linked Artefacts:**
-- 📚 Theory: `PYTHON_self_study_guide/PYTHON_NETWORKING_GUIDE.md` section 4
-- 🔬 Practice: `PYTHON_self_study_guide/examples/01_socket_tcp.py`
-- ✅ Assessment: `formative/quiz.yaml` Q8, Q9; `docs/parsons_problems.md` P1, P3, P4, P5; `docs/code_tracing.md` T1, T3
+- 📚 Theory: `a)PYTHON_self_study_guide/PYTHON_NETWORKING_GUIDE.md` section 4
+- 🔬 Practice: `a)PYTHON_self_study_guide/examples/01_socket_tcp.py`
+- ✅ Assessment: `formative/quiz.yaml` Q8, Q9; `docs/parsons_problems.md` P1, P2, P4, P5; `docs/code_tracing.md` T1, T3
 - ❌ Misconceptions: #11 (client/server sequence), #12 (recv() partial data)
 
 **Verification Code:**
@@ -225,13 +227,14 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 | Quiz Q4-Q5 | LO0.3 |
 | Quiz Q6-Q7 | LO0.4 |
 | Quiz Q8-Q9 | LO0.5 |
-| Parsons P1, P3, P4, P5 | LO0.5 |
+| Parsons P1, P4, P5 | LO0.5 |
+| Parsons P3 | LO0.4 (primary); LO0.5 (receive-loop context) |
 | Parsons P2 | LO0.4, LO0.5 |
 | Code Tracing T1, T3 | LO0.5 |
 | Code Tracing T2 | LO0.4 |
-| Peer Instruction Q1-Q2 | LO0.1 |
-| Peer Instruction Q3 | LO0.2 |
-| Peer Instruction Q4-Q5 | LO0.3 |
+| Peer Instruction Q1, Q5 | LO0.1 |
+| Peer Instruction Q2 | LO0.2 |
+| Peer Instruction Q3, Q4 | LO0.3 |
 
 ### By Bloom Level
 
@@ -257,7 +260,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 Before proceeding to Week 1, verify you can:
 
 - [ ] Start WSL2 and Docker without errors
-- [ ] Access Portainer at localhost:9000
+- [ ] Access Portainer at localhost:9050
 - [ ] Run `verify_lab_environment.sh` with all checks passing
 - [ ] Score ≥70% on `formative/quiz.yaml`
 - [ ] Explain the container/image relationship to a peer

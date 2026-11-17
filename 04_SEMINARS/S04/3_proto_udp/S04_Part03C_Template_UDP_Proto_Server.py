@@ -1,5 +1,6 @@
 import socket
 import sys
+import pickle
 
 from S04_Part03_Script_Transfer_Units import (
     RequestMessage,
@@ -34,8 +35,14 @@ def main():
         print(f"[INFO] UDP protocol server (template) listening on 0.0.0.0:{PORT}")
 
         while True:
-            message_bytes, address = server_socket.recvfrom(1024)
-            request = deserialize(message_bytes)
+            message_bytes, address = server_socket.recvfrom(65535)
+            try:
+                request = deserialize(message_bytes)
+                if not isinstance(request, RequestMessage):
+                    raise ValueError("Expected RequestMessage")
+            except (ValueError, EOFError, pickle.UnpicklingError, AttributeError) as exc:
+                print(f"[INVALID DATAGRAM] {address}: {exc}")
+                continue
 
             print(f"[RECV] From {address} -> {request}")
 
@@ -108,7 +115,11 @@ def main():
                 response = ResponseMessage(ResponseMessageType.ERR_UNKNOWN, "Unknown request type")
 
             # Serialise and send the response.
-            response_bytes = serialize(response)
+            try:
+                response_bytes = serialize(response)
+            except ValueError:
+                response_bytes = serialize(ResponseMessage(
+                    ResponseMessageType.ERR_TOO_LARGE, "Response exceeds one UDP datagram"))
             server_socket.sendto(response_bytes, address)
             print(f"[SEND] To {address} -> {response}\n")
             # <<< STUDENT CODE ENDS HERE

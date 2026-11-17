@@ -24,7 +24,7 @@ rectangle "HTTP/2 Connection" as h2conn #F5F5F5 {
     }
 }
 
-rectangle "gRPC DATA Frame Anatomy" as anatomy #FFF3E0 {
+rectangle "Length-Prefixed gRPC Message" as anatomy #FFF3E0 {
     rectangle "Compressed\n1 byte\n(0 or 1)" as comp #FFE0B2
     rectangle "Message Length\n4 bytes\n(big-endian)" as mlen #FFE0B2
     rectangle "Protobuf Message\nN bytes\n(serialised)" as pbuf #FFF9C4
@@ -35,9 +35,9 @@ mlen -right[hidden]-> pbuf
 
 legend bottom
   gRPC maps each RPC to an HTTP/2 stream
-  Unary: one DATA frame each direction
-  Streaming: multiple DATA frames on same stream
-  Protobuf payload is binary (not human-readable)
-  Wireshark: headers visible, payload requires dissector
+  Unary: one gRPC request and one gRPC response
+  A message may span DATA frames; one frame may contain multiple messages
+  Example: one large unary message can span three DATA frames
+  The 5-byte gRPC prefix is distinct from the 9-byte HTTP/2 frame header
 endlegend
 @enduml

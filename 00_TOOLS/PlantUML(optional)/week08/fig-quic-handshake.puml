@@ -22,7 +22,7 @@ C <-[#333333]> S : Application data (encrypted)
 
 == Subsequent connection (0-RTT) ==
 
-C -[#FF9800]> S : **Initial + 0-RTT data**\nClientHello + cached key\n+ early application data
+C -[#FF9800]> S : **Initial + 0-RTT data**\nClientHello with PSK identity/binder\n(keys derived locally; secret not sent)\n+ early application data
 
 S -[#43A047]> C : **Handshake** + accept 0-RTT
 

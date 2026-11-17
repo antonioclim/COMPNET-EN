@@ -18,16 +18,17 @@ C -> S : ACK
 == TLS HANDSHAKE ==
 C -> S : ClientHello\n(supported ciphers, SNI)
 S --> C : ServerHello\n(selected cipher)
-S --> C : Certificate\n(server.crt signed by CA)
-S --> C : ServerHelloDone
-
-C -> C : Verify certificate\n(CA trust chain, hostname, expiry)
-
-C -> S : ClientKeyExchange
-C -> S : ChangeCipherSpec
-C -> S : Finished
-S --> C : ChangeCipherSpec
-S --> C : Finished
+alt TLS 1.2 (ECDHE example)
+S --> C : Certificate + ServerKeyExchange + ServerHelloDone
+C -> C : Verify CA chain, hostname and expiry
+C -> S : ClientKeyExchange + ChangeCipherSpec + Finished
+S --> C : ChangeCipherSpec + Finished
+else TLS 1.3
+note over C, S : Key shares in ClientHello / ServerHello
+S --> C : EncryptedExtensions + Certificate\n+ CertificateVerify + Finished (encrypted)
+C -> C : Verify CA chain, hostname, expiry and transcript
+C -> S : Finished (encrypted)
+end
 
 == ENCRYPTED CHANNEL ESTABLISHED ==
 note over C, S #E1BEE7 : All subsequent data encrypted\n(opaque in PCAP without SSLKEYLOGFILE)
@@ -49,8 +50,9 @@ C -> S : FIN
 
 legend right
   PCAP visible: ClientHello, ServerHello
-  Certificate, cipher negotiation (metadata)
+  TLS 1.2 Certificate is normally visible; TLS 1.3 Certificate is encrypted
   PCAP opaque: application commands (encrypted)
-  Validates R1–R5 in S12.json
+  R1–R5 are capture smoke checks
+  Certificate and application acceptance require client tests
 endlegend
 @enduml

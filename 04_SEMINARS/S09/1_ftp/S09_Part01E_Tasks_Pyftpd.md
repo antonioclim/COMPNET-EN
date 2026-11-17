@@ -8,7 +8,7 @@ In a terminal run:
 
 ```
 
-python3 S09_Part03_Script_Pyftpd_Server.py
+python3 S09_Part01C_Script_Pyftpd_Server.py
 
 ```
 
@@ -60,9 +60,9 @@ Execute and save the output for:
 
 1. LIST (displaying the files)
 2. RETR for an existing file
-3. STOR for a new file
+3. STOR for a new file after logging in as `test` / `12345`
 4. What happens if you attempt to download a non-existent file?
-5. (optional) logging in with username/password instead of anonymous
+5. Log in anonymously and record the expected refusal of STOR (anonymous access is read-only).
 
 Format:
 

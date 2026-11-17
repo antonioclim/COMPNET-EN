@@ -128,20 +128,19 @@ EHLO (Extended HELO) returns a multi-line 250 response listing available extensi
 ---
 
 ### Q7. `N12.C02.Q02`
-**SMTP Port Assignments / Atribuirea porturilor SMTP**
 
-*Multiple Choice*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> Which port is designated for authenticated client-to-server email submission with STARTTLS? [Care port este desemnat pentru trimiterea autentificată a emailurilor de la client la server cu STARTTLS?]
+Which registered SMTP submission port is conventionally used with STARTTLS, as distinct from implicit TLS submission on 465? [Ce port înregistrat de submission SMTP este folosit convențional cu STARTTLS, distinct de submission cu TLS implicit pe 465?]
 
-- **a)** 587 — the submission port requiring STARTTLS for authenticated clients [587 — portul de trimitere care necesită STARTTLS pentru clienți autentificați]
-- **b)** 25 — the original historical relay port reserved for inter-server mail routing [25 — portul istoric original de releu rezervat pentru rutarea emailurilor între servere]
-- **c)** 465 — the legacy port using implicit TLS from the connection start [465 — portul vechi care utilizează TLS implicit de la începutul conexiunii]
-- **d)** 443 — the standard port used for any TLS-encrypted web application [443 — portul standard utilizat pentru orice aplicație web criptată cu TLS]
+- **a)** 587
+- **b)** 25
+- **c)** 465
+- **d)** 443
 
 <details><summary>💡 Feedback</summary>
 
-Port 587 is the designated submission port for authenticated email clients, requiring STARTTLS for encryption. Port 25 is for server-to-server relay (often blocked by ISPs), and port 465 is the legacy SMTPS port with implicit TLS. The lab uses port 587 for educational purposes. [Portul 587 este portul desemnat pentru trimiterea autentificată de la clienții de email, necesitând STARTTLS pentru criptare. Portul 25 este pentru releu server-la-server (adesea blocat de ISP-uri), iar portul 465 este portul SMTPS vechi cu TLS implicit. Laboratorul folosește portul 587 în scopuri educaționale.]
+**Correct answer / Răspuns corect: a.** 587 is the message submission port; encryption is negotiated with STARTTLS when the server supports and the policy requires it. Port 465 is the current registered submissions service using implicit TLS, not merely a legacy port. The number alone does not enable TLS or authentication. [587 este portul pentru submission; criptarea se negociază prin STARTTLS când serverul oferă suport și politica o cere. 465 este serviciul actual înregistrat submissions cu TLS implicit, nu doar un port vechi. Numărul singur nu activează TLS sau autentificarea.]
 
 </details>
 
@@ -208,20 +207,18 @@ SMTP requires commands in a specific order: EHLO → MAIL FROM → RCPT TO → D
 ---
 
 ### Q11. `N12.C03.Q01`
-**Email Delivery Chain / Lanțul de livrare a emailului**
 
-*Multiple Choice*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> Alice sends an email from Thunderbird to Bob who reads it in Gmail. Which combination of protocols is involved? [Alice trimite un email din Thunderbird către Bob care îl citește în Gmail. Ce combinație de protocoale este implicată?]
+Alice sends mail from a desktop mail client configured for SMTP. Bob reads the delivered message through Gmail in a web browser. Which client-facing protocols are stated by this scenario? [Alice trimite email dintr-un client desktop configurat pentru SMTP. Bob citește mesajul livrat prin Gmail în browser. Ce protocoale către clienți sunt precizate de scenariu?]
 
-- **a)** SMTP to push the message between servers, then POP3/IMAP for Bob to retrieve it [SMTP pentru a trimite mesajul între servere, apoi POP3/IMAP pentru ca Bob să-l preia]
-- **b)** SMTP alone handles the complete delivery from Alice's client to Bob's inbox directly [SMTP singur gestionează livrarea completă de la clientul lui Alice la inbox-ul lui Bob]
-- **c)** HTTP is the only protocol needed since both clients use web-based email access [HTTP este singurul protocol necesar deoarece ambii clienți folosesc acces email bazat pe web]
-- **d)** FTP transfers the email file between the two mail servers in the delivery chain [FTP transferă fișierul de email între cele două servere de email din lanțul de livrare]
+- **a)** SMTP for Alice’s submission and HTTPS for Bob’s browser access. [SMTP pentru trimiterea lui Alice și HTTPS pentru accesul lui Bob în browser.]
+- **b)** FTP for submission and mandatory POP3 inside Bob’s browser. [FTP pentru trimitere și POP3 obligatoriu în browserul lui Bob.]
+- **c)** IMAP must be used between Gmail’s internal components. [IMAP trebuie folosit între componentele interne Gmail.]
 
 <details><summary>💡 Feedback</summary>
 
-SMTP is used for sending (push): Alice's MUA → her MTA → Bob's MTA. Bob retrieves the message using a pull protocol (POP3 or IMAP). Gmail's web interface uses HTTP/HTTPS for the user interface, but IMAP or proprietary protocols internally for mail access. [SMTP este utilizat pentru trimitere (push): MUA-ul lui Alice → MTA-ul ei → MTA-ul lui Bob. Bob preia mesajul folosind un protocol de tip pull (POP3 sau IMAP). Interfața web Gmail folosește HTTP/HTTPS pentru interfața utilizatorului, dar IMAP sau protocoale proprietare intern pentru accesul la email.]
+**Correct answer / Răspuns corect: a.** SMTP handles mail submission and inter-server relay. Browser access uses HTTPS. This scenario does not establish how the provider’s internal mail storage is accessed; do not infer IMAP or POP3 from webmail use. [SMTP gestionează submission și releul între servere. Accesul prin browser folosește HTTPS. Scenariul nu stabilește cum este accesată stocarea internă a furnizorului; folosirea webmailului nu permite deducerea IMAP sau POP3.]
 
 </details>
 
@@ -362,20 +359,18 @@ Serialisation (also called marshalling) converts in-memory objects to a wire for
 ---
 
 ### Q19. `N12.C05.Q01`
-**JSON-RPC Error vs HTTP Status / Eroare JSON-RPC versus starea HTTP**
 
-*Multiple Choice*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> A JSON-RPC 2.0 server receives a request for a method named "nonexistent". What HTTP status code does the response carry? [Un server JSON-RPC 2.0 primește o cerere pentru o metodă numită "nonexistent". Ce cod de stare HTTP poartă răspunsul?]
+The supplied S12 JSON-RPC HTTP server receives a valid request with id 1 for an unknown method. Which response does this implementation produce? [Serverul HTTP JSON-RPC S12 distribuit primește o cerere validă cu id 1 pentru o metodă necunoscută. Ce răspuns produce implementarea?]
 
-- **a)** 200 — the HTTP transport succeeded; the RPC error is inside the JSON response body [200 — transportul HTTP a reușit; eroarea RPC este în corpul răspunsului JSON]
-- **b)** 404 — the requested RPC method resource was not found on the server endpoint [404 — resursa metodei RPC cerute nu a fost găsită pe endpoint-ul serverului]
-- **c)** 500 — an internal server error occurred while dispatching the requested RPC method call [500 — a apărut o eroare internă a serverului în timpul expedierii apelului de metodă RPC solicitat]
-- **d)** 405 — the HTTP method used was not allowed by the JSON-RPC specification [405 — metoda HTTP utilizată nu a fost permisă de specificația JSON-RPC]
+- **a)** HTTP 200 with a JSON-RPC error object carrying code -32601 and id 1. [HTTP 200 cu un obiect de eroare JSON-RPC cu codul -32601 și id 1.]
+- **b)** HTTP 404 is mandated by JSON-RPC itself. [HTTP 404 este impus de JSON-RPC însuși.]
+- **c)** HTTP 405 because the JSON-RPC method name is an HTTP verb. [HTTP 405 deoarece numele metodei JSON-RPC este un verb HTTP.]
 
 <details><summary>💡 Feedback</summary>
 
-JSON-RPC separates transport-level from application-level errors. A method-not-found error returns HTTP 200 with a JSON body containing an error object (code -32601). HTTP status only reflects transport success. [JSON-RPC separă erorile la nivel de transport de erorile la nivel de aplicație. O eroare method-not-found returnează HTTP 200 cu un corp JSON conținând un obiect de eroare (codul -32601). Starea HTTP reflectă doar succesul transportului.]
+**Correct answer / Răspuns corect: a.** This is the HTTP mapping chosen by S12_Part01_Script_JSONRPC_Server.py. JSON-RPC 2.0 is transport-agnostic and does not prescribe HTTP status codes. The response preserves the valid request id and contains error, not result. [Aceasta este maparea HTTP aleasă de S12_Part01_Script_JSONRPC_Server.py. JSON-RPC 2.0 este independent de transport și nu prescrie codurile HTTP. Răspunsul păstrează id-ul valid și conține error, nu result.]
 
 </details>
 
@@ -525,7 +520,7 @@ gRPC uses HTTP/2, which provides multiplexing (multiple concurrent streams over 
 
 *Multiple Choice*
 
-> The calculator.proto in the Week 12 lab defines unary RPCs. gRPC also supports three additional communication patterns. Which set correctly lists them? [Fișierul calculator.proto din laboratorul Săptămânii 12 definește RPC-uri unare. gRPC suportă și alte trei modele de comunicare. Care set le listează corect?]
+> The S12_Part02_Config_Calculator.proto in the Week 12 lab defines unary RPCs. gRPC also supports three additional communication patterns. Which set correctly lists them? [Fișierul S12_Part02_Config_Calculator.proto din laboratorul Săptămânii 12 definește RPC-uri unare. gRPC suportă și alte trei modele de comunicare. Care set le listează corect?]
 
 - **a)** Server streaming, client streaming, and bidirectional streaming [Streaming de la server, streaming de la client și streaming bidirecțional]
 - **b)** Broadcast, multicast, and publish-subscribe event-driven messaging patterns [Broadcast, multicast și modele de mesagerie publish-subscribe bazate pe evenimente]
@@ -717,21 +712,19 @@ Blockchain platforms like Bitcoin and Ethereum use JSON-RPC as their standard AP
 
 ---
 
-### Q37. `N12.T00.Q07`
-**Scenario: Lab Container Investigation / Scenariu: Investigarea containerului de laborator**
+### Q37. `N12.T00.Q07` — Health-check scope / Domeniul verificării de sănătate
 
-*Multiple Choice*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> After running start_lab.py, a student cannot connect to port 6200. Using docker ps, they see the container is healthy. What is the most likely diagnosis? [După rularea start_lab.py, un student nu se poate conecta la portul 6200. Folosind docker ps, vede că containerul este sănătos. Care este cel mai probabil diagnostic?]
+A hypothetical container runs two services. Its health check tests only SMTP, while a separate RPC request fails. What can healthy status establish? [Un container ipotetic rulează două servicii. Health check-ul testează numai SMTP, în timp ce o cerere RPC separată eșuează. Ce poate stabili starea healthy?]
 
-- **a)** Health check only tests port 587 (SMTP) — the JSON-RPC process may have crashed independently [Verificarea de sănătate testează doar portul 587 (SMTP) — procesul JSON-RPC poate fi căzut independent]
-- **b)** Docker automatically assigns random ports so 6200 may have been remapped to a different number [Docker atribuie automat porturi aleatorii, deci 6200 poate fi fost remapat la un număr diferent]
-- **c)** The student needs to wait 60 seconds after startup because all services have a warm-up period [Studentul trebuie să aștepte 60 de secunde după pornire deoarece toate serviciile au o perioadă de încălzire]
-- **d)** Port 6200 is blocked by the Windows firewall and requires an administrator to open it [Portul 6200 este blocat de firewall-ul Windows și necesită un administrator pentru a-l deschide]
+- **a)** Only that the configured check passed; inspect the RPC process, listener, logs and path separately. [Doar că verificarea configurată a trecut; inspectați separat procesul RPC, listenerul, logurile și calea.]
+- **b)** Every service and every published port is working. [Orice serviciu și orice port publicat funcționează.]
+- **c)** The Windows firewall is certainly the cause. [Firewall-ul Windows este sigur cauza.]
 
 <details><summary>💡 Feedback</summary>
 
-The container may be healthy (SMTP health check passes on port 587) but the JSON-RPC service inside may have failed to start. Check docker logs dms for Python errors specific to the JSON-RPC server. [Containerul poate fi sănătos (verificarea de sănătate SMTP trece pe portul 587) dar serviciul JSON-RPC din interior poate să nu fi pornit. Verificați docker logs dms pentru erori Python specifice serverului JSON-RPC.]
+**Correct answer / Răspuns corect: a.** A health check has a defined scope. The scenario is independent of S12, which supplies standalone JSON-RPC and gRPC scripts rather than start_lab.py or a dms compose service. [Health check-ul are un domeniu definit. Scenariul este independent de S12, care furnizează scripturi JSON-RPC și gRPC autonome, nu start_lab.py sau un serviciu compose dms.]
 
 </details>
 
@@ -804,11 +797,11 @@ gRPC bidirectional streaming maintains a persistent connection where both client
 
 > A student runs the following command against the Week 12 JSON-RPC server and is confused by the result:
 
-curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost:6200   -H "Content-Type: application/json"   -d '{"jsonrpc":"2.0","method":"nonexistent","params":[],"id":1}'
+curl -s -o /dev/null -w "%{http_code}" -X POST http://127.0.0.1:8000   -H "Content-Type: application/json"   -d '{"jsonrpc":"2.0","method":"nonexistent","params":[],"id":1}'
 
 The output is 200 . The student concludes the call succeeded. What error exists in the student's reasoning? [Un student execută următoarea comandă pe serverul JSON-RPC din Săptămâna 12 și este confuz de rezultat:
 
-curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost:6200   -H "Content-Type: application/json"   -d '{"jsonrpc":"2.0","method":"nonexistent","params":[],"id":1}'
+curl -s -o /dev/null -w "%{http_code}" -X POST http://127.0.0.1:8000   -H "Content-Type: application/json"   -d '{"jsonrpc":"2.0","method":"nonexistent","params":[],"id":1}'
 
 Ieșirea este 200 . Studentul concluzionează că apelul a reușit. Ce eroare există în raționamentul studentului?]
 
@@ -826,20 +819,18 @@ JSON-RPC separates transport-level success from application-level success. HTTP 
 ---
 
 ### Q42. `N12.T00.Q13`
-**Protobuf Encoding Size Analysis / Analiza dimensiunii codificării Protobuf**
 
-*Multiple Choice*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> The Week 12 calculator.proto defines CalcRequest with two double fields (tags 1 and 2). A student captures traffic on port 6251 and measures the protobuf payload for Add(a=10.0, b=32.0) at 18 bytes. The equivalent JSON-RPC payload {"jsonrpc":"2.0","method":"add","params":[10,32],"id":1} on port 6200 is approximately 56 bytes. Which analysis correctly explains the size difference? [Fișierul calculator.proto din Săptămâna 12 definește CalcRequest cu două câmpuri double (tag-uri 1 și 2). Un student capturează traficul pe portul 6251 și măsoară sarcina utilă protobuf pentru Add(a=10.0, b=32.0) la 18 octeți. Sarcina utilă JSON-RPC echivalentă pe portul 6200 are aproximativ 56 de octeți. Care analiză explică corect diferența de dimensiune?]
+In the supplied S12 schema, why is the Protobuf body of `AddRequest(a=10, b=32)` four bytes? [În schema S12 distribuită, de ce corpul Protobuf al `AddRequest(a=10, b=32)` are patru octeți?]
 
-- **a)** Protobuf encodes only field tags (1 byte each) plus raw binary double values (8 bytes each), whilst JSON-RPC carries string keys, method name and framing characters as UTF-8 text [Protobuf codifică doar tag-uri de câmp (1 octet fiecare) plus valori double binare brute (8 octeți fiecare), în timp ce JSON-RPC transportă chei text, numele metodei și caractere de încadrare ca text UTF-8]
-- **b)** Protobuf applies gzip compression to the JSON payload before transmission, reducing the 56 bytes to 18 bytes through standard deflate encoding [Protobuf aplică compresie gzip asupra sarcinii utile JSON înainte de transmisie, reducând cei 56 de octeți la 18 prin codificare deflate standard]
-- **c)** JSON-RPC uses 56 bytes because HTTP headers are included in the payload measurement, whilst gRPC HTTP/2 headers are counted separately [JSON-RPC folosește 56 de octeți deoarece anteturile HTTP sunt incluse în măsurarea sarcinii utile, în timp ce anteturile HTTP/2 ale gRPC sunt contorizate separat]
-- **d)** Protobuf truncates floating-point values to integers when they have no decimal component, storing 10 and 32 as varints instead of 8-byte doubles [Protobuf trunchiază valorile în virgulă mobilă la întregi când nu au componentă zecimală, stocând 10 și 32 ca varint-uri în loc de double-uri de 8 octeți]
+- **a)** Two one-byte field keys and two one-byte positive int32 varints. [Două chei de câmp de un octet și două varint-uri int32 pozitive de un octet.]
+- **b)** Two eight-byte doubles automatically compressed by gzip. [Două double-uri de opt octeți comprimate automat cu gzip.]
+- **c)** The four bytes include all gRPC and HTTP/2 headers. [Cei patru octeți includ toate antetele gRPC și HTTP/2.]
 
 <details><summary>💡 Feedback</summary>
 
-Protocol Buffers use a compact binary encoding: each field is identified by a 1-byte field key (field_number
+**Correct answer / Răspuns corect: a.** The actual schema defines `int32 a = 1` and `int32 b = 2`. A field key is `(field_number << 3) | wire_type`. For int32 the wire type is 0, so the keys are 0x08 and 0x10. Positive values 10 and 32 each fit one varint byte: `08 0a 10 20`, four bytes in the Protobuf message body. Add gRPC’s five-byte message prefix and HTTP/2 framing separately when comparing transmitted traffic. [Schema reală definește `int32 a = 1` și `int32 b = 2`. Cheia unui câmp este `(field_number << 3) | wire_type`. Pentru int32, wire type este 0, deci cheile sunt 0x08 și 0x10. Valorile pozitive 10 și 32 încap fiecare într-un octet varint: `08 0a 10 20`, patru octeți în corpul mesajului Protobuf. Adăugați separat prefixul gRPC de cinci octeți și cadrajul HTTP/2 când comparați traficul transmis.]
 
 </details>
 
@@ -919,61 +910,55 @@ The MIME_TYPES dictionary in ex_8_01 maps ".html" to "text/html; charset=utf-8".
 
 ---
 
-### Q46. `N12.S01.Q01`
-**Lab SMTP Port / Portul SMTP din laborator**
+### Q46. `N12.S01.Q01` — Port 587 and bind permissions / Portul 587 și permisiunile bind
 
-*Multiple Choice*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> In the Week 12 Docker lab environment, on which port does the educational SMTP server listen? [În mediul Docker al laboratorului Săptămânii 12, pe ce port ascultă serverul SMTP educațional?]
+On a conventional Linux configuration with the unprivileged port threshold at 1024, is TCP port 587 automatically unprivileged? [Într-o configurație Linux convențională cu pragul porturilor neprivilegiate la 1024, portul TCP 587 este automat neprivilegiat?]
 
-- **a)** 587 — an unprivileged educational port explicitly mapped in docker-compose.yml [587 — un port educațional neprivilegiat mapat explicit în docker-compose.yml]
-- **b)** 25 — the default SMTP relay port for production mail server deployments [25 — portul implicit de releu SMTP pentru implementări de servere de email în producție]
-- **c)** 587 — the submission port requiring STARTTLS and user authentication [587 — portul de trimitere care necesită STARTTLS și autentificarea utilizatorului]
-- **d)** 9000 — reserved for Portainer container management in this environment [9000 — rezervat pentru managementul containerelor Portainer în acest mediu]
+- **a)** No. It is below 1024; binding needs the configured privilege/capability or a changed namespace policy. [Nu. Este sub 1024; bind necesită privilegiul/capabilitatea configurată sau o politică modificată a namespace-ului.]
+- **b)** Yes, because it is used for education. [Da, deoarece este folosit pentru educație.]
+- **c)** Yes, because all SMTP ports are unprivileged. [Da, deoarece toate porturile SMTP sunt neprivilegiate.]
 
 <details><summary>💡 Feedback</summary>
 
-The lab SMTP server runs on port 587 (an unprivileged port for educational use). Port 25 is the standard SMTP relay port but requires root privileges and is often blocked by ISPs. [Serverul SMTP din laborator rulează pe portul 587 (un port neprivilegiat pentru uz educațional). Portul 25 este portul standard de releu SMTP, dar necesită privilegii root și este adesea blocat de ISP-uri.]
+**Correct answer / Răspuns corect: a.** Port assignment and permission policy are different. CAP_NET_BIND_SERVICE and namespace settings can change who may bind. S12 does not distribute an SMTP Docker service; SMTP questions are theory examples. [Atribuirea portului și politica de permisiuni sunt diferite. CAP_NET_BIND_SERVICE și setările namespace-ului pot schimba cine poate face bind. S12 nu distribuie un serviciu Docker SMTP; întrebările SMTP sunt exemple teoretice.]
 
 </details>
 
 ---
 
-### Q47. `N12.S01.Q02`
-**Lab Service Ports / Porturile serviciilor din laborator**
+### Q47. `N12.S01.Q02` — S12 server ports / Porturile serverelor S12
 
-*Multiple Choice*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> Match the Week 12 lab service ports: SMTP, JSON-RPC, XML-RPC, gRPC. Which mapping is correct? [Asociați porturile serviciilor din laboratorul Săptămânii 12: SMTP, JSON-RPC, XML-RPC, gRPC. Care mapare este corectă?]
+What are the default ports of the standalone S12 JSON-RPC and gRPC servers? [Care sunt porturile implicite ale serverelor autonome JSON-RPC și gRPC S12?]
 
-- **a)** SMTP=587, JSON-RPC=6200, XML-RPC=6201, gRPC=6251 [SMTP=587, JSON-RPC=6200, XML-RPC=6201, gRPC=6251]
-- **b)** SMTP=25, JSON-RPC=8080, XML-RPC=8081, gRPC=50051 [SMTP=25, JSON-RPC=8080, XML-RPC=8081, gRPC=50051]
-- **c)** SMTP=587, JSON-RPC=6201, XML-RPC=6200, gRPC=6251 [SMTP=587, JSON-RPC=6201, XML-RPC=6200, gRPC=6251]
-- **d)** SMTP=587, JSON-RPC=6200, XML-RPC=6201, gRPC=9000 [SMTP=587, JSON-RPC=6200, XML-RPC=6201, gRPC=9000]
+- **a)** JSON-RPC: 8000; gRPC: 50051
+- **b)** JSON-RPC: 6200; gRPC: 6251
+- **c)** JSON-RPC: 587; gRPC: 465
 
 <details><summary>💡 Feedback</summary>
 
-From docker-compose.yml: SMTP=587, JSON-RPC=6200, XML-RPC=6201, gRPC=6251. Port 9000 is reserved for Portainer and must never be used by lab services. [Din docker-compose.yml: SMTP=587, JSON-RPC=6200, XML-RPC=6201, gRPC=6251. Portul 9000 este rezervat pentru Portainer și nu trebuie folosit niciodată de serviciile laboratorului.]
+**Correct answer / Răspuns corect: a.** The JSON-RPC server defaults to 127.0.0.1:8000 and accepts --host/--port. The gRPC server uses 50051. A Mininet instructor scenario may explicitly choose JSON-RPC port 8080; use its stated endpoint. [Serverul JSON-RPC folosește implicit 127.0.0.1:8000 și acceptă --host/--port. Serverul gRPC folosește 50051. Un scenariu Mininet al profesorului poate alege explicit JSON-RPC pe 8080; folosiți endpointul precizat.]
 
 </details>
 
 ---
 
-### Q48. `N12.S01.Q04`
-**Docker Container Inspection / Inspectarea containerului Docker**
+### Q48. `N12.S01.Q04` — Interactive container process / Proces interactiv în container
 
-*Multiple Choice*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> You need to open an interactive shell inside the running dms container to debug an issue. Which command achieves this? [Trebuie să deschideți un shell interactiv în interiorul containerului dms în execuție pentru a depana o problemă. Ce comandă realizează acest lucru?]
+Assume a running example container is named demo and has /bin/sh installed. Which command starts a new interactive shell process in it? [Presupuneți că un container exemplu rulează, se numește demo și are /bin/sh instalat. Ce comandă pornește în el un nou proces shell interactiv?]
 
-- **a)** docker exec -it dms /bin/bash — opens an interactive shell inside the running container [docker exec -it dms /bin/bash — deschide un shell interactiv în containerul care rulează]
-- **b)** docker run -it dms /bin/bash — starts a brand new container instance from the same image [docker run -it dms /bin/bash — pornește o instanță de container complet nouă din aceeași imagine]
-- **c)** docker attach dms — reconnects to the main process but not a new shell [docker attach dms — se reconectează la procesul principal dar nu un shell nou]
-- **d)** docker start -i dms — restarts a stopped container with interactive mode [docker start -i dms — repornește un container oprit cu mod interactiv]
+- **a)** `docker exec -it demo /bin/sh`
+- **b)** `docker run -it demo /bin/sh`
+- **c)** `docker logs demo`
 
 <details><summary>💡 Feedback</summary>
 
-The docker exec -it command attaches to a running container with interactive mode (-i) and a pseudo-TTY (-t). The container name dms is defined in docker-compose.yml. This does not restart the container — it opens a new process inside the existing one. [Comanda docker exec -it se atașează la un container în execuție cu mod interactiv (-i) și un pseudo-TTY (-t). Numele containerului dms este definit în docker-compose.yml. Aceasta nu repornește containerul — deschide un proces nou în interiorul celui existent.]
+**Correct answer / Răspuns corect: a.** exec starts a new process in an existing running container. run creates a container from an image. This is a self-contained Docker question, not a claim that S12 provides a demo/dms container. [exec pornește un proces nou într-un container existent în execuție. run creează un container dintr-o imagine. Acesta este un item Docker autonom, nu afirmația că S12 furnizează un container demo/dms.]
 
 </details>
 
@@ -986,33 +971,31 @@ The docker exec -it command attaches to a running container with interactive mod
 
 > Which curl command correctly invokes the add method with parameters [10, 32] on the Week 12 JSON-RPC server? [Care comandă curl invocă corect metoda add cu parametrii [10, 32] pe serverul JSON-RPC din Săptămâna 12?]
 
-- **a)** curl -X POST http://localhost:6200 -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","method":"add","params":[10,32],"id":1}' [curl -X POST http://localhost:6200 -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","method":"add","params":[10,32],"id":1}']
-- **b)** curl -X GET http://localhost:6200/add?a=10&b=32 — uses REST-style query parameters to invoke the server add method [curl -X GET http://localhost:6200/add?a=10&b=32 — folosește parametri de interogare în stil REST pentru a invoca metoda de adunare de pe server]
+- **a)** curl -X POST http://127.0.0.1:8000 -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","method":"add","params":[10,32],"id":1}' [curl -X POST http://127.0.0.1:8000 -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","method":"add","params":[10,32],"id":1}']
+- **b)** curl -X GET http://127.0.0.1:8000/add?a=10&b=32 — uses REST-style query parameters to invoke the server add method [curl -X GET http://127.0.0.1:8000/add?a=10&b=32 — folosește parametri de interogare în stil REST pentru a invoca metoda de adunare de pe server]
 - **c)** curl -X POST http://localhost:6201 -H "Content-Type: text/xml" -d 'add...' [curl -X POST http://localhost:6201 -H "Content-Type: text/xml" -d 'add...']
 
 <details><summary>💡 Feedback</summary>
 
-The correct call uses POST, Content-Type: application/json, and a valid JSON-RPC 2.0 payload with "jsonrpc":"2.0", "method":"add", "params":[10,32], "id":1 sent to http://localhost:6200. [Apelul corect folosește POST, Content-Type: application/json și un corp JSON-RPC 2.0 valid cu "jsonrpc":"2.0", "method":"add", "params":[10,32], "id":1 trimis la http://localhost:6200.]
+The correct call uses POST, Content-Type: application/json, and a valid JSON-RPC 2.0 payload with "jsonrpc":"2.0", "method":"add", "params":[10,32], "id":1 sent to http://127.0.0.1:8000. [Apelul corect folosește POST, Content-Type: application/json și un corp JSON-RPC 2.0 valid cu "jsonrpc":"2.0", "method":"add", "params":[10,32], "id":1 trimis la http://127.0.0.1:8000.]
 
 </details>
 
 ---
 
-### Q50. `N12.S02.Q02`
-**Division by Zero Error Code / Codul de eroare la împărțirea cu zero**
+### Q50. `N12.S02.Q02` — S12 arithmetic error / Eroare aritmetică S12
 
-*Multiple Choice*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> When calling divide(10, 0) on the Week 12 JSON-RPC server, which error code appears in the response? [La apelarea divide(10, 0) pe serverul JSON-RPC din Săptămâna 12, ce cod de eroare apare în răspuns?]
+In the supplied S12 JSON-RPC server, what error is returned for a valid request with id 1, method evaluate and params ["10/0"]? [În serverul JSON-RPC S12 distribuit, ce eroare este returnată pentru o cerere validă cu id 1, metoda evaluate și params ["10/0"]?]
 
-- **a)** -32000 — a server-defined application error code for division by zero [-32000 — un cod de eroare de aplicație definit de server pentru împărțirea cu zero]
-- **b)** -32601 — the standard JSON-RPC Method not found error reserved by specification [-32601 — eroarea standard JSON-RPC Method not found rezervată de specificație]
-- **c)** -32700 — the Parse error code indicating malformed JSON in the request [-32700 — codul Parse error indicând JSON malformat în cerere]
-- **d)** -32603 — the Internal error code for unhandled exceptions on the server [-32603 — codul Internal error pentru excepții netratate pe server]
+- **a)** -32602 — Invalid params / Parametri invalizi
+- **b)** -32601 — Method not found / Metodă inexistentă
+- **c)** -32700 — Parse error / Eroare de parsare
 
 <details><summary>💡 Feedback</summary>
 
-Division by zero is a server-defined application error using code -32000. Standard error codes (-32700 through -32603) are reserved by JSON-RPC specification. Server-defined errors use the range -32000 to -32099. [Împărțirea cu zero este o eroare de aplicație definită de server folosind codul -32000. Codurile standard de eroare (-32700 până la -32603) sunt rezervate de specificația JSON-RPC. Erorile definite de server folosesc intervalul -32000 până la -32099.]
+**Correct answer / Răspuns corect: a.** This implementation treats an unsupported or invalid arithmetic expression, including division by zero, as Invalid params and preserves id 1. JSON-RPC does not mandate a universal division-by-zero application code; inspect the server contract. [Implementarea tratează o expresie aritmetică nepermisă sau invalidă, inclusiv împărțirea la zero, drept Invalid params și păstrează id 1. JSON-RPC nu impune un cod universal de aplicație pentru împărțirea la zero; inspectați contractul serverului.]
 
 </details>
 
@@ -1039,20 +1022,18 @@ The server returns HTTP 204 No Content with an empty body. Since the request has
 ---
 
 ### Q52. `N12.S02.Q04`
-**Available JSON-RPC Methods / Metodele JSON-RPC disponibile**
 
-*Multiple Choice*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> The Week 12 JSON-RPC server exposes several methods. Which is NOT a valid method on this server? [Serverul JSON-RPC din Săptămâna 12 expune mai multe metode. Care NU este o metodă validă pe acest server?]
+Which method is absent from the supplied S12 JSON-RPC server? [Ce metodă lipsește din serverul JSON-RPC S12 distribuit?]
 
-- **a)** power — the exponentiation operation is not implemented in the Week 12 calculator server [power — operația de exponențiere nu este implementată în serverul calculator din Săptămâna 12]
-- **b)** get_stats — returns call counts, uptime, and total number of method invocations [get_stats — returnează contoare de apeluri, timpul de funcționare și numărul total de invocări]
-- **c)** echo — returns its input parameter unchanged for diagnostic and testing purposes [echo — returnează parametrul de intrare neschimbat pentru scopuri de diagnostic și testare]
-- **d)** sort_list — sorts a given list of items with an optional reverse order parameter [sort_list — sortează o listă dată de elemente cu un parametru opțional de ordine inversă]
+- **a)** get_stats
+- **b)** evaluate
+- **c)** add
 
 <details><summary>💡 Feedback</summary>
 
-The server supports: add, subtract, multiply, divide, echo, sort_list, get_time, get_server_info, get_stats. There is no power or exponentiation method implemented. [Serverul suportă: add, subtract, multiply, divide, echo, sort_list, get_time, get_server_info, get_stats. Nu există o metodă power sau de exponențiere implementată.]
+**Correct answer / Răspuns corect: a.** The local example supports evaluate and add. Its deliberately small interface has no get_stats, echo, sort_list or standalone divide method. [Exemplul local suportă evaluate și add. Interfața sa deliberat mică nu are get_stats, echo, sort_list sau o metodă divide separată.]
 
 </details>
 
@@ -1063,7 +1044,7 @@ The server supports: add, subtract, multiply, divide, echo, sort_list, get_time,
 
 *Multiple Choice*
 
-> When sending an XML-RPC request using curl to the lab server on port 6201, what Content-Type header must be specified? [Când trimiteți o cerere XML-RPC folosind curl către serverul de laborator pe portul 6201, ce antet Content-Type trebuie specificat?]
+> When sending an XML-RPC request using curl to a hypothetical XML-RPC endpoint, what Content-Type header must be specified? [Când trimiteți o cerere XML-RPC folosind curl către un endpoint XML-RPC ipotetic, ce antet Content-Type trebuie specificat?]
 
 - **a)** text/xml — XML-RPC payloads are XML documents requiring the XML media type [text/xml — corpurile XML-RPC sunt documente XML care necesită tipul media XML]
 - **b)** application/json — all RPC protocols share the same JSON-based content type [application/json — toate protocoalele RPC partajează același tip de conținut bazat pe JSON]
@@ -1072,145 +1053,134 @@ The server supports: add, subtract, multiply, divide, echo, sort_list, get_time,
 
 <details><summary>💡 Feedback</summary>
 
-XML-RPC uses XML serialisation, so the Content-Type must be text/xml. This differs from JSON-RPC which uses application/json. The lab's XML-RPC server listens on port 6201 as configured in docker-compose.yml. [XML-RPC folosește serializare XML, deci Content-Type trebuie să fie text/xml. Aceasta diferă de JSON-RPC care folosește application/json. Serverul XML-RPC al laboratorului ascultă pe portul 6201, configurat în docker-compose.yml.]
+XML-RPC uses XML serialisation, so the Content-Type must be text/xml. This differs from JSON-RPC which uses application/json. This is a protocol-theory question; S12 does not supply this XML-RPC server or a compose file. [XML-RPC folosește serializare XML, deci Content-Type trebuie să fie text/xml. Aceasta diferă de JSON-RPC care folosește application/json. Acesta este un item teoretic de protocol; S12 nu furnizează acest server XML-RPC sau un fișier compose.]
 
 </details>
 
 ---
 
 ### Q54. `N12.S02.Q06`
-**Python smtplib Usage in Lab / Utilizarea smtplib Python în laborator**
 
-*Multiple Choice*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> In the lab, the Python smtplib module sends email to the SMTP server. Given the code smtplib.SMTP("localhost", 587) , what does the port number 587 represent? [În laborator, modulul Python smtplib trimite email către serverul SMTP. Dat fiind codul smtplib.SMTP("localhost", 587) , ce reprezintă numărul de port 587?]
+In `smtplib.SMTP("localhost", 587)`, what does 587 identify, and what does this call alone do? [În `smtplib.SMTP("localhost", 587)`, ce identifică 587 și ce face singur acest apel?]
 
-- **a)** The unprivileged lab SMTP port — production servers use 25, 587, or 465 instead [Portul SMTP de laborator neprivilegiat — serverele de producție folosesc 25, 587 sau 465]
-- **b)** The SMTP submission port standardised by RFC 6409 for authenticated client access [Portul de submission SMTP standardizat de RFC 6409 pentru accesul autentificat al clientului]
-- **c)** A fallback port used when the default SMTP port 25 is blocked by a firewall [Un port de rezervă folosit când portul SMTP implicit 25 este blocat de un paravan]
+- **a)** The destination submission port; establishing the connection alone neither starts TLS nor authenticates. [Portul destinație de submission; stabilirea conexiunii singură nu pornește TLS și nu autentifică.]
+- **b)** An unprivileged educational port that automatically encrypts and authenticates. [Un port educațional neprivilegiat care criptează și autentifică automat.]
+- **c)** The source port of the local client. [Portul sursă al clientului local.]
 
 <details><summary>💡 Feedback</summary>
 
-Port 587 is the unprivileged lab SMTP port defined in docker-compose.yml. Production SMTP uses port 25 (relay), 587 (submission), or 465 (SMTPS). The lab uses 587 because ports below 1024 require root privileges. [Portul 587 este portul SMTP de laborator neprivilegiat definit în docker-compose.yml. SMTP-ul de producție folosește portul 25 (relay), 587 (submission) sau 465 (SMTPS). Laboratorul folosește 587 deoarece porturile sub 1024 necesită privilegii root.]
+**Correct answer / Răspuns corect: a.** Use the server’s configured submission policy. A STARTTLS client needs the explicit starttls flow with certificate verification and authentication where required. Implicit TLS submission on 465 uses SMTP_SSL. [Folosiți politica de submission configurată pe server. Un client STARTTLS necesită fluxul explicit starttls cu verificarea certificatului și autentificare când este cerută. Submission cu TLS implicit pe 465 folosește SMTP_SSL.]
 
 </details>
 
 ---
 
 ### Q55. `N12.S03.Q01`
-**Proto File Field Tags / Etichetele de câmp din fișierul .proto**
 
-*Multiple Choice*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> In the Week 12 calculator.proto, the CalcRequest message defines double a = 1 and double b = 2. What do the numbers 1 and 2 represent? [În calculator.proto din Săptămâna 12, mesajul CalcRequest definește double a = 1 și double b = 2. Ce reprezintă numerele 1 și 2?]
+The supplied `S12_Part02_Config_Calculator.proto` defines `int32 a = 1; int32 b = 2;` in AddRequest. What are 1 and 2? [Fișierul distribuit `S12_Part02_Config_Calculator.proto` definește `int32 a = 1; int32 b = 2;` în AddRequest. Ce reprezintă 1 și 2?]
 
-- **a)** Field tags — numeric identifiers used in the binary wire format instead of string keys [Etichete de câmp — identificatori numerici utilizați în formatul binar de rețea în loc de chei string]
-- **b)** Default values assigned to each field when the sender omits them from the message [Valori implicite atribuite fiecărui câmp când expeditorul le omite din mesaj]
-- **c)** Version numbers indicating which protocol revision introduced each individual field definition [Numere de versiune care indică ce revizie de protocol a introdus fiecare definiție individuală de câmp]
-- **d)** Array indices specifying the memory position where each value will be stored [Indici de tablou specificând poziția în memorie unde fiecare valoare va fi stocată]
+- **a)** Field numbers used with wire types to encode field keys. [Numere de câmp folosite împreună cu wire types pentru codificarea cheilor.]
+- **b)** Default operand values. [Valorile implicite ale operanzilor.]
+- **c)** Byte lengths of the operands. [Lungimile în octeți ale operanzilor.]
 
 <details><summary>💡 Feedback</summary>
 
-The numbers are field tags (identifiers) used in the binary wire format. Unlike JSON which uses string keys, protobuf uses these numeric tags with wire types for compact encoding. Field 1 produces key byte 0x09 (for 64-bit wire type), field 2 produces 0x11. [Numerele sunt etichete de câmp (identificatori) utilizate în formatul binar de rețea. Spre deosebire de JSON care folosește chei de tip string, protobuf folosește aceste etichete numerice cu tipuri de codificare pentru encodare compactă. Câmpul 1 produce octetul cheie 0x09 (pentru tipul 64-bit), câmpul 2 produce 0x11.]
+**Correct answer / Răspuns corect: a.** The actual schema defines `int32 a = 1` and `int32 b = 2`. A field key is `(field_number << 3) | wire_type`. For int32 the wire type is 0, so the keys are 0x08 and 0x10. Positive values 10 and 32 each fit one varint byte: `08 0a 10 20`, four bytes in the Protobuf message body. Add gRPC’s five-byte message prefix and HTTP/2 framing separately when comparing transmitted traffic. [Schema reală definește `int32 a = 1` și `int32 b = 2`. Cheia unui câmp este `(field_number << 3) | wire_type`. Pentru int32, wire type este 0, deci cheile sunt 0x08 și 0x10. Valorile pozitive 10 și 32 încap fiecare într-un octet varint: `08 0a 10 20`, patru octeți în corpul mesajului Protobuf. Adăugați separat prefixul gRPC de cinci octeți și cadrajul HTTP/2 când comparați traficul transmis.]
 
 </details>
 
 ---
 
 ### Q56. `N12.S03.Q02`
-**Protobuf Encoded Size / Dimensiunea codificată protobuf**
 
-*Multiple Choice*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> CalcRequest(a=10.0, b=32.0) encodes to approximately how many bytes in Protocol Buffers? [CalcRequest(a=10.0, b=32.0) se codifică la aproximativ câți octeți în Protocol Buffers?]
+How many bytes does the Protobuf body `AddRequest(a=10, b=32)` occupy under the supplied int32 schema, excluding gRPC and HTTP/2 framing? [Câți octeți ocupă corpul Protobuf `AddRequest(a=10, b=32)` în schema int32 distribuită, excluzând cadrajul gRPC și HTTP/2?]
 
-- **a)** 18 bytes — two field keys (1 byte each) plus two IEEE 754 doubles (8 bytes each) [18 octeți — două chei de câmp (1 octet fiecare) plus două double-uri IEEE 754 (8 octeți fiecare)]
-- **b)** 56 bytes — matching the equivalent JSON-RPC payload size for identical operation [56 octeți — egal cu dimensiunea corpului JSON-RPC echivalent pentru aceeași operație]
-- **c)** 195 bytes — similar overhead to XML-RPC due to framing and metadata requirements [195 octeți — overhead similar cu XML-RPC din cauza cerințelor de încadrare și metadate]
-- **d)** 4 bytes — only the two operand values without any field identification overhead [4 octeți — doar cele două valori operand fără niciun overhead de identificare a câmpurilor]
+- **a)** 4
+- **b)** 18
+- **c)** 56
+- **d)** 0
 
 <details><summary>💡 Feedback</summary>
 
-Each double occupies 8 bytes (IEEE 754), and each field key is 1 byte (field_number
+**Correct answer / Răspuns corect: a.** The actual schema defines `int32 a = 1` and `int32 b = 2`. A field key is `(field_number << 3) | wire_type`. For int32 the wire type is 0, so the keys are 0x08 and 0x10. Positive values 10 and 32 each fit one varint byte: `08 0a 10 20`, four bytes in the Protobuf message body. Add gRPC’s five-byte message prefix and HTTP/2 framing separately when comparing transmitted traffic. [Schema reală definește `int32 a = 1` și `int32 b = 2`. Cheia unui câmp este `(field_number << 3) | wire_type`. Pentru int32, wire type este 0, deci cheile sunt 0x08 și 0x10. Valorile pozitive 10 și 32 încap fiecare într-un octet varint: `08 0a 10 20`, patru octeți în corpul mesajului Protobuf. Adăugați separat prefixul gRPC de cinci octeți și cadrajul HTTP/2 când comparați traficul transmis.]
 
 </details>
 
 ---
 
-### Q57. `N12.S03.Q03`
-**gRPC Error for Division by Zero / Eroarea gRPC la împărțirea cu zero**
+### Q57. `N12.S03.Q03` — Supplied gRPC service / Serviciul gRPC distribuit
 
-*Multiple Choice*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> In the Week 12 gRPC server, calling Divide with b=0 triggers which gRPC status code? [Pe serverul gRPC din Săptămâna 12, apelarea Divide cu b=0 declanșează ce cod de stare gRPC?]
+Which methods are declared in the unmodified S12 Calculator service schema? [Ce metode sunt declarate în schema serviciului Calculator S12 nemodificată?]
 
-- **a)** INVALID_ARGUMENT — the gRPC status code indicating the input parameters were invalid [INVALID_ARGUMENT — codul de stare gRPC indicând că parametrii de intrare au fost invalizi]
-- **b)** INTERNAL — a generic server error code used when no specific code applies [INTERNAL — un cod generic de eroare a serverului folosit când nu se aplică niciun cod specific]
-- **c)** NOT_FOUND — the error code for requests targeting a non-existent RPC method [NOT_FOUND — codul de eroare pentru cereri care vizează o metodă RPC inexistentă]
-- **d)** UNAVAILABLE — signalling that the gRPC server could not process the request [UNAVAILABLE — semnalând că serverul gRPC nu a putut procesa cererea]
+- **a)** Add and Multiply / Add și Multiply
+- **b)** Add and Divide / Add și Divide
+- **c)** Divide only / Numai Divide
 
 <details><summary>💡 Feedback</summary>
 
-The server calls context.abort(grpc.StatusCode.INVALID_ARGUMENT, 'Division by zero'). Unlike JSON-RPC which uses numeric error codes in the response body, gRPC uses its own status code system separate from HTTP. [Serverul apelează context.abort(grpc.StatusCode.INVALID_ARGUMENT, 'Division by zero'). Spre deosebire de JSON-RPC care folosește coduri numerice de eroare în corpul răspunsului, gRPC folosește propriul sistem de coduri de stare separat de HTTP.]
+**Correct answer / Răspuns corect: a.** Power is an extension to add to the .proto and regenerate. There is no Divide method in the supplied schema, so a question about its division-by-zero implementation would describe a different server. gRPC error behaviour must be tied to a method that actually exists. [Power este o extensie de adăugat în .proto și apoi de regenerat. Schema distribuită nu are metoda Divide, deci un item despre implementarea împărțirii la zero ar descrie alt server. Comportamentul erorilor gRPC trebuie asociat unei metode care există.]
 
 </details>
 
 ---
 
-### Q58. `N12.S03.Q04`
-**grpcurl Service Discovery / Descoperirea serviciilor cu grpcurl**
+### Q58. `N12.S03.Q04` — gRPC descriptor and endpoint / Descriptorul și endpointul gRPC
 
-*Multiple Choice*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> To list all gRPC services exposed by the lab server, a student uses grpcurl. Which flag is required when connecting to the lab's unencrypted gRPC endpoint on port 6251? [Pentru a lista toate serviciile gRPC expuse de serverul de laborator, un student folosește grpcurl. Ce flag este necesar la conectarea la endpoint-ul gRPC necriptat al laboratorului pe portul 6251?]
+The supplied gRPC server uses plaintext HTTP/2 and does not enable server reflection. From S12/2_protobuf, which grpcurl command can use the supplied descriptor to call Add after the server is running? [Serverul gRPC distribuit folosește HTTP/2 necriptat și nu activează server reflection. Din S12/2_protobuf, ce comandă grpcurl poate folosi descriptorul distribuit pentru a apela Add după pornirea serverului?]
 
-- **a)** -plaintext — disables TLS for unencrypted HTTP/2 connections to the lab server [-plaintext — dezactivează TLS pentru conexiuni HTTP/2 necriptate la serverul de laborator]
-- **b)** -insecure — skips certificate verification but still attempts a TLS handshake [-insecure — omite verificarea certificatului dar tot încearcă un handshake TLS]
-- **c)** -proto calculator.proto — loads the .proto file before connecting to the server [-proto calculator.proto — încarcă fișierul .proto înainte de conectarea la server]
-- **d)** -v — enables verbose output which automatically detects the connection type [-v — activează ieșirea detaliată care detectează automat tipul conexiunii]
+- **a)** `grpcurl -plaintext -import-path . -proto S12_Part02_Config_Calculator.proto -d '{"a":10,"b":32}' localhost:50051 seminar12.Calculator/Add`
+- **b)** `grpcurl localhost:6251 list`
+- **c)** `curl http://localhost:50051/Add`
 
 <details><summary>💡 Feedback</summary>
 
-The -plaintext flag tells grpcurl to use an unencrypted HTTP/2 connection. Without it, grpcurl defaults to TLS, which fails against the lab's insecure_channel. The full command is: grpcurl -plaintext localhost:6251 list. [Flagul -plaintext indică grpcurl să folosească o conexiune HTTP/2 necriptată. Fără acesta, grpcurl folosește implicit TLS, care eșuează cu insecure_channel al laboratorului. Comanda completă este: grpcurl -plaintext localhost:6251 list.]
+**Correct answer / Răspuns corect: a.** The optional grpcurl tool needs -plaintext for this laboratory endpoint and the .proto because reflection is not enabled. The method path includes package seminar12. The ordinary course route remains the generated Python client. [Instrumentul opțional grpcurl necesită -plaintext pentru acest endpoint de laborator și .proto deoarece reflection nu este activat. Calea metodei include pachetul seminar12. Ruta obișnuită a cursului rămâne clientul Python generat.]
 
 </details>
 
 ---
 
-### Q59. `N12.S04.Q02`
-**Wireshark Filter for SMTP / Filtrul Wireshark pentru SMTP**
+### Q59. `N12.S04.Q02` — Submission display filter / Filtru de afișare submission
 
-*Multiple Choice*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> Which Wireshark display filter isolates only SMTP traffic from the Week 12 lab? [Ce filtru de afișare Wireshark izolează doar traficul SMTP din laboratorul Săptămânii 12?]
+A hypothetical SMTP submission service is known to listen on TCP 587. Which Wireshark display filter selects traffic to or from that port? [Se știe că un serviciu SMTP submission ipotetic ascultă pe TCP 587. Ce filtru de afișare Wireshark selectează traficul către sau de la acel port?]
 
-- **a)** tcp.port == 587 — filtering by the lab's educational SMTP server port [tcp.port == 587 — filtrare după portul serverului SMTP educațional al laboratorului]
-- **b)** smtp — the protocol dissector filter that works only on standard port 25 [smtp — filtrul disector de protocol care funcționează doar pe portul standard 25]
-- **c)** http contains "SMTP" — searching HTTP payloads for the SMTP protocol keyword [http contains "SMTP" — căutare în corpurile HTTP pentru cuvântul cheie al protocolului SMTP]
-- **d)** tcp.port == 6200 — the port reserved for JSON-RPC traffic in this laboratory [tcp.port == 6200 — portul rezervat pentru traficul JSON-RPC în acest laborator]
+- **a)** `tcp.port == 587`
+- **b)** `udp.port == 587`
+- **c)** `tcp port 587`
 
 <details><summary>💡 Feedback</summary>
 
-The filter tcp.port == 587 captures all traffic to/from the educational SMTP server. The generic smtp filter may not work on non-standard ports. Port-based filtering is the most reliable approach for lab configurations. [Filtrul tcp.port == 587 capturează tot traficul către/de la serverul SMTP educațional. Filtrul generic smtp poate să nu funcționeze pe porturi non-standard. Filtrarea bazată pe port este cea mai fiabilă abordare pentru configurațiile de laborator.]
+**Correct answer / Răspuns corect: a.** This is a port filter, not proof that every selected payload is plaintext SMTP. STARTTLS encrypts subsequent application traffic. The BPF form tcp port 587 belongs to capture filters, not display filters. [Acesta este un filtru de port, nu dovada că orice payload selectat este SMTP în clar. STARTTLS criptează traficul de aplicație ulterior. Forma BPF tcp port 587 aparține filtrelor de captură, nu de afișare.]
 
 </details>
 
 ---
 
-### Q60. `N12.S04.Q03`
-**Combined Traffic Filter / Filtru combinat de trafic**
+### Q60. `N12.S04.Q03` — S12 combined display filter / Filtru de afișare combinat S12
 
-*Multiple Choice*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> To capture all Week 12 protocol traffic simultaneously in Wireshark, which display filter should you use? [Pentru a captura simultan tot traficul de protocol din Săptămâna 12 în Wireshark, ce filtru de afișare trebuie să folosiți?]
+Using the default standalone S12 server ports, which display filter selects JSON-RPC and gRPC traffic together? [Folosind porturile implicite ale serverelor autonome S12, ce filtru de afișare selectează împreună traficul JSON-RPC și gRPC?]
 
-- **a)** tcp.port in {587, 6200, 6201, 6251} — covers all four lab service ports [tcp.port in {587, 6200, 6201, 6251} — acoperă toate cele patru porturi de servicii de laborator]
-- **b)** tcp.port == 587 || tcp.port == 6200 || tcp.port == 9000 — includes Portainer port [tcp.port == 587 || tcp.port == 6200 || tcp.port == 9000 — include portul Portainer]
-- **c)** http — captures only HTTP-based protocols and misses SMTP and gRPC entirely [http — capturează doar protocoale bazate pe HTTP și omite complet SMTP și gRPC]
+- **a)** `tcp.port == 8000 || tcp.port == 50051`
+- **b)** `udp.port == 8000 || udp.port == 50051`
+- **c)** `tcp.port == 587 || tcp.port == 6251`
 
 <details><summary>💡 Feedback</summary>
 
-The filter tcp.port in {587, 6200, 6201, 6251} captures all four lab services in a single view: SMTP (587), JSON-RPC (6200), XML-RPC (6201), and gRPC (6251). [Filtrul tcp.port in {587, 6200, 6201, 6251} capturează toate cele patru servicii de laborator într-o singură vedere: SMTP (587), JSON-RPC (6200), XML-RPC (6201) și gRPC (6251).]
+**Correct answer / Răspuns corect: a.** These are the current script defaults. If the instructor changes an endpoint, change the filter accordingly. Port filtering selects candidate traffic and does not replace protocol decoding. [Acestea sunt valorile implicite ale scripturilor actuale. Dacă profesorul schimbă un endpoint, adaptați filtrul. Filtrarea după port selectează trafic candidat și nu înlocuiește decodarea protocolului.]
 
 </details>
 

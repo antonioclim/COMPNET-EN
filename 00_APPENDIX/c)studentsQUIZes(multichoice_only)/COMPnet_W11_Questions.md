@@ -107,41 +107,39 @@ L7 operates at the application layer and can parse HTTP headers, cookies, URI pa
 
 ---
 
-### Q6. `N11.C02.Q01`
-**First Request to Crashed Backend / Prima cerere către un server căzut**
+### Q6. `N11.C02.Q01` — First Request to Crashed Backend / Prima cerere către un server căzut
 
-*Multiple Choice – Alegere multiplă*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> Nginx uses default settings with three backends. Backend web2 crashes. A client sends a request that Nginx routes to web2. What does the client receive? [Nginx folosește setările implicite cu trei servere. Serverul web2 se oprește. Un client trimite o cerere pe care Nginx o direcționează către web2. Ce primește clientul?]
+An HTTP GET reaches Nginx with the default proxy_next_upstream error timeout. Connecting to the selected backend is refused before anything is sent to the client. Another eligible backend returns 200, and no retry/time limit blocks that attempt. What can the client receive? [Un HTTP GET ajunge la Nginx cu proxy_next_upstream error timeout implicit. Conectarea la serverul ales este refuzată înainte de a trimite ceva clientului. Alt server eligibil returnează 200, iar limitele nu împiedică încercarea. Ce poate primi clientul?]
 
-- **a)** 200 OK, because Nginx instantly reroutes to a healthy backend before the client notices [200 OK, deoarece Nginx redirecționează instant către un server sănătos înainte ca clientul să observe]
-- **b)** 504 Gateway Timeout after waiting for the configurable proxy_read_timeout interval to expire [504 Gateway Timeout după așteptarea expirării intervalului configurabil proxy_read_timeout]
-- **c)** 503 Service Unavailable, which Nginx sends immediately upon detecting any failed backend [503 Service Unavailable, pe care Nginx îl trimite imediat la detectarea oricărui server eșuat]
-- **d)** 502 Bad Gateway, because Nginx discovers the failure only upon forwarding the actual request [502 Bad Gateway, deoarece Nginx descoperă eșecul doar la redirecționarea cererii reale]
+- **a)** 200 from the second backend after Nginx retries the connection error [200 de la al doilea server după ce Nginx reîncearcă eroarea de conectare]
+- **b)** Always 504, regardless of the successful retry [Întotdeauna 504, indiferent de reîncercarea reușită]
+- **c)** Always 503 whenever one backend is unavailable [Întotdeauna 503 când un server este indisponibil]
+- **d)** Always 502 because the first attempt failed [Întotdeauna 502 deoarece prima încercare a eșuat]
 
 <details><summary>💡 Feedback</summary>
 
-Nginx uses passive health checks by default: it detects failure only when a real request fails. The first request to the dead backend returns 502. After max_fails (default 1), Nginx marks web2 as unhealthy for fail_timeout seconds. [Nginx folosește verificări pasive de sănătate implicit: detectează eșecul doar când o cerere reală eșuează. Prima cerere către serverul căzut returnează 502. După max_fails (implicit 1), Nginx marchează web2 ca nesănătos pentru fail_timeout secunde.]
+**Correct answer / Răspuns corect: a.** Default passive failure detection does not imply that the client sees the first upstream error. error and timeout are retry conditions by default. Whether a retry succeeds depends on method, response progress, eligible peers and configured limits; failover is not instantaneous or universally successful. [Detectarea pasivă implicită nu implică afișarea primei erori upstream către client. error și timeout sunt condiții implicite de reîncercare. Succesul depinde de metodă, progresul răspunsului, serverele eligibile și limitele configurate; comutarea nu este instantanee sau universal reușită.]
 
 </details>
 
 ---
 
-### Q7. `N11.C02.Q03`
-**Meaning of HTTP 502 from Nginx / Semnificația HTTP 502 de la Nginx**
+### Q7. `N11.C02.Q03` — Meaning of HTTP 502 from Nginx / Semnificația HTTP 502 de la Nginx
 
-*Multiple Choice – Alegere multiplă*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> An Nginx reverse proxy returns HTTP 502 Bad Gateway. What does this status code indicate about the system state? [Un proxy invers Nginx returnează HTTP 502 Bad Gateway. Ce indică acest cod de stare despre starea sistemului?]
+What is a defensible interpretation of HTTP502 returned through an Nginx reverse proxy? [Care este o interpretare justificată a HTTP502 returnat printr-un proxy invers Nginx?]
 
-- **a)** The client sent a malformed HTTP request that Nginx cannot parse correctly [Clientul a trimis o cerere HTTP malformată pe care Nginx nu o poate analiza corect]
-- **b)** The Nginx process itself has crashed and the operating system is generating the error page [Procesul Nginx s-a prăbușit și sistemul de operare generează pagina de eroare]
-- **c)** Nginx is running but the upstream backend is unreachable or returned an invalid response [Nginx funcționează dar serverul din amonte este inaccesibil sau a returnat un răspuns invalid]
-- **d)** The Nginx configuration file contains a syntax error discovered at runtime [Fișierul de configurare Nginx conține o eroare de sintaxă descoperită la rulare]
+- **a)** The client must have sent malformed request syntax [Clientul trebuie să fi trimis sintaxă invalidă]
+- **b)** The operating system proves that every Nginx worker crashed [Sistemul de operare dovedește că toate procesele Nginx au căzut]
+- **c)** An upstream/gateway response problem was reported; logs and upstream_status are needed to identify the cause [A fost raportată o problemă upstream/gateway; jurnalele și upstream_status sunt necesare pentru cauză]
+- **d)** The configuration parser has necessarily found a syntax error [Parserul configurației a găsit neapărat o eroare sintactică]
 
 <details><summary>💡 Feedback</summary>
 
-502 means Nginx itself is operational but received an invalid response (or no response) from the upstream backend. It does not indicate an Nginx crash. 503 would mean all backends are unavailable; 504 would mean the backend was too slow. [502 înseamnă că Nginx este operațional dar a primit un răspuns invalid (sau niciun răspuns) de la serverul din amonte. Nu indică o cădere a Nginx. 503 ar însemna că toate serverele sunt indisponibile; 504 ar însemna că serverul a fost prea lent.]
+**Correct answer / Răspuns corect: c.** 502 is a gateway/upstream error category, not a unique diagnosis. It can arise from connection or invalid-response failures, or be a status relayed from an upstream.504 concerns a timeout;503 can indicate overload, maintenance or configured policies and does not universally mean all backends are down. [502 este o categorie de eroare gateway/upstream, nu un diagnostic unic. Poate rezulta din eșecul conectării sau un răspuns invalid ori poate fi preluat de la un upstream.504 privește un timeout;503 poate indica supraîncărcare, mentenanță sau politici configurate și nu înseamnă universal că toate serverele sunt căzute.]
 
 </details>
 
@@ -315,21 +313,20 @@ DNS resolution follows a delegation chain: root servers → .ro TLD servers → 
 
 ---
 
-### Q16. `N11.C04.Q03`
-**TTL Caching Behaviour / Comportamentul de caching TTL**
+### Q16. `N11.C04.Q03` — TTL Caching Behaviour / Comportamentul de caching TTL
 
-*Multiple Choice – Alegere multiplă*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> You set a DNS record TTL to 60 seconds. A user reports seeing the old IP address 5 minutes later. What is the most probable explanation? [Setați TTL-ul unei înregistrări DNS la 60 de secunde. Un utilizator raportează că vede adresa IP veche 5 minute mai târziu. Care este cea mai probabilă explicație?]
+A resolver caches an A record at t=0 with TTL 600. At t=60 the authority changes the address and lowers its new TTL to 60. At t=300 the resolver still returns the old address. Which explanation follows from these facts? [Un resolver memorează o înregistrare A la t=0 cu TTL 600. La t=60 autoritatea schimbă adresa și reduce noul TTL la 60. La t=300 resolverul încă returnează adresa veche. Ce explicație rezultă?]
 
-- **a)** The user's ISP resolver enforces a minimum cache duration longer than the configured TTL [Resolverul ISP al utilizatorului impune o durată minimă de cache mai lungă decât TTL-ul configurat]
-- **b)** The DNS update definitively failed and the old record is still active on the authoritative server [Actualizarea DNS a eșuat definitiv și înregistrarea veche este încă activă pe serverul autoritativ]
-- **c)** The user must manually flush their local DNS cache using the ipconfig /flushdns command [Utilizatorul trebuie să golească manual cache-ul DNS local folosind comanda ipconfig /flushdns]
-- **d)** DNS propagation universally requires 24 to 48 hours regardless of TTL configuration settings [Propagarea DNS necesită universal 24 până la 48 de ore indiferent de setările de configurare TTL]
+- **a)** The previously cached record has not reached its original 600-second expiry [Înregistrarea memorată anterior nu a ajuns la expirarea originală de 600 de secunde]
+- **b)** DNS TTLs are merely suggestions that a compliant cache may ignore arbitrarily [TTL-urile DNS sunt simple sugestii ignorabile arbitrar de un cache conform]
+- **c)** All DNS changes take 48 hours [Toate schimbările DNS durează 48 de ore]
+- **d)** The authoritative update must have failed [Actualizarea autoritativă trebuie să fi eșuat]
 
 <details><summary>💡 Feedback</summary>
 
-TTL is advisory, not mandatory. ISP resolvers, OS caches, and browsers may enforce minimum TTL values (often 5 minutes) that override the record's own TTL setting. [TTL este consultativ, nu obligatoriu. Resolverele ISP, cache-urile OS și browserele pot impune valori TTL minime (adesea 5 minute) care suprascriu setarea TTL proprie a înregistrării.]
+**Correct answer / Răspuns corect: a.** Changing an authoritative TTL does not retroactively shorten a record already cached under its old TTL. At t=300 the original record has 300 seconds left. Ordinary cached DNS data expires according to its received TTL; serve-stale and application caching have separate policies and must be identified explicitly. [Modificarea TTL-ului autoritativ nu scurtează retroactiv înregistrarea deja memorată cu TTL-ul vechi. La t=300 mai rămân 300 de secunde. Datele DNS obișnuite expiră conform TTL-ului primit; serve-stale și cache-ul aplicației au politici distincte care trebuie identificate explicit.]
 
 </details>
 
@@ -555,21 +552,20 @@ SSH's Transport Layer Protocol (RFC 4253) provides server authentication, confid
 
 ---
 
-### Q28. `N11.T00.Q01`
-**Scenario: Backend Failure Diagnosis / Scenariu: diagnosticarea eșecului serverului**
+### Q28. `N11.T00.Q01` — Scenario: Backend Failure Diagnosis / Scenariu: diagnosticarea eșecului serverului
 
-*Multiple Choice – Alegere multiplă*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> A student configures Nginx with 3 backends and default settings. After stopping Backend 2, they send 6 requests and observe one 502 error followed by successful responses alternating between Backends 1 and 3. Explain what happened. [Un student configurează Nginx cu 3 servere și setări implicite. După oprirea Backend 2, trimite 6 cereri și observă o eroare 502 urmată de răspunsuri de succes alternând între Backend 1 și 3. Explicați ce s-a întâmplat.]
+For this experiment Nginx has proxy_next_upstream off, max_fails=1 and fail_timeout=10s. Backend 2 refuses the first connection. Six requests finish within those 10 seconds; the other two backends succeed. Why can the trace contain one 502 followed by successful requests to the remaining peers? [În acest experiment Nginx are proxy_next_upstream off, max_fails=1 și fail_timeout=10s. Backend 2 refuză prima conectare. Șase cereri se încheie în acele 10 secunde, iar celelalte servere reușesc. De ce poate captura arăta un 502 urmat de cereri reușite către serverele rămase?]
 
-- **a)** Backend 2 continues receiving requests because Nginx does not track backend health states [Backend 2 continuă să primească cereri deoarece Nginx nu urmărește stările de sănătate ale serverelor]
-- **b)** The 502 results from passive health check detection; Nginx marks Backend 2 down and redistributes to the remaining healthy backends [502 rezultă din detectarea pasivă; Nginx marchează Backend 2 ca inactiv și redistribuie către serverele sănătoase rămase]
-- **c)** Nginx detected the failure before any request reached Backend 2 using active health probes that periodically test each upstream endpoint independently [Nginx a detectat eșecul înainte ca vreo cerere să ajungă la Backend 2 folosind sonde active de sănătate care testează periodic fiecare punct final upstream în mod independent]
-- **d)** The 502 error indicates that Nginx itself crashed and restarted automatically [Eroarea 502 indică faptul că Nginx s-a prăbușit și s-a repornit automat]
+- **a)** Nginx never records backend failures [Nginx nu înregistrează niciodată eșecurile serverelor]
+- **b)** Retry is disabled for the failed request; passive detection excludes that peer temporarily for later requests [Reîncercarea este dezactivată pentru cererea eșuată; detectarea pasivă exclude temporar acel server pentru cererile ulterioare]
+- **c)** Active probes predicted the failure before it happened [Sondele active au prezis eșecul înainte să apară]
+- **d)** 502 proves Nginx itself crashed [502 dovedește că Nginx însuși a căzut]
 
 <details><summary>💡 Feedback</summary>
 
-When Backend 2 receives its first request and fails, Nginx returns 502 (passive detection). Nginx marks Backend 2 as down (max_fails=1). Subsequent requests distribute between the two remaining healthy backends via round-robin. [Prima cerere direcționată către Backend 2 eșuează cu 502 (detecție pasivă). Nginx marchează Backend 2 ca inactiv (max_fails=1). Cererile ulterioare se distribuie între cele două servere sănătoase rămase prin round-robin.]
+**Correct answer / Răspuns corect: b.** The explicit retry setting makes the first client-visible error plausible. With the usual error/timeout retry behaviour, another healthy upstream might instead satisfy that same request. Passive exclusion is time-limited and is not a guarantee of a permanent down state. [Setarea explicită de reîncercare face plauzibilă prima eroare vizibilă clientului. Cu comportamentul uzual error/timeout, alt upstream sănătos ar putea satisface chiar acea cerere. Excluderea pasivă este temporară, nu o stare down permanentă.]
 
 </details>
 
@@ -615,21 +611,20 @@ After pool changes, the client may be routed to any remaining backend (A, B, or 
 
 ---
 
-### Q31. `N11.T00.Q04`
-**Scenario: DNS TTL and Caching Behaviour / Scenariu: TTL DNS și comportamentul de caching**
+### Q31. `N11.T00.Q04` — Scenario: DNS TTL and Caching Behaviour / Scenariu: TTL DNS și comportamentul de caching
 
-*Multiple Choice – Alegere multiplă*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> A DNS record has TTL=300 (5 minutes). You change the IP at the authoritative server. After 10 minutes, one user sees the new IP but another does not. What explains this inconsistency? [O înregistrare DNS are TTL=300 (5 minute). Schimbați IP-ul la serverul autoritativ. După 10 minute, un utilizator vede noul IP dar altul nu. Ce explică această inconsistență?]
+An authority currently returns TTL 300. Ten minutes after an address change, one user sees the old IP and another the new IP. Previous TTLs, queried servers, application caching and serve-stale settings are unknown. What conclusion is justified? [Autoritatea returnează acum TTL 300. La zece minute după schimbare, un utilizator vede IP-ul vechi, altul pe cel nou. TTL-urile anterioare, serverele interogate, cache-ul aplicației și setările serve-stale sunt necunoscute. Ce concluzie este justificată?]
 
-- **a)** The DNS change failed partially, updating some authoritative servers but not others [Schimbarea DNS a eșuat parțial, actualizând unele servere autoritative dar nu pe toate]
-- **b)** The user who sees the old IP has a corrupted DNS cache that requires manual intervention such as running ipconfig /flushdns or restarting the resolver service [Utilizatorul care vede IP-ul vechi are un cache DNS corupt care necesită intervenție manuală precum rularea ipconfig /flushdns sau repornirea serviciului de rezolvare]
-- **c)** DNS propagation is inherently random and unpredictable regardless of TTL settings [Propagarea DNS este inerent aleatorie și imprevizibilă indiferent de setările TTL]
-- **d)** Different resolvers enforce different minimum TTL policies, causing inconsistent cache expiration times [Resolvere diferite impun politici diferite de TTL minim, cauzând timpi inconsistenți de expirare a cache-ului]
+- **a)** The authoritative update certainly failed [Actualizarea autoritativă a eșuat sigur]
+- **b)** The old cache is necessarily corrupted [Cache-ul vechi este neapărat corupt]
+- **c)** Every resolver is entitled to ignore TTL indefinitely [Orice resolver are dreptul să ignore TTL nelimitat]
+- **d)** More evidence is needed: compare authoritative answers, remaining cached TTL, lookup path and documented stale/application policies [Sunt necesare dovezi: comparați răspunsurile autoritative, TTL-ul rămas, traseul rezolvării și politicile documentate stale/aplicație]
 
 <details><summary>💡 Feedback</summary>
 
-Different resolvers cache independently and may apply different minimum TTL policies. Browser caches, OS caches, and ISP resolvers each have their own TTL enforcement rules that may extend caching beyond the record's specified TTL. [Resolvere diferite memorează independent și pot aplica politici diferite de TTL minim. Cache-urile browserelor, cache-urile OS și resolverele ISP au fiecare regulile proprii de impunere TTL care pot extinde memorarea dincolo de TTL-ul specificat al înregistrării.]
+**Correct answer / Răspuns corect: d.** Independent observations do not establish a unique cause. A pre-change long TTL, inconsistent authorities, a hosts override, application cache or an explicit serve-stale policy can produce different observations. Do not teach arbitrary minimum TTL as the general DNS rule. [Observațiile nu stabilesc o cauză unică. Un TTL vechi mai lung, autorități nealiniate, o suprascriere hosts, cache-ul aplicației sau o politică serve-stale explicită pot produce observații diferite. Un TTL minim arbitrar nu este regula generală DNS.]
 
 </details>
 
@@ -675,41 +670,39 @@ Encoding: \x04mail (5) + \x06google (7) + \x03com (4) + \x00 (1) = 17 bytes. Eac
 
 ---
 
-### Q34. `N11.T00.Q08`
-**Scenario: proxy_next_upstream Retry Limits / Scenariu: limitele de reîncercare proxy_next_upstream**
+### Q34. `N11.T00.Q08` — Scenario: proxy_next_upstream Retry Limits / Scenariu: limitele de reîncercare proxy_next_upstream
 
-*Multiple Choice – Alegere multiplă*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> Nginx is configured with proxy_next_upstream_tries 3; and 5 backends. If the first 3 backends all return 502, what happens to the request? [Nginx este configurat cu proxy_next_upstream_tries 3; și 5 servere. Dacă primele 3 servere returnează toate 502, ce se întâmplă cu cererea?]
+A GET has proxy_next_upstream error timeout http_502 and proxy_next_upstream_tries 3. Five peers are eligible; each of the first three contacted peers returns 502 before any response reaches the client. What happens when no other limit intervenes? [Un GET are proxy_next_upstream error timeout http_502 și proxy_next_upstream_tries 3. Cinci servere sunt eligibile; primele trei contactate returnează 502 înainte să ajungă un răspuns la client. Ce se întâmplă dacă nu intervine altă limită?]
 
-- **a)** The client receives 502 — Nginx stops after 3 tries even though 2 healthy backends remain untried [Clientul primește 502 — Nginx se oprește după 3 încercări chiar dacă 2 servere sănătoase rămân neîncercate]
-- **b)** Nginx queues the request until one of the failed backends recovers and can serve it [Nginx pune cererea în coadă până când unul dintre serverele eșuate se recuperează și o poate servi]
-- **c)** Nginx automatically tries all 5 backends regardless of the proxy_next_upstream_tries setting [Nginx încearcă automat toate cele 5 servere indiferent de setarea proxy_next_upstream_tries]
-- **d)** Nginx returns 503 Service Unavailable once any retry limit is reached during request processing, regardless of whether other healthy backends remain available in the pool [Nginx returnează 503 Service Unavailable odată ce orice limită de reîncercare este atinsă, indiferent dacă alte servere sănătoase rămân disponibile în grup]
+- **a)** After three total upstream attempts, Nginx stops and returns the final 502; two peers remain untried [După trei încercări upstream în total, Nginx se oprește și returnează ultimul 502; două servere rămân neîncercate]
+- **b)** It makes the initial attempt plus three retries, so four total attempts [Face încercarea inițială plus trei reîncercări, adică patru în total]
+- **c)** It must contact all five peers [Trebuie să contacteze toate cele cinci servere]
+- **d)** It changes every final upstream error into 503 [Transformă orice eroare upstream finală în 503]
 
 <details><summary>💡 Feedback</summary>
 
-After 3 retry attempts (the configured limit), Nginx stops trying additional backends and returns the last error (502) to the client. The remaining 2 backends are not contacted for this request. [După 3 încercări de reîncercare (limita configurată), Nginx oprește încercarea serverelor suplimentare și returnează ultima eroare (502) clientului. Cele 2 servere rămase nu sunt contactate pentru această cerere.]
+**Correct answer / Răspuns corect: a.** The tries value bounds the total upstream attempts, including the first. http_502 must be included to make a returned 502 a retry condition; it is not enabled by the default error timeout alone. Retries also require that nothing has already been sent to the client. [Valoarea tries limitează totalul încercărilor upstream, inclusiv prima. http_502 trebuie inclus pentru ca un 502 returnat să declanșeze reîncercarea; nu este activat doar de error timeout implicit. Reîncercarea cere și să nu fi fost trimis deja ceva clientului.]
 
 </details>
 
 ---
 
-### Q35. `N11.T00.Q09`
-**Scenario: Least Connections with Slow Backend / Scenariu: least connections cu server lent**
+### Q35. `N11.T00.Q09` — Scenario: Least Connections with Slow Backend / Scenariu: least connections cu server lent
 
-*Multiple Choice – Alegere multiplă*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> Three backends start with 0 active connections. Backend 3 has --delay 2.0 (2 second response time). After 10 rapid requests, which backend has the most active connections? [Trei servere pornesc cu 0 conexiuni active. Backend 3 are --delay 2.0 (timp de răspuns de 2 secunde). După 10 cereri rapide, care server are cele mai multe conexiuni active?]
+At the decision instant, three healthy equal-weight peers have active connection counts B1=0, B2=0, B3=2. Where does least_conn send the next eligible request? [La momentul deciziei, trei servere sănătoase cu ponderi egale au conexiuni active B1=0, B2=0, B3=2. Unde trimite least_conn următoarea cerere eligibilă?]
 
-- **a)** Backend 3 accumulates the most active connections because its 2-second delay keeps them open longer [Backend 3 acumulează cele mai multe conexiuni active deoarece întârzierea de 2 secunde le menține deschise mai mult]
-- **b)** All three backends have equal active connections because least_conn distributes them evenly [Toate cele trei servere au conexiuni active egale deoarece least_conn le distribuie uniform]
-- **c)** Backend 1 has the most because least_conn always prefers the first listed server [Backend 1 are cele mai multe deoarece least_conn preferă întotdeauna primul server listat]
-- **d)** Connection counts cannot be predicted because they depend on operating system scheduling and kernel-level thread allocation policies that vary between operating systems [Numărătoarea conexiunilor nu poate fi prezisă deoarece depinde de planificarea sistemului de operare și politicile de alocare a firelor la nivel de kernel care variază între sistemele de operare]
+- **a)** B1 or B2, using the tie-breaking policy between the two least-loaded peers [B1 sau B2, folosind politica de departajare între cele două servere cu încărcarea minimă]
+- **b)** Always B3 because it is the slowest [Întotdeauna B3 deoarece este cel mai lent]
+- **c)** Always the first listed peer, regardless of counts [Întotdeauna primul server, indiferent de numărători]
+- **d)** All three peers receive the same request simultaneously [Toate trei primesc simultan aceeași cerere]
 
 <details><summary>💡 Feedback</summary>
 
-Backend 3's 2-second delay means its connections stay open longer. Least connections initially distributes evenly, but as Backend 3 accumulates connections (slow to release), it stops receiving new ones — Backends 1 and 2 process and release faster. [Întârzierea de 2 secunde a Backend 3 înseamnă că conexiunile sale rămân deschise mai mult. Least connections distribuie inițial uniform, dar pe măsură ce Backend 3 acumulează conexiuni (lent la eliberare), oprește primirea de noi — Backend 1 și 2 procesează și eliberează mai repede.]
+**Correct answer / Răspuns corect: a.** With equal weights, the active connection counts drive this selection. A two-second response delay alone does not determine counts after ten requests: arrival times, overlap and completion times must also be known. A slow peer may receive fewer new requests while its existing connections remain active. [Cu ponderi egale, numărul conexiunilor active determină această selecție. O întârziere de două secunde nu determină singură numărătorile după zece cereri: trebuie cunoscute sosirile, suprapunerea și finalizările. Un server lent poate primi mai puține cereri noi cât timp conexiunile sale rămân active.]
 
 </details>
 
@@ -839,61 +832,86 @@ In active mode, the server initiates the data connection back to the client — 
 
 ---
 
-### Q42. `N11.S01.Q01`
-**Round-Robin Modulo Operation Result / Rezultatul operației modulo round-robin**
+### Q42. `N11.S01.Q01` — Round-Robin Modulo Operation Result / Rezultatul operației modulo round-robin
 
-*Multiple Choice – Alegere multiplă*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> The Python load balancer exercise uses a round-robin method with self._rr_idx = (self._rr_idx + 1) % n where n = 3. After selecting the third backend (index 2), what is the value of _rr_idx? [Exercițiul cu echilibratorul de încărcare Python utilizează o metodă round-robin cu self._rr_idx = (self._rr_idx + 1) % n unde n = 3. După selectarea celui de-al treilea server (index 2), care este valoarea _rr_idx?]
+For a single call to this round-robin selection fragment, what is backend_index after selecting web3? [Pentru un singur apel al acestui fragment round-robin, ce valoare are backend_index după selectarea web3?]
 
-- **a)** 0, because (2 + 1) % 3 wraps back to the beginning of the backend list [0, deoarece (2 + 1) % 3 revine la începutul listei de servere]
-- **b)** 3, because the index simply increments without any wraparound applied [3, deoarece indexul pur și simplu crește fără nicio revenire aplicată]
-- **c)** 1, because modulo 3 of the value 3 produces a remainder of 1 [1, deoarece modulo 3 din valoarea 3 produce un rest de 1]
-- **d)** 2, because the index stays at the current position until the next request arrives [2, deoarece indexul rămâne la poziția curentă până când sosește următoarea cerere]
+```python
+backends = ["web1", "web2", "web3"]
+backend_index = 2
+selected = backends[backend_index]
+backend_index = (backend_index + 1) % len(backends)
+print(backend_index)
+```
+
+- **a)** 0
+- **b)** 3
+- **c)** 1
+- **d)** 2
 
 <details><summary>💡 Feedback</summary>
 
-After selecting index 2, the expression evaluates to (2 + 1) % 3 = 0, wrapping back to the first backend. This modulo wraparound is the core mechanism that creates the cyclic pattern. [După selectarea indexului 2, expresia evaluează la (2 + 1) % 3 = 0, revenind la primul server. Această revenire prin modulo este mecanismul central care creează modelul ciclic.]
+**Correct answer / Răspuns corect: a.** The updated index is(2+1)%3=0. The fragment uses the backend_index convention of S11_Part02_Script_Simple_Lb.py. This question assumes one call; concurrent allocation requires synchronisation. [Indicele actualizat este(2+1)%3=0. Fragmentul folosește convenția backend_index din S11_Part02_Script_Simple_Lb.py. Se presupune un singur apel; alocarea concurentă necesită sincronizare.]
 
 </details>
 
 ---
 
-### Q43. `N11.S01.Q02`
-**IP Hash Determinism Property / Proprietatea de determinism a IP hash**
+### Q43. `N11.S01.Q02` — IP Hash Determinism Property / Proprietatea de determinism a IP hash
 
-*Multiple Choice – Alegere multiplă*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> The code h = (h * 131 + ord(ch)) & 0xFFFFFFFF computes the hash. If the same client IP sends 5 consecutive requests, how many distinct backends will be selected? [Codul h = (h * 131 + ord(ch)) & 0xFFFFFFFF calculează hash-ul. Dacă aceeași adresă IP de client trimite 5 cereri consecutive, câte servere distincte vor fi selectate?]
+Consider this independent IP-hash extension. The ordered backend list and health state remain unchanged. How many distinct backends do five calls with the same address select? [Considerați această extensie independentă IP-hash. Lista ordonată a serverelor și starea lor rămân neschimbate. Câte servere distincte selectează cinci apeluri cu aceeași adresă?]
 
-- **a)** Three — requests distribute evenly across all backends regardless of client IP address [Trei — cererile se distribuie uniform între toate serverele indiferent de adresa IP a clientului]
-- **b)** Exactly one — the deterministic hash always maps the same IP to the same backend [Exact unul — hash-ul determinist asociază întotdeauna aceeași adresă IP cu același server]
-- **c)** It varies unpredictably because the bitwise AND introduces non-deterministic truncation [Variază imprevizibil deoarece AND pe biți introduce o trunchiere nedeterministă]
-- **d)** Five — each request produces a different hash because the algorithm uses random seeding [Cinci — fiecare cerere produce un hash diferit deoarece algoritmul folosește inițializare aleatorie]
+```python
+backends = ["web1", "web2", "web3"]
+def choose(ip):
+    h = 0
+    for ch in ip:
+        h = (h * 131 + ord(ch)) & 0xFFFFFFFF
+    return backends[h % len(backends)]
+
+print(len({choose("192.0.2.10") for _ in range(5)}))
+```
+
+- **a)** Three, because every call advances a round-robin counter [Trei, deoarece orice apel avansează un contor round-robin]
+- **b)** Exactly one [Exact unul]
+- **c)** An unpredictable count because integer AND is random [Un număr imprevizibil deoarece AND întreg este aleatoriu]
+- **d)** Five, because each call uses a new random seed [Cinci, deoarece fiecare apel folosește o nouă inițializare aleatorie]
 
 <details><summary>💡 Feedback</summary>
 
-Hash functions are deterministic: identical input always produces the same output. All 5 requests from the same IP select the same backend, providing session affinity. The & 0xFFFFFFFF constrains the hash to 32 bits. [Funcția hash este deterministă: aceeași intrare produce întotdeauna aceeași ieșire. Toate cele 5 cereri de la aceeași adresă IP selectează același server, asigurând afinitatea sesiunii. Operatorul & 0xFFFFFFFF constrânge hash-ul la 32 de biți.]
+**Correct answer / Răspuns corect: b.** The hash starts from zero for each call and depends only on the same input. With the same ordered pool, h modulo its length selects one index. Pool/health changes can alter real load-balancer affinity; this toy hash is not claimed to be Nginx ip_hash or the supplied basic round-robin script. [Hash-ul pornește de la zero la fiecare apel și depinde doar de aceeași intrare. Cu același grup ordonat, h modulo lungimea sa selectează un singur indice. Schimbările grupului/stării pot modifica afinitatea reală; acest model nu pretinde că este Nginx ip_hash sau scriptul round-robin de bază.]
 
 </details>
 
 ---
 
-### Q44. `N11.S01.Q03`
-**Health Check State Transition / Tranziția de stare a verificării de sănătate**
+### Q44. `N11.S01.Q03` — Health Check State Transition / Tranziția de stare a verificării de sănătate
 
-*Multiple Choice – Alegere multiplă*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> In the Python LB, mark_failure() increments fails and marks the backend down when fails >= passive_failures. If passive_failures=2, after how many consecutive failures is the backend marked down? [În echilibratorul Python, mark_failure() incrementează fails și marchează serverul ca inactiv când fails >= passive_failures. Dacă passive_failures=2, după câte eșecuri consecutive este serverul marcat ca inactiv?]
+In this independent passive-failure model, after how many consecutive calls is down first True? No success/reset occurs between calls. [În acest model independent de eșec pasiv, după câte apeluri consecutive devine down prima dată True? Nu apare succes/reset între apeluri.]
 
-- **a)** After 2 consecutive failures, since the condition fails >= 2 becomes true at that point [După 2 eșecuri consecutive, deoarece condiția fails >= 2 devine adevărată în acel moment]
-- **b)** The backend is never marked down — passive_failures only logs warnings without action [Serverul nu este niciodată marcat ca inactiv — passive_failures doar jurnalizează avertismente fără acțiune]
-- **c)** After 3 failures, because >= actually requires one extra failure beyond the threshold [După 3 eșecuri, deoarece >= necesită de fapt un eșec suplimentar peste prag]
-- **d)** After 1 failure, because the >= operator triggers on the first increment above zero [După 1 eșec, deoarece operatorul >= se declanșează la prima incrementare peste zero]
+```python
+fails = 0
+passive_failures = 2
+def mark_failure():
+    global fails
+    fails += 1
+    return fails >= passive_failures
+```
+
+- **a)** Two [Două]
+- **b)** Never [Niciodată]
+- **c)** Three [Trei]
+- **d)** One [Unul]
 
 <details><summary>💡 Feedback</summary>
 
-Nginx marks the backend as down on the second consecutive failure (fails reaches 2, satisfying >= 2). After marking, down_until is set to current_time + fail_timeout_s. [Serverul este marcat ca inactiv la al doilea eșec consecutiv (fails ajunge la 2, satisfăcând >= 2). După marcare, down_until este setat la timpul_curent + fail_timeout_s.]
+**Correct answer / Răspuns corect: a.** fails starts at 0 and reaches the threshold 2 on the second increment. The snippet defines the entire answer and is not presented as the implementation of the supplied S11 proxy or as Nginx internal code. Real timeout windows and recovery rules must be specified separately. [fails pornește de la 0 și ajunge la pragul 2 la a doua incrementare. Fragmentul definește complet răspunsul și nu este prezentat ca implementarea proxy-ului S11 sau drept cod intern Nginx. Ferestrele de timp și regulile reale de recuperare trebuie specificate separat.]
 
 </details>
 
@@ -928,12 +946,12 @@ HTTP Content-Length specifies the body size in bytes, not characters. For ASCII 
 
 - **a)** It enables the socket to accept connections from multiple clients simultaneously [Permite socket-ului să accepte conexiuni de la mai mulți clienți simultan]
 - **b)** It disables Nagle's algorithm to reduce latency for small HTTP response packets [Dezactivează algoritmul Nagle pentru a reduce latența pentru pachetele mici de răspuns HTTP]
-- **c)** It allows binding to a port still in TIME_WAIT state from a previous process instance [Permite legarea la un port încă în starea TIME_WAIT de la o instanță anterioară a procesului]
+- **c)** It allows binding to an address affected by TIME_WAIT connections from a previous instance, subject to operating-system rules [Permite legarea la o adresă afectată de conexiuni TIME_WAIT ale unei instanțe anterioare, conform regulilor sistemului de operare]
 - **d)** It increases the maximum buffer size for receiving large HTTP request bodies [Crește dimensiunea maximă a buffer-ului pentru primirea corpurilor mari de cereri HTTP]
 
 <details><summary>💡 Feedback</summary>
 
-SO_REUSEADDR allows the server to bind immediately after a restart, even if the previous socket is still in TIME_WAIT state. Without it, restarting the backend would fail with 'Address already in use' for up to 60 seconds. [SO_REUSEADDR permite serverului să se lege imediat după o repornire, chiar dacă socket-ul anterior este încă în starea TIME_WAIT. Fără aceasta, repornirea serverului ar eșua cu 'Address already in use' până la 60 de secunde.]
+**Correct answer / Răspuns corect: c.** SO_REUSEADDR can permit rebinding an address affected by old TCP connections under the operating system's rules. A listening socket itself does not enter TIME_WAIT, restart does not always fail without this option, and it does not generally let a second live listener take the same address. [SO_REUSEADDR poate permite relegarea unei adrese afectate de conexiuni TCP vechi, conform regulilor sistemului. Socket-ul de ascultare nu intră el însuși în TIME_WAIT, repornirea nu eșuează întotdeauna fără opțiune, iar aceasta nu permite în general unui al doilea listener activ să preia aceeași adresă.]
 
 </details>
 
@@ -1019,41 +1037,39 @@ nginx -t tests the configuration syntax and reports errors without modifying the
 
 ---
 
-### Q51. `N11.S02.Q05`
-**Nginx X-Served-By Header Source / Sursa antetului X-Served-By Nginx**
+### Q51. `N11.S02.Q05` — Nginx X-Served-By Header Source / Sursa antetului X-Served-By Nginx
 
-*Multiple Choice – Alegere multiplă*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> The Week 11 nginx.conf includes add_header X-Served-By $upstream_addr always;. What value does the client see in this header? [Fișierul nginx.conf din săptămâna 11 include add_header X-Served-By $upstream_addr always;. Ce valoare vede clientul în acest antet?]
+You add add_header X-Served-By $upstream_addr always; to the relevant Nginx location. What can the value contain when an upstream attempt is retried? [Adăugați add_header X-Served-By $upstream_addr always; în locația Nginx relevantă. Ce poate conține valoarea când o încercare upstream este repetată?]
 
-- **a)** The round-robin counter value indicating the position in the distribution sequence [Valoarea contorului round-robin indicând poziția în secvența de distribuție]
-- **b)** The public hostname of the Nginx load balancer itself as configured in server_name [Numele de gazdă public al echilibratorului de încărcare Nginx însuși conform server_name]
-- **c)** The total number of requests processed by the upstream pool since the last restart [Numărul total de cereri procesate de grupul din amonte de la ultima repornire]
-- **d)** The IP address and port of the specific backend server that processed the request [Adresa IP și portul serverului specific care a procesat cererea]
+- **a)** Only a round-robin counter [Doar un contor round-robin]
+- **b)** Only the proxy's public hostname [Doar numele public al proxy-ului]
+- **c)** The cumulative number of requests [Numărul cumulativ al cererilor]
+- **d)** The address:port values for upstream attempts, possibly a comma-separated list containing failed attempts as well as the successful one [Valorile adresă:port ale încercărilor upstream, posibil o listă separată prin virgulă cu încercări eșuate și cea reușită]
 
 <details><summary>💡 Feedback</summary>
 
-The $upstream_addr variable contains the IP address and port of the backend that actually served the request. This allows verifying which backend handled each request when testing load distribution. [Variabila $upstream_addr conține adresa IP și portul serverului care a servit efectiv cererea. Aceasta permite verificarea care server a gestionat fiecare cerere la testarea distribuției încărcării.]
+**Correct answer / Răspuns corect: d.** $upstream_addr can identify several attempted peers; it is not guaranteed to be one backend that successfully served the response. Pair it with $upstream_status and timing/log evidence when analysing retries. The header is an explicit diagnostic extension in this question, not a claim that the baseline S11 configuration already contains it. [$upstream_addr poate identifica mai multe servere încercate; nu este garantat un singur backend care a servit cu succes. Corelați cu $upstream_status și timpi/jurnale la analizarea reîncercărilor. Antetul este o extensie diagnostică explicită aici, nu o afirmație că apare deja în configurația S11 de bază.]
 
 </details>
 
 ---
 
-### Q52. `N11.S02.Q06`
-**Lab Service Port Mapping Convention / Convenția de mapare a porturilor serviciilor de laborator**
+### Q52. `N11.S02.Q06` — Lab Service Port Mapping Convention / Convenția de mapare a porturilor serviciilor de laborator
 
-*Multiple Choice – Alegere multiplă*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> The Week 11 lab maps Nginx container port 80 to host port 8080 (ports: "8080:80"). Why is port 9000 never used for lab services? [Laboratorul din săptămâna 11 mapează portul 80 al containerului Nginx la portul host 8080 (ports: "8080:80"). De ce nu este folosit niciodată portul 9000 pentru serviciile de laborator?]
+Suppose a local Portainer instance already binds 127.0.0.1:9000/TCP. Why should another lab service use a different host mapping, such as 8080:80, on that address? [Presupuneți că un Portainer local ascultă deja pe 127.0.0.1:9000/TCP. De ce trebuie alt serviciu de laborator să folosească o altă mapare gazdă, precum 8080:80, pe acea adresă?]
 
-- **a)** Port 9000 exceeds the range supported by Docker Compose port mapping configuration [Portul 9000 depășește intervalul suportat de configurarea mapării porturilor Docker Compose]
-- **b)** Port 9000 is blocked by the Windows firewall and cannot be mapped through WSL [Portul 9000 este blocat de paravanul de protecție Windows și nu poate fi mapat prin WSL]
-- **c)** Port 9000 is reserved for Portainer, the persistent Docker management service across all weeks [Portul 9000 este rezervat pentru Portainer, serviciul persistent de gestionare Docker din toate săptămânile]
-- **d)** Port 9000 is a well-known protocol port assigned to a specific IANA-registered service [Portul 9000 este un port de protocol bine-cunoscut atribuit unui serviciu specific înregistrat IANA]
+- **a)** Docker cannot map ports above 8999 [Docker nu poate mapa porturi peste 8999]
+- **b)** Windows universally blocks 9000 [Windows blochează universal 9000]
+- **c)** The chosen host address/TCP port is occupied; the conflict depends on the actual local bindings [Adresa și portul TCP alese sunt ocupate; conflictul depinde de legările locale reale]
+- **d)** Port9000 is permanently forbidden to every other application [Portul9000 este interzis permanent oricărei alte aplicații]
 
 <details><summary>💡 Feedback</summary>
 
-Port 9000 is permanently reserved for Portainer, the Docker management interface that runs as a global service across all lab weeks. Using it for any other service would create a port conflict. [Portul 9000 este rezervat permanent pentru Portainer, interfața de gestionare Docker care rulează ca serviciu global în toate săptămânile de laborator. Folosirea lui pentru orice alt serviciu ar crea un conflict de porturi.]
+**Correct answer / Răspuns corect: c.** Port use is a local configuration decision. Portainer may use other ports, and another scenario can use 9000 when its host binding is free. Check actual listeners and Compose mappings; do not infer a universal IANA or repository reservation from one installation. [Utilizarea porturilor este o decizie de configurare locală. Portainer poate folosi alte porturi, iar alt scenariu poate utiliza 9000 când legarea gazdei este liberă. Verificați listener-ele și mapările Compose reale; nu deduceți o rezervare universală IANA sau a repository-ului dintr-o instalare.]
 
 </details>
 
@@ -1079,21 +1095,20 @@ Nginx's proxy_next_upstream directive specifies which upstream failures trigger 
 
 ---
 
-### Q54. `N11.S03.Q01`
-**Wireshark Interface Selection for Docker Traffic / Selectarea interfeței Wireshark pentru traficul Docker**
+### Q54. `N11.S03.Q01` — Wireshark Interface Selection for Docker Traffic / Selectarea interfeței Wireshark pentru traficul Docker
 
-*Multiple Choice – Alegere multiplă*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> To capture traffic between Docker containers running in WSL, which Wireshark capture interface should you select? [Pentru a captura traficul între containerele Docker care rulează în WSL, ce interfață de captură Wireshark trebuie selectată?]
+You need to capture traffic between two Docker containers on the same Linux bridge, with the engine running in a WSL/VM environment. Which approach follows the actual packet path? [Trebuie capturat traficul între două containere Docker de pe același bridge Linux, cu motorul în WSL/VM. Ce abordare urmează traseul real al pachetelor?]
 
-- **a)** Any interface works — Wireshark automatically detects and captures Docker traffic universally [Orice interfață funcționează — Wireshark detectează și capturează automat traficul Docker universal]
-- **b)** The physical Ethernet adapter, since Docker traffic exits through the hardware NIC [Adaptorul fizic Ethernet, deoarece traficul Docker iese prin placa de rețea hardware]
-- **c)** Loopback Adapter, because all Docker containers communicate via localhost only [Adaptorul Loopback, deoarece toate containerele Docker comunică doar prin localhost]
-- **d)** vEthernet (WSL), because Docker container traffic in WSL traverses this virtual interface [vEthernet (WSL), deoarece traficul containerelor Docker din WSL traversează această interfață virtuală]
+- **a)** Choose any Windows interface because all see every packet [Alegeți orice interfață Windows deoarece toate văd toate pachetele]
+- **b)** Always use the physical Wi-Fi adapter [Folosiți întotdeauna adaptorul Wi-Fi fizic]
+- **c)** Always use Windows loopback because containers use only 127.0.0.1 [Folosiți întotdeauna loopback Windows deoarece containerele folosesc doar 127.0.0.1]
+- **d)** Capture on the relevant Linux bridge/veth or in a container network namespace; verify where the Docker engine runs before selecting an interface [Capturați pe bridge/veth Linux relevant sau în namespace-ul de rețea al containerului; verificați unde rulează motorul Docker înainte de alegerea interfeței]
 
 <details><summary>💡 Feedback</summary>
 
-Docker containers in WSL generate traffic visible on the vEthernet (WSL) virtual interface. The physical Ethernet/Wi-Fi adapter carries only host traffic; the Loopback adapter only handles 127.0.0.1. [Containerele Docker din WSL generează trafic vizibil pe interfața virtuală vEthernet (WSL). Adaptorul fizic Ethernet/Wi-Fi transportă doar traficul gazdei; adaptorul Loopback gestionează doar 127.0.0.1.]
+**Correct answer / Răspuns corect: d.** Same-bridge container traffic may remain entirely inside the Linux engine environment. It need not traverse a Windows vEthernet or physical adapter. Capturing traffic to a published host port is a different path. Interface names and visibility depend on the Docker/WSL/VM architecture. [Traficul între containere pe același bridge poate rămâne complet în mediul Linux al motorului. Nu trebuie să traverseze vEthernet Windows sau adaptorul fizic. Captura traficului către un port publicat al gazdei privește alt traseu. Numele și vizibilitatea interfețelor depind de arhitectura Docker/WSL/VM.]
 
 </details>
 
@@ -1179,21 +1194,20 @@ Encoding: \x03www (4 bytes) + \x03ase (4 bytes) + \x02ro (3 bytes) + \x00 (1 byt
 
 ---
 
-### Q59. `N11.S03.Q06`
-**Python vs Nginx Performance Comparison / Comparația de performanță Python vs Nginx**
+### Q59. `N11.S03.Q06` — Python vs Nginx Performance Comparison / Comparația de performanță Python vs Nginx
 
-*Multiple Choice – Alegere multiplă*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-> When benchmarking the Python load balancer from the lab exercises against Nginx, which typically achieves higher throughput and why? [La evaluarea comparativă a echilibratorului de încărcare Python din exercițiile de laborator față de Nginx, care atinge de obicei un debit mai mare și de ce?]
+Before any controlled benchmark of the course Python proxy and Nginx has been run, which performance claim is justified? [Înainte de un benchmark controlat al proxy-ului Python din curs și Nginx, ce afirmație de performanță este justificată?]
 
-- **a)** Python, because its threading model handles concurrent connections more efficiently than C [Python, deoarece modelul său de threading gestionează conexiunile concurente mai eficient decât C]
-- **b)** Both achieve comparable throughput since the network I/O is the true bottleneck, not the language [Ambele ating un debit comparabil deoarece I/O-ul de rețea este blocajul real, nu limbajul]
-- **c)** Nginx, because its optimised C code and event-driven architecture vastly outperform interpreted Python [Nginx, deoarece codul său C optimizat și arhitectura bazată pe evenimente depășesc cu mult Python-ul interpretat]
-- **d)** The result depends entirely on the algorithm selected — Python wins with round-robin due to simpler scheduling overhead, while Nginx outperforms only with least_conn [Rezultatul depinde în întregime de algoritmul selectat — Python câștigă cu round-robin datorită costului de planificare mai simplu, în timp ce Nginx depășește doar cu least_conn]
+- **a)** Python must win because threads always outperform event loops [Python trebuie să câștige deoarece firele depășesc întotdeauna buclele de evenimente]
+- **b)** Both must be equal because all workloads are network-bound [Trebuie să fie egale deoarece orice sarcină este limitată de rețea]
+- **c)** No numeric speedup is established; compare both with the same workload and record throughput, latency, errors, concurrency, versions and environment [Nu este stabilită o accelerare numerică; comparați cu aceeași sarcină și înregistrați debitul, latența, erorile, concurența, versiunile și mediul]
+- **d)** Nginx is guaranteed to be at least 10 times faster for every workload [Nginx este garantat de cel puțin 10 ori mai rapid pentru orice sarcină]
 
 <details><summary>💡 Feedback</summary>
 
-Nginx typically achieves 10x+ more requests per second than the Python implementation. Nginx is written in optimised C with an asynchronous event-driven architecture, while Python's GIL and interpreted execution create bottlenecks. [Nginx atinge de obicei de peste 10 ori mai multe cereri pe secundă decât implementarea Python. Nginx este scris în C optimizat cu o arhitectură asincronă bazată pe evenimente, în timp ce GIL-ul Python și execuția interpretată creează blocaje.]
+**Correct answer / Răspuns corect: c.** An optimised event-driven design motivates a hypothesis, not a universal factor. Match backend delays, connection reuse, payloads and concurrency; repeat trials and report variability. Bottlenecks and error rates can dominate apparent requests/second. No benchmark result is supplied by this question. [Un design optimizat bazat pe evenimente justifică o ipoteză, nu un factor universal. Aliniați întârzierile backend, reutilizarea conexiunilor, payload-urile și concurența; repetați și raportați variabilitatea. Blocajele și rata erorilor pot domina cererile/secundă aparent. Întrebarea nu furnizează un rezultat de benchmark.]
 
 </details>
 
@@ -1216,3 +1230,10 @@ This command is a useful way to discover container details (including IPs) for a
 </details>
 
 ---
+
+
+## Repository context and reference points
+
+Canonical practical material: [S11](../../04_SEMINARS/S11/README.md) — Nginx and the basic Python round-robin proxy. Code-tracing models explicitly introduced in this question pool are self-contained exercises, not promises of additional files or features in that seminar. [Material practic canonic: S11. Modelele de trasare introduse explicit sunt exerciții autonome, nu promisiuni de fișiere sau funcții suplimentare în seminar.]
+
+Implementation reference: [Nginx proxy retry directives](https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_next_upstream) and [upstream variables](https://nginx.org/en/docs/http/ngx_http_upstream_module.html#variables). DNS TTL and serving stale: RFC 8767. https://doi.org/10.17487/RFC8767

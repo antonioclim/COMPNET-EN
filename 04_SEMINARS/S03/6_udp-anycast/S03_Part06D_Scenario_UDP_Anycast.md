@@ -5,30 +5,24 @@
 You will:
 
 - run a UDP IPv6 server that listens on all local addresses;
-- run a UDP IPv6 client that sends a message to `2001:db8::1`;
+- run a UDP IPv6 client that sends a message to `::1`;
 - understand the conceptual difference between unicast, broadcast, multicast and anycast;
 - extend the server to include a "server_id" in its response.
 
 ---
 
-### 2. Configuring the IPv6 address (laboratory, if permitted)
+### 2. Local IPv6 baseline
 
-On some systems you will need to add a test IPv6 address on loopback manually:
-
-```bash
-sudo ip -6 addr add 2001:db8::1/64 dev lo
-````
-
-(In certain laboratory environments the instructor may have already completed this step.)
-
----
+The example client uses `::1` (IPv6 loopback), so no additional address is needed.
+This is an analogy for selecting one local endpoint, not a real routed anycast deployment.
+A routed anycast extension requires an explicitly configured shared address and routing.
 
 ### 3. Running the example anycast server
 
 In a terminal:
 
 ```bash
-python3 index_udp-anycast_server_example.py
+python3 S03_Part06A_Example_UDP_Anycast_Server.py
 ```
 
 You should see:
@@ -44,13 +38,13 @@ You should see:
 In another terminal:
 
 ```bash
-python3 index_udp-anycast_client_example.py
+python3 S03_Part06B_Example_UDP_Anycast_Client.py
 ```
 
 You should see:
 
 ```text
-[INFO] Sending to [2001:db8::1]:5007
+[INFO] Sending to [::1]:5007
 [INFO] Received response: 'Reply from anycast server' from (...)
 ```
 
@@ -60,7 +54,7 @@ In the server terminal the received message and sent reply will appear.
 
 ### 5. Student task – server with server_id
 
-1. Open `index_udp-anycast_server_template.py`.
+1. Open `S03_Part06C_Template_UDP_Anycast.py`.
 
 2. Complete the `TODO` section to:
 
@@ -71,7 +65,7 @@ In the server terminal the received message and sent reply will appear.
 3. Start the template server:
 
 ```bash
-python3 index_udp-anycast_server_template.py
+python3 S03_Part06C_Template_UDP_Anycast.py
 ```
 
 Enter e.g. `S1` as the server_id.
@@ -79,7 +73,7 @@ Enter e.g. `S1` as the server_id.
 4. Start the client:
 
 ```bash
-python3 index_udp-anycast_client_example.py
+python3 S03_Part06B_Example_UDP_Anycast_Client.py
 ```
 
 Observe:

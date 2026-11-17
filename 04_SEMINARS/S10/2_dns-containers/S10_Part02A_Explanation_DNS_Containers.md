@@ -31,7 +31,6 @@ From inside the `debug` container:
 
 ```sh
 ping web
-ping db
 nslookup web
 ```
 
@@ -67,14 +66,13 @@ Inside the `debug` container:
 
 ```sh
 dig web
-dig db
 ```
 
 2. resolve names handled by your custom DNS server:
 
 ```sh
-dig @dns-server myservice.lab.local
-dig @dns-server doesnotexist.local
+dig @dns-server -p 5353 myservice.lab.local
+dig @dns-server -p 5353 doesnotexist.local
 ```
 
 3. compare the output between the built-in DNS and the Python mini DNS.
@@ -97,7 +95,7 @@ dig @dns-server doesnotexist.local
 From this directory, run:
 
 ```bash
-docker compose up --build
+docker compose -f S10_Part02_Config_Docker_Compose.yml up --build
 ```
 
 Wait for the services `web`, `debug` and `dns-server` to start.
@@ -109,16 +107,14 @@ Wait for the services `web`, `debug` and `dns-server` to start.
 Enter the debug container:
 
 ```bash
-docker compose exec debug sh
+docker compose -f S10_Part02_Config_Docker_Compose.yml exec debug sh
 ```
 
 Run:
 
 ```sh
 ping web
-ping db
 dig web
-dig db
 ```
 
 Save the output in:
@@ -134,8 +130,8 @@ seminar10_dns_builtin_output.txt
 Still inside the `debug` container:
 
 ```sh
-dig @dns-server myservice.lab.local
-dig @dns-server doesnotexist.local
+dig @dns-server -p 5353 myservice.lab.local
+dig @dns-server -p 5353 doesnotexist.local
 ```
 
 Save the output in:

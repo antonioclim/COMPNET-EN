@@ -82,7 +82,7 @@ netstat -tulnp
 
 Explică fiecare flag: `-t` TCP, `-u` UDP, `-l` listening, `-n` numeric (fără DNS invers), `-p` procesul proprietar.
 
-Arată output-ul: un port în LISTEN (ex. sshd pe :22), eventual ESTABLISHED (sesiunea SSH curentă).
+Arată un port în LISTEN (ex. sshd pe :22). Pentru ESTABLISHED (sesiunea SSH curentă), rulează separat `netstat -tnp` sau `ss -tnp`; `-l` selectează listeners.
 
 > *▸ Alternativă modernă: `ss -tulnp` — exact aceleași flag-uri, disponibil pe distribuțiile mai noi.*
 

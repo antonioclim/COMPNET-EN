@@ -104,9 +104,9 @@ We want 4 large subnets.
 Use 2 additional bits for the Subnet ID → prefix /50:
 
 - `2001:db8:abcd:0::/50`
-- `2001:db8:abcd:4::/50`
-- `2001:db8:abcd:8::/50`
-- `2001:db8:abcd:c::/50`
+- `2001:db8:abcd:4000::/50`
+- `2001:db8:abcd:8000::/50`
+- `2001:db8:abcd:c000::/50`
 
 However, for most exercises and practical applications we use only /64.
 

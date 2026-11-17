@@ -1,6 +1,9 @@
 # 🔍 Code Tracing Exercises — Week 0
 ## Computer Networks — ASE, CSIE | by ing. dr. Antonio Clim
 
+The code-tracing examples are self-contained teaching scenarios. For files and wire protocols used in the actual COMPNET-EN seminars, use the unit README and the canonical Python lab map; a toy JSON or text example does not redefine the S04 protocol.
+
+
 > **Purpose:** Trace code execution step by step without actually running it.
 > **Technique:** Complete the tables with variable state after each line.
 
@@ -9,7 +12,7 @@
 ## Why Code Tracing?
 
 Code tracing helps you:
-- Aderstand **exactly** what each line of code does
+- Understand **exactly** what each line of code does
 - Detect logic errors before execution
 - Build a correct mental model of the programme
 - Answer "what will it display?" questions without running the code
@@ -92,12 +95,14 @@ Assume a client sends the message `"test"` from address `('192.168.1.100', 54321
 
 </details>
 
-**3. What happens if the client sends empty bytes (`b''`)?**
+**3. What happens when a TCP client closes its sending direction and the server’s positive-length `recv()` returns `b''` after consuming buffered bytes?**
 
 <details>
 <summary>Click for solution</summary>
 
-The condition `if data:` is `False` for empty bytes (`b''` is considered falsy in Python), so:
+Sending `sendall(b'')` alone sends no bytes and does not signal EOF; the peer may keep waiting. `shutdown(socket.SHUT_WR)` or a normal close signals the end of that TCP sending direction.
+
+When `recv()` returns EOF, the condition `if data:` is `False` for empty bytes (`b''` is considered falsy in Python), so:
 - "Received:" is not displayed
 - No response is sent
 - Connection closes without processing
@@ -311,7 +316,7 @@ Without `with`, if an exception occurs between `socket()` and `close()`, the soc
 | Variable table | Track state at each step |
 | Flow diagram | Visualise branches (if/else) |
 | Call stack | Track function calls |
-| Timeline | Aderstand async operation order |
+| Timeline | Understand async operation order |
 
 **Final tip:** When you encounter a bug, **manually trace** the code before adding print statements. You'll often find the error without running anything.
 

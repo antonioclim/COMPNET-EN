@@ -35,13 +35,13 @@ You should see a 200 response and the page content (or a directory listing).
 In the same directory where you have `S08_Part04_Config_Docker_Compose.yml` and `S08_Part04_Config_Nginx.conf`, run:
 
 ```bash
-docker compose up
+docker compose -f S08_Part04_Config_Docker_Compose.yml up
 ```
 
 (or, depending on your installation:)
 
 ```bash
-docker-compose up
+docker compose -f S08_Part04_Config_Docker_Compose.yml up
 ```
 
 You should see nginx start without errors.
@@ -113,7 +113,7 @@ add_header X-Student-Lab "Seminar8-ReverseProxy";
 
 ```bash
 # In the terminal running docker compose, stop with Ctrl+C
-docker compose up   # or docker-compose up
+docker compose -f S08_Part04_Config_Docker_Compose.yml up   # or docker compose -f S08_Part04_Config_Docker_Compose.yml up
 ```
 
 3. Test again:

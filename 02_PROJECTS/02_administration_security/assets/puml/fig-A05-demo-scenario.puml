@@ -21,9 +21,9 @@ SH -> VIC : drop rule on :443 (filtered)
 
 == STEP 2 — SCAN (polite mode) ==
 
-EX -> SH : ./run_scan.sh --ports 1-100 --rate 50
+EX -> SH : ./run_scan.sh ~--ports 1-100,443,2222 ~--rate 50
 SH -> SC : TCP connect scan (50 probes/s)
-SC -> VIC : SYN to 100 ports
+SC -> VIC : SYN to the 102 listed ports
 SC -> SC : classify: open, closed, filtered
 SC -> ART : scan_report.json
 note right of ART : ports 80 (open), 2222 (open)\nothers closed or filtered
@@ -37,7 +37,7 @@ note right of ART #E8F5E9 : service_guess: http, ssh
 
 == STEP 4 — RATE COMPARISON ==
 
-EX -> SH : ./run_scan.sh --rate 200
+EX -> SH : ./run_scan.sh ~--ports 1-100,443,2222 ~--rate 200
 SH -> SC : scan at higher rate
 EX -> EX : compare PCAP: SYN/s\nrate at 50 vs 200
 note right of EX : PCAP confirms rate control

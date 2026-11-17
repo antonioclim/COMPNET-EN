@@ -45,6 +45,13 @@ This is not a duplicate of the existing pub/sub broker. It shares notification m
 - **Protocol/default ports (E2):** TCP: 5019/TCP.
 - The Flex component must work with the default values without manual reconfiguration so that it can be integrated into automated tests.
 
+### Interpretation and complementary evidence
+
+The [E2 capture and semantic-evidence matrix](../00_common/E2_CAPTURE_EVIDENCE_MATRIX.md#s19) maps every capture rule to its generating action and the complementary application evidence.
+
+- The supplied command counter uses LF/CRLF framing. If E1 selects JSON or binary framing, supply and test the corresponding decoder in the student validator; do not replace logical counts with frame counts.
+- Correlate client identities, topics/keys and request IDs with pytest assertions to prove the required application behaviour.
+
 ### Deliverables
 - `flex/` directory with sources plus build and run instructions.
 - `docs/FLEX.md` with:
@@ -137,11 +144,11 @@ This is not a duplicate of the existing pub/sub broker. It shares notification m
 
 | ID | tshark filter (`-Y`) | Condition | What it validates |
 |---:|---|---:|---|
-| R1 | `tcp.dstport==5019 && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | Handshake to the auction service. |
-| R2 | `tcp.port==5019 && (frame contains "SELL" || frame contains "OPEN")` | `>= 1` | Auction creation or open-state announcement. |
-| R3 | `tcp.port==5019 && frame contains "BID"` | `>= 2` | At least two bids are visible in payload. |
-| R4 | `tcp.port==5019 && (frame contains "OUTBID" || frame contains "TOP_BID")` | `>= 1` | Competitive update to the highest bid is visible. |
-| R5 | `tcp.port==5019 && (frame contains "CLOSED" || frame contains "WINNER")` | `>= 1` | Automatic closure and winner reporting are observable. |
+| R1 | `tcp.dstport==5019 && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | SYN connection attempt to the auction service. |
+| R2 | `tcp.dstport==5019 && tcp.len>0` | `>= 1` | Complete SELL command lines in the request direction after TCP reassembly and retransmission removal. Measurement: `tcp_commands`. |
+| R3 | `tcp.dstport==5019 && tcp.len>0` | `>= 2` | Complete BID command lines in the request direction after TCP reassembly and retransmission removal. Measurement: `tcp_commands`. |
+| R4 | `tcp.srcport==5019 && tcp.len>0` | `>= 1` | Complete OUTBID/TOP_BID command lines in the response direction after TCP reassembly and retransmission removal. Measurement: `tcp_commands`. |
+| R5 | `tcp.srcport==5019 && tcp.len>0` | `>= 1` | Complete CLOSED/WINNER command lines in the response direction after TCP reassembly and retransmission removal. Measurement: `tcp_commands`. |
 
 ### Deliverables
 - Docker Compose with `auction_service` and `tester` plus optional bidder clients.

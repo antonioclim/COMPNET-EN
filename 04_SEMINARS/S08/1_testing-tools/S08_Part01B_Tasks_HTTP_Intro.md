@@ -30,8 +30,8 @@ Choose any server that exposes a simple API endpoint (e.g. httpbin.org):
 
 ```
 
-curl -v [http://httpbin.org/get](http://httpbin.org/get)
-curl -X POST -d "x=1&y=2" [http://httpbin.org/post](http://httpbin.org/post)
+curl -v http://httpbin.org/get
+curl -X POST -d "x=1&y=2" http://httpbin.org/post
 
 ```
 

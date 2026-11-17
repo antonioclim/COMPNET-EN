@@ -1,39 +1,30 @@
 #!/usr/bin/env bash
-# ──────────────────────────────────────────────────────────────
-# get_plantuml_jar.sh — download the PlantUML JAR into 00_TOOLS/
-#
-# The JAR is intentionally kept out of Git history (.gitignore).
-# Run this script once after cloning the repository.
-# ──────────────────────────────────────────────────────────────
+# Download and validate the PlantUML JAR before atomically replacing the cache.
 set -euo pipefail
-
 PLANTUML_URL="https://github.com/plantuml/plantuml/releases/latest/download/plantuml.jar"
-
-# Resolve paths relative to the script's own location.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TOOLS_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 JAR_PATH="$TOOLS_DIR/plantuml.jar"
-
-if [[ -f "$JAR_PATH" ]]; then
-    echo "[OK]   PlantUML JAR already present: $JAR_PATH"
-    exit 0
+command -v java >/dev/null || { echo "[FAIL] Java is required to validate the JAR." >&2; exit 1; }
+valid_jar() { [[ -s "$1" ]] && java -jar "$1" -version >/dev/null 2>&1; }
+if valid_jar "$JAR_PATH"; then
+  echo "[OK] Valid PlantUML JAR already present: $JAR_PATH"
+  exit 0
 fi
-
+TEMP_JAR=$(mktemp "$TOOLS_DIR/.plantuml-download.XXXXXXXX.jar")
+trap 'rm -f "$TEMP_JAR"' EXIT
 echo "[INFO] Downloading PlantUML (latest release)..."
-
-if command -v curl &>/dev/null; then
-    curl -fSL -o "$JAR_PATH" "$PLANTUML_URL"
-elif command -v wget &>/dev/null; then
-    wget -q --show-progress -O "$JAR_PATH" "$PLANTUML_URL"
+if command -v curl >/dev/null; then
+  curl --connect-timeout 20 --max-time 300 -fSL -o "$TEMP_JAR" "$PLANTUML_URL"
+elif command -v wget >/dev/null; then
+  wget --timeout=30 --tries=2 -O "$TEMP_JAR" "$PLANTUML_URL"
 else
-    echo "[FAIL] Neither curl nor wget is available." >&2
-    exit 1
+  echo "[FAIL] Neither curl nor wget is available." >&2
+  exit 1
 fi
-
-if [[ ! -s "$JAR_PATH" ]]; then
-    echo "[FAIL] Download produced an empty file. Check your network." >&2
-    rm -f "$JAR_PATH"
-    exit 1
+if ! valid_jar "$TEMP_JAR"; then
+  echo "[FAIL] Download is not an executable PlantUML JAR; cache was not replaced." >&2
+  exit 1
 fi
-
-echo "[OK]   PlantUML JAR saved to: $JAR_PATH"
+mv -f "$TEMP_JAR" "$JAR_PATH"
+echo "[OK] Validated PlantUML JAR saved to: $JAR_PATH"

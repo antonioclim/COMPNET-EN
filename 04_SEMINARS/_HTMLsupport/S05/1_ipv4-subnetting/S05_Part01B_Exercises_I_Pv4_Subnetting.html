@@ -81,7 +81,9 @@
 
         // Convert IP string to Integer
         const ipToInt = (ip) => {
-            return ip.split('.').reduce((acc, octet) => (acc << 8) + parseInt(octet, 10), 0) >>> 0;
+            const parts = ip.split('.');
+            if (parts.length !== 4 || !parts.every(p => /^\d{1,3}$/.test(p) && Number(p) <= 255)) throw new Error('Invalid IPv4 address');
+            return parts.reduce((acc, octet) => (acc << 8) + parseInt(octet, 10), 0) >>> 0;
         };
 
         // Convert Integer to IP String
@@ -96,17 +98,18 @@
 
         // Get Subnet Details
         const calculateSubnet = (ip, cidr) => {
+            if (!Number.isInteger(cidr) || cidr < 0 || cidr > 32) throw new Error("Invalid prefix");
             const ipInt = ipToInt(ip);
-            const maskInt = -1 << (32 - cidr);
-            const networkInt = ipInt & maskInt;
-            const broadcastInt = networkInt | (~maskInt >>> 0);
+            const maskInt = cidr === 0 ? 0 : (0xffffffff << (32 - cidr)) >>> 0;
+            const networkInt = (ipInt & maskInt) >>> 0;
+            const broadcastInt = (networkInt | (~maskInt >>> 0)) >>> 0;
 
             return {
                 network: intToIp(networkInt),
                 broadcast: intToIp(broadcastInt),
-                firstHost: intToIp(networkInt + 1),
-                lastHost: intToIp(broadcastInt - 1),
-                numHosts: Math.max(0, Math.pow(2, 32 - cidr) - 2),
+                firstHost: intToIp(networkInt + (cidr < 31 ? 1 : 0)),
+                lastHost: intToIp(broadcastInt - (cidr < 31 ? 1 : 0)),
+                numHosts: cidr >= 31 ? 2 ** (32 - cidr) : 2 ** (32 - cidr) - 2,
                 maskInt,
                 networkInt,
                 broadcastInt
@@ -186,8 +189,8 @@
                 const cleanRange = inputs.range.replace(/\s/g, '');
                 const correctRange1 = `${solution.firstHost}-${solution.lastHost}`;
                 const correctRange2 = `${solution.firstHost}-${solution.lastHost.split('.').pop()}`;
-                const isRange = cleanRange.includes(correctRange1) || cleanRange.includes(correctRange2) || (cleanRange.includes(solution.firstHost) && cleanRange.includes(solution.lastHost));
-                const isCount = parseInt(inputs.count) === solution.numHosts;
+                const isRange = cleanRange === correctRange1 || cleanRange === correctRange2 || cleanRange === `${solution.firstHost.split('.').pop()}-${solution.lastHost.split('.').pop()}`;
+                const isCount = /^\d+$/.test(inputs.count.trim()) && Number(inputs.count) === solution.numHosts;
 
                 if (isNet && isBroad && isRange && isCount) {
                     setStatus('success');
@@ -553,7 +556,8 @@
             const calculate = () => {
                 try {
                     const [ip, cidrStr] = input.split('/');
-                    const cidr = parseInt(cidrStr);
+                    const cidr = Number(cidrStr);
+                    if (!/^\d{1,2}$/.test(cidrStr) || input.split("/").length !== 2) throw new Error("Invalid prefix");
                     if(!ip || isNaN(cidr) || cidr < 0 || cidr > 32) throw new Error("Format invalid");
 
                     const res = calculateSubnet(ip, cidr);

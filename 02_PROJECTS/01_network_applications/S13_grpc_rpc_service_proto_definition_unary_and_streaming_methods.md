@@ -47,6 +47,10 @@ gRPC introduces constraints that affect testing: the contract is proto-first, me
 - **Protocol/default ports (E2):** TCP (HTTP/2 gRPC): gRPC 50051/TCP; raw-protobuf 50052/TCP.
 - The Flex component must work with the default values (without manual reconfiguration) so that it can be integrated into automated tests.
 
+### Interpretation and complementary evidence
+
+The [E2 capture and semantic-evidence matrix](../00_common/E2_CAPTURE_EVIDENCE_MATRIX.md#s13) maps every capture rule to its generating action and the complementary application evidence.
+
 ### Deliverables
 - `flex/` directory with sources plus build/run instructions (avoid exotic dependencies where possible).
 - `docs/FLEX.md` with:
@@ -134,7 +138,7 @@ gRPC introduces constraints that affect testing: the contract is proto-first, me
 - The observed error status for a deadline is mentioned.
 
 ### Automatic PCAP criteria (E2)
-These criteria are **deterministic** and can be verified automatically with `tshark`.
+These capture checks are reproducible with `tshark`. Frame counts are smoke checks; they do not replace the application tests or prove complete project acceptance.
 - Official rules: `tools/pcap_rules/S13.json`
 - In the catalogue (template): `00_common/tools/pcap_rules/S13.json` and `00_common/tools/validate_pcap.py` (copy into the student repository).
 
@@ -142,11 +146,11 @@ These criteria are **deterministic** and can be verified automatically with `tsh
 
 | ID | tshark filter (`-Y`) | Condition | What it validates |
 |---:|---|---:|---|
-| R1 | `tcp.dstport==50051 && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | Handshake to the gRPC endpoint (50051). |
-| R2 | `tcp.port==50051 && frame contains "PRI * HTTP/2.0"` | `>= 1` | HTTP/2 preface (gRPC without TLS in E2). |
-| R3 | `tcp.port==50051 && tcp.len>0` | `>= 5` | Sufficient HTTP/2 traffic (at least 5 data-bearing segments). |
-| R4 | `tcp.dstport==50052 && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | Handshake to the raw-protobuf endpoint (50052). |
-| R5 | `tcp.port==50052 && frame contains "PB1"` | `>= 1` | Raw protobuf message contains the PB1 magic value (an E1 requirement for determinism). |
+| R1 | `tcp.dstport==50051 && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | SYN connection attempt to the gRPC endpoint (50051). |
+| R2 | `tcp.port==50051 && frame contains "PRI * HTTP/2.0"` | `>= 1` | The HTTP/2 connection-preface byte pattern is present (cleartext E2 transport). |
+| R3 | `tcp.port==50051 && tcp.len>0` | `>= 5` | At least five payload-bearing TCP/50051 segments are present; this does not count HTTP/2 frames or gRPC messages. |
+| R4 | `tcp.dstport==50052 && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | SYN connection attempt to the raw-protobuf endpoint (50052). |
+| R5 | `tcp.port==50052 && frame contains "PB1"` | `>= 1` | PB1 marker bytes are present on TCP/50052; decode the complete raw-protobuf frame separately. |
 
 ### Deliverables
 - Docker Compose with `grpc_server` and `tester`.

@@ -1,7 +1,7 @@
 ### IPv4 Addressing, Subnetting and VLSM Exercises
 
 Solve the exercises below. Write your answers in the file:
-`index_ipv4-subnetting_solutions-template.md`
+`S05_Part01C_Solutions_Template_I_Pv4_Subnetting.md`
 
 You may use an online calculator only after completing the calculations by hand.
 

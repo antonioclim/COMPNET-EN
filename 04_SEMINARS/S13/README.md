@@ -85,7 +85,7 @@ python3 S13_Part04_Script_Simple_Scanner.py
 
 ## Pedagogical Context
 
-The seminar follows the standard pentest lifecycle — reconnaissance → scanning → enumeration → exploitation — within a sandboxed Docker environment that poses no risk to production systems. The emphasis is on methodology and evidence gathering rather than tool mastery. By scripting their own exploit in Part 9, students experience the full chain from vulnerability discovery to confirmed access, reinforcing why secure coding and patch management matter.
+The seminar follows the standard pentest lifecycle — reconnaissance → scanning → enumeration → exploitation — within a local Docker teaching environment with deliberately vulnerable services. The emphasis is on methodology and evidence gathering rather than tool mastery. By scripting their own exploit in Part 9, students experience the full chain from vulnerability discovery to confirmed access, reinforcing why secure coding and patch management matter.
 
 ## Cross-References
 
@@ -118,7 +118,7 @@ The seminar follows the standard pentest lifecycle — reconnaissance → scanni
 ```bash
 git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
 cd COMPNET-EN
-git sparse-checkout set 04_SEMINARS/S13
+git sparse-checkout set 04_SEMINARS/S13 00_TOOLS
 ```
 
 **Method B — Direct download**
@@ -130,3 +130,23 @@ https://github.com/antonioclim/COMPNET-EN/tree/main/04_SEMINARS/S13
 ---
 
 *Course: COMPNET-EN — ASE Bucharest, CSIE*
+
+### Scope and shutdown of the vulnerable lab
+
+The supplied Compose file publishes services on **127.0.0.1 of the Docker host**.
+With Docker inside the course VM, that is the guest loopback, not Windows loopback.
+Use the VM terminal or an explicitly configured SSH tunnel for host access; do not
+change these bindings to `0.0.0.0` or use bridged networking to make them reachable.
+A Docker bridge is not a complete security boundary: use only the supplied local
+lab targets and verify the actual published addresses with `docker compose -f
+S13_Part02_Config_Docker_Compose_Pentest.yml ps`.
+
+When finished, run from this directory:
+
+```bash
+docker compose -f S13_Part02_Config_Docker_Compose_Pentest.yml down
+```
+
+Port overrides are decimal integers (1–65535), optionally quoted and followed by a
+space and a `# comment`. Interpolation is not supported in these port values.
+The generator probes availability but cannot reserve a port until Docker starts.

@@ -31,7 +31,8 @@ import os
 import tempfile
 from typing import Any, Union
 
-__all__ = ['safe_decode', 'hex_dump', 'demonstrate_encoding', 'demonstrate_decoding']
+__all__ = ['safe_decode', 'hex_dump', 'ensure_bytes', 'ensure_str',
+           'demonstrate_conversion', 'demonstrate_encoding_errors', 'binary_file_example']
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # LOGGING_CONFIGURATION
@@ -258,7 +259,8 @@ def binary_file_example() -> None:
     test_data: bytes = b'\x45\x00\x00\x28'  # IPv4, IHL=5, length=40
     
     # HACK: Use a temporary file to avoid polluting the system
-    temp_path: str = os.path.join(tempfile.gettempdir(), 'test_packet.bin')
+    temp_dir = tempfile.TemporaryDirectory(prefix='compnet-bytes-')
+    temp_path: str = os.path.join(temp_dir.name, 'test_packet.bin')
     
     try:
         # ─────────────────────────────────────────────────────────────
@@ -298,9 +300,8 @@ def binary_file_example() -> None:
         
     finally:
         # NOTE: Cleanup — delete the temporary file
-        if os.path.exists(temp_path):
-            os.remove(temp_path)
-            print(f"\n🧹 Cleanup: temporary file deleted")
+        temp_dir.cleanup()
+        print("\n🧹 Cleanup: this demonstration's temporary directory deleted")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

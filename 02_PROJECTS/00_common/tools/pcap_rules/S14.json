@@ -7,25 +7,30 @@
       "id": "R1",
       "filter": "udp.port==5014 && frame contains \"DV1\"",
       "condition": ">= 3",
-      "description": "At least 3 DV messages (magic DV1), periodic updates."
+      "description": "At least three UDP/5014 frames contain DV1 marker bytes."
     },
     {
       "id": "R2",
       "filter": "udp.port==5015 && frame contains \"DATA1\"",
       "condition": ">= 1",
-      "description": "At least one forwarded overlay data packet (magic DATA1)."
+      "description": "A UDP/5015 frame contains DATA1 marker bytes; verify forwarding hops separately."
     },
     {
       "id": "R3",
       "filter": "udp.port==5014 && (frame contains \"POISON\" || frame contains \"SPLITH\")",
       "condition": ">= 1",
-      "description": "Anti-loop evidence (poison reverse/split horizon) in the payload or logs."
+      "description": "A POISON/SPLITH marker is present in UDP/5014 payload; inspect recipient, metric and routing effect separately."
     },
     {
       "id": "R4",
       "filter": "icmp || udp.port==5015",
       "condition": ">= 1",
-      "description": "Demonstrative end-to-end traffic (data/ping) in the topology."
+      "description": "ICMP or UDP/5015 frames are present; correlate an end-to-end request and result."
     }
+  ],
+  "manual_checks": [
+    "R1: Decode sender, destination and metric according to E1.",
+    "R2 R4: Correlate each hop and the destination result with the routing table.",
+    "R3: Inspect destination, recipient and metric: distinguish route poisoning from poison reverse and prove the resulting route changes."
   ]
 }

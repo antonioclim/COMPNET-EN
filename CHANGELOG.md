@@ -1,5 +1,28 @@
 # CHANGELOG — Backbone comparison and downstream evolution (compnet-2025-redo-main → COMPNET-EN-main → COMPNET-EN-main_PHASEC_plus_more_labs_QAfix)
 
+## Unreleased — v1.5.0 candidate, 17 November 2026
+
+The candidate starts from the preserved v1.4.0 commit
+`8b10df86bdd9dae33a7aa82beb580fa449c530ea`. It does not replace that tag or
+re-export the independently versioned MININET-SDN 1.0.0 appliance.
+
+- Reconcile canonical examples, student quizzes, lecture/seminar diagrams,
+  project evidence and installation routes across the course kit.
+- Correct confirmed protocol, connection ownership, framing, error propagation,
+  grading, export and interactive presentation defects; add targeted regressions.
+- Rebuild the project verification workbook against the canonical requirements,
+  preserving requirement identifiers, assessment stages and original provenance.
+- Use a common non-mutating source gate for local QA, CI and release packaging;
+  commit executable modes and reject uncommitted or failed packaging inputs.
+- Correct verified reference metadata and qualify unsupported comparative claims.
+  Record the unresolved licence policy for the author's explicit decision.
+
+The detailed [remediation and acceptance record](00_TOOLS/qa/REMEDIATION_v1.5.0.md)
+distinguishes native component tests, structural checks and model-based probes.
+OVA/Windows/WSL, complete Docker/Mininet labs, native browser, LMS and desktop
+spreadsheet acceptance remain separate release gates. This entry does not claim
+that v1.5.0 has been published or that all cumulative findings are fully accepted.
+
 ## 16 November 2026 — MININET-SDN distribution and student setup
 
 The update below uses the current GitHub snapshot as its base; the historical

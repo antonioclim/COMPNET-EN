@@ -311,10 +311,17 @@ ping -c 2 10.0.2.10
 
 ### Pas 5 — Repari: forwarding ON + ping + traceroute (2 min)
 
-🟢 **În s05-r1:**
-```bash
-sysctl -w net.ipv4.ip_forward=1
+🔵 **În PowerShell, în directorul fişierului Compose:** schimbă valoarea
+`net.ipv4.ip_forward` din `"0"` în `"1"` în `docker-compose.yml`, apoi:
+
+```powershell
+docker compose -f docker-compose.yml up -d --force-recreate r1
+docker exec s05-r1 sysctl net.ipv4.ip_forward
 ```
+
+`/proc/sys` poate fi read-only într-un container. `NET_ADMIN` nu schimbă această
+montare; setăm sysctl la creare, fără a acorda `privileged`. Redeschide terminalul
+routerului şi reia captura după recreare, apoi repetă pingul din h1.
 
 🟢 **În s05-h1:**
 ```bash
@@ -506,7 +513,7 @@ docker compose up -d --build
 | Mogul, J., & Postel, J. (1985). *Internet Standard Subnetting Procedure* (RFC 950). RFC Editor. | https://doi.org/10.17487/RFC0950 |
 | Fuller, V., & Li, T. (2006). *Classless Inter-domain Routing (CIDR): The Internet Address Assignment and Aggregation Plan* (RFC 4632). RFC Editor. | https://doi.org/10.17487/RFC4632 |
 | Deering, S., & Hinden, R. (2017). *Internet Protocol, Version 6 (IPv6) Specification* (RFC 8200). RFC Editor. | https://doi.org/10.17487/RFC8200 |
-| Deering, S., & Hinden, R. (2006). *IP Version 6 Addressing Architecture* (RFC 4291). RFC Editor. | https://doi.org/10.17487/RFC4291 |
+| Hinden, R., & Deering, S. (2006). *IP Version 6 Addressing Architecture* (RFC 4291). RFC Editor. | https://doi.org/10.17487/RFC4291 |
 | Kawamura, S., & Kawashima, M. (2010). *A Recommendation for IPv6 Address Text Representation* (RFC 5952). RFC Editor. | https://doi.org/10.17487/RFC5952 |
 
 ---

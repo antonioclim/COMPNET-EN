@@ -129,7 +129,7 @@ Urmărești în loguri: containerele `nginx-proxy`, `web1`, `web2`, `web3`.
 **Predicție privind concepția greșită #5 (porturi auto-expuse):**
 > *▸ „Putem accesa direct web1 pe portul 8000 din browser? De ce nu?"*
 
-Răspuns: nu — `expose` nu mapează pe host; doar Nginx, cu `ports: 8080:80`, e accesibil din exterior.
+Răspuns: `localhost:8000` nu este publicat, iar numele `web1` este DNS intern Docker. Totuşi, hostul Linux al daemonului poate accesa IP-ul containerului dacă rutarea şi filtrarea permit. Docker Desktop şi hostul fizic pot avea alt traseu. `expose` este metadată, nu regulă firewall.
 
 ### C.2 Test round robin (4–5 min)
 
@@ -343,7 +343,7 @@ mkdir -p captures
 docker run --rm --net=container:lb-custom \
   -v "$(pwd)/captures:/captures" \
   nicolaka/netshoot \
-  tcpdump -i eth0 -w /captures/lb_upstream.pcap port 8000
+  tcpdump -i eth0 -w /captures/lb_upstream.pcap "tcp port 8000 or tcp port 8080"
 ```
 
 🟢 **Terminal 2 (în paralel):**
@@ -379,7 +379,7 @@ Sau, dacă ai Wireshark GUI: `wireshark captures/lb_upstream.pcap &` → filtru 
 
 > *▸ „Trei lucruri de reținut:"*
 > 1. *„Reverse proxy = ascunde backend-urile; clientul vede o singură adresă."*
-> 2. *„Diferența practică: Nginx e declarativ și are health checks; scriptul Python e procedural și orb — trimite și la backend-uri moarte."*
+> 2. *„Diferența practică: Nginx e declarativ; în configuraţia livrată verificările sunt pasive; scriptul Python e procedural și orb — trimite și la backend-uri moarte."*
 > 3. *„LB-ul nu pasează conexiunea — o rupe în două. Asta ați văzut în pcap."*
 
 ### Reluare hook

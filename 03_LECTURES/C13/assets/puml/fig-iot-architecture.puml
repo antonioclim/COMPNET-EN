@@ -19,9 +19,9 @@ package "IoT Deployment" as iot #F5F5F5 {
 }
 
 sensor -[#1565C0]-> broker : publish\ntelemetry data
-broker -[#43A047]-> actuator : deliver\ncontrol messages
+broker -[#43A047]-> actuator : PUBLISH\ncontrol messages
 broker -[#1565C0]-> backend : forward\ntelemetry stream
-backend -[#FF9800].> actuator : optional\ndirect command
+backend -[#FF9800]-> broker : PUBLISH control command
 
 legend right
 Components communicate exclusively

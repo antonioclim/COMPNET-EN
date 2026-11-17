@@ -496,6 +496,7 @@
             // Wireshark: FIN
             this.wireshark.addPacket("54321", "12345", "54321 → 12345 [FIN, ACK] Seq=11 Ack=11", 0);
             this.wireshark.addPacket("12345", "54321", "12345 → 54321 [FIN, ACK] Seq=11 Ack=12", 0);
+            this.wireshark.addPacket("54321", "12345", "54321 → 12345 [ACK] Seq=12 Ack=12", 0);
 
             await wait(1000);
 
@@ -519,13 +520,13 @@
 
             // Expected Output in Server:
             // [CLIENT] 127.0.0.1:54322 connected
-            // [CLIENT] Sent 16 bytes: b'testing template'
+            // [CLIENT] Sent 17 bytes: b'testing template\\n'
             this.termServer.output("[CLIENT] 127.0.0.1:54322 connected");
-            this.termServer.output("[CLIENT] Sent 16 bytes: b'testing template'");
+            this.termServer.output("[CLIENT] Sent 17 bytes: b'testing template\\n'");
 
             // Wireshark update
-            this.wireshark.addPacket("54322", "12345", "54322 → 12345 [PSH, ACK] Seq=1 Ack=1 Len=16", 16);
-            this.wireshark.addPacket("12345", "54322", "12345 → 54322 [PSH, ACK] Seq=1 Ack=17 Len=20", 20); // Len 20 because "OK: " (4) + 16
+            this.wireshark.addPacket("54322", "12345", "54322 → 12345 [PSH, ACK] Seq=1 Ack=1 Len=17", 17);
+            this.wireshark.addPacket("12345", "54322", "12345 → 54322 [PSH, ACK] Seq=1 Ack=18 Len=21", 21); // "OK: " (4) + 16 text bytes + LF (1)
 
             this.badge.innerText = "Lab Complete";
             this.badge.style.background = "#4ec9b0";

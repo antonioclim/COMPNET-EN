@@ -10,7 +10,8 @@ ports via a simple `.env`.
 
 This generator is intentionally conservative:
 - if `.env` already exists, it will NOT overwrite it (reproducibility)
-- it picks the first free port in a small window near each default
+- it picks the first apparently free port in a small window near each default
+- bind probes do not reserve ports; Docker remains the final availability check
 
 Usage
 -----
@@ -104,10 +105,12 @@ def is_port_free(port: int) -> bool:
 
 
 def pick_port(hint: int, window: int = 50) -> int:
+    if not 1 <= hint <= 65535 or window < 0 or hint + window > 65535:
+        raise ValueError("Port range must fit in 1..65535 and window must be non-negative")
     for p in range(hint, hint + window + 1):
         if is_port_free(p):
             return p
-    return hint
+    raise ValueError(f"No free TCP port in {hint}..{hint + window}; .env was not written")
 
 
 def write_env_file(path: Path, force: bool, window: int) -> None:
@@ -150,7 +153,10 @@ def main() -> None:
     args = ap.parse_args()
 
     env_path = Path(__file__).resolve().parent / args.env_file
-    write_env_file(env_path, force=args.force, window=args.window)
+    try:
+        write_env_file(env_path, force=args.force, window=args.window)
+    except ValueError as exc:
+        ap.error(str(exc))
 
 
 if __name__ == "__main__":

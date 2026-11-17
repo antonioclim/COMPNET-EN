@@ -21,7 +21,7 @@ The script removes namespaces and links on exit.
 
 | Name | Lines |
 |------|-------|
-| `nat-demo.sh` | 53 |
+| `nat-demo.sh` | 75 |
 
 ## Cross-References
 

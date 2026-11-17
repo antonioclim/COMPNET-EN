@@ -144,6 +144,29 @@ Do not stop an unrelated service merely because it occupies port 9050. Select an
 | Image unavailable and no internet | Obtain the selected image beforehand; a failed pull does not delete the existing instance |
 | HTTP 500 during environment registration | Treat as a server error, inspect the logs and do not label it “already configured” |
 
+### Password recovery while retaining configuration
+
+Use the [official password helper](https://docs.portainer.io/advanced/reset-admin)
+for the initial administrator account. First inspect the existing `/data` mount:
+
+```bash
+docker inspect portainer --format '{{json .Mounts}}'
+```
+
+Only if the container is named `portainer` and its existing named data volume is
+`portainer_data`, run the following in the terminal for that Docker daemon:
+
+```bash
+docker stop portainer
+docker run --rm -v portainer_data:/data portainer/helper-reset-password
+docker start portainer
+```
+
+If either name differs, substitute the observed name. Do not create a new empty
+volume as a password-recovery shortcut. Use the account and password printed by
+the helper; an existing personal administrator does not automatically become
+`stud`. Record any helper failure and retain the original data for diagnosis.
+
 ## 8. Scope and upstream references
 
 Binding to loopback keeps the shared teaching login off the LAN. Portainer has administrative control over the selected Docker daemon through its socket. The course configuration is for the local teaching environment.

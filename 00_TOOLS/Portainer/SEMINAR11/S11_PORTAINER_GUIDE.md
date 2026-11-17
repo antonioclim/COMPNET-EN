@@ -1,5 +1,21 @@
 # S11 — Portainer Integration (Instructor Notes)
 
+> **Execution route:** PowerShell commands in this guide use Docker Desktop on
+> Windows. With the primary MININET-SDN OVA, run the Compose commands in the Linux
+> guest and test guest endpoints there; translate `..\folder` to `../folder`.
+> Windows `127.0.0.1:2222` is the OVA SSH forward, not automatically an S10
+> container endpoint. Use the [environment routes](../../../00_APPENDIX/docs/environment_routes.md)
+> and the canonical seminar README for the chosen route.
+
+**Reading the dashboard:** a port mapping is configuration, a running container is
+process state and a successful application request is service evidence. Record
+these separately. `EXPOSE`/Compose `expose` documents a container port; it does not
+create an access-control boundary. On normal Linux bridge networks the daemon
+host can reach container addresses even without published ports. Docker Desktop's
+Windows host normally accesses them through published ports. See
+[Docker port publishing](https://docs.docker.com/engine/network/port-publishing/).
+
+
 ## Context
 
 Seminar 11 is the most Docker-intensive session of the semester. Two load-balancing architectures are deployed back-to-back: an Nginx reverse proxy (Part 1) and a custom Python load balancer (Part 2). Each stack runs four containers on a shared `lbnet` network. The seminar's arc depends on students *seeing* the difference between the two architectures and observing real-time behaviour during deliberate failure tests.
@@ -13,8 +29,8 @@ This is where Portainer shifts from "handy shortcut" to "primary observation ins
 | Observe round-robin distribution across backends | Three simultaneous log tabs — watch requests land on web1, web2, web3 in rotation |
 | Test resilience by stopping a backend | Stop/start a container from the dashboard in one click; the state change is immediately visible |
 | Compare Nginx proxy vs custom Python LB | Side-by-side topology snapshots (same 4-container shape, different images and ports) |
-| Understand that backends are not directly reachable | Published-ports column: only the proxy has one; backends have none |
-| Debug build failures in custom Dockerfile | Exit code and log trace visible on the container card without extra commands |
+| Distinguish proxy publication from internal backend addresses | Published-ports column: only the proxy has one; backends have none |
+| Debug build failures in custom Dockerfile | Inspect Compose build output first; a build failure may create no container |
 
 The round-robin log observation is the highlight. Doing it from the CLI requires three terminals running `docker logs -f web1`, `docker logs -f web2`, `docker logs -f web3` — manageable but clunky. Portainer turns this into three browser tabs with auto-refresh, which students find more intuitive.
 
@@ -50,7 +66,7 @@ docker compose -f S11_Part01_Config_Docker_Compose_Nginx.yml up -d
 | `web3`        | 🟢    | —               |
 | `nginx-proxy` | 🟢    | **8080 → 80**   |
 
-> *▸ "Four containers. Only `nginx-proxy` has a port published on the host. The backends are invisible from the outside — reachable only through the proxy."*
+> *▸ "Four containers. Only `nginx-proxy` has a host-port mapping. Use that endpoint for this experiment; the Linux daemon host and same-network containers can also reach backend addresses directly."*
 
 **Network view.** Click **Networks** → **lbnet**. All four containers are on the same subnet. The IPs listed here are what the `upstream` block in `nginx.conf` resolves to.
 
@@ -69,13 +85,13 @@ docker compose -f S11_Part01_Config_Docker_Compose_Nginx.yml up -d
    }
    ```
 
-3. Students watch the log lines appear in rotation: web1 gets requests 1 and 4, web2 gets 2 and 5, web3 gets 3 and 6.
+3. Students record which backend serves each request. With three healthy, equally weighted backends and no other traffic, distribution should cycle, but the first backend and exact order must be observed rather than assumed.
 
 > *▸ "Real-time round-robin distribution: each backend receives a request in turn. Without Portainer you would need three PowerShell windows with `docker logs -f`."*
 
-**Failure test.** In Portainer, select `web2` → **Stop**. The card turns red. Repeat the six-request loop. Only web1 and web3 receive traffic.
+**Failure test.** In Portainer, select `web2` → **Stop** and record its stopped state. Repeat the six-request loop, retaining response codes and proxy error logs. Observe retries, failures and subsequent distribution according to the supplied Nginx passive-failure settings.
 
-> *▸ "Nginx detects the failed backend and removes it from the rotation. Notice: web2 is stopped, and its logs are silent."*
+> *▸ "Nginx learns about connection failures when requests reach the stopped backend. Examine its retry and passive-failure behaviour; the stopped container’s log alone cannot explain the proxy’s decision."*
 
 Restart `web2` from Portainer. Resume requests — web2 re-enters the rotation.
 
@@ -98,7 +114,9 @@ cd ..\2_custom-load-balancer
 docker compose -f S11_Part02_Config_Docker_Compose_Lb_Custom.yml up -d --build
 ```
 
-**Build verification.** `lb-custom` is built from a Dockerfile. If the build fails, the container appears as red (exited) in Portainer. Click it → **Logs** → the Python traceback or build error is right there.
+**Build verification.** `lb-custom` is built from a Dockerfile. A failed build is diagnosed from the `docker compose ... up --build` terminal/build output and may create no container at all. If the image builds and the process later exits, inspect that container’s exit code and runtime logs. Keep these two failure stages distinct.
+
+**Deliberate exercise fault:** the canonical Part 2 starts with backend-name settings that students must diagnose and correct. Follow `S11_Part02B_Tasks_Custom_Lb.md`; do not interpret its initial name-resolution failure as a regression or claim load balancing before completing that task.
 
 > *▸ "If `lb-custom` appears in red, open its logs — typically it is an import error or a Python syntax error."*
 
@@ -113,7 +131,7 @@ docker compose -f S11_Part02_Config_Docker_Compose_Lb_Custom.yml up -d --build
 
 > *▸ "Compare with Part 1: there Nginx listened on internal port 80, published as 8080. Here, the Python load balancer listens directly on 8080. Different implementation, same role."*
 
-**DNS verification.** Open **Console** on `lb-custom`:
+**DNS verification after the assigned configuration correction.** Open **Console** on `lb-custom`:
 
 ```sh
 ping -c 1 web1-lb
@@ -140,7 +158,7 @@ docker cp lb-custom:/tmp/lb_traffic.pcap .
 
 ### Usage Density Summary
 
-Across the full seminar, Portainer is used roughly fifteen times: four state checks, two parallel-log sessions, four stop/start actions, two network inspections, two console accesses and one build-failure diagnosis. This is the peak. Students who are comfortable with Portainer after S11 will use it instinctively for their projects.
+Across the full seminar, Portainer is used roughly fifteen times: four state checks, two parallel-log sessions, four stop/start actions, two network inspections, two console accesses and one diagnosis that distinguishes build output from runtime logs. This is the peak. Students who are comfortable with Portainer after S11 will use it instinctively for their projects.
 
 ## How to Use It — Student Perspective
 

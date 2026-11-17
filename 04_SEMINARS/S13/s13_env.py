@@ -12,12 +12,14 @@ This helper keeps scripts robust when students:
 Design constraints
 ------------------
 - standard library only (no python-dotenv dependency)
-- very small parser: KEY=VALUE, ignores blanks/comments
+- decimal port values, optionally quoted, with Compose-style inline comments
+- interpolation and escapes are not accepted for port values
 """
 
 from __future__ import annotations
 
 from pathlib import Path
+import re
 from typing import Dict
 
 
@@ -36,7 +38,17 @@ def load_env_file(env_path: Path) -> Dict[str, str]:
             continue
         k, v = line.split("=", 1)
         k = k.strip()
-        v = v.strip().strip('"').strip("'")
+        v = v.strip()
+        if v.startswith(('"', "'")):
+            quote = v[0]
+            end = v.find(quote, 1)
+            if end < 0 or (v[end + 1:].strip() and not v[end + 1:].strip().startswith("#")):
+                raise ValueError(f"Invalid quoted .env value for {k}")
+            v = v[1:end]
+        else:
+            v = re.split(r"\s+#", v, maxsplit=1)[0].strip()
+        if k.endswith("_PORT") and not (v.isdecimal() and 1 <= int(v) <= 65535):
+            raise ValueError(f"{k} must be a decimal port in 1..65535 (no interpolation)")
         if k:
             data[k] = v
     return data

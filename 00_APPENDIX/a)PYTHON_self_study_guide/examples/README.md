@@ -90,7 +90,7 @@ git sparse-checkout set "00_APPENDIX/a)PYTHON_self_study_guide/examples"
 If you plan to run tests, also include the Python dependencies:
 
 ```bash
-git sparse-checkout add 00_APPENDIX/requirements.txt
+# requirements.txt in the ancestor 00_APPENDIX directory is included by cone mode.
 ```
 
 Method B — Direct download (no Git required)

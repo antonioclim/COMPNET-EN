@@ -131,43 +131,58 @@
 
 ---
 
-### Q10. `Multiple Choice`
-**NAT Translation Trace — Server-Visible Source / Trasarea traducerii NAT — sursa vizibilă de server**
+### Q10. — SNAT source address / Adresa sursă după SNAT
 
-> Host h1 (192.168.10.2) sends a packet to server h3 (203.0.113.2) through a NAT router with public IP 203.0.113.1. What source IP address does the server h3 observe? [Gazda h1 (192.168.10.2) trimite un pachet către serverul h3 (203.0.113.2) prin intermediul unui ruter NAT cu IP-ul public 203.0.113.1. Ce adresă IP sursă observă serverul h3?]
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-- **a)  192.168.10.2 (h1's private IP) [192.168.10.2 (IP-ul privat al lui h1)]**
-- **b)  192.168.10.1 (the router's private interface) [192.168.10.1 (interfața privată a ruterului)]**
-- **c)  203.0.113.1 (the NAT router's public IP) [203.0.113.1 (IP-ul public al ruterului NAT)]**
-- **d)  203.0.113.2 (h3's own IP) [203.0.113.2 (IP-ul propriu al lui h3)]**
+A configured SNAT rule rewrites source 192.168.10.2 to 203.0.113.1 on packets forwarded to 203.0.113.2. What source address is in the IP header received by that server? [O regulă SNAT configurată rescrie sursa 192.168.10.2 în 203.0.113.1 pentru pachetele către 203.0.113.2. Ce adresă sursă apare în antetul IP primit de server?]
 
-> 💡 **Feedback:** Private addresses (RFC 1918) are never visible outside the NAT boundary. The server only sees the NAT router's public IP, 203.0.113.1, as the source. A common misconception is that private IP addresses travel across the Internet; in reality, the NAT router rewrites the source address before forwarding the packet, and external hosts have no knowledge of the internal addressing scheme. [Adresele private (RFC 1918) nu sunt niciodată vizibile în afara granței NAT. Serverul vede doar IP-ul public al ruterului NAT, 203.0.113.1, ca sursă. O concepție greșită frecventă este că adresele IP private circulă prin Internet; în realitate, ruterul NAT rescrie adresa sursă înainte de a redirecționa pachetul, iar gazdele externe nu au cunoștință despre schema de adresare internă.]
+- **a)** 203.0.113.1
+- **b)** 192.168.10.2
+- **c)** 192.168.10.1
+- **d)** 203.0.113.2
 
----
+<details><summary>💡 Feedback</summary>
 
-### Q11. `Multiple Choice`
-**Why NAT Breaks Inbound Connections / De ce NAT întrerupe conexiunile de intrare**
+**Correct answer / Răspuns corect: a.** The supplied translation rule determines the visible IP-header source. This does not prove that private addresses cannot appear in payloads, logs, tunnels or routed private networks. 203.0.113.0/24 is a documentation range. [Regula de traducere dată determină sursa vizibilă în antetul IP. Aceasta nu dovedește că adrese private nu pot apărea în payloaduri, loguri, tuneluri sau rețele private rutate. 203.0.113.0/24 este interval de documentație.]
 
-> Peer-to-peer applications and inbound connections often fail when traversing NAT. What is the fundamental reason for this? [Aplicațiile peer-to-peer (egal la egal) și conexiunile de intrare eșuează adesea la traversarea NAT. Care este motivul fundamental?]
-
-- **a)  Without an existing conntrack entry, NAT cannot map unsolicited inbound packets to an internal host [Fără o intrare conntrack existentă, NAT nu poate mapa pachetele de intrare nesolicitate către o gazdă internă]**
-- **b)  NAT blocks all UDP traffic by default [NAT blochează tot traficul UDP implicit]**
-- **c)  NAT encrypts all outbound traffic at the network layer, preventing external hosts from responding or establishing reverse connections [NAT criptează tot traficul de ieșire la nivelul rețelei, împiedicând gazdele externe să răspundă sau să stabilească conexiuni inverse]**
-- **d)  NAT requires all applications to use TCP exclusively [NAT necesită ca toate aplicațiile să utilizeze exclusiv TCP]**
-
-> 💡 **Feedback:** NAT relies on conntrack entries created by outbound connections. Without a pre-existing entry, unsolicited inbound packets cannot be mapped to any internal host and are dropped. A common misconception is that NAT blocks inbound traffic intentionally as a security feature; in reality, it simply has no mapping to route unsolicited packets, which is obscurity rather than deliberate security enforcement. [NAT se bazează pe intrările conntrack create de conexiunile de ieșire. Fără o intrare preexistentă, pachetele de intrare nesolicitate nu pot fi mapate către nicio gazdă internă și sunt eliminate. O concepție greșită frecventă este că NAT blochează traficul de intrare intenționat ca funcție de securitate; în realitate, pur și simplu nu are o mapare pentru a direcționa pachetele nesolicitate, ceea ce reprezintă obscuritate, nu aplicarea deliberată a securității.]
+</details>
 
 ---
 
-### Q12. `True / False`
-**NAT Provides Security / NAT oferă securitate**
+### Q11. — NAT mapping and filtering / Mapare NAT și filtrare
 
-> NAT is an adequate replacement for a firewall because it hides internal IP addresses and blocks all inbound attacks. [NAT este un înlocuitor adecvat al unui firewall (paravan de protecție) deoarece ascunde adresele IP interne și blochează toate atacurile de intrare.]
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-- **a)  true**
-- **b)  false**
+An unsolicited packet arrives at a NAT router public endpoint with no matching dynamic translation or static DNAT mapping. Which statement is correct? [Un pachet nesolicitat ajunge la endpointul public al unui ruter NAT fără traducere dinamică sau mapare DNAT statică potrivită. Ce afirmație este corectă?]
 
-> 💡 **Feedback:** NAT provides obscurity, not security. While it blocks unsolicited inbound connections (no conntrack entry), it does not inspect packet contents, block outbound malware, detect intrusions, or encrypt traffic. A proper stateful firewall is still required. The key question to consider: if an employee clicks a malicious link, does NAT stop the malware from calling home? The  [NAT oferă obscuritate, nu securitate. Deși blochează conexiunile de intrare nesolicitate (fără intrare conntrack), nu inspectează conținutul pachetelor, nu blochează programele malware de ieșire, nu detectează intruziunile și nu criptează traficul. Un firewall (paravan de protecție) cu inspecție de stare rămâne necesar. Întrebarea cheie de considerat: dacă un angajat accesează un link malițios, oprește NAT-ul programul malware să comunice cu serverul de comandă? Răspunsul este nu.]
+- **a)** There is no supplied translation to an internal destination; routing and firewall policy still decide handling. [Nu există traducerea dată către o destinație internă; rutarea și politica firewall decid în continuare tratarea.]
+- **b)** NAT automatically drops every packet addressed directly to any internal IP. [NAT elimină automat orice pachet adresat direct oricărui IP intern.]
+- **c)** NAT encrypts the packet before rejecting it. [NAT criptează pachetul înainte de respingere.]
+
+<details><summary>💡 Feedback</summary>
+
+**Correct answer / Răspuns corect: a.** Translation and filtering are different operations. Static port forwarding can supply a mapping; a packet routed directly to an internal address can avoid the need for DNAT. Enforce the intended inbound policy with explicit firewall rules. [Traducerea și filtrarea sunt operații distincte. Redirecționarea statică poate furniza o mapare; un pachet rutat direct la o adresă internă poate să nu necesite DNAT. Aplicați politica de intrare prin reguli firewall explicite.]
+
+</details>
+
+---
+
+### Q12. — NAT and firewall roles / Rolurile NAT și firewall
+
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
+
+Does address translation alone replace a firewall policy? [Traducerea adreselor înlocuiește singură politica unui firewall?]
+
+- **a)** No. NAT changes addressing; filtering rules define permitted traffic. [Nu. NAT schimbă adresarea; regulile de filtrare definesc traficul permis.]
+- **b)** Yes. NAT blocks every possible inbound attack. [Da. NAT blochează orice atac posibil de intrare.]
+- **c)** Yes. NAT authenticates and encrypts every application message. [Da. NAT autentifică și criptează fiecare mesaj al aplicației.]
+
+<details><summary>💡 Feedback</summary>
+
+**Correct answer / Răspuns corect: a.** NAT is not a general access-control policy. It does not inherently block malware communicating through permitted outbound connections. Use explicit stateful filtering and application controls appropriate to the intended policy. [NAT nu este o politică generală de control al accesului. Nu blochează implicit malware care comunică prin conexiuni de ieșire permise. Folosiți filtrare cu stare și controale ale aplicației potrivite politicii dorite.]
+
+</details>
 
 ---
 
@@ -279,17 +294,21 @@
 
 ---
 
-### Q21. `Multiple Choice`
-**When Packet-In Messages Are Sent / Când se trimit mesajele Packet-In**
+### Q21. — OpenFlow 1.3 table miss / Table-miss în OpenFlow 1.3
 
-> Under what condition does an OpenFlow switch send a Packet-In message to the SDN controller? [În ce condiție un comutator OpenFlow trimite un mesaj Packet-In către controlerul SDN?]
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-- **a)  When the switch runs out of flow table memory and cannot allocate new entries for incoming packets [Când comutatorul rămâne fără memorie pentru tabela de fluxuri și nu poate aloca intrări noi]**
-- **b)  When a packet does not match any existing flow rule (table-miss) [Când un pachet nu corespunde niciunei reguli de flux existente (table-miss)]**
-- **c)  Only for TCP packets [Doar pentru pachete TCP]**
-- **d)  For every packet that passes through the switch [Pentru fiecare pachet care trece prin comutator]**
+In an OpenFlow 1.3 table, a packet matches no specific entry. When does this path send it to the controller? [Într-o tabelă OpenFlow 1.3, un pachet nu corespunde niciunei intrări specifice. Când îl trimite această cale la controler?]
 
-> 💡 **Feedback:** A Packet-In is triggered when a packet matches no existing flow rule (table-miss). The controller then decides what action to take and may install a new flow rule (reactive flow installation). A common misconception is that the controller processes every packet; if this were the case, SDN would be prohibitively slow — the controller only intervenes when no matching rule exists. [Un Packet-In este declanșat când un pachet nu corespunde niciunei reguli de flux existente (table-miss). Controlerul decide apoi ce acțiune să întreprindă și poate instala o nouă regulă de flux (instalare reactivă de flux). O concepție greșită frecventă este că controlerul procesează fiecare pachet; dacă ar fi așa, SDN ar fi prohibitiv de lent — controlerul intervine doar când nu există nicio regulă care să corespundă.]
+- **a)** When a matching table-miss entry explicitly outputs it to CONTROLLER. [Când o intrare table-miss potrivită îl trimite explicit la CONTROLLER.]
+- **b)** Always, even if the table has no table-miss entry. [Întotdeauna, chiar dacă tabela nu are intrare table-miss.]
+- **c)** Only when it is TCP. [Numai dacă este TCP.]
+
+<details><summary>💡 Feedback</summary>
+
+**Correct answer / Răspuns corect: a.** In OpenFlow 1.3 a missing table-miss entry causes an unmatched packet to be dropped. A wildcard priority-zero table-miss entry can instead output to the controller or continue processing. Other explicit rules can also output to CONTROLLER. [În OpenFlow 1.3, absența intrării table-miss duce la eliminarea pachetului nepotrivit. O intrare table-miss wildcard de prioritate zero poate trimite la controler sau continua procesarea. Și alte reguli explicite pot trimite la CONTROLLER.]
+
+</details>
 
 ---
 
@@ -315,7 +334,7 @@
 - **a)  true**
 - **b)  false**
 
-> 💡 **Feedback:** OpenFlow uses a numerical priority system where higher numbers indicate higher importance. Priority 300 takes precedence over priority 30. The maximum is 65535, and 0 is reserved for the table-miss rule (lowest possible). This is the opposite of everyday language where "Priority 1" typically means most important. [OpenFlow folosește un sistem numeric de priorități în care numerele mai mari indică importanță mai mare. Prioritatea 300 are precedență față de prioritatea 30. Maximul este 65535, iar 0 este rezervat regulii table-miss (cea mai scăzută posibilă). Aceasta este opusul limbajului curent unde „Prioritatea 1" înseamnă de obicei cea mai importantă.]
+> 💡 **Feedback:** OpenFlow uses a numerical priority system where higher numbers indicate higher importance. Priority 300 takes precedence over priority 30. The maximum is 65535, and 0 is the lowest possible priority. A table-miss entry combines priority 0 with an all-wildcard match; priority 0 is not reserved exclusively for that entry. This is the opposite of everyday language where "Priority 1" typically means most important. [OpenFlow folosește un sistem numeric de priorități în care numerele mai mari indică importanță mai mare. Prioritatea 300 are precedență față de prioritatea 30. Maximul este 65535, iar 0 este cea mai mică prioritate. Intrarea table-miss combină prioritatea 0 cu o potrivire complet wildcard; prioritatea 0 nu este rezervată exclusiv acestei intrări. Aceasta este opusul limbajului curent unde „Prioritatea 1" înseamnă de obicei cea mai importantă.]
 
 ---
 
@@ -341,7 +360,7 @@
 - **a)  true**
 - **b)  false**
 
-> 💡 **Feedback:** The controller only installs rules in switches. The data plane (switches) performs the actual forwarding at line rate. Once a flow rule is installed, matching packets are forwarded directly by the switch without controller involvement. An analogy: the controller is like a GPS navigator — it tells you where to go but does not drive the car. [Controlerul doar instalează reguli în comutatoare. Planul de date (comutatoarele) efectuează redirecționarea (forwarding) efectivă la viteza liniei. Odată ce o regulă de flux este instalată, pachetele corespunzătoare sunt redirecționate direct de comutator fără implicarea controlerului. O analogie: controlerul este ca un navigator GPS — îți spune unde să mergi, dar nu conduce mașina.]
+> 💡 **Feedback:** The controller usually programmes switch behaviour and may also handle selected packets using Packet-In and Packet-Out. The data plane (switches) performs the actual forwarding at line rate. Once a flow rule is installed, matching packets are forwarded directly by the switch without controller involvement. An analogy: the controller is like a GPS navigator — it tells you where to go but does not drive the car. [Controlerul programează de regulă comportamentul comutatoarelor și poate trata pachete selectate prin Packet-In și Packet-Out. Planul de date (comutatoarele) efectuează redirecționarea (forwarding) efectivă la viteza liniei. Odată ce o regulă de flux este instalată, pachetele corespunzătoare sunt redirecționate direct de comutator fără implicarea controlerului. O analogie: controlerul este ca un navigator GPS — îți spune unde să mergi, dar nu conduce mașina.]
 
 ---
 
@@ -371,15 +390,21 @@
 
 ---
 
-### Q28. `True / False`
-**Volatility of OpenFlow Rules / Volatilitatea regulilor OpenFlow**
+### Q28. — OpenFlow timeout and disconnection / Timeout și deconectare OpenFlow
 
-> By default, OpenFlow flow rules are stored in the switch's volatile memory, meaning they may be lost when the controller restarts or the connection drops, unless the controller proactively reinstalls them upon reconnection. [Implicit, regulile de flux OpenFlow sunt stocate în memoria volatilă a comutatorului, ceea ce înseamnă că pot fi pierdute când controlerul repornește sau conexiunea se întrerupe, cu excepția cazului în care controlerul le reinstalează proactiv la reconectare.]
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-- **a)  true**
-- **b)  false**
+A switch remains running but loses its controller connection. Its rule has hard_timeout=0 and idle_timeout=10. Which statement follows? [Comutatorul continuă să ruleze, dar pierde conexiunea cu controlerul. Regula sa are hard_timeout=0 și idle_timeout=10. Ce afirmație rezultă?]
 
-> 💡 **Feedback:** OpenFlow flow rules reside in the switch's volatile memory (typically TCAM or software tables). When the controller restarts, crashes, or the TCP connection between controller and switch drops, existing rules may be lost depending on switch implementation. Robust SDN applications handle this by proactively reinstalling rules upon reconnection. Rules with hard_timeout=0 do not expire automatically but remain volatile across restarts. [Regulile de flux OpenFlow se află în memoria volatilă a comutatorului (de obicei TCAM sau tabele software). Când controlerul repornește, se blochează sau conexiunea TCP se întrerupe, regulile existente pot fi pierdute. Aplicațiile SDN robuste gestionează aceasta reinstalând proactiv regulile la reconectare. Regulile cu hard_timeout=0 nu expiră automat, dar rămân volatile la repornire.]
+- **a)** It has no hard expiry, but can expire after ten seconds without matching traffic; controller disconnection alone does not require deletion. [Nu are expirare hard, dar poate expira după zece secunde fără trafic potrivit; deconectarea controlerului singură nu impune ștergerea.]
+- **b)** hard_timeout=0 guarantees permanence under all conditions. [hard_timeout=0 garantează permanența în orice condiții.]
+- **c)** Every controller disconnect immediately erases every rule. [Orice deconectare a controlerului șterge imediat toate regulile.]
+
+<details><summary>💡 Feedback</summary>
+
+**Correct answer / Răspuns corect: a.** Hard and idle timeouts are independent. Fail-secure behaviour can retain eligible entries after control-channel loss. A switch restart, explicit deletion, eviction or a controller policy can change state. State reconciliation is needed on reconnect. [Timeout-urile hard și idle sunt independente. Comportamentul fail-secure poate păstra intrările eligibile după pierderea canalului de control. Repornirea comutatorului, ștergerea explicită, evacuarea sau politica controlerului pot schimba starea. La reconectare este necesară reconcilierea.]
+
+</details>
 
 ---
 
@@ -467,17 +492,21 @@
 
 ---
 
-### Q35. `Multiple Choice`
-**Primary Purpose of PAT / Scopul principal al PAT**
+### Q35. — Purpose of PAT / Scopul PAT
 
-> What is the primary purpose of Port Address Translation (PAT) in modern networks? [Care este scopul principal al Port Address Translation (PAT) în rețelele moderne?]
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-- **a)  Encrypt traffic between internal and external networks [Criptează traficul între rețelele interne și cele externe]**
-- **b)  Provide comprehensive network security by hiding internal addresses from external threats and inspecting all inbound traffic [Asigură securitate completă a rețelei prin ascunderea adreselor interne față de amenințările externe și inspectarea întregului trafic de intrare]**
-- **c)  Allow multiple internal hosts to share a single public IP via port multiplexing [Permite mai multor gazde interne să partajeze o singură adresă IP publică prin multiplexarea porturilor]**
-- **d)  Accelerate packet forwarding through hardware offloading [Accelerează dirijarea pachetelor prin descărcare hardware]**
+What is the primary role of Port Address Translation? [Care este rolul principal al Port Address Translation?]
 
-> 💡 **Feedback:** PAT's primary purpose is enabling multiple internal hosts to share a single public IP address by multiplexing through unique port numbers. This directly addresses IPv4 address exhaustion. A common wrong  Encrypting traffic is a function of protocols like TLS, not NAT. [Scopul principal al PAT este de a permite mai multor gazde interne să partajeze o singură adresă IP publică prin multiplexarea cu numere de port unice. Aceasta adresează direct epuizarea adreselor IPv4. Un răspuns greșit frecvent este „asigurarea securității rețelei" — deși NAT blochează conexiunile de intrare nesolicitate ca efect secundar, scopul său este conservarea adreselor, nu securitatea. Criptarea traficului este o funcție a protocoalelor precum TLS, nu a NAT.]
+- **a)** Allow multiple private endpoints to share a public address using translated transport endpoints. [Permite mai multor endpointuri private să partajeze o adresă publică folosind endpointuri de transport traduse.]
+- **b)** Encrypt the payload. [Criptează payloadul.]
+- **c)** Replace all firewall and intrusion-detection rules. [Înlocuiește toate regulile firewall și de detecție a intruziunilor.]
+
+<details><summary>💡 Feedback</summary>
+
+**Correct answer / Răspuns corect: a.** PAT conserves public IPv4 addresses by maintaining translation mappings. It does not provide comprehensive security or encryption; filtering is a separate policy. [PAT economisește adrese IPv4 publice prin menținerea mapărilor de traducere. Nu oferă securitate completă sau criptare; filtrarea reprezintă o politică separată.]
+
+</details>
 
 ---
 
@@ -498,14 +527,14 @@
 ### Q37. `Multiple Choice`
 **SDN Controller vs Switch Roles / Rolurile controlerului SDN vs comutatorului**
 
-> In an SDN deployment, 1000 packets matching an already-installed flow rule pass through switch S1. How many of these packets does the SDN controller process? [Într-un deployment SDN, 1000 de pachete care corespund unei reguli de flux deja instalate trec prin comutatorul S1. Câte dintre aceste pachete procesează controlerul SDN?]
+> In an SDN deployment, 1000 packets matching an already-installed rule whose only action is output to a physical port (no controller output or sampling) pass through switch S1. How many of these packets does the SDN controller process? [Într-un deployment SDN, 1000 de pachete care corespund unei reguli deja instalate cu unica acțiune output către un port fizic (fără output la controler sau eșantionare) trec prin comutatorul S1. Câte dintre aceste pachete procesează controlerul SDN?]
 
 - **a)  500 — the controller samples half the traffic using a statistical round-robin method [500 — controlerul eșantionează jumătate din trafic utilizând o metodă statistică round-robin]**
 - **b)  0 — the switch forwards all matching packets independently [0 — comutatorul dirijează toate pachetele corespunzătoare independent]**
 - **c)  1 — the controller processes only the first packet [1 — controlerul procesează doar primul pachet]**
 - **d)  1000 — the controller processes every packet [1000 — controlerul procesează fiecare pachet]**
 
-> 💡 **Feedback:** Once a flow rule is installed, the switch forwards matching packets at line rate without involving the controller. The controller is only contacted during table-miss events (when no rule matches). This is what makes SDN scalable — the data plane operates independently. A common misconception is that every packet passes through the controller, which would make SDN extremely slow. [Odată ce o regulă de flux este instalată, comutatorul dirijează pachetele corespunzătoare la viteză de linie fără a implica controlerul. Controlerul este contactat doar în timpul evenimentelor table-miss (când nicio regulă nu corespunde). Aceasta este ceea ce face SDN scalabil — planul de date funcționează independent. O concepție greșită frecventă este că fiecare pachet trece prin controler, ceea ce ar face SDN extrem de lent.]
+> 💡 **Feedback:** Once a flow rule is installed, the switch forwards matching packets at line rate without involving the controller. Under this supplied rule no matching data packet is sent to the controller. Other rules can explicitly request controller output; table misses reach it only when configured to do so. This is what makes SDN scalable — the data plane operates independently. A common misconception is that every packet passes through the controller, which would make SDN extremely slow. [Odată ce o regulă de flux este instalată, comutatorul dirijează pachetele corespunzătoare la viteză de linie fără a implica controlerul. Conform regulii date, niciun pachet potrivit nu este trimis controlerului. Alte reguli pot solicita explicit output la controler; table-miss ajunge la el numai când este configurat astfel. Aceasta este ceea ce face SDN scalabil — planul de date funcționează independent. O concepție greșită frecventă este că fiecare pachet trece prin controler, ceea ce ar face SDN extrem de lent.]
 
 ---
 
@@ -523,17 +552,21 @@
 
 ---
 
-### Q39. `Multiple Choice`
-**NAT Impact on End-to-End Connectivity / Impactul NAT asupra conectivității capăt-la-capăt**
+### Q39. — NAT traversal / Traversare NAT
 
-> A developer discovers that their peer-to-peer application fails to establish direct connections between two users, both behind separate NAT routers. What is the most likely explanation? [Un dezvoltator descoperă că aplicația sa peer-to-peer nu reușește să stabilească conexiuni directe între doi utilizatori, ambii în spatele unor rutere NAT separate. Care este explicația cea mai probabilă?]
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-- **a)  Both NAT routers occupy all available ports, leaving none for P2P [Ambele rutere NAT ocupă toate porturile disponibile, nelăsând niciunul pentru P2P]**
-- **b)  Neither host can initiate inbound connections without existing conntrack entries [Niciuna dintre gazde nu poate iniția conexiuni de intrare fără intrări conntrack existente]**
-- **c)  NAT reduces bandwidth below the threshold needed for P2P connections [NAT reduce lățimea de bandă sub pragul necesar pentru conexiuni P2P]**
-- **d)  NAT encrypts the packets at the transport layer, preventing the P2P protocol from reading source addresses [NAT criptează pachetele la nivelul transport, împiedicând protocolul P2P să citească adresele sursă]**
+Two peers behind separate NAT/firewall devices cannot establish a direct connection. Which explanation is plausible without assuming a universal NAT rule? [Doi participanți aflați în spatele unor dispozitive NAT/firewall separate nu pot stabili o conexiune directă. Ce explicație este plauzibilă fără a presupune o regulă NAT universală?]
 
-> 💡 **Feedback:** NAT breaks end-to-end connectivity because without an existing conntrack entry, unsolicited inbound packets are dropped. Neither host can initiate a direct connection to the other because both are behind NAT. This is why techniques like STUN, TURN, and ICE were developed for NAT traversal in P2P and VoIP applications. The issue is not about ports being "occupied" or bandwidth — it is fundamentally about the absence of conntrack entries for inbound connections. [NAT întrerupe conectivitatea capăt-la-capăt deoarece fără o intrare conntrack existentă, pachetele de intrare nesolicitate sunt abandonate. Niciuna dintre gazde nu poate iniția o conexiune directă cu cealaltă deoarece ambele sunt în spatele NAT. De aceea au fost dezvoltate tehnici precum STUN, TURN și ICE pentru traversarea NAT în aplicații P2P și VoIP. Problema nu este despre porturi „ocupate" sau lățime de bandă — este fundamental despre absența intrărilor conntrack pentru conexiunile de intrare.]
+- **a)** The required mapping or inbound permission is absent; traversal or a relay may be needed. [Lipsește maparea sau permisiunea de intrare necesară; poate fi necesară traversare NAT sau un releu.]
+- **b)** Every NAT device encrypts the transport payload. [Orice dispozitiv NAT criptează payloadul de transport.]
+- **c)** NAT always prevents all peer-to-peer communication. [NAT împiedică întotdeauna orice comunicare peer-to-peer.]
+
+<details><summary>💡 Feedback</summary>
+
+**Correct answer / Răspuns corect: a.** Translation mappings and filtering policies both affect reachability. Static forwarding, coordinated traversal (such as ICE) or a relay can help depending on deployment. The failed attempt alone does not identify the exact cause. [Mapările de traducere și politicile de filtrare afectează conectivitatea. Redirecționarea statică, traversarea coordonată (precum ICE) sau un releu pot ajuta în funcție de implementare. Tentativa eșuată singură nu identifică exact cauza.]
+
+</details>
 
 ---
 
@@ -568,12 +601,12 @@
 ### Q42. `Multiple Choice`
 **SDN Policy Priority Design / Proiectarea priorităților politicii SDN**
 
-> A network administrator wants to: (1) allow SSH to server 10.0.10.2, (2) block all other traffic to 10.0.10.2, and (3) allow all remaining traffic. Which priority assignment correctly implements this policy? [Un administrator de rețea dorește să: (1) permită SSH la serverul 10.0.10.2, (2) blocheze tot celălalt trafic la 10.0.10.2 și (3) permită tot traficul rămas. Care atribuire de priorități implementează corect această politică?]
+> A network administrator wants to: (1) allow SSH to server 10.0.10.2, (2) block all other traffic to 10.0.10.2, and (3) allow all remaining IPv4 traffic. Assume ARP is handled separately and all rules are in one table. Which priority assignment correctly implements this policy? [Un administrator de rețea dorește să: (1) permită SSH la serverul 10.0.10.2, (2) blocheze tot celălalt trafic la 10.0.10.2 și (3) permită restul traficului IPv4. Presupuneți că ARP este tratat separat și toate regulile sunt în aceeași tabelă. Care atribuire de priorități implementează corect această politică?]
 
 - **a)  All three rules at priority=100 with installation order determining matching [Toate cele trei reguli la prioritate=100 cu ordinea instalării determinând potrivirea]**
-- **b)  SSH allow: priority=100, Block to .12: priority=50, Default allow: priority=10 [Permisiune SSH: prioritate=100, Blocare la .12: prioritate=50, Permisiune implicită: prioritate=10]**
-- **c)  Block to .12: priority=100, SSH allow: priority=50, Default allow: priority=10 [Blocare la .12: prioritate=100, Permisiune SSH: prioritate=50, Permisiune implicită: prioritate=10]**
-- **d)  Default allow: priority=100, SSH allow: priority=50, Block to .12: priority=10 [Permisiune implicită: prioritate=100, Permisiune SSH: prioritate=50, Blocare la .12: prioritate=10]**
+- **b)  SSH allow: priority=100, Block to .2: priority=50, Default allow: priority=10 [Permisiune SSH: prioritate=100, Blocare la .2: prioritate=50, Permisiune implicită: prioritate=10]**
+- **c)  Block to .2: priority=100, SSH allow: priority=50, Default allow: priority=10 [Blocare la .2: prioritate=100, Permisiune SSH: prioritate=50, Permisiune implicită: prioritate=10]**
+- **d)  Default allow: priority=100, SSH allow: priority=50, Block to .2: priority=10 [Permisiune implicită: prioritate=100, Permisiune SSH: prioritate=50, Blocare la .2: prioritate=10]**
 
 > 💡 **Feedback:** The correct pattern is: specific permit at highest priority (100) > general deny at medium priority (50) > default allow at lowest priority (10). The SSH allow rule must have higher priority than the block rule so it is matched first for SSH packets. If the block rule had the highest priority, even SSH packets would be dropped. [Modelul corect este: permisiune specifică la cea mai mare prioritate (100) > interdicție generală la prioritate medie (50) > permisiune implicită la cea mai mică prioritate (10). Regula de permisiune SSH trebuie să aibă o prioritate mai mare decât regula de blocare pentru a fi potrivită prima pentru pachetele SSH. Dacă regula de blocare ar avea cea mai mare prioritate, chiar și pachetele SSH ar fi abandonate.]
 
@@ -603,10 +636,9 @@
 - **c)  SDN eliminates the need for routing protocols entirely [SDN elimină complet necesitatea protocoalelor de rutare]**
 - **d)  Centralised global network view enables consistent policies and optimal path computation [Viziunea globală centralizată a rețelei permite politici consistente și calculul optim al căilor]**
 
-> 💡 **Feedback:** SDN's centralised controller maintains a global view of the entire network, enabling consistent policy enforcement and optimal path computation. Traditional networking only provides each device with a local view (neighbour information from routing protocols). This global visibility is SDN's primary operational advantage. SDN does not inherently provide faster hardware switching — the data plane hardware is often the same. [Controlerul centralizat SDN menține o viziune globală a întregii rețele, permițând aplicarea consistentă a politicilor și calculul optim al căilor. Rețeaua tradițională oferă fiecărui dispozitiv doar o viziune locală (informații despre vecini de la protocoale de rutare). Această vizibilitate globală este principalul avantaj operațional al SDN. SDN nu oferă în mod inerent comutare hardware mai rapidă — hardware-ul planului de date este adesea același.]
+> 💡 **Feedback:** SDN's centralised controller maintains a global view of the entire network, enabling consistent policy enforcement and optimal path computation. Distributed link-state protocols such as OSPF also build a topology database for the area, beyond immediate neighbours. SDN supports logically centralised programmability and policy coordination; its visibility depends on collected information. This global visibility is SDN's primary operational advantage. SDN does not inherently provide faster hardware switching — the data plane hardware is often the same. [Controlerul centralizat SDN menține o viziune globală a întregii rețele, permițând aplicarea consistentă a politicilor și calculul optim al căilor. Protocoalele distribuite link-state precum OSPF construiesc și o bază de date topologică a ariei, nu doar informații despre vecinii direcți. SDN permite programabilitate logic centralizată și coordonarea politicilor; vizibilitatea sa depinde de informațiile colectate. Această vizibilitate globală este principalul avantaj operațional al SDN. SDN nu oferă în mod inerent comutare hardware mai rapidă — hardware-ul planului de date este adesea același.]
 
 ---
-
 
 ## §2.  Laborator / Lab   (16 questions)
 
@@ -725,7 +757,7 @@
 ### Q53. `Multiple Choice`
 **Table-Miss Packet Handling / Gestionarea pachetelor table-miss**
 
-> A flow table contains rules for h1-h2 ICMP traffic and a drop rule for h3, plus a table-miss rule at priority 0 with action CONTROLLER. A packet from an unknown host 10.0.10.99 arrives at the switch. What happens? [O tabelă de fluxuri conține reguli pentru traficul ICMP h1-h2 și o regulă de eliminare pentru h3, plus o regulă table-miss cu prioritatea 0 și acțiunea CONTROLLER. Un pachet de la o gazdă necunoscută 10.0.10.99 sosește la comutator. Ce se întâmplă?]
+> A flow table contains rules for h1-h2 ICMP traffic and a drop rule for h3, plus a table-miss rule at priority 0 with action CONTROLLER. A packet from 10.0.10.99 arrives and matches none of the specific permit or drop rules. What happens? [O tabelă de fluxuri conține reguli pentru traficul ICMP h1-h2 și o regulă de eliminare pentru h3, plus o regulă table-miss cu prioritatea 0 și acțiunea CONTROLLER. Un pachet de la 10.0.10.99 sosește și nu corespunde niciuneia dintre regulile specifice de permitere sau eliminare. Ce se întâmplă?]
 
 - **a)  The packet is silently dropped [Pachetul este eliminat în tăcere]**
 - **b)  The switch generates an error message [Comutatorul generează un mesaj de eroare]**
@@ -788,7 +820,7 @@
 - **c)  Priority 30 — same level allows both rules to coexist [Prioritatea 30 — același nivel permite ambelor reguli să coexiste]**
 - **d)  Priority 0 — table-miss priority [Prioritatea 0 — prioritatea table-miss]**
 
-> 💡 **Feedback:** The permit rule must have a higher priority number than the block rule (30) to override it. Any value above 30 works. A common misconception is that priority 0 could override other rules; priority 0 is the lowest possible priority, reserved for the table-miss default action. [Regula de permitere trebuie să aibă un număr de prioritate mai mare decât regula de blocare (30) pentru a o suprascrie. Orice valoare peste 30 funcționează. O concepție greșită frecventă este că prioritatea 0 ar putea suprascrie alte reguli; prioritatea 0 este cea mai mică prioritate posibilă, rezervată acțiunii implicite table-miss.]
+> 💡 **Feedback:** The permit rule must have a higher priority number than the block rule (30) to override it. Any valid priority from 31 through 65535 works for this comparison, assuming no higher conflicting entry in the same table. A common misconception is that priority 0 could override other rules; priority 0 is the lowest possible priority, used by a table-miss entry when its match is all-wildcard. [Regula de permitere trebuie să aibă un număr de prioritate mai mare decât regula de blocare (30) pentru a o suprascrie. Orice prioritate validă între 31 și 65535 funcționează pentru această comparație, presupunând că nu există altă regulă conflictuală mai prioritară în aceeași tabelă. O concepție greșită frecventă este că prioritatea 0 ar putea suprascrie alte reguli; prioritatea 0 este cea mai mică prioritate posibilă, folosită de o intrare table-miss când potrivirea este complet wildcard.]
 
 ---
 
@@ -820,20 +852,23 @@
 
 ---
 
-### Q60. `Multiple Choice`
-**SDN Host Access Levels in Lab Topology / Nivelurile de acces ale gazdelor SDN în topologia laboratorului**
+### Q60. — Basic S06 controller policy / Politica controlerului S06 de bază
 
-> In the Week 6 SDN topology (10.0.10.0/24), three hosts are connected to switch s1. According to the lab's default policy, which host has restricted access — meaning most inbound traffic to it is dropped? [În topologia SDN din săptămâna 6 (10.0.10.0/24), trei gazde sunt conectate la comutatorul s1. Conform politicii implicite a laboratorului, care gazdă are acces restricționat — adică majoritatea traficului de intrare către ea este eliminat?]
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-- **a)  All three hosts have identical access levels [Toate cele trei gazde au niveluri de acces identice]**
-- **b)  h1 (10.0.10.1)**
-- **c)  h3 (10.0.10.3)**
-- **d)  h2 (10.0.10.2)**
+In `S06_Part02C_Script_SDNOS_Ken_Controller.py`, which IPv4 destination causes the controller to install a drop flow at priority 20? [În `S06_Part02C_Script_SDNOS_Ken_Controller.py`, ce destinație IPv4 determină instalarea unei reguli drop cu prioritatea 20?]
 
-> 💡 **Feedback:** In the SDN topology, h3 (10.0.10.3) has restricted access. The default policy drops IP traffic destined for h3 at priority 50, while h1 (10.0.10.1) has full access and h2 (10.0.10.2) acts as the server. A common misconception is that all three hosts have identical access; the SDN policy explicitly differentiates access levels using priority-based flow rules. [În topologia SDN, h3 (10.0.10.3) are acces restricționat. Politica implicită elimină traficul IP destinat lui h3 la prioritatea 50, în timp ce h1 (10.0.10.1) are acces complet, iar h2 (10.0.10.2) acționează ca server. O concepție greșită frecventă este că toate cele trei gazde au acces identic; politica SDN diferențiază explicit nivelurile de acces folosind reguli de flux bazate pe priorități.]
+- **a)** h3 — 10.0.10.3
+- **b)** h1 — 10.0.10.1
+- **c)** h2 — 10.0.10.2
+
+<details><summary>💡 Feedback</summary>
+
+**Correct answer / Răspuns corect: a.** The basic controller permits h1↔h2 and drops IPv4 traffic destined for h3. This is the basic controller contract; the AdvancedPolicy variant has its own explicit priorities and optional UDP exception. [Controlerul de bază permite h1↔h2 și elimină traficul IPv4 destinat lui h3. Acesta este contractul controlerului de bază; varianta AdvancedPolicy are prioritățile proprii și o excepție UDP opțională.]
+
+</details>
 
 ---
-
 
 ## §3.  Numerical (Răspuns numeric)   (2 questions)
 
@@ -920,19 +955,24 @@ Drag the components to form the command that displays active NAT translation ent
 
 ---
 
-### Q66. `Drag and Drop`
-**OpenFlow Flow Addition / Adăugare flux OpenFlow / Adăugare flux OpenFlow**
+### Q66. — OpenFlow flow addition / Adăugarea unui flux OpenFlow
 
+*Drag and Drop / Trageți și plasați*
+
+Complete this OpenFlow 1.3 drop rule for switch s1, from a root shell. [Completați regula drop OpenFlow 1.3 pentru comutatorul s1, dintr-un shell root.]
+
+```bash
+[[1]] [[2]] [[3]] [[4]] [[5]] "priority=100,icmp,nw_src=10.0.10.1,actions=[[6]]"
 ```
-Arrange the fragments to install a flow rule on switch s1 that drops all ICMP traffic from host 10.0.10.1 using OpenFlow 1.3. [Aranjați fragmentele pentru a instala o regulă de flux pe comutatorul s1 care blochează tot traficul ICMP de la gazda 10.0.10.1 folosind OpenFlow 1.3.] [[1]] [[2]] [[3]] [[4]] "priority=100,icmp,nw_src=10.0.10.1,actions=[[5]]"
-```
 
-**Available items / Elemente disponibile:**
+Choices / Variante: `ovs-ofctl`, `-O`, `OpenFlow13`, `add-flow`, `s1`, `drop`, `CONTROLLER`, `del-flows`.
 
-  `[ ovs-ofctl ]   [ -O ]   [ OpenFlow13 ]   [ add-flow ]   [ drop ]   [ s1 ]   [ CONTROLLER ]   [ del-flows ]   [ output:1 ]`
+<details><summary>💡 Feedback</summary>
 
+`ovs-ofctl -O OpenFlow13 add-flow s1 "priority=100,icmp,nw_src=10.0.10.1,actions=drop"`.
+There are five tokens before the quoted flow and one action token inside it. [Sunt cinci tokenuri înaintea fluxului între ghilimele și un token de acțiune în interior.]
 
-> 💡 **Feedback:** The correct command is: ovs-ofctl -O OpenFlow13 add-flow s1 "priority=100,icmp,nw_src=10.0.10.1,actions=drop". The -O flag specifies the OpenFlow version, and actions=drop silently discards matching packets. [Comanda corectă este: ovs-ofctl -O OpenFlow13 add-flow s1 "priority=100,icmp,nw_src=10.0.10.1,actions=drop". Flagul -O specifică versiunea OpenFlow, iar actions=drop elimină silențios pachetele care corespund.]
+</details>
 
 ---
 
@@ -999,7 +1039,7 @@ In SDN, the [[1]] makes forwarding decisions, while the [[2]] performs actual pa
 - Gap [[1]]: [ control plane [planul de control] ]   [ data plane [planul de date] ]
 - Gap [[2]]: [ data plane [planul de date] ]   [ control plane [planul de control] ]
 
-> 💡 **Feedback:** The control plane (centralised controller) computes paths and installs rules. The data plane (distributed switches) forwards packets based on installed flow rules. A common misconception is that the controller forwards packets directly — it only installs rules. [Planul de control (controlerul centralizat) calculează căile și instalează regulile. Planul de date (comutatoarele distribuite) dirijează pachetele pe baza regulilor de flux instalate. O concepție greșită frecventă este că controlerul dirijează pachetele direct — acesta doar instalează reguli.]
+> 💡 **Feedback:** The control plane (centralised controller) computes paths and installs rules. The data plane (distributed switches) forwards packets based on installed flow rules. A common misconception is that the controller forwards packets directly — ordinary matching traffic is forwarded by switches; the controller may also handle selected packets through Packet-In/Packet-Out. [Planul de control (controlerul centralizat) calculează căile și instalează regulile. Planul de date (comutatoarele distribuite) dirijează pachetele pe baza regulilor de flux instalate. O concepție greșită frecventă este că controlerul dirijează pachetele direct — traficul obișnuit potrivit este redirecționat de comutatoare; controlerul poate trata și pachete selectate prin Packet-In/Packet-Out.]
 
 ---
 
@@ -1071,21 +1111,21 @@ The MASQUERADE target operates in the [[1]] chain of the [[2]] table. It dynamic
 
 ---
 
-### Q75. `Gap Select`
-**Traditional vs SDN Architecture / Arhitectura tradițională vs SDN / Arhitectura tradițională vs SDN**
+### Q75. — OSPF and SDN network knowledge / Cunoașterea rețelei în OSPF și SDN
 
-```
-In traditional networking, each device maintains a [[1]] view of the network and uses [[2]] protocols like OSPF for routing. In SDN, the controller has a [[3]] view and pushes rules to switches via the [[4]] interface. [În rețelistica tradițională, fiecare dispozitiv menține o viziune ___ asupra rețelei și folosește protocoale de ___ precum OSPF pentru rutare. În SDN, controlerul are o viziune ___ și transmite reguli comutatoarelor prin interfața ___.]
-```
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-**Options per gap / Opțiuni pentru fiecare spațiu:**
+Which statement correctly compares OSPF and a logically centralised SDN controller? [Ce afirmație compară corect OSPF și un controler SDN logic centralizat?]
 
-- Gap [[1]]: [ local ]   [ global ]   [ partial ]   [ cached ]
-- Gap [[2]]: [ distributed ]   [ centralised ]   [ static ]   [ manual ]
-- Gap [[3]]: [ global ]   [ local ]   [ partial ]   [ distributed ]
-- Gap [[4]]: [ southbound ]   [ northbound ]   [ eastbound ]   [ management ]
+- **a)** OSPF routers exchange link state and compute routes from an area topology database; SDN can coordinate policy through a controller that programmes switches. [Ruterele OSPF schimbă starea legăturilor și calculează rute din baza topologică a ariei; SDN poate coordona politica printr-un controler care programează comutatoarele.]
+- **b)** OSPF routers know only their immediate neighbours and no topology. [Ruterele OSPF cunosc doar vecinii direcți și nicio topologie.]
+- **c)** An SDN controller automatically knows every external network and fault without telemetry. [Un controler SDN cunoaște automat orice rețea externă și defect fără telemetrie.]
 
-> 💡 **Feedback:** Traditional networking: each device has local knowledge and uses distributed routing protocols. SDN: centralised controller has a global network view and programmes switches via the southbound interface (OpenFlow). [Rețelistica tradițională: fiecare dispozitiv are cunoștințe locale și folosește protocoale de rutare distribuite. SDN: controlerul centralizat are o viziune globală asupra rețelei și programează comutatoarele prin interfața southbound (OpenFlow).]
+<details><summary>💡 Feedback</summary>
+
+**Correct answer / Răspuns corect: a.** Distributed control does not imply neighbour-only knowledge. The scope and freshness of both architectures depend on protocol exchanges and monitoring. [Controlul distribuit nu implică informații doar despre vecini. Domeniul și actualitatea informațiilor ambelor arhitecturi depind de schimburile de protocol și de monitorizare.]
+
+</details>
 
 ---
 

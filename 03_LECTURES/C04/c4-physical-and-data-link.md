@@ -248,16 +248,16 @@ By the end of the lecture, students should be able to:
 ---
 
 ### Switches: repeater vs bridge vs switch
-- repeater: amplifies the signal
-- bridge: minimal filtering, simple decisions
-- switch: forwarding based on MAC (virtual circuits)
+- repeater: regenerates signals without interpreting frame addresses
+- bridge: learns source MAC addresses and forwards or filters frames
+- switch: a multiport bridge; ordinary Ethernet switching does not establish virtual circuits
 
 ---
 
 ### CAM (MAC learning)
 - table: MAC → port
 - learns from the source address of frames
-- if the destination is unknown: floods on all ports
+- if the destination is unknown: floods to eligible forwarding ports in the same VLAN, excluding the ingress port
 
 [FIG] assets/images/fig-switch-cam-learning.png
 

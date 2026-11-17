@@ -29,9 +29,12 @@ def main():
         2. For each message:
            - If the user enters 'exit', break the loop.
            - Measure the time before and after sending and receiving
-             the server response (use time.time()).
-           - Send the message as bytes (use .encode('utf-8')).
-           - Read the server response with recv(1024).
+             the server response (use time.perf_counter()).
+           - Send UTF-8 bytes followed by b'\n' using sendall().
+           - Reject messages whose encoded length including LF exceeds 1024 bytes.
+           - Create reader = s.makefile('rb') once, before the loop.
+           - Read one response with reader.readline(8193); stop on EOF.
+           - Close reader when the interaction ends.
 
         3. For each round, print:
            - the message that was sent

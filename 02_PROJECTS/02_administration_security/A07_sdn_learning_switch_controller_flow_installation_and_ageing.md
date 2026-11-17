@@ -113,7 +113,7 @@ An SDN learning switch has two parts: learning logic in the controller (MAC→po
 - Include filters for broadcast and unicast plus a note on OpenFlow messages if captured.
 
 ### Automatic PCAP criteria (E2)
-These criteria are **deterministic** and can be verified automatically with `tshark`.
+These capture checks are reproducible with `tshark`. Frame counts are smoke checks; they do not replace the application tests or prove complete project acceptance.
 - Official rules: `tools/pcap_rules/A07.json`
 - In the catalogue (template): `00_common/tools/pcap_rules/A07.json` and `00_common/tools/validate_pcap.py` (copy into the student repository).
 
@@ -121,9 +121,15 @@ These criteria are **deterministic** and can be verified automatically with `tsh
 
 | ID | tshark filter (`-Y`) | Condition | What it validates |
 |---:|---|---:|---|
-| R1 | `tcp.port==6653` | `>= 1` | OpenFlow traffic (TCP/6653) present. |
-| R2 | `tcp.port==6653 && tcp.len>0` | `>= 5` | At least 5 OpenFlow segments with payload (learning plus flow installation). |
-| R3 | `arp || icmp || ip` | `>= 5` | L2/L3 traffic in the network (to trigger learning). |
+| R1 | `tcp.port==6653` | `>= 1` | OpenFlow traffic (TCP/6653) is present. |
+| R2 | `tcp.port==6653 && tcp.len>0` | `>= 5` | At least five payload-bearing OpenFlow transport segments; learning and FlowMod installation require correlated evidence. |
+| R3 | `(arp \|\| icmp \|\| ip) && !(tcp.port==6653 \|\| tcp.port==6633)` | `>= 5` | Data-network frames excluding OpenFlow transport; confirm endpoint roles and learned entries separately. |
+
+### Interpretation and complementary evidence
+
+The [E2 capture and semantic-evidence matrix](../00_common/E2_CAPTURE_EVIDENCE_MATRIX.md#a07) maps every capture rule to its generating action and the complementary application evidence.
+
+- Correlate host MAC addresses, switch ports, PacketIn events and installed flow entries. Control traffic alone cannot establish forwarding.
 
 ### Deliverables
 - Docker Compose with `controller` and `tester` that run scripts and produce `artifacts/pcap/traffic_e2.pcap`.

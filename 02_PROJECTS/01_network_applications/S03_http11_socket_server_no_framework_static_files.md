@@ -22,7 +22,7 @@ The emphasis is on correct HTTP format handling: separation of headers from body
 
 In the Mininet demonstration you will show simultaneous requests from multiple hosts together with different responses (200, 404, 405) that are visible in the PCAP. The implementation must be robust enough for a standard `curl` client to receive valid responses.
 
-Because this is a socket-level HTTP server, the team must explicitly handle parsing of the request line, headers and body (where present) as well as the connection close rules. In E1 you must define a coherent policy for `Connection: keep-alive` versus `close` so that tests do not depend on client behaviour. A practical goal is a clear separation between: (1) an HTTP parser tolerant to whitespace and header folding (within reasonable limits), (2) a minimal router for GET/HEAD and (3) a file-serving layer with deterministic MIME types.
+Because this is a socket-level HTTP server, the team must explicitly handle parsing of the request line, headers and body (where present) as well as the connection close rules. In E1 you must define a coherent policy for `Connection: keep-alive` versus `close` so that tests do not depend on client behaviour. A practical goal is a clear separation between: (1) an HTTP parser with explicit whitespace rules that rejects obsolete header folding, (2) a minimal router for GET/HEAD and (3) a file-serving layer with deterministic MIME types.
 
 ## Learning objectives
 - Implement HTTP/1.1 parsing at the byte and line level
@@ -47,6 +47,10 @@ Because this is a socket-level HTTP server, the team must explicitly handle pars
 - **Protocol/default ports (E2):** TCP: 8080/TCP.
 - The Flex component must work with the default values (without manual reconfiguration) so that it can be integrated into automated tests.
 
+### Interpretation and complementary evidence
+
+The [E2 capture and semantic-evidence matrix](../00_common/E2_CAPTURE_EVIDENCE_MATRIX.md#s03) maps every capture rule to its generating action and the complementary application evidence.
+
 ### Deliverables
 - `flex/` directory with sources plus build/run instructions (avoid exotic dependencies where possible).
 - `docs/FLEX.md` with:
@@ -64,9 +68,7 @@ Because this is a socket-level HTTP server, the team must explicitly handle pars
 ### Minimum scenario
 - Start an existing HTTP server (for example `python -m http.server`) in a Mininet topology with two client hosts.
 - Capture traffic and send a `GET /index.html` request then a `HEAD /index.html` request with `curl`.
-- Observe header delimitation (`
-
-`) and relevant headers (`Host`, `User-Agent`, `Content-Length`).
+- Observe header delimitation (`\r\n\r\n`) and relevant headers (`Host`, `User-Agent`, `Content-Length`).
 - Send a request to a missing file to observe a 404.
 
 ### Recommended Wireshark filters
@@ -93,12 +95,12 @@ Because this is a socket-level HTTP server, the team must explicitly handle pars
 - Correct responses for at least: 200, 404, 405, 500 with `Content-Length` and `Content-Type`.
 - Concurrency: the server can process simultaneous requests from at least 10 clients without blocking on a single request.
 - Server logs for each request: method, path, status, response size and duration.
-- Explicitly define supported methods (minimum `GET`, optional `HEAD`). Unsupported methods respond with `405 Method Not Allowed`.
+- Explicitly define supported methods (minimum `GET` and `HEAD`). Unsupported methods respond with `405 Method Not Allowed`.
 - Persistent connections: support `Connection: keep-alive` (at least 2 requests on the same connection in E2 tests).
 - Deterministic `Content-Type` mapping by extension (minimum: html, txt, css, js, png/jpg).
 
 ### SHOULD (recommended)
-- Persistent connections (keep-alive) for multiple requests per connection with a limit on requests per connection.
+- A configurable request limit and idle timeout for the mandatory persistent connections.
 - Minimal Cache-Control for static files and coherent headers (Date, Server).
 - Static error page for 404 and 500 served from the docroot.
 
@@ -107,8 +109,7 @@ Because this is a socket-level HTTP server, the team must explicitly handle pars
 - Rate limiting per IP or per connection with a 429 response.
 
 ## Non-functional requirements
-- HTTP framing: `
-` delimitation and robust handling of multi-line or additional headers.
+- HTTP framing: `\r\n\r\n` separates headers from the body. Accept additional valid headers and reject obsolete folded header lines.
 - Read and write timeouts, configurable; inactive connections close gracefully.
 - Strict path validation: normalisation, denial of `..`, disallowed characters and excessive lengths.
 - Simple MIME detection by extension with fallback `application/octet-stream`.
@@ -138,7 +139,7 @@ Because this is a socket-level HTTP server, the team must explicitly handle pars
 - A filter showing a header (for example `http.content_length`) is provided.
 
 ### Automatic PCAP criteria (E2)
-These criteria are **deterministic** and can be verified automatically with `tshark`.
+These capture checks are reproducible with `tshark`. Frame counts are smoke checks; they do not replace the application tests or prove complete project acceptance.
 - Official rules: `tools/pcap_rules/S03.json`
 - In the catalogue (template): `00_common/tools/pcap_rules/S03.json` and `00_common/tools/validate_pcap.py` (copy into the student repository).
 
@@ -146,11 +147,11 @@ These criteria are **deterministic** and can be verified automatically with `tsh
 
 | ID | tshark filter (`-Y`) | Condition | What it validates |
 |---:|---|---:|---|
-| R1 | `tcp.dstport==8080 && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | Handshake to the HTTP server. |
-| R2 | `tcp.port==8080 && frame contains "GET "` | `>= 2` | At least 2 GET requests (keep-alive/pipelining test). |
-| R3 | `tcp.port==8080 && frame contains "HTTP/1.1 200"` | `>= 1` | 200 OK response for an existing file. |
-| R4 | `tcp.port==8080 && frame contains "HTTP/1.1 404"` | `>= 1` | 404 response for a missing resource. |
-| R5 | `tcp.port==8080 && frame contains "Content-Type:"` | `>= 1` | Content-Type header present in the response. |
+| R1 | `tcp.dstport==8080 && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | SYN connection attempt to the HTTP server. |
+| R2 | `tcp.dstport==8080 && http.request.method=="GET" && !tcp.analysis.retransmission` | `>= 2` | At least two decoded GET requests in one TCP stream; count HTTP messages, not frames. Measurement: `field_occurrences`. |
+| R3 | `tcp.srcport==8080 && http.response.code==200` | `>= 1` | Decoded HTTP 200 response. |
+| R4 | `tcp.srcport==8080 && http.response.code==404` | `>= 1` | Decoded HTTP 404 response. |
+| R5 | `tcp.srcport==8080 && http.content_type` | `>= 1` | Decoded Content-Type response header. |
 
 ### Deliverables
 - Docker Compose with `http_raw_server` and `tester`.
@@ -203,7 +204,7 @@ The catalogue includes a reference template: `00_common/docker/tester_base/`.
 ## Notes
 - Full web frameworks are not used. Work with sockets and controlled parsing.
 - For simplicity request bodies may be ignored in E2 but E3 must handle headers and errors robustly.
-- Persistent connections are recommended but a limit must be enforced to avoid starvation.
+- Persistent connections are mandatory in E2; enforce a request limit and timeout to avoid starvation.
 
 ### Typical pitfalls
 - Headers are parsed incompletely (CRLF, continued lines) and incompatibilities with standard clients appear.

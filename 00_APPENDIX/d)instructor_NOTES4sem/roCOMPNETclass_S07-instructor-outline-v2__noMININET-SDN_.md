@@ -237,10 +237,10 @@ python3 /seminars/S07/1_sniffing/S07_Part01B_Script_Packet_Sniffer.py eth0
 
 **🟢 TERMINAL ATTACKER:**
 ```bash
-echo "hello_s07" | nc 172.30.7.20 5000
+echo "hello_s07" | nc -N 172.30.7.20 5000
 ```
 
-**Ce apare:** linii cu `proto=ICMP` (din ping-ul anterior, dacă nu s-a ajuns la MAX_PACKETS) și `proto=TCP`.
+**Ce apare:** linii cu `proto=TCP` din traficul generat după pornirea capturii. Pentru ICMP, rulează un nou ping în timp ce snifferul este activ.
 
 **Micro-întrebare (10 sec):** „Sniffer-ul arată `proto=TCP` dar nu arată porturile. Ce ar trebui să decodăm în plus?" (Răspuns: header-ul TCP, primii 4 bytes — porturile sursă și destinație.)
 
@@ -290,7 +290,7 @@ python3 /seminars/S07/2_packet-filter/S07_Part02A_Script_Packet_Filter.py eth0
 
 **🟢 TERMINAL ATTACKER:**
 ```bash
-echo "again" | nc 172.30.7.20 5000
+echo "again" | nc -N 172.30.7.20 5000
 ```
 
 **Ce apare:** linii de forma `172.30.7.10:<port_efemer> -> 172.30.7.20:5000  proto=TCP`
@@ -367,7 +367,7 @@ Cureți regula:
 iptables -D INPUT -p tcp --dport 5001 -j DROP
 ```
 
-> *▸ „DROP → timeout → FILTERED. Dacă ar fi fost REJECT, vedeai RST → CLOSED."*
+> *▸ „DROP poate produce timeout, raportat FILTERED de această probă; tăcerea nu dovedeşte cauza. Pentru RST folosiţi explicit REJECT --reject-with tcp-reset; REJECT implicit poate trimite ICMP."*
 
 ---
 

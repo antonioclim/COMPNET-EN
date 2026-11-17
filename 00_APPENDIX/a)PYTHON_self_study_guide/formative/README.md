@@ -39,7 +39,7 @@ python3 run_quiz.py --review
 
 # Parsons problems
 python3 parsons_runner.py --list
-python3 parsons_runner.py --file parsons/parsons_socket.yaml
+python3 parsons_runner.py --file parsons_socket.yaml
 ```
 
 The quiz runner saves results to `results/` by default. Use `--no-save` to disable this.
@@ -84,7 +84,7 @@ git sparse-checkout set "00_APPENDIX/a)PYTHON_self_study_guide/formative"
 To run the quiz, also include the dependency list:
 
 ```bash
-git sparse-checkout add 00_APPENDIX/requirements.txt
+# requirements.txt in the ancestor 00_APPENDIX directory is included by cone mode.
 ```
 
 Method B — Direct download (no Git required)
@@ -99,3 +99,7 @@ https://github.com/antonioclim/COMPNET-EN/tree/main/00_APPENDIX/a)PYTHON_self_st
 |---|---|
 | YAML source of truth | `quiz.yaml` and `parsons/*.yaml` |
 | Output location | `results/` (local JSON result files) |
+
+## Scoring and filtering contract
+
+Background filters include shared foundation questions (`all`) and explicitly tagged language-comparison questions. They are a small adaptation, not a complete separate curriculum per language. The configured difficulty weights (1, 1.5 and 2) contribute to earned/planned points; skipped items earn zero. Results distinguish attempted, skipped and unattempted questions. A session ended early has no pass/readiness verdict; a completed session uses the bank's 70% threshold. Passing a formative quiz is not a substitute for running the practical tasks.

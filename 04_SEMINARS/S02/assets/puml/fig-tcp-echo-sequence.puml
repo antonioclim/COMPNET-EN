@@ -18,13 +18,13 @@ C -> S : ACK
 
 == DATA EXCHANGE ==
 
-C -> S : PSH-ACK "Hello, world"
+C -> S : PSH-ACK "Hello, world + LF"
 note right of S
-  Server calls recv(1024),
+  Server reads one bounded LF-terminated line,
   converts to uppercase,
   replies with sendall()
 end note
-S --> C : PSH-ACK "HELLO, WORLD"
+S --> C : PSH-ACK "HELLO, WORLD + LF"
 C -> S : ACK
 
 == CONNECTION TEARDOWN ==

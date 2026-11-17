@@ -13,9 +13,9 @@ participant "iot_gateway\nUDP :5515\nHTTP :8080" as GW #C8E6C9
 participant "tester\n(dashboard)" as D #FFF9C4
 
 == UDP TELEMETRY INGESTION ==
-SA -> GW : IOT1 {sensor_id: "A", seq: 1, temp: 22.5, ts: T1}
-SA -> GW : IOT1 {sensor_id: "A", seq: 2, temp: 22.7, ts: T2}
-SB -> GW : IOT1 {sensor_id: "B", seq: 1, humidity: 65, ts: T1}
+SA -> GW : IOT1 {device_id: "A", seq: 1, value: 22.5, ts: T1}
+SA -> GW : IOT1 {device_id: "A", seq: 2, value: 22.7, ts: T2}
+SB -> GW : IOT1 {device_id: "B", seq: 1, value: 65, ts: T1}
 
 note right of GW
   Validate: mandatory fields present
@@ -24,7 +24,7 @@ note right of GW
   Store in ring buffer
 end note
 
-SA -> GW : IOT1 {sensor_id: "A", seq: 2, temp: 22.7, ts: T2}
+SA -> GW : IOT1 {device_id: "A", seq: 2, value: 22.7, ts: T2}
 note right of GW #FFF9C4 : Duplicate seq=2 → discard
 
 == HTTP API QUERY ==
@@ -44,6 +44,7 @@ legend right
   PCAP shows both: UDP datagrams (IOT1)
   and HTTP request/response pairs
   seq field enables deduplication
-  Validates R1–R5 in S15.json
+  R1–R5 are capture checks; the E1 decoder verifies fields
+  and pytest proves sequence handling and API results
 endlegend
 @enduml

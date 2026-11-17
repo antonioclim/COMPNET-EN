@@ -7,37 +7,41 @@
       "id": "R1",
       "filter": "tcp.dstport==2525 && tcp.flags.syn==1 && tcp.flags.ack==0",
       "condition": ">= 1",
-      "description": "Client → SMTP handshake."
+      "description": "SYN attempt to the SMTP service."
     },
     {
       "id": "R2",
       "filter": "tcp.port==2525 && (frame contains \"EHLO\" || frame contains \"HELO\")",
       "condition": ">= 1",
-      "description": "SMTP greeting (EHLO/HELO)."
+      "description": "HELO/EHLO marker bytes are present on the SMTP transport."
     },
     {
       "id": "R3",
       "filter": "tcp.port==2525 && frame contains \"MAIL FROM\"",
       "condition": ">= 1",
-      "description": "MAIL FROM present."
+      "description": "MAIL FROM marker bytes are present."
     },
     {
       "id": "R4",
       "filter": "tcp.port==2525 && frame contains \"RCPT TO\"",
       "condition": ">= 1",
-      "description": "RCPT TO present."
+      "description": "RCPT TO marker bytes are present."
     },
     {
       "id": "R5",
       "filter": "tcp.port==2525 && frame contains \"DATA\"",
       "condition": ">= 1",
-      "description": "DATA command present."
+      "description": "DATA marker bytes are present; verify the SMTP state and response."
     },
     {
       "id": "R6",
       "filter": "tcp.port==2525 && (frame contains \"\\r\\n.\\r\\n\" || frame contains \"\\n.\\n\")",
       "condition": ">= 1",
-      "description": "The data terminator (dot) appears in the payload (dot-stuffing is demonstrable)."
+      "description": "The SMTP terminator byte pattern occurs in a captured frame; reassembly and a dot-stuffing test establish correct message framing."
     }
+  ],
+  "manual_checks": [
+    "R1 R2 R3 R4: Assert the corresponding SMTP status codes and intended recipient.",
+    "R5 R6: Reassemble the TCP stream, test dot-stuffing and verify maildir storage; a dot substring alone does not prove valid termination."
   ]
 }

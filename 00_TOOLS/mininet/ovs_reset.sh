@@ -112,9 +112,11 @@ mininet_cleanup() {
       log_success "Mininet cleanup complete"
     else
       log_warn "Mininet cleanup returned an error; inspect the output before continuing."
+      return 1
     fi
   else
     log_warn "Mininet command 'mn' not found; skipped mn -c"
+    return 1
   fi
 }
 
@@ -226,18 +228,19 @@ main() {
 
   kill_mininet_processes
   delete_ovs_bridges
-  mininet_cleanup
-  restart_ovs
+  local cleanup_rc=0
+  mininet_cleanup || cleanup_rc=1
+  restart_ovs || cleanup_rc=1
 
   echo ""
-  if verify_clean; then
+  if verify_clean && [[ $cleanup_rc -eq 0 ]]; then
     echo "================================================"
     log_success "Reset complete — environment looks clean."
     echo "================================================"
     exit 0
   else
     echo "================================================"
-    log_warn "Reset incomplete — inspect the OVS query and bridge diagnostics above."
+    log_warn "Reset incomplete — inspect Mininet cleanup, service and OVS diagnostics above."
     echo "================================================"
     exit 1
   fi

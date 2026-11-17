@@ -30,3 +30,8 @@ build/
 
 # Large binaries fetched later
 00_TOOLS/plantuml.jar
+
+# Local formative assessment results (keep the documentation).
+00_APPENDIX/a)PYTHON_self_study_guide/formative/results/quiz_results_*.json
+
+.venv-qa/

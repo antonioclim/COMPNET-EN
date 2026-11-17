@@ -28,7 +28,7 @@ Open **Console** on `http-server`:
 
 ```sh
 # Verify the server responds to a minimal request
-echo -e "GET / HTTP/1.1\r\nHost: localhost\r\n\r\n" | nc localhost 8080
+printf 'GET / HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' | nc -w 3 localhost 8080
 ```
 
 This tests your parser without involving the full tester suite.

@@ -42,7 +42,8 @@ legend right
   TCP in Wireshark: SYN/SYN-ACK/ACK visible,
   stream index assigned, seq/ack tracking.
   UDP in Wireshark: each datagram is a standalone
-  packet — no handshake, no stream, no ACK.
+  datagram — no transport handshake or acknowledgement.
+  Wireshark can still assign a udp.stream analysis index.
   Display filter: tcp.stream eq N or udp.port == P.
 endlegend
 @enduml

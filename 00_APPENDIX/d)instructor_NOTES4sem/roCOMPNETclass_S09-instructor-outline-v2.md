@@ -180,7 +180,7 @@ PY
 
 > *▸ „Rezultatul e identic — aceleași fișiere. Dar mecanica e inversată: acum clientul a trimis comanda `PORT`, anunțând serverul pe ce port ascultă. Serverul s-a conectat **înapoi** la client pentru a trimite datele."*
 
-> *▸ „Și asta răspunde la întrebarea de la început: colegul de acasă, prin NAT, era în active mode. Routerul lui bloca conexiunea inițiată de server. În passive mode, clientul inițiază toate conexiunile — trece de NAT fără probleme."*
+> *▸ „Și asta răspunde la întrebarea de la început: colegul de acasă, prin NAT, era în active mode. Routerul lui bloca conexiunea inițiată de server. În passive mode, clientul inițiază toate conexiunile — poate traversa NAT-ul clientului; adresa şi porturile pasive ale serverului trebuie să fie accesibile."*
 
 **(← Hook reluat explicit)**
 
@@ -326,7 +326,7 @@ docker compose -f S09_Part03_Config_Docker_Compose.yml down
 >
 > *Unu: FTP clasic = **două conexiuni TCP** — una pentru comenzi, una pentru date. Le-am numărat pe captură.*
 >
-> *Doi: **active vs passive** = diferență de inițiator al conexiunii de date. Passive trece de NAT; active nu — și asta era problema colegului de acasă de la începutul orei.*
+> *Doi: **active vs passive** = diferență de inițiator al conexiunii de date. Passive iniţiază datele de la client, iar active cere acces de la server spre client; rezultatul depinde de rutare, NAT şi filtrare — și asta era problema colegului de acasă de la începutul orei.*
 >
 > *(← Hook reluat)*
 >
@@ -431,6 +431,6 @@ Bellovin, S. M. (1989). Security problems in the TCP/IP protocol suite. *ACM SIG
 
 **Tipar POE secundar (Bloc C.3):** „Cine face `listen()` în active mode?" — invers-intuitiv. Concepția greșită #11 (confuzie secvență server/client) se manifestă aici: studenții tind să creadă că serverul face `listen()` întotdeauna, dar în active mode clientul face `listen()` pe portul de date.
 
-**Legătura cu concepția greșită #12 (recv() parțial):** Pseudo-FTP folosește un framing pe 1 byte + recv(1024) și presupune că totul ajunge într-un singur apel. Comentariul din cod (`[WARN] content_length vs data length mismatch`) evidențiază exact limita discutată la S04. Nu insista prea mult — 30 de secunde, fără deraiere.
+**Legătura cu concepția greșită #12 (recv() parțial):** Pseudo-FTP folosește un octet pentru lungimea conținutului și `read_exact()` pentru a acumula exact octeții declarați, indiferent de fragmentarea TCP. Răspunsurile de control sunt și ele încadrate prin lungime; clientul consumă obligatoriu confirmarea finală `done!` sau eroarea înaintea comenzii următoare. Nu insista prea mult — 30 de secunde, fără deraiere.
 
 **Progresia temelor:** Stage 1–2 sunt auto-studiu + completare template (amintire/înțelegere/aplicare). Stage 3 cere analiză (active vs passive → cine face listen/connect). Stage 4 cere sinteză (scenariu multi-client, întrebări reflexive despre rolul serverului și extensibilitate FXP).

@@ -54,7 +54,7 @@ Additionally, we map port 2121 to the host, so that:
 
 ## 2. Laboratory Scenario
 
-1. `docker compose up -d` starts:
+1. `docker compose -f S09_Part03_Config_Docker_Compose.yml up -d` starts:
    - the FTP server
    - client1
    - client2

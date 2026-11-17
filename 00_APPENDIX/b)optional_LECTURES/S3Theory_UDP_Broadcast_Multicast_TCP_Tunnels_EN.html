@@ -327,7 +327,7 @@
 <div class="quiz-option" onclick="checkQuiz(this, true, 'quiz1')">B) <code>recv(1024)</code> may return fewer than 1 000 bytes — TCP is a byte stream, not a message stream</div>
 <div class="quiz-option" onclick="checkQuiz(this, false, 'quiz1')">C) <code>recv()</code> on UDP works identically — both protocols may return partial data</div>
 <div class="quiz-feedback correct" id="quiz1-correct">✅ <strong>Correct.</strong> TCP provides a continuous byte stream with no built-in message boundaries. A single <code>recv()</code> call may return anywhere from 1 byte to the buffer size, regardless of how the sender grouped the data. This is the framing problem from Lecture 3 — and it is one of the most common sources of bugs in socket programming.</div>
-<div class="quiz-feedback incorrect" id="quiz1-incorrect">❌ <strong>Not quite.</strong> The correct answer is B. TCP is a <em>byte stream</em> — it does not preserve the boundaries of individual <code>send()</code> calls. <code>recv(1024)</code> returns <em>up to</em> 1 024 bytes, but may return fewer. This is fundamentally different from UDP, which preserves datagram boundaries: a single <code>recvfrom()</code> always returns one complete datagram. Confusing these two behaviours (misconception #12) is one of the most frequent errors in network programming.</div>
+<div class="quiz-feedback incorrect" id="quiz1-incorrect">❌ <strong>Not quite.</strong> The correct answer is B. TCP is a <em>byte stream</em> — it does not preserve the boundaries of individual <code>send()</code> calls. <code>recv(1024)</code> returns <em>up to</em> 1 024 bytes, but may return fewer. This is fundamentally different from UDP, which preserves datagram boundaries: a single <code>recvfrom()</code> consumes one datagram, but a buffer that is too small truncates its returned payload. Confusing these two behaviours (misconception #12) is one of the most frequent errors in network programming.</div>
 </div>
 </div>
 
@@ -815,7 +815,7 @@ sock.sendto(data, (<span class="string">"255.255.255.255"</span>, port))</div>
 </div>
 <div class="ascii-diagram">
    ┌──────┐
-   │  h1  │  SENDER → group 239.1.1.1
+   │  h1  │  SENDER → group 239.255.0.1
    └──┬───┘
       │
       ▼
@@ -864,7 +864,7 @@ receives  receives  nothing
 <li>Private use (like 10.x.x.x for unicast)</li>
 <li>Internal to an organisation</li>
 <li><strong>Use this range for experiments!</strong></li>
-<li>Our starterkit uses 239.1.1.1</li>
+<li>The S03 teaching examples use 239.255.0.1</li>
 </ul>
 </div>
 </div>
@@ -894,19 +894,19 @@ receives  receives  nothing
 <div class="slide slide-content" id="slide25">
 <h2>🤝 IGMP: How Multicast Membership Works</h2>
 <div class="story-box">
-<strong>IGMP</strong> (Internet Group Management Protocol, RFC 2236) is the mechanism that hosts use to inform routers about their multicast group subscriptions. Think of it as raising your hand and saying: "I want to receive messages for group 239.1.1.1."
+<strong>IGMP</strong> (Internet Group Management Protocol, RFC 2236) is the mechanism that hosts use to inform routers about their multicast group subscriptions. Think of it as raising your hand and saying: "I want to receive messages for group 239.255.0.1."
 </div>
 <div class="ascii-diagram" style="font-size: 0.85rem;">
-Host wants to join group 239.1.1.1:
+Host wants to join group 239.255.0.1:
 
   ┌────────┐                       ┌──────────┐
   │  HOST  │── IGMP Member Report ►│  ROUTER  │
-  │        │   (Join 239.1.1.1)    │          │
+  │        │   (Join 239.255.0.1)    │          │
   └────────┘                       └────┬─────┘
                                         │
   Router updates its multicast          │
   forwarding table: "forward            ▼
-  239.1.1.1 to this segment"     Table updated
+  239.255.0.1 to this segment"     Table updated
 
 Later, the router periodically asks "who is still interested?":
 
@@ -923,7 +923,7 @@ Later, the router periodically asks "who is still interested?":
 <span class="keyword">import</span> socket
 
 <span class="comment"># Configuration</span>
-MCAST_GROUP = <span class="string">"239.1.1.1"</span>
+MCAST_GROUP = <span class="string">"239.255.0.1"</span>
 PORT = <span class="number">5001</span>
 
 <span class="comment"># TTL = 1 means link-local only</span>
@@ -960,7 +960,7 @@ sock.sendto(message, (MCAST_GROUP, PORT))</div>
 <span class="keyword">import</span> socket
 <span class="keyword">import</span> struct
 
-MCAST_GROUP = <span class="string">"239.1.1.1"</span>
+MCAST_GROUP = <span class="string">"239.255.0.1"</span>
 PORT = <span class="number">5001</span>
 
 <span class="comment"># Step 1: Create a UDP socket</span>
@@ -1004,7 +1004,7 @@ sock.setsockopt(
 <div class="protocol-header">
 <div class="header-field span-4">
 <div class="field-name">Multicast Group IP</div>
-<div class="field-value">239.1.1.1</div>
+<div class="field-value">239.255.0.1</div>
 <div class="field-bits">4 bytes — inet_aton()</div>
 </div>
 <div class="header-field span-4">
@@ -1015,14 +1015,14 @@ sock.setsockopt(
 </div>
 <div class="code-block" data-lang="python" style="margin-top: 20px; font-size: 0.92rem;">
 <span class="comment"># Building the mreq structure</span>
-mreq = socket.inet_aton(<span class="string">"239.1.1.1"</span>)
+mreq = socket.inet_aton(<span class="string">"239.255.0.1"</span>)
 mreq += struct.pack(
     <span class="string">"=I"</span>,
     socket.<span class="builtin">INADDR_ANY</span>
 )
 
 <span class="comment"># Or for a specific interface:</span>
-mreq = socket.inet_aton(<span class="string">"239.1.1.1"</span>)
+mreq = socket.inet_aton(<span class="string">"239.255.0.1"</span>)
 mreq += socket.inet_aton(<span class="string">"10.0.3.2"</span>)</div>
 </div>
 <div>
@@ -1036,7 +1036,7 @@ mreq += socket.inet_aton(<span class="string">"10.0.3.2"</span>)</div>
 </ul>
 </div>
 <div class="warning-box">
-<strong>Common pitfall:</strong> Forgetting to call <code>IP_ADD_MEMBERSHIP</code> means you will never receive multicast packets, even if you are bound to the correct port. The bind alone is not sufficient.
+<strong>Common pitfall:</strong> Join the intended group explicitly on the intended interface. Host membership and per-socket delivery are distinct: Linux normally has <code>IP_MULTICAST_ALL=1</code>, so a socket may also receive traffic for groups joined elsewhere on that host. The all-hosts group 224.0.0.1 is joined implicitly. Use a dedicated group such as 239.255.0.1 in an isolated namespace when comparing joined and unjoined cases; on Linux set IP_MULTICAST_ALL=0 for per-socket filtering.
 </div>
 </div>
 </div>
@@ -1186,86 +1186,65 @@ mreq += socket.inet_aton(<span class="string">"10.0.3.2"</span>)</div>
 <div class="slide slide-content" id="slide35">
 <h2>💻 Core Pattern: Unidirectional Forwarding</h2>
 <div class="code-block" data-lang="python">
-<span class="keyword">def</span> <span class="function">forward_stream</span>(
-    src, dst, direction, stop_event
-):
-    <span class="string">"""Copy data from src to dst until closed."""</span>
-    total = <span class="number">0</span>
-    <span class="keyword">try</span>:
-        <span class="keyword">while</span> <span class="keyword">not</span> stop_event.is_set():
-            <span class="comment"># Read from source</span>
-            data = src.recv(<span class="number">4096</span>)
-
-            <span class="keyword">if</span> <span class="keyword">not</span> data:
-                <span class="comment"># Empty bytes = peer closed</span>
-                <span class="function">print</span>(
-                    <span class="string">f"{direction}: closed"</span>
-                )
-                <span class="keyword">break</span>
-
-            <span class="comment"># Write to destination</span>
+def forward_stream(src, dst, direction, stop_event):
+    &quot;&quot;&quot;Forward this direction; EOF half-closes only the peer write side.&quot;&quot;&quot;
+    try:
+        while not stop_event.is_set():
+            data = src.recv(4096)
+            if not data:
+                dst.shutdown(socket.SHUT_WR)
+                return
             dst.sendall(data)
-            total += <span class="function">len</span>(data)
-
-    <span class="keyword">except</span> (ConnectionResetError, BrokenPipeError):
-        <span class="function">print</span>(
-            <span class="string">f"{direction}: connection reset"</span>
-        )
-    <span class="keyword">finally</span>:
-        <span class="comment"># Signal the other thread to stop</span>
-        stop_event.set()</div>
+    except OSError as exc:
+        print(f&quot;{direction}: {exc}&quot;)
+        stop_event.set()
+        for channel in (src, dst):
+            try:
+                channel.shutdown(socket.SHUT_RDWR)
+            except OSError:
+                pass
+</div>
 </div>
 
 <!-- SLIDE 36: Handle Client + Main Loop -->
 <div class="slide slide-content" id="slide36">
 <h2>💻 Client Handler and Accept Loop</h2>
 <div class="code-block" data-lang="python" style="font-size:0.92rem;">
-<span class="keyword">import</span> threading
+import threading
 
-<span class="keyword">def</span> <span class="function">handle_client</span>(client, host, port):
-    <span class="string">"""Connect to target, forward both ways."""</span>
-
-    <span class="comment"># Connect to the actual target server</span>
-    target = socket.socket(
-        socket.<span class="builtin">AF_INET</span>,
-        socket.<span class="builtin">SOCK_STREAM</span>
-    )
-    target.settimeout(<span class="number">10.0</span>)
-    target.connect((host, port))
-    target.settimeout(<span class="builtin">None</span>)
-
-    <span class="comment"># Shared shutdown signal</span>
-    stop = threading.Event()
-
-    <span class="comment"># Two threads: one per direction</span>
-    t1 = threading.Thread(
-        target=forward_stream,
-        args=(client, target, <span class="string">"c→t"</span>, stop)
-    )
-    t2 = threading.Thread(
-        target=forward_stream,
-        args=(target, client, <span class="string">"t→c"</span>, stop)
-    )
-    t1.start()
-    t2.start()
-    t1.join()
-    t2.join()
-
-    <span class="comment"># Clean up both sockets</span>
-    client.close()
-    target.close()</div>
+def handle_client(client, host, port):
+    &quot;&quot;&quot;Forward both ways; the lab uses a 30-second idle timeout.&quot;&quot;&quot;
+    target = None
+    try:
+        target = socket.create_connection((host, port), timeout=10)
+        target.settimeout(30)
+        client.settimeout(30)
+        stop = threading.Event()
+        workers = [threading.Thread(target=forward_stream, args=args)
+                   for args in ((client, target, &quot;c-to-t&quot;, stop),
+                                (target, client, &quot;t-to-c&quot;, stop))]
+        for worker in workers:
+            worker.start()
+        for worker in workers:
+            worker.join()
+    finally:
+        client.close()
+        if target is not None:
+            target.close()
+</div>
 </div>
 
 <!-- SLIDE 37: Running the Tunnel -->
+<!-- Run from this optional_LECTURES directory; the scenario README gives a standalone loopback route. -->
 <div class="slide slide-content" id="slide37">
 <h2>🚀 Running the Tunnel in Mininet</h2>
 <div class="code-block" data-lang="bash">
 <span class="comment"># Terminal 1: Echo server on b1 (target)</span>
-mininet> b1 python3 ex04_echo_server.py \
+mininet> b1 python3 ../../03_LECTURES/C03/assets/scenario-tcp-tunnel/echo.py \
     --listen 0.0.0.0:8080
 
 <span class="comment"># Terminal 2: Tunnel on r1 (router)</span>
-mininet> r1 python3 ex03_tcp_tunnel.py \
+mininet> r1 python3 ../../03_LECTURES/C03/assets/scenario-tcp-tunnel/tunnel.py \
     --listen 0.0.0.0:9090 \
     --target 10.0.2.1:8080
 
@@ -1285,7 +1264,7 @@ mininet> a1 echo "Hello tunnel!" \
 <div class="slide slide-content" id="slide38">
 <h2>🔄 Coordinating Thread Shutdown</h2>
 <div class="story-box">
-When one direction closes (e.g. the client sends FIN), the other forwarding thread must stop too. <code>threading.Event</code> provides a lightweight, thread-safe signalling mechanism — no locks required.
+When one direction receives EOF (e.g. the client sends FIN), propagate a half-close and let the reverse direction drain. On an error or idle timeout, signal cancellation and shut down both sockets to wake blocked receives. <code>threading.Event</code> provides a lightweight, thread-safe signalling mechanism — no locks required.
 </div>
 <div class="two-columns">
 <div class="code-block" data-lang="python" style="font-size: 0.92rem;">
@@ -1315,7 +1294,7 @@ stop.set()
 </ul>
 </div>
 <div class="warning-box" style="margin-top:15px;">
-<strong>Note:</strong> <code>recv()</code> is a blocking call. When one thread calls <code>stop.set()</code>, the other thread may still be blocked in <code>recv()</code>. The connection close from the peer will cause <code>recv()</code> to return empty bytes, breaking the loop.
+<strong>Note:</strong> <code>recv()</code> is a blocking call. When one thread calls <code>stop.set()</code>, the other thread may still be blocked in <code>recv()</code>. A cancellation flag alone does not wake a blocked receive. The implementation above uses socket shutdown on errors and a 30-second idle timeout; normal EOF only half-closes the corresponding write direction.
 </div>
 </div>
 </div>
@@ -1356,9 +1335,9 @@ sock.setsockopt(
 )
 sock.sendto(
     status,
-    (<span class="string">"239.1.1.1"</span>, <span class="number">5007</span>)
+    (<span class="string">"239.255.0.1"</span>, <span class="number">5007</span>)
 )</div>
-<p style="margin-top:12px;font-size:0.95rem;">Only the 50 inventory devices that joined group 239.1.1.1 receive the packets. The other 290 devices are undisturbed.</p>
+<p style="margin-top:12px;font-size:0.95rem;">Only the 50 inventory devices that joined group 239.255.0.1 receive the packets. The other 290 devices are undisturbed.</p>
 </div>
 </div>
 </div>
@@ -1429,7 +1408,7 @@ How would you explain broadcast, multicast and tunnelling to a non-technical per
 <div class="slide slide-content" id="slide42">
 <h2>🧠 Synthesis: The QUIC Protocol</h2>
 <div class="highlight-box">
-<strong>Context:</strong> Google developed QUIC (now standardised as HTTP/3 in RFC 9000) which runs over UDP but provides reliable, ordered delivery with built-in encryption. Given what you have learned about TCP and UDP trade-offs, why would engineers choose to rebuild TCP's features on top of UDP?
+<strong>Context:</strong> Google developed the original QUIC; IETF QUIC transport is specified by RFC 9000, and HTTP/3 by RFC 9114 which runs over UDP but provides reliable, ordered delivery with built-in encryption. Given what you have learned about TCP and UDP trade-offs, why would engineers choose to rebuild TCP's features on top of UDP?
 </div>
 <div class="quiz-container" style="margin-top: 20px;">
 <div class="quiz-question">What is the primary advantage of QUIC over traditional TCP?</div>
@@ -1489,7 +1468,8 @@ How would you explain broadcast, multicast and tunnelling to a non-technical per
 <div class="subtitle">Apply these concepts with the Seminar 3 starterkit</div>
 <div class="meta" style="margin-top: 45px;">
 <code style="background: rgba(255,255,255,0.15); padding: 14px 28px; border-radius: 12px; font-size: 1.1rem;">
-  cd ~/WEEK3 &amp;&amp; make verify
+  cd ~/COMPNET-EN/04_SEMINARS/S03
+  <span class="comment"># Follow README.md for the chosen scenario and its expected evidence.</span>
 </code>
 </div>
 <div class="meta" style="margin-top: 30px; opacity: 0.7;">
@@ -1632,6 +1612,7 @@ Questions? Feedback? Use the thumbs-down button or speak with your seminar instr
     // ═══════════════════════════════════════════════════════════════════
 
     document.addEventListener('keydown', (e) => {
+      if (e.target && e.target.closest && e.target.closest('input, textarea, select, button, [contenteditable="true"]')) return;
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
       switch(e.key) {

@@ -15,7 +15,7 @@ Given an IPv4 address/prefix, compute:
 
 | Name | Lines |
 |------|-------|
-| `cidr-calc.py` | 24 |
+| `cidr-calc.py` | 31 |
 
 ## Cross-References
 

@@ -1,4 +1,5 @@
 import argparse
+import ssl
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -15,7 +16,9 @@ def main():
     p.add_argument("--body", default="Hello from Python")
     p.add_argument("--starttls", action="store_true", default=True)
     p.add_argument("--no-starttls", dest="starttls", action="store_false")
+    p.add_argument("--cafile", default="tls/ca.crt", help="Trusted CA certificate for this local lab")
     args = p.parse_args()
+    context = ssl.create_default_context(cafile=args.cafile)
 
     msg = MIMEMultipart()
     msg["From"] = args.user
@@ -26,7 +29,7 @@ def main():
     with smtplib.SMTP(args.smtp_host, args.smtp_port, timeout=10) as smtp:
         smtp.ehlo()
         if args.starttls:
-            smtp.starttls()
+            smtp.starttls(context=context)
             smtp.ehlo()
         smtp.login(args.user, args.password)
         smtp.sendmail(args.user, [args.to_addr], msg.as_string())

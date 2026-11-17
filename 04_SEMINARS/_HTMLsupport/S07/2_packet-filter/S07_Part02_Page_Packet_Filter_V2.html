@@ -288,44 +288,34 @@
             },
 
             createPacketData: function(type) {
-                // Mock Byte array generation
-                let bytes = [];
-                // Ethernet (0-13)
-                for(let i=0; i<12; i++) bytes.push(Math.floor(Math.random()*255).toString(16).padStart(2,'0'));
-                bytes.push('08', '00'); // Proto IPv4
-
-                // IP (14-33)
-                bytes.push('45'); // Ver 4, IHL 5
-                for(let i=0; i<8; i++) bytes.push(Math.floor(Math.random()*255).toString(16).padStart(2,'0'));
-
-                let proto = (type === 'DNS') ? 17 : 6;
-                bytes.push(proto.toString(16).padStart(2,'0')); // Proto
-                bytes.push('00', '00'); // Checksum placeholder
-
-                // Src IP / Dst IP mock logic
-                let srcIP = "192.168.1.5";
-                let validNetwork = Math.random() > 0.3; // 70% chance to be 10.x
-                if (validNetwork) srcIP = "10.0.5." + Math.floor(Math.random()*255);
-
-                let dstIP = "8.8.8.8";
-
-                // Push IP bytes (simplified visuals)
-                bytes.push('c0','a8','01','05'); // Fake src
-                bytes.push('08','08','08','08'); // Fake dst
-
-                // Transport
-                let srcPort = Math.floor(Math.random() * 50000) + 1024;
-                let dstPort = (type === 'DNS') ? 53 : (type === 'HTTP' ? 80 : 22);
-
-                return {
-                    raw: bytes,
-                    type: type,
-                    srcIP: srcIP,
-                    dstIP: dstIP,
-                    proto: proto,
-                    srcPort: srcPort,
-                    dstPort: dstPort
+                const srcIP = Math.random() > 0.3 ? `10.0.5.${1 + Math.floor(Math.random() * 254)}` : '192.168.1.5';
+                const dstIP = '8.8.8.8';
+                const srcPort = 1024 + Math.floor(Math.random() * 50000);
+                const dstPort = type === 'DNS' ? 53 : (type === 'HTTP' ? 80 : 22);
+                const proto = type === 'DNS' ? 17 : 6;
+                const ipBytes = ip => ip.split('.').map(Number);
+                const word = n => [(n >>> 8) & 255, n & 255];
+                const checksum = data => {
+                    let sum = 0;
+                    for(let i=0;i<data.length;i+=2) sum += (data[i] << 8) + (data[i+1] || 0);
+                    while(sum >>> 16) sum = (sum & 65535) + (sum >>> 16);
+                    return (~sum) & 65535;
                 };
+                const transport = proto === 17
+                    ? [...word(srcPort), ...word(dstPort), 0, 8, 0, 0]
+                    : [...word(srcPort), ...word(dstPort), 0,0,0,1, 0,0,0,1, 0x50,0x10, 0x10,0, 0,0, 0,0];
+                if (proto === 6) {
+                    const check = checksum([...ipBytes(srcIP), ...ipBytes(dstIP), 0, proto, ...word(transport.length), ...transport]);
+                    transport[16] = check >>> 8; transport[17] = check & 255;
+                }
+                const ip = [0x45,0,...word(20 + transport.length), 0,1,0,0, 64,proto,0,0, ...ipBytes(srcIP),...ipBytes(dstIP)];
+                const check = checksum(ip); ip[10] = check >>> 8; ip[11] = check & 255;
+                const dmac = [0,12,41,0,0,1], smac = [0,80,86,0,0,2];
+                const bytes = [...dmac,...smac,8,0,...ip,...transport];
+                while(bytes.length < 60) bytes.push(0); // Ethernet padding, FCS excluded.
+                const hex = n => n.toString(16).padStart(2,'0');
+                return {raw:bytes.map(hex), type, srcIP, dstIP, proto, srcPort, dstPort,
+                    dmac:dmac.map(hex).join(':'), smac:smac.map(hex).join(':')};
             },
 
             renderBytes: function(packet) {
@@ -357,8 +347,8 @@
 
                 // Populate Data
                 await this.wait(300);
-                document.getElementById('val-dmac').innerText = "00:0c:29:..";
-                document.getElementById('val-smac').innerText = "00:50:56:..";
+                document.getElementById('val-dmac').innerText = packet.dmac;
+                document.getElementById('val-smac').innerText = packet.smac;
                 document.getElementById('val-ethproto').innerText = "0x0800";
 
                 await this.wait(this.delay);

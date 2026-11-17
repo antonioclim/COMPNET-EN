@@ -2,6 +2,7 @@ import socket
 import threading
 import pickle
 import io
+from binary_framing import encode_frame, read_frame
 
 # Server IP address and port.
 HOST = "127.0.0.1"
@@ -122,59 +123,20 @@ def process_command(data: bytes) -> bytes:
     serialized_payload = stream.getvalue()
 
     # Calculate the COMPLETE MESSAGE length (including LEN_BYTE).
-    payload_length = len(serialized_payload) + 1
-
-    # LEN_BYTE encoded as a single big-endian byte.
-    len_byte = payload_length.to_bytes(1, byteorder="big")
-
-    # Final message: LEN_BYTE + PICKLED_RESPONSE.
-    return len_byte + serialized_payload
+    return encode_frame(serialized_payload)
 
 
 def handle_client(client: socket.socket):
-    """
-    Handler for a single client (runs in a separate thread).
-
-    Steps:
-      - read the first fragment of bytes
-      - extract LEN_BYTE (first byte)
-      - keep reading until LEN_BYTE bytes in total are collected
-      - call process_command() and send the response
-    """
-
+    # Pickle is for this trusted local exercise only: never accept untrusted peers.
     with client:
-        while True:
-            if client is None:
-                break
-
-            # First data fragment (max BUFFER_SIZE bytes).
-            data = client.recv(BUFFER_SIZE)
-            if not data:
-                # The client has closed the connection.
-                break
-
-            # Store what has been received so far.
-            full_data = data
-
-            # The first byte contains the total message length.
-            message_length = data[0]
-
-            # How many more bytes do we need to read?
-            remaining = message_length - len(full_data)
-
-            # Keep reading until the entire message is available.
-            while remaining > 0:
-                chunk = client.recv(BUFFER_SIZE)
-                if not chunk:
+        try:
+            while True:
+                frame = read_frame(client)
+                if frame is None:
                     break
-                full_data += chunk
-                remaining -= len(chunk)
-
-            # full_data should now represent a single complete message.
-            response = process_command(full_data)
-
-            # Send the response to the client.
-            client.sendall(response)
+                client.sendall(process_command(frame))
+        except (OSError, EOFError, ValueError, pickle.UnpicklingError, AttributeError) as exc:
+            print(f"[PROTOCOL ERROR] {exc}")
 
 
 def accept_loop(server: socket.socket):
@@ -186,7 +148,7 @@ def accept_loop(server: socket.socket):
     while is_running:
         client, addr = server.accept()
         print(f"[CONNECT] {addr} has connected")
-        client_thread = threading.Thread(target=handle_client, args=(client,))
+        client_thread = threading.Thread(target=handle_client, args=(client,), daemon=True)
         client_thread.start()
 
 

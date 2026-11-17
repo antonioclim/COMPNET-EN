@@ -23,7 +23,7 @@ H -> H : Generate global address\nprefix + interface ID (or random)
 == Duplicate Address Detection (DAD) ==
 
 H -[#FF9800]> H : NS for own address\n(solicited-node multicast)
-H -> H : No NA received → address is unique
+H -> H : Tentative address: send configured DAD probes\nWatch for relevant competing NS or NA\nNo duplicate detected after the DAD interval → use address
 
 == Neighbour Resolution ==
 

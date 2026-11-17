@@ -13,25 +13,25 @@ start
 repeat
   :accept() — wait for\nincoming connection;
 
-  :recv() — read raw\nrequest bytes;
+  :Read until CRLF CRLF\nwith size and timeout limits;
 
   :Parse first line\n(e.g. "GET /index.html HTTP/1.1");
 
   if (Valid request line?) then (no)
-    #FFCDD2:Send 500\nInternal Server Error;
+    :Send 400\nBad Request; <<#FFCDD2>>
   else (yes)
     if (Method == GET?) then (no)
-      #FFCDD2:Send 500\nOnly GET supported;
+      :Send 405\nMethod Not Allowed; <<#FFCDD2>>
     else (yes)
       :Map path to file\nin static/ directory;
-      :Sanitise path\n(remove ".." segments);
+      :Resolve path and require\ncontainment inside static root;
 
       if (File exists?) then (no)
-        #FFCDD2:Send **404 Not Found**\n<h1>404 Not Found</h1>;
+        :Send **404 Not Found**\n<h1>404 Not Found</h1>; <<#FFCDD2>>
       else (yes)
         :Read file contents;
         :Detect MIME type\n(mimetypes module);
-        #C8E6C9:Send **200 OK**\nContent-Type + Content-Length\n+ file body;
+        :Send **200 OK**\nContent-Type + Content-Length\n+ file body; <<#C8E6C9>>
       endif
     endif
   endif

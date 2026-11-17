@@ -17,7 +17,7 @@ together {
 
     rectangle "TLS Session\n(:5443/TCP — E2/E3)" as tls #E8F5E9 {
         rectangle "TCP Handshake\n(SYN, SYN-ACK, ACK)" as tTcp #FFE0B2
-        rectangle "TLS Handshake\n(ClientHello, cert, cipher)\n**VISIBLE** metadata" as tHs #E1BEE7
+        rectangle "TLS Handshake\nClientHello / ServerHello visible\nTLS 1.3 Certificate encrypted" as tHs #E1BEE7
         rectangle "Application Data\n**OPAQUE** (encrypted)" as tApp #C8E6C9
         rectangle "close_notify + FIN" as tFin #FFE0B2
     }
@@ -26,16 +26,16 @@ together {
 rectangle "Deducible from TLS metadata" as meta #FFF9C4 {
     rectangle "SNI (hostname)" as m1 #ECEFF1
     rectangle "Cipher suite" as m2 #ECEFF1
-    rectangle "Record sizes\n(message lengths)" as m3 #ECEFF1
+    rectangle "Record sizes\n(not exact message lengths)" as m3 #ECEFF1
     rectangle "Timing\n(request/response pattern)" as m4 #ECEFF1
 }
 
 tHs -down-> meta : observable\nwithout decryption
 
 legend bottom
-  Left: plaintext — all commands readable in PCAP
-  Right: TLS — only metadata visible (SNI, cipher, sizes)
-  SSLKEYLOGFILE allows lab decryption in Wireshark
+  Plaintext Session panel: commands readable in PCAP
+  TLS Session panel: metadata only; TLS 1.3 encrypts most handshake messages
+  Session key logging (when supported) allows local-test decryption in Wireshark
   Key insight: TLS protects content, not traffic patterns
 endlegend
 @enduml

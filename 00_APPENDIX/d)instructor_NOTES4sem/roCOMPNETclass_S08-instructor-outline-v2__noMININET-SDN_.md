@@ -75,7 +75,7 @@ La finalul seminarului, studentul:
 
 ### Pregătire fișiere nginx Windows
 
-Fișierele din kit (`S08_Part04_Config_Docker_Compose.yml` și `S08_Part04_Config_Nginx.conf`) folosesc `network_mode: host`, care funcționează doar pe Linux. Pentru Windows, **creezi înainte de seminar** două fișiere adaptate în `04_SEMINARS\S08\4_nginx\`:
+Fișierele din kit (`S08_Part04_Config_Docker_Compose.yml` și `S08_Part04_Config_Nginx.conf`) folosesc `network_mode: host`. Pe Linux acesta foloseşte namespace-ul hostului. Docker Desktop 4.34+ oferă o opţiune de host networking care trebuie activată explicit şi are limite de nivel 4; nu o presupunem activă. https://docs.docker.com/engine/network/drivers/host/. Pentru Windows, **creezi înainte de seminar** două fișiere adaptate în `04_SEMINARS\S08\4_nginx\`:
 
 **Fișier 1: `S08_Part04_Config_Nginx.win.conf`**
 
@@ -230,7 +230,7 @@ curl.exe -v http://localhost:8000/api/time
 
 > *▸ „Acum avem răspunsul la întrebarea de la început. La `/hello`, serverul NU a trimis Content-Length. Clientul se descurcă pentru că protocolul e HTTP/1.0 — serverul închide conexiunea, iar clientul citește până la EOF."*
 >
-> *▸ „La `/api/time`, serverul a trimis explicit `Content-Length`. Clientul știe exact câți octeți să aștepte. Asta e mecanismul robust — și obligatoriu pentru HTTP/1.1 cu conexiuni persistente."*
+> *▸ „La `/api/time`, serverul a trimis explicit `Content-Length`. Clientul știe exact câți octeți să aștepte. Acesta este mecanismul ales în laborator. HTTP/1.1 permite şi chunked transfer coding; mesajele pe conexiuni persistente au nevoie de delimitare neambiguă."*
 
 ### C.4. Temă
 
@@ -295,7 +295,7 @@ cd 04_SEMINARS\S08\4_nginx
 docker compose -f S08_Part04_Config_Docker_Compose.win.yml up
 ```
 
-> *▸ „Pe Windows nu avem `network_mode: host`. Compose-ul pune backend-ul și nginx în aceeași rețea Docker. nginx accesează backend-ul prin numele serviciului: `http://backend:8000`."*
+> *▸ „În această rută Windows nu presupunem activarea opţiunii host networking din Docker Desktop. Compose-ul pune backend-ul și nginx în aceeași rețea Docker. nginx accesează backend-ul prin numele serviciului: `http://backend:8000`."*
 
 ### E.3. Test comparativ: direct vs proxy
 
@@ -445,7 +445,7 @@ Mogul, J. C. (1995). The case for persistent-connection HTTP. *ACM SIGCOMM Compu
 
 Nielsen, H. F., Gettys, J., Baird-Smith, A., Prud'hommeaux, E., Lie, H. W., & Lilley, C. (1997). Network performance effects of HTTP/1.1, CSS1, and PNG. *ACM SIGCOMM Computer Communication Review, 27*(4), 155–166. https://doi.org/10.1145/263109.263157
 
-Reese, W. (2008). Nginx: The high-performance web server and reverse proxy. *Linux Journal, 2008*(173). https://doi.org/10.5555/1412202.1412204
+Reese, W. (2008). Nginx: The high-performance web server and reverse proxy. *Linux Journal, 2008*(173). https://www.linuxjournal.com/article/10108
 
 ---
 

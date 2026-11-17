@@ -64,7 +64,7 @@ def detect_orientation(content: str) -> str:
     return 'portrait' if portrait >= landscape else 'landscape'
 
 
-def resize_to_a4(src_path: Path, dst_path: Path, width: int, height: int):
+def resize_to_a4(src_path: Path, dst_path: Path, width: int, height: int, dpi: int = 150):
     """Resize image to exact A4 with content centred on white background."""
     try:
         from PIL import Image
@@ -102,7 +102,7 @@ def resize_to_a4(src_path: Path, dst_path: Path, width: int, height: int):
         y = (height - new_h) // 2
         canvas.paste(img, (x, y))
         
-        canvas.save(dst_path, 'PNG')
+        canvas.save(dst_path, 'PNG', dpi=(dpi, dpi))
 
 
 def generate_diagram(puml_path: Path, output_dir: Path, dpi: int, jar_path: Path) -> tuple:
@@ -140,7 +140,7 @@ def generate_diagram(puml_path: Path, output_dir: Path, dpi: int, jar_path: Path
             
             # Resize to A4
             final_png = week_dir / (puml_path.stem + '.png')
-            resize_to_a4(tmp_png, final_png, width, height)
+            resize_to_a4(tmp_png, final_png, width, height, dpi=dpi)
             
             return (True, orientation, str(final_png))
             

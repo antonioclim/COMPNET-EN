@@ -86,7 +86,7 @@ cat S13_Part02_Config_Docker_Compose_Pentest.yml
 
 > *▸ „Fără să scanați — doar din ce vedeți în Compose: câte porturi vă așteptați să fie deschise pe `172.20.0.12`? Care anume?"*
 
-Răspunsuri așteptate: 21 și 6200. Unii pot spune „doar 21" — notezi ambele pe tablă, revii după scan.
+Răspunsul corect din Compose: sunt publicate porturile 21 şi 6200, dar mappingul nu demonstrează listenerul. Notează ipotezele şi verifică separat starea înainte şi după activarea comportamentului de laborator.
 
 > **Epifanie urmărită:** Porturile nu sunt accidentale; sunt *interfețe ale funcțiilor expuse* — fiecare port e o decizie de design (sau o greșeală).
 
@@ -228,11 +228,11 @@ print('Done.')
 
 > *▸ „Ce se întâmplă dacă pun timeout-ul la 0.01 secunde? Dar la 5 secunde?"*
 
-Răspuns: timeout mic → false negatives (porturi raportate ca „closed" înainte ca serverul să răspundă). Timeout mare → scan lent.
+Răspuns: timeout mic → rezultate neconcludente; timeoutul nu dovedeşte CLOSED. Timeout mare → scan lent.
 
 ### Întrebări (închid bucla)
 
-> *▸ „De ce scannerul nostru nu poate identifica versiunile? [nu trimite probe de fingerprinting, nu analizează banner-ul] De ce nu funcționează pentru UDP? [`connect_ex()` e specific TCP — UDP e connectionless]"*
+> *▸ „De ce scannerul nostru nu poate identifica versiunile? [nu trimite probe de fingerprinting, nu analizează banner-ul] De ce nu funcționează pentru UDP? [scannerul creează SOCK_STREAM; connect_ex pe UDP doar setează peer-ul local şi nu dovedeşte existenţa serviciului]"*
 
 > **Epifanie urmărită:** Scannerele sunt *politici de măsurare*: ce trimiți, cât aștepți, cum clasifici răspunsul.
 

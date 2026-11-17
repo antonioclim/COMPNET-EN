@@ -12,7 +12,7 @@ rectangle "Frame Control\n2 B\nversion, type\nsubtype, flags\nToDS / FromDS" as 
 rectangle "Duration\n/ ID\n2 B" as dur #ECEFF1
 rectangle "Address 1\n6 B\n(receiver)" as a1 #BBDEFB
 rectangle "Address 2\n6 B\n(transmitter)" as a2 #BBDEFB
-rectangle "Address 3\n6 B\n(BSSID / AP)" as a3 #BBDEFB
+rectangle "Address 3\n6 B\n(depends on ToDS/FromDS)" as a3 #BBDEFB
 rectangle "Seq\nCtrl\n2 B" as seq #ECEFF1
 rectangle "Address 4\n6 B\n(optional)" as a4 #90CAF9
 rectangle "Payload\n0–2304 B" as pay #FFF9C4
@@ -27,11 +27,13 @@ seq -right-> a4
 a4 -right-> pay
 pay -right-> fcs
 
+
 legend bottom
-  Frame types: management, control and data.
-  Address 4 is present only in WDS (wireless
-  distribution system) or mesh scenarios.
-  ToDS/FromDS bits determine address semantics.
-  FCS provides error detection via CRC-32.
+  Infrastructure address roles (RA=receiver, TA=transmitter):
+  |= ToDS |= FromDS |= Address 1 |= Address 2 |= Address 3 |= Address 4 |
+  | 0 | 0 | DA/RA | SA/TA | BSSID | absent |
+  | 1 | 0 | BSSID/RA | SA/TA | DA | absent |
+  | 0 | 1 | DA/RA | BSSID/TA | SA | absent |
+  | 1 | 1 | RA | TA | DA | SA |
 endlegend
 @enduml

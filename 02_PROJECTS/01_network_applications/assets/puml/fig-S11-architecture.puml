@@ -44,6 +44,6 @@ legend right
   Gateway: routes based on registry, not config
   Expiry: service removed after missed heartbeats
   Ports: 8080 (gw), 8500 (reg), 5101–5103 (svc)
-  Discovery: 239.10.11.12:5111/UDP (optional)
+  Discovery: 239.10.11.12:5111/UDP (mandatory E2)
 endlegend
 @enduml

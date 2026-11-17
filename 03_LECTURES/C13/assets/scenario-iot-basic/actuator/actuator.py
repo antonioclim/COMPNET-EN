@@ -37,13 +37,14 @@ def main():
     def set_fan(on: bool):
         state["fan_on"] = on
         msg = "ON" if on else "OFF"
-        client.publish(COMMAND_TOPIC, payload=msg)
+        client.publish(COMMAND_TOPIC, payload=msg, qos=1, retain=True)
         print(f"[actuator] FAN -> {msg} (published to {COMMAND_TOPIC})")
 
     def on_connect(_client, _userdata, _flags, reason_code, _properties=None):
         if reason_code == 0:
             print(f"[actuator] Connected to MQTT broker at {BROKER}:{PORT}")
             _client.subscribe(SENSOR_TOPIC)
+            set_fan(state["fan_on"])  # publish an initial retained state after each connection
             print(f"[actuator] Subscribed to {SENSOR_TOPIC}")
         else:
             print(f"[actuator] Connection failed: reason_code={reason_code}")

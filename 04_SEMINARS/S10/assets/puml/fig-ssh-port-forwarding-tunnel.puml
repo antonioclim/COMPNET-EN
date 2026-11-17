@@ -27,7 +27,8 @@ sshcli -[#43A047]up-> browser : HTTP response
 note right of web
   Port 8000 is only exposed
   internally (Docker "expose").
-  No direct host access.
+  No host port is published.
+  A Linux daemon host may still route to the container IP.
 end note
 
 note left of bastion
@@ -40,7 +41,7 @@ end note
 legend bottom
   ssh -L binds a local port and tunnels traffic
   through the SSH connection to a remote destination.
-  The web container is invisible to the host but
-  reachable via the bastion's Docker DNS.
+  The bastion resolves web through Docker DNS.
+  Physical-host reachability depends on Engine/Desktop and routing.
 endlegend
 @enduml

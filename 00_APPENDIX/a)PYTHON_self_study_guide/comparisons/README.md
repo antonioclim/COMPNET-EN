@@ -31,7 +31,7 @@ cd "00_APPENDIX/a)PYTHON_self_study_guide"
 
 # read the Rosetta Stone first, then the misconceptions for your background
 
-# run the quiz subset tailored to your background
+# include common questions plus questions explicitly tagged for this background
 make quiz-c
 make quiz-js
 make quiz-java
@@ -89,4 +89,4 @@ https://github.com/antonioclim/COMPNET-EN/tree/main/00_APPENDIX/a)PYTHON_self_st
 | Item | Value |
 |---|---|
 | Scope | Optional student aid within the Python bridge pack |
-| Quiz filters | Implemented in `../formative/run_quiz.py` and configured in `../formative/quiz.yaml` |
+| Quiz filters | Common questions are included for every background; a small set has explicit C, JavaScript, Java or Kotlin tags. The filter is not a separate complete examination for each language. |

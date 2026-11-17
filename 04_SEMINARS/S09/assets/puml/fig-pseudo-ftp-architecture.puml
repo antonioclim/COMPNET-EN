@@ -18,11 +18,11 @@ package "Server process" as spkg #E8F5E9 {
   card "File storage\n./temp/" as server_fs #FFF9C4
 }
 
-cmd_loop -right-> ctrl : <color:#1565C0>control connection (TCP)\nlist, help, active_*, passive_*</color>
+cmd_loop -right-> ctrl : control connection (TCP)\nlist, help, active_*, passive_*
 ctrl -down-> dispatch : decode + route
 dispatch -down-> server_fs : read / write
 
-cmd_loop .right.> dispatch : <color:#43A047>data connection (TCP)\ntemporary socket per transfer</color>
+cmd_loop .right.> dispatch : data connection (TCP)\ntemporary socket per transfer
 cmd_loop -down-> local_fs : save / load files
 
 legend bottom

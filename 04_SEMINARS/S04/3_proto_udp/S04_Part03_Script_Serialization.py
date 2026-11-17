@@ -1,6 +1,8 @@
 import pickle
 import io
 
+MAX_DATAGRAM = 65507  # IPv4 UDP payload limit; fragmentation is possible below this limit.
+
 
 def serialize(message) -> bytes:
     """
@@ -14,6 +16,8 @@ def serialize(message) -> bytes:
     stream = io.BytesIO()
     pickle.dump(message, stream)
     serialized_message = stream.getvalue()
+    if len(serialized_message) > MAX_DATAGRAM:
+        raise ValueError("Serialised message exceeds the IPv4 UDP payload limit")
     return serialized_message
 
 

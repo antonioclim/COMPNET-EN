@@ -10,7 +10,7 @@ Usage:
     python run_quiz.py                    # Full quiz
     python run_quiz.py --quick            # 10 random questions
     python run_quiz.py --background c     # C-programmer specific
-    python run_quiz.py --section sockets  # Topic filtering
+    python run_quiz.py --section socket  # Topic filtering
 
 Course: Computer Networks — ASE Bucharest, CSIE
 Version: 5.0 — January 2026
@@ -319,17 +319,17 @@ def check_answer(question: Dict[str, Any], answer: str) -> bool:
     Returns:
         True if answer matches the correct answer.
     """
-    correct = str(question['correct']).lower()
-    
-    if question.get('type') == 'fill_blank':
-        # Accept partial matches for fill-in-the-blank
-        acceptable = question.get('correct', [])
-        if isinstance(acceptable, list):
-            return any(ans.lower() in answer.lower() or answer.lower() in ans.lower() 
-                      for ans in acceptable)
-        return correct in answer.lower() or answer.lower() in correct
-    
-    return answer == correct
+    normalise = lambda value: str(value).strip().casefold()
+    kind = question.get('type')
+    if kind == 'true_false':
+        values = {'t': True, 'true': True, 'f': False, 'false': False}
+        expected = question['correct']
+        expected = expected if isinstance(expected, bool) else values.get(normalise(expected))
+        supplied = values.get(normalise(answer))
+        return expected is not None and supplied is not None and supplied == expected
+    acceptable = question['correct']
+    acceptable = acceptable if isinstance(acceptable, list) else [acceptable]
+    return normalise(answer) in {normalise(value) for value in acceptable}
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -387,7 +387,9 @@ def _show_misconception_ref(question: Dict[str, Any], is_correct: bool) -> None:
 def run_quiz(
     questions: List[Dict[str, Any]],
     randomise: bool = False,
-    limit: Optional[int] = None
+    limit: Optional[int] = None,
+    scoring: Optional[Dict[str, Any]] = None,
+    passing_score: float = 70
 ) -> Dict[str, Any]:
     """
     Run the interactive quiz and return results.
@@ -403,6 +405,11 @@ def run_quiz(
     """
     questions = _prepare_questions(questions, randomise, limit)
     results = _initialise_results(len(questions))
+    results['passing_score'] = passing_score
+    weights = scoring or {}
+    results['weights'] = {q['id']: float(weights.get(q.get('difficulty', 'basic'), {}).get('weight', 1)) for q in questions}
+    results['planned_points'] = sum(results['weights'].values())
+    results['earned_points'] = 0.0
     
     _display_quiz_header(len(questions))
     
@@ -415,9 +422,14 @@ def run_quiz(
             if i < len(questions):
                 input(f"\n{Colours.DIM}Press Enter for next question...{Colours.RESET}")
     
-    except KeyboardInterrupt:
-        print(f"\n\n{Colours.YELLOW}Quiz aborted.{Colours.RESET}")
-    
+    except (KeyboardInterrupt, EOFError):
+        print(f"\n\n{Colours.YELLOW}Quiz interrupted.{Colours.RESET}")
+
+    results['attempted'] = len(results['answers']) - results['skipped']
+    results['unattempted'] = results['total'] - len(results['answers'])
+    results['session_status'] = 'complete' if results['unattempted'] == 0 else 'incomplete'
+    results['percentage'] = 100 * results['earned_points'] / results['planned_points'] if results['planned_points'] else 0
+    results['passed'] = results['session_status'] == 'complete' and results['percentage'] >= passing_score
     return results
 
 
@@ -484,6 +496,7 @@ def _process_question(
         is_correct = check_answer(question, answer)
         if is_correct:
             results['correct'] += 1
+            results['earned_points'] += results['weights'][question['id']]
             section = question.get('section', 'general')
             results['by_section'][section]['correct'] += 1
     
@@ -519,8 +532,8 @@ def display_results(results: Dict[str, Any]) -> None:
     """
     c = Colours
     
-    answered = results['total'] - results['skipped']
-    percentage = (results['correct'] / answered * 100) if answered > 0 else 0
+    answered = results['attempted']
+    percentage = results['percentage']
     
     _display_results_header()
     _display_overall_score(results, answered, percentage)
@@ -544,23 +557,16 @@ def _display_overall_score(
     """Display overall score with colour coding."""
     c = Colours
     
-    if percentage >= 80:
-        grade_colour = c.GREEN
-        emoji = '🌟'
-        message = "Excellent! Ready for networking labs."
-    elif percentage >= 60:
-        grade_colour = c.YELLOW
-        emoji = '👍'
-        message = "Good progress. Review weak areas."
+    print(f"  Correct answers: {results['correct']}/{answered} attempted")
+    print(f"  Skipped: {results['skipped']}; unattempted: {results['unattempted']}; planned: {results['total']}")
+    print(f"  Weighted score: {results['earned_points']:g}/{results['planned_points']:g} ({percentage:.1f}%)")
+    print(f"  Passing threshold: {results['passing_score']:g}%")
+    if results['session_status'] != 'complete':
+        print("  Incomplete session: no readiness/pass verdict. Finish the remaining items.")
+    elif results['passed']:
+        print("  Threshold reached. Review feedback and verify the practical skills in the labs.")
     else:
-        grade_colour = c.RED
-        emoji = '📚'
-        message = "More study recommended before labs."
-    
-    score_text = f"{results['correct']}/{answered} ({percentage:.0f}%)"
-    print(f"  {emoji} Score: {grade_colour}{c.BOLD}{score_text}{c.RESET}")
-    print(f"  {c.DIM}Skipped: {results['skipped']}{c.RESET}")
-    print(f"\n  {message}\n")
+        print("  Threshold not reached. Review missed and skipped questions.")
 
 
 def _display_section_breakdown(results: Dict[str, Any]) -> None:
@@ -590,7 +596,7 @@ def save_results(results: Dict[str, Any], output_dir: Path) -> Path:
         Path to the saved JSON file.
     """
     output_dir.mkdir(parents=True, exist_ok=True)
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_%f')
     output_path = output_dir / f'quiz_results_{timestamp}.json'
     
     with open(output_path, 'w', encoding='utf-8') as f:
@@ -653,6 +659,10 @@ Examples:
         Colours.disable()
     
     # Normalise background
+    if args.limit is not None and args.limit <= 0:
+        parser.error('--limit must be positive')
+    if args.background == 'all':
+        args.background = None
     if args.background == 'js':
         args.background = 'javascript'
     
@@ -676,7 +686,7 @@ Examples:
     
     if not questions:
         print(f"{Colours.YELLOW}No questions match the specified filters.{Colours.RESET}")
-        sys.exit(0)
+        sys.exit(1)
     
     # Determine limit
     limit = args.limit
@@ -685,7 +695,9 @@ Examples:
         args.random = True
     
     # Run quiz
-    results = run_quiz(questions, randomise=args.random, limit=limit)
+    results = run_quiz(questions, randomise=args.random, limit=limit,
+                       scoring=quiz_data.get('scoring'),
+                       passing_score=quiz_data.get('metadata', {}).get('passing_score', 70))
     
     # Display and optionally save results
     display_results(results)

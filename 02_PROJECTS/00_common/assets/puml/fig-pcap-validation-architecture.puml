@@ -13,15 +13,16 @@ start
 :Resolve paths\n(expanduser + resolve);
 
 if (PCAP file exists?) then (no)
-  #FFCDD2:Print "[FAIL] PCAP not found";
+  :Print "[FAIL] PCAP not found"; <<#FFCDD2>>
   stop
 else (yes)
 endif
 
 :load_rules()\nRead pcap_rules/<CODE>.json;
 
-if (Rules file found?) then (no)
-  #FFCDD2:Print "[FAIL] Unable to load rules";
+if (Non-empty typed manifest
+with unique IDs and matching project?) then (no)
+  :Print "[FAIL] Unable to load rules"; <<#FFCDD2>>
   stop
 else (yes)
 endif
@@ -33,17 +34,17 @@ partition "validate() — iterate over rules" #E8F5E9 {
     :_parse_condition()\nParse operator and threshold\n(==, >=, <=, >, <) N;
 
     partition "tshark invocation" #E3F2FD {
-      :_run_tshark_count()\ntshark -r PCAP\n-Y "display_filter"\n-T fields -e frame.number;
+      :tshark -2 -r PCAP\n-Y "display_filter"\n-T fields with declared measurement;
 
-      :Count output lines\n→ observed packet count;
+      :Frames / field occurrences / distinct values\nor reassembled command lines\naccording to rule.measurement;
     }
 
     :_eval_condition()\nCompare observed vs threshold;
 
     if (condition met?) then (yes)
-      #C8E6C9:Record [OK] for rule;
+      :Record [OK] for rule; <<#C8E6C9>>
     else (no)
-      #FFCDD2:Record [FAIL] for rule;
+      :Record [FAIL] for rule; <<#FFCDD2>>
     endif
   endwhile (no)
 }
@@ -51,9 +52,9 @@ partition "validate() — iterate over rules" #E8F5E9 {
 :Print results per rule\n(status, expected, observed, filter);
 
 if (all rules passed?) then (yes)
-  #C8E6C9:Print "[OK] All rules passed"\nexit 0;
+  :Print "[OK] Capture checks passed"\nexit 0; <<#C8E6C9>>
 else (no)
-  #FFCDD2:Print "[FAIL] Some rules failed"\nexit 1;
+  :Print "[FAIL] Some rules failed"\nexit 1; <<#FFCDD2>>
 endif
 
 stop
@@ -64,5 +65,7 @@ Each rule in the JSON file defines:
 - filter: tshark display filter expression
 - condition: comparison operator + threshold
 - description: human-readable purpose
+- measurement: explicit unit of counting
+Application tests and complementary evidence remain required
 endlegend
 @enduml

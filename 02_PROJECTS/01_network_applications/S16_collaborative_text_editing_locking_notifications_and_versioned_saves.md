@@ -45,6 +45,10 @@ This project deserves a place in COMPNET-EN because it is **not** a duplicate of
 - **Protocol/default ports (E2):** TCP: 5016/TCP.
 - The Flex component must work with the default values without manual reconfiguration so that it can be integrated into automated tests.
 
+### Interpretation and complementary evidence
+
+The [E2 capture and semantic-evidence matrix](../00_common/E2_CAPTURE_EVIDENCE_MATRIX.md#s16) maps every capture rule to its generating action and the complementary application evidence.
+
 ### Deliverables
 - `flex/` directory with sources plus build and run instructions.
 - `docs/FLEX.md` with:
@@ -139,11 +143,11 @@ These criteria are deterministic and can be verified automatically with `tshark`
 
 | ID | tshark filter (`-Y`) | Condition | What it validates |
 |---:|---|---:|---|
-| R1 | `tcp.dstport==5016 && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | Handshake to the editing service. |
-| R2 | `tcp.port==5016 && frame contains "LOCK"` | `>= 1` | At least one lock attempt appears in payload. |
-| R3 | `tcp.port==5016 && (frame contains "BUSY" || frame contains "ERR_LOCKED" || frame contains "LOCK_DENIED")` | `>= 1` | The competing lock is refused deterministically. |
-| R4 | `tcp.port==5016 && frame contains "SAVE"` | `>= 1` | A save command is visible in the session. |
-| R5 | `tcp.port==5016 && (frame contains "DOC_UPDATE" || frame contains "UPDATED" || frame contains "VERSION")` | `>= 1` | A post-save update or version marker is visible. |
+| R1 | `tcp.dstport==5016 && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | SYN connection attempt to the editing service. |
+| R2 | `tcp.port==5016 && frame contains "LOCK"` | `>= 1` | LOCK marker bytes are present; reassemble and distinguish LOCK from UNLOCK. |
+| R3 | `tcp.port==5016 && (frame contains "BUSY" \|\| frame contains "ERR_LOCKED" \|\| frame contains "LOCK_DENIED")` | `>= 1` | A BUSY/ERR_LOCKED/LOCK_DENIED marker is present; assert the competing request and unchanged owner. |
+| R4 | `tcp.port==5016 && frame contains "SAVE"` | `>= 1` | SAVE marker bytes are present; verify the saved document and version. |
+| R5 | `tcp.port==5016 && (frame contains "DOC_UPDATE" \|\| frame contains "UPDATED" \|\| frame contains "VERSION")` | `>= 1` | An update/version marker is present; verify the recipient and actual post-save state. |
 
 ### Deliverables
 - Docker Compose with `editor_server` and `tester` plus optional interactive clients.

@@ -29,10 +29,22 @@ The server responds with:
 
 ## 1. JSON-RPC endpoint used
 
-The exercises target a JSON-RPC test endpoint (public or local). For this seminar the commonly used example is:
+The exercises use the supplied local JSON-RPC 2.0 server. From this directory, start it in terminal A:
+
+```bash
+python3 S12_Part01_Script_JSONRPC_Server.py
+```
+
+Run the client in terminal B:
+
+```bash
+python3 S12_Part01_Script_JSONRPC_Client.py
+```
+
+The endpoint is:
 
 ```text
-https://api.mathjs.org/v4/
+http://127.0.0.1:8000/
 ```
 
 It accepts JSON-RPC requests of the form:
@@ -58,3 +70,19 @@ The programme:
 - sends the request via `requests.post`
 - prints the result
 - includes TODO sections for students
+
+### Local contract and error evidence
+
+`evaluate` accepts `["2+3"]` or `{"expr":"2+3"}`; the bounded expression language
+contains numbers, parentheses and `+ - * /`. `add` accepts `[2,3]` or `{"a":2,"b":3}`.
+Request ids are echoed unchanged. Errors use -32700 (invalid JSON), -32600 (invalid
+request), -32601 (unknown method) and -32602 (invalid method parameters).
+A notification omits `id` and receives no JSON-RPC response. For this HTTP binding,
+responses use HTTP 200 and notifications use HTTP 204 with an empty body. JSON-RPC
+itself does not mandate these HTTP statuses. Batches are supported, up to 100 requests.
+
+Capture one successful call, one unknown method and one notification. Check the id
+and the exclusive `result`/`error` fields. The public mathjs API is a separate REST
+API using `expr`; do not send JSON-RPC envelopes to it.
+
+Specification: <https://www.jsonrpc.org/specification>.

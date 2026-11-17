@@ -21,6 +21,9 @@ MUA -> MTA1 : EHLO client.local
 MTA1 --> MUA : 250 capabilities\n(AUTH, STARTTLS, SIZE)
 MUA -> MTA1 : STARTTLS
 MTA1 --> MUA : 220 Ready for TLS
+MUA <-> MTA1 : TLS handshake and certificate verification
+MUA -> MTA1 : EHLO client.local (again, inside TLS)
+MTA1 --> MUA : 250 capabilities after TLS
 MUA -> MTA1 : AUTH LOGIN
 MTA1 --> MUA : 235 Authenticated
 MUA -> MTA1 : MAIL FROM:<alice@sender.tld>

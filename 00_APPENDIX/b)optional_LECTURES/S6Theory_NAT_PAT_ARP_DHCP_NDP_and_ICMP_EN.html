@@ -223,7 +223,7 @@
 <div class="slide-content">
   <div class="story-box">
     <h4>3 February 2011 &mdash; IANA Headquarters, Los Angeles</h4>
-    <p>Representatives of the five Regional Internet Registries (RIRs) gathered for what they described as a &ldquo;solemn ceremony.&rdquo; The Internet Assigned Numbers Authority (IANA) had just allocated the last five /8 blocks of IPv4 addresses &mdash; roughly 83 million addresses each &mdash; to the five regions. The global free pool was officially empty.</p>
+    <p>Representatives of the five Regional Internet Registries (RIRs) gathered for what they described as a &ldquo;solemn ceremony.&rdquo; The Internet Assigned Numbers Authority (IANA) had just allocated the last five /8 blocks of IPv4 addresses &mdash; 16,777,216 addresses each (83,886,080 in total) &mdash; to the five regions. The global free pool was officially empty.</p>
     <p style="margin-top: 0.75rem;">Yet the internet did not collapse. Thirty billion devices are online today, sharing barely 4.3 billion addresses. <strong>How?</strong></p>
   </div>
   <div class="columns" style="margin-top: 1.5rem;">
@@ -460,13 +460,13 @@
     <div class="result-display" id="patResult">
       <p><strong>Public IP:</strong> 85.120.33.7</p>
       <p><strong>Port range used:</strong> 49152 &ndash; 49201</p>
-      <p><strong>Utilisation:</strong> 50 / 16,383 ephemeral ports = <strong>0.31%</strong></p>
-      <p><strong>Remaining capacity:</strong> 16,333 connections</p>
+      <p><strong>Utilisation:</strong> 50 / 16,384 ephemeral ports = <strong>0.31%</strong></p>
+      <p><strong>Remaining capacity:</strong> 16,334 connections</p>
     </div>
   </div>
   <div class="warning-box" style="margin-top: 0.75rem;">
     <h4>Practical Limit</h4>
-    <p>The IANA ephemeral range (49152&ndash;65535) provides 16,383 ports. In theory, a single public IP can support that many simultaneous connections. In practice, conntrack table memory, CPU overhead and timeout policies reduce this significantly &mdash; a typical consumer router handles 4,000&ndash;8,000 concurrent mappings before performance degrades.</p>
+    <p>The IANA ephemeral range (49152&ndash;65535) provides 16,384 ports. In theory, this simplified example permits that many distinct public ports per transport protocol; real NAT mappings can also depend on the remote endpoint. In practice, conntrack table memory, CPU overhead and timeout policies reduce this significantly &mdash; the measured capacity depends on the router and traffic pattern.</p>
   </div>
 </div>
 </div>
@@ -784,12 +784,12 @@ Get-NetNeighbor    # PowerShell</pre>
 
 <!-- Slide 23: NDP — What It Unifies -->
 <div class="slide" data-slide="23">
-<div class="slide-header"><h2>NDP: One Protocol to Replace Several</h2></div>
+<div class="slide-header"><h2>IPv6 Neighbour Discovery and Address Configuration</h2></div>
 <div class="slide-content">
-  <p>In IPv4, address resolution (ARP), router discovery (ICMP Router Solicitation) and address autoconfiguration (DHCP) are separate protocols. IPv6&rsquo;s Neighbour Discovery Protocol (NDP, RFC 4861) consolidates all of these into a single, coherent framework built on top of ICMPv6.</p>
+  <p>In IPv4, address resolution (ARP), router discovery (ICMP Router Solicitation) and address autoconfiguration (DHCP) are separate protocols. IPv6 Neighbour Discovery (NDP, RFC 4861) uses ICMPv6 for neighbours, routers and prefix discovery. SLAAC uses these advertisements; DHCPv6 is a separate UDP-based configuration protocol.</p>
   <div class="table-container">
     <table>
-      <tr><th>Function</th><th>IPv4 Protocol</th><th>NDP Equivalent (IPv6)</th></tr>
+      <tr><th>Function</th><th>IPv4 Protocol</th><th>IPv6 mechanism</th></tr>
       <tr><td>IP → MAC resolution</td><td>ARP (broadcast)</td><td>Neighbour Solicitation / Advertisement (multicast)</td></tr>
       <tr><td>Router discovery</td><td>ICMP Router Discovery (optional)</td><td>Router Solicitation / Advertisement (mandatory)</td></tr>
       <tr><td>Address autoconfiguration</td><td>DHCP</td><td>SLAAC (stateless) or DHCPv6 (stateful)</td></tr>
@@ -1322,7 +1322,7 @@ traceroute -I 93.184.216.34</pre>
   <div class="toc-section">
     <h4>Section IV &mdash; NDP and Section V &mdash; ICMP</h4>
     <div class="toc-item" onclick="goToSlide(22)"><span>22</span> Section Title: NDP</div>
-    <div class="toc-item" onclick="goToSlide(23)"><span>23</span> NDP: One Protocol to Replace Several</div>
+    <div class="toc-item" onclick="goToSlide(23)"><span>23</span> IPv6 Neighbour Discovery and Address Configuration</div>
     <div class="toc-item" onclick="goToSlide(24)"><span>24</span> SLAAC: Addresses Without a Server</div>
     <div class="toc-item" onclick="goToSlide(25)"><span>25</span> Section Title: ICMP</div>
     <div class="toc-item" onclick="goToSlide(26)"><span>26</span> Error Reporting and Diagnostics</div>
@@ -1357,9 +1357,9 @@ const TOTAL_SLIDES = 42;
 let currentSlide = 1;
 
 document.addEventListener('DOMContentLoaded', () => {
+  const hash = window.location.hash;
   showSlide(1);
   updateProgress();
-  const hash = window.location.hash;
   if (hash && hash.startsWith('#slide-')) {
     const n = parseInt(hash.replace('#slide-', ''));
     if (n >= 1 && n <= TOTAL_SLIDES) goToSlide(n);
@@ -1394,6 +1394,7 @@ function updateCounter() {
 
 // Keyboard navigation
 document.addEventListener('keydown', (e) => {
+      if (e.target && e.target.closest && e.target.closest('input, textarea, select, button, [contenteditable="true"]')) return;
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
   switch (e.key) {
     case 'ArrowRight': case ' ': e.preventDefault(); nextSlide(); break;
@@ -1466,13 +1467,13 @@ function updatePAT() {
   const n = parseInt(slider.value);
   const portStart = 49152;
   const portEnd = portStart + n - 1;
-  const util = ((n / 16383) * 100).toFixed(2);
-  const remaining = 16383 - n;
+  const util = ((n / 16384) * 100).toFixed(2);
+  const remaining = 16384 - n;
   document.getElementById('patCount').textContent = n;
   document.getElementById('patResult').innerHTML =
     '<p><strong>Public IP:</strong> 85.120.33.7</p>' +
     '<p><strong>Port range used:</strong> ' + portStart + ' \u2013 ' + portEnd + '</p>' +
-    '<p><strong>Utilisation:</strong> ' + n + ' / 16,383 ephemeral ports = <strong>' + util + '%</strong></p>' +
+    '<p><strong>Utilisation:</strong> ' + n + ' / 16,384 ephemeral ports = <strong>' + util + '%</strong></p>' +
     '<p><strong>Remaining capacity:</strong> ' + remaining.toLocaleString() + ' connections</p>';
 }
 

@@ -7,15 +7,17 @@ skinparam shadowing false
 title S20 — Object Lifecycle State Machine
 
 [*] --> Present : seed data or INSERT
-Present --> Selected : QUERY or GET match
-Selected --> Present : session returns to idle
-Present --> Present : UPDATE commit\nrevision incremented
+state Present {
+  Present : QUERY / GET this key: return current value
+  Present : UPDATE commit: increment revision and notify
+  Present : Unknown other key: ERR_NOT_FOUND
+  Present : Reads and rejected requests preserve this object
+}
 Present --> Deleted : DELETE commit
 Deleted --> [*]
-Present --> Missing : unknown key queried
-Missing --> Present : valid key requested
 
 legend right
+  State is per object key
   Notifications follow committed UPDATE and DELETE events
   Durable storage is the source of truth
   Watch state belongs to sessions, not objects

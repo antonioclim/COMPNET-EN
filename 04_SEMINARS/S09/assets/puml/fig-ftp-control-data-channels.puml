@@ -17,8 +17,8 @@ package "FTP Server" as server_pkg #E8F5E9 {
   card "File system\n(server storage)" as fs #FFF9C4
 }
 
-client -right-> ctrl : <color:#1565C0>control connection\n(commands: USER, LIST, RETR, STOR)</color>
-client -right-> data : <color:#43A047>data connection\n(file content / directory listing)</color>
+client -right-> ctrl : control connection\n(commands: USER, LIST, RETR, STOR)
+client -right-> data : data connection\n(file content / directory listing)
 data -down-> fs : read / write files
 
 legend bottom

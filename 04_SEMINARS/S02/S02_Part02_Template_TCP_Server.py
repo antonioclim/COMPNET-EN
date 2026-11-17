@@ -8,7 +8,7 @@ Students are expected to complete the TODO section inside `MyTCPHandler.handle()
 import socketserver
 
 
-class MyTCPHandler(socketserver.BaseRequestHandler):
+class MyTCPHandler(socketserver.StreamRequestHandler):
     """Request handler for our TCP server.
 
     This class is instantiated once for each new connection.
@@ -28,32 +28,40 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
         - self.client_address is a tuple (ip, port)
         - len(self.data) gives the message length (in bytes)
         """
-        # Read data from the client (up to 1024 bytes).
-        self.data = self.request.recv(1024).strip()
+        # TCP is a stream: read one bounded LF-terminated message at a time.
+        while True:
+            line = self.rfile.readline(1025)
+            if not line:
+                break
+            if len(line) > 1024 or not line.endswith(b"\n"):
+                self.request.sendall(b"ERR invalid line\n")
+                break
+            self.data = line[:-1].removesuffix(b"\r")
 
-        # >>> STUDENT CODE STARTS HERE
+            # >>> STUDENT CODE STARTS HERE
 
-        # 1. Print the client's IP and port in the format:
-        #    [CLIENT] <ip>:<port> connected
-        #    Use self.client_address.
+            # 1. Print the client's IP and port in the format:
+            #    [CLIENT] <ip>:<port> connected
+            #    Use self.client_address.
 
-        # 2. Print the message content and its length:
-        #    [CLIENT] Sent <len> bytes: <message>
+            # 2. Print the message content and its length:
+            #    [CLIENT] Sent <len> bytes: <message>
 
-        # 3. Build a response that starts with b"OK: "
-        #    followed by the original message converted to uppercase.
-        #
-        #    Example: for "hello", the response should be:
-        #    b"OK: HELLO"
+            # 3. Build a response that starts with b"OK: "
+            #    followed by the original message converted to uppercase.
+            #
+            #    Example: for "hello", the response should be:
+            #    b"OK: HELLO"
 
-        # 4. Send the response back to the client with sendall().
+            # 4. Send the response back to the client with sendall(), including the terminating LF.
 
-        # <<< STUDENT CODE ENDS HERE
+            # <<< STUDENT CODE ENDS HERE
 
 
 class MyTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     # Ensure we can restart the server immediately on the same port.
     allow_reuse_address = True
+    daemon_threads = True
 
 
 if __name__ == "__main__":

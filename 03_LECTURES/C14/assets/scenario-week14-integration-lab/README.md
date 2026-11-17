@@ -9,7 +9,10 @@ This capstone-style lab integrates multiple topics from the module:
 
 The goal is to be able to narrate a complete request path:
 
-> *client → DNS resolver → authoritative DNS → reverse proxy → backend service(s) → response*
+> DNS lookup: *client → recursive resolver → authoritative DNS*, followed by a DNS reply.
+> HTTP exchange: *client → resolved reverse-proxy address → backend service → response*.
+
+The HTTP request does not travel through the DNS servers.
 
 …and to identify where each protocol lives (L7 vs L4), and where state is maintained (caches, sessions, TLS state).
 

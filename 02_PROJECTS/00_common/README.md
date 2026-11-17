@@ -4,13 +4,15 @@ Common templates, tooling and CI configuration that enforce reproducibility and 
 
 ## File/Folder Index
 
-| Name | Description | Metric |
-|---|---|---|
-| [`README_STANDARD_RC2026.md`](README_STANDARD_RC2026.md) | Minimum student-repository structure, PCAP validation protocol and E3 evidence requirements | 71 lines |
-| [`assets/`](assets/) | PlantUML source diagrams and the rendering scaffold for the shared assessment architecture | 11 files total (6 `.puml` sources plus render and support files) |
-| [`ci/`](ci/) | GitHub Actions workflow template for E2 automation | 2 files (workflow template plus local index) |
-| [`docker/`](docker/) | Base tester container: Dockerfile, entrypoint and local documentation | 4 files |
-| [`tools/`](tools/) | PCAP validation script, rule sets and local documentation | 33 files (1 Python script + 30 JSON rule files + 2 docs) |
+| Name | Description |
+|---|---|
+| [`README_STANDARD_RC2026.md`](README_STANDARD_RC2026.md) | Minimum student-repository structure, PCAP validation protocol and E3 evidence requirements |
+| [`E2_CAPTURE_EVIDENCE_MATRIX.md`](E2_CAPTURE_EVIDENCE_MATRIX.md) | Every capture rule mapped to its generating scenario step and semantic evidence for all 30 projects |
+| [`tests/`](tests/) | Regression checks for validator logic and catalogue traceability |
+| [`assets/`](assets/) | PlantUML source diagrams and the rendering scaffold for the shared assessment architecture |
+| [`ci/`](ci/) | GitHub Actions workflow template for E2 automation |
+| [`docker/`](docker/) | Base tester container: Dockerfile, entrypoint and local documentation |
+| [`tools/`](tools/) | PCAP validation script, rule sets and local documentation |
 
 ## Visual Overview
 
@@ -64,7 +66,7 @@ Rendered PNGs appear in `assets/images/`.
 
 ## Design Rationale
 
-Centralising assessment tooling in a single directory ensures that rule updates propagate to all projects without per-brief edits. The separation of JSON rule files from the validation engine allows instructors to modify acceptance criteria independently of the tshark-parsing logic.
+Keep each rule manifest, its brief table, the scenario matrix and the verification workbook aligned when changing a criterion. The regression checks compare the canonical brief and manifest content. The separation of JSON rule files from the validation engine allows instructors to modify acceptance criteria independently of the tshark-parsing logic.
 
 ## Cross-References
 

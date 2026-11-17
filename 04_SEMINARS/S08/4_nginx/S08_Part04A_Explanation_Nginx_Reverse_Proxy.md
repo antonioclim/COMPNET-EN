@@ -42,7 +42,7 @@ Instead of installing nginx directly on the system, we use a container:
 
 - official `nginx:alpine` image
 - our configuration is mounted into the container
-- everything starts with a single command: `docker compose up`
+- everything starts with a single command: `docker compose -f S08_Part04_Config_Docker_Compose.yml up`
 
 In our laboratory:
 
@@ -68,7 +68,7 @@ Diagram:
 
 ```
 
-curl [http://localhost:8080/](http://localhost:8080/)  -> nginx (8080) -> [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+curl http://localhost:8080/  -> nginx (8080) -> http://127.0.0.1:8000/
 
 ```
 

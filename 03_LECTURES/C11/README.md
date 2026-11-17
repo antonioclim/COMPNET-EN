@@ -11,10 +11,10 @@ Week 11 treats three classic application protocols that predate the web yet rema
 | [`assets/puml/`](assets/puml/) | PlantUML diagram sources | 7 files |
 | [`assets/images/`](assets/images/) | Rendered PNG output | .gitkeep |
 | [`assets/render.sh`](assets/render.sh) | Diagram rendering script | — |
-| [`assets/scenario-dns-ttl-caching/`](assets/scenario-dns-ttl-caching/) | DNS caching with BIND resolver and auth server (Docker Compose) | 7 files |
-| [`assets/scenario-ftp-baseline/`](assets/scenario-ftp-baseline/) | Basic FTP server and client (Docker Compose) | 5 files |
-| [`assets/scenario-ftp-nat-firewall/`](assets/scenario-ftp-nat-firewall/) | FTP through NAT/firewall (Docker Compose) | 8 files |
-| [`assets/scenario-ssh-provision/`](assets/scenario-ssh-provision/) | SSH-based multi-node provisioning (Docker Compose) | 6 files |
+| [`assets/scenario-dns-ttl-caching/`](assets/scenario-dns-ttl-caching/) | DNS caching with an Unbound resolver and BIND authoritative server (Docker Compose) | 7 files |
+| [`assets/scenario-ftp-baseline/`](assets/scenario-ftp-baseline/) | Basic FTP server and client (Docker Compose) | 6 files |
+| [`assets/scenario-ftp-nat-firewall/`](assets/scenario-ftp-nat-firewall/) | FTP through NAT/firewall (Docker Compose) | 9 files |
+| [`assets/scenario-ssh-provision/`](assets/scenario-ssh-provision/) | SSH-based multi-node provisioning (Docker Compose) | 7 files |
 
 ## Visual Overview
 
@@ -114,7 +114,7 @@ DNS knowledge is assumed by the email protocol lecture (C12), where MX record lo
 ```bash
 git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
 cd COMPNET-EN
-git sparse-checkout set 03_LECTURES/C11
+git sparse-checkout set 03_LECTURES/C11 00_TOOLS
 ```
 
 **Method B — Direct download**

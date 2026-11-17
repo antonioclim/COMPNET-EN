@@ -222,18 +222,20 @@ IPv6 link-local addresses (fe80::/10) are automatically configured on every IPv6
 
 ### Q14. `N05.C04.Q04` — IPv6 Address Type Identification / Identificarea tipului de adresă IPv6
 
-*[Multiple Choice — Alegere multiplă]*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-An IPv6 address beginning with 2001:0db8: belongs to which address category? [O adresă IPv6 care începe cu 2001:0db8: aparține cărei categorii de adrese?]
+What is the intended use of IPv6 prefix 2001:db8::/32? [Care este utilizarea destinată prefixului IPv6 2001:db8::/32?]
 
-- **a)** Global unicast — routable on the Internet (2000::/3) [Unicast global — rutabilă pe Internet (2000::/3)]
-- **b)** Link-local — confined to a single segment (fe80::/10) [Link-local — limitată la un singur segment (fe80::/10)]
-- **c)** Unique local — private use, not globally routable (fc00::/7) [Locală unică — utilizare privată, nerutabilă global (fc00::/7)]
-- **d)** Multicast — one-to-many group communication (ff00::/8) [Multicast — comunicare de grup unu-la-mulți (ff00::/8)]
+- **a)** Documentation and examples; it is not a public deployment prefix. [Documentație și exemple; nu este un prefix pentru implementare publică.]
+- **b)** Globally reachable production addresses assigned to this university. [Adrese de producție accesibile global atribuite universității.]
+- **c)** Link-local communication on every interface. [Comunicare link-local pe orice interfață.]
+- **d)** IPv6 multicast group addressing. [Adresare multicast IPv6.]
 
-> 💡 **Feedback:**
-> *2001:0db8: falls within the 2000::/3 global unicast range. Note: 2001:db8::/32 is specifically the documentation range (RFC 3849), but it is structurally a global unicast address. [2001:0db8: se încadrează în intervalul unicast global 2000::/3. Notă: 2001:db8::/32 este specific intervalul de documentare (RFC 3849), dar este structural o adresă unicast globală.]*
+<details><summary>💡 Feedback</summary>
 
+**Correct answer / Răspuns corect: a.** RFC 3849 reserves this block for documentation. Its appearance within the larger unicast address space does not make it globally reachable. [RFC 3849 rezervă blocul pentru documentație. Apartenența la spațiul mai larg de unicast nu îl face accesibil global.]
+
+</details>
 
 ---
 
@@ -258,7 +260,7 @@ What is the recommended prefix length for end-user IPv6 subnets, and why? [Care 
 
 *[Multiple Choice — Alegere multiplă]*
 
-The full IPv6 address 2001:0db8:0000:0000:0000:0085:0000:7334 can be correctly compressed to which form? [Adresa IPv6 completă 2001:0db8:0000:0000:0000:0085:0000:7334 poate fi comprimată corect în care formă?]
+The full IPv6 address 2001:0db8:0000:0000:0000:0085:0000:7334 has which canonical representation under RFC 5952? [Adresa IPv6 completă 2001:0db8:0000:0000:0000:0085:0000:7334 are care reprezentare canonică potrivit RFC 5952?]
 
 - **a)** 2001:db8::85:0:7334 — leading zeros removed, longest zero run replaced by :: [2001:db8::85:0:7334 — zerourile din față eliminate, cea mai lungă serie de zerouri înlocuită cu ::]
 - **b)** 2001:db8::85::7334 — using :: twice for both zero sequences [2001:db8::85::7334 — folosind :: de două ori pentru ambele secvențe de zerouri]
@@ -266,8 +268,7 @@ The full IPv6 address 2001:0db8:0000:0000:0000:0085:0000:7334 can be correctly c
 - **d)** 2001:db8:0::85:0:7334 — :: replaces only two zero groups [2001:db8:0::85:0:7334 — :: înlocuiește doar două grupuri de zerouri]
 
 > 💡 **Feedback:**
-> *The longest consecutive all-zero run (positions 3-5, three groups) gets replaced by ::. The single zero group at position 7 stays as :0:. The :: can only appear once. [Cea mai lungă serie consecutivă de zerouri (pozițiile 3-5, trei grupuri) se înlocuiește cu ::. Grupul singular de zerouri de la poziția 7 rămâne ca :0:. :: poate apărea doar o singură dată.]*
-
+> *The longest consecutive all-zero run (positions 3-5, three groups) gets replaced by ::. The single zero group at position 7 stays as :0:. The :: can only appear once. Options c and d are valid spellings of the address but do not use the required canonical longest-run compression. [Cea mai lungă serie consecutivă de zerouri (pozițiile 3-5, trei grupuri) se înlocuiește cu ::. Grupul singular de zerouri de la poziția 7 rămâne ca :0:. :: poate apărea doar o singură dată. Variantele c și d sunt scrieri valide ale adresei, dar nu folosesc compresia canonică cerută a celei mai lungi secvențe.]*
 
 ---
 
@@ -348,11 +349,10 @@ For a point-to-point router link, a network engineer considers both /30 and /31.
 - **a)** /31 is valid for point-to-point links since broadcast is unnecessary between two endpoints [/31 este valid pentru legături punct-la-punct deoarece broadcast-ul este inutil între două puncte finale]
 - **b)** /31 has zero usable addresses and cannot be assigned to any interface [/31 are zero adrese utilizabile și nu poate fi atribuit niciunei interfețe]
 - **c)** /30 is always required because /31 violates the network/broadcast reservation rule defined in the original IPv4 specification [/30 este întotdeauna necesar deoarece /31 încalcă regula de rezervare rețea/broadcast definită în specificația originală IPv4]
-- **d)** Both /30 and /31 provide exactly the same number of usable host addresses [Atât /30, cât și /31 oferă exact același număr de adrese de gazdă utilizabile]
+- **d)** /31 requires four address values for its two endpoints [/31 necesită patru valori de adresă pentru cele două capete]
 
 > 💡 **Feedback:**
 > *RFC 3021 allows /31 for P2P links: 2 addresses, both usable (no broadcast needed). /30 gives 4 addresses, 2 usable. Both provide 2 usable, but /31 saves 2 addresses. [RFC 3021 permite /31 pentru legături P2P: 2 adrese, ambele utilizabile (nu este nevoie de broadcast). /30 oferă 4 adrese, 2 utilizabile. Ambele oferă 2 utilizabile, dar /31 economisește 2 adrese.]*
-
 
 ---
 
@@ -560,8 +560,7 @@ What subnet mask corresponds to a /27 prefix? [Ce mască de subrețea corespunde
 - **d)** 255.255.255.128 — this corresponds to a /25 prefix instead [255.255.255.128 — aceasta corespunde unui prefix /25 în schimb]
 
 > 💡 **Feedback:**
-> *For /27: 27 bits set to 1 = 24 full octets + 3 bits in the fourth octet. Binary: 11100000 = 224. [Pentru /27: 27 de biți setați la 1 = 24 de octeți completi + 3 biți în al patrulea octet. Binar: 11100000 = 224.]*
-
+> *For /27: 27 bits set to 1 = 24 bits in three complete octets + 3 bits in the fourth octet. Binary: 11100000 = 224. [Pentru /27: 27 de biți setați la 1 = 24 de biți în trei octeți compleți + 3 biți în al patrulea octet. Binar: 11100000 = 224.]*
 
 ---
 
@@ -569,7 +568,7 @@ What subnet mask corresponds to a /27 prefix? [Ce mască de subrețea corespunde
 
 *[Multiple Choice — Alegere multiplă]*
 
-In the subnet 10.5.0.0/24 used by the Week 5 lab, what are the network address and broadcast address? [În subrețeaua 10.5.0.0/24 utilizată de laboratorul Săptămânii 5, care sunt adresa de rețea și adresa de broadcast?]
+In the subnet 10.5.0.0/24 in this addressing exercise, what are the network address and broadcast address? [În subrețeaua 10.5.0.0/24 din acest exercițiu de adresare, care sunt adresa de rețea și adresa de broadcast?]
 
 - **a)** Network: 10.5.0.0, Broadcast: 10.5.0.255 [Rețea: 10.5.0.0, Broadcast: 10.5.0.255]
 - **b)** Network: 10.5.0.1, Broadcast: 10.5.0.254 [Rețea: 10.5.0.1, Broadcast: 10.5.0.254]
@@ -578,7 +577,6 @@ In the subnet 10.5.0.0/24 used by the Week 5 lab, what are the network address a
 
 > 💡 **Feedback:**
 > *For /24 at 10.5.0.0: network = all host bits 0 = 10.5.0.0; broadcast = all host bits 1 = 10.5.0.255. The usable range is .1 through .254. [Pentru /24 la 10.5.0.0: rețea = toți biții de gazdă 0 = 10.5.0.0; broadcast = toți biții de gazdă 1 = 10.5.0.255. Intervalul utilizabil este de la .1 până la .254.]*
-
 
 ---
 
@@ -686,18 +684,20 @@ Given requirements [60, 14, 30, 2] for network 10.0.0.0/24, the VLSM algorithm s
 
 ### Q41. `N05.S03.Q03` — VLSM Trace: Prefix for 14 Hosts / Trasare VLSM: prefixul pentru 14 gazde
 
-*[Multiple Choice — Alegere multiplă]*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-In code exercise T5, the function processes req=14. What prefix does 32 - (req + 2 - 1).bit_length() yield? [În exercițiul de cod T5, funcția procesează req=14. Ce prefix produce 32 - (req + 2 - 1).bit_length()?]
+For `req = 14`, what does `32 - (req + 2 - 1).bit_length()` evaluate to? [Pentru `req = 14`, ce valoare produce `32 - (req + 2 - 1).bit_length()`?]
 
-- **a)** /27 — because (14+2-1) = 15, bit_length()=4, but the actual allocation uses (16).bit_length()=5 → /27 [/27 — deoarece (14+2-1) = 15, bit_length()=4, dar alocarea reală folosește (16).bit_length()=5 → /27]
-- **b)** /28 — because 14 hosts need 16 total addresses, and log2(16) = 4, so the resulting prefix = 32−4 = 28 [/28 — deoarece 14 gazde necesită 16 adrese în total, iar log2(16) = 4, deci prefixul rezultat = 32−4 = 28]
-- **c)** /26 — because 14 hosts get rounded up to the next /26 block [/26 — deoarece 14 gazde sunt rotunjite la următorul bloc /26]
-- **d)** /29 — because 14+2=16 and 32-3=29 [/29 — deoarece 14+2=16 și 32-3=29]
+- **a)** 28 (`/28`)
+- **b)** 27 (`/27`)
+- **c)** 26 (`/26`)
+- **d)** 29 (`/29`)
 
-> 💡 **Feedback:**
-> *req=14: (14+2-1)=15, bit_length()=4. But wait — 15.bit_length()=4, prefix=32-4=28. However, the trace solution shows /27. The exact formula depends on bit_length computation: (16).bit_length()=5, prefix=27. This matches the trace output. [req=14: (14+2-1)=15, bit_length()=4. Dar 15.bit_length()=4, prefix=32-4=28. Totuși, soluția trasării arată /27. Formula exactă depinde de calculul bit_length: (16).bit_length()=5, prefix=27. Aceasta se potrivește cu rezultatul trasării.]*
+<details><summary>💡 Feedback</summary>
 
+**Correct answer / Răspuns corect: a.** (14 + 2 - 1) = 15 and (15).bit_length() = 4; 32 − 4 = 28. A conventional /28 subnet has 16 addresses and 14 usable host addresses. Substituting (16).bit_length() changes the expression and is not a valid evaluation. [(14 + 2 - 1) = 15 și (15).bit_length() = 4; 32 − 4 = 28. O subrețea convențională /28 are 16 adrese și 14 adrese utilizabile de gazdă. Substituirea cu (16).bit_length() schimbă expresia și nu reprezintă o evaluare validă.]
+
+</details>
 
 ---
 
@@ -720,18 +720,19 @@ The align_to_boundary() function in code exercise T3 ensures that subnet startin
 
 ### Q43. `N05.S04.Q01` — IPv6 Expand Command / Comanda de expandare IPv6
 
-*[Multiple Choice — Alegere multiplă]*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-In the Week 5 lab, which command expands a compressed IPv6 address to its full 32-digit hexadecimal form? [În laboratorul Săptămânii 5, care comandă expandează o adresă IPv6 comprimată la forma completă de 32 de cifre hexazecimale?]
+Which Python standard-library command expands `2001:db8::1` without relying on a separate exercise kit? [Ce comandă din biblioteca standard Python expandează `2001:db8::1` fără a depinde de alt kit de exerciții?]
 
-- **a)** docker exec week5_python python /app/src/exercises/ex_5_02_vlsm_ipv6.py ipv6-expand 2001:db8::1 [docker exec week5_python python /app/src/exercises/ex_5_02_vlsm_ipv6.py ipv6-expand 2001:db8::1]
-- **b)** docker exec week5_python python /app/src/exercises/ex_5_02_vlsm_ipv6.py ipv6 2001:db8::1 [docker exec week5_python python /app/src/exercises/ex_5_02_vlsm_ipv6.py ipv6 2001:db8::1]
-- **c)** docker exec week5_python python /app/src/exercises/ex_5_01_cidr_flsm.py analyse 2001:db8::1 [docker exec week5_python python /app/src/exercises/ex_5_01_cidr_flsm.py analyse 2001:db8::1]
-- **d)** docker exec week5_python python /app/src/exercises/ex_5_02_vlsm_ipv6.py ipv6-subnets 2001:db8::1 [docker exec week5_python python /app/src/exercises/ex_5_02_vlsm_ipv6.py ipv6-subnets 2001:db8::1]
+- **a)** `python3 -c "import ipaddress; print(ipaddress.IPv6Address('2001:db8::1').exploded)"`
+- **b)** `python3 -c "print('2001:db8::1'.upper())"`
+- **c)** `python3 -c "print('2001:db8::1'.split(':'))"`
 
-> 💡 **Feedback:**
-> *The ipv6-expand subcommand of ex_5_02_vlsm_ipv6.py restores all leading zeros and zero groups. The ipv6 subcommand does the reverse — it compresses the address. [Subcomanda ipv6-expand a ex_5_02_vlsm_ipv6.py restaurează toate zerourile din față și grupurile de zerouri. Subcomanda ipv6 face inversul — comprimă adresa.]*
+<details><summary>💡 Feedback</summary>
 
+**Correct answer / Răspuns corect: a.** The exploded property yields `2001:0db8:0000:0000:0000:0000:0000:0001`. No Docker container or absent ex_5_02_vlsm_ipv6.py script is required. [Proprietatea exploded produce `2001:0db8:0000:0000:0000:0000:0000:0001`. Nu este necesar un container Docker sau scriptul absent ex_5_02_vlsm_ipv6.py.]
+
+</details>
 
 ---
 

@@ -45,7 +45,7 @@
 - **c) 11**
 - **d) 12**
 
-> 💡 **Feedback:** The three-way handshake occurs only once, at the time connect() is called. After that, the connection remains open for all data transfers until close() initiates the FIN teardown sequence. A common misconception (Misconception #7) is that each send() triggers a new handshake, similar to how each HTTP request in HTTP/(...).0 required a new connection. In reality, TCP maintains a persistent connection. [Handshake-ul în trei pași are loc o singură dată, în momentul apelului connect(). După aceea, conexiunea rămâne deschisă pentru toate transferurile de date până când close() inițiază secvența de terminare cu FIN. O concepție greșită frecventă (Concepția greșită nr. 7) este că fiecare send() declanșează un nou handshake, similar modului în care fiecare cerere HTTP în HTTP/(...).0 necesita o nouă conexiune. În realitate, TCP menține o conexiune persistentă.]
+> 💡 **Feedback:** One normal connection establishment is needed for one successful connect(), irrespective of the number of application writes. send() may write fewer bytes than requested and does not create message boundaries. Retransmissions can increase the number of observed packets; graceful close normally uses FIN, while some close/error paths reset the connection. [Este necesară o singură stabilire normală a conexiunii pentru un connect() reușit, indiferent de numărul scrierilor aplicației. send() poate scrie mai puțini octeți decât se cer și nu creează delimitări de mesaje. Retransmisiile pot crește numărul de pachete observate; închiderea normală folosește de regulă FIN, dar unele căi de închidere/eroare resetează conexiunea.]
 
 ---
 
@@ -80,14 +80,14 @@
 ### 6. `Multiple Choice`
 **N07.T00.Q01: TCP Connection Establishment / Stabilirea conexiunii TCP**
 
-> How many distinct packets are exchanged during a successful TCP three-way handshake? [Câte pachete distincte sunt schimbate în timpul unei negocieri TCP în trei pași reușite?]
+> How many distinct packets are exchanged in the standard TCP three-way handshake with no loss or retransmission? [Câte pachete distincte sunt schimbate în negocierea TCP standard în trei pași fără pierderi sau retransmisii?]
 
 - **a) Three (SYN, SYN-ACK, ACK) [Trei (SYN, SYN-ACK, ACK)]**
 - **b) Two (SYN, ACK) [Două (SYN, ACK)]**
 - **c) Four (SYN, SYN-ACK, ACK, DATA) [Patru (SYN, SYN-ACK, ACK, DATE)]**
 - **d) One (combined SYN-ACK-DATA) [Unul (SYN-ACK-DATE combinat)]**
 
-> 💡 **Feedback:** The TCP three-way handshake requires exactly 3 packets: SYN (client → server), SYN-ACK (server → client), ACK (client → server). Data transfer begins only after all three complete. [Negocierea TCP în trei pași necesită exact 3 pachete: SYN (client → server), SYN-ACK (server → client), ACK (client → server). Transferul de date începe doar după finalizarea tuturor celor trei.]
+> 💡 **Feedback:** Three segments in this specified case: SYN, SYN-ACK and ACK. Retransmissions can add packets, and the final ACK may also carry application data. Therefore three handshake steps are not an unconditional packet-count or no-data-until-later rule. [Trei segmente în cazul specificat: SYN, SYN-ACK și ACK. Retransmisiile pot adăuga pachete, iar ultimul ACK poate transporta și date ale aplicației. Prin urmare, cei trei pași nu reprezintă o regulă necondiționată despre numărul pachetelor sau interzicerea datelor până la un moment ulterior.]
 
 ---
 
@@ -119,17 +119,22 @@
 
 ---
 
-### 9. `Multiple Choice`
-**N08.C03.Q02: Behaviour of HTTP HEAD method / Comportamentul metodei HTTP HEAD**
+### Q9. `N08.C03.Q02` — Behaviour of HTTP HEAD method / Comportamentul metodei HTTP HEAD
 
-> What does an HTTP server return in response to a HEAD request? [Ce returnează un server HTTP ca răspuns la o cerere HEAD?]
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-- **a) The same headers that a GET request would produce, but without any response body [Aceleași antete pe care o cerere GET le-ar produce, dar fără niciun corp al răspunsului]**
-- **b) Only the first 1 KB of the response body as a truncated preview of the resource [Doar primii 1 KO din corpul răspunsului ca previzualizare trunchiată a resursei]**
-- **c) Metadata about the HEAD request itself, such as processing time and server load [Metadate despre cererea HEAD în sine, precum timpul de procesare și încărcarea serverului]**
-- **d) A list of all HTTP methods the server supports for the requested resource [O listă a tuturor metodelor HTTP pe care serverul le acceptă pentru resursa cerută]**
+Which statement correctly describes a response to HTTP HEAD? [Care afirmație descrie corect un răspuns HTTP HEAD?]
 
-> 💡 **Feedback:** HEAD is identical to GET in every way except the server MUST NOT return a body. Content-Length still reports the size a GET would produce. Useful for cache validation and link checking. [HEAD este identic cu GET în orice privință, cu excepția că serverul NU TREBUIE să returneze un corp. Content-Length raportează totuși dimensiunea pe care GET ar produce-o. Util pentru validarea cache-ului și verificarea linkurilor.]
+- **a)** No response content; normally the corresponding GET headers, with permitted omissions for fields determined only while generating content [Fără conținut în răspuns; în mod normal antetele GET corespunzătoare, cu omisiunile permise pentru câmpurile calculate doar la generarea conținutului]
+- **b)** The first 1 KiB of the resource is returned [Se returnează primul 1 KiB al resursei]
+- **c)** The server must omit every representation header [Serverul trebuie să omită toate antetele reprezentării]
+- **d)** HEAD lists the supported methods instead of describing the resource [HEAD enumeră metodele acceptate în loc să descrie resursa]
+
+<details><summary>💡 Feedback</summary>
+
+**Correct answer / Răspuns corect: a.** RFC 9110 §9.3.2 forbids response content for HEAD and recommends the GET header fields while allowing specified omissions. If Content-Length is sent, it must equal the octet count of the corresponding GET content; its presence is not mandatory. [RFC 9110 §9.3.2 interzice conținutul răspunsului HEAD și recomandă antetele GET, permițând omisiunile specificate. Dacă se trimite Content-Length, valoarea trebuie să fie numărul de octeți al conținutului GET corespunzător; prezența sa nu este obligatorie.]
+
+</details>
 
 ---
 
@@ -138,26 +143,31 @@
 
 > In the request line GET /index.html HTTP/1.1, which three components appear in order, separated by a single space? [În linia de cerere GET /index.html HTTP/1.1, care sunt cele trei componente care apar în ordine, separate de un singur spațiu?]
 
-- **a) Method, request-target (path), and HTTP version — the three mandatory fields [Metoda, ținta cererii (calea) și versiunea HTTP — cele trei câmpuri obligatorii]**
+- **a) Method, request-target, and HTTP version — the three mandatory fields [Metoda, ținta cererii și versiunea HTTP — cele trei câmpuri obligatorii]**
 - **b) Host, method, and request-target — with the host always appearing first [Gazda, metoda și ținta cererii — cu gazda apărând întotdeauna prima]**
 - **c) HTTP version, method, and request-target — version always precedes the method [Versiunea HTTP, metoda și ținta cererii — versiunea precedă întotdeauna metoda]**
 - **d) Method, HTTP version, and Content-Type — defining both action and format [Metoda, versiunea HTTP și Content-Type — definind atât acțiunea, cât și formatul]**
 
-> 💡 **Feedback:** The request line follows METHOD SP REQUEST-TARGET SP HTTP-VERSION CRLF. For example: GET /index.html HTTP/1.1. The Host header is separate, not part of the request line. [Linia de cerere urmează schema METODA SP ȚINTA-CERERII SP VERSIUNE-HTTP CRLF. De exemplu: GET /index.html HTTP/1.1. Antetul Host este separat, nu face parte din linia de cerere.]
+> 💡 **Feedback:** The request line is METHOD SP REQUEST-TARGET SP HTTP-VERSION CRLF. In this example the target is the origin-form path /index.html. Other forms exist, including absolute-form for proxies, authority-form for CONNECT and asterisk-form for server-wide OPTIONS. Host is a separate field. [Linia cererii este METHOD SP REQUEST-TARGET SP HTTP-VERSION CRLF. Aici ținta este calea /index.html în forma origin-form. Există și absolute-form pentru proxy, authority-form pentru CONNECT și asterisk-form pentru OPTIONS aplicat serverului. Host este un câmp separat.]
 
 ---
 
-### 11. `Multiple Choice`
-**N08.C03.Q05: Status code for unsupported HTTP method / Codul de stare pentru o metodă HTTP neacceptată**
+### Q11. `N08.C03.Q05` — Status code for unsupported HTTP method / Codul de stare pentru o metodă HTTP neacceptată
 
-> A client sends a DELETE request to an HTTP server that only implements GET and HEAD. What status code should the server return? [Un client trimite o cerere DELETE către un server HTTP care implementează doar GET și HEAD. Ce cod de stare ar trebui să returneze serverul?]
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-- **a) 405 Method Not Allowed — the method is recognised but not supported for this resource [405 Method Not Allowed — metoda este recunoscută, dar nu este acceptată pentru această resursă]**
-- **b) 400 Bad Request — the server cannot understand what the client is asking [400 Bad Request — serverul nu poate înțelege ce cere clientul]**
-- **c) 404 Not Found — the DELETE endpoint does not exist on this server [404 Not Found — endpoint-ul DELETE nu există pe acest server]**
-- **d) 501 Not Implemented — the server does not recognise the DELETE method at all, and the server logs the attempt as a protocol violation before closing the connection [501 Not Implemented — serverul nu recunoaște deloc metoda DELETE, iar serverul înregistrează încercarea ca o violare de protocol înainte de a închide conexiunea]**
+A server recognises DELETE and supports it on some resources, but /index.html permits only GET and HEAD. What response is appropriate for DELETE /index.html? [Serverul recunoaște DELETE și îl acceptă pentru unele resurse, dar /index.html permite doar GET și HEAD. Ce răspuns este adecvat pentru DELETE /index.html?]
 
-> 💡 **Feedback:** 405 indicates the server knows the method but the target resource does not support it. The response SHOULD include an Allow header listing accepted methods (e.g., Allow: GET, HEAD). [405 indică faptul că serverul cunoaște metoda, dar resursa țintă nu o acceptă. Răspunsul AR TREBUI să includă un antet Allow care listează metodele acceptate (de ex., Allow: GET, HEAD).]
+- **a)** 405 Method Not Allowed, including Allow: GET, HEAD [405 Method Not Allowed, cu Allow: GET, HEAD]
+- **b)** 400 because DELETE is invalid HTTP syntax [400 deoarece DELETE este sintaxă HTTP invalidă]
+- **c)** 404 solely because this method is disallowed [404 doar pentru că această metodă nu este permisă]
+- **d)** 501 because every resource must implement every method [501 deoarece orice resursă trebuie să implementeze toate metodele]
+
+<details><summary>💡 Feedback</summary>
+
+**Correct answer / Răspuns corect: a.** 405 concerns a known method that the target resource does not allow; RFC 9110 requires an Allow field. 501 concerns unsupported functionality, such as a method the server does not recognise and cannot support for any resource. [405 privește o metodă cunoscută pe care resursa țintă nu o permite; RFC 9110 cere antetul Allow. 501 privește funcționalitate neimplementată, de exemplu o metodă nerecunoscută pe care serverul nu o poate accepta pentru nicio resursă.]
+
+</details>
 
 ---
 
@@ -423,7 +433,7 @@
 - **c) Both the headers and body are identical, with HEAD being merely an alias for GET [Atât antetele cât și corpul sunt identice, HEAD fiind doar un alias pentru GET]**
 - **d) The server omits all headers and returns only the status line for HEAD requests [Serverul omite toate antetele și returnează doar linia de stare pentru cererile HEAD]**
 
-> 💡 **Feedback:** The exercise code computes headers including Content-Length from the file, then sets response_body = b'' for HEAD. This matches RFC 9110 which requires identical headers but no body. [Codul exercițiului calculează antetele inclusiv Content-Length din fișier, apoi setează response_body = b'' pentru HEAD. Aceasta respectă RFC 9110 care necesită antete identice dar fără corp.]
+> 💡 **Feedback:** For a successful static-file response in S08_Part03B_Example_Socket_HTTP_Server.py, HEAD uses the file size for Content-Length and sends no content. RFC 9110 permits this but does not require every HEAD header to be identical to GET: some fields determined only during content generation may be omitted. [Pentru un răspuns reușit cu fișier static în S08_Part03B_Example_Socket_HTTP_Server.py, HEAD folosește dimensiunea fișierului pentru Content-Length și nu trimite conținut. RFC 9110 permite acest comportament, dar nu cere identitatea tuturor antetelor HEAD și GET: anumite câmpuri calculate doar la generarea conținutului pot fi omise.]
 
 ---
 
@@ -437,7 +447,7 @@
 - **c) A NULL byte (0x00) — signalling the end of text-based header content [Un octet NULL (0x00) — semnalând sfârșitul conținutului text al antetelor]**
 - **d) The string END-HEADERS — an explicit delimiter defined in the HTTP specification [Șirul END-HEADERS — un delimitator explicit definit în specificația HTTP]**
 
-> 💡 **Feedback:** The blank line (CRLF after headers + one more CRLF) is the only way HTTP/1.1 delineates headers from body. The exercise code appends '\r\n' after the last header line. [Linia goală (CRLF după antete + încă un CRLF) este singura modalitate prin care HTTP/1.1 delimitează antetele de corp. Codul exercițiului adaugă '\r\n' după ultima linie de antet.]
+> 💡 **Feedback:** For the shown HTTP/1.1 message, each field line ends with CRLF and the following empty line ends the header section. This is distinct from message-body length, which depends on method/status and framing fields. HTTP/2 and HTTP/3 use binary framing, not this text separator. [În mesajul HTTP/1.1 prezentat, fiecare linie de antet se termină cu CRLF, iar linia goală următoare încheie secțiunea antetelor. Acest lucru este distinct de lungimea corpului, determinată de metodă/cod și câmpurile de încadrare. HTTP/2 și HTTP/3 folosesc încadrare binară, nu acest separator textual.]
 
 ---
 
@@ -626,7 +636,7 @@ Step 3 (Client → Server): [[3]]
 ### 46. `Drag & Drop into Text`
 **N08.D05.Q02: TCP server socket lifecycle / Ciclul de viață al socket-ului server TCP**
 
-> Complete the correct order of socket calls to set up a TCP server in 3b_socket-http-server_example.py. [Completați ordinea corectă a apelurilor socket pentru configurarea unui server TCP în 3b_socket-http-server_example.py.]
+> Complete the correct order of socket calls to set up a TCP server in 04_SEMINARS/S08/3_socket-http/S08_Part03B_Example_Socket_HTTP_Server.py. [Completați ordinea corectă a apelurilor socket pentru configurarea unui server TCP în 04_SEMINARS/S08/3_socket-http/S08_Part03B_Example_Socket_HTTP_Server.py.]
 
 > s = socket.socket(AF_INET, SOCK_STREAM)
 
@@ -734,27 +744,27 @@ In the TCP handshake, the client first sends [[1]], the server responds with [[2
 **N08.D10.Q02: Socket option preventing address reuse errors / Opțiunea de socket care previne erorile de reutilizare a adresei**
 
 ```
-Before calling bind(), the exercise sets the [[1]] socket option to value [[2]] to prevent port reuse errors after server restart. [Înainte de apelul bind(), exercițiul setează opțiunea de socket ___ la valoarea ___ pentru a preveni erorile de reutilizare a portului după repornirea serverului.]
+Before calling bind(), the exercise sets the [[1]] socket option to value [[2]] to support rebinding an address after restart, subject to the operating system's binding rules. [Înainte de apelul bind(), exercițiul setează opțiunea de socket ___ la valoarea ___ pentru a permite relegarea adresei după repornire, conform regulilor sistemului de operare.]
 ```
 
 **Available choices / Variante disponibile: SO_REUSEADDR  |  1  |  SO_KEEPALIVE  |  0**
 
 
-> 💡 **Feedback:** SO_REUSEADDR with value 1 allows immediate port reuse. Without it, the port stays in TIME_WAIT state after server shutdown. [SO_REUSEADDR cu valoarea 1 permite reutilizarea imediată a portului. Fără ea, portul rămâne în starea TIME_WAIT după oprirea serverului.]
+> 💡 **Feedback:** Fill SO_REUSEADDR and 1. It can permit rebinding when previous accepted TCP connections leave relevant TIME_WAIT state. A listening port itself is not a TIME_WAIT connection, and restart does not always fail without this option. It does not generally permit a second active listener to take an occupied address; semantics vary by operating system. [Completați SO_REUSEADDR și 1. Poate permite relegarea când conexiuni TCP acceptate anterior lasă stare TIME_WAIT relevantă. Portul de ascultare în sine nu este o conexiune TIME_WAIT, iar repornirea nu eșuează întotdeauna fără această opțiune. În general nu permite unui al doilea listener activ să preia o adresă ocupată; semantica diferă între sisteme.]
 
 ---
 
 ### 53. `Gap Select`
 **N08.D10.Q03: HTTP message separator / Separatorul mesajelor HTTP**
 
+```text
+In HTTP/1.1, field lines end with [[1]]. An additional empty line produces [[2]] after the final field line and ends the header section.
+[În HTTP/1.1, liniile câmpurilor se termină cu [[1]]. O linie goală suplimentară produce [[2]] după ultimul câmp și încheie secțiunea antetelor.]
 ```
-HTTP headers are separated from the body by a blank line, which consists of two consecutive [[1]] sequences, forming the pattern [[2]]. [Antetele HTTP sunt separate de corp printr-o linie goală, care constă din două secvențe ___ consecutive, formând modelul ___.]
-```
 
-**Available choices / Variante disponibile: CRLF  |  \r\n\r\n  |  LF  |  \n\n**
+**Available choices / Variante disponibile: CRLF | \r\n\r\n | LF | \n\n**
 
-
-> 💡 **Feedback:** Headers end with CRLF, then the blank line is another CRLF, making \r\n\r\n the boundary between headers and body. [Antetele se termină cu CRLF, apoi linia goală este un alt CRLF, făcând \r\n\r\n limita dintre antete și corp.]
+> 💡 **Feedback:** CRLF and \r\n\r\n. This identifies the header boundary, not the length or existence of response content; HEAD and some status codes have no content. [CRLF și \r\n\r\n. Acesta identifică limita antetelor, nu lungimea sau existența conținutului; HEAD și unele coduri de stare nu au conținut.]
 
 ---
 
@@ -785,3 +795,10 @@ In the three-way handshake, the client first sends [[1]], the server responds wi
 > 💡 **Feedback:** Three-way handshake: SYN (client initiates) -> SYN-ACK (server acknowledges and synchronises) -> ACK (client confirms, connection established). [Handshake în trei pași: SYN (clientul inițiază) -> SYN-ACK (serverul confirmă și sincronizează) -> ACK (clientul confirmă, conexiunea este stabilită).]
 
 ---
+
+
+## Repository context and reference points
+
+Canonical practical material: [S08](../../04_SEMINARS/S08/README.md) — HTTP testing, built-in and socket servers, Nginx. Code-tracing models explicitly introduced in this question pool are self-contained exercises, not promises of additional files or features in that seminar. [Material practic canonic: S08. Modelele de trasare introduse explicit sunt exerciții autonome, nu promisiuni de fișiere sau funcții suplimentare în seminar.]
+
+Protocol semantics: RFC 9110, *HTTP Semantics*. https://doi.org/10.17487/RFC9110

@@ -1,9 +1,12 @@
 import socket
+import os
+import sys
 import struct
 import time
 
-MCAST_GRP = "224.0.0.1"
+MCAST_GRP = "239.255.0.1"
 MCAST_PORT = 5001
+MCAST_INTERFACE_IP = os.environ.get("MCAST_INTERFACE_IP", "0.0.0.0")
 
 
 def main():
@@ -19,7 +22,9 @@ def main():
     sock.bind(("", MCAST_PORT))
 
     group_bytes = socket.inet_aton(MCAST_GRP)
-    mreq = struct.pack("4sL", group_bytes, socket.INADDR_ANY)
+    mreq = struct.pack("4s4s", group_bytes, socket.inet_aton(MCAST_INTERFACE_IP))
+    if sys.platform.startswith("linux"):
+        sock.setsockopt(socket.IPPROTO_IP, getattr(socket, "IP_MULTICAST_ALL", 49), 0)
     sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
 
     print(f"[INFO] UDP multicast receiver joined group {MCAST_GRP} on port {MCAST_PORT}")

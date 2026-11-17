@@ -195,31 +195,32 @@ The Maximum Transmission Unit (MTU) for standard Ethernet frames is 1500 bytes. 
 
 CSMA/CD and CSMA/CA are both random-access media access control protocols. Which pairing of technology and protocol variant is correct? [CSMA/CD și CSMA/CA sunt ambele protocoale de acces la mediu de tip acces aleatoriu. Care asociere dintre tehnologie și varianta de protocol este corectă?]
 
-- **a)** CSMA/CD for wired Ethernet; CSMA/CA for Wi-Fi (IEEE 802.11) [CSMA/CD pentru Ethernet cu fir; CSMA/CA pentru Wi-Fi (IEEE 802.11)]
+- **a)** CSMA/CD for shared half-duplex Ethernet; CSMA/CA for Wi-Fi (IEEE 802.11) [CSMA/CD pentru Ethernet partajat half-duplex; CSMA/CA pentru Wi-Fi (IEEE 802.11)]
 - **b)** CSMA/CA for wired Ethernet; CSMA/CD for Wi-Fi (IEEE 802.11) [CSMA/CA pentru Ethernet cu fir; CSMA/CD pentru Wi-Fi (IEEE 802.11)]
 - **c)** CSMA/CD for both wired Ethernet and Wi-Fi simultaneously [CSMA/CD atât pentru Ethernet cu fir cât și pentru Wi-Fi simultan]
 - **d)** Token passing for Ethernet; CSMA/CA for fibre optic links [Transmitere cu jeton pentru Ethernet; CSMA/CA pentru legături de fibră]
 
 > 💡 **Feedback:**
-> *CSMA/CD (Collision Detection) is used in wired Ethernet — the sender detects collisions and terminates early. CSMA/CA (Collision Avoidance) is used in Wi-Fi (IEEE 802.11) — collisions cannot be detected in wireless, so stations use acknowledgements to avoid them. [CSMA/CD (detecția coliziunilor) se folosește în Ethernet cu fir — emițătorul detectează coliziunile și oprește transmisia. CSMA/CA (evitarea coliziunilor) se folosește în Wi-Fi (IEEE 802.11) — coliziunile nu pot fi detectate în wireless, astfel că stațiile folosesc confirmări pentru a le evita.]*
-
+> *CSMA/CD (Collision Detection) is used in shared half-duplex Ethernet; full-duplex switched links do not use it. CSMA/CA (Collision Avoidance) is used in Wi-Fi (IEEE 802.11) — stations use contention and random backoff to reduce collisions; a missing acknowledgement indicates that delivery was not confirmed. Optional RTS/CTS can reduce hidden-terminal collisions. [CSMA/CD se folosește în Ethernet partajat half-duplex; legăturile comutate full-duplex nu îl folosesc. CSMA/CA (evitarea coliziunilor) se folosește în Wi-Fi (IEEE 802.11) — stațiile folosesc contendență și backoff aleatoriu pentru reducerea coliziunilor; lipsa confirmării arată că livrarea nu a fost confirmată. RTS/CTS opțional poate reduce coliziunile cauzate de terminale ascunse.]*
 
 ---
 
 ### Q13. `N04.C03.Q01` — TCP byte stream property / Proprietatea TCP de flux de octeți
 
-*[Multiple Choice]*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-A client calls sock.send(b'HELLO') immediately followed by sock.send(b'WORLD'). On the server side, sock.recv(1024) is invoked once. What is the most likely output? [Un client apelează sock.send(b'HELLO') urmat imediat de sock.send(b'WORLD'). Pe partea de server, sock.recv(1024) este apelat o singură dată. Care este rezultatul cel mai probabil?]
+A client successfully calls sendall(b'HELLO') and sendall(b'WORLD'). The server then uses blocking recv(1024), with no earlier reads. Assuming data arrives and no error occurs, what is guaranteed about the returned non-empty bytes? [Un client execută cu succes sendall(b'HELLO') și sendall(b'WORLD'). Serverul apelează recv(1024) blocant, fără citiri anterioare. Presupunând că sosesc date fără eroare, ce se garantează pentru octeții nenuli returnați?]
 
-- **a)** b'HELLOWORLD' — TCP may coalesce both sends into a single segment [b'HELLOWORLD' — TCP poate uni ambele trimiteri într-un singur segment]
-- **b)** b'HELLO' alone, with b'WORLD' arriving in the subsequent recv() call [b'HELLO' singur, cu b'WORLD' sosind la următorul apel recv()]
-- **c)** b'HELLO WORLD' with an automatic space separator inserted by TCP [b'HELLO WORLD' cu un separator de spațiu inserat automat de TCP]
-- **d)** A ConnectionError because two rapid send() calls overload the buffer [O ConnectionError deoarece două apeluri send() rapide supraîncarcă buffer-ul]
+- **a)** They form a prefix of b'HELLOWORLD'; recv() need not return all ten bytes at once. [Formează un prefix al b'HELLOWORLD'; recv() nu trebuie să returneze toți cei zece octeți odată.]
+- **b)** They must be exactly b'HELLO'. [Trebuie să fie exact b'HELLO'.]
+- **c)** They must be exactly b'HELLOWORLD'. [Trebuie să fie exact b'HELLOWORLD'.]
+- **d)** TCP inserts a space between the writes. [TCP inserează un spațiu între scrieri.]
 
-> 💡 **Feedback:**
-> *TCP is a byte stream protocol with no inherent message boundaries. Consecutive send() calls may be coalesced into a single segment. The receiver sees b'HELLOWORLD' without any delimiter indicating where one message ends. Applications must implement framing (length-prefix or delimiter) to recover boundaries. [TCP este un protocol de flux de octeți fără delimitări inerente ale mesajelor. Apelurile consecutive send() pot fi unite într-un singur segment. Receptorul vede b'HELLOWORLD' fără niciun delimitator. Aplicațiile trebuie să implementeze cadraj (prefix de lungime sau delimitator) pentru a recupera limitele.]*
+<details><summary>💡 Feedback</summary>
 
+**Correct answer / Răspuns corect: a.** TCP preserves byte order and has no application message boundaries. A receive can return a partial write, one write or several writes together. sendall() handles short sends locally, but framing and repeated receives are still required. [TCP păstrează ordinea octeților și nu are delimitări de mesaje de aplicație. O recepție poate întoarce o parte dintr-o scriere, o scriere sau mai multe împreună. sendall() gestionează trimiterile locale parțiale, dar încadrarea și recepțiile repetate rămân necesare.]
+
+</details>
 
 ---
 
@@ -259,18 +260,20 @@ A sender packs the integer 1000 as a 2-byte big-endian unsigned short. The recei
 
 ### Q16. `N04.C04.Q01` — CRC-32 burst error detection guarantee / Garanția detecției erorilor de rafală a CRC-32
 
-*[Multiple Choice]*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-CRC-32 is mathematically guaranteed to detect which categories of transmission errors? [CRC-32 are garanția matematică de a detecta care categorii de erori de transmisie?]
+For a degree-32 CRC generator with non-zero constant term, which burst-error guarantee is valid? [Pentru un polinom generator CRC de grad 32 cu termen liber nenul, ce garanție privind erorile de rafală este validă?]
 
-- **a)** All single-bit, double-bit, odd-count, and burst errors up to 32 bits [Toate erorile de un bit, doi biți, număr impar și erorile de rafală de până la 32 biți]
-- **b)** Only single-bit errors; multi-bit corruption requires Reed-Solomon codes [Doar erorile de un bit; coruperea multi-bit necesită coduri Reed-Solomon]
-- **c)** All possible errors without exception, providing absolute data integrity [Toate erorile posibile fără excepție, oferind integritate absolută a datelor]
-- **d)** All errors and also corrects them, functioning as forward error correction [Toate erorile și le corectează, funcționând ca și corecție de erori proactivă]
+- **a)** Every non-zero burst error of length at most 32 bits is detected. [Orice eroare de rafală nenulă cu lungimea de cel mult 32 de biți este detectată.]
+- **b)** Every possible error of any length is detected. [Orice eroare posibilă de orice lungime este detectată.]
+- **c)** Every odd-weight error is detected for every CRC-32 polynomial. [Orice eroare cu număr impar de biți este detectată pentru orice polinom CRC-32.]
+- **d)** The CRC automatically corrects all detected errors. [CRC corectează automat toate erorile detectate.]
 
-> 💡 **Feedback:**
-> *CRC-32 detects all single-bit errors, all double-bit errors, all odd numbers of bit errors, and all burst errors of 32 bits or fewer. For longer bursts, detection probability is approximately 99.99999998%. CRC detects but does not correct errors. [CRC-32 detectează toate erorile de un bit, toate erorile de doi biți, toate erorile cu un număr impar de biți și toate erorile de rafală de 32 de biți sau mai puțin. Pentru rafale mai lungi, probabilitatea de detecție este aproximativ 99,99999998%. CRC detectează dar nu corectează erorile.]*
+<details><summary>💡 Feedback</summary>
 
+**Correct answer / Răspuns corect: a.** The burst bound follows from the generator degree. Other guarantees depend on the polynomial and protected message length; the Ethernet CRC-32 polynomial does not provide a universal odd-weight guarantee. CRC is error detection, not authentication or automatic correction. [Limita de rafală rezultă din gradul generatorului. Alte garanții depind de polinom și de lungimea mesajului protejat; polinomul CRC-32 Ethernet nu oferă o garanție universală pentru greutate impară. CRC detectează erori, nu autentifică și nu corectează automat.]
+
+</details>
 
 ---
 
@@ -286,8 +289,7 @@ A system transmits financial transaction data that must be protected against bot
 - **d)** A simple additive checksum, because it is very fast to compute at sender and receiver [O sumă de control aditivă simplă, deoarece este foarte rapidă de calculat la emițător și receptor]
 
 > 💡 **Feedback:**
-> *Financial data requires protection against adversaries, not just noise. HMAC-SHA256 provides both error detection and cryptographic tamper resistance. CRC-32 detects accidental errors but is trivially forgeable; parity detects only single-bit errors. [Datele financiare necesită protecție împotriva adversarilor, nu doar a zgomotului. HMAC-SHA256 oferă atât detecție de erori cât și rezistență criptografică la falsificare. CRC-32 detectează erori accidentale dar poate fi falsificat trivial; paritatea detectează doar erori de un bit.]*
-
+> *Financial data requires protection against adversaries, not just noise. HMAC-SHA256 provides both error detection and cryptographic tamper resistance. CRC-32 detects accidental errors but is trivially forgeable; a single parity bit detects any odd number of flipped bits but misses an even number. [Datele financiare necesită protecție împotriva adversarilor, nu doar a zgomotului. HMAC-SHA256 oferă atât detecție de erori cât și rezistență criptografică la falsificare. CRC-32 detectează erori accidentale dar poate fi falsificat trivial; un bit de paritate detectează orice număr impar de biți inversați, dar nu un număr par.]*
 
 ---
 
@@ -354,8 +356,7 @@ Stop-and-wait flow control transmits one frame and waits for acknowledgement bef
 - **d)** Frame corruption increases proportionally with the distance between nodes [Coruperea cadrelor crește proporțional cu distanța dintre noduri]
 
 > 💡 **Feedback:**
-> *On high bandwidth-delay product links, the sender spends most of its time idle waiting for acknowledgements. The sliding window protocol allows multiple frames to be in flight simultaneously, utilising the link far more efficiently: efficiency = W / (1 + 2a). [Pe legături cu produs lățime de bandă-întârziere ridicat, emițătorul petrece cea mai mare parte a timpului inactiv așteptând confirmări. Protocolul cu fereastră glisantă permite trimiterea simultană a mai multor cadre, utilizând legătura mult mai eficient: eficiență = W / (1 + 2a).]*
-
+> *On high bandwidth-delay product links, the sender spends most of its time idle waiting for acknowledgements. The sliding window protocol allows multiple frames to be in flight simultaneously, utilising the link far more efficiently: ideal utilisation = min(1, W / (1 + 2a)), where W is the frame window and a is one-way propagation time divided by frame transmission time. This assumes error-free delivery and negligible ACK transmission/processing time. [Pe legături cu produs lățime de bandă-întârziere ridicat, emițătorul petrece cea mai mare parte a timpului inactiv așteptând confirmări. Protocolul cu fereastră glisantă permite trimiterea simultană a mai multor cadre, utilizând legătura mult mai eficient: utilizarea ideală = min(1, W / (1 + 2a)), unde W este fereastra în cadre, iar a este timpul de propagare într-un sens împărțit la timpul de transmisie al cadrului. Se presupun livrare fără erori și timp neglijabil de transmitere/procesare a ACK.]*
 
 ---
 
@@ -378,9 +379,10 @@ A developer writes a chat application where the client sends messages using sock
 
 ### Q23. `N04.T00.Q02` — Purpose of magic bytes in binary protocols / Scopul octeților magici în protocoalele binare
 
+> Independent design exercise. The layout stated in this item is hypothetical; it is not the one-byte-prefix/pickle implementation in S04. [Exercițiu independent de proiectare. Contractul definit aici nu este implementarea S04 distribuită.]
 *[Multiple Choice]*
 
-The Week 4 BINARY protocol begins each message with the bytes b'NP'. If a receiver reads a header where the first two bytes are not b'NP', what should it do and why? [Protocolul BINAR din Săptămâna 4 începe fiecare mesaj cu octeții b'NP'. Dacă un receptor citește un antet unde primii doi octeți nu sunt b'NP', ce ar trebui să facă și de ce?]
+The hypothetical binary protocol in this item begins each message with the bytes b'NP'. If a receiver reads a header where the first two bytes are not b'NP', what should it do and why? [Protocolul binar ipotetic din acest item începe fiecare mesaj cu octeții b'NP'. Dacă un receptor citește un antet unde primii doi octeți nu sunt b'NP', ce ar trebui să facă și de ce?]
 
 - **a)** Reject the message — magic mismatch indicates corruption or wrong protocol [Respingerea mesajului — nepotrivirea magic-ului indică corupere sau protocol greșit]
 - **b)** Process the message normally since magic bytes are optional identification data [Procesarea mesajului normal deoarece octeții magici sunt date opționale de identificare]
@@ -390,11 +392,11 @@ The Week 4 BINARY protocol begins each message with the bytes b'NP'. If a receiv
 > 💡 **Feedback:**
 > *Magic bytes serve as a protocol identifier and synchronisation marker. Mismatched magic indicates either a corrupt message, wrong protocol version, or stream desynchronisation. The receiver should reject the message and potentially reset the connection. [Octeții magici servesc ca identificator de protocol și marcator de sincronizare. Un magic nepotrivit indică fie un mesaj corupt, fie o versiune greșită de protocol, fie desincronizarea fluxului. Receptorul ar trebui să respingă mesajul și, potențial, să reseteze conexiunea.]*
 
-
 ---
 
 ### Q24. `N04.T00.Q03` — CRC detection versus correction / Detecția CRC versus corecție
 
+> Independent design exercise. The layout stated in this item is hypothetical; it is not the one-byte-prefix/pickle implementation in S04. [Exercițiu independent de proiectare. Contractul definit aici nu este implementarea S04 distribuită.]
 *[Multiple Choice]*
 
 A student claims: 'Our binary protocol uses CRC-32, so if a packet arrives corrupted, the server can fix the error automatically.' Is this claim correct? [Un student afirmă: 'Protocolul nostru binar folosește CRC-32, deci dacă un pachet ajunge corupt, serverul poate repara automat eroarea.' Este corectă această afirmație?]
@@ -406,7 +408,6 @@ A student claims: 'Our binary protocol uses CRC-32, so if a packet arrives corru
 
 > 💡 **Feedback:**
 > *The claim is incorrect. CRC-32 is an error detection mechanism only — it can identify that corruption occurred but cannot determine which bits changed. Error correction requires FEC codes like Reed-Solomon or Hamming codes. When CRC fails, the appropriate action is to discard and request retransmission. [Afirmația este incorectă. CRC-32 este doar un mecanism de detecție a erorilor — poate identifica faptul că a avut loc coruperea dar nu poate determina ce biți s-au schimbat. Corecția erorilor necesită coduri FEC precum Reed-Solomon sau Hamming. Când CRC eșuează, acțiunea adecvată este eliminarea și cererea de retransmisie.]*
-
 
 ---
 
@@ -422,25 +423,26 @@ A UDP sensor client sends temperature 23.5°C using big-endian float. A misconfi
 - **d)** The CRC check should have caught this error before the receiver processed the data [Verificarea CRC ar fi trebuit să detecteze această eroare înainte ca receptorul să proceseze datele]
 
 > 💡 **Feedback:**
-> *Network byte order convention requires big-endian for all protocol fields. When the receiver applies little-endian interpretation to big-endian data, the IEEE 754 float bytes are reversed, producing a completely different floating-point value. Both endpoints must agree on byte order. [Convenția ordinii octeților în rețea necesită big-endian pentru toate câmpurile de protocol. Când receptorul aplică interpretare little-endian datelor big-endian, octeții float IEEE 754 sunt inversați, producând o valoare cu virgulă mobilă complet diferită. Ambele capete trebuie să fie de acord asupra ordinii octeților.]*
-
+> *Both endpoints must implement the byte order defined for each field by their application protocol; big-endian is not mandatory for every application protocol. When the receiver applies little-endian interpretation to big-endian data, the IEEE 754 float bytes are reversed, producing a completely different floating-point value. Both endpoints must agree on byte order. [Ambele capete trebuie să implementeze ordinea octeților definită pentru fiecare câmp de protocolul aplicației; big-endian nu este obligatoriu pentru orice protocol de aplicație. Când receptorul aplică interpretare little-endian datelor big-endian, octeții float IEEE 754 sunt inversați, producând o valoare cu virgulă mobilă complet diferită. Ambele capete trebuie să fie de acord asupra ordinii octeților.]*
 
 ---
 
 ### Q26. `N04.T00.Q08` — CSMA/CD versus CSMA/CA rationale / Motivația CSMA/CD versus CSMA/CA
 
-*[Multiple Choice]*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-Wired Ethernet uses CSMA/CD while Wi-Fi uses CSMA/CA. Why cannot CSMA/CD be used in wireless networks? [Ethernet cu fir folosește CSMA/CD iar Wi-Fi folosește CSMA/CA. De ce nu poate fi folosit CSMA/CD în rețelele wireless?]
+Why does ordinary Wi-Fi use collision avoidance rather than the CSMA/CD mechanism of legacy shared, half-duplex Ethernet? [De ce Wi-Fi obișnuit folosește evitarea coliziunilor în locul CSMA/CD din Ethernet partajat, half-duplex tradițional?]
 
-- **a)** Wireless stations cannot detect collisions while transmitting (hidden terminal problem) [Stațiile wireless nu pot detecta coliziunile în timpul transmisiei (problema terminalului ascuns)]
-- **b)** Wi-Fi operates at lower physical-layer speeds where collision detection is computationally infeasible [Wi-Fi operează la viteze fizice mai mici unde detecția coliziunilor este imposibilă din punct de vedere computațional]
-- **c)** The IEEE 802.11 standard deliberately chose CA over CD for marketing differentiation purposes [Standardul IEEE 802.11 a ales deliberat CA în locul CD în scopuri de diferențiere de marketing]
-- **d)** CSMA/CD requires dedicated hardware only available in wired network adapters [CSMA/CD necesită hardware dedicat disponibil doar în adaptoarele de rețea cu fir]
+- **a)** A transmitter cannot reliably detect another weak radio transmission while its own strong signal is being sent. [Emițătorul nu poate detecta fiabil o altă transmisie radio slabă în timpul propriei transmisii puternice.]
+- **b)** All modern full-duplex switched Ethernet still needs CSMA/CD. [Orice Ethernet modern comutat full-duplex încă necesită CSMA/CD.]
+- **c)** CSMA/CA guarantees that collisions never occur. [CSMA/CA garantează că nu există niciodată coliziuni.]
+- **d)** Wireless bandwidth is too low to compute a checksum. [Lățimea de bandă wireless este prea mică pentru un checksum.]
 
-> 💡 **Feedback:**
-> *In wireless networks, a station cannot simultaneously transmit and listen for collisions (the hidden terminal problem). The transmitted signal is much stronger than any received collision signal. CSMA/CA avoids collisions proactively using RTS/CTS handshakes and acknowledgements. [În rețelele wireless, o stație nu poate transmite și asculta simultan pentru coliziuni (problema terminalului ascuns). Semnalul transmis este mult mai puternic decât orice semnal de coliziune recepționat. CSMA/CA evită coliziunile proactiv folosind handshake-uri RTS/CTS și confirmări.]*
+<details><summary>💡 Feedback</summary>
 
+**Correct answer / Răspuns corect: a.** Full-duplex switched Ethernet does not use collision detection. Radio self-interference explains the detection difficulty; hidden terminals are a distinct problem. CSMA/CA uses contention/backoff, with optional RTS/CTS, and does not eliminate every collision. [Ethernet comutat full-duplex nu folosește detecția coliziunilor. Interferența proprie explică dificultatea detecției; terminalele ascunse reprezintă altă problemă. CSMA/CA folosește contendență/backoff, cu RTS/CTS opțional, fără a elimina toate coliziunile.]
+
+</details>
 
 ---
 
@@ -463,18 +465,19 @@ A binary protocol has monotonically increasing 4-byte sequence numbers but no du
 
 ### Q28. `N04.T00.Q10` — Protocol overhead analysis scenario / Scenariu de analiză a overhead-ului protocoalelor
 
-*[Multiple Choice]*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-A system sends the command 'SET counter 42' (14 bytes) using both TEXT and BINARY protocols. TEXT adds a length-prefix frame ('14 SET counter 42' = 17 bytes). BINARY uses a 14-byte header plus the payload (14+14 = 28 bytes). Which protocol is more efficient for this specific message, and when does the comparison reverse? [Un sistem trimite comanda 'SET counter 42' (14 octeți) folosind ambele protocoale TEXT și BINAR. TEXT adaugă un cadru cu prefix de lungime ('14 SET counter 42' = 17 octeți). BINAR folosește un antet de 14 octeți plus sarcina utilă (14+14 = 28 octeți). Care protocol este mai eficient pentru acest mesaj specific și când se inversează comparația?]
+For S04 text and pickle-based binary messages, which method correctly compares application byte overhead? [Pentru mesajele text și binare bazate pe pickle din S04, ce metodă compară corect overhead-ul în octeți al aplicației?]
 
-- **a)** TEXT is more efficient here (17 vs 28 bytes); BINARY wins for large or numeric-heavy payloads [TEXT este mai eficient aici (17 vs 28 octeți); BINAR câștigă pentru sarcini utile mari sau cu multe date numerice]
-- **b)** BINARY is always more efficient regardless of payload size due to its fixed-width header [BINAR este întotdeauna mai eficient indiferent de dimensiunea sarcinii utile datorită antetului cu lățime fixă]
-- **c)** TEXT and BINARY have identical overhead because both transmit the same application data [TEXT și BINAR au overhead identic deoarece ambele transmit aceleași date de aplicație]
-- **d)** The overhead comparison is irrelevant since modern networks have unlimited bandwidth [Comparația overhead-ului este irelevantă deoarece rețelele moderne au lățime de bandă nelimitată]
+- **a)** Encode equivalent data with each actual serializer, include its framing and compare measured byte lengths. [Codificați date echivalente cu fiecare serializator real, includeți cadrajul și comparați lungimile măsurate în octeți.]
+- **b)** Assume every binary encoding is smaller and encrypted. [Presupuneți că orice codificare binară este mai mică și criptată.]
+- **c)** Count Python string characters and ignore the prefix. [Numărați caracterele șirului Python și ignorați prefixul.]
 
-> 💡 **Feedback:**
-> *For this small payload, TEXT is more efficient (17 vs 28 bytes). The BINARY protocol's 14-byte fixed header dominates. The comparison reverses for large payloads: as payload grows, the fixed 14 bytes becomes a smaller percentage of total, and binary values are more compact than their ASCII text equivalents. [Pentru această sarcină utilă mică, TEXT este mai eficient (17 vs 28 octeți). Antetul fix de 14 octeți al protocolului BINAR domină. Comparația se inversează pentru sarcini utile mari: pe măsură ce sarcina utilă crește, cei 14 octeți fixi devin un procent mai mic din total, iar valorile binare sunt mai compacte decât echivalentele lor text ASCII.]*
+<details><summary>💡 Feedback</summary>
 
+**Correct answer / Răspuns corect: a.** Pickle contains representation metadata and can be larger than a short text command. It is neither encryption nor compression. S04 binary frames add one total-length byte and are limited to 255 bytes; text uses a decimal total-byte length and UTF-8. [Pickle conține metadate de reprezentare și poate fi mai mare decât o comandă text scurtă. Nu este criptare sau compresie. Cadrele binare S04 adaugă un octet de lungime totală și sunt limitate la 255 de octeți; textul folosește lungimea totală în octeți exprimată zecimal și UTF-8.]
+
+</details>
 
 ---
 
@@ -485,35 +488,40 @@ A system sends the command 'SET counter 42' (14 bytes) using both TEXT and BINAR
 
 ### Q29. `N04.S01.Q03` — TEXT protocol frame format / Formatul cadrului protocolului TEXT
 
-*[Multiple Choice]*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-In the Week 4 TEXT protocol, the frame format is " " where LENGTH is an ASCII decimal number. For the command "SET name Alice" (13 bytes), what is the complete frame transmitted? [În protocolul TEXT din Săptămâna 4, formatul cadrului este " " unde LENGTH este un număr zecimal ASCII. Pentru comanda "SET name Alice" (13 octeți), care este cadrul complet transmis?]
+S04 text framing is `TOTAL_LENGTH SP PAYLOAD`, where the decimal total includes its own digits, the space and UTF-8 payload bytes. What is the frame for the 13-byte command `add key value`? [Cadrajul text S04 este `TOTAL_LENGTH SP PAYLOAD`, unde totalul zecimal include propriile cifre, spațiul și octeții UTF-8 ai payloadului. Care este cadrul pentru comanda de 13 octeți `add key value`?]
 
-- **a)** "13 SET name Alice" — ASCII length prefix, space separator, then payload ["13 SET name Alice" — prefix de lungime ASCII, separator spațiu, apoi sarcina utilă]
-- **b)** "SET name Alice\\r\\n" — the payload followed by a CRLF delimiter at the end ["SET name Alice\\r\\n" — sarcina utilă urmată de un delimitator CRLF la final]
-- **c)** "\\x00\\x0dSET name Alice" — 2-byte binary length prefix in big-endian ["\\x00\\x0dSET name Alice" — prefix de lungime binar pe 2 octeți în big-endian]
-- **d)** "SET name Alice" — raw payload without any framing or length prefix ["SET name Alice" — sarcina utilă brută fără cadraj sau prefix de lungime]
+- **a)** `16 add key value`
+- **b)** `13 add key value`
+- **c)** `add key value
+`
+- **d)** `14 add key value`
 
-> 💡 **Feedback:**
-> *The frame consists of the ASCII string "13" followed by a space separator and then the 13-byte payload. Total: "13 SET name Alice" — a 16-byte frame (2 digits + 1 space + 13 payload). [Cadrul constă din șirul ASCII "13" urmat de un separator spațiu și apoi sarcina utilă de 13 octeți. Total: "13 SET name Alice" — un cadru de 16 octeți (2 cifre + 1 spațiu + 13 sarcină utilă).]*
+<details><summary>💡 Feedback</summary>
 
+**Correct answer / Răspuns corect: a.** Two ASCII digits + one space + thirteen payload bytes = sixteen bytes. Receivers parse the prefix and read exactly the remaining bytes. Character count is not byte count for non-ASCII text. [Două cifre ASCII + un spațiu + treisprezece octeți de payload = șaisprezece octeți. Receptorul parsează prefixul și citește exact octeții rămași. Numărul caracterelor nu este numărul octeților pentru text non-ASCII.]
+
+</details>
 
 ---
 
 ### Q30. `N04.S01.Q05` — TEXT protocol supported commands / Comenzile suportate de protocolul TEXT
 
-*[Multiple Choice]*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-The TEXT protocol server in Exercise 4.01 supports several commands. Which set correctly lists valid commands? [Serverul protocolului TEXT din Exercițiul 4.01 suportă mai multe comenzi. Care set listează corect comenzile valide?]
+Which commands are implemented by the unmodified S04 text example server? [Ce comenzi sunt implementate de serverul text exemplu S04 nemodificat?]
 
-- **a)** PING, SET, GET, DEL, COUNT, KEYS, QUIT [PING, SET, GET, DEL, COUNT, KEYS, QUIT]
-- **b)** CONNECT, SEND, RECEIVE, CLOSE, STATUS [CONNECT, SEND, RECEIVE, CLOSE, STATUS]
-- **c)** PUT, POST, DELETE, PATCH, OPTIONS, HEAD [PUT, POST, DELETE, PATCH, OPTIONS, HEAD]
-- **d)** HELO, MAIL FROM, RCPT TO, DATA, QUIT [HELO, MAIL FROM, RCPT TO, DATA, QUIT]
+- **a)** `add`, `get`, `remove`
+- **b)** `PING`, `SET`, `GET`, `DEL`, `QUIT`
+- **c)** `CONNECT`, `SEND`, `LIST`, `DISCONNECT`
+- **d)** `GET`, `POST`, `PUT`, `DELETE`
 
-> 💡 **Feedback:**
-> *The TEXT server supports: PING (connectivity test), SET key value (store), GET key (retrieve), DEL key (delete), COUNT (number of keys), KEYS (list all), and QUIT (close connection). [Serverul TEXT suportă: PING (test de conectivitate), SET key value (stocare), GET key (recuperare), DEL key (ștergere), COUNT (număr de chei), KEYS (listare toate) și QUIT (închidere conexiune).]*
+<details><summary>💡 Feedback</summary>
 
+**Correct answer / Răspuns corect: a.** The reference text server provides add/get/remove. The scenario asks students to implement count; exit is handled locally by the client and is not transmitted. The uppercase CONNECT/SEND/LIST/DISCONNECT names belong to the separate UDP lesson. [Serverul text de referință oferă add/get/remove. Scenariul cere implementarea count; exit este tratat local de client și nu se transmite. Numele CONNECT/SEND/LIST/DISCONNECT aparțin lecției UDP separate.]
+
+</details>
 
 ---
 
@@ -536,6 +544,7 @@ What hex string does struct.pack('\>H', 1000).hex() produce in Python? [Ce șir 
 
 ### Q32. `N04.S02.Q02` — Binary header total size calculation / Calculul dimensiunii totale a antetului binar
 
+> Independent design exercise. The layout stated in this item is hypothetical; it is not the one-byte-prefix/pickle implementation in S04. [Exercițiu independent de proiectare. Contractul definit aici nu este implementarea S04 distribuită.]
 *[Multiple Choice]*
 
 The BINARY protocol header uses format '\>2sBBHII'. What is the total header size in bytes? [Antetul protocolului BINAR folosește formatul '\>2sBBHII'. Care este dimensiunea totală a antetului în octeți?]
@@ -548,31 +557,32 @@ The BINARY protocol header uses format '\>2sBBHII'. What is the total header siz
 > 💡 **Feedback:**
 > *Calculation: 2s = 2 bytes (magic), B = 1 byte (version), B = 1 byte (type), H = 2 bytes (payload_len), I = 4 bytes (seq), I = 4 bytes (CRC32). Total: 2+1+1+2+4+4 = 14 bytes. [Calcul: 2s = 2 octeți (magic), B = 1 octet (versiune), B = 1 octet (tip), H = 2 octeți (payload_len), I = 4 octeți (seq), I = 4 octeți (CRC32). Total: 2+1+1+2+4+4 = 14 octeți.]*
 
-
 ---
 
-### Q33. `N04.S02.Q05` — struct format '\>' versus '\<' meaning / Semnificația '\>' versus '\<' în formatul struct
+### Q33. `N04.S02.Q05` — struct byte-order prefixes / Prefixele de ordine a octeților în struct
 
-*[Multiple Choice]*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-In a struct.pack() call, the prefix character '\>' and '' și '\<' controlează ordinea octeților. Ce specifică ele?]
+What do the prefixes `>` and `<` select in Python `struct.pack`? [Ce selectează prefixele `>` și `<` în `struct.pack` din Python?]
 
-- **a)** '\>' is big-endian (MSB first); '' este big-endian (MSB primul); '\<' este little-endian (LSB primul)]
-- **b)** '\>' compresses the output data; '' comprimă datele; '\<' decomprimă datele binare împachetate]
-- **c)** '\>' adds field padding bytes; '' adaugă octeți de completare; '\<' elimină completarea de aliniere]
-- **d)** '\>' enables signed integer values; '' activează valori de întregi cu semn; '\<' forțează interpretarea fără semn]
+- **a)** `>` selects big-endian; `<` selects little-endian, both with standard sizes and no alignment padding. [`>` selectează big-endian; `<` selectează little-endian, ambele cu dimensiuni standard și fără padding de aliniere.]
+- **b)** `>` compresses and `<` decompresses. [`>` comprimă și `<` decomprimă.]
+- **c)** `>` encrypts and `<` decrypts. [`>` criptează și `<` decriptează.]
 
-> 💡 **Feedback:**
-> *'\>' means big-endian (network byte order, MSB first). '' (network order). Using native order ('@' or '=') risks interoperability issues. ['\>' înseamnă big-endian (ordinea octeților în rețea, MSB primul). '' (ordinea rețelei). Folosirea ordinii native ('@' sau '=') riscă probleme de interoperabilitate.]*
+<details><summary>💡 Feedback</summary>
 
+**Correct answer / Răspuns corect: a.** The `!` prefix also selects standard-size big-endian (network order). `@` uses native size and alignment; `=` uses native byte order with standard sizes and no alignment padding. [Prefixul `!` selectează tot big-endian cu dimensiuni standard (ordinea rețelei). `@` folosește dimensiuni și aliniere native; `=` folosește ordinea nativă a octeților, dimensiuni standard și fără padding de aliniere.]
+
+</details>
 
 ---
 
 ### Q34. `N04.S03.Q03` — CRC computation scope in binary header / Domeniul de calcul CRC în antetul binar
 
+> Independent design exercise. The layout stated in this item is hypothetical; it is not the one-byte-prefix/pickle implementation in S04. [Exercițiu independent de proiectare. Contractul definit aici nu este implementarea S04 distribuită.]
 *[Multiple Choice]*
 
-When building a BINARY protocol message, over which data is the CRC-32 checksum calculated? [La construirea unui mesaj de protocol BINAR, peste ce date se calculează suma de control CRC-32?]
+A hypothetical protocol computes `crc = zlib.crc32(header_without_crc + payload)`, with a 10-byte header_without_crc. Which bytes does this checksum cover? [Un protocol ipotetic calculează `crc = zlib.crc32(header_without_crc + payload)`, cu header_without_crc de 10 octeți. Ce octeți acoperă suma de control?]
 
 - **a)** Over the header without the CRC field (10 bytes) plus the entire payload [Peste antetul fără câmpul CRC (10 octeți) plus întreaga sarcină utilă]
 - **b)** Over the payload only, excluding all header fields from the calculation [Doar peste sarcina utilă, excluzând toate câmpurile antetului din calcul]
@@ -582,11 +592,11 @@ When building a BINARY protocol message, over which data is the CRC-32 checksum 
 > 💡 **Feedback:**
 > *CRC is calculated over the header (WITHOUT the CRC field itself) concatenated with the payload. The header is first packed without CRC (10 bytes), then CRC is computed over those 10 bytes + payload, and finally the full 14-byte header is assembled with the CRC included. [CRC-ul se calculează peste antetul (FĂRĂ câmpul CRC în sine) concatenat cu sarcina utilă. Antetul este mai întâi împachetat fără CRC (10 octeți), apoi CRC-ul se calculează peste acei 10 octeți + sarcina utilă, iar în final antetul complet de 14 octeți este asamblat cu CRC-ul inclus.]*
 
-
 ---
 
 ### Q35. `N04.S03.Q04` — Hex representation of NP magic bytes / Reprezentarea hexazecimală a octeților magici NP
 
+> Independent design exercise. The layout stated in this item is hypothetical; it is not the one-byte-prefix/pickle implementation in S04. [Exercițiu independent de proiectare. Contractul definit aici nu este implementarea S04 distribuită.]
 *[Multiple Choice]*
 
 The BINARY protocol magic bytes are b'NP'. What is their hexadecimal representation? [Octeții magici ai protocolului BINAR sunt b'NP'. Care este reprezentarea lor hexazecimală?]
@@ -599,11 +609,11 @@ The BINARY protocol magic bytes are b'NP'. What is their hexadecimal representat
 > 💡 **Feedback:**
 > *In ASCII: 'N' = 0x4E (78 decimal), 'P' = 0x50 (80 decimal). Therefore b'NP' in hex is 4e50. This can be verified with b'NP'.hex() in Python. [În ASCII: 'N' = 0x4E (78 zecimal), 'P' = 0x50 (80 zecimal). Prin urmare, b'NP' în hex este 4e50. Se poate verifica cu b'NP'.hex() în Python.]*
 
-
 ---
 
 ### Q36. `N04.S03.Q05` — Sequence number purpose in binary protocol / Scopul numărului de secvență în protocolul binar
 
+> Independent design exercise. The layout stated in this item is hypothetical; it is not the one-byte-prefix/pickle implementation in S04. [Exercițiu independent de proiectare. Contractul definit aici nu este implementarea S04 distribuită.]
 *[Multiple Choice]*
 
 Each BINARY protocol message contains a 4-byte sequence number. What primary purpose does it serve? [Fiecare mesaj de protocol BINAR conține un număr de secvență pe 4 octeți. Ce scop principal servește?]
@@ -614,13 +624,13 @@ Each BINARY protocol message contains a 4-byte sequence number. What primary pur
 - **d)** Compressing repeated fields by referencing previously sent sequence values [Comprimarea câmpurilor repetate prin referirea valorilor de secvență trimise anterior]
 
 > 💡 **Feedback:**
-> *Sequence numbers correlate requests with their corresponding responses (request-response matching) and enable detection of duplicate or lost messages. The number is monotonically increasing and allows a receiver to identify gaps or replays. [Numerele de secvență corelează cererile cu răspunsurile corespunzătoare (potrivirea cerere-răspuns) și permit detectarea mesajelor duplicate sau pierdute. Numărul este crescător monoton și permite receptorului să identifice goluri sau reluări.]*
-
+> *Sequence numbers correlate requests with their corresponding responses (request-response matching) and enable detection of duplicate or lost messages. With a defined numbering and wraparound policy, receiver-side state can identify duplicates and gaps; a sequence field alone neither prevents replay nor proves packet loss. [Numerele de secvență corelează cererile cu răspunsurile corespunzătoare (potrivirea cerere-răspuns) și permit detectarea mesajelor duplicate sau pierdute. Cu o politică definită de numerotare și revenire la zero, starea receptorului poate identifica duplicate și goluri; un câmp de secvență singur nu previne replay și nu dovedește pierderea pachetelor.]*
 
 ---
 
 ### Q37. `N04.S04.Q01` — UDP sensor datagram size / Dimensiunea datagramei senzorului UDP
 
+> Independent design exercise. The layout stated in this item is hypothetical; it is not the one-byte-prefix/pickle implementation in S04. [Exercițiu independent de proiectare. Contractul definit aici nu este implementarea S04 distribuită.]
 *[Multiple Choice]*
 
 The UDP sensor protocol datagram structure has fields: version(1B), sensor_id(4B), temperature(4B float), location(10B), CRC32(4B). What is the total datagram size? [Structura datagramei protocolului senzorului UDP are câmpurile: version(1O), sensor_id(4O), temperature(4O float), location(10O), CRC32(4O). Care este dimensiunea totală a datagramei?]
@@ -633,23 +643,24 @@ The UDP sensor protocol datagram structure has fields: version(1B), sensor_id(4B
 > 💡 **Feedback:**
 > *Sum of all fields: 1 + 4 + 4 + 10 + 4 = 23 bytes. This compact, fixed-size format is ideal for high-frequency sensor transmissions over UDP. [Suma tuturor câmpurilor: 1 + 4 + 4 + 10 + 4 = 23 octeți. Acest format compact de dimensiune fixă este ideal pentru transmisii de senzori de frecvență ridicată peste UDP.]*
 
-
 ---
 
-### Q38. `N04.S04.Q02` — ECHO_REQ message type code / Codul tipului de mesaj ECHO_REQ
+### Q38. `N04.S04.Q02` — S04 UDP request enum / Enum-ul cererilor UDP S04
 
-*[Multiple Choice]*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-In the BINARY protocol, message types are encoded as single-byte integers. What numeric value corresponds to ECHO_REQ? [În protocolul BINAR, tipurile de mesaje sunt codificate ca întregi pe un singur octet. Ce valoare numerică corespunde tipului ECHO_REQ?]
+In `S04_Part03_Script_Transfer_Units.py`, what is the value of `RequestMessageType.CONNECT`? [În `S04_Part03_Script_Transfer_Units.py`, ce valoare are `RequestMessageType.CONNECT`?]
 
-- **a)** 1 — ECHO_REQ is assigned type code 1, with ECHO_RESP being type code 2 [1 — ECHO_REQ are codul de tip 1, cu ECHO_RESP fiind codul de tip 2]
-- **b)** 0 — type codes start from zero for the first defined message type [0 — codurile de tip pornesc de la zero pentru primul tip de mesaj definit]
-- **c)** 255 — this value is reserved for ERROR responses, not echo requests [255 — această valoare este rezervată pentru răspunsuri ERROR, nu cereri echo]
-- **d)** 3 — this is the code for PUT_REQ, not for echo request messages [3 — acesta este codul pentru PUT_REQ, nu pentru mesajele de cerere echo]
+- **a)** 1
+- **b)** 0
+- **c)** 255
+- **d)** 5
 
-> 💡 **Feedback:**
-> *TYPE_ECHO_REQ = 1, TYPE_ECHO_RESP = 2, TYPE_PUT_REQ = 3, TYPE_PUT_RESP = 4, TYPE_GET_REQ = 5, TYPE_GET_RESP = 6, TYPE_ERROR = 255. Response types are always request type + 1. [TYPE_ECHO_REQ = 1, TYPE_ECHO_RESP = 2, TYPE_PUT_REQ = 3, TYPE_PUT_RESP = 4, TYPE_GET_REQ = 5, TYPE_GET_RESP = 6, TYPE_ERROR = 255. Tipurile de răspuns sunt întotdeauna tipul cererii + 1.]*
+<details><summary>💡 Feedback</summary>
 
+**Correct answer / Răspuns corect: a.** CONNECT=1, SEND=2, LIST=3 and DISCONNECT=4. CLEAR=5 is the student extension. These are enum values serialised by pickle; they are not a fixed one-byte sensor packet layout. [CONNECT=1, SEND=2, LIST=3 și DISCONNECT=4. CLEAR=5 este extensia studentului. Acestea sunt valori enum serializate prin pickle; nu reprezintă un format fix de pachet de senzor pe un octet.]
+
+</details>
 
 ---
 
@@ -674,16 +685,15 @@ Which Wireshark display filter isolates traffic for the Week 4 TEXT protocol ser
 
 *[Multiple Choice]*
 
-Which tcpdump command captures TEXT protocol packets on TCP port 3333 in ASCII mode without resolving hostnames? [Care comandă tcpdump capturează pachetele protocolului TEXT pe portul TCP 3333 în mod ASCII fără rezoluția numelor de gazdă?]
+Which tcpdump command captures TEXT protocol packets between the client and server on 127.0.0.1:3333 in ASCII mode without resolving hostnames? [Care comandă tcpdump capturează pachetele protocolului TEXT între clientul și serverul de pe 127.0.0.1:3333 în mod ASCII fără rezoluția numelor de gazdă?]
 
-- **a)** sudo tcpdump -i eth0 -nn -A 'tcp port 3333' [sudo tcpdump -i eth0 -nn -A 'tcp port 3333']
-- **b)** tcpdump -i eth0 -verbose port 3333 \--ascii [tcpdump -i eth0 -verbose port 3333 \--ascii]
-- **c)** sudo tcpdump -i eth0 -XX 'udp port 3333' [sudo tcpdump -i eth0 -XX 'udp port 3333']
+- **a)** sudo tcpdump -i lo -nn -A 'tcp port 3333' [sudo tcpdump -i lo -nn -A 'tcp port 3333']
+- **b)** tcpdump -i lo -verbose port 3333 \--ascii [tcpdump -i lo -verbose port 3333 \--ascii]
+- **c)** sudo tcpdump -i lo -XX 'udp port 3333' [sudo tcpdump -i lo -XX 'udp port 3333']
 - **d)** tcpdump -capture -port 3333 -format text [tcpdump -capture -port 3333 -format text]
 
 > 💡 **Feedback:**
-> *sudo tcpdump -i eth0 -nn -A 'tcp port 3333' — the -nn flag disables host and port name resolution, -A shows ASCII content, and the BPF filter 'tcp port 3333' isolates the TEXT protocol traffic. [sudo tcpdump -i eth0 -nn -A 'tcp port 3333' — indicatorul -nn dezactivează rezoluția numelor de gazdă și port, -A arată conținutul ASCII, iar filtrul BPF 'tcp port 3333' izolează traficul protocolului TEXT.]*
-
+> *sudo tcpdump -i lo -nn -A 'tcp port 3333' — the -nn flag disables host and port name resolution, -A shows ASCII content, and the BPF filter 'tcp port 3333' isolates the TEXT protocol traffic. [sudo tcpdump -i lo -nn -A 'tcp port 3333' — indicatorul -nn dezactivează rezoluția numelor de gazdă și port, -A arată conținutul ASCII, iar filtrul BPF 'tcp port 3333' izolează traficul protocolului TEXT.]*
 
 ---
 
@@ -774,6 +784,7 @@ Before calling bind(), the TEXT protocol server sets SO_REUSEADDR on the socket.
 
 ### Q46. `N04.S04.Q03` — Location field padding in UDP datagram / Completarea câmpului locație în datagrama UDP
 
+> Independent design exercise. The layout stated in this item is hypothetical; it is not the one-byte-prefix/pickle implementation in S04. [Exercițiu independent de proiectare. Contractul definit aici nu este implementarea S04 distribuită.]
 *[Multiple Choice]*
 
 The UDP sensor datagram allocates exactly 10 bytes for the location field. If the location string is 'Lab1' (4 bytes), how is it stored? [Datagrama senzorului UDP alocă exact 10 octeți pentru câmpul locație. Dacă șirul de locație este 'Lab1' (4 octeți), cum este stocat?]
@@ -784,8 +795,7 @@ The UDP sensor datagram allocates exactly 10 bytes for the location field. If th
 - **d)** Base64-encoded and then stored, expanding from 4 to approximately 8 bytes [Codificată Base64 și apoi stocată, expandându-se de la 4 la aproximativ 8 octeți]
 
 > 💡 **Feedback:**
-> *The location is left-justified and padded with null bytes (\\x00) to fill the 10-byte field: b'Lab1\\x00\\x00\\x00\\x00\\x00\\x00'. This is implemented with location.encode('utf-8').ljust(10)[:10]. [Locația este aliniată la stânga și completată cu octeți nuli (\\x00) pentru a umple câmpul de 10 octeți: b'Lab1\\x00\\x00\\x00\\x00\\x00\\x00'. Se implementează cu location.encode('utf-8').ljust(10)[:10].]*
-
+> *The location is left-justified and padded with null bytes (\\x00) to fill the 10-byte field: b'Lab1\\x00\\x00\\x00\\x00\\x00\\x00'. This is implemented with location.encode('utf-8').ljust(10, b'\x00')[:10]. [Locația este aliniată la stânga și completată cu octeți nuli (\\x00) pentru a umple câmpul de 10 octeți: b'Lab1\\x00\\x00\\x00\\x00\\x00\\x00'. Se implementează cu location.encode('utf-8').ljust(10, b'\x00')[:10].]*
 
 ---
 
@@ -868,6 +878,7 @@ What is the size of a UDP header in bytes? [Care este dimensiunea antetului UDP 
 
 ### Q53. `N04.D03.Q01` — Binary header size in bytes / Dimensiunea antetului binar în octeți
 
+> Independent design exercise. The layout stated in this item is hypothetical; it is not the one-byte-prefix/pickle implementation in S04. [Exercițiu independent de proiectare. Contractul definit aici nu este implementarea S04 distribuită.]
 *[Numerical]*
 
 The BINARY protocol header format is '\>2sBBHII'. How many bytes is the total header? Enter a whole number. [Formatul antetului protocolului BINAR este '\>2sBBHII'. Câți octeți are antetul total? Introduceți un număr întreg.]
@@ -875,11 +886,11 @@ The BINARY protocol header format is '\>2sBBHII'. How many bytes is the total he
 > 💡 **Feedback:**
 > *2(2s) + 1(B) + 1(B) + 2(H) + 4(I) + 4(I) = (\...) bytes. [2(2s) + 1(B) + 1(B) + 2(H) + 4(I) + 4(I) = (\...) octeți.]*
 
-
 ---
 
 ### Q54. `N04.D03.Q02` — UDP sensor datagram size / Dimensiunea datagramei senzorului UDP
 
+> Independent design exercise. The layout stated in this item is hypothetical; it is not the one-byte-prefix/pickle implementation in S04. [Exercițiu independent de proiectare. Contractul definit aici nu este implementarea S04 distribuită.]
 *[Numerical]*
 
 The UDP sensor datagram has fields: version(1B), sensor_id(4B), temp(4B), location(10B), CRC32(4B). Total size in bytes? [Datagrama senzorului UDP are câmpurile: version(1O), sensor_id(4O), temp(4O), location(10O), CRC32(4O). Dimensiunea totală în octeți?]
@@ -887,30 +898,33 @@ The UDP sensor datagram has fields: version(1B), sensor_id(4B), temp(4B), locati
 > 💡 **Feedback:**
 > *1 + 4 + 4 + 10 + 4 = (\...) bytes. [1 + 4 + 4 + 10 + 4 = (\...) octeți.]*
 
-
 ---
 
 ### Q55. `N04.D03.Q03` — Endianness misinterpretation of 1000 / Interpretarea greșită a 1000 din cauza endianness
 
-*[Numerical]*
+*Numerical / Numeric*
 
-Value 1000 is packed as big-endian unsigned short ('\>H'). If the receiver reads it as little-endian ('H'). Dacă receptorul o citește ca little-endian ('\<H'), ce valoare zecimală rezultă?]
+What is the result of `struct.unpack("<H", struct.pack(">H", 1000))[0]`? [Care este rezultatul expresiei `struct.unpack("<H", struct.pack(">H", 1000))[0]`?]
 
-> 💡 **Feedback:**
-> *1000 = 0x03E8. Big-endian: [03][E8]. Read as little-endian: 0xE803 = 232\*3 + 8\*256 = (\...). [1000 = 0x03E8. Big-endian: [03][E8]. Citit ca little-endian: 0xE803 = (\...).]*
+<details><summary>💡 Feedback</summary>
 
+**59395**. `1000 = 0x03E8`; the bytes are `03 E8`. Little-endian interpretation gives `0xE803 = 232 × 256 + 3 = 59395`. [Interpretarea little-endian produce `0xE803 = 232 × 256 + 3 = 59395`.]
+
+</details>
 
 ---
 
 ### Q56. `N04.D03.Q04` — TEXT protocol frame size for 13-byte payload / Dimensiunea cadrului TEXT pentru sarcină utilă de 13 octeți
 
-*[Numerical]*
+*Numerical / Numeric*
 
-The TEXT protocol uses " " framing where LENGTH is ASCII decimal. For payload "SET key value" (13 bytes), how many bytes is the complete frame? [Protocolul TEXT folosește cadrajul " " unde LUNGIME este zecimal ASCII. Pentru sarcina utilă "SET key value" (13 octeți), câți octeți are cadrul complet?]
+S04 uses `TOTAL_LENGTH SP PAYLOAD`, counting all UTF-8 bytes including the prefix and space. How many bytes are in the frame for `add key value` (13 ASCII bytes)? [S04 folosește `TOTAL_LENGTH SP PAYLOAD`, numărând toți octeții UTF-8, inclusiv prefixul și spațiul. Câți octeți are cadrul pentru `add key value` (13 octeți ASCII)?]
 
-> 💡 **Feedback:**
-> *"13 SET key value" = 2 (ASCII digits "13") + 1 (space) + 13 (payload) = (\...) bytes total. ["13 SET key value" = 2 (cifrele ASCII "13") + 1 (spațiu) + 13 (sarcină utilă) = (\...) octeți total.]*
+<details><summary>💡 Feedback</summary>
 
+**16**. The complete frame is `16 add key value`: 2 + 1 + 13 = 16. [Cadrul complet este `16 add key value`: 2 + 1 + 13 = 16.]
+
+</details>
 
 ---
 
@@ -976,37 +990,41 @@ A sender packs the value {a} as a 2-byte big-endian unsigned short. The receiver
 
 ### Q62. `N04.D04.Q04` — Text frame total size / Dimensiunea totală a cadrului text
 
-*[Calculated]*
+*Calculated / Calculat*
 
-In the TEXT protocol, a message is framed as " ". If the payload is "{a} SET key value" ({a} characters), the length prefix is the ASCII representation of {a} followed by a space. How many bytes is the complete frame? (Length prefix chars + 1 space + payload bytes) [În protocolul TEXT, un mesaj este încadrat ca " ". Dacă payloadul este "{a} SET key value" ({a} caractere), prefixul de lungime este reprezentarea ASCII a lui {a} urmată de un spațiu. Câți octeți are cadrul complet? (Caractere prefix lungime + 1 spațiu + octeți payload)]
+In S04, `TOTAL_LENGTH SP PAYLOAD` counts all bytes. Let `{a}` be the UTF-8 payload length, restricted to integer values from **10 through 96 inclusive**. How many bytes are in the complete frame? [În S04, `TOTAL_LENGTH SP PAYLOAD` numără toți octeții. `{a}` este lungimea payloadului UTF-8, limitată la valori întregi între **10 și 96 inclusiv**. Câți octeți are cadrul complet?]
 
-> 💡 **Feedback:**
-> *The length prefix "{a}" is ceil(log10({a}+1)) ASCII digits, plus 1 space, plus {a} payload bytes. For a two-digit length like 13: "13 " (3 bytes) + 13 bytes = 16 total. [Prefixul de lungime "{a}" este ceil(log10({a}+1)) cifre ASCII, plus 1 spațiu, plus {a} octeți payload. Pentru o lungime de două cifre ca 13: "13 " (3 octeți) + 13 octeți = 16 total.]*
+<details><summary>💡 Feedback</summary>
 
+**Formula: `{a} + 3`**, because the total lies between 13 and 99 and therefore always has two ASCII digits plus one space. Outside this supplied range, solve `T = payload_bytes + 1 + len(str(T))`; do not assume a constant digit count. [Totalul se află între 13 și 99, deci are două cifre ASCII și un spațiu. În afara intervalului dat, rezolvați `T = payload_bytes + 1 + len(str(T))`; numărul cifrelor nu este constant.]
+
+</details>
 
 ---
 
 ### Q63. `N04.D04.Q05` — Binary message total bytes / Total octeți mesaj binar
 
-*[Calculated]*
+*Calculated / Calculat*
 
-A binary protocol message consists of a 14-byte header followed by the payload. If the key is {a} characters and the value is {b} characters, and the payload encoding uses 1 byte for key_length + key + value, how many total bytes does the entire message occupy? [Un mesaj de protocol binar constă dintr-un antet de 14 octeți urmat de payload. Dacă cheia are {a} caractere și valoarea are {b} caractere, iar codificarea payload-ului folosește 1 octet pentru lungime_cheie + cheie + valoare, câți octeți totali ocupă întregul mesaj?]
+The S04 binary protocol prefixes a pickle payload with **one byte containing the total frame length**. If serialisation has already produced `{a}` bytes, with integer `1 ≤ {a} ≤ 254`, how many bytes are sent? [Protocolul binar S04 prefixează payloadul pickle cu **un octet care conține lungimea totală a cadrului**. Dacă serializarea a produs deja `{a}` octeți, cu valoare întreagă `1 ≤ {a} ≤ 254`, câți octeți se trimit?]
 
-> 💡 **Feedback:**
-> *Total = 14 (header) + 1 (key_length byte) + {a} (key) + {b} (value) = 15 + {a} + {b}. The key_length field uses 1 byte (struct 'B') as defined in proto_common.py encode_kv(). [Total = 14 (antet) + 1 (octet lungime_cheie) + {a} (cheie) + {b} (valoare) = 15 + {a} + {b}. Câmpul lungime_cheie folosește 1 octet (struct 'B') conform definiției din proto_common.py encode_kv().]*
+<details><summary>💡 Feedback</summary>
 
+**Formula: `1 + {a}`**. Do not infer the pickle length from the number of characters in the key and value; measure the serialised bytes. A payload longer than 254 bytes is rejected before transmission. [Nu deduceți lungimea pickle din numărul caracterelor cheii și valorii; măsurați octeții serializați. Un payload mai lung de 254 de octeți este respins înainte de transmisie.]
+
+</details>
 
 ---
 
 ### Q64. `N04.D04.Q06` — UDP sensor useful data ratio / Raportul datelor utile senzor UDP
 
+> Independent design exercise. The layout stated in this item is hypothetical; it is not the one-byte-prefix/pickle implementation in S04. [Exercițiu independent de proiectare. Contractul definit aici nu este implementarea S04 distribuită.]
 *[Calculated]*
 
-The UDP sensor datagram is 23 bytes total. The useful data fields are: sensor_id (4 bytes) and temperature ({a} bytes). The remaining fields (version, location, CRC32) are protocol overhead. What percentage of the datagram carries useful sensor readings? Round to one decimal. [Datagrama senzorului UDP are 23 de octeți în total. Câmpurile de date utile sunt: sensor_id (4 octeți) și temperatură ({a} octeți). Câmpurile rămase (versiune, locație, CRC32) sunt overhead de protocol. Ce procent din datagramă transportă citiri utile ale senzorilor? Rotunjiți la o zecimală.]
+In this hypothetical layout, the UDP payload has 15 bytes of fixed protocol overhead. The useful data fields are: sensor_id (4 bytes) and temperature ({a} bytes). The remaining fields (version, location, CRC32) are protocol overhead. What percentage of the datagram carries useful sensor readings? Round to one decimal. [În acest format ipotetic, payload-ul UDP are 15 octeți de overhead fix. Câmpurile de date utile sunt: sensor_id (4 octeți) și temperatură ({a} octeți). Câmpurile rămase (versiune, locație, CRC32) sunt overhead de protocol. Ce procent din datagramă transportă citiri utile ale senzorilor? Rotunjiți la o zecimală.]
 
 > 💡 **Feedback:**
-> *Useful = 4 + {a} bytes. Percentage = (4 + {a}) / 23 × 100. For the standard 4-byte float: (4+4)/23 × 100 = 34.8%. The location field (10B) and CRC (4B) are overhead necessary for identification and integrity. [Util = 4 + {a} octeți. Procent = (4 + {a}) / 23 × 100. Pentru float-ul standard de 4 octeți: (4+4)/23 × 100 = 34.8%. Câmpul locație (10B) și CRC (4B) sunt overhead necesar pentru identificare și integritate.]*
-
+> *Useful = 4 + {a} bytes; total payload = 19 + {a} bytes. Percentage = (4 + {a}) / (19 + {a}) × 100. For the standard 4-byte float: (4+4)/23 × 100 = 34.8%. The location field (10B) and CRC (4B) are overhead necessary for identification and integrity. [Util = 4 + {a} octeți; payload total = 19 + {a} octeți. Procent = (4 + {a}) / (19 + {a}) × 100. Pentru float-ul standard de 4 octeți: (4+4)/23 × 100 = 34.8%. Câmpul locație (10B) și CRC (4B) sunt overhead necesar pentru identificare și integritate.]*
 
 ---
 
@@ -1039,22 +1057,28 @@ A sensor sends {a} readings per minute. The text protocol frame is 35 bytes per 
 
 ---
 
-### Q67. `N04.D05.Q03` — Complete struct.pack call for binary header / Completați apelul struct.pack pentru antetul binar
+### Q67. `N04.D05.Q03` — Equivalent standard big-endian prefixes / Prefixe big-endian standard echivalente
 
-*[Drag & Drop into Text]*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-Complete the struct.pack() call to build the binary header with CRC: [Completați apelul struct.pack() pentru a construi antetul binar cu CRC:]
-header = struct.pack('[[1]]2sBBHII', MAGIC, VERSION, msg_type, payload_len, seq, [[2]])
-*Available choices / Variante disponibile:* \> | crc | \< | seq | ! | version
+For an independent 14-byte header with fields `2sBBHII`, which prefixes give standard-size big-endian encoding? [Pentru un antet independent de 14 octeți cu câmpurile `2sBBHII`, ce prefixe produc codificare big-endian cu dimensiuni standard?]
 
-> 💡 **Feedback:**
-> *The format prefix '\>' specifies big-endian (network byte order). The last field is the CRC32 value. Format: \>2sBBHII = magic(2) + ver(1) + type(1) + len(2) + seq(4) + crc(4) = 14 bytes. [Prefixul de format '\>' specifică big-endian (ordinea octeților în rețea). Ultimul câmp este valoarea CRC32. Format: \>2sBBHII = magic(2) + ver(1) + tip(1) + lungime(2) + seq(4) + crc(4) = 14 octeți.]*
+- **a)** Both `>` and `!`. [Atât `>`, cât și `!`.]
+- **b)** Only `<`. [Doar `<`.]
+- **c)** Only `@`, on every platform. [Doar `@`, pe orice platformă.]
+- **d)** Only `=` guarantees big-endian. [Doar `=` garantează big-endian.]
 
+<details><summary>💡 Feedback</summary>
+
+**Correct answer / Răspuns corect: a.** `struct.calcsize(">2sBBHII")` and `struct.calcsize("!2sBBHII")` both equal 14. This hypothetical header is not the S04 pickle wire format, which has one total-length prefix byte. [`struct.calcsize(">2sBBHII")` și `struct.calcsize("!2sBBHII")` sunt ambele 14. Antetul ipotetic nu este formatul pickle S04, care are un octet prefix de lungime totală.]
+
+</details>
 
 ---
 
 ### Q68. `N04.D05.Q06` — Complete UDP sensor pack call / Completați apelul de împachetare al senzorului UDP
 
+> Independent design exercise. The layout stated in this item is hypothetical; it is not the one-byte-prefix/pickle implementation in S04. [Exercițiu independent de proiectare. Contractul definit aici nu este implementarea S04 distribuită.]
 *[Drag & Drop into Text]*
 
 Complete the struct.pack for the UDP sensor datagram (without CRC): [Completați struct.pack pentru datagrama senzorului UDP (fără CRC):]
@@ -1064,41 +1088,52 @@ payload = struct.pack('\>[[1]][[2]]f[[3]]', VERSION, sensor_id, temp, location_b
 > 💡 **Feedback:**
 > *Format: \>BIf10s — B for version (1 byte), I for sensor_id (4 bytes unsigned int), f for temperature (4 bytes float), 10s for location (10 bytes string). [Format: \>BIf10s — B pentru versiune (1 octet), I pentru sensor_id (4 octeți unsigned int), f pentru temperatură (4 octeți float), 10s pentru locație (10 octeți șir).]*
 
-
 ---
 
 ### Q69. `N04.D05.Q01` — Build tcpdump command for binary protocol / Construiți comanda tcpdump pentru protocolul binar
 
-*[Drag & Drop into Text]*
+*Drag and Drop / Trageți și plasați*
 
-Build the tcpdump command that captures BINARY protocol traffic in hex dump mode without hostname resolution: [Construiți comanda tcpdump care capturează traficul protocolului BINAR în mod hex dump fără rezoluție de nume de gazdă:]
-sudo [[1]] -i eth0 [[2]] [[3]] 'tcp port [[4]]'
-*Available choices / Variante disponibile:* tcpdump | -nn | -XX | 5401 | curl | -A | 3333 | 5402
+Build a capture for the S04 binary example running on `127.0.0.1:3333`. [Construiți captura pentru exemplul binar S04 care rulează pe `127.0.0.1:3333`.]
 
-> 💡 **Feedback:**
-> *tcpdump -nn -XX captures TCP port 5401 traffic in hex+ASCII mode without name resolution. -nn disables both host and port resolution. [tcpdump -nn -XX capturează traficul TCP portul 5401 în mod hex+ASCII fără rezoluție de nume. -nn dezactivează rezoluția numelor de gazdă și port.]*
+```bash
+sudo [[1]] -i lo [[2]] [[3]] 'tcp port [[4]]'
+```
 
+Choices / Variante: `tcpdump`, `-nn`, `-XX`, `3333`, `curl`, `-A`, `5401`, `5402`.
+
+<details><summary>💡 Feedback</summary>
+
+`sudo tcpdump -i lo -nn -XX 'tcp port 3333'`. `-nn` disables name and service resolution; `-XX` prints hexadecimal and ASCII including the link header. The text and binary examples both default to 3333, so run them separately. [Comanda dezactivează rezoluția de nume și servicii și afișează hexazecimal și ASCII inclusiv antetul legăturii. Exemplele text și binar folosesc implicit același port 3333, deci rulați-le separat.]
+
+</details>
 
 ---
 
 ### Q70. `N04.D05.Q05` — Build recv_exact function call / Construiți apelul funcției recv_exact
 
-*[Drag & Drop into Text]*
+*Drag and Drop / Trageți și plasați*
 
-Complete the recv_exact helper to receive exactly n bytes: [Completați helper-ul recv_exact pentru a primi exact n octeți:]
+Complete this helper for a non-negative integer `n`. [Completați acest helper pentru un întreg nenegativ `n`.]
 
 ```python
-while len(data) < n:
-    chunk = sock.[[1]](n - [[2]](data))
-    if not chunk:
-        raise [[3]]("closed")
+def recv_exact(sock, n):
+    data = bytearray()
+    while len(data) < n:
+        chunk = sock.[[1]](n - [[2]](data))
+        if not chunk:
+            raise [[3]]("connection closed before the frame ended")
+        data.extend(chunk)
+    return bytes(data)
 ```
 
-*Available choices / Variante disponibile:* recv | len | ConnectionError | send | size | ValueError
+Choices / Variante: `recv`, `len`, `ConnectionError`, `send`, `size`, `ValueError`.
 
-> 💡 **Feedback:**
-> *sock.recv(n - len(data)) requests at most the remaining bytes needed. An empty chunk (not chunk) means the peer closed the connection, raising ConnectionError. [sock.recv(n - len(data)) solicită cel mult octeții rămași necesari. Un fragment gol (not chunk) înseamnă că partenerul a închis conexiunea, ridicând ConnectionError.]*
+<details><summary>💡 Feedback</summary>
 
+1 = `recv`; 2 = `len`; 3 = `ConnectionError`. Accumulating each chunk is essential. Reading only the remaining count avoids consuming bytes belonging to the next frame. [Acumularea fiecărui fragment este esențială. Citirea numai a numărului rămas evită consumarea octeților cadrului următor.]
+
+</details>
 
 ---
 

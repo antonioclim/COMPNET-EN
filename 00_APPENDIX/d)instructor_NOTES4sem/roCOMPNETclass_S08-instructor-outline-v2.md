@@ -410,7 +410,7 @@ ss -tuln | grep -E ':8000|:8080'
 | 3 | Docker pull lent (nginx:alpine) | compose blochează la pull | Pre-pull: `docker pull nginx:alpine`. Alternativ: sari la Bloc F, tema include nginx |
 | 4 | `curl` returnează erori de conexiune | `Connection refused` | Verifică: serverul rulează? Portul e corect? Firewall? `ss -tuln` |
 | 5 | Serverul manual returnează 500 | Eroare Python în terminal 🔵 | Citește traceback-ul. Cele mai frecvente: fișier lipsă în `static/`, eroare de parsare request |
-| 6 | nginx nu pornește | Eroare config în loguri | `docker compose logs nginx` — de obicei linia de eroare indică exact unde e problema în `.conf` |
+| 6 | nginx nu pornește | Eroare config în loguri | `docker compose -f S08_Part04_Config_Docker_Compose.yml logs nginx` — de obicei linia de eroare indică exact unde e problema în `.conf` |
 | 7 | Serverul builtin nu răspunde la `/api/time` | Eroare 404 sau timeout | Verifică că rulezi `S08_Part02B_Example_Simple_HTTP_Builtin.py`, nu `python3 -m http.server` |
 
 **Regulă de sacrificare (dacă timpul se comprimă):**
@@ -437,7 +437,7 @@ Mogul, J. C. (1995). The case for persistent-connection HTTP. *ACM SIGCOMM Compu
 
 Nielsen, H. F., Gettys, J., Baird-Smith, A., Prud'hommeaux, E., Lie, H. W., & Lilley, C. (1997). Network performance effects of HTTP/1.1, CSS1, and PNG. *ACM SIGCOMM Computer Communication Review, 27*(4), 155–166. https://doi.org/10.1145/263109.263157
 
-Reese, W. (2008). Nginx: The high-performance web server and reverse proxy. *Linux Journal, 2008*(173). https://doi.org/10.5555/1412202.1412204
+Reese, W. (2008). Nginx: The high-performance web server and reverse proxy. *Linux Journal, 2008*(173). https://www.linuxjournal.com/article/10108
 
 ---
 

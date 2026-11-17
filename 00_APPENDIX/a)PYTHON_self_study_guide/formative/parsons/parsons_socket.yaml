@@ -1,6 +1,6 @@
 # Parsons Problems: Socket Programming
 # Version: 5.0 — January 2026
-# Usage: python formative/parsons_runner.py --file parsons/parsons_socket.yaml
+# Usage: python formative/parsons_runner.py --file parsons_socket.yaml
 
 metadata:
   topic: "TCP/UDP Socket Programming"
@@ -150,7 +150,7 @@ problems:
     
     distractors:
       - {id: D1, code: "sock.timeout = 5.0", indent: 0, hint: "Use settimeout() method, not attribute assignment"}
-      - {id: D2, code: "except TimeoutError:", indent: 0, hint: "Socket timeouts raise socket.timeout, not TimeoutError"}
+      - {id: D2, code: "except ConnectionRefusedError:", indent: 0, hint: "A refused connection is a different failure from a timeout; in Python 3.10+, socket.timeout and TimeoutError are aliases"}
     
     correct_order: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     

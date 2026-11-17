@@ -1,22 +1,38 @@
 # S13 — Portainer Integration (Instructor Notes)
 
+> **Execution route:** PowerShell commands in this guide use Docker Desktop on
+> Windows. With the primary MININET-SDN OVA, run the Compose commands in the Linux
+> guest and test guest endpoints there; translate `..\folder` to `../folder`.
+> Windows `127.0.0.1:2222` is the OVA SSH forward, not automatically an S10
+> container endpoint. Use the [environment routes](../../../00_APPENDIX/docs/environment_routes.md)
+> and the canonical seminar README for the chosen route.
+
+**Reading the dashboard:** a port mapping is configuration, a running container is
+process state and a successful application request is service evidence. Record
+these separately. `EXPOSE`/Compose `expose` documents a container port; it does not
+create an access-control boundary. On normal Linux bridge networks the daemon
+host can reach container addresses even without published ports. Docker Desktop's
+Windows host normally accesses them through published ports. See
+[Docker port publishing](https://docs.docker.com/engine/network/port-publishing/).
+
+
 ## Context
 
 Seminar 13 deploys intentionally vulnerable services — DVWA, WebGoat and a backdoored vsftpd 2.3.4 — inside Docker containers on a fixed-IP subnet. Students scan and enumerate these targets from a separate "tool container" (`nicolaka/netshoot`). The session is conceptually dense: ethical framing, reconnaissance, port scanning, banner grabbing, basic exploitation — packed into roughly 40 minutes.
 
-Portainer enters this seminar not as a convenience tool but as a **perspective shift**. Everything the attacker must discover through scanning, the administrator already sees in the dashboard. This duality — asymmetric information between attacker and defender — is one of the foundational ideas in network security, and Portainer makes it tangible.
+Portainer enters this seminar not as a convenience tool but as a **perspective shift**. The administrator sees declared containers, images, addresses and mappings; the scanner observes reachability and protocol responses. These are different kinds of evidence and can disagree. This duality — asymmetric information between attacker and defender — is one of the foundational ideas in network security, and Portainer makes it tangible.
 
 ## Pedagogical Objectives Augmented
 
 | Objective already in the seminar | What Portainer adds |
 |---|---|
-| Reconnaissance: discover hosts and open ports | Administrator already sees all containers, IPs and ports — the asymmetry is immediate |
+| Reconnaissance: discover hosts and open ports | Administrator sees declared addresses and mappings; scans test actual listeners and reachability |
 | Service enumeration: version detection via banners | Compare the Docker image tag (admin view) with the banner returned by `nmap -sV` (attacker view) |
-| Understand attack surfaces | Published-ports column is literally a list of the attack surface |
+| Understand attack surfaces | Published-ports column lists configured mappings, which must be combined with listener, routing and application checks |
 | Ethical framing: attacker vs defender roles | Portainer embodies the defender perspective throughout the exercise |
-| Detect scanning activity | Log tailing on target containers shows incoming connection attempts as they happen |
+| Detect scanning activity | Compare application logs with a packet capture; a connection-only scan may produce no HTTP access entry |
 
-The scan-detection angle is particularly effective. Students run `nmap` from the scanner container while watching the target's logs in Portainer. They see, in real time, that the target "feels" the scan — connection attempts appear in the Apache or vsftpd logs. This makes the abstract concept of "noisy scanning" concrete.
+Use two controlled probes: a TCP connect scan and a real HTTP request. Record whether each appears in application logs and in a packet capture. A missing HTTP access entry after a connect scan is a valid result: opening and closing TCP does not necessarily send an HTTP request. Docker logs show stdout/stderr; file-based service logs may require a different view.
 
 ## How to Use It — Instructor Perspective
 
@@ -44,15 +60,22 @@ docker compose -f S13_Part02_Config_Docker_Compose_Pentest.yml up -d
 
 **Administrator's view.** Open Portainer → Containers:
 
+The table shows the default host ports. If `.env` overrides them, use the values
+shown by `docker compose -f S13_Part02_Config_Docker_Compose_Pentest.yml config`
+and the actual container mappings for every host-side URL below.
+
 | Container      | Image                         | Published Ports          |
 |----------------|-------------------------------|--------------------------|
 | `dvwa`         | `vulnerables/web-dvwa`        | **8888 → 80**            |
 | `webgoat`      | `webgoat/webgoat-8.0`         | **8080 → 8080**          |
 | `vsftpd_vuln`  | `clintmint/vsftpd-2.3.4:1.0` | **2121 → 21, 6200 → 6200** |
 
-> *▸ "As administrators, we can see everything: which services are running, on which ports, and which images they use. The attacker does not have this information — they must discover it through scanning."*
+> *▸ "As administrators, we see configuration and container state. We still need protocol requests or listener checks to establish that a service is ready. The scanner provides an independent observation of reachability."*
 
-**Network with static IPs.** Navigate to **Networks** → **pentestnet**:
+**Network with static IPs.** Open `dvwa` in Portainer and follow its network link.
+`pentestnet` is the Compose network key; Docker normally prefixes its actual name
+with the Compose project name, for example `s13_pentestnet`. Do not assume that an
+unprefixed Docker network named `pentestnet` exists.
 
 | Container      | Static IP    |
 |----------------|-------------|
@@ -68,9 +91,9 @@ Share these IPs with students (or write them on the board). In a real engagement
 
 2. **WebGoat:** click → **Logs** → look for "Started WebGoat." This container is slow to start (30–60 seconds).
 
-3. **vsftpd:** click → **Logs** → the container runs `start-vsftpd && tail -f /dev/null`. If FTP fails to start, the log will show why.
+3. **vsftpd:** click → **Logs** → the container runs `start-vsftpd && tail -f /dev/null`. Inspect any available startup errors, then test the FTP greeting. A long-running `tail` process can keep the container running even when its service is unavailable.
 
-> *▸ "As administrators, we verify that the services are actually working. A scan that finds nothing may mean the service is not running — or the scanner is wrong. Portainer removes the first possibility."*
+> *▸ "As administrators, we verify that the services are actually working. A scan that finds nothing may mean the service is not running — or the scanner is wrong. Portainer gives supporting state and logs; only a successful service-level check addresses that possibility."*
 
 ---
 
@@ -79,16 +102,23 @@ Share these IPs with students (or write them on the board). In a real engagement
 Launch the scanner:
 
 ```powershell
-docker run -it --rm --name scanner --network pentestnet nicolaka/netshoot bash
+$s13Networks = @(docker inspect dvwa --format '{{range $name, $_ := .NetworkSettings.Networks}}{{println $name}}{{end}}' | Where-Object { $_.Trim() })
+if ($LASTEXITCODE -ne 0 -or $s13Networks.Count -ne 1) {
+    throw 'Expected one network on the existing dvwa container; inspect its configuration.'
+}
+$s13Network = $s13Networks[0].Trim()
+docker run -it --rm --name scanner --network $s13Network nicolaka/netshoot bash
 ```
 
-Refresh Portainer. A fourth container (`scanner`) appears on `pentestnet`, with no published ports.
+Refresh Portainer. A fourth container (`scanner`) appears on that same network,
+with no published ports. The snippet above is PowerShell; in the VM route, read
+the network name from `docker inspect dvwa` and pass that exact name to `--network`.
 
-> *▸ "The scanner is on the same network as the targets. From the host, the 172.20.0.x addresses are not directly reachable — but from inside the container they are."*
+> *▸ "The scanner is on the same network as the targets. From Windows using Docker Desktop, use published loopback endpoints. From the scanner, use the Compose service network. On the Linux daemon host, direct bridge-IP access normally also works."*
 
-**Dual-screen observation.** While students run `nmap` in the scanner, open the DVWA and vsftpd logs in Portainer with auto-refresh. As nmap probes port 80 on DVWA, connection entries appear in the Apache log. As it probes port 21 on vsftpd, FTP banner negotiations show up.
+**Dual-screen observation.** Open the target logs and run a TCP connect scan from the scanner. Save the actual result, including an absence of application log entries. Then run `curl -v http://172.20.0.10/` from the same scanner and compare. If Docker logs contain no access log, inspect the service’s configured log destination. A packet capture provides transport evidence independently of application logging.
 
-> *▸ "From Portainer we can see how the targets 'feel' the scan. DVWA receives new connections; vsftpd receives banner requests. This is the defender's perspective."*
+> *▸ "Compare the request we sent, the packets captured and the application events logged. They describe different layers; an empty application log does not prove that no scan occurred."*
 
 ---
 
@@ -96,11 +126,11 @@ Refresh Portainer. A fourth container (`scanner`) appears on `pentestnet`, with 
 
 **Image tags vs banners.** In Portainer, the image tag for vsftpd reads `clintmint/vsftpd-2.3.4:1.0`. An attacker running `nmap -sV` against port 21 sees the banner `vsFTPd 2.3.4`. The information matches.
 
-> *▸ "The administrator knows the version from the Docker image tag. The attacker infers it from the banner. They usually match — which is why banners are a security issue."*
+> *▸ "An image tag and a service banner are claims about identity. Record both, but do not treat either as proof of the exact binary or vulnerability state."*
 
 **The backdoor port.** In Portainer, `vsftpd_vuln` shows two published port mappings: `2121 → 21` and `6200 → 6200`. Port 6200 is unusual for an FTP server.
 
-> *▸ "Port 6200 is the backdoor port in vsftpd 2.3.4. The administrator sees it in the Docker configuration. The attacker discovers it with nmap. The question is: why is anything listening on port 6200?"*
+> *▸ "This intentionally vulnerable image maps port 6200 for the backdoor exercise. A mapping does not mean a listener is active. Record its state before and after the authorised local exercise, then explain the observed difference."*
 
 ---
 
@@ -108,7 +138,7 @@ Refresh Portainer. A fourth container (`scanner`) appears on `pentestnet`, with 
 
 > *▸ "Today we worked from two perspectives at the same time:*
 > - *The attacker: discovery through scanning, enumeration via banners, exploitation.*
-> - *The administrator (Portainer): full visibility, log monitoring, detection of suspicious activity.*
+> - *The administrator (Portainer): configuration and process visibility, log inspection and correlation with network evidence.*
 >
 > *A good administrator uses observability tools — Portainer, Prometheus, Grafana and the ELK stack — to see what the attacker would see, before the attacker sees it."*
 

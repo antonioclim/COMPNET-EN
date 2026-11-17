@@ -4,7 +4,7 @@ These exercises must be carried out inside the Mininet CLI after starting the to
 
 ```
 
-sudo python3 index_mininet-topology.py
+sudo python3 S05_Part03B_Script_Mininet_Topology.py
 
 ```
 
@@ -67,7 +67,7 @@ On h1:
 
 ```
 
-h1 ip route add default via 10.0.1.1
+h1 ip route replace default via 10.0.1.1
 
 ```
 
@@ -75,7 +75,7 @@ On h2:
 
 ```
 
-h2 ip route add default via 10.0.2.1
+h2 ip route replace default via 10.0.2.1
 
 ```
 
@@ -160,3 +160,5 @@ It must contain:
   - why r1 is necessary for the communication
 
 This file will be uploaded as proof of lab completion.
+
+The supplied topology preconfigures the baseline routes. Inspect `ip route` first; `replace` deliberately changes an existing route. Record the table before and after each change.

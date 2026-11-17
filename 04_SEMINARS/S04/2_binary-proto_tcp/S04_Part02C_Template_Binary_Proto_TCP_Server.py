@@ -2,6 +2,7 @@ import socket
 import threading
 import pickle
 import io
+from binary_framing import encode_frame, read_frame
 
 HOST = "127.0.0.1"
 PORT = 3333
@@ -73,9 +74,7 @@ def build_response(payload_str: str) -> bytes:
     pickle.dump(Response(payload_str), stream)
     serialized_payload = stream.getvalue()
 
-    payload_length = len(serialized_payload) + 1
-    len_byte = payload_length.to_bytes(1, byteorder="big")
-    return len_byte + serialized_payload
+    return encode_frame(serialized_payload)
 
 
 def process_command(data: bytes) -> bytes:
@@ -131,35 +130,23 @@ def process_command(data: bytes) -> bytes:
 
 
 def handle_client(client: socket.socket):
+    # Pickle is for this trusted local exercise only: never accept untrusted peers.
     with client:
-        while True:
-            if client is None:
-                break
-
-            data = client.recv(BUFFER_SIZE)
-            if not data:
-                break
-
-            full_data = data
-            message_length = data[0]  # LEN_BYTE
-
-            remaining = message_length - len(full_data)
-            while remaining > 0:
-                chunk = client.recv(BUFFER_SIZE)
-                if not chunk:
+        try:
+            while True:
+                frame = read_frame(client)
+                if frame is None:
                     break
-                full_data += chunk
-                remaining -= len(chunk)
-
-            response = process_command(full_data)
-            client.sendall(response)
+                client.sendall(process_command(frame))
+        except (OSError, EOFError, ValueError, pickle.UnpicklingError, AttributeError) as exc:
+            print(f"[PROTOCOL ERROR] {exc}")
 
 
 def accept_loop(server: socket.socket):
     while is_running:
         client, addr = server.accept()
         print(f"[CONNECT] {addr} has connected")
-        client_thread = threading.Thread(target=handle_client, args=(client,))
+        client_thread = threading.Thread(target=handle_client, args=(client,), daemon=True)
         client_thread.start()
 
 

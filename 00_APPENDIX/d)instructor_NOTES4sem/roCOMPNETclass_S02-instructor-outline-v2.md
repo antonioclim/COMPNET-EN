@@ -180,7 +180,7 @@ tshark -r /tmp/tcp_demo.pcapng
 
 ### C4. Epifanie: TCP livrează un stream, nu „mesaje" (vizează misconception #12)
 
-**Ce faci:** Rulezi clientul de două ori rapid:
+**Ce faci:** Reporneşte captura în terminalul 🟠 înainte de cele două rulări; opreşte-o după ce ambele conexiuni s-au închis. Rulezi clientul de două ori:
 ```bash
 python3 S02_Part04_Example_TCP_Client.py
 python3 S02_Part04_Example_TCP_Client.py
@@ -207,12 +207,12 @@ nano S02_Part02_Template_TCP_Server.py
 
 **Arată cu cursorul** (pe proiector) zona `>>> STUDENT CODE STARTS HERE`:
 
-> *▸ „Trei lucruri de implementat: (1) log complet — IP, port, mesaj, lungime în bytes; (2) construiți răspunsul `b"OK: " + mesaj.upper()`; (3) trimiteți cu `sendall()`."*
+> *▸ „Trei lucruri de implementat: (1) log complet — IP, port, mesaj, lungime în bytes; (2) construiți răspunsul `b"OK: " + mesaj.upper()`; (3) trimiteți cu `sendall()`, incluzând LF (`b"\n"`) la final. Scaffold-ul citeşte repetat linii complete, nu fragmente arbitrare de recv()."*
 
 **Subliniază:**
 - `self.client_address` → `(ip, port)` — tuplu, nu string
 - `self.data` → bytes, trebuie decodat cu `.decode(errors='replace')` (misconception #10)
-- `sendall()` vs `send()` — `sendall` garantează trimiterea integrală
+- `sendall()` vs `send()` — `sendall` trimite până ce toate datele sunt acceptate de stiva locală sau apare o eroare; nu confirmă procesarea la aplicaţia peer
 
 > *▸ „Scenariul complet e descris pas cu pas în `S02_Part03_Scenario_TCP_Server_Netcat_Wireshark.md`. Citiți-l — conține secvența exactă de testare și ce fișiere încărcați."*
 

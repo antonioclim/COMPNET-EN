@@ -47,6 +47,10 @@ The load balancer is an exercise in application-layer routing control: the team 
 - **Protocol/default ports (E2):** TCP: LB 8080/TCP; backends 8081, 8082, 8083/TCP.
 - The Flex component must work with the default values (without manual reconfiguration) so that it can be integrated into automated tests.
 
+### Interpretation and complementary evidence
+
+The [E2 capture and semantic-evidence matrix](../00_common/E2_CAPTURE_EVIDENCE_MATRIX.md#s05) maps every capture rule to its generating action and the complementary application evidence.
+
 ### Deliverables
 - `flex/` directory with sources plus build/run instructions (avoid exotic dependencies where possible).
 - `docs/FLEX.md` with:
@@ -133,7 +137,7 @@ The load balancer is an exercise in application-layer routing control: the team 
 - A filter for the `X-Backend` header or an equivalent marker is provided.
 
 ### Automatic PCAP criteria (E2)
-These criteria are **deterministic** and can be verified automatically with `tshark`.
+These capture checks are reproducible with `tshark`. Frame counts are smoke checks; they do not replace the application tests or prove complete project acceptance.
 - Official rules: `tools/pcap_rules/S05.json`
 - In the catalogue (template): `00_common/tools/pcap_rules/S05.json` and `00_common/tools/validate_pcap.py` (copy into the student repository).
 
@@ -141,11 +145,11 @@ These criteria are **deterministic** and can be verified automatically with `tsh
 
 | ID | tshark filter (`-Y`) | Condition | What it validates |
 |---:|---|---:|---|
-| R1 | `tcp.dstport==8080 && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | Client → load balancer handshake. |
-| R2 | `tcp.port==8080 && frame contains "GET "` | `>= 1` | HTTP request to the load balancer. |
-| R3 | `(tcp.dstport==8081 || tcp.dstport==8082 || tcp.dstport==8083) && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | The load balancer initiates a connection to at least one backend. |
-| R4 | `(tcp.port==8081 || tcp.port==8082 || tcp.port==8083) && frame contains "/health"` | `>= 1` | At least one health check (/health) to a backend exists. |
-| R5 | `tcp.port==8080 && frame contains "HTTP/1.1 200"` | `>= 1` | Final 200 response to the client. |
+| R1 | `tcp.dstport==8080 && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | SYN attempt to the load balancer. |
+| R2 | `tcp.port==8080 && frame contains "GET "` | `>= 1` | HTTP request-marker bytes are present on the load-balancer transport. |
+| R3 | `(tcp.dstport==8081 \|\| tcp.dstport==8082 \|\| tcp.dstport==8083) && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | SYN attempt on a backend port; correlate the selected backend. |
+| R4 | `(tcp.port==8081 \|\| tcp.port==8082 \|\| tcp.port==8083) && frame contains "/health"` | `>= 1` | /health bytes are present on a backend transport; verify the health-check outcome separately. |
+| R5 | `tcp.port==8080 && frame contains "HTTP/1.1 200"` | `>= 1` | HTTP 200 marker bytes are present on the client-facing transport; verify the complete response. |
 
 ### Deliverables
 - Docker Compose with `lb` plus at least two backend services plus `tester`.

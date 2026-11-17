@@ -13,7 +13,14 @@ The script is a minimal HTTP reverse proxy. Complete the TODO sections so that i
 
 ---
 
-### 2. Start the Docker Compose setup
+### 2. Diagnose the deliberate service-name mismatch
+
+The supplied `BACKENDS` list uses `web1`, `web2` and `web3`; this Compose file defines
+`web1-lb`, `web2-lb` and `web3-lb`. This is an intentional debugging task. Compare both
+files, make the names agree and explain how Compose service DNS names work.
+Complete the forwarding TODOs before expecting successful responses.
+
+### 3. Start the Docker Compose setup
 
 Run:
 
@@ -23,12 +30,12 @@ docker compose -f S11_Part02_Config_Docker_Compose_Lb_Custom.yml up --build
 
 This will start:
 
-- `web1`, `web2`, `web3` (simple HTTP servers on port 8000 inside the network)
-- `custom-lb` (your Python load balancer, exposed on port 8080)
+- `web1-lb`, `web2-lb`, `web3-lb` (simple HTTP servers on port 8000 inside the network)
+- `lb-custom` (your Python load balancer, exposed on port 8080)
 
 ---
 
-### 3. Test load balancing with curl
+### 4. Test load balancing with curl
 
 On the host, run multiple requests:
 
@@ -52,12 +59,12 @@ For each response, note which backend answered (web1/web2/web3).
 
 ---
 
-### 4. Basic failure test (optional but recommended)
+### 5. Basic failure test (optional but recommended)
 
 Stop one backend container:
 
 ```bash
-docker stop web2
+docker compose -f S11_Part02_Config_Docker_Compose_Lb_Custom.yml stop web2-lb
 ```
 
 Then run the curl test again. Record:
@@ -69,7 +76,7 @@ Add the results to `lb_custom_output.txt`.
 
 ---
 
-### 5. Reflection questions (write in lb_custom_output.txt)
+### 6. Reflection questions (write in lb_custom_output.txt)
 
 Answer in a few sentences:
 

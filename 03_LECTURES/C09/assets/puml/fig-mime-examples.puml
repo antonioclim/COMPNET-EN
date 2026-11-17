@@ -30,7 +30,10 @@ package "image/*" as pkg_img #FFF3E0 {
 package "audio / video" as pkg_media #FCE4EC {
   card "audio/mpeg\n(.mp3)" as m1 #FFCDD2
   card "video/mp4\n(.mp4)" as m2 #FFCDD2
-  card "multipart/form-data\n(file uploads)" as m3 #FFCDD2
+}
+
+package "multipart/*" as pkg_multi #F3E5F5 {
+  card "multipart/form-data\n(file uploads)" as m3 #E1BEE7
 }
 
 legend bottom

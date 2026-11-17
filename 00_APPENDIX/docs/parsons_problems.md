@@ -74,7 +74,7 @@ conn, addr = server_sock.accept()
 
 **Shuffled Lines:**
 ```python
-A: sock.send(encoded_msg)
+A: sock.sendall(encoded_msg)
 B: message = "Hello, Server!"
 C: encoded_msg = message.encode('utf-8')
 D: sock.connect(('localhost', 8080))
@@ -101,7 +101,7 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 sock.connect(('localhost', 8080))
 message = "Hello, Server!"
 encoded_msg = message.encode('utf-8')
-sock.send(encoded_msg)
+sock.sendall(encoded_msg)
 ```
 
 **Distractors:**
@@ -121,7 +121,7 @@ sock.send(encoded_msg)
 
 ## Problem 3: Receiving and Decoding Data (LO0.4, LO0.5)
 
-**Objective:** Arrange the lines to safely receive and decode data from a socket.
+**Objective:** Arrange the lines inside `while True:` below; `conn` is already connected. Indent the entire ordered block by four spaces. This demonstrates replacement decoding per chunk, not application-message framing. The canonical block data are in [parsons_problems.json](../formative/parsons_problems.json).
 
 **Shuffled Lines:**
 ```python
@@ -147,11 +147,12 @@ recv() receives data, send() sends data.
 **Correct order:** B → D → E → C → A
 
 ```python
-data = conn.recv(1024)
-if not data:
-    break
-text = data.decode('utf-8', errors='replace')
-print(f"Received: {text}")
+while True:
+    data = conn.recv(1024)
+    if not data:
+        break
+    text = data.decode('utf-8', errors='replace')
+    print(f"Received: {text}")
 ```
 
 **Distractors:**
@@ -175,9 +176,9 @@ print(f"Received: {text}")
 
 **Shuffled Lines:**
 ```python
-A: response = data.upper()
-B: conn.sendall(response)
-C: data = conn.recv(1024)
+A:     response = data.upper()
+B:     conn.sendall(response)
+C:     data = conn.recv(1024)
 D: with conn:
 E: conn, addr = server_sock.accept()
 F: print(f"Connected by {addr}")

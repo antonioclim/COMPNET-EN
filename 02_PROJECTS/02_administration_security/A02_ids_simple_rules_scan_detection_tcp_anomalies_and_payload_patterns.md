@@ -112,7 +112,7 @@ An IDS transforms raw traffic into events: aggregation over time windows, simple
 - Include filters for SYN scan and payload pattern.
 
 ### Automatic PCAP criteria (E2)
-These criteria are **deterministic** and can be verified automatically with `tshark`.
+These capture checks are reproducible with `tshark`. Frame counts are smoke checks; they do not replace the application tests or prove complete project acceptance.
 - Official rules: `tools/pcap_rules/A02.json`
 - In the catalogue (template): `00_common/tools/pcap_rules/A02.json` and `00_common/tools/validate_pcap.py` (copy into the student repository).
 
@@ -120,9 +120,15 @@ These criteria are **deterministic** and can be verified automatically with `tsh
 
 | ID | tshark filter (`-Y`) | Condition | What it validates |
 |---:|---|---:|---|
-| R1 | `tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 10` | At least 10 SYN packets (scan) in the test window. |
-| R2 | `tcp.flags.reset==1` | `>= 1` | Observable RST (closed port), distinguishing it from filtered. |
-| R3 | `tcp.len>0 && frame contains "GET "` | `>= 1` | Payload with a pattern (e.g. HTTP GET) for a signature rule. |
+| R1 | `tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 10` | At least ten distinct destination ports have SYN attempts in this capture. Measurement: `distinct_values`. |
+| R2 | `tcp.flags.reset==1` | `>= 1` | Observable RST (closed port) to distinguish it from filtering. |
+| R3 | `tcp.len>0 && frame contains "GET "` | `>= 1` | Payload containing a pattern (e.g. HTTP GET) for a signature rule. |
+
+### Interpretation and complementary evidence
+
+The [E2 capture and semantic-evidence matrix](../00_common/E2_CAPTURE_EVIDENCE_MATRIX.md#a02) maps every capture rule to its generating action and the complementary application evidence.
+
+- Identify the scanning source and target and calculate the event count within the detector window fixed in E1. A whole-capture count does not establish a rate threshold.
 
 ### Deliverables
 - Docker Compose with `ids_sensor` and `tester` (runs the scenario and produces the capture).

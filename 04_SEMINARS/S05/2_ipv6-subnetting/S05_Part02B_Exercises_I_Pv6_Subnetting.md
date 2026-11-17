@@ -2,7 +2,7 @@
 ### IPv6 Subnetting Exercises
 
 Solve the exercises and write your answers in:
-`index_ipv6-subnetting_solutions-template.md`
+`S05_Part02C_Solutions_Template_I_Pv6_Subnetting.md`
 
 ---
 

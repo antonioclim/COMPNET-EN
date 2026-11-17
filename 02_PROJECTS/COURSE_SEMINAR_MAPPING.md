@@ -29,3 +29,8 @@ The table below is used to align projects with lecture content and seminar compe
 | **S13** | gRPC-based RPC service: .proto definition, unary and streaming methods | 4/5 (★★★★☆) | C03, C10, C09 | S12, S07, S04 |
 | **S14** | Didactic distance-vector routing in Mininet with convergence and anti-loop | 5/5 (★★★★★) | C05, C06, C07 | S06, S05, S07 |
 | **S15** | IoT gateway: UDP telemetry ingestion and an HTTP API for querying and streaming | 4/5 (★★★★☆) | C03, C10, C13 | S07, S08, S02 |
+| **S16** | Collaborative text editing with locking, notifications and versioned saves | 5/5 (★★★★★) | C03, C08, C09 | S03, S04, S09 |
+| **S17** | In-memory object store with registry, lookup, watchers and lease expiry | 4/5 (★★★★☆) | C03, C08, C09 | S03, S04, S02 |
+| **S18** | Resource reservation with holds, leases, wait queue and consistency | 5/5 (★★★★★) | C03, C08, C09 | S03, S04, S02 |
+| **S19** | Distributed auction with bids, timers, state transitions and an event log | 4/5 (★★★★☆) | C03, C08, C09 | S03, S04, S02 |
+| **S20** | Database-backed object service with selection, update, delete and notifications | 5/5 (★★★★★) | C03, C08, C09 | S04, S02, S07 |

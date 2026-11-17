@@ -183,7 +183,7 @@
 <h2>The Day the Addresses Ran Out</h2>
 <div class="story-box">
 <div class="story-title">3 February 2011 &mdash; IANA Exhaustion Day</div>
-<p>On this date, the Internet Assigned Numbers Authority (IANA) handed the last five <span class="code">/8</span> blocks of IPv4 space to the Regional Internet Registries. After three decades of exponential growth, the pool of 4.3 billion publicly routable addresses was <em>empty</em>.</p>
+<p>On this date, the Internet Assigned Numbers Authority (IANA) handed the last five <span class="code">/8</span> blocks of IPv4 space to the Regional Internet Registries. After three decades of exponential growth, the IANA free pool of ordinary /8 allocations was <em>exhausted</em>. The full 2<sup>32</sup> IPv4 space also includes private, reserved and other special-purpose ranges.</p>
 </div>
 <p>Yet the Internet kept growing. Billions of smartphones, IoT sensors and cloud instances came online. How?</p>
 <p>By the end of this lecture you will understand the addressing system that both <em>caused</em> and <em>survived</em> this crisis &mdash; and you will be able to design efficient address plans yourself.</p>
@@ -712,7 +712,7 @@ Decimal: 255.255.255.192
 <div>
 <h3>Reserved Ranges</h3>
 <ul>
-<li><span class="code">0.0.0.0/8</span> &mdash; &ldquo;this host&rdquo; / default route</li>
+<li><span class="code">0.0.0.0/8</span> &mdash; this network; <span class="code">0.0.0.0/0</span> is the default route</li>
 <li><span class="code">127.0.0.0/8</span> &mdash; loopback (commonly 127.0.0.1)</li>
 <li><span class="code">169.254.0.0/16</span> &mdash; link-local (APIPA)</li>
 <li><span class="code">255.255.255.255</span> &mdash; limited broadcast</li>
@@ -1378,6 +1378,7 @@ iface = ipaddress.ip_interface(
   }
 
   document.addEventListener('keydown', (e) => {
+      if (e.target && e.target.closest && e.target.closest('input, textarea, select, button, [contenteditable="true"]')) return;
    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
     e.preventDefault();
     changeSlide(1);

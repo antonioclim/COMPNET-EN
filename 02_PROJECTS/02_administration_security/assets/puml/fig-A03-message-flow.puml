@@ -17,7 +17,7 @@ participant "Report\nTool" as TOOL #E1BEE7
 
 == TRAFFIC GENERATION ==
 
-SH -> SW : tc qdisc: add 50 ms delay + 2% loss
+SH -> SW : select documented delay/loss profile\nexample: 50 ms delay + 2% random loss
 H1 -> SW : DNS query (h2.lab)
 SW -> H3 : forward
 H3 --> SW : DNS response
@@ -33,8 +33,9 @@ H2 --> H1 : HTTP 200 + payload
 
 H1 -[#FF9800]> SW : large TCP transfer
 SW -[#FF9800]> H2 : segments (some lost)
-H2 -[#E53935]-> SW : retransmission
-note right of CAP : R1: tcp >= 50\nR2: tcp.analysis.retransmission >= 1
+H1 -[#E53935]-> SW : retransmission (if loss occurs)
+SW -> H2 : retransmitted segment
+note right of CAP : R1: tcp >= 50\nR2: report retransmission count\nzero is valid for delay-only
 
 == CAPTURE AND ANALYSIS ==
 
@@ -46,6 +47,8 @@ TOOL -> SH : report.md + metrics.json
 note right of TOOL : verify with tshark\nStatistics → Conversations
 
 legend right
+  Random loss does not guarantee a retransmission.
+  Record the selected profile and observed evidence.
   The report includes: top talkers (bytes),
   flow count, TCP retransmissions per flow
   and estimated RTT (median). Each metric

@@ -51,7 +51,7 @@ Run a TCP server and test with netcat:
 
 ```bash
 python3 S02_Part01_Example_TCP_Server.py &
-nc localhost 9999
+nc localhost 12345
 ```
 
 Observe traffic with Wireshark or tshark on the loopback interface.
@@ -88,7 +88,7 @@ S03 through S04 build directly on the TCP and UDP server patterns introduced her
 ```bash
 git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
 cd COMPNET-EN
-git sparse-checkout set 04_SEMINARS/S02
+git sparse-checkout set 04_SEMINARS/S02 00_TOOLS
 ```
 
 **Method B — Direct download**
@@ -100,3 +100,12 @@ https://github.com/antonioclim/COMPNET-EN/tree/main/04_SEMINARS/S02
 ---
 
 *Course: COMPNET-EN — ASE Bucharest, CSIE*
+
+### TCP message contract
+
+The reference server accepts repeated LF-terminated UTF-8 lines on one connection.
+Each request, including LF, is limited to 1024 bytes. The response also ends in LF.
+Netcat adds LF when you press Enter. In Python, use `sendall(message.encode('utf-8') + b'\n')`
+and a single `socket.makefile('rb')` reader with `readline()`; a `recv()` call is not a message boundary.
+The reference example returns uppercase text. The template exercise adds the `OK: ` prefix.
+The local `exit` command closes the client and is not sent to the server.

@@ -37,6 +37,7 @@ legend bottom
   Channels 1, 6 and 11 (green) are the three
   non-overlapping choices in most regions.
   Red channels overlap with their neighbours
-  and cause co-channel interference.
+  and can cause adjacent-channel interference.
+  Co-channel interference is contention on the same channel.
 endlegend
 @enduml

@@ -2390,6 +2390,7 @@ sudo tcpdump -i eth0 -e -c 10</pre>
       document.getElementById('progressFill').style.width = ((currentSlide / totalSlides) * 100) + '%';
       document.getElementById('prevBtn').disabled = currentSlide === 1;
       document.getElementById('nextBtn').disabled = currentSlide === totalSlides;
+      requestAnimationFrame(drawLineCoding);
     }
 
     function changeSlide(delta) {
@@ -2498,6 +2499,7 @@ sudo tcpdump -i eth0 -e -c 10</pre>
       const canvas = document.getElementById(canvasId);
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
+      if (canvas.offsetWidth === 0) return;
       canvas.width = canvas.offsetWidth;
       canvas.height = 50;
       const w = canvas.width;
@@ -2533,6 +2535,7 @@ sudo tcpdump -i eth0 -e -c 10</pre>
         const y = levels[i] === 1 ? high : low;
         if (i === 0) ctx.moveTo(x, y);
         else ctx.lineTo(x, y);
+        ctx.lineTo(((i + 1) / levels.length) * w, y);
       }
       ctx.stroke();
     }
@@ -2641,6 +2644,7 @@ sudo tcpdump -i eth0 -e -c 10</pre>
 
     // Keyboard navigation
     document.addEventListener('keydown', (e) => {
+      if (e.target && e.target.closest && e.target.closest('input, textarea, select, button, [contenteditable="true"]')) return;
       if (document.getElementById('tocModal').classList.contains('show')) {
         if (e.key === 'Escape') closeTOC();
         return;

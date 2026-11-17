@@ -1,6 +1,6 @@
 # Parsons Problems: Bytes and Encoding
 # Version: 5.0 — January 2026
-# Usage: python formative/parsons_runner.py --file parsons/parsons_bytes.yaml
+# Usage: python formative/parsons_runner.py --file parsons_bytes.yaml
 
 metadata:
   topic: "Bytes, Strings and Binary Protocol Parsing"
@@ -138,7 +138,7 @@ problems:
       - {id: 6, code: "print(f'Decoded: {text}')", indent: 0}
     
     distractors:
-      - {id: D1, code: "text = str(data, 'utf-8')", indent: 1, hint: "This works but does not handle errors gracefully"}
+      - {id: D1, code: "text = str(data)", indent: 1, hint: "This returns the bytes representation, not decoded text; str(data, encoding) would be valid"}
       - {id: D2, code: "except EncodingError:", indent: 0, hint: "The exception is UnicodeDecodeError, not EncodingError"}
     
     correct_order: [1, 2, 3, 4, 5, 6]

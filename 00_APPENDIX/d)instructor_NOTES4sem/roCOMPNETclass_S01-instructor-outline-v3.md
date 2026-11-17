@@ -136,7 +136,7 @@ netstat -tulnp
 
 Explică flag-urile: `-t` TCP, `-u` UDP, `-l` listening, `-n` numeric (fără DNS invers), `-p` procesul proprietar.
 
-Arată output-ul: un port în LISTEN (ex. sshd pe :22), eventual ESTABLISHED (sesiunea SSH curentă).
+Arată un port în LISTEN (ex. sshd pe :22). Pentru ESTABLISHED (sesiunea SSH curentă), rulează separat `netstat -tnp` sau `ss -tnp`; `-l` selectează listeners.
 
 > *▸ Alternativă modernă: `ss -tulnp` — aceleași flag-uri, disponibil pe distribuțiile recente. Vom folosi `netstat` și `ss` alternativ pe tot semestrul.*
 
@@ -241,9 +241,9 @@ Client tastează `salut` → apare în SERVER. Server tastează `răspuns` → a
 
 ### Pregătire logistică — acum ai 3 terminale
 
-Pe lângă cele două sesiuni SSH de la Bloc C (SERVER și CLIENT), deschide un **al treilea terminal SSH** dedicat capturii. Alternativ, Wireshark pe Windows.
+Pe lângă cele două sesiuni SSH de la Bloc C (SERVER și CLIENT), deschide un **al treilea terminal SSH** dedicat capturii. Wireshark pe Windows poate analiza ulterior fişierul salvat în VM; traficul de pe `lo` al VM nu apare pe adaptorul Windows.
 
-> *▸ Dacă configurația NAT face capturile dificile în Wireshark pe host, fă toată demonstrația cu `tshark` din VM. Pedagogic e identic; doar interfața e text în loc de grafic.*
+> *▸ Pentru traficul localhost al VM, capturează cu `tshark -i lo` în VM, apoi transferă PCAP-ul pentru analiza în Wireshark pe Windows. Pedagogic e identic; doar interfața e text în loc de grafic.*
 
 ### Narativ de tranziție
 
@@ -258,7 +258,7 @@ Pe lângă cele două sesiuni SSH de la Bloc C (SERVER și CLIENT), deschide un 
 | 🟠 TERMINAL CAPTURĂ (SSH #3) |
 |:----|
 | `$ sudo tshark -i lo -f "tcp port 9200"` |
-| *(sau Wireshark pe host: Capture Filter → `tcp port 9200` → Start)* |
+| *(sau Wireshark în VM, interfaţa lo: Capture Filter → `tcp port 9200` → Start)* |
 
 > *▸ „Asta e un capture filter — filtrare la nivel libpcap/BPF, înainte de captură. Doar traficul care se potrivește se înregistrează."*
 
@@ -397,7 +397,7 @@ Postel, J. (Ed.). (1981). Transmission Control Protocol. RFC 793. Internet Engin
 
 Postel, J. (1980). User Datagram Protocol. RFC 768. Internet Engineering Task Force. https://doi.org/10.17487/RFC0768
 
-McCanne, S. & Jacobson, V. (1993). The BSD packet filter: A new architecture for user-level packet capture. In *Proceedings of the USENIX Winter 1993 Conference* (pp. 259–270). USENIX Association. https://doi.org/10.5555/1267303.1267305
+McCanne, S. & Jacobson, V. (1993). The BSD packet filter: A new architecture for user-level packet capture. In *Proceedings of the USENIX Winter 1993 Conference* (pp. 259–270). USENIX Association. https://www.usenix.org/conference/usenix-winter-1993-conference/bsd-packet-filter-new-architecture-user-level-packet
 
 Matthews, J. N. (2005). Hands-on approach to teaching computer networking using packet traces. In *Proceedings of the 6th Conference on Information Technology Education* (pp. 361–367). ACM. https://doi.org/10.1145/1095714.1095777
 

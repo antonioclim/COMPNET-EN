@@ -1,3 +1,5 @@
+import os
+
 from pyftpdlib.authorizers import DummyAuthorizer
 from pyftpdlib.handlers import FTPHandler
 from pyftpdlib.servers import FTPServer
@@ -10,7 +12,9 @@ def main():
     handler = FTPHandler
     handler.authorizer = authorizer
 
-    # Listen on port 2121 inside the container (mapped externally to 2121)
+    # PASV advertises the reachable client-side address of the DNAT firewall.
+    handler.masquerade_address = os.environ.get("FTP_MASQUERADE_ADDRESS")
+    # Active PORT/EPRT targets are still checked against the control peer.
     handler.passive_ports = range(30000, 30010)
 
     address = ("0.0.0.0", 2121)

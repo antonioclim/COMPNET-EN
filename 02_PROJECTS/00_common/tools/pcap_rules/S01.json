@@ -19,19 +19,19 @@
       "id": "R3",
       "filter": "tcp.port==5000 && frame contains \"LOGIN\"",
       "condition": ">= 1",
-      "description": "A LOGIN command is transmitted (correct framing)."
+      "description": "A TCP/5000 frame contains LOGIN bytes; framing and authentication are checked by the application tests."
     },
     {
       "id": "R4",
       "filter": "tcp.port==5000 && frame contains \"MSG \"",
       "condition": ">= 1",
-      "description": "At least one MSG message is transmitted."
+      "description": "A TCP/5000 frame contains MSG bytes; verify the complete message and recipients separately."
     },
     {
       "id": "R5",
       "filter": "tcp.port==5000 && frame contains \"EVENT \"",
       "condition": ">= 1",
-      "description": "The server sends at least one push event (presence)."
+      "description": "A TCP/5000 frame contains EVENT bytes; correlate its direction, event type and recipient."
     },
     {
       "id": "R6",
@@ -39,5 +39,10 @@
       "condition": ">= 1",
       "description": "Session closure (FIN or documented RST)."
     }
+  ],
+  "manual_checks": [
+    "R1 R2: Match SYN/SYN-ACK/ACK to the same flow.",
+    "R3 R4 R5: Reassemble the declared framing and assert identities, message text and intended recipients.",
+    "R6: Correlate the application close response, presence event and transport teardown."
   ]
 }

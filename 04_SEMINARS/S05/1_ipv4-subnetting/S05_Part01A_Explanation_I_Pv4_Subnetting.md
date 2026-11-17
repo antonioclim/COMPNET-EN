@@ -32,7 +32,8 @@ Certain IPv4 ranges are reserved for specific purposes. The most important ones:
 
 | Range | Purpose |
 |---------|---------|
-| 0.0.0.0/8 | "This host", default routes |
+| 0.0.0.0/8 | Special-purpose "this network" addresses; not the default-route prefix |
+| 0.0.0.0/0 | Default route: matches the entire IPv4 address space |
 | 127.0.0.0/8 | Loopback (localhost) |
 | 169.254.0.0/16 | Link-local APIPA, used when DHCP fails |
 | 192.168.0.0/16 | Private |

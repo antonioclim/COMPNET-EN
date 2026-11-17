@@ -61,18 +61,18 @@ graph TD
 
 ## Usage
 
-Line coding demo (requires Python 3.10+ and matplotlib):
+Line coding demo (requires Python 3.10+; standard library only):
 
 ```bash
 cd assets/scenario-line-coding
-python3 line_coding_demo.py
+python3 line_coding_demo.py 10110010
 ```
 
 MAC/ARP observation follows the instructions in its README and requires Wireshark or tcpdump.
 
 ## Pedagogical Context
 
-This is the most hardware-oriented lecture in the course. Covering L1 and L2 together makes the physical-to-logical transition explicit: students see how electrical signals become frames with addresses. The line coding demo reinforces this by showing NRZ, Manchester and 4B/5B encoding of the same bit sequence.
+This is the most hardware-oriented lecture in the course. Covering L1 and L2 together makes the physical-to-logical transition explicit: students see how electrical signals become frames with addresses. The line coding demo reinforces this by showing NRZ-L, NRZI and Manchester encoding of the same bit sequence.
 
 ## Cross-References
 
@@ -112,7 +112,7 @@ The MAC addressing and Ethernet frame format are prerequisites for ARP (C06), sw
 ```bash
 git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
 cd COMPNET-EN
-git sparse-checkout set 03_LECTURES/C04
+git sparse-checkout set 03_LECTURES/C04 00_TOOLS
 ```
 
 **Method B — Direct download**

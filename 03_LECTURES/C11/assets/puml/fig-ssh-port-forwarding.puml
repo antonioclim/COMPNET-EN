@@ -24,12 +24,13 @@ end note
 
 == REMOTE FORWARDING (-R) ==
 
-U -> B : connect bastion:9000
+U -> B : application running on bastion\nconnects to 127.0.0.1:9000
 B -[#1565C0]> C : SSH tunnel (encrypted)
 C -> I : connect localhost:3000
 note right of C
-  ssh -R 9000:localhost:3000 bastion
-  Expose a local service through the server
+  ssh -R 127.0.0.1:9000:localhost:3000 bastion
+  Expose the local service to loopback on the server
+  External access needs an explicit bind and GatewayPorts policy
 end note
 
 == DYNAMIC FORWARDING (-D) ==

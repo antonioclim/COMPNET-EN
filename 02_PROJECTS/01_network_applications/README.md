@@ -1,31 +1,31 @@
 # Group 1 — Network Applications (S01–S20)
 
-Eighteen projects targeting application-layer protocol design, service implementation and reproducible network experimentation. Each brief follows the RC2026 E1/E2/E3 assessment structure and mandates a Flex component in E3: at least one interoperable subsystem implemented in a language other than Python (C, C++, Java, Go, Rust, JavaScript/Node.js or similar).
+Twenty projects targeting application-layer protocol design, service implementation and reproducible network experimentation. Each brief follows the RC2026 E1/E2/E3 assessment structure and mandates a Flex component in E3: at least one interoperable subsystem implemented in a language other than Python (C, C++, Java, Go, Rust, JavaScript/Node.js or similar).
 
 ## Project Index
 
-| Code | Title | Lines | Difficulty | Primary protocols |
-|---|---|---|---|---|
-| [S01](S01_multi_client_tcp_chat_text_protocol_and_presence.md) | Multi-client TCP chat with a text protocol and presence | 217 | ★★★★☆ | TCP custom text |
-| [S02](S02_file_transfer_server_control_and_data_channels_ftp_passive.md) | File transfer server — control and data channels (FTP passive) | 214 | ★★★★☆ | TCP (FTP-style) |
-| [S03](S03_http11_socket_server_no_framework_static_files.md) | HTTP/1.1 socket server (no framework) for static files | 215 | ★★★★☆ | HTTP/1.1 raw |
-| [S04](S04_forward_http_proxy_with_filtering_and_traffic_logging.md) | Forward HTTP proxy with filtering and traffic logging | 213 | ★★★★☆ | HTTP proxy |
-| [S05](S05_application_level_http_load_balancer_health_checks_and_two_algorithms.md) | Application-level HTTP load balancer with health checks | 214 | ★★★★☆ | HTTP |
-| [S06](S06_tcp_pub_sub_broker_topics_and_deterministic_routing.md) | TCP pub/sub broker with topics and deterministic routing | 212 | ★★★★★ | TCP custom |
-| [S07](S07_udp_dns_resolver_local_zone_forwarding_and_ttl_cache.md) | DNS resolver over UDP — local zone, forwarding, TTL cache | 211 | ★★★★★ | UDP/DNS |
-| [S08](S08_minimal_email_system_smtp_delivery_and_pop3_retrieval.md) | Minimal email system — SMTP delivery and POP3 retrieval | 215 | ★★★★★ | SMTP, POP3 |
-| [S09](S09_tcp_tunnel_single_port_session_multiplexing_and_demultiplexing.md) | TCP tunnel — single-port session multiplexing | 214 | ★★★★★ | TCP tunnel |
-| [S10](S10_network_file_synchronisation_manifest_hashes_and_conflict_resolution.md) | Network file synchronisation — manifest, hashes, conflicts | 212 | ★★★★☆ | TCP/HTTP |
-| [S11](S11_rest_microservices_service_registry_api_gateway_dynamic_routing.md) | REST microservices — service registry and API gateway | 217 | ★★★★☆ | HTTP/REST |
-| [S12](S12_client_server_messaging_tls_channel_and_minimal_authentication.md) | Client–server messaging — TLS channel and authentication | 212 | ★★★★☆ | TLS/TCP |
-| [S13](S13_grpc_rpc_service_proto_definition_unary_and_streaming_methods.md) | gRPC RPC service — .proto, unary and streaming methods | 211 | ★★★★☆ | gRPC/HTTP2 |
-| [S14](S14_didactic_distance_vector_routing_in_mininet_convergence_and_anti_loop.md) | Didactic distance-vector routing in Mininet | 190 | ★★★★★ | UDP (routing) |
-| [S15](S15_iot_gateway_udp_telemetry_ingestion_http_api_query_and_streaming.md) | IoT gateway — UDP telemetry ingestion and HTTP API | 211 | ★★★★☆ | UDP, HTTP |
-| [S16](S16_collaborative_text_editing_locking_notifications_and_versioned_saves.md) | Collaborative text editing — locking, notifications and versioned saves | 203 | ★★★★★ | TCP custom control |
-| [S17](S17_in_memory_object_store_registry_lookup_watchers_and_lease_expiry.md) | In-memory object store — registry, lookup, watchers, lease expiry | 200 | ★★★★☆ | TCP custom registry |
-| [S18](S18_resource_reservation_holds_leases_wait_queue_and_consistency.md) | Resource reservation — holds, leases, wait queue and consistency | 202 | ★★★★★ | TCP stateful service |
-| [S19](S19_distributed_auction_bids_timers_state_transitions_and_event_log.md) | Distributed auction — bids, timers, state transitions and an event log | 202 | ★★★★☆ | TCP auction control |
-| [S20](S20_database_backed_object_service_selection_update_delete_and_notifications.md) | Database-backed object service — selection, update, delete and notifications | 201 | ★★★★★ | TCP + SQLite |
+| Code | Title | Difficulty | Primary protocols |
+|---|---|---|---|
+| [S01](S01_multi_client_tcp_chat_text_protocol_and_presence.md) | Multi-client TCP chat with a text protocol and presence | ★★★★☆ | TCP custom text |
+| [S02](S02_file_transfer_server_control_and_data_channels_ftp_passive.md) | File transfer server — control and data channels (FTP passive) | ★★★★☆ | TCP (FTP-style) |
+| [S03](S03_http11_socket_server_no_framework_static_files.md) | HTTP/1.1 socket server (no framework) for static files | ★★★★☆ | HTTP/1.1 raw |
+| [S04](S04_forward_http_proxy_with_filtering_and_traffic_logging.md) | Forward HTTP proxy with filtering and traffic logging | ★★★★☆ | HTTP proxy |
+| [S05](S05_application_level_http_load_balancer_health_checks_and_two_algorithms.md) | Application-level HTTP load balancer with health checks | ★★★★☆ | HTTP |
+| [S06](S06_tcp_pub_sub_broker_topics_and_deterministic_routing.md) | TCP pub/sub broker with topics and deterministic routing | ★★★★★ | TCP custom |
+| [S07](S07_udp_dns_resolver_local_zone_forwarding_and_ttl_cache.md) | DNS resolver over UDP — local zone, forwarding, TTL cache | ★★★★★ | UDP/DNS |
+| [S08](S08_minimal_email_system_smtp_delivery_and_pop3_retrieval.md) | Minimal email system — SMTP delivery and POP3 retrieval | ★★★★★ | SMTP, POP3 |
+| [S09](S09_tcp_tunnel_single_port_session_multiplexing_and_demultiplexing.md) | TCP tunnel — single-port session multiplexing | ★★★★★ | TCP tunnel |
+| [S10](S10_network_file_synchronisation_manifest_hashes_and_conflict_resolution.md) | Network file synchronisation — manifest, hashes, conflicts | ★★★★☆ | TCP/HTTP |
+| [S11](S11_rest_microservices_service_registry_api_gateway_dynamic_routing.md) | REST microservices — service registry and API gateway | ★★★★☆ | HTTP/REST |
+| [S12](S12_client_server_messaging_tls_channel_and_minimal_authentication.md) | Client–server messaging — TLS channel and authentication | ★★★★☆ | TLS/TCP |
+| [S13](S13_grpc_rpc_service_proto_definition_unary_and_streaming_methods.md) | gRPC RPC service — .proto, unary and streaming methods | ★★★★☆ | gRPC/HTTP2 |
+| [S14](S14_didactic_distance_vector_routing_in_mininet_convergence_and_anti_loop.md) | Didactic distance-vector routing in Mininet | ★★★★★ | UDP (routing) |
+| [S15](S15_iot_gateway_udp_telemetry_ingestion_http_api_query_and_streaming.md) | IoT gateway — UDP telemetry ingestion and HTTP API | ★★★★☆ | UDP, HTTP |
+| [S16](S16_collaborative_text_editing_locking_notifications_and_versioned_saves.md) | Collaborative text editing — locking, notifications and versioned saves | ★★★★★ | TCP custom control |
+| [S17](S17_in_memory_object_store_registry_lookup_watchers_and_lease_expiry.md) | In-memory object store — registry, lookup, watchers, lease expiry | ★★★★☆ | TCP custom registry |
+| [S18](S18_resource_reservation_holds_leases_wait_queue_and_consistency.md) | Resource reservation — holds, leases, wait queue and consistency | ★★★★★ | TCP stateful service |
+| [S19](S19_distributed_auction_bids_timers_state_transitions_and_event_log.md) | Distributed auction — bids, timers, state transitions and an event log | ★★★★☆ | TCP auction control |
+| [S20](S20_database_backed_object_service_selection_update_delete_and_notifications.md) | Database-backed object service — selection, update, delete and notifications | ★★★★★ | TCP + SQLite |
 
 ## E1/E2/E3 Summary
 
@@ -123,7 +123,7 @@ Data sourced from [`../COURSE_SEMINAR_MAPPING.md`](../COURSE_SEMINAR_MAPPING.md)
 
 | Directory | Contents | Count |
 |---|---|---|
-| [`assets/PORTAINER/`](assets/PORTAINER/) | Per-project Portainer debugging guides (S01–S20) | 18 Markdown guides |
+| [`assets/PORTAINER/`](assets/PORTAINER/) | Per-project Portainer debugging guides (S01–S20) | 20 Markdown guides |
 | [`assets/puml/`](assets/puml/) | PlantUML sources: architecture, E2 message flow and state diagrams for each project | 60 `.puml` files (3 × 20 projects) |
 | [`assets/images/`](assets/images/) | Rendered diagram output (populated by `assets/render.sh`) | `.gitkeep` placeholder |
 

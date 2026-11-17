@@ -48,18 +48,18 @@ graph LR
 
 ## Usage
 
-CIDR calculator example:
+Run this sequence from the `C05` directory. CIDR calculator example:
 
 ```bash
 cd assets/scenario-cidr-basic
-python3 cidr-calc.py
+python3 cidr-calc.py 192.168.23.233/24
 ```
 
 VLSM allocation:
 
 ```bash
-cd assets/scenario-vlsm
-python3 vlsm-alloc.py
+cd ../scenario-vlsm
+python3 vlsm-alloc.py 192.168.10.0/24 100 50 20
 ```
 
 ## Pedagogical Context
@@ -102,7 +102,7 @@ IP addressing is assumed by every lecture from C06 onward. NAT (C06) requires un
 ```bash
 git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
 cd COMPNET-EN
-git sparse-checkout set 03_LECTURES/C05
+git sparse-checkout set 03_LECTURES/C05 00_TOOLS
 ```
 
 **Method B — Direct download**

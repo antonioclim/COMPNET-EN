@@ -122,7 +122,7 @@ In a building, imagine a floor that operates under completely different rules â€
 - Real blueprints aren't "downloaded" from the internet
 - Real flats don't start up in milliseconds
 - You can't create 100 identical flats instantly
-- Layers have no equivaslow in real construction
+- Layers have no equivalent in real construction
 
 ---
 
@@ -190,8 +190,8 @@ In a building, imagine a floor that operates under completely different rules â€
 
 - Telephones don't have "buffer size"
 - You can't send raw bytes through a telephone
-- TCP guarantees delivery, telephones don't
-- A telephone can't have 65535 different numbers (ports)
+- TCP orders and retransmits bytes while the connection is viable; neither TCP nor a telephone call proves that the remote person or application processed a message
+- TCP and UDP use a 16-bit port field (0â€“65535); a port number identifies a transport endpoint, not a person
 
 ---
 

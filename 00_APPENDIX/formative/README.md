@@ -9,8 +9,8 @@ Week 0 formative assessment for the course toolchain: an interactive quiz runner
 | [`README.md`](README.md) | Orientation for the Week 0 formative quiz | — |
 | [`quiz.yaml`](quiz.yaml) | Quiz source in YAML (Week 0) | 269 lines, 10 questions |
 | [`run_quiz.py`](run_quiz.py) | Interactive quiz runner and exporter | 657 lines |
-| [`quiz.json`](quiz.json) | Exported quiz artefact (do not edit by hand) | 418 lines |
-| [`parsons_problems.json`](parsons_problems.json) | Exported Parsons artefact (do not edit by hand) | 186 lines |
+| [`quiz.json`](quiz.json) | Reviewed question mirror of quiz.yaml; preserves editorial metadata | 418 lines |
+| [`parsons_problems.json`](parsons_problems.json) | Structured Parsons bank with explicit compilation context | 186 lines |
 | [`tests/`](tests/) | Pytest suite validating quiz exports | 6 files (recursive) |
 
 ## Visual Overview
@@ -20,7 +20,7 @@ flowchart TD
     YAML["quiz.yaml"] --> RUN["run_quiz.py"]
     RUN --> JSON["quiz.json"]
     RUN --> GIFT["Moodle GIFT export"]
-    RUN --> PAR["parsons_problems.json"]
+    PAR["parsons_problems.json: independent structured bank"]
     TEST["tests/test_quiz_exports.py"] --> RUN
 
     style RUN fill:#fff3e0,stroke:#f57c00
@@ -37,7 +37,7 @@ python3 run_quiz.py
 
 # export quiz
 python3 run_quiz.py --export json
-python3 run_quiz.py --export gift
+python3 run_quiz.py --export moodle
 
 # run export tests
 python3 -m pytest -q
@@ -96,7 +96,7 @@ git sparse-checkout set 00_APPENDIX/formative
 To run the quiz you also need the dependency list:
 
 ```bash
-git sparse-checkout add 00_APPENDIX/requirements.txt
+# requirements.txt in the ancestor 00_APPENDIX directory is included by cone mode.
 ```
 
 Method B — Direct download (no Git required)
@@ -111,3 +111,13 @@ https://github.com/antonioclim/COMPNET-EN/tree/main/00_APPENDIX/formative
 |---|---|
 | Quiz runner header | `run_quiz.py` contains the course kit version marker |
 | YAML source of truth | `quiz.yaml` |
+
+## Export acceptance
+
+`--export moodle` writes GIFT with the blank in its original position. `--export qti` writes a QTI 1.2 ZIP containing `assessment.xml` and `imsmanifest.xml`, including choices, responses and scoring. `--output file.xml` is an unpackaged inspection export. JSON is the repository interchange format and is not a Canvas import package. Import a copy into the target LMS and check all item types, answer keys and scores before using it with students.
+
+Sources: [Moodle GIFT](https://docs.moodle.org/en/GIFT_format) and [QTI 1.2 XML binding](https://www.imsglobal.org/question/qtiv1p2/imsqti_asi_bindv1p2.html).
+
+The YAML bank is canonical for quiz questions. The tracked JSON mirror preserves its additional editorial metadata; CI checks each mirrored question against the exporter. A newly generated `*_export.json` contains the export schema rather than every editorial field of the tracked mirror.
+
+Quiz scoring uses all planned question points. Skips earn zero; an interrupted session reports unanswered items and has no pass/readiness verdict. Review mode displays answers without awarding a score.

@@ -23,43 +23,48 @@ def handle_client(client_socket, client_address):
     ip, port = client_address
     print(f"[THREAD START] Client {ip}:{port} connected")
 
-    with client_socket:
-        while True:
-            data = client_socket.recv(1024)
-            if not data:
-                print(f"[DISCONNECT] Client {ip}:{port} closed the connection")
-                break
+    try:
+        with client_socket:
+            while True:
+                data = client_socket.recv(1024)
+                if not data:
+                    print(f"[DISCONNECT] Client {ip}:{port} closed the connection")
+                    break
 
-            # >>> STUDENT CODE STARTS HERE
-            """
-            TODO (student):
+                # >>> STUDENT CODE STARTS HERE
+                """
+                TODO (student):
 
-            1. Display a clear log with the received message, in the form:
-               [RECV] From <ip>:<port> -> <data>
+                1. Display a clear log with the received message, in the form:
+                   [RECV] From <ip>:<port> -> <data>
 
-            2. Implement a "mini-chat":
-               - construct a text message of the form:
-                 f"[{ip}:{port}] {data.decode('utf-8', errors='ignore')}"
-               - encode it to bytes (UTF-8).
+                2. Implement a "mini-chat":
+                   - construct a text message of the form:
+                     f"[{ip}:{port}] {data.decode('utf-8', errors='ignore')}"
+                   - encode it to bytes (UTF-8).
 
-               - send this message to ALL other connected clients
-                 (all entries in the 'clients' list except client_socket).
+                   - send this message to ALL other connected clients
+                     (all entries in the 'clients' list except client_socket).
 
-            3. For each client you send to, display:
-               [FWD] To <other_ip>:<other_port> -> <message>
+                3. For each client you send to, display:
+                   [FWD] To <other_ip>:<other_port> -> <message>
 
-               Hint:
-               - to obtain the address of another client you can use:
-                   other_ip, other_port = other.getpeername()
-               - use clients_lock to protect access to the 'clients' list.
-            """
-            # <<< STUDENT CODE ENDS HERE
-
-    # Upon exiting the loop the client has disconnected: remove it from the list.
-    with clients_lock:
-        if client_socket in clients:
-            clients.remove(client_socket)
-            print(f"[INFO] Removed client {ip}:{port}. Clients left: {len(clients)}")
+                   Hint:
+                   - to obtain the address of another client you can use:
+                       other_ip, other_port = other.getpeername()
+                   - copy the recipients while holding clients_lock, then release it.
+                   - send outside the lock; catch OSError per recipient and remove
+                     failed recipients under the lock without aborting other sends.
+                """
+                # <<< STUDENT CODE ENDS HERE
+    except OSError as exc:
+        print(f"[DISCONNECT] {ip}:{port}: {exc}")
+    finally:
+        # Upon exiting the loop the client has disconnected: remove it from the list.
+        with clients_lock:
+            if client_socket in clients:
+                clients.remove(client_socket)
+                print(f"[INFO] Removed client {ip}:{port}. Clients left: {len(clients)}")
 
     print(f"[THREAD END] Client {ip}:{port} handler finished\n")
 

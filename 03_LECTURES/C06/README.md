@@ -111,7 +111,7 @@ NAT knowledge is required for the FTP NAT/firewall scenario in C11. ARP understa
 ```bash
 git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
 cd COMPNET-EN
-git sparse-checkout set 03_LECTURES/C06
+git sparse-checkout set 03_LECTURES/C06 00_TOOLS
 ```
 
 **Method B — Direct download**

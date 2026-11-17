@@ -10,28 +10,28 @@ title TCP server flow (listen / accept / recv / send)
 
 start
 
-#E3F2FD:socket(AF_INET, SOCK_STREAM);
-#E3F2FD:bind((host, port));
-#E3F2FD:listen(backlog);
+:socket(AF_INET, SOCK_STREAM); <<#E3F2FD>>
+:bind((host, port)); <<#E3F2FD>>
+:listen(backlog); <<#E3F2FD>>
 
 repeat
-  #C8E6C9:conn, addr = accept();
+  :conn, addr = accept(); <<#C8E6C9>>
   note right: blocks until a\nclient connects
 
   repeat
-    #BBDEFB:data = recv(buffer_size);
+    :data = recv(buffer_size); <<#BBDEFB>>
     if (data == b"") then (yes — client closed)
-      #FFCDD2:close(conn);
+      :close(conn); <<#FFCDD2>>
       break
     else (no)
-      #FFF9C4:process(data);
-      #C8E6C9:send(response);
+      :process(data); <<#FFF9C4>>
+      :send(response); <<#C8E6C9>>
     endif
   repeat while (connection alive?)
 
 repeat while (server running?)
 
-#FFCDD2:close(server_socket);
+:close(server_socket); <<#FFCDD2>>
 
 stop
 

@@ -1,10 +1,16 @@
 import socket
 import time
+import argparse
 
 HOST = "0.0.0.0"
 PORT = 9091
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--count", type=int, default=200, help="Agreed sender sequence length, starting at zero")
+    expected = parser.parse_args().count
+    if expected <= 0:
+        parser.error("--count must be positive")
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.bind((HOST, PORT))
     s.settimeout(1.0)
@@ -24,20 +30,16 @@ def main():
         if msg.startswith("MSG "):
             try:
                 n = int(msg.split(" ", 1)[1])
-                received.add(n)
+                if 0 <= n < expected:
+                    received.add(n)
             except Exception:
                 pass
 
-    if received:
-        mn = min(received)
-        mx = max(received)
-        missing = [i for i in range(mn, mx + 1) if i not in received]
-        print(f"[udp_receiver] received {len(received)} messages, range {mn}..{mx}")
-        print(f"[udp_receiver] missing count: {len(missing)}")
-        if missing[:20]:
-            print(f"[udp_receiver] first missing: {missing[:20]}")
-    else:
-        print("[udp_receiver] received nothing")
+    s.close()
+    missing = [i for i in range(expected) if i not in received]
+    print(f"[udp_receiver] received {len(received)}/{expected} unique messages (sequence 0..{expected - 1})")
+    print(f"[udp_receiver] missing count: {len(missing)}")
+    print(f"[udp_receiver] first missing: {missing[:20]}")
 
 if __name__ == "__main__":
     main()

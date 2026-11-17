@@ -3,7 +3,7 @@
 Complete the following mini-scenario:
 
 1. Run `ping` to two different destinations: one global (e.g., `google.com`) and one local within your network (e.g., your gateway: `192.168.1.1`).
-2. Run `netstat -tulnp` and identify:
+2. Run `netstat -tulnp` for listeners and `netstat -tnp` for active TCP connections; identify:
    * a port in the LISTEN state,
    * a port in the ESTABLISHED state,
    * an active UDP service.

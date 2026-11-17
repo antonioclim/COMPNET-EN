@@ -18,7 +18,7 @@
 ## Description
 This project requires a messaging application over TCP where transport is secured via TLS using the standard `ssl` library. The goal is a clear separation between the problem of securing the channel and the problem of the application protocol: the protocol remains simple but complete, with framing and errors.
 
-A key component is server identity verification: the client does not connect blindly but validates the certificate through a local CA or via pinning. In addition, the project includes a minimal security policy (timeouts, input limits, logs without sensitive data).
+A key component is server identity verification: the client does not connect blindly but validates the certificate through the laboratory CA (additional pinning is optional). In addition, the project includes a minimal security policy (timeouts, input limits, logs without sensitive data).
 
 In PCAP, the TLS handshake is observable but the application payload becomes opaque. In the analysis you explain what can still be deduced from metadata (SNI, negotiated suites, sizes) and what is no longer visible after the channel is established.
 
@@ -46,6 +46,14 @@ TLS shifts attention away from “hand-made cryptography” towards key and cert
 ### Contract (interface) — fixed for assessment
 - **Protocol/default ports (E2):** TCP/TLS: TLS 5443/TCP (E2/E3); optional plain 5002/TCP for Phase 0 comparison.
 - The Flex component must work with the default values (without manual reconfiguration) so that it can be integrated into automated tests.
+
+### Interpretation and complementary evidence
+
+The [E2 capture and semantic-evidence matrix](../00_common/E2_CAPTURE_EVIDENCE_MATRIX.md#s12) maps every capture rule to its generating action and the complementary application evidence.
+
+- Provide a passing test in which the client validates the server certificate and a test rejecting an untrusted certificate.
+- Provide a passing application request/response assertion with correlated client/server logs. A handshake-only capture is insufficient for project acceptance.
+- Optional: decrypt this local test with --tls-keylog PATH. Do not commit session secrets or downgrade TLS to make Certificate visible.
 
 ### Deliverables
 - `flex/` directory with sources plus build/run instructions (avoid exotic dependencies where possible).
@@ -87,7 +95,7 @@ TLS shifts attention away from “hand-made cryptography” towards key and cert
 ## Functional requirements
 ### MUST (mandatory)
 - The server accepts TLS connections using certificate and key provided via configured files, not embedded as strings in code.
-- The client validates the identity of the server (local CA or pinning) and refuses to connect when the certificate is invalid.
+- The client validates the identity of the server (laboratory CA, hostname and validity checks) and refuses to connect when the certificate is invalid.
 - Application protocol over TLS with framing and minimal commands (for example authenticate user and send a message) plus OK/ERR responses.
 - Logs include connection events and TLS errors without logging plaintext payload or keys.
 - Automated tests validate TLS connection and a request–response exchange, producing a PCAP capture.
@@ -126,7 +134,7 @@ TLS shifts attention away from “hand-made cryptography” towards key and cert
 ### Minimum demonstrable outcome
 - The TLS server starts in Docker with certificate available in the container.
 - The tester connects with certificate validation and executes one application request with an OK response.
-- PCAP includes a complete TLS handshake and at least one application-data record.
+- PCAP records the TLS exchange. Correlated client/server logs and a passing application assertion prove the request and response; an encrypted TLS 1.3 handshake record alone is insufficient.
 
 ### PCAP requirements
 - The capture `artifacts/pcap/traffic_e2.pcap` highlights `ClientHello` and `ServerHello` and certificate exchange.
@@ -134,7 +142,7 @@ TLS shifts attention away from “hand-made cryptography” towards key and cert
 - Mention negotiated parameters (version, cipher suite) observed in the capture.
 
 ### Automatic PCAP criteria (E2)
-These criteria are **deterministic** and can be verified automatically with `tshark`.
+These capture checks are reproducible with `tshark`. Frame counts are smoke checks; they do not replace the application tests or prove complete project acceptance.
 - Official rules: `tools/pcap_rules/S12.json`
 - In the catalogue (template): `00_common/tools/pcap_rules/S12.json` and `00_common/tools/validate_pcap.py` (copy into the student repository).
 
@@ -143,11 +151,11 @@ These criteria are **deterministic** and can be verified automatically with `tsh
 
 | ID | tshark filter (`-Y`) | Condition | What it validates |
 |---:|---|---:|---|
-| R1 | `tcp.dstport==5443 && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | TCP handshake to the TLS service. |
+| R1 | `tcp.dstport==5443 && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | SYN attempt to the TLS service; correlate the complete transport handshake separately. |
 | R2 | `tls.handshake.type==1` | `>= 1` | ClientHello in the TLS handshake. |
 | R3 | `tls.handshake.type==2` | `>= 1` | ServerHello in the TLS handshake. |
-| R4 | `tls.handshake.type==11 || tls.handshake.certificate` | `>= 1` | Server certificate transmitted. |
-| R5 | `tcp.port==5443 && tcp.len>0` | `>= 3` | Application traffic over TLS (data-bearing segments). |
+| R4 | `tcp.port==5443 && (tls.handshake.type==11 \|\| tls.record.content_type==23)` | `>= 1` | Visible Certificate (TLS 1.2) or encrypted TLS record (TLS 1.3). Certificate validation is established by the client tests, not this smoke check. |
+| R5 | `tcp.port==5443 && tls.record.content_type==23` | `>= 1` | Encrypted TLS record is present. TLS 1.3 also encrypts handshake messages, so application delivery requires the separate request/response test. |
 
 ### Deliverables
 - Docker Compose with `tls_server` and `tester`.

@@ -333,7 +333,7 @@ New-Item -ItemType Directory -Force captures | Out-Null
 docker run --rm --net=container:lb-custom `
   -v "${PWD}\captures:/captures" `
   nicolaka/netshoot `
-  tcpdump -i eth0 -w /captures/lb_upstream.pcap port 8000
+  tcpdump -i eth0 -w /captures/lb_upstream.pcap "tcp port 8000 or tcp port 8080"
 ```
 
 🟢 **Terminal 2 (în paralel):**
@@ -362,7 +362,7 @@ Wireshark → *File → Open* → `captures\lb_upstream.pcap`.
 
 > *▸ „Trei lucruri de reținut:"*
 > 1. *„Reverse proxy = ascunde backend-urile; clientul vede o singură adresă."*
-> 2. *„Nginx e declarativ și are health checks; scriptul Python e procedural și orb."*
+> 2. *„Nginx e declarativ; în configuraţia livrată verificările sunt pasive; scriptul Python e procedural și orb."*
 > 3. *„LB-ul nu pasează conexiunea — o rupe în două. Ați văzut asta în pcap."*
 
 ### Reluare hook

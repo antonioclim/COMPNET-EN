@@ -13,6 +13,7 @@ This is deliberately dependency-free (stdlib only).
 from __future__ import annotations
 
 import json
+import uuid
 import time
 import urllib.error
 import urllib.request
@@ -66,12 +67,16 @@ def main() -> int:
         except json.JSONDecodeError:
             failures.append("/api/users did not return JSON")
 
-    # 3) Cache behaviour (MISS -> HIT)
-    s1, h1, _ = http_get("/api/users")
-    s2, h2, _ = http_get("/api/users")
+    # Fresh key per run: the API reachability check must not warm this key.
+    time.sleep(3)  # allow the preceding rate-limit burst to drain
+    cache_path = "/api/users?cache_probe=" + uuid.uuid4().hex
+    s1, h1, _ = http_get(cache_path)
+    s2, h2, _ = http_get(cache_path)
     c1 = h1.get("X-Cache-Status")
     c2 = h2.get("X-Cache-Status")
-    if s1 == 200 and s2 == 200:
+    if s1 != 200 or s2 != 200:
+        failures.append(f"Cache probes require 200 responses, got {s1}, {s2}")
+    else:
         if not (c1 and c2):
             failures.append("Missing X-Cache-Status header (expected caching to be enabled)")
         elif not (c1.upper() in {"MISS", "BYPASS", "EXPIRED"} and c2.upper() in {"HIT", "REVALIDATED", "UPDATING"}):

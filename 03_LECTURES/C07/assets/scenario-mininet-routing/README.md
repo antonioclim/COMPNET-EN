@@ -1,4 +1,4 @@
-### Scenario: Mininet (router triangle) — failures and asymmetric routing
+### Scenario: Mininet (router triangle) — failures and a missing return route
 
 **ASE lab environment:** use the [MININET-SDN appliance and setup guide](../../../../01_GUIDE_MININET-SDN/README.md#download-the-lab-virtual-machine). The workstation provisioning script for ASE PCs is not a student prerequisite.
 
@@ -28,7 +28,7 @@ What happens:
 - the r1-r2 link is then brought down
 - ping h1 -> h2 should still succeed via r3
 
-#### Scenario 2: asymmetric routing (route in one direction only)
+#### Scenario 2: a missing return route (route in one direction only)
 Running:
 - sudo python3 tringle-net.py asymmetric
 
@@ -77,3 +77,5 @@ git sparse-checkout set 03_LECTURES/C07/assets/scenario-mininet-routing
 **Method B — Direct download**
 
 Browse at: `https://github.com/antonioclim/COMPNET-EN/tree/main/03_LECTURES/C07/assets/scenario-mininet-routing`
+
+The `link-down` mode installs the static r3 bypass before taking r1–r2 down. It demonstrates a prepared alternative path, not routing-protocol convergence. The legacy `asymmetric` mode intentionally omits the return route; successful asymmetric routing would have a valid return path via different routers.

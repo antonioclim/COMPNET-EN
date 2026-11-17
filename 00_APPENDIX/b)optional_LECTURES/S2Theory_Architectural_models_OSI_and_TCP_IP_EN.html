@@ -758,7 +758,7 @@
     <button class="reveal-btn" onclick="toggleReveal('reveal-router')">What happens at an intermediate router?</button>
     <div class="reveal-content" id="reveal-router">
       <div class="insight-box">
-        <p>A router operates at <strong>Layer 3</strong>. It decapsulates only up to the IP header (to read the destination address and make a routing decision), then <strong>re-encapsulates</strong> with a new Layer 2 frame for the next hop. The IP header and everything above it pass through unchanged. This is why MAC addresses change at each hop but IP addresses remain constant.</p>
+        <p>A router operates at <strong>Layer 3</strong>. It decapsulates only up to the IP header (to read the destination address and make a routing decision), then <strong>re-encapsulates</strong> with a new Layer 2 frame for the next hop. The router decrements IPv4 TTL and updates its header checksum (or IPv6 Hop Limit). Source/destination IP addresses remain unchanged when no NAT is applied; Ethernet source/destination addresses identify the current link endpoints.</p>
       </div>
     </div>
   </div>
@@ -1263,9 +1263,9 @@ sock.listen(<span class="number">32</span>)
         <input id="dataSize" type="range" min="1" max="1460" value="100" oninput="calculateOverhead()"/>
         <p style="text-align:center;font-family:'JetBrains Mono',monospace;"><span id="dataSizeValue">100</span> bytes of application data</p>
         <div class="result-display">
-          <p>Ethernet frame: <span id="frameSize">154</span> bytes</p>
-          <p>Overhead: <span id="overheadPercent">35.1</span>%</p>
-          <p>Efficiency: <span id="efficiencyPercent">64.9</span>%</p>
+          <p>Ethernet frame: <span id="frameSize">158</span> bytes</p>
+          <p>Overhead: <span id="overheadPercent">36.7</span>%</p>
+          <p>Efficiency: <span id="efficiencyPercent">63.3</span>%</p>
         </div>
       </div>
       <div class="card">
@@ -1446,8 +1446,8 @@ sock.listen(<span class="number">32</span>)
   <h1 class="slide-title">Questions?</h1>
   <p class="slide-subtitle">We continue with hands-on exercises in the seminar</p>
   <div style="margin-top:3rem;">
-    <p style="color:rgba(255,255,255,0.8);font-size:1.1rem;">Starter kit: <code style="background:rgba(255,255,255,0.15);color:white;">~/WEEK2/</code></p>
-    <p style="color:rgba(255,255,255,0.6);font-size:0.95rem;margin-top:1rem;">Run <code style="background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.8);">make help</code> to see available commands</p>
+    <p style="color:rgba(255,255,255,0.8);font-size:1.1rem;">Starter kit: <code style="background:rgba(255,255,255,0.15);color:white;">~/COMPNET-EN/04_SEMINARS/S02/</code></p>
+    <p style="color:rgba(255,255,255,0.6);font-size:0.95rem;margin-top:1rem;">Follow the <a href="../../04_SEMINARS/S02/README.md">S02 README</a> for complete commands</p>
   </div>
   <div style="margin-top:4rem;padding-top:2rem;border-top:1px solid rgba(255,255,255,0.2);">
     <p style="color:rgba(255,255,255,0.5);font-size:0.85rem;">Bucharest University of Economic Studies — CSIE Faculty</p>
@@ -1557,6 +1557,7 @@ sock.listen(<span class="number">32</span>)
   function goToSlide(n) { showSlide(n); closeTOC(); }
 
   document.addEventListener('keydown', (e) => {
+      if (e.target && e.target.closest && e.target.closest('input, textarea, select, button, [contenteditable="true"]')) return;
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
     switch (e.key) {
       case 'ArrowRight': case ' ': e.preventDefault(); changeSlide(1); break;
@@ -1623,8 +1624,8 @@ sock.listen(<span class="number">32</span>)
   function calculateOverhead() {
     const dataSize = parseInt(document.getElementById('dataSize').value);
     document.getElementById('dataSizeValue').textContent = dataSize;
-    const overhead = 58; // Ethernet(18) + IP(20) + TCP(20)
-    const frameSize = dataSize + overhead;
+    const frameSize = Math.max(64, dataSize + 58); // MAC header + IPv4 + TCP + FCS, including minimum padding
+    const overhead = frameSize - dataSize;
     document.getElementById('frameSize').textContent = frameSize;
     document.getElementById('overheadPercent').textContent = ((overhead / frameSize) * 100).toFixed(1);
     document.getElementById('efficiencyPercent').textContent = ((dataSize / frameSize) * 100).toFixed(1);

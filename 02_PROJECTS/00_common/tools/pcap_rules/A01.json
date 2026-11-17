@@ -13,13 +13,18 @@
       "id": "R2",
       "filter": "tcp.port==6653 && tcp.len>0",
       "condition": ">= 5",
-      "description": "At least 5 OpenFlow segments with payload (negotiation plus rule installation)."
+      "description": "At least five payload-bearing OpenFlow transport segments; decode their message types and inspect installed rules separately."
     },
     {
       "id": "R3",
-      "filter": "ip && (tcp || udp || icmp)",
+      "filter": "ip && (tcp || udp || icmp) && !(tcp.port==6653 || tcp.port==6633)",
       "condition": ">= 5",
-      "description": "Sufficient data-plane traffic to demonstrate filtering."
+      "description": "Non-controller IP frames are present; this count does not prove firewall policy."
     }
+  ],
+  "manual_checks": [
+    "Identify both data hosts and ingress/egress interfaces. Correlate allowed exchanges and blocked attempts with the installed rules and capture windows.",
+    "R1 R2: Correlate decoded OpenFlow messages and flow-table entries; payload segments alone do not identify a FlowMod.",
+    "R3: Record both capture points, allowed replies, blocked-flow counter and absence of the denied delivery in the declared window."
   ]
 }

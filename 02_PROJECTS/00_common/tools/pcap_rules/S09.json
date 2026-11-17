@@ -7,31 +7,35 @@
       "id": "R1",
       "filter": "tcp.dstport==9000 && tcp.flags.syn==1 && tcp.flags.ack==0",
       "condition": ">= 1",
-      "description": "Handshake to the tunnel."
+      "description": "SYN connection attempt to the tunnel."
     },
     {
       "id": "R2",
       "filter": "tcp.port==9000 && frame contains \"TNL1O\"",
       "condition": ">= 1",
-      "description": "OPEN frame (magic TNL1 plus type O)."
+      "description": "TNL1O marker bytes are present in a captured frame; decode the full OPEN message separately."
     },
     {
       "id": "R3",
       "filter": "tcp.port==9000 && frame contains \"TNL1D\"",
       "condition": ">= 1",
-      "description": "DATA frame (magic TNL1 plus type D)."
+      "description": "TNL1D marker bytes are present in a captured frame; decode session and length separately."
     },
     {
       "id": "R4",
       "filter": "tcp.port==9000 && frame contains \"TNL1C\"",
       "condition": ">= 1",
-      "description": "CLOSE frame (magic TNL1 plus type C)."
+      "description": "TNL1C marker bytes are present in a captured frame; correlate the closed session."
     },
     {
       "id": "R5",
       "filter": "tcp.port==9000 && tcp.len>0",
       "condition": ">= 5",
-      "description": "Sufficient payload traffic for multiplexing (at least 5 data-bearing segments)."
+      "description": "At least five payload-bearing TCP segments are present; segment count does not establish multiplexing."
     }
+  ],
+  "manual_checks": [
+    "R1 R2: Decode the TNL1 header, type, session ID, service ID and length from the reassembled stream.",
+    "R3 R4 R5: Correlate session IDs, payload boundaries and each target response. Segment counts do not prove multiplexing."
   ]
 }

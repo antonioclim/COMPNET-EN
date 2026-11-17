@@ -11,7 +11,7 @@ Split a /p network into N equal-sized subnets and list:
 
 | Name | Lines |
 |------|-------|
-| `flsm-split.py` | 36 |
+| `flsm-split.py` | 42 |
 
 ## Cross-References
 

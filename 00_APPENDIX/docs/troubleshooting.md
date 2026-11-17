@@ -167,24 +167,35 @@ wsl --list --verbose
 
 **Symptom:** `ping: network unreachable` or DNS failures.
 
-**Solution:**
+**Diagnose before changing configuration:**
+
 ```bash
-# Check DNS configuration
+ip route
+getent hosts example.com
 cat /etc/resolv.conf
-
-# If empty or wrong, fix it
-sudo rm /etc/resolv.conf
-sudo bash -c 'echo "nameserver 8.8.8.8" > /etc/resolv.conf'
-
-# Prevent WSL from overwriting
-sudo bash -c 'echo "[network]" > /etc/wsl.conf'
-sudo bash -c 'echo "generateResolvConf = false" >> /etc/wsl.conf'
+cat /etc/wsl.conf 2>/dev/null || true
 ```
 
-Then restart WSL from PowerShell:
-```powershell
-wsl --shutdown
+Check connectivity and the DNS/VPN policy of your institution. A public DNS server
+may be blocked or unable to resolve institutional names. Current WSL can use DNS
+tunnelling; first follow [Microsoft's WSL networking guidance](https://learn.microsoft.com/en-us/windows/wsl/networking).
+
+If an administrator requires a manual resolver, back up both files before editing:
+
+```bash
+compnet_dns_backup="$HOME/compnet-dns-backup-$(date -u +%Y%m%dT%H%M%SZ)"
+mkdir -- "$compnet_dns_backup"
+sudo cp -a -- /etc/resolv.conf "$compnet_dns_backup/resolv.conf"
+if [ -e /etc/wsl.conf ]; then sudo cp -a -- /etc/wsl.conf "$compnet_dns_backup/wsl.conf"; fi
+sudoedit /etc/wsl.conf
 ```
+
+Add or edit `generateResolvConf=false` **inside the existing `[network]` section**,
+retaining `[boot]`, `[user]`, `[automount]` and other settings. Do not append a second
+`[network]` section or replace the entire file. Configure the approved DNS addresses
+using `sudoedit /etc/resolv.conf`; inspect whether it is a generated symlink first.
+Save Linux work, then run `wsl --shutdown` in Windows PowerShell and restart the
+selected distribution. Restore the backups if the change does not resolve the issue.
 
 ---
 
@@ -305,7 +316,7 @@ server_sock.bind(('', port))
 
 ## 🌐 Portainer Issues
 
-### Can't access Portainer (localhost:9000)
+### Can't access Portainer (localhost:9050)
 
 **Diagnostic:**
 ```bash
@@ -321,28 +332,25 @@ docker logs portainer
 | Issue | Solution |
 |-------|----------|
 | Container not running | `docker start portainer` |
-| Port conflict | Check `ss -tlnp \| grep 9000` |
-| Wrong URL | Use `http://localhost:9000` (not https) |
+| Port conflict | Check `ss -tlnp \| grep 9050` |
+| Wrong URL | Use `http://localhost:9050` (not https) |
 
 ---
 
 ### Portainer password forgotten
 
-**Solution:** Reset Portainer (loses settings):
+**Solution:** Preserve the existing data volume and use the [official password reset helper](https://docs.portainer.io/advanced/reset-admin). Confirm the container name and `/data` mount first:
+
 ```bash
+docker inspect portainer --format '{{json .Mounts}}'
+# The following assumes container portainer and named volume portainer_data.
 docker stop portainer
-docker rm portainer
-docker volume rm portainer_data
-# Recreate and set new password on first access
-docker run -d -p 9000:9000 --name portainer \
-    -v /var/run/docker.sock:/var/run/docker.sock \
-    -v portainer_data:/data \
-    portainer/portainer-ce
+docker run --rm -v portainer_data:/data portainer/helper-reset-password
+docker start portainer
 ```
 
-**Default credentials for this course:**
-- Username: `stud`
-- Password: `studstudstud`
+Use the account and password printed by the helper. Existing personal accounts do
+not automatically become the teaching account `stud`. See [environment routes](environment_routes.md).
 
 ---
 
@@ -423,13 +431,27 @@ echo -n "Docker: "
 docker --version 2>/dev/null || echo "NOT INSTALLED"
 
 echo -n "Docker daemon: "
-sudo service docker status 2>/dev/null | grep -q running && echo "RUNNING" || echo "STOPPED"
+if ! command -v docker >/dev/null 2>&1; then
+    echo "CLIENT MISSING"
+elif docker info >/dev/null 2>&1; then
+    echo "DAEMON ACCESSIBLE"
+else
+    echo "DAEMON INACCESSIBLE (inspect context, service and permissions)"
+fi
 
-echo -n "Containers: "
-docker ps -q 2>/dev/null | wc -l
+echo -n "Running containers: "
+if container_ids=$(docker ps -q 2>/dev/null); then
+    if [ -z "$container_ids" ]; then
+        echo 0
+    else
+        printf '%s\n' "$container_ids" | wc -l
+    fi
+else
+    echo "UNKNOWN (daemon query failed)"
+fi
 
 echo -n "Portainer: "
-curl -s -o /dev/null -w "%{http_code}" http://localhost:9000 2>/dev/null || echo "NOT ACCESSIBLE"
+curl -s -o /dev/null -w "%{http_code}" http://localhost:9050 2>/dev/null || echo "NOT ACCESSIBLE"
 
 echo -n "WSL IP: "
 hostname -I | awk '{print $1}'

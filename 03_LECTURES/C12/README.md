@@ -11,7 +11,7 @@ Week 12 treats the email system as a distributed application built from multiple
 | [`assets/puml/`](assets/puml/) | PlantUML diagram sources | 10 files |
 | [`assets/images/`](assets/images/) | Rendered PNG output | .gitkeep |
 | [`assets/render.sh`](assets/render.sh) | Diagram rendering script | — |
-| [`assets/scenario-local-mailbox/`](assets/scenario-local-mailbox/) | Full mail stack: SMTP send, POP3/IMAP fetch (Docker Compose) | 8 files |
+| [`assets/scenario-local-mailbox/`](assets/scenario-local-mailbox/) | Full mail stack: SMTP send, POP3/IMAP fetch (Docker Compose) | 12 files |
 
 ## Visual Overview
 
@@ -45,30 +45,29 @@ graph LR
 
 ## Usage
 
-Deploy the complete mail stack:
+From this `C12` directory, initialise the local CA and first account before starting services:
 
 ```bash
 cd assets/scenario-local-mailbox
-docker compose up --build
+bash scripts/generate_demo_certs.sh
+docker compose run --rm mail setup email add alice@example.test alicepw
+docker compose up -d
+docker compose logs --tail=50 mail
 ```
 
-Then in separate terminals:
+Wait for startup, then run from the same scenario directory. The clients verify
+`tls/ca.crt` and the hostname; IMAP/POP3 upgrade with STARTTLS on the default ports.
 
 ```bash
-# Send a plain-text email
-python3 scripts/send_mail_smtp.py
-
-# Send an email with attachment
-python3 scripts/send_attachment_smtp.py
-
-# Fetch via POP3
-python3 scripts/fetch_pop3.py
-
-# Fetch via IMAP
-python3 scripts/fetch_imap.py
+python3 scripts/send_mail_smtp.py --user alice@example.test --password alicepw --to alice@example.test
+printf 'A small MIME attachment.\n' > attachment.txt
+python3 scripts/send_attachment_smtp.py --user alice@example.test --password alicepw --to alice@example.test --file attachment.txt
+python3 scripts/fetch_pop3.py --user alice@example.test --password alicepw
+python3 scripts/fetch_imap.py --user alice@example.test --password alicepw
 ```
 
-Python dependencies are listed in `requirements.txt`.
+Open http://localhost:8080 for Roundcube. Stop the stack with `docker compose down`.
+The scenario README explains the saved mail volumes and explicit destructive cleanup.
 
 ## Pedagogical Context
 
@@ -112,7 +111,7 @@ Email security (SPF, DKIM, DMARC) is revisited in the security discussion of C13
 ```bash
 git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
 cd COMPNET-EN
-git sparse-checkout set 03_LECTURES/C12
+git sparse-checkout set 03_LECTURES/C12 00_TOOLS
 ```
 
 **Method B — Direct download**

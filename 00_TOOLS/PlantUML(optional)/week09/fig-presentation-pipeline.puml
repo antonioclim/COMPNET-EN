@@ -1,41 +1,22 @@
 @startuml fig-presentation-pipeline
 skinparam backgroundColor white
 skinparam defaultFontName Arial
-skinparam defaultFontSize 12
 skinparam shadowing false
-skinparam roundcorner 12
-
-title Presentation layer pipeline (L6 functions)
-
-rectangle "Application object\n(struct, dict, class)" as obj #FFE0B2
-rectangle "Serialisation\n(JSON, XML, Protobuf)" as ser #FFF9C4
-rectangle "Text encoding\n(UTF-8, ASCII)" as enc #BBDEFB
-rectangle "Compression\n(gzip, brotli)" as cmp #E1BEE7
-rectangle "Transport payload\n(bytes on the wire)" as wire #C8E6C9
-
-obj -down-> ser : structure → format
-ser -down-> enc : characters → bytes
-enc -down-> cmp : reduce size
-cmp -down-> wire : transmit
-
-note right of ser
-  Both endpoints must
-  agree on the format.
-end note
-
-note right of enc
-  Charset mismatch causes
-  garbled text (mojibake).
-end note
-
-note right of cmp
-  Trades CPU cycles
-  for less bandwidth.
-end note
-
+title Text and binary serialisation paths
+rectangle "Application object" as object
+rectangle "Text serialisation\nJSON / XML" as text
+rectangle "Character encoding\nUTF-8" as encoding
+rectangle "Binary serialisation\nProtobuf / MessagePack" as binary
+rectangle "Bytes\nOptional compression" as bytes
+rectangle "Protocol payload" as wire
+object --> text
+text --> encoding
+encoding --> bytes
+object --> binary
+binary --> bytes : already bytes
+bytes --> wire
 legend bottom
-  Each stage is a presentation-layer responsibility.
-  The receiver applies the inverse pipeline: decompress → decode → deserialise.
-  On the modern Internet these steps are handled by libraries, not a separate protocol.
+  Both peers agree on the serialisation and any content coding.
+  Binary serialisation does not require a character-encoding stage.
 endlegend
 @enduml

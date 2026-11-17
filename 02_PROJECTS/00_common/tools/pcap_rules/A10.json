@@ -7,19 +7,23 @@
       "id": "R1",
       "filter": "tcp || udp",
       "condition": ">= 10",
-      "description": "Container-generated network traffic (to demonstrate egress filtering)."
+      "description": "TCP or UDP frames are present; identify their source namespace and policy result separately."
     },
     {
       "id": "R2",
       "filter": "dns || udp.port==53",
       "condition": ">= 1",
-      "description": "Attempted DNS resolution (allowed/blocked)."
+      "description": "DNS/UDP-53 frames are present; correlate the query and its actual result."
     },
     {
       "id": "R3",
       "filter": "tcp.port==80 || tcp.port==443",
       "condition": ">= 1",
-      "description": "Attempted external HTTP/HTTPS access (allowed/blocked)."
+      "description": "TCP traffic involving port 80 or 443 is present; this does not establish an allowed or blocked outcome."
     }
+  ],
+  "manual_checks": [
+    "R1: Attribute each flow to its source namespace and show the matching DOCKER-USER decision.",
+    "R2 R3: Check the actual reply or absence of delivery, counters and capture placement; attempts alone do not prove isolation."
   ]
 }

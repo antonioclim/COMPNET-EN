@@ -31,6 +31,7 @@ def main():
     PORT = int(PORT)
 
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as client_socket:
+        client_socket.settimeout(5)
         print(f"[INFO] UDP client ready, sending to {HOST}:{PORT}")
 
         while True:
@@ -69,12 +70,26 @@ def main():
                 continue
 
             # Serialise the message and send it.
-            message_bytes = serialize(request)
+            try:
+                message_bytes = serialize(request)
+            except ValueError as exc:
+                print(f"[ERROR] {exc}")
+                continue
             client_socket.sendto(message_bytes, (HOST, PORT))
 
             # Wait for a response.
-            response_bytes, _ = client_socket.recvfrom(1024)
-            response: ResponseMessage = deserialize(response_bytes)
+            try:
+                response_bytes, _ = client_socket.recvfrom(65535)
+            except socket.timeout:
+                print("[TIMEOUT] No reply within 5 s; UDP does not guarantee delivery.")
+                continue
+            try:
+                response: ResponseMessage = deserialize(response_bytes)
+                if not isinstance(response, ResponseMessage):
+                    raise ValueError("Unexpected response type")
+            except Exception as exc:
+                print(f"[ERROR] Invalid response: {type(exc).__name__}")
+                continue
 
             # Display the response.
             print(response)

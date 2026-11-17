@@ -55,26 +55,28 @@ Similar to FTP:
 
 In this laboratory, for simplicity:
 
-- each transfer uses a single message:
-  - 1 byte: content length (max ~255 bytes — this is purely a didactic example)
-  - the rest: file content
-- `recv(BUFFER_SIZE)` is used and we assume the data arrives in a single `recv`.
+- each data transfer uses one application frame:
+  - 1 byte: content length, from 0 through 255 bytes
+  - exactly that many file-content bytes
+- `read_exact()` accumulates fragmented TCP reads and rejects premature EOF.
+- files larger than 255 bytes are rejected before transfer; the limit is part of this teaching protocol.
 
-This approach is **not robust** for production, but it suffices
-to understand the idea of application-level protocols over TCP.
+The application frame is independent of TCP packet boundaries. The small file limit,
+simple authentication-free design and local listener binding make this a classroom
+example, not a production FTP service.
 
 ---
 
 ## 4. Code Structure
 
-### Server (`pseudo_ftp_server.py`)
+### Server (`S09_Part02B_Script_Pseudo_FTP_Server.py`)
 
 - listens on `HOST`, `PORT` (e.g. 127.0.0.1:3333) for control connections
 - when a client connects:
   - starts a command thread `handle_client_commands`
   - the command is decoded and sent to `process_command`
   - depending on the command, it calls:
-    - `process_list`
+    - the `list` branch of `process_command`
     - `active_get`
     - `active_put`
     - `passive_get`
@@ -86,7 +88,7 @@ Files on the server reside in the directory:
 FILE_ROOT = "./temp"
 ```
 
-### Client (`pseudo_ftp_client.py`)
+### Client (`S09_Part02C_Script_Pseudo_FTP_Client.py`)
 
 * connects to the server on control port 3333
 * displays a `->` prompt
@@ -119,3 +121,14 @@ LOCAL_STORAGE = "./client-temp"
   * the client directory (`./client-temp`)
 * complete a few simple TODOs (help, feedback messages)
 * document the tests in `pseudoftp_log.txt`
+
+### Framing used by the supplied reference implementation
+
+Each command is a UTF-8 line terminated by LF. Every control reply has an ASCII
+byte count, LF and exactly that many UTF-8 payload bytes, allowing multiline `list`
+and `help` replies. Active transfers first receive `READY`; passive transfers receive
+`PORT n`. The client then transfers data and consumes exactly one final `done!` or
+`ERR ...` reply before issuing its next command. Error responses are mandatory.
+The data format remains one length byte plus 0–255 file bytes. Both peers read exact
+lengths, including fragmented TCP input. This teaching protocol is not standard FTP.
+Files live beside the scripts in `temp/` and `client-temp/`, regardless of launch directory.
