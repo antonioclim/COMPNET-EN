@@ -104,7 +104,7 @@ MIME types and content negotiation are directly used in C10 (HTTP). Character en
 ```bash
 git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
 cd COMPNET-EN
-git sparse-checkout set 03_LECTURES/C09
+git sparse-checkout set 03_LECTURES/C09 00_TOOLS
 ```
 
 **Method B — Direct download**

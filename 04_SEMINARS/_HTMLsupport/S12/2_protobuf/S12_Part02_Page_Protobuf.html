@@ -424,7 +424,7 @@ service Calculator {
                     <button onclick="clearTerminal()" class="hover:text-white transition"><i class="fas fa-trash-alt"></i></button>
                 </div>
                 <div id="terminal-output" class="terminal flex-1 text-sm font-mono leading-snug">
-                    <div class="text-gray-500 mb-1"># Environment initialised. Protobuf compiler (protoc) ready.</div>
+                    <div class="text-gray-500 mb-1"># Interactive preview ready. Run protoc in your terminal for real validation.</div>
                     <div class="text-gray-500 mb-2"># Edit 'S12_Part02_Config_Calculator.proto' and click 'Generate Code' to compile.</div>
                     <div class="mt-2 cmd-prompt"></div>
                 </div>
@@ -699,10 +699,10 @@ service Calculator {
                 appendLog("Scanning dependencies...", "text-blue-400");
                 await new Promise(r => setTimeout(r, 600));
 
-                appendLog("[OK] Syntax check passed.", "text-green-500");
-                appendLog("Generating Python data structures...", "text-gray-400");
+                appendLog("[HINT] Expected text patterns found; syntax has not been compiled.", "text-green-500");
+                appendLog("Previewing the expected generated Python filenames...", "text-gray-400");
                 await new Promise(r => setTimeout(r, 400));
-                appendLog("Generating gRPC client/server stubs...", "text-gray-400");
+                appendLog("No compiler is running in this page.", "text-gray-400");
 
                 // Show Files Animation
                 const fileArea = document.getElementById('generated-files-area');
@@ -715,20 +715,20 @@ service Calculator {
 
                 appendLog("Done.", "text-green-400 font-bold");
                 appendLog("----------------------------------------", "text-gray-600");
-                appendLog("SUCCESS: Artifacts generated in /dist", "text-white bg-green-900/50 p-1 inline-block rounded");
+                appendLog("SIMULATION: No files were generated. Run the documented protoc command.", "text-white bg-green-900/50 p-1 inline-block rounded");
                 appendLog("Next Step: Implement the logic in Python.", "text-yellow-400 mt-2");
 
             } else {
                 // Failure Sequence
                 appendLog("Scanning dependencies...", "text-blue-400");
                 await new Promise(r => setTimeout(r, 500));
-                appendLog("Syntax Error: Compilation failed.", "text-red-500 font-bold");
+                appendLog("CHECKLIST: Expected patterns are missing; this is not a compiler result.", "text-red-500 font-bold");
 
                 if (!checks.hasPowerReq) appendLog(" > Missing 'PowerRequest' message definition.", "text-red-400 ml-2");
                 else if (!checks.hasPowerRes) appendLog(" > Missing 'PowerResponse' message definition.", "text-red-400 ml-2");
                 else if (!checks.hasRpc) appendLog(" > Service 'Calculator' missing 'Power' method.", "text-red-400 ml-2");
 
-                appendLog("Please fix the errors marked in the checklist.", "text-gray-400 mt-2");
+                appendLog("Complete the requested extension, then run protoc for syntax and schema validation.", "text-gray-400 mt-2");
             }
 
             // Restore prompt

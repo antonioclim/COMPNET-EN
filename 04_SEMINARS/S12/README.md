@@ -6,7 +6,7 @@ Week 12 introduces remote procedure call (RPC) as an alternative to REST-style H
 
 | Name | Type | Description |
 |---|---|---|
-| [`1_jsonrpc/`](1_jsonrpc/) | Subdir | JSON-RPC: RPC intro explanation, RPC tasks, JSON-RPC explanation, JSON-RPC tasks, client script (5 files) |
+| [`1_jsonrpc/`](1_jsonrpc/) | Subdir | JSON-RPC: RPC intro explanation, RPC tasks, JSON-RPC explanation, JSON-RPC tasks, client and server scripts (6 files) |
 | [`2_protobuf/`](2_protobuf/) | Subdir | Protocol Buffers: explanation, tasks, `.proto` definition file (3 files) |
 | [`3_grpc/`](3_grpc/) | Subdir | gRPC: server explanation, server tasks, client explanation, client tasks, server script, client script (6 files) |
 | [`assets/puml/`](assets/puml/) | Diagrams | 6 PlantUML sources: gRPC calculator architecture, gRPC client-server flow, JSON-RPC request-response, protobuf codegen flow, RPC call types, RPC vs REST |
@@ -26,27 +26,41 @@ flowchart LR
 
 ## Usage
 
-Run the JSON-RPC client (assumes a JSON-RPC server is running):
+From the repository root, start the supplied JSON-RPC server in terminal A:
 
 ```bash
-cd 1_jsonrpc
+cd 04_SEMINARS/S12/1_jsonrpc
+python3 S12_Part01_Script_JSONRPC_Server.py
+```
+
+In terminal B, start from the repository root and run the client:
+
+```bash
+cd 04_SEMINARS/S12/1_jsonrpc
 python3 S12_Part01_Script_JSONRPC_Client.py
 ```
 
-Compile the Protocol Buffers definition:
+The default endpoint is `http://127.0.0.1:8000/`. Keep terminal A running during the
+exercise and stop its server with Ctrl+C afterwards. To use another endpoint, set
+`JSONRPC_URL` for the client and matching `--host`/`--port` options for the server.
+
+Generate both Python messages and gRPC stubs from the repository root:
 
 ```bash
-cd 2_protobuf
-protoc --python_out=. S12_Part02_Config_Calculator.proto
+cd 04_SEMINARS/S12/3_grpc
+python3 -m grpc_tools.protoc -I../2_protobuf --python_out=. --grpc_python_out=. ../2_protobuf/S12_Part02_Config_Calculator.proto
+python3 S12_Part03_Script_g_RPC_Server.py
 ```
 
-Run the gRPC server and client:
+In a second terminal, enter the same `3_grpc` directory and run:
 
 ```bash
-cd 3_grpc
-python3 S12_Part03_Script_g_RPC_Server.py &
 python3 S12_Part03_Script_g_RPC_Client.py
 ```
+
+Keep the server in its own terminal and stop it with Ctrl+C when finished.
+If a Python environment lacks gRPC, install the repository requirements into the
+course virtual environment before code generation. Regenerate both stubs after editing the schema.
 
 ## Pedagogical Context
 
@@ -76,7 +90,7 @@ The three-step progression — JSON-RPC (text, schema-free) → Protocol Buffers
 ```bash
 git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
 cd COMPNET-EN
-git sparse-checkout set 04_SEMINARS/S12
+git sparse-checkout set 04_SEMINARS/S12 00_TOOLS
 ```
 
 **Method B — Direct download**

@@ -15,12 +15,12 @@ start
 :Strip whitespace;
 
 if (message == "ping") then (yes)
-  #C8E6C9:response = "PONG";
+  :response = "PONG"; <<#C8E6C9>>
 elseif (message starts with "upper:") then (yes)
-  #BBDEFB:Extract text after "upper:"
-  response = text.upper();
+  :Extract text after "upper:"
+  response = text.upper(); <<#BBDEFB>>
 else (default)
-  #FFCDD2:response = "UNKNOWN COMMAND";
+  :response = "UNKNOWN COMMAND"; <<#FFCDD2>>
 endif
 
 :Encode response to bytes;
@@ -33,11 +33,12 @@ message text and byte count;
 stop
 
 legend right
-  This protocol is identical for
-  both the TCP and UDP servers.
+  Optional ping/upper command parser.
+  It can be implemented for either transport.
   TCP: response via sendall()
   UDP: response via sendto()
-  Students implement this in
-  Part02 (TCP) and Part08 (UDP).
+  Optional extension after the base tasks.
+  Part02 TCP base: OK: + uppercase + LF.
+  TCP requests and replies use LF framing.
 endlegend
 @enduml

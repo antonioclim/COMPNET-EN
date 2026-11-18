@@ -144,7 +144,7 @@ SCAN_EXTENSIONS: Set[str] = {
 
 IGNORED_DIRS: Set[str] = {
     ".git", "__pycache__", ".mypy_cache", ".pytest_cache",
-    ".venv", "venv", "node_modules", "dist", ".tox",
+    ".venv", ".venv-qa", "venv", "node_modules", "dist", ".tox",
 }
 
 # -- 4. Exempt zones ------------------------------------------------------ #
@@ -255,7 +255,7 @@ def scan_file(filepath: str, relpath: str) -> List[Violation]:
     return violations
 
 
-def walk_repo(root: str) -> List[Violation]:
+def walk_repo(root: str, excluded_paths: set[str] | None = None) -> List[Violation]:
     """Walk the repository tree and collect all violations."""
     all_violations: List[Violation] = []
     root_path = Path(root).resolve()
@@ -270,6 +270,8 @@ def walk_repo(root: str) -> List[Violation]:
                 continue
             full = os.path.join(dirpath, fname)
             rel = os.path.relpath(full, root_path)
+            if Path(rel).as_posix() in (excluded_paths or set()):
+                continue
             all_violations.extend(scan_file(full, rel))
 
     return all_violations
@@ -323,6 +325,7 @@ def main(argv: list[str] | None = None) -> int:
         "root", nargs="?", default=".",
         help="Repository root directory (default: cwd).",
     )
+    parser.add_argument("--exclude", action="append", default=[], help="Exact repository-relative path to exclude")
     args = parser.parse_args(argv)
 
     root = os.path.abspath(args.root)
@@ -331,7 +334,7 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     try:
-        violations = walk_repo(root)
+        violations = walk_repo(root, set(args.exclude))
     except Exception as exc:
         print(f"ERROR: unexpected failure -- {exc}", file=sys.stderr)
         return 2

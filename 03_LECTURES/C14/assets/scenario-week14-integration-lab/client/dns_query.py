@@ -23,13 +23,19 @@ from typing import List, Tuple
 
 
 def _encode_qname(name: str) -> bytes:
-    parts = [p for p in name.strip(".").split(".") if p]
+    if name == ".":
+        return b"\x00"
+    parts = name.removesuffix(".").split(".")
+    if any(not part for part in parts):
+        raise ValueError("DNS name contains an empty label")
     out = b""
     for p in parts:
         b = p.encode("ascii")
         if len(b) > 63:
             raise ValueError("DNS label too long")
         out += struct.pack("!B", len(b)) + b
+    if len(out) + 1 > 255:
+        raise ValueError("DNS name is too long")
     return out + b"\x00"
 
 
@@ -59,6 +65,8 @@ def _read_name(data: bytes, offset: int, depth: int = 0) -> Tuple[str, int]:
             labels.append(name)
             i += 2
             break
+        if length & 0xC0:
+            raise ValueError("Unsupported DNS label type")
         if length == 0:
             i += 1
             break
@@ -86,11 +94,17 @@ def query_a(server: str, name: str, timeout: float = 2.0) -> List[Tuple[str, int
     question = qname + struct.pack("!HH", qtype, qclass)
     packet = header + question
 
+    server_ip = socket.gethostbyname(server)
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.settimeout(timeout)
-    sock.sendto(packet, (server, 53))
-    data, _ = sock.recvfrom(4096)
+    try:
+        sock.sendto(packet, (server_ip, 53))
+        data, peer = sock.recvfrom(4096)
+    finally:
+        sock.close()
 
+    if peer != (server_ip, 53):
+        raise ValueError("Response did not come from the queried DNS server")
     if len(data) < 12:
         raise ValueError("Truncated DNS response")
 
@@ -98,16 +112,26 @@ def query_a(server: str, name: str, timeout: float = 2.0) -> List[Tuple[str, int
     if rid != tid:
         raise ValueError("Transaction ID mismatch")
 
+    if not (rflags & 0x8000) or rflags & 0x0200 or rflags & 0x7800:
+        raise ValueError("Not a complete DNS response (QR/TC flags)")
     rcode = rflags & 0x000F
     if rcode != 0:
         raise ValueError(f"DNS error rcode={rcode}")
 
     offset = 12
 
-    # Skip questions
-    for _ in range(rqd):
-        _, offset = _read_name(data, offset)
-        offset += 4  # qtype + qclass
+    # Check the echoed question as well as the ID and peer. This small UDP tool
+    # rejects TC responses rather than claiming to implement TCP fallback.
+    if rqd != 1:
+        raise ValueError("Expected exactly one echoed DNS question")
+    question_name, offset = _read_name(data, offset)
+    if offset + 4 > len(data):
+        raise ValueError("Truncated DNS question")
+    question_type, question_class = struct.unpack("!HH", data[offset:offset + 4])
+    offset += 4
+    if (question_name.lower() != name.removesuffix(".").lower()
+            or (question_type, question_class) != (1, 1)):
+        raise ValueError("DNS question mismatch")
 
     answers: List[Tuple[str, int, str]] = []
 
@@ -118,12 +142,16 @@ def query_a(server: str, name: str, timeout: float = 2.0) -> List[Tuple[str, int
             raise ValueError("Truncated RR")
         rtype, rclass, ttl, rdlen = struct.unpack("!HHIH", data[offset : offset + 10])
         offset += 10
+        if offset + rdlen > len(data):
+            raise ValueError("Truncated DNS RDATA")
         rdata = data[offset : offset + rdlen]
         offset += rdlen
 
         if rclass != 1:
             continue
-        if rtype == 1 and rdlen == 4:
+        if rtype == 1 and rdlen != 4:
+            raise ValueError("Invalid A-record RDATA length")
+        if rtype == 1:
             ipv4 = ".".join(str(b) for b in rdata)
             answers.append((rrname, int(ttl), ipv4))
 
@@ -138,6 +166,8 @@ def main() -> int:
     ap.add_argument("--sleep", type=float, default=0.0, help="Sleep between repeats (seconds)")
 
     args = ap.parse_args()
+    if args.repeat < 1 or args.sleep < 0:
+        ap.error("--repeat must be positive and --sleep non-negative")
 
     for i in range(args.repeat):
         ans = query_a(args.server, args.name)

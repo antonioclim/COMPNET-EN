@@ -20,7 +20,7 @@ DC -> EP : start tester container\n(PROJECT_CODE set)
 
 EP -> TD : tcpdump -i any -w traffic_e2.pcap &
 activate TD #C8E6C9
-EP -> EP : sleep 1\n(wait for capture readiness)
+EP -> EP : sleep 1, then check capture process\nexit 2 if capture failed to start
 
 == PHASE 2 — SMOKE TESTS ==
 
@@ -33,7 +33,7 @@ deactivate PT
 
 == PHASE 3 — STOP AND VALIDATE ==
 
-EP -> TD : kill -2 (SIGINT flush)
+EP -> TD : SIGINT, bounded wait\nTERM/KILL fallback; collect capture status
 deactivate TD
 
 EP -> VP : validate_pcap.py\n--project $PROJECT_CODE\n--pcap traffic_e2.pcap
@@ -41,13 +41,14 @@ activate VP #E1BEE7
 VP --> EP : rule results (OK / FAIL)
 deactivate VP
 
-EP --> DC : exit $TEST_RC
+EP --> DC : preserve failing TEST_RC; otherwise\nexit 2 for capture failure or validator status
 
 legend right
 entrypoint.sh uses set -euo pipefail
 for strict error handling.
-SIGINT ensures tcpdump flushes
-all buffered packets before exit.
-Final exit code reflects pytest result.
+Request SIGINT flush and inspect capture exit status.
+Failed pytest still reaches cleanup and validation.
+EXIT / INT / TERM traps perform bounded cleanup.
+A passing capture check alone is not application acceptance.
 endlegend
 @enduml

@@ -14,7 +14,29 @@ Demonstrate the limitations of FTP in modern networks that use NAT and firewalls
 - Why passive mode is usually preferred
 
 ## Run
+From this scenario directory:
+
+```bash
 docker compose up --build
+```
+
+The client uses `natfw:2121` on `172.29.112.0/24`. The firewall DNATs the control connection and passive ports 30000–30009 to `172.29.113.10`; SNAT makes replies return through it. The server advertises `172.29.112.2` for PASV. The client is never attached to the server network. Keep both subnets free of overlap with other running labs.
+
+Passive LIST must succeed. Active mode is expected to fail: the server sees the translated control peer while PORT advertises the client's private address, and pyftpdlib's foreign-address check rejects it. This is a concrete active-mode limitation, not proof that all active FTP through all NAT configurations fails.
+
+For packet evidence, start only services in terminal 1 and capture in the firewall before running the client in terminal 2:
+
+```bash
+docker compose up -d --build ftp natfw
+docker compose exec natfw tcpdump -ni any 'tcp port 2121 or tcp portrange 30000-30009'
+```
+
+```bash
+docker compose run --rm client
+docker compose exec natfw iptables -t nat -nvL
+```
+
+Record the pre/post NAT endpoints and the PORT/PASV control replies. Stop tcpdump with Ctrl+C and run `docker compose down` after the experiment.
 
 ## Discussion
 - Why FTP is difficult to secure
@@ -24,7 +46,7 @@ docker compose up --build
 
 | Name | Lines |
 |------|-------|
-| `docker-compose.yml` | 36 |
+| `docker-compose.yml` | 71 |
 | `client/` | 1 files |
 | `data/` | 1 files |
 | `ftp/` | 3 files |

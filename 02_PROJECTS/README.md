@@ -6,14 +6,14 @@ Project specifications and shared assessment artefacts for the RC2026 Computer N
 
 ## File and folder index
 
-| Name | Description | Metric |
-|---|---|---|
-| [`00_common/`](00_common/) | Shared assessment infrastructure (templates, CI, tester container and validation tooling) | 47 files (25 .json, 10 .md) |
-| [`01_network_applications/`](01_network_applications/) | Group 1 project briefs (S01–S15): application protocols and services | 97 files (50 .md, 45 .puml) |
-| [`02_administration_security/`](02_administration_security/) | Group 2 project briefs (A01–A10): SDN, analysis and controlled security labs | 46 files (30 .puml, 14 .md) |
-| [`COURSE_SEMINAR_MAPPING.md`](COURSE_SEMINAR_MAPPING.md) | Project ↔ course/seminar mapping (RC2026) | 31 lines |
-| [`RC2026_VERIFICATION_INDEX.xlsx`](RC2026_VERIFICATION_INDEX.xlsx) | Instructor verification index (spreadsheet checklist) | 140 KB |
-| `README.md` | Directory orientation and cross-reference map | 102 lines |
+| Name | Description |
+|---|---|
+| [`00_common/`](00_common/) | Shared assessment infrastructure (templates, CI, tester container and validation tooling) |
+| [`01_network_applications/`](01_network_applications/) | Group 1 project briefs (S01–S20): application protocols and services |
+| [`02_administration_security/`](02_administration_security/) | Group 2 project briefs (A01–A10): SDN, analysis and controlled security labs |
+| [`COURSE_SEMINAR_MAPPING.md`](COURSE_SEMINAR_MAPPING.md) | Project ↔ course/seminar mapping (RC2026) |
+| [`RC2026_VERIFICATION_INDEX.xlsx`](RC2026_VERIFICATION_INDEX.xlsx) | Instructor verification index (spreadsheet checklist) |
+| `README.md` | Directory orientation and cross-reference map |
 
 ## Visual overview
 

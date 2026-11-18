@@ -1,0 +1,70 @@
+[
+  {
+    "publication_id": "PB001",
+    "unit_ids": [
+      "U02"
+    ],
+    "doi": "10.1145/3402413.3402420",
+    "reference_apa7": "Holterbach, T., Bühler, T., Rellstab, T., & Vanbever, L. (2020). An open platform to teach how the Internet practically works. ACM SIGCOMM Computer Communication Review, 50(2), 45–52. https://doi.org/10.1145/3402413.3402420",
+    "evidence_scope": "Research description of the mini-Internet platform; not an evaluation of COMPNET-EN or a measured comparison across the present units.",
+    "metadata_resolution": "Crossref truncates the second author surname to Bü; the ETH author-maintained publication record explicitly gives Tobias Bühler. The reference uses the primary institutional spelling.",
+    "primary_confirmation_url": "https://nsg.ee.ethz.ch/publications/2020-05-01-an-open-platform-to-teach-how-the-internet-practically-works-20-500-11850-454902/",
+    "primary_web_ref": "turn425432890view2",
+    "accessed_at_utc": "2026-11-17T16:16:32.643171+00:00",
+    "doi_metadata_url": "https://api.crossref.org/works/10.1145/3402413.3402420",
+    "doi_metadata_sha256": "8cd83033bd5d9148f4af0c3ad1aa46ea3963dd4946e7881b02c0e3e48f9c2b34",
+    "doi_metadata_status": "verified",
+    "full_paper_evaluation": "not_performed"
+  },
+  {
+    "publication_id": "PB002",
+    "unit_ids": [
+      "U10"
+    ],
+    "doi": "10.1109/MSP.2018.1870862",
+    "reference_apa7": "Thompson, M. F., & Irvine, C. E. (2018). Individualizing cybersecurity lab exercises with Labtainers. IEEE Security & Privacy, 16(2), 91–95. https://doi.org/10.1109/MSP.2018.1870862",
+    "evidence_scope": "Publication describing individualised Labtainers exercises; the institutional listing separately identifies a 2021 SIGCSE workshop.",
+    "metadata_resolution": "Workshop appearance is not labelled a separate peer-reviewed research article. DOI case is normalised only for equality checking.",
+    "primary_confirmation_url": "https://nps.edu/web/c3o/labtainers",
+    "primary_web_ref": "turn962988234search1",
+    "accessed_at_utc": "2026-11-17T16:16:32.643809+00:00",
+    "doi_metadata_url": "https://api.crossref.org/works/10.1109/MSP.2018.1870862",
+    "doi_metadata_sha256": "45cbafb4342aa530d481eefda63ca071f11b0aaa10e0dd5eb87aa68f4a547041",
+    "doi_metadata_status": "verified",
+    "full_paper_evaluation": "not_performed"
+  },
+  {
+    "publication_id": "PB003",
+    "unit_ids": [
+      "U08"
+    ],
+    "doi": "10.1145/2676723.2677304",
+    "reference_apa7": "Lee, K., Kim, J., & Moon, S. (2015). An educational networking framework for full layer implementation and testing. In Proceedings of the 46th ACM Technical Symposium on Computer Science Education (pp. 663–668). Association for Computing Machinery. https://doi.org/10.1145/2676723.2677304",
+    "evidence_scope": "The paper describes KENSv2; its evidence must not be relabelled as evaluation of the KENSv3 version inspected here.",
+    "metadata_resolution": "A different SIGCOMM 2014 record has a similar title and another DOI. The present reference is the six-page SIGCSE 2015 paper.",
+    "primary_confirmation_url": "https://pure.kaist.ac.kr/en/publications/an-educational-networking-framework-for-full-layer-implementation/",
+    "primary_web_ref": "turn425432890view3",
+    "accessed_at_utc": "2026-11-17T16:16:32.644360+00:00",
+    "doi_metadata_url": "https://api.crossref.org/works/10.1145/2676723.2677304",
+    "doi_metadata_sha256": "1c3ba1f924d2126810effb4af005eac3954bfebdcfefc134a7c7e6aa09cc9935",
+    "doi_metadata_status": "verified",
+    "full_paper_evaluation": "not_performed"
+  },
+  {
+    "publication_id": "PB004",
+    "unit_ids": [
+      "X03"
+    ],
+    "doi": "10.1145/1348713.1348716",
+    "reference_apa7": "Du, W., & Wang, R. (2008). SEED: A suite of instructional laboratories for computer security education. Journal on Educational Resources in Computing, 8(1), 1–24. https://doi.org/10.1145/1348713.1348716",
+    "evidence_scope": "Contextual security-laboratory publication; SEED is an auxiliary resource, not an added course or evidence about COMPNET-EN effectiveness.",
+    "metadata_resolution": "Crossref supplies title SEED plus the subtitle, pages 1–24 and the two authors; the author project confirms the 2008 journal version separately from SIGCSE 2007. Initial rate-limit failure and later successful metadata request are both retained.",
+    "primary_confirmation_url": "https://seedsecuritylabs.org/publications.html",
+    "primary_web_ref": "turn425432890view1",
+    "accessed_at_utc": "2026-11-17T16:18:28.458545+00:00",
+    "doi_metadata_url": "https://api.crossref.org/works/10.1145/1348713.1348716",
+    "doi_metadata_sha256": "78095c4dae970c040f90c0b6b76a5946e80639597f91f02cd249a3dcbb32c324",
+    "doi_metadata_status": "verified",
+    "full_paper_evaluation": "not_performed"
+  }
+]

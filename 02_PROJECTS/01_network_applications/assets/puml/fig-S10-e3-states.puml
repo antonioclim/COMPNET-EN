@@ -11,17 +11,17 @@ start
 :Compare manifests\n(per-file diff);
 
 if (File only on Replica A?) then (yes)
-    #C8E6C9:Action: PUSH A → B;
+    :Action: PUSH A → B; <<#C8E6C9>>
     stop
 elseif (File only on Replica B?) then (yes)
-    #C8E6C9:Action: PULL B → A;
+    :Action: PULL B → A; <<#C8E6C9>>
     stop
 endif
 
 :File exists on both replicas;
 
 if (SHA-256 hashes match?) then (yes)
-    #ECEFF1:Action: SKIP (identical);
+    :Action: SKIP (identical); <<#ECEFF1>>
     stop
 else (different)
 endif
@@ -31,12 +31,12 @@ endif
 if (Conflict policy?) then (last-writer-wins)
     :Compare mtime timestamps;
     if (A newer?) then (yes)
-        #FFF9C4:Action: PUSH A → B\n(overwrite B);
+        :Action: PUSH A → B\n(overwrite B); <<#FFF9C4>>
     else (B newer)
-        #FFF9C4:Action: PULL B → A\n(overwrite A);
+        :Action: PULL B → A\n(overwrite A); <<#FFF9C4>>
     endif
 else (rename)
-    #FFF9C4:Action: keep both\nrename one as .conflict;
+    :Action: keep both\nrename one as .conflict; <<#FFF9C4>>
 endif
 
 :Log conflict resolution\n(file, policy, outcome);

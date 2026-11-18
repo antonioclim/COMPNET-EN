@@ -1,12 +1,12 @@
 # C14 — Revision and Examination Preparation
 
-Week 14 is the final lecture and serves as an integrative review. Rather than introducing new protocols, it traces a single network transaction — a user loading a web page — through every layer of the stack, from DNS resolution and ARP at the bottom through TCP handshake and TLS negotiation to HTTP request/response at the top. The lecture revisits key concepts from each prior week, highlights common examination pitfalls and provides a structured revision checklist. A single PlantUML diagram maps the full course.
+Week 14 is the final lecture and serves as an integrative review. Rather than introducing new protocols, it traces a single network transaction — a user loading a web page — through every layer of the stack, from DNS resolution and ARP at the bottom through TCP handshake and TLS negotiation to HTTP request/response at the top. The lecture revisits key concepts from each prior week, highlights common examination pitfalls and provides a structured revision checklist. The course-map diagram supports revision, while the integration lab supplies a runnable DNS, HTTP, TLS and reverse-proxy stack.
 
 ## File and Folder Index
 
 | Name | Description | Metric |
 |------|-------------|--------|
-| [`c14-revision-and-exam-prep.md`](c14-revision-and-exam-prep.md) | Slide-by-slide lecture content | 242 lines |
+| [`c14-revision-and-exam-prep.md`](c14-revision-and-exam-prep.md) | Slide-by-slide lecture content | 252 lines |
 | [`c14-week14-integration-lab.md`](c14-week14-integration-lab.md) | Week 14 integration lab handout (capstone) | — |
 | [`assets/puml/`](assets/puml/) | PlantUML diagram sources | 1 file |
 | [`assets/images/`](assets/images/) | Rendered PNG output | .gitkeep |
@@ -70,7 +70,7 @@ No other repository components depend on this directory. The `fig-course-map.pum
 ```bash
 git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
 cd COMPNET-EN
-git sparse-checkout set 03_LECTURES/C14
+git sparse-checkout set 03_LECTURES/C14 00_TOOLS
 ```
 
 **Method B — Direct download**

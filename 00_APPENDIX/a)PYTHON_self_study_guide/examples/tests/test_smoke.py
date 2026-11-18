@@ -20,6 +20,7 @@ Or with pytest:
 import subprocess
 import sys
 import os
+import importlib.util
 from pathlib import Path
 
 # NOTE: Auto-detect the examples/ directory
@@ -38,34 +39,38 @@ TEST_PORT: int = 8080         # Standard port for socket tests
 # ═══════════════════════════════════════════════════════════════════════════════
 # TEST_IMPORTS
 # ═══════════════════════════════════════════════════════════════════════════════
+def load_example(filename):
+    path = EXAMPLES_DIR / filename
+    assert path.is_file(), f"Required example is missing: {path}"
+    name = 'compnet_smoke_' + path.stem
+    spec = importlib.util.spec_from_file_location(name, path)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[name] = module
+    spec.loader.exec_module(module)
+    for exported in getattr(module, '__all__', []):
+        assert hasattr(module, exported), f"{filename}: missing export {exported}"
+    return module
+
+
 def test_socket_tcp_imports() -> None:
-    """Verify that 01_socket_tcp.py imports without errors."""
-    result = subprocess.run(
-        [sys.executable, "-c", "import socket; import logging; import sys"],
-        capture_output=True,
-        timeout=10
-    )
-    assert result.returncode == 0, f"Import failed: {result.stderr.decode()}"
+    module = load_example('01_socket_tcp.py')
+    assert callable(module.server) and callable(module.client)
 
 
 def test_bytes_vs_str_imports() -> None:
-    """Verify that 02_bytes_vs_str.py imports without errors."""
-    result = subprocess.run(
-        [sys.executable, "-c", "from typing import Optional; import logging"],
-        capture_output=True,
-        timeout=10
-    )
-    assert result.returncode == 0, f"Import failed: {result.stderr.decode()}"
+    module = load_example('02_bytes_vs_str.py')
+    assert module.ensure_bytes('hello') == b'hello'
+    assert module.safe_decode(b'hello') == 'hello'
 
 
 def test_struct_parsing_imports() -> None:
-    """Verify that 03_struct_parsing.py imports without errors."""
-    result = subprocess.run(
-        [sys.executable, "-c", "import struct; from dataclasses import dataclass"],
-        capture_output=True,
-        timeout=10
-    )
-    assert result.returncode == 0, f"Import failed: {result.stderr.decode()}"
+    module = load_example('03_struct_parsing.py')
+    assert module.get_protocol_name(6) == 'TCP'
+
+
+def test_error_handling_imports() -> None:
+    module = load_example('04_error_handling.py')
+    assert callable(module.connect_with_retry) and callable(module.recv_exactly)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -74,9 +79,7 @@ def test_struct_parsing_imports() -> None:
 def test_bytes_demo_runs() -> None:
     """Run the bytes demonstration without errors."""
     script_path = EXAMPLES_DIR / "02_bytes_vs_str.py"
-    if not script_path.exists():
-        print(f"SKIP: {script_path} does not exist")
-        return
+    assert script_path.is_file(), f"Required example is missing: {script_path}"
         
     result = subprocess.run(
         [sys.executable, str(script_path)],
@@ -94,9 +97,7 @@ def test_bytes_demo_runs() -> None:
 def test_struct_parsing_runs() -> None:
     """Run the struct demonstration without errors."""
     script_path = EXAMPLES_DIR / "03_struct_parsing.py"
-    if not script_path.exists():
-        print(f"SKIP: {script_path} does not exist")
-        return
+    assert script_path.is_file(), f"Required example is missing: {script_path}"
         
     result = subprocess.run(
         [sys.executable, str(script_path)],
@@ -158,6 +159,7 @@ def run_all_tests() -> bool:
         test_socket_tcp_imports,
         test_bytes_vs_str_imports,
         test_struct_parsing_imports,
+        test_error_handling_imports,
         test_bytes_encoding,
         test_struct_pack_unpack,
         test_socket_creation,

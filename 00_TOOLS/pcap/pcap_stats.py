@@ -61,7 +61,8 @@ def _is_pcapng_magic(magic: int) -> bool:
 def _pcap_endianness_from_magic(magic: int) -> Optional[str]:
     # Classic PCAP magic numbers:
     #   0xA1B2C3D4 (big-endian) or 0xD4C3B2A1 (little-endian)
-    # Variants for nanosecond resolution exist; not used in our fallback.
+    # The integer is read in network order so it describes the bytes on disk.
+    # Both microsecond and nanosecond captures use the same record layout.
     if magic == 0xA1B2C3D4:
         return ">"
     if magic == 0xD4C3B2A1:
@@ -140,7 +141,7 @@ def stats_pure_pcap(path: str) -> Stats:
         if len(header) != 24:
             raise ValueError("File too small to be a classic PCAP (missing global header).")
 
-        magic = struct.unpack("<I", header[0:4])[0]
+        magic = struct.unpack(">I", header[0:4])[0]
         if _is_pcapng_magic(magic):
             raise ValueError("PCAPNG detected. The pure backend supports classic PCAP only. "
                              "Install scapy, or convert the capture to PCAP.")
@@ -152,9 +153,14 @@ def stats_pure_pcap(path: str) -> Stats:
         # Global header fields:
         #   magic(4), version_major(2), version_minor(2), thiszone(4),
         #   sigfigs(4), snaplen(4), network(4)
-        _version_major, _version_minor, _thiszone, _sigfigs, _snaplen, network = struct.unpack(
-            endian + "HHiiii", header[4:24]
+        major, minor, _thiszone, _sigfigs, snaplen, network = struct.unpack(
+            endian + "HHiIII", header[4:24]
         )
+        if (major, minor) != (2, 4) or snaplen == 0:
+            raise ValueError("Invalid or unsupported classic PCAP global header.")
+        network &= 0xFFFF  # upper bits can carry additional linktype information
+        if network not in {1, 113}:
+            raise ValueError(f"Pure backend does not support linktype {network}; use scapy.")
         st.linktype = network
 
         rec_hdr_fmt = endian + "IIII"  # ts_sec, ts_usec, incl_len, orig_len
@@ -168,7 +174,12 @@ def stats_pure_pcap(path: str) -> Stats:
                 st.truncated += 1
                 break
 
-            _ts_sec, _ts_subsec, incl_len, _orig_len = struct.unpack(rec_hdr_fmt, rh)
+            _ts_sec, _ts_subsec, incl_len, orig_len = struct.unpack(rec_hdr_fmt, rh)
+            if incl_len > snaplen or incl_len > orig_len:
+                raise ValueError("Invalid PCAP record lengths (capture > snaplen/original).")
+            if incl_len > os.fstat(f.fileno()).st_size - f.tell():
+                st.truncated += 1
+                break
             frame = f.read(incl_len)
             if len(frame) != incl_len:
                 st.truncated += 1
@@ -312,7 +323,7 @@ def main() -> int:
 
     if args.json:
         print(json.dumps(_as_dict(st), indent=2, sort_keys=True))
-        return 0
+        return 1 if st.truncated else 0
 
     # Human-readable output
     print("=" * 72)
@@ -334,7 +345,7 @@ def main() -> int:
     if st.truncated:
         print(f"Truncated records: {st.truncated}")
     print("=" * 72)
-    return 0
+    return 1 if st.truncated else 0
 
 
 if __name__ == "__main__":

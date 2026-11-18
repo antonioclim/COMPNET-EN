@@ -27,5 +27,9 @@
       "condition": ">= 1",
       "description": "Minimal fingerprinting (banner/header)."
     }
+  ],
+  "manual_checks": [
+    "R1 R2 R3: Match each reported state to its actual probed port, response or timeout and firewall rule.",
+    "R4: Match the parsed fingerprint to the service; any matching text frame alone is insufficient."
   ]
 }

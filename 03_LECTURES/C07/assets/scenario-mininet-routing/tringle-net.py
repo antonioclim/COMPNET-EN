@@ -75,7 +75,7 @@ def build_net():
 
 
 def scenario_link_down(net, r1, r2, r3):
-    info("*** Scenario: link-down (r1-r2 fails, traffic routes via r3)\n")
+    info("*** Scenario: link-down with a preconfigured static bypass via r3 (no dynamic convergence)\n")
 
     # r1 <-> r2 via r3 (bypass)
     r1.cmd("ip route add 10.2.0.0/24 via 10.13.0.3 dev r1-eth2")
@@ -95,7 +95,7 @@ def scenario_link_down(net, r1, r2, r3):
 
 
 def scenario_asymmetric(net, r1, r2, r3):
-    info("*** Scenario: asymmetric routing (only r1 has a route to r2)\n")
+    info("*** Scenario: missing return route (legacy CLI mode name: asymmetric)\n")
 
     # r1 knows how to reach r2's LAN via r2 (directly)
     r1.cmd("ip route add 10.2.0.0/24 via 10.12.0.2 dev r1-eth1")

@@ -272,7 +272,7 @@ Pauză 5 secunde. Majoritatea vor răspunde „serverul". Corect e **clientul**.
 
 > *▸ „Acum invers: serverul a ascultat pe un port temporar, clientul s-a conectat. Rezultatul e același — fișierul ajunge. Mecanica e diferită."*
 
-> *▸ „Și asta răspunde complet la întrebarea de la început: colegul de acasă, prin NAT, era în active mode. Routerul lui bloca conexiunea inițiată de server. În passive mode, clientul inițiază totul — trece de NAT fără probleme."*
+> *▸ „Și asta răspunde complet la întrebarea de la început: colegul de acasă, prin NAT, era în active mode. Routerul lui bloca conexiunea inițiată de server. În passive mode, clientul inițiază totul — poate traversa NAT-ul clientului; adresa şi porturile pasive ale serverului trebuie să fie accesibile."*
 
 **(← Hook reluat explicit)**
 
@@ -292,7 +292,7 @@ La final: `exit` (containerul se oprește automat).
 >
 > *Unu: FTP clasic = **două conexiuni TCP** — una pentru comenzi, una pentru date. Le-am văzut pe captură.*
 >
-> *Doi: **active vs passive** = diferență de inițiator al conexiunii de date. Passive trece de NAT; active nu — și asta era problema colegului de acasă de la începutul orei.*
+> *Doi: **active vs passive** = diferență de inițiator al conexiunii de date. Passive iniţiază datele de la client, iar active cere acces de la server spre client; rezultatul depinde de rutare, NAT şi filtrare — și asta era problema colegului de acasă de la începutul orei.*
 >
 > *(← Hook reluat)*
 >
@@ -303,11 +303,11 @@ La final: `exit` (containerul se oprește automat).
 | Stage | Fișier livrabil | Ce fac studenții | Script de referință |
 |---|---|---|---|
 | 1 | `intro_file_protocols_log.txt` | Răspunsuri scurte la 4 întrebări conceptuale | `S09_Part01A_Explanation_File_Protocols_Intro.md` |
-| 2 | `pyftpd_log.txt` | LIST/RETR/STOR + observații (modifică TODO-urile din `S09_Part01D_Script_Pyftpd_Client.py`); pot rula serverul local sau în container (portul 2121 e mapat pe host) | `S09_Part01E_Tasks_Pyftpd.md` |
+| 2 | `pyftpd_log.txt` | LIST/RETR/STOR + observații (modifică TODO-urile din `S09_Part01D_Script_Pyftpd_Client.py`); pot rula serverul local sau în container (portul 2121 şi intervalul pasiv 30000–30009 sunt mapate pe loopback-ul hostului) | `S09_Part01E_Tasks_Pyftpd.md` |
 | 3 | `pseudoftp_log.txt` + modificare `help` în server | Toate comenzile din `S09_Part02D_Tasks_Pseudo_FTP.md` + întrebări reflexive | `S09_Part02D_Tasks_Pseudo_FTP.md` |
 | 4 | `ftp_multi_client_log.txt` | Upload (client1) + download (client2) + întrebări reflexive | `S09_Part03B_Tasks_Multi_Client_Containers.md` |
 
-> *▸ „Stage 1 și Stage 2 le faceți acasă. Citiți explicațiile din `S09_Part01A` și `S09_Part01B`, apoi modificați template-ul client (`S09_Part01D_Script_Pyftpd_Client.py`) — are trei TODO-uri: `LIST`, `RETR`, `STOR`. Serverul FTP rulează deja în container (portul 2121 e mapat pe host), deci puteți testa fără să instalați pyftpdlib local."*
+> *▸ „Stage 1 și Stage 2 le faceți acasă. Citiți explicațiile din `S09_Part01A` și `S09_Part01B`, apoi modificați template-ul client (`S09_Part01D_Script_Pyftpd_Client.py`) — are trei TODO-uri: `LIST`, `RETR`, `STOR`. Serverul FTP rulează deja în container (portul 2121 şi intervalul pasiv 30000–30009 sunt mapate pe loopback-ul hostului), deci puteți testa fără să instalați pyftpdlib local."*
 
 > *▸ „Stage 3: porniți un container cu `python:3.12-slim` (exact ca în demo) și rulați pseudo-FTP-ul. Stage 4: scenariul multi-client l-ați văzut deja — refaceți-l și documentați."*
 
@@ -371,7 +371,7 @@ La final: `exit` (containerul se oprește automat).
 
 | # | Problemă | Soluție |
 |---|---|---|
-| 1 | Docker Desktop nu e pornit / Docker trage imagini lent | Pre-pull înainte de oră (`docker compose pull`). Dacă persistă, sari direct la Bloc D (pseudo-FTP într-un singur container, fără Compose). |
+| 1 | Docker Desktop nu e pornit / Docker trage imagini lent | Pre-pull înainte de oră (`docker compose -f S09_Part03_Config_Docker_Compose.yml pull`). Dacă persistă, sari direct la Bloc D (pseudo-FTP într-un singur container, fără Compose). |
 | 2 | `apk add tcpdump` eșuează (container fără internet) | Renunți la captură live. Explici conceptual diferența control/data folosind diagrama de pe tablă. Studenții vor face captura acasă. |
 | 3 | Wireshark nu deschide `s09_ftp.pcap` | Verifică dacă fișierul e nenul: `dir s09_ftp.pcap`. Dacă e gol, repetă captura. Alternativ, folosește `tcpdump -r` direct în container. |
 | 4 | Portul 2121 ocupat pe host | Modifică mapping-ul în `S09_Part03_Config_Docker_Compose.yml`: schimbă `"2121:2121"` cu `"21210:2121"`. |
@@ -399,7 +399,7 @@ Saltzer, J. H., Reed, D. P. și Clark, D. D. (1984). End-to-end arguments in sys
 
 **Ordonarea blocurilor — diferență față de varianta VM:** pe Windows nativ, pseudo-FTP fără Compose e mai simplu de pornit decât pe VM (nu necesită `pip install`), dar multi-client Docker e mai spectaculos ca punct de intrare. Ordinea B (Docker multi-client) → C (captură) → D (pseudo-FTP) asigură un demo vizual imediat și amână pseudo-FTP-ul (mai abstract) pentru după ce studenții au văzut traficul real.
 
-**Stage 1 și Stage 2 ca teme:** spre deosebire de varianta VM (unde pyftpdlib rulează nativ), pe Windows fără VM nu avem Python cu pip într-un mediu controlat. Soluția: serverul FTP rulează deja în container (portul 2121 mapat pe host). Studenții pot rula `S09_Part01D_Script_Pyftpd_Client.py` de pe Windows dacă au Python instalat, sau dintr-un container temporar. Explicațiile din `S09_Part01A` și `S09_Part01B` se citesc ca auto-studiu.
+**Stage 1 și Stage 2 ca teme:** spre deosebire de varianta VM (unde pyftpdlib rulează nativ), pe Windows fără VM nu avem Python cu pip într-un mediu controlat. Soluția: serverul FTP rulează deja în container (portul 2121 şi intervalul pasiv 30000–30009 mapate pe loopback-ul hostului). Studenții pot rula `S09_Part01D_Script_Pyftpd_Client.py` de pe Windows dacă au Python instalat, sau dintr-un container temporar. Explicațiile din `S09_Part01A` și `S09_Part01B` se citesc ca auto-studiu.
 
 **Tipar POE principal (Bloc C.5):** credențialele în clar pe captură. Studenții care au anticipat „sunt criptate" descoperă vizual pe ecran `USER test` / `PASS 12345`.
 

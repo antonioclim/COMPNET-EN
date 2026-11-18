@@ -22,7 +22,7 @@ The difficult part is the DNS wire format: header, question, answer sections, na
 
 A TTL cache is required. After the first upstream response, the resolver may answer locally until TTL expiry and E2 must include a capture that shows the difference between a forwarded query and one served from cache.
 
-A DNS resolver forces work with a binary format: header, question, name compression and resource records even if support remains limited to A/AAAA (and optionally CNAME). In caching, TTL becomes the expiry criterion and must be handled together with negative caching (NXDOMAIN) in a simplified form. In E2, captures must clearly show: a query resolved locally (internal zone), a query forwarded to upstream and a query served from cache (no upstream packet for that third query).
+A DNS resolver forces work with a binary format: header, question, name compression and resource records with mandatory A support and optional AAAA/CNAME extensions. In caching, TTL becomes the expiry criterion and is mandatory; simplified negative caching (NXDOMAIN) is recommended. In E2, captures must clearly show: a query resolved locally (internal zone), a query forwarded to upstream and a query served from cache (no upstream packet for that third query).
 
 ## Learning objectives
 - Parse and construct DNS messages (header, question, answer) at the byte level
@@ -46,6 +46,10 @@ A DNS resolver forces work with a binary format: header, question, name compress
 ### Contract (interface) — fixed for assessment
 - **Protocol/default ports (E2):** UDP: resolver 5300/UDP; upstream 53/UDP (DNS).
 - The Flex component must work with the default values (without manual reconfiguration) so that it can be integrated into automated tests.
+
+### Interpretation and complementary evidence
+
+The [E2 capture and semantic-evidence matrix](../00_common/E2_CAPTURE_EVIDENCE_MATRIX.md#s07) maps every capture rule to its generating action and the complementary application evidence.
 
 ### Deliverables
 - `flex/` directory with sources plus build/run instructions (avoid exotic dependencies where possible).
@@ -95,7 +99,7 @@ A DNS resolver forces work with a binary format: header, question, name compress
 - Deterministic TTL handling: cache uses the TTL from responses; for tests support TTL min/max override (config) for predictability.
 
 ### SHOULD (recommended)
-- Support `NXDOMAIN` for names absent from the local zone with the correct response code.
+- Additional NXDOMAIN tests for multiple local-zone boundaries beyond the mandatory response-code handling.
 - Simple negative caching (store NXDOMAIN for a short interval) to avoid repeated forwarding.
 - `AAAA` support as an extension if the parser is generalised.
 
@@ -134,7 +138,7 @@ A DNS resolver forces work with a binary format: header, question, name compress
 - Filters for queries and responses are provided separately.
 
 ### Automatic PCAP criteria (E2)
-These criteria are **deterministic** and can be verified automatically with `tshark`.
+These capture checks are reproducible with `tshark`. Frame counts are smoke checks; they do not replace the application tests or prove complete project acceptance.
 - Official rules: `tools/pcap_rules/S07.json`
 - In the catalogue (template): `00_common/tools/pcap_rules/S07.json` and `00_common/tools/validate_pcap.py` (copy into the student repository).
 
@@ -143,11 +147,11 @@ These criteria are **deterministic** and can be verified automatically with `tsh
 
 | ID | tshark filter (`-Y`) | Condition | What it validates |
 |---:|---|---:|---|
-| R1 | `udp.dstport==5300 && dns.flags.response==0` | `>= 3` | At least 3 client → resolver queries (local zone plus forwarding plus cache). |
-| R2 | `udp.srcport==5300 && dns.flags.response==1` | `>= 3` | At least 3 resolver → client responses. |
-| R3 | `udp.dstport==53 && dns.flags.response==0` | `>= 1` | At least one query forwarded to upstream (port 53). |
-| R4 | `udp.dstport==53 && dns.qry.name` | `<= 2` | A limited number of upstream queries (cache demonstration). |
-| R5 | `dns.flags.rcode==3` | `>= 1` | At least one NXDOMAIN response (negative caching). |
+| R1 | `udp.dstport==5300 && dns.flags.response==0` | `>= 3` | At least three decoded DNS query frames to resolver UDP/5300. |
+| R2 | `udp.srcport==5300 && dns.flags.response==1` | `>= 3` | At least three decoded DNS response frames from resolver UDP/5300. |
+| R3 | `udp.dstport==53 && dns.flags.response==0` | `>= 1` | At least one decoded DNS query to upstream UDP/53. |
+| R4 | `udp.dstport==53 && dns.qry.name` | `<= 2` | Upstream DNS query-frame count is within the declared bound; correlate repeated names and TTL to establish caching. |
+| R5 | `dns.flags.rcode==3` | `>= 1` | A decoded NXDOMAIN response is present; negative caching is not established by this check. |
 
 ### Deliverables
 - Docker Compose with `dns_resolver`, `upstream_dns` (or an upstream mock) and `tester`.
@@ -156,7 +160,7 @@ These criteria are **deterministic** and can be verified automatically with `tsh
 
 ## E3 — Completion plus demo plus testing
 - All MUST requirements implemented including TTL expiry and behaviour under upstream timeout.
-- Extended tests for malformed messages, negative caching and cache capacity.
+- Extended tests for malformed messages, cache capacity and negative caching if implemented.
 - Mininet demo showing the difference between local, forwarded and cached answers (logs plus PCAP evidence).
 - Documented refactoring and a mini security audit for binary input handling and rate limiting.
 

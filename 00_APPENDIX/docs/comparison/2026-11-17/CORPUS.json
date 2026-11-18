@@ -1,0 +1,1940 @@
+{
+  "schema_version": 1,
+  "study_date": "2026-11-17",
+  "design": "Bounded descriptive study of public artefacts; no scores or ranking",
+  "anchor": {
+    "repository": "https://github.com/antonioclim/COMPNET-EN",
+    "candidate": "v1.5.0",
+    "commit": "8fb6afcd89eb3fa27b909941f96eff4276df8f29",
+    "tree": "5884c293f2ec944a42a92c189ab6c178714c8e03"
+  },
+  "protocol_sha256": "a036146226cc907d48d4e450e20acf6fa287bedbac541a2eaf717b02b0aa8c21",
+  "unit_count": 18,
+  "external_unit_count": 17,
+  "cell_count": 180,
+  "status_definitions": {
+    "DOCUMENTED": "Direct primary-source support for the stated feature; no execution inferred",
+    "MIXED": "Subclaims have different visibility or edition scope, as stated",
+    "NOT_IDENTIFIED": "Not identified within listed inspected sources; no universal absence",
+    "ACCESS_LIMITED": "Relevant content could not be inspected through recorded routes",
+    "NOT_APPLICABLE": "Dimension explicitly does not apply to the identified unit"
+  },
+  "status_counts_are_not_scores": {
+    "DOCUMENTED": 111,
+    "NOT_IDENTIFIED": 22,
+    "MIXED": 42,
+    "ACCESS_LIMITED": 5
+  },
+  "raw_external_material_included": false,
+  "units": [
+    {
+      "unit_id": "U00",
+      "name": "ASE-CSIE COMPNET-EN",
+      "unit_type": "integrated course kit",
+      "observed_edition": "v1.5.0 candidate, commit 8fb6afcd89eb3fa27b909941f96eff4276df8f29",
+      "selection_status": "fixed_anchor",
+      "identity_notes": "The author project is fixed at the pre-comparison candidate; current evidence does not silently change its source identity.",
+      "cells": {
+        "C1": {
+          "status": "DOCUMENTED",
+          "claim": "The README organises fourteen lecture–seminar weeks with linked practical pathways.",
+          "source_ids": [
+            "CP001"
+          ],
+          "limitations": "Declared course structure, not contact-hour equivalence or measured mastery."
+        },
+        "C2": {
+          "status": "DOCUMENTED",
+          "claim": "The shared source gate parses Python and runs regressions; it does not enforce a Python lint or type-check gate.",
+          "source_ids": [
+            "CP005",
+            "CP006"
+          ],
+          "limitations": "Source configuration inspected; optional formatting tools do not establish repository-wide style enforcement."
+        },
+        "C3": {
+          "status": "DOCUMENTED",
+          "claim": "A model–observation–explanation–transfer loop, evidence-based submissions, quizzes, Parsons problems and cross-language support are documented.",
+          "source_ids": [
+            "CP001",
+            "CP003"
+          ],
+          "limitations": "Designed scaffolding is not an observed learning-effectiveness result."
+        },
+        "C4": {
+          "status": "DOCUMENTED",
+          "claim": "The kit documents Python, Docker and Mininet pathways; the lab runner registers eighteen labs with named variants.",
+          "source_ids": [
+            "CP001",
+            "CP004"
+          ],
+          "limitations": "Registered lab definitions differ from Compose file counts and do not establish successful deployment."
+        },
+        "C5": {
+          "status": "DOCUMENTED",
+          "claim": "The fixed tree contains 413 Markdown files and 401 PlantUML sources, with student, instructor and Python-bridge guidance.",
+          "source_ids": [
+            "CP001",
+            "CP003",
+            "CP009"
+          ],
+          "limitations": "Inventory size is not a quality, depth or superiority measure."
+        },
+        "C6": {
+          "status": "DOCUMENTED",
+          "claim": "The catalogue contains thirty project briefs, S01–S20 and A01–A10, supported by shared assessment tooling and a verification workbook.",
+          "source_ids": [
+            "CP002",
+            "CP009"
+          ],
+          "limitations": "Alternative briefs are not thirty required assignments or equivalent to another course’s checkpoints."
+        },
+        "C7": {
+          "status": "DOCUMENTED",
+          "claim": "The tree contains 101 HTML files; the bridge documents ten presentation modules, formative quizzes and Parsons exercises.",
+          "source_ids": [
+            "CP003",
+            "CP009"
+          ],
+          "limitations": "File/source presence only; browser interaction acceptance remains outstanding."
+        },
+        "C8": {
+          "status": "DOCUMENTED",
+          "claim": "CI calls the shared source gate; earlier F5 evidence records 188 pytest passes and fourteen packaging checks for this tree.",
+          "source_ids": [
+            "CP005",
+            "CP006",
+            "CP010"
+          ],
+          "limitations": "Prior execution is explicitly inherited; no new CI run or native lab acceptance occurred in this phase."
+        },
+        "C9": {
+          "status": "NOT_IDENTIFIED",
+          "claim": "No independent COMPNET-EN learning-outcome evaluation was identified in the inspected project documents and exact-name search.",
+          "source_ids": [
+            "CP001",
+            "CP008",
+            "CP011"
+          ],
+          "limitations": "This bounded search does not prove absence of publications or adoption; mirrored self-report was excluded."
+        },
+        "C10": {
+          "status": "MIXED",
+          "claim": "LICENCE.md declares category-specific CC BY-NC-SA, GPL and reserved material; F3-R14 retains unresolved overlaps and additional conditions.",
+          "source_ids": [
+            "CP007",
+            "CP008"
+          ],
+          "limitations": "Declared terms only. The separate option A remains unapproved and unapplied; third-party rights are not certified."
+        }
+      }
+    },
+    {
+      "unit_id": "U01",
+      "name": "Stanford CS144",
+      "unit_type": "Dated course and its public starter-code component",
+      "observed_edition": "Fall 2026; Imp source head dated 2026-09-29",
+      "selection_status": "INCLUDED_PUBLIC_EDITION",
+      "identity_notes": "Fall 2026 landing and checkpoint 0 explicitly identify Imp. This is a new observation, not a reproduction of the historical Minnow/C++20 comparison. Private student solutions and server-only tests are outside the corpus.",
+      "cells": {
+        "C1": {
+          "status": "DOCUMENTED",
+          "claim": "Fall 2026 calendar and eight checkpoints describe a progressively constructed network stack.",
+          "source_ids": [
+            "US014",
+            "US042"
+          ],
+          "limitations": "Calendar and assignment design are documented; completed teaching or student mastery is not measured."
+        },
+        "C2": {
+          "status": "DOCUMENTED",
+          "claim": "Imp documents C++23, clang-tidy, formatting and sanitised test targets.",
+          "source_ids": [
+            "US042",
+            "US047",
+            "US048"
+          ],
+          "limitations": "Configuration/instructions inspected at the pinned commit; tools were not run and mandatory CI enforcement is not established."
+        },
+        "C3": {
+          "status": "DOCUMENTED",
+          "claim": "Staged checkpoints, tutorials, quizzes and lab write-ups provide documented scaffolding and assessment.",
+          "source_ids": [
+            "US014",
+            "US042"
+          ],
+          "limitations": "Designed feedback structure only; no claim of measured learning effectiveness."
+        },
+        "C4": {
+          "status": "DOCUMENTED",
+          "claim": "The 2026 handout documents GNU/Linux, VirtualBox/UTM/cloud options and an Ubuntu 26.04 test environment.",
+          "source_ids": [
+            "US042"
+          ],
+          "limitations": "These are stated requirements, not installations or deployments performed by this study; no VM image was downloaded."
+        },
+        "C5": {
+          "status": "DOCUMENTED",
+          "claim": "Public checkpoint instructions, a lab FAQ link and build/test commands are available.",
+          "source_ids": [
+            "US014",
+            "US042",
+            "US047"
+          ],
+          "limitations": "FAQ is linked but not separately inspected; no claim that all instructor resources are public."
+        },
+        "C6": {
+          "status": "DOCUMENTED",
+          "claim": "Eight successive checkpoints cover byte streams, TCP, network interfaces, routing and a final creative networking exercise.",
+          "source_ids": [
+            "US014"
+          ],
+          "limitations": "Checkpoint titles and declared progression, not eight independent projects or executed implementations."
+        },
+        "C7": {
+          "status": "MIXED",
+          "claim": "The course documents quizzes and Gradescope use; their authenticated interactive content was not inspected.",
+          "source_ids": [
+            "US014"
+          ],
+          "limitations": "A declared assessment platform is not evidence of embedded public HTML exercises or native-browser acceptance."
+        },
+        "C8": {
+          "status": "MIXED",
+          "claim": "Public local tests and sanitised targets are documented; the README places most tests behind the Stanford submission server.",
+          "source_ids": [
+            "US047",
+            "US048"
+          ],
+          "limitations": "No test or CI run was executed or observed. Server-side tests are not part of the retrieved corpus."
+        },
+        "C9": {
+          "status": "NOT_IDENTIFIED",
+          "claim": "No teaching-evaluation publication, external adoption statement or measured learning outcomes were identified in inspected materials.",
+          "source_ids": [
+            "US014",
+            "US042",
+            "US047"
+          ],
+          "limitations": "Inspected course landing, checkpoint 0, Imp README/build/test configuration and tree; no separate literature or adoption survey was conducted."
+        },
+        "C10": {
+          "status": "MIXED",
+          "claim": "The README conditions public lab access on keeping solutions private; no standard component licence was identified.",
+          "source_ids": [
+            "US047",
+            "US049"
+          ],
+          "limitations": "Declared notice only. README, handout and tree were inspected; public visibility is not a general reuse licence."
+        }
+      }
+    },
+    {
+      "unit_id": "U02",
+      "name": "ETH Zurich Communication Networks / mini-Internet",
+      "unit_type": "Course-associated practical platform",
+      "observed_edition": "Repository snapshot 006ec471cb90df12a6da179499b79cbb39a4c7ad (commit dated 2026-07-03); inspected assignment locator explicitly names 2024.",
+      "selection_status": "RESOLVED_PLATFORM_WITH_COURSE_LINK",
+      "identity_notes": "The pinned platform repository links Communication Networks and advanced-networking uses. No full 2026 course syllabus was inspected; assignment locator inspected is explicitly 2024.",
+      "cells": {
+        "C1": {
+          "status": "DOCUMENTED",
+          "claim": "Repository organises introductory mini-Internet assignments and advanced-networking exercises.",
+          "source_ids": [
+            "FW001",
+            "FW002"
+          ],
+          "limitations": "Repository organisation, not a verified semester schedule."
+        },
+        "C2": {
+          "status": "MIXED",
+          "claim": "README documents script-driven topology builds; formatting, linting and typing conventions were not identified in inspected READMEs or monitoring code.",
+          "source_ids": [
+            "FW001",
+            "FW003",
+            "FW006"
+          ],
+          "limitations": "Only these sources; no repository-wide absence claim or executed build."
+        },
+        "C3": {
+          "status": "DOCUMENTED",
+          "claim": "Student groups operate autonomous systems and cooperate towards network-wide connectivity.",
+          "source_ids": [
+            "FW001",
+            "FW007"
+          ],
+          "limitations": "Declared teaching design; no measured learning gain inferred."
+        },
+        "C4": {
+          "status": "DOCUMENTED",
+          "claim": "Each network component runs in a Linux container; students connect remotely through SSH.",
+          "source_ids": [
+            "FW001"
+          ],
+          "limitations": "Per-component containers, not one container per autonomous system; deployment untested."
+        },
+        "C5": {
+          "status": "MIXED",
+          "claim": "Public READMEs describe the platform; linked platform and 2024 assignment wikis could not be inspected.",
+          "source_ids": [
+            "FW001",
+            "FW002",
+            "FW003",
+            "FW005",
+            "FW008",
+            "FW009"
+          ],
+          "limitations": "Wiki failures were tool access limitations, not evidence of unavailable material generally."
+        },
+        "C6": {
+          "status": "DOCUMENTED",
+          "claim": "The group-operated mini-Internet is documented alongside separate advanced protocol exercises.",
+          "source_ids": [
+            "FW001",
+            "FW002"
+          ],
+          "limitations": "Different exercise types are not counted as equivalent projects."
+        },
+        "C7": {
+          "status": "DOCUMENTED",
+          "claim": "README describes a connectivity website, routing views and RPKI registration.",
+          "source_ids": [
+            "FW001"
+          ],
+          "limitations": "Documented features only; no browser interaction certified."
+        },
+        "C8": {
+          "status": "DOCUMENTED",
+          "claim": "The connectivity script invokes ping, classifies return codes and writes monitoring results.",
+          "source_ids": [
+            "FW006"
+          ],
+          "limitations": "Static source inspection; no network probes or successful test run observed."
+        },
+        "C9": {
+          "status": "DOCUMENTED",
+          "claim": "A 2020 CCR paper describes the platform and reports ETH course use.",
+          "source_ids": [
+            "FW007",
+            "FW001"
+          ],
+          "limitations": "Publication and author-reported use, not current-snapshot learning-effectiveness evidence."
+        },
+        "C10": {
+          "status": "MIXED",
+          "claim": "The project declares MIT licensing and separately identifies a GPLv3 container component.",
+          "source_ids": [
+            "FW001",
+            "FW004"
+          ],
+          "limitations": "Declared terms only; no ownership certification or blanket third-party licence inference."
+        }
+      }
+    },
+    {
+      "unit_id": "U03",
+      "name": "UC Berkeley CS168",
+      "unit_type": "Dated course with textbook and project documentation",
+      "observed_edition": "Fall 2026 course; textbook source head dated 2026-10-01 retains a Fall 2024 maintenance notice",
+      "selection_status": "INCLUDED_PUBLIC_EDITION",
+      "identity_notes": "cs168.io redirects to fa26.cs168.io. Textbook and course are separate components: the pinned textbook retains older maintenance/PDF notices, while project pages explicitly identify Fall 2026.",
+      "cells": {
+        "C1": {
+          "status": "DOCUMENTED",
+          "claim": "The Fall 2026 calendar organises lectures, readings, discussions and three project themes through the final examination.",
+          "source_ids": [
+            "US011"
+          ],
+          "limitations": "The 17 numbered calendar weeks include breaks/revision/examination; they are not 17 equivalent teaching-load units."
+        },
+        "C2": {
+          "status": "DOCUMENTED",
+          "claim": "Routing instructions restrict editable files and imports, prohibit hard-coded globals and encourage helper methods.",
+          "source_ids": [
+            "US003"
+          ],
+          "limitations": "These are assignment coding rules, not demonstrated lint/type/CI enforcement or general code-quality scores."
+        },
+        "C3": {
+          "status": "DOCUMENTED",
+          "claim": "The routing project pairs ten stages with local tests and prediction-observation questions.",
+          "source_ids": [
+            "US003"
+          ],
+          "limitations": "Directly documented scaffolding; neither execution nor learning effectiveness was measured."
+        },
+        "C4": {
+          "status": "DOCUMENTED",
+          "claim": "Routing setup specifies Python 3.8, starter code and a locally served visual simulator.",
+          "source_ids": [
+            "US003"
+          ],
+          "limitations": "The stated supported version and commands were inspected; no dependencies, simulator or browser were executed."
+        },
+        "C5": {
+          "status": "DOCUMENTED",
+          "claim": "An open textbook, diagram slides, worksheets and project guides are linked; the textbook explicitly retains a beta/proofreading disclaimer.",
+          "source_ids": [
+            "US015",
+            "US011",
+            "US002"
+          ],
+          "limitations": "Linked artefacts are distinguished from those inspected. The disclaimer does not imply that every passage is erroneous."
+        },
+        "C6": {
+          "status": "DOCUMENTED",
+          "claim": "Fall 2026 projects cover traceroute, distance-vector routing and transport; routing uses ten implementation stages.",
+          "source_ids": [
+            "US011",
+            "US003"
+          ],
+          "limitations": "Project themes and stages are different units; no source implementation was executed."
+        },
+        "C7": {
+          "status": "DOCUMENTED",
+          "claim": "The routing guide documents browser-controlled topology changes and packet visualisation in a local simulator.",
+          "source_ids": [
+            "US003"
+          ],
+          "limitations": "This concerns project interaction, not embedded textbook quizzes. The browser behaviour was documented, not exercised."
+        },
+        "C8": {
+          "status": "DOCUMENTED",
+          "claim": "Each routing stage has local unit tests; the guide says these determine grading without hidden tests.",
+          "source_ids": [
+            "US003"
+          ],
+          "limitations": "Declared grading/test contract only. No passing test output or CI execution was independently observed."
+        },
+        "C9": {
+          "status": "NOT_IDENTIFIED",
+          "claim": "No teaching-evaluation publication, external adoption statement or measured learning outcomes were identified in inspected materials.",
+          "source_ids": [
+            "US015",
+            "US011",
+            "US003",
+            "US002"
+          ],
+          "limitations": "Inspected textbook landing/source, Fall 2026 calendar and routing guide; no separate literature/adoption survey. Author/lecturer attribution is not outcome evidence."
+        },
+        "C10": {
+          "status": "DOCUMENTED",
+          "claim": "The textbook declares Creative Commons Attribution-ShareAlike 4.0 International.",
+          "source_ids": [
+            "US002"
+          ],
+          "limitations": "This notice applies to the identified textbook work; it does not establish the licence of every course/project component."
+        }
+      }
+    },
+    {
+      "unit_id": "U04",
+      "name": "CMU 15-441/641",
+      "unit_type": "Archived course landing and separately pinned public project template",
+      "observed_edition": "Fall 2022 course landing; TCP template head dated 2026-09-24 does not state its course offering",
+      "selection_status": "INCLUDED_WITH_EXPLICIT_EDITION_SPLIT",
+      "identity_notes": "The legacy root returned 404. The owner organisation locator led to Fall 2022. Its TCP template has a 2026 default-head commit but no offering date in the inspected README. These components are not silently merged into one current course edition.",
+      "cells": {
+        "C1": {
+          "status": "DOCUMENTED",
+          "claim": "The Fall 2022 landing describes network design trade-offs, protocol topics and multi-week implementation projects.",
+          "source_ids": [
+            "US012"
+          ],
+          "limitations": "Archived syllabus overview only; no complete current-semester schedule was established."
+        },
+        "C2": {
+          "status": "DOCUMENTED",
+          "claim": "The 2026-head TCP template documents optional pre-commit analysis/formatting; its Makefile enables compiler warning flags.",
+          "source_ids": [
+            "US009",
+            "US008"
+          ],
+          "limitations": "Optional local configuration, not enforced CI or observed code correctness."
+        },
+        "C3": {
+          "status": "DOCUMENTED",
+          "claim": "TCP project instructions require a testing-strategy write-up, additional tests and congestion-window experiment logs.",
+          "source_ids": [
+            "US009"
+          ],
+          "limitations": "Documented tasks/feedback mechanisms in this project template; no claim about all course projects or measured outcomes."
+        },
+        "C4": {
+          "status": "DOCUMENTED",
+          "claim": "TCP development uses Vagrant with Docker; checkpoint-two experiments are directed to separate AWS instances.",
+          "source_ids": [
+            "US009"
+          ],
+          "limitations": "Declared distinction between local development and experimental environment; no provisioning or cloud execution occurred."
+        },
+        "C5": {
+          "status": "DOCUMENTED",
+          "claim": "The TCP README explains files, packet capture, the Wireshark dissector, test commands and submission preparation.",
+          "source_ids": [
+            "US009"
+          ],
+          "limitations": "README inspected; linked third-party manuals and the complete assignment handout were not separately inspected."
+        },
+        "C6": {
+          "status": "DOCUMENTED",
+          "claim": "The pinned repository supplies a TCP-over-UDP project template with staged testing and congestion-control experiments.",
+          "source_ids": [
+            "US009"
+          ],
+          "limitations": "One representative project, not verification of the historical three-project course count or equivalence to a full course kit."
+        },
+        "C7": {
+          "status": "MIXED",
+          "claim": "Ed discussion and Gradescope submission are documented; public interactive teaching widgets were not identified.",
+          "source_ids": [
+            "US012",
+            "US009"
+          ],
+          "limitations": "Inspected archived landing and TCP guide; authenticated platform content was outside scope. No native browser test."
+        },
+        "C8": {
+          "status": "DOCUMENTED",
+          "claim": "The Makefile invokes two Python test scripts; the README explicitly describes the supplied tests as incomplete.",
+          "source_ids": [
+            "US008",
+            "US009"
+          ],
+          "limitations": "Configured local tests, not observed test success, complete coverage or CI. No external code executed."
+        },
+        "C9": {
+          "status": "NOT_IDENTIFIED",
+          "claim": "No teaching-evaluation publication, external adoption statement or measured learning outcomes were identified in inspected materials.",
+          "source_ids": [
+            "US012",
+            "US009"
+          ],
+          "limitations": "Inspected Fall 2022 landing and pinned TCP README/Makefile/licence; no separate literature/adoption survey."
+        },
+        "C10": {
+          "status": "DOCUMENTED",
+          "claim": "The TCP repository notice requires express course-staff permission for copying or distribution.",
+          "source_ids": [
+            "US007"
+          ],
+          "limitations": "Declared repository notice only, not legal ownership certification. Full retrieved files are retained privately, excluded from distribution."
+        }
+      }
+    },
+    {
+      "unit_id": "U05",
+      "name": "Princeton COS461",
+      "unit_type": "Historical public assignment repository with cross-course provenance evidence",
+      "observed_edition": "Fall 2021 assignments, identified by COS461_F2021 hand-in URL; source head dated 2021-11-04",
+      "selection_status": "INCLUDED_HISTORICAL_EDITION",
+      "identity_notes": "The seed repository redirects to feamster/COS461-Public. Assignment 1 links COS461_F2021 for submission. A separately indexed Spring 2017 institutional page returned 403 on direct access and is not used to reconstruct the 2021 syllabus.",
+      "cells": {
+        "C1": {
+          "status": "DOCUMENTED",
+          "claim": "The historical repository organises five assignments spanning sockets, congestion, measurement, port scanning and HTTP proxies.",
+          "source_ids": [
+            "US040"
+          ],
+          "limitations": "Assignment list, not a verified current syllabus or semester length; commented-out links are not counted."
+        },
+        "C2": {
+          "status": "DOCUMENTED",
+          "claim": "The HTTP proxy Makefile provides explicit Go build targets for proxy and DNS-prefetching variants.",
+          "source_ids": [
+            "US038"
+          ],
+          "limitations": "Build convention only; lint, type or sanitiser enforcement was not established and code was not built."
+        },
+        "C3": {
+          "status": "DOCUMENTED",
+          "claim": "Assignment guides provide staged setup, debugging hints, expected behaviours and submission/grading requirements.",
+          "source_ids": [
+            "US035",
+            "US036"
+          ],
+          "limitations": "Designed support and evaluation requirements, not measured learning effects."
+        },
+        "C4": {
+          "status": "DOCUMENTED",
+          "claim": "Assignment 1 documents Vagrant/VirtualBox setup and an Apple-Silicon UTM route.",
+          "source_ids": [
+            "US035"
+          ],
+          "limitations": "Historical 2021 instructions; the separate UTM guide was linked but not inspected. Neither current compatibility nor native VM deployment was verified."
+        },
+        "C5": {
+          "status": "DOCUMENTED",
+          "claim": "Public guides cover socket programming and proxy implementation, with troubleshooting and test instructions.",
+          "source_ids": [
+            "US035",
+            "US036"
+          ],
+          "limitations": "Two representative assignment guides, not a claim that all teaching/staff materials are available."
+        },
+        "C6": {
+          "status": "DOCUMENTED",
+          "claim": "The repository lists five programming assignments; sockets require C plus either Python or Go implementations.",
+          "source_ids": [
+            "US040",
+            "US035"
+          ],
+          "limitations": "Historical assignment requirements; no equivalence to five independent capstones or actual student completion."
+        },
+        "C7": {
+          "status": "MIXED",
+          "claim": "Browser proxy experiments and TigerFile submission are documented; embedded web quizzes were not identified.",
+          "source_ids": [
+            "US035",
+            "US036"
+          ],
+          "limitations": "Inspected repository README and two assignment guides. Browser-based protocol experiments are distinct from interactive presentation widgets."
+        },
+        "C8": {
+          "status": "DOCUMENTED",
+          "claim": "The guides specify client/server interoperability tests and proxy/concurrency test scripts, supplemented by grading tests.",
+          "source_ids": [
+            "US035",
+            "US036"
+          ],
+          "limitations": "Test instructions only; no passing run, complete coverage or CI was observed."
+        },
+        "C9": {
+          "status": "MIXED",
+          "claim": "JHU documents reuse of selected Princeton exercises; no course-wide adoption or measured learning effects were established.",
+          "source_ids": [
+            "US017",
+            "US019"
+          ],
+          "limitations": "Primary acknowledgements support selected-assignment lineage, not adoption of the complete Princeton course or exact 2021 snapshot. No publication/outcome survey was conducted."
+        },
+        "C10": {
+          "status": "NOT_IDENTIFIED",
+          "claim": "No overall course reuse licence was identified in the inspected repository materials.",
+          "source_ids": [
+            "US040",
+            "US035",
+            "US036",
+            "US041"
+          ],
+          "limitations": "Inspected top-level README/tree and two assignment guides. Vendored code may have separate terms; public access does not establish unrestricted reuse."
+        }
+      },
+      "cross_unit_relationships": [
+        {
+          "from_unit_id": "U05",
+          "to_unit_id": "U11",
+          "relationship": "acknowledged_adaptation_of_selected_assignment",
+          "source_id": "US017",
+          "scope": "JHU assignment 1 credits a similar Princeton socket assignment",
+          "exact_upstream_revision_identified": false,
+          "complete_course_adoption_claimed": false
+        },
+        {
+          "from_unit_id": "U05",
+          "to_unit_id": "U11",
+          "relationship": "acknowledged_adaptation_of_selected_assignment",
+          "source_id": "US019",
+          "scope": "JHU assignment 3 credits a Princeton routing assignment",
+          "exact_upstream_revision_identified": false,
+          "complete_course_adoption_claimed": false
+        }
+      ]
+    },
+    {
+      "unit_id": "U06",
+      "name": "Michigan EECS489",
+      "unit_type": "Dated course repository and bundled project component",
+      "observed_edition": "Winter 2025 (W25), default branch w25; source head dated 2025-05-11",
+      "selection_status": "INCLUDED_HISTORICAL_EDITION",
+      "identity_notes": "Default branch is w25. README and assignment policies say W25 and Assignment 1 is due 29 January 2025. Calendar first-column dates retain 2024 suffixes, so the edition is taken from explicit headers/due date rather than those inconsistent cells. This is not a Fall 2025 snapshot.",
+      "cells": {
+        "C1": {
+          "status": "DOCUMENTED",
+          "claim": "Winter 2025 materials provide a layered networking outline, lecture/discussion schedule and four assignments.",
+          "source_ids": [
+            "US033",
+            "US028"
+          ],
+          "limitations": "Schedule includes inconsistent 2024 year suffixes; W25 headings and the dated first assignment establish the observed edition."
+        },
+        "C2": {
+          "status": "DOCUMENTED",
+          "claim": "Project 1 specifies C++23 and CMake with spdlog/cxxopts dependencies.",
+          "source_ids": [
+            "US027",
+            "US029"
+          ],
+          "limitations": "Declared toolchain/build configuration; no compilation, dependency installation or quality rating was performed."
+        },
+        "C3": {
+          "status": "DOCUMENTED",
+          "claim": "Per-lecture self-evaluation quizzes, group exercises and delayed autograder release support documented formative practice.",
+          "source_ids": [
+            "US033",
+            "US028"
+          ],
+          "limitations": "Quizzes are described as completion-based bonus work; actual quiz content and effectiveness were not evaluated."
+        },
+        "C4": {
+          "status": "DOCUMENTED",
+          "claim": "Project 1 documents Ubuntu Server 24.04 in a VM, Mininet, SSH/SCP and CMake.",
+          "source_ids": [
+            "US027"
+          ],
+          "limitations": "Instructions were read only; no VM image, environment or experiment was run."
+        },
+        "C5": {
+          "status": "DOCUMENTED",
+          "claim": "Course and assignment policies accompany a staged Mininet/socket guide with testing and measurement instructions.",
+          "source_ids": [
+            "US033",
+            "US028",
+            "US027"
+          ],
+          "limitations": "Specific inspected guides, not an overall documentation-quality score or complete instructor-material inventory."
+        },
+        "C6": {
+          "status": "DOCUMENTED",
+          "claim": "Four projects cover sockets/Mininet, CDN video streaming, reliable transport and a static router.",
+          "source_ids": [
+            "US028",
+            "US034"
+          ],
+          "limitations": "Project links/names and repository paths are visible; only the first project specification was inspected in depth."
+        },
+        "C7": {
+          "status": "MIXED",
+          "claim": "Self-evaluation quizzes, an autograder and Gradescope are documented; authenticated assessment content was not inspected.",
+          "source_ids": [
+            "US033",
+            "US027"
+          ],
+          "limitations": "Declared assessment mechanisms only, not a browser acceptance result or accessible public quiz bank."
+        },
+        "C8": {
+          "status": "DOCUMENTED",
+          "claim": "Project 1 specifies autograder checks and limits, while requiring student-designed tests and Mininet measurements.",
+          "source_ids": [
+            "US027",
+            "US028"
+          ],
+          "limitations": "The autograder was not accessed or executed; no passing run or CI enforcement is claimed."
+        },
+        "C9": {
+          "status": "MIXED",
+          "claim": "CUHK reports reusing Michigan course materials; no whole-course adoption or learning-outcome evidence was established.",
+          "source_ids": [
+            "AO023"
+          ],
+          "limitations": "Author-reported reuse of unspecified materials, not the exact w25 snapshot; permission was not independently verified. Incoming Wisconsin provenance remains separate."
+        },
+        "C10": {
+          "status": "MIXED",
+          "claim": "Bundled POX declares Apache 2.0; an overall course licence was not identified.",
+          "source_ids": [
+            "US032",
+            "US033",
+            "US034"
+          ],
+          "limitations": "POX is a distinct vendored component. Its licence is not extended to the course materials or student assignments."
+        }
+      },
+      "provenance_observations": [
+        {
+          "claim": "Assignment 1 credits Wisconsin CS640 and earlier Michigan staff.",
+          "source_ids": [
+            "US027"
+          ],
+          "direction": "incoming reuse",
+          "c9_implication": "Not evidence of publication, external adoption or evaluated outcomes of Michigan EECS489."
+        }
+      ],
+      "cross_unit_relationships": [
+        {
+          "from_unit_id": "U06",
+          "to_unit_id": "U12",
+          "relationship": "author_reported_reuse_of_unspecified_course_materials",
+          "source_id": "AO023",
+          "scope": "CUHK README credits borrowing Michigan networking course materials with permission.",
+          "exact_upstream_revision_identified": false,
+          "whole_course_adoption_claimed": false,
+          "permission_independently_verified": false,
+          "learning_outcomes_established": false
+        }
+      ]
+    },
+    {
+      "unit_id": "U07",
+      "name": "Georgia Tech CS 6250 Computer Networks",
+      "unit_type": "Online graduate course: public landing page and sample syllabus",
+      "observed_edition": "Fall 2026 sample syllabus; landing page accessed 17 November 2026",
+      "selection_status": "INCLUDED",
+      "identity_notes": "Official OMSCS page links the Fall 2026 PDF. The institution labels public syllabi as samples; enrolled-course revisions on Canvas were not inspected.",
+      "cells": {
+        "C1": {
+          "status": "DOCUMENTED",
+          "claim": "Fall 2026 syllabus provides a sixteen-week calendar and thirteen numbered lessons.",
+          "source_ids": [
+            "AO005"
+          ],
+          "limitations": "Published plan; delivery and mastery were not observed."
+        },
+        "C2": {
+          "status": "NOT_IDENTIFIED",
+          "claim": "No explicit lint, formatting or type-checking convention identified in the landing page and syllabus.",
+          "source_ids": [
+            "AO001",
+            "AO005"
+          ],
+          "limitations": "Python 3 is specified; project source and Canvas materials were not inspected."
+        },
+        "C3": {
+          "status": "DOCUMENTED",
+          "claim": "Syllabus states learning objectives, weighted assessment and required participation in three of six discussions.",
+          "source_ids": [
+            "AO005"
+          ],
+          "limitations": "Design evidence only."
+        },
+        "C4": {
+          "status": "MIXED",
+          "claim": "Syllabus identifies practical platforms; reproducible setup instructions were not identified in the inspected public documents.",
+          "source_ids": [
+            "AO001",
+            "AO005"
+          ],
+          "limitations": "Tutorial handouts and Canvas content were outside the acquired corpus; no environment was run."
+        },
+        "C5": {
+          "status": "DOCUMENTED",
+          "claim": "Syllabus describes guided tutorials and recommends Kurose–Ross as optional reading.",
+          "source_ids": [
+            "AO005"
+          ],
+          "limitations": "Referenced textbooks and tutorial handouts were not inspected."
+        },
+        "C6": {
+          "status": "DOCUMENTED",
+          "claim": "Five regular-semester projects cover spanning tree, distance vector, SDN firewall, BGP hijacking and BGP measurements.",
+          "source_ids": [
+            "AO005"
+          ],
+          "limitations": "Summer omits hijacking; extra-credit work is separate."
+        },
+        "C7": {
+          "status": "DOCUMENTED",
+          "claim": "Web-based asynchronous delivery, content quizzes, tutorial quizzes and Ed Discussion participation are documented.",
+          "source_ids": [
+            "AO005"
+          ],
+          "limitations": "No quiz content or browser behaviour was tested."
+        },
+        "C8": {
+          "status": "NOT_IDENTIFIED",
+          "claim": "No executable tests, grader implementation or CI configuration identified in the landing page and syllabus.",
+          "source_ids": [
+            "AO001",
+            "AO005"
+          ],
+          "limitations": "Assessment descriptions do not establish automation."
+        },
+        "C9": {
+          "status": "NOT_IDENTIFIED",
+          "claim": "No course-specific publication or outcome evaluation identified in the inspected landing page and syllabus.",
+          "source_ids": [
+            "AO001",
+            "AO005"
+          ],
+          "limitations": "Bounded document review; no universal absence claim."
+        },
+        "C10": {
+          "status": "NOT_IDENTIFIED",
+          "claim": "No express reuse licence identified in the inspected landing page and sample syllabus.",
+          "source_ids": [
+            "AO001",
+            "AO005"
+          ],
+          "limitations": "Public accessibility does not establish permission to redistribute course materials."
+        }
+      }
+    },
+    {
+      "unit_id": "U08",
+      "name": "KAIST CS341 / KENSv3",
+      "unit_type": "Course-associated C/C++ network simulation framework",
+      "observed_edition": "master@7dfa45c6356a02b1ba330b6e900a759fdebd9809, committed 28 March 2026; CMake project version 3.3.8",
+      "selection_status": "INCLUDED",
+      "identity_notes": "README associates the KENS series with KAIST CS341. The fixed KENSv3 snapshot is not a complete current CS341 syllabus. The 2015 publication concerns predecessor KENSv2.",
+      "cells": {
+        "C1": {
+          "status": "DOCUMENTED",
+          "claim": "README organises TCP implementation into four stages, from socket context to congestion control.",
+          "source_ids": [
+            "AO017"
+          ],
+          "limitations": "Framework structure; no current semester schedule inferred."
+        },
+        "C2": {
+          "status": "DOCUMENTED",
+          "claim": "LLVM-based clang-format, C++17/C11, compiler warnings and optional sanitisers are configured.",
+          "source_ids": [
+            "AO019",
+            "AO020"
+          ],
+          "limitations": "Configuration inspected without compiling or executing."
+        },
+        "C3": {
+          "status": "DOCUMENTED",
+          "claim": "README describes incremental implementation using solution binaries and automated grading.",
+          "source_ids": [
+            "AO017"
+          ],
+          "limitations": "Author-described scaffolding; no learning-effectiveness comparison."
+        },
+        "C4": {
+          "status": "MIXED",
+          "claim": "Dockerfile defines an Ubuntu 24.04 build environment; the linked installation wiki could not be retrieved.",
+          "source_ids": [
+            "AO021",
+            "AO027",
+            "AO040"
+          ],
+          "limitations": "Web retrieval was disabled; connector rejected the wiki URL. No container was built."
+        },
+        "C5": {
+          "status": "MIXED",
+          "claim": "README provides project guidance; wiki installation documentation remained inaccessible through the available retrieval routes.",
+          "source_ids": [
+            "AO017",
+            "AO027",
+            "AO040"
+          ],
+          "limitations": "Repository tree lists further documentation, but its contents were outside the eight-artefact sample."
+        },
+        "C6": {
+          "status": "DOCUMENTED",
+          "claim": "Four TCP development stages address context, handshakes, flow control and recovery/congestion control.",
+          "source_ids": [
+            "AO017"
+          ],
+          "limitations": "Stages of one implementation exercise, not four equivalent independent projects."
+        },
+        "C7": {
+          "status": "MIXED",
+          "claim": "README describes network simulation and automated assessment; no web teaching interface was identified in inspected framework files.",
+          "source_ids": [
+            "AO017",
+            "AO019",
+            "AO022"
+          ],
+          "limitations": "Simulation is documented; browser interactivity is not established."
+        },
+        "C8": {
+          "status": "DOCUMENTED",
+          "claim": "Linux workflow configures GCC/Ubuntu builds and reliable/unreliable solution tests; CMake selects GoogleTest 1.16.0.",
+          "source_ids": [
+            "AO019",
+            "AO022",
+            "AO011"
+          ],
+          "limitations": "No workflow run inspected or triggered. Tree lists seven workflow files; only one was inspected substantively."
+        },
+        "C9": {
+          "status": "MIXED",
+          "claim": "README reports CS341 use; the identifiable SIGCSE 2015 publication describes KENSv2, not this KENSv3 snapshot.",
+          "source_ids": [
+            "AO017",
+            "AO045"
+          ],
+          "limitations": "DOI 10.1145/2676723.2677304; publication is not evidence of current-version or COMPNET effectiveness."
+        },
+        "C10": {
+          "status": "DOCUMENTED",
+          "claim": "Repository LICENSE declares MIT terms; README separately requests students keep solutions private.",
+          "source_ids": [
+            "AO018",
+            "AO017"
+          ],
+          "limitations": "Declared repository terms and teaching request; third-party ownership was not certified."
+        }
+      }
+    },
+    {
+      "unit_id": "U09",
+      "name": "UCLouvain CNP3 ebook and INGInious exercises",
+      "unit_type": "Textbook and exercise ecosystem",
+      "observed_edition": "Third-edition ebook snapshot 5d270364790500fe58283be91329365835a69d66 (commit dated 2025-06-04), plus undated live CNP3 exercise catalogue.",
+      "selection_status": "RESOLVED_BOUNDED_ECOSYSTEM",
+      "identity_notes": "Constituent artifacts are the pinned cnp3/ebook third edition and public CNP3 INGInious catalogue, not every repository in the organisation.",
+      "cells": {
+        "C1": {
+          "status": "DOCUMENTED",
+          "claim": "The textbook separates principles, protocols and practical exercises; INGInious groups tasks by networking topic.",
+          "source_ids": [
+            "FW012",
+            "FW016"
+          ],
+          "limitations": "Not a dated UCLouvain semester syllabus."
+        },
+        "C2": {
+          "status": "DOCUMENTED",
+          "claim": "Contribution guidance specifies spelling checks and Sphinx builds; build instructions include dependency and Docker commands.",
+          "source_ids": [
+            "FW010",
+            "FW011"
+          ],
+          "limitations": "Documented conventions, not verified build success or general code quality."
+        },
+        "C3": {
+          "status": "DOCUMENTED",
+          "claim": "Socket explanations, coding tasks and topic-based exercises provide documented practice scaffolding.",
+          "source_ids": [
+            "FW015",
+            "FW016"
+          ],
+          "limitations": "Exercise submissions and delivered feedback were not tested."
+        },
+        "C4": {
+          "status": "DOCUMENTED",
+          "claim": "BUILD.md documents ebook dependencies and Docker builds; INGInious hosts the exercises.",
+          "source_ids": [
+            "FW011",
+            "FW016"
+          ],
+          "limitations": "Book-build setup only; no native deployment or authenticated grading session."
+        },
+        "C5": {
+          "status": "DOCUMENTED",
+          "claim": "The source textbook includes a preface, structured contents, contribution guidance and build instructions.",
+          "source_ids": [
+            "FW010",
+            "FW011",
+            "FW012",
+            "FW013"
+          ],
+          "limitations": "Named inspected materials; no subjective depth or completeness rating."
+        },
+        "C6": {
+          "status": "DOCUMENTED",
+          "claim": "The catalogue lists socket programming, packet analysis, routing and protocol exercises.",
+          "source_ids": [
+            "FW016",
+            "FW015"
+          ],
+          "limitations": "Catalogue scope; exercise counts are not equated with course projects."
+        },
+        "C7": {
+          "status": "MIXED",
+          "claim": "Public INGInious listings document interactive exercises; answer submission requires registration or sign-in.",
+          "source_ids": [
+            "FW016",
+            "FW011"
+          ],
+          "limitations": "Public catalogue inspected; no authenticated interaction or browser acceptance."
+        },
+        "C8": {
+          "status": "DOCUMENTED",
+          "claim": "A GitHub Actions workflow configures book building and publication; README describes spelling checks.",
+          "source_ids": [
+            "FW014",
+            "FW010"
+          ],
+          "limitations": "Configuration and maintainer statements; no workflow or grading execution observed."
+        },
+        "C9": {
+          "status": "DOCUMENTED",
+          "claim": "Preface reports Saylor incorporation and contributions spanning earlier editions.",
+          "source_ids": [
+            "FW013"
+          ],
+          "limitations": "Historical self-reported reuse; no current-version learner-outcome study inspected."
+        },
+        "C10": {
+          "status": "MIXED",
+          "claim": "Notices differ: README states CC BY-SA 3.0; inspected book sources state CC BY 3.0.",
+          "source_ids": [
+            "FW010",
+            "FW012",
+            "FW013"
+          ],
+          "limitations": "No precedence rule identified in these three sources; ownership and legal effect not assessed."
+        }
+      }
+    },
+    {
+      "unit_id": "U10",
+      "name": "NPS Labtainers",
+      "unit_type": "Laboratory framework and exercise collection",
+      "observed_edition": "Repository snapshot fc1baca0aa2abe2809d92fbc9e93f5ce719b597e (commit dated 2026-11-06); README labels distribution v1.4.4n and 09/11/2026 11:33 without declaring the date format.",
+      "selection_status": "RESOLVED_FRAMEWORK",
+      "identity_notes": "A reusable cybersecurity lab framework, not a single networking semester course. Repository snapshot and embedded distribution label are distinguished.",
+      "cells": {
+        "C1": {
+          "status": "DOCUMENTED",
+          "claim": "Instructor guidance organises labs into topical categories and ordered labpacks.",
+          "source_ids": [
+            "FW020"
+          ],
+          "limitations": "Framework organisation, not an equivalent semester schedule."
+        },
+        "C2": {
+          "status": "DOCUMENTED",
+          "claim": "Designer guidance prescribes Dockerfile naming, configuration structure and a build/test workflow.",
+          "source_ids": [
+            "FW022"
+          ],
+          "limitations": "Instructions inspected; no lint, build or runtime success certified."
+        },
+        "C3": {
+          "status": "DOCUMENTED",
+          "claim": "Student checkwork provides configured progress feedback; designer guidance describes optional formative quizzes.",
+          "source_ids": [
+            "FW021",
+            "FW022"
+          ],
+          "limitations": "Coverage varies by lab; checkwork is expressly distinct from a grade."
+        },
+        "C4": {
+          "status": "DOCUMENTED",
+          "claim": "Student guidance documents Docker-based labs, VM/cloud access and installation options.",
+          "source_ids": [
+            "FW021",
+            "FW023"
+          ],
+          "limitations": "No appliance downloaded or deployment executed."
+        },
+        "C5": {
+          "status": "DOCUMENTED",
+          "claim": "Separate student, instructor and lab-designer manuals are available as source documents.",
+          "source_ids": [
+            "FW020",
+            "FW021",
+            "FW022"
+          ],
+          "limitations": "Relevant sections inspected; no exhaustive evaluation of every manual or lab."
+        },
+        "C6": {
+          "status": "DOCUMENTED",
+          "claim": "Labpacks group related labs; instructors can select exercises and add modules.",
+          "source_ids": [
+            "FW020",
+            "FW017"
+          ],
+          "limitations": "Lab collections are not treated as equivalent course projects."
+        },
+        "C7": {
+          "status": "DOCUMENTED",
+          "claim": "Gradelab documents a browser interface for reviewing assessment results and student artifacts.",
+          "source_ids": [
+            "FW020"
+          ],
+          "limitations": "Documented interface only; no browser run."
+        },
+        "C8": {
+          "status": "DOCUMENTED",
+          "claim": "Regression guidance compares generated grades with reference files; instructor guidance documents configured assessment.",
+          "source_ids": [
+            "FW019",
+            "FW020",
+            "FW017"
+          ],
+          "limitations": "No tests executed; README says per-lab SimLab drivers are not distributed."
+        },
+        "C9": {
+          "status": "DOCUMENTED",
+          "claim": "Official site lists a 2017 framework paper, 2018 individualisation article and 2021 workshop guide.",
+          "source_ids": [
+            "FW023"
+          ],
+          "limitations": "Publication and workshop metadata; no current-version learning outcomes evaluated."
+        },
+        "C10": {
+          "status": "MIXED",
+          "claim": "Notice declares US-government material public domain and identifies separate third-party terms and lab-specific constraints.",
+          "source_ids": [
+            "FW018"
+          ],
+          "limitations": "Declared scope, including US qualifier; no global ownership or legal conclusion."
+        }
+      }
+    },
+    {
+      "unit_id": "U11",
+      "name": "Johns Hopkins EN.601.414/614",
+      "unit_type": "Historical course and linked assignment repositories",
+      "observed_edition": "Fall 2020, identified by syllabus, Piazza link and final-exam schedule; source heads in November/December 2020",
+      "selection_status": "INCLUDED_HISTORICAL_EDITION",
+      "identity_notes": "The course README identifies Fall 2020 through Piazza and the final-exam schedule. The course and linked assignments are separately pinned. This corrects the edition descriptor for this observed snapshot without claiming the present JHU course remains unchanged.",
+      "cells": {
+        "C1": {
+          "status": "DOCUMENTED",
+          "claim": "The Fall 2020 syllabus lists layered protocols, routing, security, weekly topics and four programming assignments.",
+          "source_ids": [
+            "US025"
+          ],
+          "limitations": "Historical public offering; no claim about the current institutional course."
+        },
+        "C2": {
+          "status": "DOCUMENTED",
+          "claim": "The first assignment supplies gcc Makefile targets; routing instructions restrict edits to the designated Python implementations.",
+          "source_ids": [
+            "US018",
+            "US019"
+          ],
+          "limitations": "Build/edit conventions only; no lint, sanitiser or CI enforcement was established and no code was executed."
+        },
+        "C3": {
+          "status": "DOCUMENTED",
+          "claim": "Guides supply scaffolding, debugging feedback, explicit grading criteria and an optional second-routing-algorithm bonus.",
+          "source_ids": [
+            "US017",
+            "US019"
+          ],
+          "limitations": "Instructional design and declared feedback, not measured learning outcomes."
+        },
+        "C4": {
+          "status": "DOCUMENTED",
+          "claim": "Assignment 1 documents Vagrant/VirtualBox, SSH and platform-specific setup; routing uses the supplied VM and simulator.",
+          "source_ids": [
+            "US017",
+            "US019"
+          ],
+          "limitations": "Historical instructions include old dependencies; present-day compatibility and VM operation were not tested."
+        },
+        "C5": {
+          "status": "DOCUMENTED",
+          "claim": "The syllabus links slides, while assignment guides explain sockets, routing, visualisation and troubleshooting.",
+          "source_ids": [
+            "US025",
+            "US017",
+            "US019"
+          ],
+          "limitations": "Slides are linked, not all opened; two representative assignment guides were inspected."
+        },
+        "C6": {
+          "status": "DOCUMENTED",
+          "claim": "Four assignments cover sockets, reliable transport, intra-domain routing and programmable networks.",
+          "source_ids": [
+            "US025",
+            "US021"
+          ],
+          "limitations": "Declared assignment structure, not executed solutions or equivalent independent projects."
+        },
+        "C7": {
+          "status": "MIXED",
+          "claim": "Gradescope submission is documented; the routing simulator is a local graphical tool, not verified as browser-based.",
+          "source_ids": [
+            "US025",
+            "US019"
+          ],
+          "limitations": "No authenticated platform access or browser interaction was performed; a desktop visualisation is not an embedded web teaching widget."
+        },
+        "C8": {
+          "status": "DOCUMENTED",
+          "claim": "Guides describe cross-language socket tests and a routing script covering supplied topologies and failures.",
+          "source_ids": [
+            "US017",
+            "US019"
+          ],
+          "limitations": "Documented local/grading tests only; no successful execution or CI result was observed."
+        },
+        "C9": {
+          "status": "NOT_IDENTIFIED",
+          "claim": "No publication evaluating this unit, external adoption statement or measured learning outcomes were identified in inspected materials.",
+          "source_ids": [
+            "US025",
+            "US021",
+            "US017",
+            "US019"
+          ],
+          "limitations": "Inspected course and assignment READMEs, representative Makefile and trees. Princeton attribution is upstream provenance, not evidence of JHU adoption or evaluation; no separate literature survey."
+        },
+        "C10": {
+          "status": "NOT_IDENTIFIED",
+          "claim": "No overall reuse licence was identified in the inspected course and assignment materials.",
+          "source_ids": [
+            "US025",
+            "US021",
+            "US017",
+            "US019",
+            "US026",
+            "US022"
+          ],
+          "limitations": "Inspected READMEs, representative Makefile and both trees. Acknowledgements establish credit, not a licence or ownership certification."
+        }
+      },
+      "provenance_observations": [
+        {
+          "claim": "Assignments 1 and 3 credit Princeton exercises.",
+          "source_ids": [
+            "US017",
+            "US019"
+          ],
+          "direction": "incoming reuse",
+          "c9_implication": "Not evidence of publication, external adoption or evaluated outcomes of the JHU unit."
+        }
+      ],
+      "cross_unit_relationships": [
+        {
+          "from_unit_id": "U05",
+          "to_unit_id": "U11",
+          "relationship": "acknowledged_adaptation_of_selected_assignment",
+          "source_id": "US017",
+          "scope": "JHU assignment 1 credits a similar Princeton socket assignment",
+          "exact_upstream_revision_identified": false,
+          "complete_course_adoption_claimed": false
+        },
+        {
+          "from_unit_id": "U05",
+          "to_unit_id": "U11",
+          "relationship": "acknowledged_adaptation_of_selected_assignment",
+          "source_id": "US019",
+          "scope": "JHU assignment 3 credits a Princeton routing assignment",
+          "exact_upstream_revision_identified": false,
+          "complete_course_adoption_claimed": false
+        }
+      ]
+    },
+    {
+      "unit_id": "U12",
+      "name": "CUHK CSCI4430 / ESTR4120 Computer Networks",
+      "unit_type": "Course repository with lectures, tutorials and assignment starter materials",
+      "observed_edition": "Fall 2025 term 1; 2025_fall@aac3e1e9a785c138da5d1ac8954470102571b522",
+      "selection_status": "INCLUDED",
+      "identity_notes": "Owner-maintained repository identifies Hong Xu and CUHK. CSCI4430 and ESTR4120 share materials but have different assessment requirements. Branch commit is dated 25 November 2025.",
+      "cells": {
+        "C1": {
+          "status": "DOCUMENTED",
+          "claim": "README provides a thirteen-week lecture/tutorial schedule and a top-down networking outline.",
+          "source_ids": [
+            "AO023"
+          ],
+          "limitations": "Observed Fall 2025 edition, not an inferred 2026 offering."
+        },
+        "C2": {
+          "status": "DOCUMENTED",
+          "claim": "Assignment 2 CMake requires C++20 and Debug builds; Assignment 1 documents grader compiler compatibility.",
+          "source_ids": [
+            "AO043",
+            "AO025"
+          ],
+          "limitations": "The CMake project label contains s25; edition follows the course README. No build was executed."
+        },
+        "C3": {
+          "status": "DOCUMENTED",
+          "claim": "Assignments specify learning outcomes, staged measurements, testing guidance and grading/submission rules.",
+          "source_ids": [
+            "AO025",
+            "AO026"
+          ],
+          "limitations": "Documented design; feedback service was not accessed."
+        },
+        "C4": {
+          "status": "DOCUMENTED",
+          "claim": "Assignment 1 documents Mininet VM/Docker setup; Assignment 2 provides local development instructions and a Mininet integration caveat.",
+          "source_ids": [
+            "AO025",
+            "AO026"
+          ],
+          "limitations": "No image downloaded, VM started, container pulled or code executed."
+        },
+        "C5": {
+          "status": "DOCUMENTED",
+          "claim": "README identifies textbooks and readings; two assignment guides include setup, debugging and submission instructions.",
+          "source_ids": [
+            "AO023",
+            "AO025",
+            "AO026"
+          ],
+          "limitations": "Linked lecture files and textbooks were not substantively inspected."
+        },
+        "C6": {
+          "status": "MIXED",
+          "claim": "Schedule lists three assignments; fixed public tree contains only assignment-1 and assignment-2 directories.",
+          "source_ids": [
+            "AO023",
+            "AO012"
+          ],
+          "limitations": "ESTR's individual project is separate; missing public directory does not prove an assignment was not taught."
+        },
+        "C7": {
+          "status": "DOCUMENTED",
+          "claim": "Assignment 2 uses browser video playback, network throttling and request inspection to investigate CDN behaviour.",
+          "source_ids": [
+            "AO026"
+          ],
+          "limitations": "Instructions inspected; browser and video execution were not tested."
+        },
+        "C8": {
+          "status": "DOCUMENTED",
+          "claim": "Assignment guides describe autograder checks and submission limits, including argument, output and throughput checks.",
+          "source_ids": [
+            "AO025",
+            "AO026"
+          ],
+          "limitations": "Grader service requires CUHK credentials/VPN; no login or grading run occurred."
+        },
+        "C9": {
+          "status": "NOT_IDENTIFIED",
+          "claim": "No CUHK-specific publication, downstream adoption or learning-outcome evidence identified in the inspected course README and assignment guides.",
+          "source_ids": [
+            "AO023",
+            "AO025",
+            "AO026"
+          ],
+          "limitations": "Upstream Michigan credits establish material provenance, not research or downstream adoption of CUHK's own offering."
+        },
+        "C10": {
+          "status": "DOCUMENTED",
+          "claim": "Repository LICENSE declares MIT terms; README acknowledges externally sourced teaching materials.",
+          "source_ids": [
+            "AO024",
+            "AO023"
+          ],
+          "limitations": "Declared terms only; licence scope and ownership of every third-party component were not certified."
+        }
+      },
+      "provenance_observations": [
+        {
+          "claim": "CUHK author reports reusing unspecified Michigan networking materials with permission.",
+          "source_ids": [
+            "AO023"
+          ],
+          "related_unit_ids": [
+            "U06"
+          ],
+          "relation": "CUHK reuse of upstream Michigan materials",
+          "limitations": "Not whole-course adoption, not adoption of the exact w25 snapshot; permission and learning outcomes are not independently verified."
+        }
+      ]
+    },
+    {
+      "unit_id": "U13",
+      "name": "University of Illinois Urbana-Champaign CS/ECE 438 Computer Networks",
+      "unit_type": "Cross-listed course: institution-indexed course site on Notion",
+      "observed_edition": "Fall 2026 Notion course page; instructor homepage lists earlier Fall 2024/2025 editions",
+      "selection_status": "INCLUDED",
+      "identity_notes": "Institutional ECE438 search result links ece438-fall26.notion.site; the page identifies CS/ECE438 and Saksham Agarwal. The institutional page's rendered body omitted course details. Instructor institutional homepage confirms affiliation and earlier course teaching, not independently the 2026 link.",
+      "cells": {
+        "C1": {
+          "status": "DOCUMENTED",
+          "claim": "Fall 2026 course page provides a dated calendar covering Internet layers, datacentres, host networking and security.",
+          "source_ids": [
+            "AO013"
+          ],
+          "limitations": "Published schedule is subject to change."
+        },
+        "C2": {
+          "status": "ACCESS_LIMITED",
+          "claim": "Implementation conventions could not be inspected because linked MP0 and MP1 PDF retrievals returned 404.",
+          "source_ids": [
+            "AO028",
+            "AO029",
+            "AO034",
+            "AO035"
+          ],
+          "limitations": "Specific tool routes failed; not evidence that conventions are absent."
+        },
+        "C3": {
+          "status": "DOCUMENTED",
+          "claim": "Course page states assessment weights, group work, office hours and extension rules.",
+          "source_ids": [
+            "AO013"
+          ],
+          "limitations": "Assessment and feedback design only."
+        },
+        "C4": {
+          "status": "MIXED",
+          "claim": "Calendar lists ungraded setup/socket MP0; its PDF could not be retrieved to inspect environment instructions.",
+          "source_ids": [
+            "AO013",
+            "AO034"
+          ],
+          "limitations": "No setup or native run performed."
+        },
+        "C5": {
+          "status": "DOCUMENTED",
+          "claim": "Course page lists lecture notes, readings and Kurose–Ross as the textbook.",
+          "source_ids": [
+            "AO013"
+          ],
+          "limitations": "Listing inspected; linked PDFs and video playback were not comprehensively accessed."
+        },
+        "C6": {
+          "status": "DOCUMENTED",
+          "claim": "Course load lists four homeworks, four machine problems and an additional mini-project for four-credit students.",
+          "source_ids": [
+            "AO013"
+          ],
+          "limitations": "Ungraded MP0 is additional; different work types are not equivalent project counts."
+        },
+        "C7": {
+          "status": "DOCUMENTED",
+          "claim": "Lecture-video links, Piazza discussion and Gradescope submission are documented.",
+          "source_ids": [
+            "AO013"
+          ],
+          "limitations": "No platform login or interactive behaviour certified; illustration link resolved back to the course page."
+        },
+        "C8": {
+          "status": "MIXED",
+          "claim": "Gradescope and Git submission are stated; grader implementation and tests were not inspectable through the failed assignment PDF routes.",
+          "source_ids": [
+            "AO013",
+            "AO034",
+            "AO035"
+          ],
+          "limitations": "Submission infrastructure is not proof of automated checks or successful runs."
+        },
+        "C9": {
+          "status": "NOT_IDENTIFIED",
+          "claim": "No evaluation of these teaching materials identified in the inspected course page or instructor teaching listing.",
+          "source_ids": [
+            "AO013",
+            "AO041"
+          ],
+          "limitations": "Instructor networking publications are not treated as course-effectiveness studies."
+        },
+        "C10": {
+          "status": "NOT_IDENTIFIED",
+          "claim": "No express course-material reuse licence identified in the inspected Notion page and instructor teaching listing.",
+          "source_ids": [
+            "AO013",
+            "AO041"
+          ],
+          "limitations": "Failed assignment PDF retrievals limit component-level conclusions."
+        }
+      }
+    },
+    {
+      "unit_id": "U14",
+      "name": "MIT 6.5820 Computer Networks",
+      "unit_type": "Graduate networking course: official catalogue and numbering evidence",
+      "observed_edition": "Fall 2026 catalogue; course renumbering introduced Fall 2022",
+      "selection_status": "INCLUDED",
+      "identity_notes": "Official Fall 2026 catalogue identifies graduate 6.5820, meeting with undergraduate 6.5821. Official numbering search result maps former 6.829 to 6.5820. The 2002 OCW syllabus returned incidentally through a mirror was excluded from current coding.",
+      "cells": {
+        "C1": {
+          "status": "DOCUMENTED",
+          "claim": "Fall 2026 catalogue outlines networking architecture, protocols, routing, security and overlays.",
+          "source_ids": [
+            "AO036"
+          ],
+          "limitations": "Catalogue outline, not a detailed weekly schedule."
+        },
+        "C2": {
+          "status": "NOT_IDENTIFIED",
+          "claim": "No code-practice convention identified in the inspected current catalogue and numbering material.",
+          "source_ids": [
+            "AO036",
+            "AO032"
+          ],
+          "limitations": "No current implementation handout was identified within the bounded queries."
+        },
+        "C3": {
+          "status": "DOCUMENTED",
+          "claim": "Catalogue states original-paper readings, a term-long project/paper and additional graduate assignments.",
+          "source_ids": [
+            "AO036"
+          ],
+          "limitations": "Assessment structure only; detailed rubrics were not inspected."
+        },
+        "C4": {
+          "status": "NOT_IDENTIFIED",
+          "claim": "No setup or execution instructions identified in the inspected current catalogue and numbering material.",
+          "source_ids": [
+            "AO036",
+            "AO032"
+          ],
+          "limitations": "The historical 2002 environment was not substituted."
+        },
+        "C5": {
+          "status": "MIXED",
+          "claim": "Catalogue identifies research-paper readings but supplies no textbook information or detailed manual in the inspected entry.",
+          "source_ids": [
+            "AO036"
+          ],
+          "limitations": "Current handouts were not located within the fixed retrieval budget."
+        },
+        "C6": {
+          "status": "DOCUMENTED",
+          "claim": "A term-long project and paper are stated; graduate students complete additional assignments.",
+          "source_ids": [
+            "AO036"
+          ],
+          "limitations": "Assignment count and implementation depth are unspecified."
+        },
+        "C7": {
+          "status": "NOT_IDENTIFIED",
+          "claim": "No web teaching or interactive assessment feature identified in the inspected current catalogue entry.",
+          "source_ids": [
+            "AO036"
+          ],
+          "limitations": "Catalogue visibility does not establish absence from the taught course."
+        },
+        "C8": {
+          "status": "NOT_IDENTIFIED",
+          "claim": "No test, grader or CI configuration identified in the inspected catalogue and numbering material.",
+          "source_ids": [
+            "AO036",
+            "AO032"
+          ],
+          "limitations": "No external software or institutional assessment system was accessed."
+        },
+        "C9": {
+          "status": "NOT_IDENTIFIED",
+          "claim": "No course-evaluation publication or outcome evidence identified in the inspected current catalogue entry.",
+          "source_ids": [
+            "AO036"
+          ],
+          "limitations": "Research readings concern networking topics; no effectiveness inference."
+        },
+        "C10": {
+          "status": "NOT_IDENTIFIED",
+          "claim": "No course-material reuse licence identified in the inspected current catalogue and numbering material.",
+          "source_ids": [
+            "AO036",
+            "AO032"
+          ],
+          "limitations": "OCW terms were not transferred to the current course."
+        }
+      }
+    },
+    {
+      "unit_id": "U15",
+      "name": "Imperial networks course — unresolved legacy identity",
+      "unit_type": "Ambiguous legacy course label",
+      "observed_edition": "Undated indexed institutional module descriptors accessed 2026-11-17; legacy course identity and edition remain unresolved.",
+      "selection_status": "UNRESOLVED_IDENTITY",
+      "identity_notes": "Public descriptors for 50005 and 70041 are plausible candidates. The legacy report supplies no unique module code; neither candidate is silently substituted.",
+      "cells": {
+        "C1": {
+          "status": "MIXED",
+          "claim": "Public descriptors identify multiple networking modules; the legacy unit remains unresolved.",
+          "source_ids": [
+            "FW024",
+            "FW025"
+          ],
+          "limitations": "Candidate syllabi are observable, but no unique module or semester is established."
+        },
+        "C2": {
+          "status": "ACCESS_LIMITED",
+          "claim": "Code conventions cannot be attributed reliably to the unresolved legacy unit.",
+          "source_ids": [
+            "FW024",
+            "FW025",
+            "FW026",
+            "FW027"
+          ],
+          "limitations": "Indexed descriptors inspected; direct opens returned 403; detailed practical sources not resolved."
+        },
+        "C3": {
+          "status": "MIXED",
+          "claim": "Candidate descriptors discuss coursework and formative feedback; attribution to the legacy unit remains unresolved.",
+          "source_ids": [
+            "FW024",
+            "FW025"
+          ],
+          "limitations": "Candidate-level statements only, not coding of a uniquely identified course."
+        },
+        "C4": {
+          "status": "MIXED",
+          "claim": "One candidate describes a BYOD practical session; a resolved-course setup artifact was not retrieved.",
+          "source_ids": [
+            "FW024",
+            "FW025"
+          ],
+          "limitations": "Identity unresolved; no environment or execution acceptance."
+        },
+        "C5": {
+          "status": "MIXED",
+          "claim": "Indexed institutional descriptors are inspectable; manuals for a uniquely resolved legacy unit were not identified.",
+          "source_ids": [
+            "FW024",
+            "FW025",
+            "FW026",
+            "FW027"
+          ],
+          "limitations": "Inspected two candidate descriptors; direct opens returned 403."
+        },
+        "C6": {
+          "status": "MIXED",
+          "claim": "Both candidate descriptors describe coursework, but the legacy module identity remains unresolved.",
+          "source_ids": [
+            "FW024",
+            "FW025"
+          ],
+          "limitations": "Coursework specifications were not inspected or attributed to the seed unit."
+        },
+        "C7": {
+          "status": "MIXED",
+          "claim": "One candidate descriptor mentions Mentimeter; legacy identity and runtime behaviour remain unresolved.",
+          "source_ids": [
+            "FW024",
+            "FW025"
+          ],
+          "limitations": "Declared candidate feature only; no interactive session observed."
+        },
+        "C8": {
+          "status": "ACCESS_LIMITED",
+          "claim": "Tests or graders cannot be attributed to a uniquely resolved legacy course.",
+          "source_ids": [
+            "FW024",
+            "FW025",
+            "FW026",
+            "FW027"
+          ],
+          "limitations": "Candidate descriptions and failed direct retrievals do not establish feature absence."
+        },
+        "C9": {
+          "status": "ACCESS_LIMITED",
+          "claim": "Publication or outcome evidence cannot be attributed to a uniquely resolved legacy course.",
+          "source_ids": [
+            "FW024",
+            "FW025"
+          ],
+          "limitations": "Only candidate institutional descriptors inspected; no broader absence inference."
+        },
+        "C10": {
+          "status": "ACCESS_LIMITED",
+          "claim": "A reuse notice cannot be assigned reliably to the unresolved legacy course materials.",
+          "source_ids": [
+            "FW024",
+            "FW025",
+            "FW026",
+            "FW027"
+          ],
+          "limitations": "Unresolved identity and limited detailed-source access; no licence inferred from public visibility."
+        }
+      }
+    },
+    {
+      "unit_id": "U16",
+      "name": "TUM Advanced Computer Networking IN2097",
+      "unit_type": "University course",
+      "observed_edition": "Advanced Computer Networking IN2097, winter semester 2026/27; project updated 2026-11-11. Tutorial captures at one live URL show document updates 2026-10-29 and 2026-11-16.",
+      "selection_status": "RESOLVED_CURRENT_EDITION",
+      "identity_notes": "The official WS 2026/27 page resolves the course title and code. Public materials and enrolment-restricted execution infrastructure have different access scopes.",
+      "cells": {
+        "C1": {
+          "status": "DOCUMENTED",
+          "claim": "Official WS 2026/27 page outlines networking topics and a reproducible-experiment training component.",
+          "source_ids": [
+            "FW028"
+          ],
+          "limitations": "Edition-specific outline, not evidence of attained learning outcomes."
+        },
+        "C2": {
+          "status": "DOCUMENTED",
+          "claim": "Project instructions require the specified DPDK framework, scripted setup and a prescribed Git submission structure.",
+          "source_ids": [
+            "FW033"
+          ],
+          "limitations": "Build requirements documented; framework repository and execution not inspected."
+        },
+        "C3": {
+          "status": "DOCUMENTED",
+          "claim": "Project instructions specify individual submissions, staged deadlines and tasks requiring explanations of observed behaviour.",
+          "source_ids": [
+            "FW033",
+            "FW034"
+          ],
+          "limitations": "Designed assessment, not measured feedback quality or effectiveness."
+        },
+        "C4": {
+          "status": "MIXED",
+          "claim": "Public instructions describe Jupyter, Git and a four-node testbed; infrastructure access requires enrolment-linked authentication.",
+          "source_ids": [
+            "FW033",
+            "FW034"
+          ],
+          "limitations": "No authenticated repository, VM or testbed session accessed."
+        },
+        "C5": {
+          "status": "DOCUMENTED",
+          "claim": "The public portal exposes lecture material, project instructions and an exercise-procedure guide.",
+          "source_ids": [
+            "FW029",
+            "FW031",
+            "FW032",
+            "FW033",
+            "FW034"
+          ],
+          "limitations": "Selected published materials inspected; no complete-course completeness claim."
+        },
+        "C6": {
+          "status": "MIXED",
+          "claim": "Router project names four stages; the setup task is described while later problem details await publication.",
+          "source_ids": [
+            "FW033"
+          ],
+          "limitations": "Observed on 2026-11-17; credits within this project are not assumed to be ECTS."
+        },
+        "C7": {
+          "status": "DOCUMENTED",
+          "claim": "Exercise instructions describe browser-edited Jupyter notebooks with questions, code and plots.",
+          "source_ids": [
+            "FW034"
+          ],
+          "limitations": "Documented interaction only; no browser or notebook execution."
+        },
+        "C8": {
+          "status": "DOCUMENTED",
+          "claim": "Router assignment specifies ping/tcpdump checks and written comparison of expected and observed traffic.",
+          "source_ids": [
+            "FW033"
+          ],
+          "limitations": "Manual verification instructions; no observed run, grader or CI success."
+        },
+        "C9": {
+          "status": "DOCUMENTED",
+          "claim": "Lecture material links the 2021 pos framework publication underlying reproducible network experiments.",
+          "source_ids": [
+            "FW035",
+            "FW033"
+          ],
+          "limitations": "Research infrastructure publication, not evidence of student learning gains."
+        },
+        "C10": {
+          "status": "MIXED",
+          "claim": "Retrieved slides attribute a FAIR graphic under CC BY-SA 4.0; no course-wide reuse licence was identified.",
+          "source_ids": [
+            "FW035",
+            "FW028",
+            "FW033",
+            "FW034"
+          ],
+          "limitations": "Scope is inspected descriptors, instructions and slide excerpts; graphic terms do not license the entire course."
+        }
+      }
+    },
+    {
+      "unit_id": "U17",
+      "name": "National University of Singapore CS2105 Introduction to Computer Networks",
+      "unit_type": "Undergraduate course: current institutional outline plus explicitly archived assignment",
+      "observed_edition": "AY 2026/27 institutional schedule; detailed Assignment 1 is Semester 2 AY 2013/14",
+      "selection_status": "INCLUDED",
+      "identity_notes": "Current official schedule confirms CS2105. Detailed coding retains the 2013/14 assignment date explicitly. Current course-root retrieval failed; two archived blog pages returned 502. CS3103 is a separate follow-on course and was not substituted.",
+      "cells": {
+        "C1": {
+          "status": "DOCUMENTED",
+          "claim": "Current institutional pages identify a four-unit course introducing the Internet's five-layer organisation.",
+          "source_ids": [
+            "AO044",
+            "AO042"
+          ],
+          "limitations": "AY 2026/27 timetable; detailed current weekly plan not recovered."
+        },
+        "C2": {
+          "status": "MIXED",
+          "claim": "The 2013/14 assignment specifies method decomposition, naming, indentation, comments and avoidance of hardcoded paths/ports.",
+          "source_ids": [
+            "AO039"
+          ],
+          "limitations": "Historical instructions only; current conventions not established."
+        },
+        "C3": {
+          "status": "MIXED",
+          "claim": "The archived assignment gives objectives, staged HTTP/CGI tasks, a demo and marking criteria.",
+          "source_ids": [
+            "AO039"
+          ],
+          "limitations": "Semester 2 AY 2013/14; not evidence of current assessment design."
+        },
+        "C4": {
+          "status": "MIXED",
+          "claim": "The archived assignment documents controlled UNIX access, Java execution and port selection.",
+          "source_ids": [
+            "AO039"
+          ],
+          "limitations": "2013/14 instructions; no institutional host accessed and no present compatibility claim."
+        },
+        "C5": {
+          "status": "MIXED",
+          "claim": "The recovered nine-page assignment includes implementation guidance, debugging advice and common bugs.",
+          "source_ids": [
+            "AO039",
+            "AO037",
+            "AO038"
+          ],
+          "limitations": "Archive from 2013/14; blog pages failed with 502."
+        },
+        "C6": {
+          "status": "MIXED",
+          "claim": "Recovered 2013/14 Assignment 1 requires a two-person HTTP/CGI web-server extension.",
+          "source_ids": [
+            "AO039"
+          ],
+          "limitations": "One inspected assignment; total current workload was not established."
+        },
+        "C7": {
+          "status": "MIXED",
+          "claim": "Archived exercise uses browser interaction with a to-do application and developer tools.",
+          "source_ids": [
+            "AO039"
+          ],
+          "limitations": "2013/14 documented interaction; no live browser certification."
+        },
+        "C8": {
+          "status": "MIXED",
+          "claim": "Archived assignment states automated grading plus an individual oral demo.",
+          "source_ids": [
+            "AO039"
+          ],
+          "limitations": "Grader implementation not acquired or executed; current assessment system unknown."
+        },
+        "C9": {
+          "status": "NOT_IDENTIFIED",
+          "claim": "No teaching-outcome study identified in the inspected institutional outline, timetable and archived assignment.",
+          "source_ids": [
+            "AO042",
+            "AO044",
+            "AO039"
+          ],
+          "limitations": "Current offering and archived instructions do not establish effectiveness."
+        },
+        "C10": {
+          "status": "NOT_IDENTIFIED",
+          "claim": "No express reuse licence identified in the inspected institutional outline and archived assignment.",
+          "source_ids": [
+            "AO042",
+            "AO039"
+          ],
+          "limitations": "Public availability is not a redistribution grant; failed blog retrievals remain a visibility limit."
+        }
+      }
+    }
+  ],
+  "auxiliary_units": [
+    {
+      "unit_id": "X01",
+      "name": "Kathara",
+      "status": "Legacy context only; not substantively collected"
+    },
+    {
+      "unit_id": "X02",
+      "name": "Containerlab",
+      "status": "Context only",
+      "source_ids": [
+        "AX002"
+      ]
+    },
+    {
+      "unit_id": "X03",
+      "name": "SEED",
+      "status": "Context only",
+      "source_ids": [
+        "AX003",
+        "PB004"
+      ]
+    },
+    {
+      "unit_id": "X04",
+      "name": "INGInious",
+      "status": "Within U09 ecosystem, not independently counted",
+      "source_ids": [
+        "FW016"
+      ]
+    }
+  ]
+}

@@ -264,8 +264,8 @@
                         <div>
                             <h3 class="font-semibold text-sm text-slate-300">4. Add Default Routes</h3>
                             <p class="text-xs text-slate-500 mt-1">Hosts need to know where to send remote traffic.</p>
-                            <code class="block bg-slate-800 p-1 mt-2 text-xs rounded text-blue-300 cursor-pointer hover:bg-slate-700" onclick="app.typeCommand('h1 ip route add default via 10.0.1.1')">h1 ip route add default via 10.0.1.1</code>
-                            <code class="block bg-slate-800 p-1 mt-1 text-xs rounded text-blue-300 cursor-pointer hover:bg-slate-700" onclick="app.typeCommand('h2 ip route add default via 10.0.2.1')">h2 ip route add default via 10.0.2.1</code>
+                            <code class="block bg-slate-800 p-1 mt-2 text-xs rounded text-blue-300 cursor-pointer hover:bg-slate-700" onclick="app.typeCommand('h1 ip route replace default via 10.0.1.1')">h1 ip route replace default via 10.0.1.1</code>
+                            <code class="block bg-slate-800 p-1 mt-1 text-xs rounded text-blue-300 cursor-pointer hover:bg-slate-700" onclick="app.typeCommand('h2 ip route replace default via 10.0.2.1')">h2 ip route replace default via 10.0.2.1</code>
                         </div>
                     </div>
                 </div>
@@ -505,55 +505,52 @@
             },
 
             handleIpRoute(hostName, args) {
-                // ip route add default via X.X.X.X
-                if (args[1] === 'add' && args[2] === 'default' && args[3] === 'via') {
+                // ip route replace default via X.X.X.X
+                if (['add', 'replace'].includes(args[1]) && args[2] === 'default' && args[3] === 'via') {
                     const gw = args[4];
                     // Basic validation
                     if (!this.isValidIP(gw)) {
                         this.printToTerminal("Invalid IP address", "text-red-400");
                         return;
                     }
+                    if (args[1] === 'add' && this.nodes[hostName].routes.some(r => r.dest === '0.0.0.0/0')) {
+                        this.printToTerminal('RTNETLINK answers: File exists (use ip route replace).', 'text-red-400'); return;
+                    }
+                    if (!this.isLocal(hostName, gw) || this.getNodeNameByIP(gw) !== 'r1') {
+                        this.printToTerminal('Invalid gateway: use the directly connected router address.', 'text-red-400'); return;
+                    }
                     this.nodes[hostName].routes = [{dest: '0.0.0.0/0', gw: gw}];
                     this.printToTerminal(""); // Success is silent in Linux usually, but user needs feedback? Mininet CLI is silent on success.
                     this.updateUI();
                     this.markTaskComplete(4);
                 } else {
-                    this.printToTerminal("Supported: ip route add default via <IP>", "text-yellow-400");
+                    this.printToTerminal("Supported: ip route replace default via <IP>", "text-yellow-400");
                 }
             },
 
             handlePing(srcName, args) {
-                // h1 ping -c 3 10.0.2.10
-                let destIP = args[args.length - 1];
-                let count = 3; // Default
-                if (args.includes('-c')) {
-                    const idx = args.indexOf('-c');
-                    if (args[idx+1]) count = parseInt(args[idx+1]);
-                }
-
-                this.printToTerminal(`PING ${destIP} (${destIP}) 56(84) bytes of data.`);
-
-                let seq = 1;
-                const interval = setInterval(() => {
-                    if (seq > count) {
-                        clearInterval(interval);
-                        this.printToTerminal(`--- ${destIP} ping statistics ---`);
-                        this.printToTerminal(`${count} packets transmitted, ${count} received, 0% packet loss`);
+                const destIP = args[args.length - 1];
+                const i = args.indexOf('-c');
+                const count = i < 0 ? 3 : Number(args[i + 1]);
+                if (!Number.isInteger(count) || count < 1 || count > 20) { this.printToTerminal('Use -c 1..20'); return; }
+                let sent = 0, received = 0;
+                const next = () => {
+                    if (sent === count) {
+                        this.printToTerminal(`${sent} packets transmitted, ${received} received, ${100 * (sent - received) / sent}% packet loss`);
                         return;
                     }
-
-                    this.simulatePacket(srcName, destIP, (success, msg, type) => {
+                    const seq = ++sent;
+                    this.simulatePacket(srcName, destIP, success => {
                         if (success) {
-                            this.printToTerminal(`64 bytes from ${destIP}: icmp_seq=${seq} ttl=64 time=0.0${Math.floor(Math.random()*9)} ms`);
-                            // Check task completions
-                            if (srcName === 'h1' && (destIP === '10.0.1.1')) this.markTaskComplete(2);
+                            received++;
+                            this.printToTerminal(`64 bytes from ${destIP}: icmp_seq=${seq} (simulated reply)`);
+                            if (srcName === 'h1' && destIP === '10.0.1.1') this.markTaskComplete(2);
                             if (srcName === 'h1' && destIP === '10.0.2.10') this.markTaskComplete(5);
-                        } else {
-                            this.printToTerminal(`From ${msg || 'Gateway'}: icmp_seq=${seq} Destination Host Unreachable`, "text-yellow-400");
-                        }
-                    }, 'icmp');
-                    seq++;
-                }, 1200); // 1.2s delay between pings for animation
+                        } else this.printToTerminal(`icmp_seq=${seq}: no reply`, 'text-yellow-400');
+                        next();
+                    }, 'icmp', seq);
+                };
+                next();
             },
 
             handleTraceroute(srcName, args) {
@@ -579,14 +576,14 @@
 
                 // Logic:
                 // Is dest local?
-                if (this.isLocal(srcName, destIP)) {
+                if (this.isLocal(srcName, destIP) && this.pathTo(srcName, destIP) && this.pathTo(this.getNodeNameByIP(destIP), this.getIP(srcName))) {
                     runHop(destIP, this.getNodeNameByIP(destIP), true);
                     return;
                 }
 
                 // Is GW set?
                 const gw = this.nodes[srcName].routes.find(r => r.dest === '0.0.0.0/0')?.gw;
-                if (!gw) {
+                if (!gw || !this.isLocal(srcName, gw) || this.getNodeNameByIP(gw) !== "r1") {
                     this.printToTerminal(` 1  * * *`);
                     return;
                 }
@@ -601,7 +598,7 @@
                 }
 
                 // Is dest reachable from GW?
-                if (this.isLocal('r1', destIP)) {
+                if (this.pathTo(srcName, destIP) && this.pathTo(this.getNodeNameByIP(destIP), this.getIP(srcName))) {
                      setTimeout(() => runHop(destIP, 'h2', true), 500);
                 }
             },
@@ -626,79 +623,53 @@
                 this.printToTerminal("\n[1]+  Stopped                 tcpdump");
             },
 
-            logTcpdump(srcIP, destIP, proto) {
+            logTcpdump(srcIP, destIP, proto, kind, seq) {
                 if (!this.tcpdumpActive) return;
                 const div = document.getElementById('tcpdump-output');
-                const time = new Date().toLocaleTimeString('en-GB', { hour12: false }) + '.' + Math.floor(Math.random()*100000);
-                const line = `<div class="font-mono text-[10px] whitespace-nowrap">${time} IP ${srcIP} > ${destIP}: ${proto.toUpperCase()} echo request, id 1337, seq 1, length 64</div>`;
-                const lineRep = `<div class="font-mono text-[10px] whitespace-nowrap">${time} IP ${destIP} > ${srcIP}: ${proto.toUpperCase()} echo reply, id 1337, seq 1, length 64</div>`;
-
-                div.innerHTML += line;
-                setTimeout(() => { if(this.tcpdumpActive) div.innerHTML += lineRep; }, 500);
+                const line = document.createElement('div');
+                line.className = 'font-mono text-[10px] whitespace-nowrap';
+                line.textContent = `SIMULATED IP ${srcIP} > ${destIP}: ${proto.toUpperCase()} echo ${kind}, seq ${seq}, length 64`;
+                div.appendChild(line);
                 div.scrollTop = div.scrollHeight;
             },
 
-            // --- Packet Engine ---
-
-            simulatePacket(srcName, destIP, callback, type = 'icmp') {
-                const srcNode = this.nodes[srcName];
-                const destNodeName = this.getNodeNameByIP(destIP);
-
-                // 1. Local Subnet Check
+            pathTo(srcName, destIP) {
+                const target = this.getNodeNameByIP(destIP);
+                if (!target || !this.nodes[srcName]) return null;
+                if (target === srcName) return [srcName];
                 if (this.isLocal(srcName, destIP)) {
-                    // Direct Link
-                    if (destNodeName === 'r1') {
-                        // h1 -> r1 (local interface)
-                        this.animatePacket(srcName, 'r1', true, () => callback(true));
-                    } else if (destNodeName) {
-                        // Direct connection? Not in this topology (h1-h2 not direct)
-                        // Should technically fail if user thinks h1 can ping h2 directly without gw
-                        callback(false, srcNode.interfaces[Object.keys(srcNode.interfaces)[0]].ip);
-                    } else {
-                        callback(false);
-                    }
-                    return;
+                    return srcName === 'r1' || target === 'r1' ? [srcName, target] : null;
                 }
+                if (srcName === 'r1') return null;
+                const gw = this.nodes[srcName].routes.find(r => r.dest === '0.0.0.0/0')?.gw;
+                if (!gw || this.getNodeNameByIP(gw) !== 'r1' || !this.isLocal(srcName, gw)) return null;
+                if (target === 'r1') return [srcName, 'r1'];
+                if (!this.nodes.r1.forwarding || !this.isLocal('r1', destIP)) return [srcName, 'r1'];
+                return [srcName, 'r1', target];
+            },
 
-                // 2. Routing Check
-                const gw = srcNode.routes.find(r => r.dest === '0.0.0.0/0')?.gw;
-                if (!gw) {
-                    this.animatePacket(srcName, null, false); // drop immediately
-                    setTimeout(() => callback(false, 'Network is unreachable'), 500);
-                    return;
-                }
-
-                // 3. Send to Gateway
-                this.animatePacket(srcName, 'r1', true, () => {
-                    // At Router
-                    // Check Forwarding
-                    if (!this.nodes.r1.forwarding) {
-                        this.animateDrop('r1');
-                         // Log to tcpdump if listening on input interface
-                        if(type === 'icmp') this.logTcpdump(this.getIP(srcName), destIP, type);
-                        setTimeout(() => callback(false, '10.0.1.1'), 500); // Admin prohibited / unreachable
-                        return;
-                    }
-
-                    // Log to tcpdump
-                    if(type === 'icmp') this.logTcpdump(this.getIP(srcName), destIP, type);
-
-                    // Check if router knows dest
-                    if (this.isLocal('r1', destIP)) {
-                        // Forward to H2
-                        this.animatePacket('r1', 'h2', true, () => {
-                             // Success Return Path
-                             this.animatePacket('h2', 'r1', true, () => {
-                                 this.animatePacket('r1', srcName, true, () => {
-                                     callback(true);
-                                 }, 'reply');
-                             }, 'reply');
-                        });
-                    } else {
-                        // Unknown dest
-                        this.animateDrop('r1');
-                        callback(false, '10.0.1.1');
-                    }
+            simulatePacket(srcName, destIP, callback, type = 'icmp', seq = 1) {
+                const outward = this.pathTo(srcName, destIP);
+                if (!outward) { callback(false); return; }
+                const srcIP = srcName === 'r1' && destIP.startsWith('10.0.2.') ? '10.0.2.1' : this.getIP(srcName);
+                const target = this.getNodeNameByIP(destIP);
+                const returning = this.pathTo(target, srcIP);
+                const animatePath = (path, variant, done) => {
+                    let index = 0;
+                    const step = () => {
+                        if (index + 1 >= path.length) { done(); return; }
+                        const from = path[index], to = path[++index];
+                        if ((from === 'h1' && to === 'r1') || (from === 'r1' && to === 'h1'))
+                            this.logTcpdump(variant === 'req' ? srcIP : destIP,
+                                variant === 'req' ? destIP : srcIP, type, variant === 'req' ? 'request' : 'reply', seq);
+                        this.animatePacket(from, to, true, step, variant);
+                    };
+                    step();
+                };
+                animatePath(outward, 'req', () => {
+                    if (outward[outward.length - 1] !== target) { this.animateDrop('r1'); callback(false); return; }
+                    if (!returning) { callback(false); return; }
+                    animatePath(returning, 'reply', () => callback(true));
                 });
             },
 

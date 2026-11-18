@@ -507,7 +507,7 @@
 <p>The response mirrors the request structure: a status line, headers and an optional body.</p>
 <div class="code-block" data-lang="http"><span class="string">HTTP/1.1</span> <span class="number">200</span> <span class="keyword">OK</span>
 <span class="function">Content-Type</span>: application/json; charset=utf-8
-<span class="function">Content-Length</span>: 128
+<span class="function">Content-Length</span>: 54
 <span class="function">Cache-Control</span>: max-age=3600
 <span class="function">X-Request-Id</span>: a3f8c2d1-e9b7-4f2a
 
@@ -542,7 +542,7 @@
 </div>
 <div class="definition-box mt-2">
 <div class="term">Why does this table matter?</div>
-<p><strong>Safe</strong> means the method does not alter server state &mdash; a proxy may pre-fetch safe resources. <strong>Idempotent</strong> means repeating the request produces the same final state &mdash; load balancers and retry logic depend on this. <strong>Cacheable</strong> means intermediaries may store and reuse the response without contacting the server.</p>
+<p><strong>Safe</strong> means the client does not request a state-changing effect (logging may still occur) &mdash; a proxy may pre-fetch safe resources. <strong>Idempotent</strong> means repeating the request produces the same final state &mdash; load balancers and retry logic depend on this. <strong>Cacheable</strong> means intermediaries may store and reuse the response without contacting the server.</p>
 </div>
 </div>
 </div>
@@ -615,10 +615,10 @@
 <div class="quiz-option" onclick="checkQuizDetailed('quiz2',this,true,'q2fb-correct')">C) The user is authenticated but lacks permission to delete this resource.</div>
 <div class="quiz-option" onclick="checkQuizDetailed('quiz2',this,false,'q2fb-wrong3')">D) The server does not support the DELETE method.</div>
 </div>
-<div class="quiz-feedback correct" id="q2fb-correct">Correct. <code>403 Forbidden</code> means the server understood the request and recognised the caller, but the caller does not have authorisation for this specific action. The distinction: <strong>401 = who are you?</strong> (authentication missing), <strong>403 = I know who you are, but you may not do this</strong> (authorisation denied).</div>
-<div class="quiz-feedback incorrect" id="q2fb-wrong1">An expired or malformed token would produce <code>401 Unauthorized</code>, not 403. The 401 code signals that authentication is missing or invalid. A 403 presupposes that authentication succeeded but the caller lacks permission.</div>
-<div class="quiz-feedback incorrect" id="q2fb-wrong2">A non-existent resource would produce <code>404 Not Found</code>. The server returns 403 specifically to say &ldquo;the resource exists, you are authenticated, but you lack permission.&rdquo;</div>
-<div class="quiz-feedback incorrect" id="q2fb-wrong3">If the server did not support DELETE on this endpoint, it would return <code>405 Method Not Allowed</code>, typically with an <code>Allow</code> header listing the permitted methods.</div>
+<div class="quiz-feedback correct" id="q2fb-correct">Correct for the stated valid-token scenario: an authorisation refusal is most likely. In general 403 means the server understood and refuses the request; it does not establish authentication. A 401 challenges missing or invalid credentials.</div>
+<div class="quiz-feedback incorrect" id="q2fb-wrong1">An expired or malformed token would produce <code>401 Unauthorized</code>, not 403. The 401 code signals that authentication is missing or invalid. For this stated scenario, the valid token makes an authorisation refusal likely; 403 in general does not prove successful authentication.</div>
+<div class="quiz-feedback incorrect" id="q2fb-wrong2">A non-existent resource would produce <code>404 Not Found</code>. A server can use 404 to avoid disclosing a forbidden resource. Neither status alone proves whether a resource exists.</div>
+<div class="quiz-feedback incorrect" id="q2fb-wrong3">If the server did not support DELETE on this endpoint, it would return <code>405 Method Not Allowed</code>, with a required <code>Allow</code> header listing the permitted methods.</div>
 </div>
 </div>
 </div>
@@ -750,7 +750,7 @@
 </div>
 <div class="card card-danger">
 <div class="card-title">Cross-origin (blocked unless server opts in)</div>
-<div class="card-content"><code>https://app.example.com</code> requests <code>https://api.example.com</code> &mdash; different host. The browser sends a <strong>preflight</strong> <code>OPTIONS</code> request to ask permission.</div>
+<div class="card-content"><code>https://app.example.com</code> requests <code>https://api.example.com</code> &mdash; different host. A non-safelisted method or header causes a <strong>preflight</strong> <code>OPTIONS</code> request. Safelisted cross-origin requests can be sent without preflight, though the browser still checks CORS response permissions.</div>
 </div>
 </div>
 <div class="highlight-box mt-2">
@@ -895,12 +895,14 @@
 <span class="keyword">GET</span> /chat <span class="string">HTTP/1.1</span>
 <span class="function">Upgrade</span>: websocket
 <span class="function">Connection</span>: Upgrade
-<span class="function">Sec-WebSocket-Key</span>: dGhlIHNh...
+<span class="function">Sec-WebSocket-Version</span>: 13
+<span class="function">Sec-WebSocket-Key</span>: dGhlIHNhbXBsZSBub25jZQ==
 
 <span class="comment"># Server confirms</span>
 <span class="string">HTTP/1.1</span> <span class="number">101</span> <span class="keyword">Switching Protocols</span>
 <span class="function">Upgrade</span>: websocket
-<span class="function">Connection</span>: Upgrade</div>
+<span class="function">Connection</span>: Upgrade
+<span class="function">Sec-WebSocket-Accept</span>: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=</div>
 </div>
 <div>
 <div class="card card-accent" style="margin-bottom:1rem;">
@@ -1059,17 +1061,18 @@
 <h1>Checkpoint &mdash; REST in Practice</h1>
 <div class="content">
 <div class="quiz-container" id="quiz4">
-<p class="quiz-question">An API endpoint <code>POST /api/users/42/activate</code> changes the user&rsquo;s status to &ldquo;active&rdquo;. At which Richardson maturity level does this endpoint operate?</p>
+<p class="quiz-question">An API provides separate resource URIs, but uses POST for every read and write, encodes the operation in an action field and always returns 200. It has no hypermedia links. Which Richardson maturity level best describes it?</p>
 <div class="quiz-options">
-<div class="quiz-option" onclick="checkQuizDetailed('quiz4',this,false,'q4fb-wrong1')">A) Level 2 &mdash; because it uses a URI for the resource and POST for the action.</div>
-<div class="quiz-option" onclick="checkQuizDetailed('quiz4',this,true,'q4fb-correct')">B) Level 1 &mdash; it has a resource URI but encodes the action in the URL path instead of using HTTP methods.</div>
-<div class="quiz-option" onclick="checkQuizDetailed('quiz4',this,false,'q4fb-wrong2')">C) Level 3 &mdash; because it targets a specific sub-resource of the user.</div>
-<div class="quiz-option" onclick="checkQuizDetailed('quiz4',this,false,'q4fb-wrong3')">D) Level 0 &mdash; because POST is used instead of GET.</div>
+<div class="quiz-option" onclick="checkQuizDetailed('quiz4',this,false,'q4fb-wrong1')">A) Level 2 &mdash; any use of HTTP methods is sufficient.</div>
+<div class="quiz-option" onclick="checkQuizDetailed('quiz4',this,true,'q4fb-correct')">B) Level 1 &mdash; resources have URIs, but HTTP method and status semantics are not used.</div>
+<div class="quiz-option" onclick="checkQuizDetailed('quiz4',this,false,'q4fb-wrong2')">C) Level 3 &mdash; separate URIs automatically provide hypermedia.</div>
+<div class="quiz-option" onclick="checkQuizDetailed('quiz4',this,false,'q4fb-wrong3')">D) Level 0 &mdash; any use of POST implies a single-endpoint API.</div>
 </div>
-<div class="quiz-feedback correct" id="q4fb-correct">Correct. The verb &ldquo;activate&rdquo; in the URL is a strong indicator of RPC-style thinking encoded in a resource path. At Level 2, you would model this as <code>PATCH /api/users/42</code> with a body like <code>{"status": "active"}</code>, using the HTTP method (PATCH) to express the action and the body to express the change. The URL <code>/activate</code> is an action, not a resource.</div>
-<div class="quiz-feedback incorrect" id="q4fb-wrong1">Level 2 requires using HTTP methods to express operations. Here, the action &ldquo;activate&rdquo; is baked into the URL path, which means the API is using the URL as a verb rather than letting the HTTP method carry that information. This is characteristic of Level 1.</div>
-<div class="quiz-feedback incorrect" id="q4fb-wrong2">Level 3 (HATEOAS) requires the server to include hypermedia links in responses, guiding the client to available actions. The URL structure alone does not determine Level 3.</div>
-<div class="quiz-feedback incorrect" id="q4fb-wrong3">Level 0 uses a single endpoint for all operations (e.g. <code>POST /api</code>). Here, the API does address a specific resource URI, placing it above Level 0.</div>
+<div class="quiz-feedback correct" id="q4fb-correct">Correct. The description supplies the behaviour needed for Level 1. A URI containing an action word, or one POST endpoint alone, cannot classify an entire API.</div>
+<div class="quiz-feedback incorrect" id="q4fb-wrong1">Level 2 uses HTTP method and status semantics appropriately, which the stated API does not.</div>
+<div class="quiz-feedback incorrect" id="q4fb-wrong2">Level 3 adds response hypermedia that guides clients to available actions.</div>
+<div class="quiz-feedback incorrect" id="q4fb-wrong3">Separate resource URIs distinguish this example from the single-endpoint Level 0 model.</div>
+</div>
 </div>
 </div>
 </div>
@@ -1163,9 +1166,10 @@
     https://httpbin.org/post
 
 <span class="comment"># Follow redirects and show timing</span>
-<span class="keyword">curl</span> -L -w <span class="string">"DNS: %{time_namelookup}s\nTCP: %{time_connect}s\nTLS: %{time_appconnect}s\nTotal: %{time_total}s\n"</span> \
+<span class="keyword">curl</span> -L -w <span class="string">"DNS complete: %{time_namelookup}s\nTCP complete: %{time_connect}s\nTLS complete: %{time_appconnect}s\nTotal: %{time_total}s\n"</span> \
     -o /dev/null -s \
     https://example.com</div>
+<p>curl timing values are cumulative from the request start. Without redirects, approximate TCP setup as time_connect minus time_namelookup and TLS setup as time_appconnect minus time_connect. Redirects and connection reuse require separate interpretation.</p>
 <!-- LIVE CODING: see instructor guide -->
 <div class="warning-box mt-1">
 <div class="warning-title">Instructor note</div>
@@ -1464,6 +1468,7 @@
 
   // ── Keyboard Navigation ──────────────────────────────
   document.addEventListener('keydown', function(e) {
+      if (e.target && e.target.closest && e.target.closest('input, textarea, select, button, [contenteditable="true"]')) return;
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
     switch(e.key) {
       case 'ArrowRight': case ' ': e.preventDefault(); changeSlide(1); break;

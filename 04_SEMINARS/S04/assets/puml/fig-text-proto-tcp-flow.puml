@@ -15,19 +15,19 @@ note right of S: Thread spawned for client
 
 == Request/Response Cycle ==
 
-C -> S : "20 add user1 Alice"
+C -> S : "18 add user1 Alice"
 note right of S
-  Parse: LEN=20, cmd=add
+  Parse: LEN=18, cmd=add
   key=user1, resource=Alice
   state.add("user1", "Alice")
 end note
-S --> C : "13 user1 added"
+S --> C : "14 user1 added"
 
-C -> S : "14 get user1"
-S --> C : "8 Alice"
+C -> S : "12 get user1"
+S --> C : "7 Alice"
 
-C -> S : "17 remove user1"
-S --> C : "15 user1 removed"
+C -> S : "15 remove user1"
+S --> C : "16 user1 removed"
 
 C -> S : "7 count"
 S --> C : "8 0 keys"
@@ -35,18 +35,18 @@ S --> C : "8 0 keys"
 == Unrecognised Command ==
 
 C -> S : "16 foo something"
-S --> C : "25 ERR unknown command"
+S --> C : "22 ERR unknown command"
 
 == Termination ==
 
-C -> S : "6 exit"
+C -> S : TCP close (exit is local)
 note over C: Client closes socket
 
 legend right
   Framing: "<LEN> <payload>" where LEN is the
-  total character count of the entire message.
+  total UTF-8 byte count of the entire message.
   The server reads LEN, then receives exactly
-  that many characters before parsing.
-  The protocol is stateless per request.
+  the remaining bytes before decoding/parsing.
+  KV state persists across requests; count is the student extension.
 endlegend
 @enduml

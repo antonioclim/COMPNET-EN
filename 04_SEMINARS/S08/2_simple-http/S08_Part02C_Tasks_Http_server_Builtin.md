@@ -14,9 +14,9 @@ Then test with:
 
 ```
 
-curl -v [http://localhost:8000/](http://localhost:8000/)
-curl -v [http://localhost:8000/hello](http://localhost:8000/hello)
-curl -v [http://localhost:8000/api/time](http://localhost:8000/api/time)
+curl -v http://localhost:8000/
+curl -v http://localhost:8000/hello
+curl -v http://localhost:8000/api/time
 
 ```
 

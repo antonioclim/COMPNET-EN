@@ -7,31 +7,57 @@
       "id": "R1",
       "filter": "tcp.dstport==5006 && tcp.flags.syn==1 && tcp.flags.ack==0",
       "condition": ">= 1",
-      "description": "Handshake to the broker."
+      "description": "SYN connection attempt to the broker."
     },
     {
       "id": "R2",
-      "filter": "tcp.port==5006 && (frame contains \"HELLO\" || frame contains \"AUTH\")",
+      "filter": "tcp.dstport==5006 && tcp.len>0",
       "condition": ">= 1",
-      "description": "Client registration (HELLO/AUTH)."
+      "description": "Complete HELLO/AUTH command lines in the request direction after TCP reassembly and retransmission removal.",
+      "measurement": "tcp_commands",
+      "commands": [
+        "HELLO",
+        "AUTH"
+      ]
     },
     {
       "id": "R3",
-      "filter": "tcp.port==5006 && (frame contains \"SUBSCRIBE\" || frame contains \"SUB \")",
+      "filter": "tcp.dstport==5006 && tcp.len>0",
       "condition": ">= 1",
-      "description": "At least one SUBSCRIBE."
+      "description": "Complete SUBSCRIBE/SUB command lines in the request direction after TCP reassembly and retransmission removal.",
+      "measurement": "tcp_commands",
+      "commands": [
+        "SUBSCRIBE",
+        "SUB"
+      ]
     },
     {
       "id": "R4",
-      "filter": "tcp.port==5006 && (frame contains \"PUBLISH\" || frame contains \"PUB \")",
+      "filter": "tcp.dstport==5006 && tcp.len>0",
       "condition": ">= 1",
-      "description": "At least one PUBLISH."
+      "description": "Complete PUBLISH/PUB command lines in the request direction after TCP reassembly and retransmission removal.",
+      "measurement": "tcp_commands",
+      "commands": [
+        "PUBLISH",
+        "PUB"
+      ]
     },
     {
       "id": "R5",
-      "filter": "tcp.port==5006 && (frame contains \"DELIVER\" || frame contains \"MSG \")",
+      "filter": "tcp.srcport==5006 && tcp.len>0",
       "condition": ">= 1",
-      "description": "The broker delivers at least one message to a subscriber (push)."
+      "description": "Complete DELIVER/MSG command lines in the response direction after TCP reassembly and retransmission removal.",
+      "measurement": "tcp_commands",
+      "commands": [
+        "DELIVER",
+        "MSG"
+      ]
     }
+  ],
+  "manual_checks": [
+    "The supplied command counter uses LF/CRLF framing. If E1 selects JSON or binary framing, supply and test the corresponding decoder in the student validator; do not replace logical counts with frame counts.",
+    "Correlate client identities, topics/keys and request IDs with pytest assertions to prove the required application behaviour.",
+    "R1 R2 R3: Decode LF/CRLF command lines or supply the E1 framing decoder; correlate client and topic.",
+    "R4 R5: Assert payloads and recipients, then verify unsubscribe and the E1 duplicate/delivery policy."
   ]
 }

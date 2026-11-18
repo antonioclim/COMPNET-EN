@@ -668,7 +668,11 @@
             margin: 0 -1rem;
             padding: 0 1rem;
         }
-    </style>
+    button.quiz-option {width:100%;color:inherit;font:inherit;text-align:left;}
+button.quiz-option:focus-visible,.page-dot:focus-visible {outline:3px solid var(--accent-primary);outline-offset:3px;}
+button.page-dot {border:0;padding:0;}
+code,.file-name {overflow-wrap:anywhere;}
+</style>
 </head>
 <body>
     <div class="progress-container">
@@ -689,6 +693,7 @@
         <!-- Slide 1: Title -->
         <div class="slide active title-slide" data-slide="1">
             <div class="slide-content">
+                <p class="simulation-note">Interactive outputs are prewritten demonstrations. Run the canonical scripts in the VM or supported Linux environment using <a href="../CANONICAL_LAB_MAP.md">the lab map</a>.</p>
                 <div class="python-logo">📖</div>
                 <h1>Reading Python Code</h1>
                 <p class="lead">From Syntax to Deep Understanding</p>
@@ -696,7 +701,7 @@
                 <div class="title-meta">
                     <span class="badge badge-time">⏱️ ~25 minutes</span>
                     <span class="badge badge-week">📅 Weeks 1-2</span>
-                    <span class="badge badge-file">📁 01roWSL, 02roWSL</span>
+                    <span class="badge badge-file">📁 04_SEMINARS/S01, 04_SEMINARS/S02</span>
                 </div>
 
                 <div class="modulee-badge">
@@ -747,7 +752,7 @@
                         <div class="objective-icon">🔍</div>
                         <div class="objective-text">
                             <strong>Reading Real Exercises</strong>
-                            <span>We will analyse <code>ex_1_01_latency_ping.py</code> line by line together</span>
+                            <span>We will analyse <code>00_APPENDIX/a)PYTHON_self_study_guide/examples/05_ping_latency.py</code> line by line together</span>
                         </div>
                     </div>
                 </div>
@@ -764,11 +769,11 @@
             <div class="slide-content">
                 <h2>📄 Anatomy of a Python File</h2>
 
-                <p>Every exercise in the starter kits follows a standard structure. Let us analyse its components:</p>
+                <p>The following excerpt illustrates common Python file structure. Incomplete fragments are for reading; the runnable reference is examples/05_ping_latency.py in this guide.</p>
 
                 <div class="code-container">
                     <div class="code-header">
-                        <span class="code-filename">🐍 ex_1_01_latency_ping.py (structure)</span>
+                        <span class="code-filename">🐍 00_APPENDIX/a)PYTHON_self_study_guide/examples/05_ping_latency.py (structure)</span>
                         <div class="code-actions">
                             <button class="btn-code btn-copy" onclick="copyCode(this)">📋 Copy</button>
                         </div>
@@ -915,7 +920,7 @@ printf(<span class="str">"%d"</span>, r.sequence);  <span class="cmt">// 1</span
                     <div class="code-header">
                         <span class="code-filename">🐍 type_hints_example.py</span>
                         <div class="code-actions">
-                            <button class="btn-code btn-run" onclick="simulateRun(this, 'output-types')">▶ Run</button>
+                            <button class="btn-code btn-run" onclick="simulateRun(this, 'output-types')">▶ Simulate</button>
                         </div>
                     </div>
                     <div class="code-body">
@@ -933,7 +938,7 @@ printf(<span class="str">"%d"</span>, r.sequence);  <span class="cmt">// 1</span
 
 <span class="kw">def</span> <span class="fn">analyse_network</span>(
     ip_addresses: <span class="type">List[str]</span>,                    <span class="cmt"># List of strings</span>
-    config: <span class="type">Dict[str, int]</span>,               <span class="cmt"># Dictionaryy str→int</span>
+    config: <span class="type">Dict[str, int]</span>,               <span class="cmt"># Dictionary str→int</span>
     timeout: <span class="type">Optional[float]</span> = <span class="kw">None</span>       <span class="cmt"># Float or None</span>
 ) -> <span class="type">Tuple[int, List[str]]</span>:              <span class="cmt"># Returns a tuple</span>
     <span class="str">"""Analyses a list of IP addresses."""</span>
@@ -951,7 +956,7 @@ result = process_clear(<span class="str">"test"</span>, <span class="num">3</spa
 
                 <div class="card card-warning">
                     <h3>⚠️ Important</h3>
-                    <p>Type hints serve <strong>only as documentation</strong> — Python does NOT enforce them at runtime. You can pass any type and the code will still run. Tools such as <code>mypy</code> perform static checking.</p>
+                    <p>Type hints serve <strong>only as documentation</strong> — Python does NOT enforce them at runtime. A wrong type may still fail when an operation uses it; annotations alone do not enforce the contract. Tools such as <code>mypy</code> perform static checking.</p>
                 </div>
 
                 <div class="callout callout-networking">
@@ -1054,13 +1059,13 @@ result = process_clear(<span class="str">"test"</span>, <span class="num">3</spa
         <!-- Slide 7: Real Code Analysis -->
         <div class="slide" data-slide="7">
             <div class="slide-content">
-                <h2>🔍 Analysing Real Code: ex_1_01_latency_ping.py</h2>
+                <h2>🔍 Analysing Real Code: 00_APPENDIX/a)PYTHON_self_study_guide/examples/05_ping_latency.py</h2>
 
-                <p>Let us analyse a real fragment from the Week 1 exercise:</p>
+                <p>This shortened reading exercise illustrates subprocess and dataclass use. The complete implementation is in the canonical ping helper:</p>
 
                 <div class="code-container">
                     <div class="code-header">
-                        <span class="code-filename">🐍 01roWSL/src/exercises/ex_1_01_latency_ping.py</span>
+                        <span class="code-filename">🐍 00_APPENDIX/a)PYTHON_self_study_guide/examples/05_ping_latency.py</span>
                         <div class="code-actions">
                             <button class="btn-code btn-copy" onclick="copyCode(this)">📋 Copy</button>
                         </div>
@@ -1136,7 +1141,7 @@ result = process_clear(<span class="str">"test"</span>, <span class="num">3</spa
                             <div class="step-number">1</div>
                             <div class="step-content">
                                 <h4>Open the file in an editor</h4>
-                                <p><code>code /mnt/d/NETWORKING/netROwsl/01roWSL/src/exercises/ex_1_01_latency_ping.py</code></p>
+                                <p><code>code "00_APPENDIX/a)PYTHON_self_study_guide/examples/05_ping_latency.py"</code></p>
                                 <p class="step-why">🎯 Purpose: VS Code can open files directly from WSL</p>
                                 <p class="step-what">👀 What you will see: The Python file with syntax highlighting</p>
                             </div>
@@ -1146,7 +1151,7 @@ result = process_clear(<span class="str">"test"</span>, <span class="num">3</spa
                             <div class="step-number">2</div>
                             <div class="step-content">
                                 <h4>Identify the sections</h4>
-                                <p>Find: the shebang (line 1), docstring (first lines with """), imports, @dataclass and the functions</p>
+                                <p>Find the shebang, module docstring, imports, PingResult dataclass, run_ping and main</p>
                                 <p class="step-why">🎯 Purpose: Practise pattern recognition on real code</p>
                                 <p class="step-what">👀 What you will see: The structure we discussed in the previous slides</p>
                             </div>
@@ -1155,10 +1160,10 @@ result = process_clear(<span class="str">"test"</span>, <span class="num">3</spa
                         <div class="experiment-step">
                             <div class="step-number">3</div>
                             <div class="step-content">
-                                <h4>Find the TODOs</h4>
-                                <p>Search the file for <code># TODO</code> or <code># COMPLETE</code></p>
-                                <p class="step-why">🎯 Purpose: These are the sections you need to complete during the lab</p>
-                                <p class="step-what">👀 What you will see: The exact locations where you need to write code</p>
+                                <h4>Inspect failure handling</h4>
+                                <p>Search for <code>TimeoutExpired</code> and <code>parse_ping_rtt</code></p>
+                                <p class="step-why">🎯 Purpose: Compare timeout handling with the successful-reply path</p>
+                                <p class="step-what">👀 What you will see: How a failed observation differs from an RTT sample</p>
                             </div>
                         </div>
 
@@ -1166,7 +1171,7 @@ result = process_clear(<span class="str">"test"</span>, <span class="num">3</spa
                             <div class="step-number">4</div>
                             <div class="step-content">
                                 <h4>Modify the default value</h4>
-                                <p>Find <code>count: int = 3</code> and change it to <code>count: int = 5</code></p>
+                                <p>In a personal copy, change the argparse <code>--count</code> default from 3 to 5</p>
                                 <p class="step-why">🎯 Purpose: Experience how you can alter the default behaviour</p>
                                 <p class="step-what">👀 What you will learn: How default parameters affect execution</p>
                             </div>
@@ -1176,7 +1181,7 @@ result = process_clear(<span class="str">"test"</span>, <span class="num">3</spa
                             <div class="step-number">5</div>
                             <div class="step-content">
                                 <h4>Run and observe the difference</h4>
-                                <p><code>python3 src/exercises/ex_1_01_latency_ping.py --host 127.0.0.1</code></p>
+                                <p><code>python3 "00_APPENDIX/a)PYTHON_self_study_guide/examples/05_ping_latency.py" --host 127.0.0.1</code></p>
                                 <p class="step-why">🎯 Purpose: Verify that your modification took effect</p>
                                 <p class="step-what">👀 What you will see: It now sends 5 packets instead of 3</p>
                             </div>
@@ -1205,22 +1210,22 @@ result = process_clear(<span class="str">"test"</span>, <span class="num">3</spa
                     </div>
 
                     <div class="quiz-options">
-                        <div class="quiz-option" onclick="selectOption(this, 'quiz1')">
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this, 'quiz1')">
                             <span class="option-marker">A</span>
                             <span>Transforms the class into a function</span>
-                        </div>
-                        <div class="quiz-option" onclick="selectOption(this, 'quiz1')" data-correct="true">
+                        </button>
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this, 'quiz1')" data-correct="true">
                             <span class="option-marker">B</span>
                             <span>Automatically generates __init__, __repr__ and other methods for the data class</span>
-                        </div>
-                        <div class="quiz-option" onclick="selectOption(this, 'quiz1')">
+                        </button>
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this, 'quiz1')">
                             <span class="option-marker">C</span>
                             <span>Checks types at runtime and raises errors</span>
-                        </div>
-                        <div class="quiz-option" onclick="selectOption(this, 'quiz1')">
+                        </button>
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this, 'quiz1')">
                             <span class="option-marker">D</span>
                             <span>Automatically converts the class to JSON format</span>
-                        </div>
+                        </button>
                     </div>
 
                     <div class="quiz-actions">
@@ -1241,7 +1246,7 @@ result = process_clear(<span class="str">"test"</span>, <span class="num">3</spa
                         <p><code>@dataclass</code> = "data class" = a class designed for holding data. It automatically generates a constructor (<code>__init__</code>), a text representation (<code>__repr__</code>) and equality comparisons (<code>__eq__</code>).</p>
                     </div>
 
-                    <div class="feedback-box" id="quiz1-feedback"></div>
+                    <div class="feedback-box" role="status" aria-live="polite" id="quiz1-feedback"></div>
                 </div>
             </div>
         </div>
@@ -1263,22 +1268,22 @@ result = process_clear(<span class="str">"test"</span>, <span class="num">3</spa
                     </div>
 
                     <div class="quiz-options">
-                        <div class="quiz-option" onclick="selectOption(this, 'quiz2')">
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this, 'quiz2')">
                             <span class="option-marker">A</span>
                             <span>The value must be a float</span>
-                        </div>
-                        <div class="quiz-option" onclick="selectOption(this, 'quiz2')">
+                        </button>
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this, 'quiz2')">
                             <span class="option-marker">B</span>
                             <span>The parameter is optional and can be omitted</span>
-                        </div>
-                        <div class="quiz-option" onclick="selectOption(this, 'quiz2')" data-correct="true">
+                        </button>
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this, 'quiz2')" data-correct="true">
                             <span class="option-marker">C</span>
                             <span>The value can be either float or None</span>
-                        </div>
-                        <div class="quiz-option" onclick="selectOption(this, 'quiz2')">
+                        </button>
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this, 'quiz2')">
                             <span class="option-marker">D</span>
                             <span>The value will be automatically converted to a float</span>
-                        </div>
+                        </button>
                     </div>
 
                     <div class="quiz-actions">
@@ -1299,7 +1304,7 @@ result = process_clear(<span class="str">"test"</span>, <span class="num">3</spa
                         <p>If the ping fails, there is no valid RTT. Instead of using a magic value (-1), we use <code>None</code> to indicate "no value".</p>
                     </div>
 
-                    <div class="feedback-box" id="quiz2-feedback"></div>
+                    <div class="feedback-box" role="status" aria-live="polite" id="quiz2-feedback"></div>
                 </div>
 
                 <div class="quiz-container" id="quiz3" style="margin-top: 2rem;">
@@ -1316,22 +1321,22 @@ result = process_clear(<span class="str">"test"</span>, <span class="num">3</spa
                     </div>
 
                     <div class="quiz-options">
-                        <div class="quiz-option" onclick="selectOption(this, 'quiz3')">
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this, 'quiz3')">
                             <span class="option-marker">A</span>
                             <span><code>for (i = 0; i < 10; i++):</code></span>
-                        </div>
-                        <div class="quiz-option" onclick="selectOption(this, 'quiz3')">
+                        </button>
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this, 'quiz3')">
                             <span class="option-marker">B</span>
                             <span><code>for i = 0 to 10:</code></span>
-                        </div>
-                        <div class="quiz-option" onclick="selectOption(this, 'quiz3')" data-correct="true">
+                        </button>
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this, 'quiz3')" data-correct="true">
                             <span class="option-marker">C</span>
                             <span><code>for i in range(10):</code></span>
-                        </div>
-                        <div class="quiz-option" onclick="selectOption(this, 'quiz3')">
+                        </button>
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this, 'quiz3')">
                             <span class="option-marker">D</span>
                             <span><code>foreach i in [0..10]:</code></span>
-                        </div>
+                        </button>
                     </div>
 
                     <div class="quiz-actions">
@@ -1352,7 +1357,7 @@ result = process_clear(<span class="str">"test"</span>, <span class="num">3</spa
                         <p>The code block is delimited by indentation (spaces) rather than curly braces. The <code>for</code> line ends with <code>:</code></p>
                     </div>
 
-                    <div class="feedback-box" id="quiz3-feedback"></div>
+                    <div class="feedback-box" role="status" aria-live="polite" id="quiz3-feedback"></div>
                 </div>
             </div>
         </div>
@@ -1368,7 +1373,7 @@ result = process_clear(<span class="str">"test"</span>, <span class="num">3</spa
                     <div class="code-header">
                         <span class="code-filename">🐍 sandbox_dataclass.py</span>
                         <div class="code-actions">
-                            <button class="btn-code btn-run" onclick="simulateRun(this, 'sandbox-output')">▶ Run</button>
+                            <button class="btn-code btn-run" onclick="simulateRun(this, 'sandbox-output')">▶ Simulate</button>
                             <button class="btn-code btn-copy" onclick="copyCode(this)">📋 Copy</button>
                         </div>
                     </div>
@@ -1484,7 +1489,7 @@ PacketInfo(source_ip='192.168.1.100', dest_ip='8.8.8.8', protocol='TCP', size=15
                     <span class="callout-icon">🌐</span>
                     <div class="callout-content">
                         <h4>Practical Application in the Lab</h4>
-                        <p>You can now open any exercise from <code>01roWSL</code> or <code>02roWSL</code> and understand its structure. Identify the dataclasses used to represent packets, ping results and connections.</p>
+                        <p>You can now open any exercise from <code>04_SEMINARS/S01</code> or <code>04_SEMINARS/S02</code> and understand its structure. Identify the dataclasses used to represent packets, ping results and connections.</p>
                     </div>
                 </div>
 
@@ -1511,9 +1516,11 @@ PacketInfo(source_ip='192.168.1.100', dest_ip='8.8.8.8', protocol='TCP', size=15
         const quizHintCounts = {};
 
         document.addEventListener('DOMContentLoaded', () => {
-            updataUI();
+            updateUI();
             createPageDots();
+            goToSlide(currentSlide);
             document.addEventListener('keydown', (e) => {
+                if (e.target.closest('input, textarea, select, button, a, [contenteditable=true]')) return;
                 if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
                 else if (e.key === 'ArrowLeft') { prevSlide(); }
             });
@@ -1522,14 +1529,16 @@ PacketInfo(source_ip='192.168.1.100', dest_ip='8.8.8.8', protocol='TCP', size=15
         function createPageDots() {
             const container = document.getElementById('pageDots');
             for (let i = 1; i <= totalSlides; i++) {
-                const dot = document.createElement('div');
+                const dot = document.createElement('button');
+                dot.type = 'button';
+                dot.setAttribute('aria-label', `Go to slide ${i}`);
                 dot.className = 'page-dot' + (i === 1 ? ' active' : '');
                 dot.onclick = () => goToSlide(i);
                 container.appendChild(dot);
             }
         }
 
-        function updataUI() {
+        function updateUI() {
             document.getElementById('progressBar').style.width = `${(currentSlide / totalSlides) * 100}%`;
             document.getElementById('slideCounter').textContent = `${currentSlide} / ${totalSlides}`;
             document.getElementById('btnPrev').disabled = currentSlide === 1;
@@ -1540,17 +1549,16 @@ PacketInfo(source_ip='192.168.1.100', dest_ip='8.8.8.8', protocol='TCP', size=15
         }
 
         function goToSlide(n) {
-            if (n < 1 || n > totalSlides || n === currentSlide) return;
-            const currentEl = document.querySelector(`.slide[data-slide="${currentSlide}"]`);
-            const nextEl = document.querySelector(`.slide[data-slide="${n}"]`);
-            currentEl.classList.remove('active');
-            currentEl.classList.add('exit');
-            setTimeout(() => {
-                currentEl.classList.remove('exit');
-                nextEl.classList.add('active');
-                currentSlide = n;
-                updataUI();
-            }, 100);
+            if (!Number.isInteger(n) || n < 1 || n > totalSlides) return;
+            currentSlide = n;
+            document.querySelectorAll('.slide').forEach(slide => {
+                const active = Number(slide.dataset.slide) === n;
+                slide.classList.remove('exit');
+                slide.classList.toggle('active', active);
+                slide.inert = !active;
+                slide.setAttribute('aria-hidden', String(!active));
+            });
+            updateUI();
         }
 
         function nextSlide() { if (currentSlide < totalSlides) goToSlide(currentSlide + 1); }
@@ -1562,26 +1570,36 @@ PacketInfo(source_ip='192.168.1.100', dest_ip='8.8.8.8', protocol='TCP', size=15
             btn.disabled = true;
             setTimeout(() => {
                 output.classList.add('visible');
-                btn.textContent = '▶ Run';
+                btn.textContent = '▶ Simulate';
                 btn.disabled = false;
             }, 800);
         }
 
-        function copyCode(btn) {
-            const container = btn.closest('.code-container');
-            const code = container.querySelector('pre').textContent;
-            navigator.clipboard.writeText(code);
-            const originalText = btn.textContent;
-            btn.textContent = '✓ Copied!';
-            setTimeout(() => btn.textContent = originalText, 1500);
+        async function copyCode(btn) {
+            const pre = btn.closest('.code-container').querySelector('pre');
+            const original = btn.textContent;
+            try {
+                await navigator.clipboard.writeText(pre.textContent);
+                btn.textContent = 'Copied!';
+            } catch (_) {
+                const range = document.createRange();
+                range.selectNodeContents(pre);
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+                btn.textContent = 'Selected: copy manually';
+            }
+            setTimeout(() => { btn.textContent = original; }, 2000);
         }
 
         function selectOption(el, quizId) {
             const container = document.getElementById(quizId);
-            container.querySelectorAll('.quiz-option').forEach(opt => {
-                opt.classList.remove('selected', 'correct', 'incorrect');
+            container.querySelectorAll('.quiz-option').forEach(option => {
+                option.classList.remove('selected', 'correct', 'incorrect');
+                option.setAttribute('aria-pressed', 'false');
             });
             el.classList.add('selected');
+            el.setAttribute('aria-pressed', 'true');
             document.getElementById(`${quizId}-feedback`).classList.remove('visible');
         }
 

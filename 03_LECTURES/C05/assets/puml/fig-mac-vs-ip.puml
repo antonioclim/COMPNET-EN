@@ -23,11 +23,12 @@ package "LAN B" as lanB #FFF3E0 {
     SWB -- B
 }
 
-R1 -[#1565C0]-> R2 : L3 packet: IP_A → IP_B\n(IP unchanged end-to-end)
+R1 -[#1565C0]-> R2 : L3 packet: IP_A → IP_B\n(source/destination preserved without NAT)
 
 legend bottom
   MAC addresses change at each hop (local scope).
-  IP addresses remain constant end-to-end (global scope).
-  The router rewrites L2 headers but preserves L3 headers.
+  IP source/destination remain unchanged when no NAT is applied.
+  A router replaces the L2 header and decrements IPv4 TTL;
+  it updates the IPv4 header checksum. Other L3 fields may change.
 endlegend
 @enduml

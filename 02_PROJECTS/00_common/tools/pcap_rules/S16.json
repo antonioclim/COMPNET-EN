@@ -7,31 +7,35 @@
       "id": "R1",
       "filter": "tcp.dstport==5016 && tcp.flags.syn==1 && tcp.flags.ack==0",
       "condition": ">= 1",
-      "description": "Handshake to the editing service."
+      "description": "SYN connection attempt to the editing service."
     },
     {
       "id": "R2",
       "filter": "tcp.port==5016 && frame contains \"LOCK\"",
       "condition": ">= 1",
-      "description": "At least one lock attempt appears in payload."
+      "description": "LOCK marker bytes are present; reassemble and distinguish LOCK from UNLOCK."
     },
     {
       "id": "R3",
       "filter": "tcp.port==5016 && (frame contains \"BUSY\" || frame contains \"ERR_LOCKED\" || frame contains \"LOCK_DENIED\")",
       "condition": ">= 1",
-      "description": "The competing lock is refused deterministically."
+      "description": "A BUSY/ERR_LOCKED/LOCK_DENIED marker is present; assert the competing request and unchanged owner."
     },
     {
       "id": "R4",
       "filter": "tcp.port==5016 && frame contains \"SAVE\"",
       "condition": ">= 1",
-      "description": "A save command is visible in the session."
+      "description": "SAVE marker bytes are present; verify the saved document and version."
     },
     {
       "id": "R5",
       "filter": "tcp.port==5016 && (frame contains \"DOC_UPDATE\" || frame contains \"UPDATED\" || frame contains \"VERSION\")",
       "condition": ">= 1",
-      "description": "A post-save update or version marker is visible."
+      "description": "An update/version marker is present; verify the recipient and actual post-save state."
     }
+  ],
+  "manual_checks": [
+    "R1 R2 R3: Assert B receives the declared refusal and that A remains owner.",
+    "R4 R5: Compare saved content/version and notification recipient; a version marker alone is insufficient."
   ]
 }

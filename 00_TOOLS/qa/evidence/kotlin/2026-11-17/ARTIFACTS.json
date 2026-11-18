@@ -1,0 +1,261 @@
+{
+  "schema_version": 1,
+  "tested_commit": "7c79582c5750e9b94b1d7d34d269f080e91a32d3",
+  "tested_tree": "355b2399aec344c63be855cf800c901c92ec4677",
+  "files": [
+    {
+      "execution_relative_path": "EXTRACTED_KOTLIN_BODY.kt",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/EXTRACTED_KOTLIN_BODY.kt",
+      "bytes": 351,
+      "sha256": "4339065722c25a414bd1f106d282221ee847aa07aa907102491a1161176fe4fc",
+      "retained_as": "Generated locally; digest retained here, regenerate with the frozen harness"
+    },
+    {
+      "execution_relative_path": "N08_KOTLIN_RESULTS.json",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/N08_KOTLIN_RESULTS.json",
+      "bytes": 23304,
+      "sha256": "0949411bb81912cc5baecde2c7bd7fd50bd9f790679131105090519bc7c1721c",
+      "retained_as": "00_TOOLS/qa/evidence/kotlin/2026-11-17/N08_KOTLIN_RESULTS.json"
+    },
+    {
+      "execution_relative_path": "PROTOCOL_FREEZE.json",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/PROTOCOL_FREEZE.json",
+      "bytes": 2925,
+      "sha256": "3c7316616aaa3bdc73b53de4c5fa8fc5dc058e14791fedfe9d2d71fb74561ff8",
+      "retained_as": "00_TOOLS/qa/evidence/kotlin/2026-11-17/PROTOCOL_FREEZE.json"
+    },
+    {
+      "execution_relative_path": "PROTOCOL_N08.md",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/PROTOCOL_N08.md",
+      "bytes": 10410,
+      "sha256": "7befb3aeecb21edf245482f67bae258d7ff88a89ee48aa871b5cc88f2c6ed306",
+      "retained_as": "00_TOOLS/qa/evidence/kotlin/2026-11-17/PROTOCOL_N08.md"
+    },
+    {
+      "execution_relative_path": "derived_50081/RESULT.json",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/derived_50081/RESULT.json",
+      "bytes": 6147,
+      "sha256": "bb70a4ae5291a61060b0cf5f36585e89b99b321defdbc6c90ddc0e3a030a8e8f",
+      "retained_as": "The same variant result is embedded in N08_KOTLIN_RESULTS.json; standalone digest retained"
+    },
+    {
+      "execution_relative_path": "derived_50081/RosettaKotlinAudit.kt",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/derived_50081/RosettaKotlinAudit.kt",
+      "bytes": 397,
+      "sha256": "d2b1e8fdee7896ceae1c1184c445ea5dac0041a735d3e52d1135adf3c9ff9e3a",
+      "retained_as": "Generated locally; digest retained here, regenerate with the frozen harness"
+    },
+    {
+      "execution_relative_path": "derived_50081/compile.command.json",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/derived_50081/compile.command.json",
+      "bytes": 1222,
+      "sha256": "7b053eb1b7aeecd99b98672ed515633289098cbc4187b08cb60c5da65c378fc2",
+      "retained_as": "Diagnostic stream or command record in LOGS.json"
+    },
+    {
+      "execution_relative_path": "derived_50081/compile.stderr.log",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/derived_50081/compile.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained_as": "Diagnostic stream or command record in LOGS.json"
+    },
+    {
+      "execution_relative_path": "derived_50081/compile.stdout.log",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/derived_50081/compile.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained_as": "Diagnostic stream or command record in LOGS.json"
+    },
+    {
+      "execution_relative_path": "derived_50081/rosetta-kotlin.jar",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/derived_50081/rosetta-kotlin.jar",
+      "bytes": 5679796,
+      "sha256": "820619a94eee355bbb49cbb8f6d63aa69b84a73f2789de0461a36e6f129d1a76",
+      "retained_as": "Generated locally; digest retained here, regenerate with the frozen harness"
+    },
+    {
+      "execution_relative_path": "derived_50081/runtime.stderr.log",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/derived_50081/runtime.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained_as": "Diagnostic stream or command record in LOGS.json"
+    },
+    {
+      "execution_relative_path": "derived_50081/runtime.stdout.log",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/derived_50081/runtime.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained_as": "Diagnostic stream or command record in LOGS.json"
+    },
+    {
+      "execution_relative_path": "exact_8080/RESULT.json",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/exact_8080/RESULT.json",
+      "bytes": 6069,
+      "sha256": "52a32e8ae005f070db46b1fb2cabce4de0b8d18f264c1c2a01bde169ca4eca85",
+      "retained_as": "The same variant result is embedded in N08_KOTLIN_RESULTS.json; standalone digest retained"
+    },
+    {
+      "execution_relative_path": "exact_8080/RosettaKotlinAudit.kt",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/exact_8080/RosettaKotlinAudit.kt",
+      "bytes": 396,
+      "sha256": "7db14d004dd18a82f3326f74d9e36c9dd5013b03c1af02c4294db2c7a766aefd",
+      "retained_as": "Generated locally; digest retained here, regenerate with the frozen harness"
+    },
+    {
+      "execution_relative_path": "exact_8080/compile.command.json",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/exact_8080/compile.command.json",
+      "bytes": 1209,
+      "sha256": "adbc688b439b1350ac2cf7f0713a880eddbb16834e81cba4e4ee1d23c7d5ea64",
+      "retained_as": "Diagnostic stream or command record in LOGS.json"
+    },
+    {
+      "execution_relative_path": "exact_8080/compile.stderr.log",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/exact_8080/compile.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained_as": "Diagnostic stream or command record in LOGS.json"
+    },
+    {
+      "execution_relative_path": "exact_8080/compile.stdout.log",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/exact_8080/compile.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained_as": "Diagnostic stream or command record in LOGS.json"
+    },
+    {
+      "execution_relative_path": "exact_8080/rosetta-kotlin.jar",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/exact_8080/rosetta-kotlin.jar",
+      "bytes": 5679794,
+      "sha256": "59a5cec8cb0088f43092aeb3b6d8cf48baf3afac9083ba061eb14e93002e24a5",
+      "retained_as": "Generated locally; digest retained here, regenerate with the frozen harness"
+    },
+    {
+      "execution_relative_path": "exact_8080/runtime.stderr.log",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/exact_8080/runtime.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained_as": "Diagnostic stream or command record in LOGS.json"
+    },
+    {
+      "execution_relative_path": "exact_8080/runtime.stdout.log",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/exact_8080/runtime.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained_as": "Diagnostic stream or command record in LOGS.json"
+    },
+    {
+      "execution_relative_path": "git_commit.command.json",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/git_commit.command.json",
+      "bytes": 1029,
+      "sha256": "217b1d43613861474ae6bd1f5a0544b3928229af3c2063d69c6f0cce4605a21e",
+      "retained_as": "Diagnostic stream or command record in LOGS.json"
+    },
+    {
+      "execution_relative_path": "git_commit.stderr.log",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/git_commit.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained_as": "Diagnostic stream or command record in LOGS.json"
+    },
+    {
+      "execution_relative_path": "git_commit.stdout.log",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/git_commit.stdout.log",
+      "bytes": 41,
+      "sha256": "028ca967a048f56f8601926c969637b60c686d4e68701d5db84b79ab75b91ff1",
+      "retained_as": "Diagnostic stream or command record in LOGS.json"
+    },
+    {
+      "execution_relative_path": "git_status.command.json",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/git_status.command.json",
+      "bytes": 1062,
+      "sha256": "bd53a965ea299b2551217018a8d66e8db2fa2a508529b832df0d464270efb7d9",
+      "retained_as": "Diagnostic stream or command record in LOGS.json"
+    },
+    {
+      "execution_relative_path": "git_status.stderr.log",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/git_status.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained_as": "Diagnostic stream or command record in LOGS.json"
+    },
+    {
+      "execution_relative_path": "git_status.stdout.log",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/git_status.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained_as": "Diagnostic stream or command record in LOGS.json"
+    },
+    {
+      "execution_relative_path": "git_tree.command.json",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/git_tree.command.json",
+      "bytes": 1033,
+      "sha256": "a1bfeed30bd3bab218526c0ea8382a4039a2427ae45ca360720160aad3cfe29a",
+      "retained_as": "Diagnostic stream or command record in LOGS.json"
+    },
+    {
+      "execution_relative_path": "git_tree.stderr.log",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/git_tree.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained_as": "Diagnostic stream or command record in LOGS.json"
+    },
+    {
+      "execution_relative_path": "git_tree.stdout.log",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/git_tree.stdout.log",
+      "bytes": 41,
+      "sha256": "34992683680f1af23e3ec4608d608ea5dc804d468da427d74b855b9c6202803c",
+      "retained_as": "Diagnostic stream or command record in LOGS.json"
+    },
+    {
+      "execution_relative_path": "java_version.command.json",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/java_version.command.json",
+      "bytes": 969,
+      "sha256": "0c5a2b923dd3fbc3990eff121be3c21d02ca2b5908796e3e9b6ced45cfbd3dfb",
+      "retained_as": "Diagnostic stream or command record in LOGS.json"
+    },
+    {
+      "execution_relative_path": "java_version.stderr.log",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/java_version.stderr.log",
+      "bytes": 181,
+      "sha256": "0fc83381287ccbc8623d257bce2b0d03997ba0e85ff4492d38b409aea37a8aa9",
+      "retained_as": "Diagnostic stream or command record in LOGS.json"
+    },
+    {
+      "execution_relative_path": "java_version.stdout.log",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/java_version.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained_as": "Diagnostic stream or command record in LOGS.json"
+    },
+    {
+      "execution_relative_path": "kotlinc_version.command.json",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/kotlinc_version.command.json",
+      "bytes": 1003,
+      "sha256": "729083eb0ca16d8e10e86b6cf468e1bf2084aac20ffe7e6b566cfa3d36c74add",
+      "retained_as": "Diagnostic stream or command record in LOGS.json"
+    },
+    {
+      "execution_relative_path": "kotlinc_version.stderr.log",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/kotlinc_version.stderr.log",
+      "bytes": 58,
+      "sha256": "8b9433e04ce88a8a4fedbf6ee1c7ba746af3202394a977225fe2e19aad89845d",
+      "retained_as": "Diagnostic stream or command record in LOGS.json"
+    },
+    {
+      "execution_relative_path": "kotlinc_version.stdout.log",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/kotlinc_version.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained_as": "Diagnostic stream or command record in LOGS.json"
+    },
+    {
+      "execution_relative_path": "probe_kotlin.py",
+      "original_local_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/probe_kotlin.py",
+      "bytes": 31313,
+      "sha256": "fc90a248212151d4bcdfd7380f2488909f88481c612a4e5b893478a4acd0574e",
+      "retained_as": "00_TOOLS/qa/check_kotlin_rosetta.py; identical executed bytes under the published name"
+    }
+  ],
+  "distribution_policy": "Retain source identities, protocol, raw report, diagnostics and commands. The compiler distribution and generated JARs are not committed.",
+  "jar_hash_interpretation": "Digests identify this execution; the probe does not claim byte-reproducible JAR packaging across timestamps or toolchains."
+}

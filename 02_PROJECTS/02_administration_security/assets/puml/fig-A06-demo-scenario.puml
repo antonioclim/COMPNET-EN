@@ -37,15 +37,15 @@ note right of ART #E8F5E9 : NAT rewrite confirmed\non both interfaces
 == STEP 3 — INBOUND BLOCK ==
 
 EX -> SH : ./test_inbound.sh
-SH -> SRV : curl h4 → 10.0.1.10:22
-SRV -[#E53935]> GW : SYN (no DNAT rule)
-GW ->x GW : dropped
-note right of ART #FFCDD2 : inbound blocked by default
+SH -> SRV : TCP connect attempt h4 → 10.0.1.10:22\nroute to internal subnet via gateway
+SRV -[#E53935]> GW : SYN to routed internal destination
+GW ->x GW : FORWARD drops NEW inbound traffic
+note right of ART #FFCDD2 : blocked by explicit stateful FORWARD policy
 
 == STEP 4 — OPTIONAL DNAT ==
 
 EX -> SH : ./add_dnat.sh
-SH -> GW : iptables DNAT :8080 → h1:80
+SH -> GW : iptables DNAT :8080 → h1:80\nplus FORWARD allow for this mapped service
 SRV -> GW : HTTP GET :8080
 GW -> CL : forwarded to h1:80
 CL --> SRV : HTTP 200 (through DNAT)

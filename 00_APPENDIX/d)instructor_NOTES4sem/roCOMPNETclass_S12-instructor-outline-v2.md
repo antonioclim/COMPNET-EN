@@ -40,7 +40,7 @@ La finalul seminarului, studentul poate:
 ### Verificare mediu
 
 ```bash
-cd ~/compnet-2025-redo-main       # sau calea efectivă din VM
+cd ~/COMPNET-EN       # sau calea efectivă din VM
 source ~/venvs/compnet/bin/activate 2>/dev/null || true
 python3 -c "import requests, grpc; import grpc_tools; print('OK')"
 ```
@@ -54,74 +54,24 @@ python3 -m pip install requests grpcio grpcio-tools
 
 ### Pre-creare server JSON-RPC
 
-Serverul JSON-RPC minimal nu există în kit — trebuie creat o singură dată. Recomandare: creează-l *înainte* de seminar, nu în fața studenților (evită 2 minute de lipire în `nano`).
+Serverul local canonic este inclus în kit. Verifică-l înainte de seminar; nu crea o variantă separată.
 
 ```bash
-cd 04_SEMINARS/S12/1_jsonrpc
-cat > jsonrpc_server_minimal.py << 'PYEOF'
-from http.server import BaseHTTPRequestHandler, HTTPServer
-import json
-import ast, operator
-
-BIN_OPS = {
-    ast.Add: operator.add, ast.Sub: operator.sub,
-    ast.Mult: operator.mul, ast.Div: operator.truediv,
-    ast.Pow: operator.pow, ast.Mod: operator.mod,
-    ast.FloorDiv: operator.floordiv,
-}
-UNARY_OPS = {ast.UAdd: operator.pos, ast.USub: operator.neg}
-
-def safe_eval(expr: str):
-    node = ast.parse(expr, mode="eval").body
-    def _eval(n):
-        if isinstance(n, ast.Constant) and isinstance(n.value, (int, float)):
-            return n.value
-        if isinstance(n, ast.BinOp) and type(n.op) in BIN_OPS:
-            return BIN_OPS[type(n.op)](_eval(n.left), _eval(n.right))
-        if isinstance(n, ast.UnaryOp) and type(n.op) in UNARY_OPS:
-            return UNARY_OPS[type(n.op)](_eval(n.operand))
-        raise ValueError("Unsupported expression.")
-    return _eval(node)
-
-class Handler(BaseHTTPRequestHandler):
-    def do_POST(self):
-        length = int(self.headers.get("Content-Length", "0"))
-        body = self.rfile.read(length).decode("utf-8", errors="replace")
-        try:
-            req = json.loads(body)
-            method, params = req.get("method"), req.get("params", [])
-            req_id = req.get("id")
-            if method != "evaluate":
-                raise ValueError(f"Unknown method: {method}")
-            expr = params[0] if params else ""
-            result = safe_eval(expr)
-            resp = {"jsonrpc": "2.0", "id": req_id, "result": result}
-            print(f"[JSONRPC-SERVER] evaluate({expr}) -> {result}")
-        except Exception as e:
-            resp = {"jsonrpc": "2.0", "id": None,
-                    "error": {"code": -32602, "message": str(e)}}
-            print("[JSONRPC-SERVER] error:", e)
-        data = json.dumps(resp).encode("utf-8")
-        self.send_response(200)
-        self.send_header("Content-Type", "application/json")
-        self.send_header("Content-Length", str(len(data)))
-        self.end_headers()
-        self.wfile.write(data)
-
-def main():
-    host, port = "0.0.0.0", 8080
-    print(f"[JSONRPC-SERVER] listening on http://{host}:{port}")
-    HTTPServer((host, port), Handler).serve_forever()
-
-if __name__ == "__main__":
-    main()
-PYEOF
+cd ~/COMPNET-EN/04_SEMINARS/S12/1_jsonrpc
+python3 S12_Part01_Script_JSONRPC_Server.py
 ```
+
+Serverul canonic se află în `04_SEMINARS/S12/1_jsonrpc/`. Rulează-l din acest director
+într-un terminal separat; nu este necesară crearea unui server temporar. Pentru ruta
+Mininet, porneşte-l în h1 cu `--host 0.0.0.0 --port 8080`, iar clientul din h2 foloseşte
+`JSONRPC_URL=http://10.0.0.1:8080/`. Verifică id-ul, codurile -32700/-32600/-32601/-32602
+şi lipsa corpului JSON pentru notificări (convenţia HTTP 204 a acestui exemplu).
+
 
 ### Repetiție codegen (opțional)
 
 ```bash
-cd ../3_grpc
+cd ~/COMPNET-EN/04_SEMINARS/S12/3_grpc
 python3 -m grpc_tools.protoc -I../2_protobuf \
     --python_out=. --grpc_python_out=. \
     ../2_protobuf/S12_Part02_Config_Calculator.proto
@@ -132,7 +82,7 @@ python3 -c "import S12_Part02_Config_Calculator_pb2 as pb2; print('OK pb2')"
 
 Dacă nu vrei să editezi în fața studenților:
 
-1. În `1_jsonrpc/S12_Part01_Script_JSONRPC_Client.py`, schimbă `URL = "https://api.mathjs.org/v4/"` în `URL = "http://10.0.0.1:8080/"`.
+1. În `1_jsonrpc/S12_Part01_Script_JSONRPC_Client.py`, foloseşte variabila de mediu `JSONRPC_URL=http://10.0.0.1:8080/` la lansare.
 2. În `3_grpc/S12_Part03_Script_g_RPC_Client.py`, schimbă `GRPC_TARGET = "localhost:50051"` în `GRPC_TARGET = "10.0.0.1:50051"`.
 
 ---
@@ -186,8 +136,9 @@ result = server.Add(AddRequest(a=2, b=3))
 **Fă (din directorul `04_SEMINARS/S12`):**
 
 ```bash
-cd ~/compnet-2025-redo-main/04_SEMINARS/S12
-sudo mn --topo single,2 --mac --switch ovsk --controller none
+cd ~/COMPNET-EN/04_SEMINARS/S12
+sudo mn --topo single,2 --mac --switch ovsbr --controller none
+# În CLI Mininet: pingall; continuă numai după conectivitate h1 ↔ h2.
 ```
 
 **Fă (verificare IP, 15 sec):**
@@ -202,13 +153,13 @@ mininet> h2 ip -4 addr show h2-eth0
 ### C.2 Pornești serverul JSON-RPC pe h1 🔵
 
 ```
-mininet> h1 python3 1_jsonrpc/jsonrpc_server_minimal.py &
+mininet> h1 python3 1_jsonrpc/S12_Part01_Script_JSONRPC_Server.py --host 0.0.0.0 --port 8080 > /tmp/s12-jsonrpc.log 2>&1 & echo $! > /tmp/s12-jsonrpc.pid
 ```
 
 Ar trebui să apară:
 
 ```text
-[JSONRPC-SERVER] listening on http://0.0.0.0:8080
+JSON-RPC endpoint: http://0.0.0.0:8080/
 ```
 
 > *▸ „Serverul ascultă pe portul 8080. Evaluarea expresiei e deliberat restricționată — scopul e să vedem protocolul, nu să facem un calculator de producție."*
@@ -222,10 +173,10 @@ Ar trebui să apară:
 **Fă:**
 
 ```
-mininet> h2 python3 1_jsonrpc/S12_Part01_Script_JSONRPC_Client.py
+mininet> h2 env JSONRPC_URL=http://10.0.0.1:8080/ python3 1_jsonrpc/S12_Part01_Script_JSONRPC_Client.py
 ```
 
-**Observație:** clientul afișează payload-ul JSON (lizibil) și rezultatul `evaluate(2+3) = 5`. Serverul raportează `[JSONRPC-SERVER] evaluate(2+3) -> 5`.
+**Observație:** clientul afișează payload-ul JSON (lizibil) și rezultatul `evaluate(2+3) = 5`. Serverul raportează `o linie de acces HTTP pentru POST, cu status 200; rezultatul se verifică în corpul răspunsului`.
 
 **Explicație:**
 
@@ -238,11 +189,17 @@ mininet> h2 python3 1_jsonrpc/S12_Part01_Script_JSONRPC_Client.py
 ### C.4 Captură pcap JSON-RPC 🟠
 
 ```
-mininet> h1 tcpdump -i h1-eth0 -w /tmp/jsonrpc.pcap tcp port 8080 -c 50 &
-mininet> h2 python3 1_jsonrpc/S12_Part01_Script_JSONRPC_Client.py
+mininet> h1 tcpdump -i h1-eth0 -w /tmp/jsonrpc.pcap tcp port 8080 > /tmp/s12-capture.log 2>&1 & echo $! > /tmp/s12-capture.pid
+mininet> h2 env JSONRPC_URL=http://10.0.0.1:8080/ python3 1_jsonrpc/S12_Part01_Script_JSONRPC_Client.py
 ```
 
 Apoi, în VM (alt terminal):
+
+În Mininet, înainte de analiză, oprește exact procesul de captură pornit mai sus și așteaptă închiderea fișierului:
+
+```text
+mininet> h1 kill -INT $(cat /tmp/s12-capture.pid); wait $(cat /tmp/s12-capture.pid)
+```
 
 ```bash
 tshark -r /tmp/jsonrpc.pcap -q -z follow,tcp,ascii,0 | head -n 80
@@ -263,7 +220,7 @@ tshark -r /tmp/jsonrpc.pcap -q -z follow,tcp,ascii,0 | head -n 80
 **Fă (în alt terminal al VM, nu în Mininet):**
 
 ```bash
-cd ~/compnet-2025-redo-main/04_SEMINARS/S12/2_protobuf
+cd ~/COMPNET-EN/04_SEMINARS/S12/2_protobuf
 nano S12_Part02_Config_Calculator.proto
 ```
 
@@ -322,13 +279,13 @@ Dacă nu apar ambele fișiere, nu mergi mai departe.
 Oprește serverul JSON-RPC (dacă rulează încă):
 
 ```
-mininet> h1 kill %1
+mininet> h1 kill -TERM $(cat /tmp/s12-jsonrpc.pid)
 ```
 
 Pornește serverul gRPC:
 
 ```
-mininet> h1 python3 3_grpc/S12_Part03_Script_g_RPC_Server.py &
+mininet> h1 python3 3_grpc/S12_Part03_Script_g_RPC_Server.py > /tmp/s12-grpc.log 2>&1 & echo $! > /tmp/s12-grpc.pid
 ```
 
 Ar trebui să apară:
@@ -362,7 +319,7 @@ Dictează valori predictibile:
 > *▸ „Acum oprim serverul și rulăm clientul din nou."*
 
 ```
-mininet> h1 kill %1
+mininet> h1 kill -TERM $(cat /tmp/s12-grpc.pid)
 mininet> h2 python3 3_grpc/S12_Part03_Script_g_RPC_Client.py
 ```
 
@@ -387,7 +344,7 @@ mininet> h2 python3 3_grpc/S12_Part03_Script_g_RPC_Client.py
 Repornește serverul:
 
 ```
-mininet> h1 python3 3_grpc/S12_Part03_Script_g_RPC_Server.py &
+mininet> h1 python3 3_grpc/S12_Part03_Script_g_RPC_Server.py > /tmp/s12-grpc.log 2>&1 & echo $! > /tmp/s12-grpc.pid
 ```
 
 Captură:
@@ -439,18 +396,19 @@ tshark -r /tmp/grpc.pcap -q -z follow,tcp,ascii,0 | head -n 80
 
 | Ce | Comandă |
 |---|---|
-| Pornire Mininet | `sudo mn --topo single,2 --mac --switch ovsk --controller none` |
+| Pornire Mininet | `sudo mn --topo single,2 --mac --switch ovsbr --controller none
+# În CLI Mininet: pingall; continuă numai după conectivitate h1 ↔ h2.` |
 | IP h1 | `10.0.0.1` (default Mininet `single,2`) |
 | IP h2 | `10.0.0.2` |
-| Server JSON-RPC | `h1 python3 1_jsonrpc/jsonrpc_server_minimal.py &` |
-| Client JSON-RPC | `h2 python3 1_jsonrpc/S12_Part01_Script_JSONRPC_Client.py` |
+| Server JSON-RPC | `h1 python3 1_jsonrpc/S12_Part01_Script_JSONRPC_Server.py --host 0.0.0.0 --port 8080 > /tmp/s12-jsonrpc.log 2>&1 & echo $! > /tmp/s12-jsonrpc.pid` |
+| Client JSON-RPC | `h2 env JSONRPC_URL=http://10.0.0.1:8080/ python3 1_jsonrpc/S12_Part01_Script_JSONRPC_Client.py` |
 | Codegen protobuf | `python3 -m grpc_tools.protoc -I../2_protobuf --python_out=. --grpc_python_out=. ../2_protobuf/S12_Part02_Config_Calculator.proto` |
-| Server gRPC | `h1 python3 3_grpc/S12_Part03_Script_g_RPC_Server.py &` |
+| Server gRPC | `h1 python3 3_grpc/S12_Part03_Script_g_RPC_Server.py > /tmp/s12-grpc.log 2>&1 & echo $! > /tmp/s12-grpc.pid` |
 | Client gRPC | `h2 python3 3_grpc/S12_Part03_Script_g_RPC_Client.py` |
-| Captură JSON-RPC | `h1 tcpdump -i h1-eth0 -w /tmp/jsonrpc.pcap tcp port 8080 -c 50 &` |
+| Captură JSON-RPC | `h1 tcpdump -i h1-eth0 -w /tmp/jsonrpc.pcap tcp port 8080 > /tmp/s12-capture.log 2>&1 & echo $! > /tmp/s12-capture.pid` |
 | Captură gRPC | `h1 tcpdump -i h1-eth0 -w /tmp/grpc.pcap tcp port 50051 -c 80 &` |
 | Inspecție pcap | `tshark -r /tmp/<fisier>.pcap -q -z follow,tcp,ascii,0 \| head -n 80` |
-| Oprire proces background | `h1 kill %1` sau `pkill -f <script>` |
+| Oprire proces background | `h1 kill -TERM $(cat /tmp/s12-jsonrpc.pid)` pentru serverul JSON-RPC; foloseşte PID-ul gRPC pentru gRPC |
 
 ### Porturi
 
@@ -475,7 +433,7 @@ tshark -r /tmp/grpc.pcap -q -z follow,tcp,ascii,0 | head -n 80
 | 1 | `ModuleNotFoundError: grpc_tools` | Import eșuat la server/codegen | `python3 -m pip install grpcio grpcio-tools` | 30–60 sec |
 | 2 | pb2-urile nu se găsesc la import | `ModuleNotFoundError: S12_Part02_Config_Calculator_pb2` | Verifică: `ls 3_grpc/S12_Part02_Config_Calculator_pb2*.py`. Dacă lipsesc, rulează codegen din `3_grpc/`. | 30 sec |
 | 3 | Clientul gRPC se conectează la `localhost` | `UNAVAILABLE` deși serverul rulează pe h1 | Verifică `GRPC_TARGET` — trebuie să fie `10.0.0.1:50051`, nu `localhost:50051`. | 15 sec |
-| 4 | Port 8080/50051 ocupat | `OSError: [Errno 98] Address already in use` | `pkill -f jsonrpc_server_minimal.py` sau `pkill -f S12_Part03_Script_g_RPC_Server.py` | 10 sec |
+| 4 | Port 8080/50051 ocupat | `OSError: [Errno 98] Address already in use` | `pkill -f S12_Part01_Script_JSONRPC_Server.py` sau `pkill -f S12_Part03_Script_g_RPC_Server.py` | 10 sec |
 | 5 | `requests` lipsește | `ModuleNotFoundError: No module named 'requests'` la clientul JSON-RPC | `python3 -m pip install requests` | 20 sec |
 | 6 | Mininet nu pornește | `mn: command not found` sau eroare Mininet | Verifică instalarea Mininet: `which mn`. Dacă VM-ul nu are Mininet, revino la varianta locală (fără topologie). | 2–3 min |
 | 7 | tcpdump nu capturează nimic | `pcap` gol | Asigură-te că tcpdump rulează *înainte* de client. Verifică interfața: `h1-eth0`, nu `eth0`. | 30 sec |

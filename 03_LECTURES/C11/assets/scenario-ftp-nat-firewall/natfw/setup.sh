@@ -1,19 +1,12 @@
 #!/usr/bin/env bash
-set -e
-
-apt-get update
-apt-get install -y iptables iproute2 tcpdump
-
-# enable forwarding
-sysctl -w net.ipv4.ip_forward=1
-
-# NAT from net_client -> net_server
-iptables -t nat -A POSTROUTING -o eth1 -j MASQUERADE
-iptables -A FORWARD -i eth0 -o eth1 -j ACCEPT
-iptables -A FORWARD -i eth1 -o eth0 -m state --state ESTABLISHED,RELATED -j ACCEPT
-
-# Optional: simulate "no inbound to client" (already typical)
-# (client doesn't accept inbound anyway)
-
-echo "NAT/FW ready. Keeping container alive."
-tail -f /dev/null
+set -euo pipefail
+# Address-based matching is independent of Docker's eth0/eth1 ordering.
+iptables -P FORWARD DROP
+iptables -A FORWARD -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+iptables -A FORWARD -s 172.29.112.0/24 -d 172.29.113.10 -p tcp --dport 2121 -j ACCEPT
+iptables -A FORWARD -s 172.29.112.0/24 -d 172.29.113.10 -p tcp --dport 30000:30009 -j ACCEPT
+iptables -t nat -A PREROUTING -d 172.29.112.2 -p tcp --dport 2121 -j DNAT --to-destination 172.29.113.10
+iptables -t nat -A PREROUTING -d 172.29.112.2 -p tcp --dport 30000:30009 -j DNAT --to-destination 172.29.113.10
+iptables -t nat -A POSTROUTING -s 172.29.112.0/24 -d 172.29.113.10 -j MASQUERADE
+echo "NAT/FW ready: client -> natfw -> FTP; passive range 30000-30009."
+exec tail -f /dev/null

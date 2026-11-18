@@ -18,7 +18,7 @@ Estimated duration: ~15–20 minutes.
 1. Start the server (example):
 
 ```bash
-python3 index_udp-proto_server_example.py 4000
+python3 S04_Part03A_Example_UDP_Proto_Server.py 4000
 ````
 
 You should see something like:
@@ -30,7 +30,7 @@ You should see something like:
 2. In another terminal, start the client:
 
 ```bash
-python3 index_udp-proto_client_example.py 127.0.0.1 4000
+python3 S04_Part03B_Example_UDP_Proto_Client.py 127.0.0.1 4000
 ```
 
 3. At the `storage>` prompt, try:
@@ -95,7 +95,7 @@ You will use this description in the deliverable file.
 
 ### 4. Student Task – the CLEAR Command
 
-1. Open `index_udp-proto_server_template.py`.
+1. Open `S04_Part03C_Template_UDP_Proto_Server.py`.
 
 2. Implement the logic for all messages in the `TODO` block,
    with emphasis on `CLEAR`:
@@ -108,7 +108,7 @@ You will use this description in the deliverable file.
 
   * `ResponseMessage(ResponseMessageType.ERR_CONNECTED)`
 
-3. Open `index_udp-proto_client_template.py` and:
+3. Open `S04_Part03C_Template_UDP_Proto_Client.py` and:
 
 * implement the `clear` command so that it sends
   `RequestMessage(RequestMessageType.CLEAR)`.
@@ -116,13 +116,13 @@ You will use this description in the deliverable file.
 4. Run the template server:
 
 ```bash
-python3 index_udp-proto_server_template.py 4000
+python3 S04_Part03C_Template_UDP_Proto_Server.py 4000
 ```
 
 5. Run the template client:
 
 ```bash
-python3 index_udp-proto_client_template.py 127.0.0.1 4000
+python3 S04_Part03C_Template_UDP_Proto_Client.py 127.0.0.1 4000
 ```
 
 Test:
@@ -164,3 +164,11 @@ Observe:
 
      * `(current state, message)` -> `(new state, response)`;
    * explicitly mention what `CLEAR` does.
+
+### Datagram size and trust
+
+The implementation receives complete IPv4 UDP datagrams and rejects serialised
+messages larger than 65507 bytes. Large datagrams may still fragment and be lost;
+the client reports a five-second timeout. A LIST response too large for one datagram
+returns ERR_TOO_LARGE. Pickle is used only between trusted laboratory peers and is
+neither compression nor encryption; never unpickle data from untrusted peers.

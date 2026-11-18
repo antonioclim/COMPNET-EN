@@ -47,6 +47,10 @@ In practice, the project behaves as a protocol-design exercise: the team must de
 - **Protocol/default ports (E2):** TCP: 5000/TCP (configurable; the default is used in automated tests).
 - The Flex component must work with the default values (without manual reconfiguration) so that it can be integrated into automated tests.
 
+### Interpretation and complementary evidence
+
+The [E2 capture and semantic-evidence matrix](../00_common/E2_CAPTURE_EVIDENCE_MATRIX.md#s01) maps every capture rule to its generating action and the complementary application evidence.
+
 ### Deliverables
 - `flex/` directory with sources plus build/run instructions (avoid exotic dependencies where possible).
 - `docs/FLEX.md` with:
@@ -137,7 +141,7 @@ In practice, the project behaves as a protocol-design exercise: the team must de
 - The analysed stream and the ports used are stated.
 
 ### Automatic PCAP criteria (E2)
-These criteria are **deterministic** and can be verified automatically with `tshark`.
+These capture checks are reproducible with `tshark`. Frame counts are smoke checks; they do not replace the application tests or prove complete project acceptance.
 - Official rules: `tools/pcap_rules/S01.json`
 - In the catalogue (template): `00_common/tools/pcap_rules/S01.json` and `00_common/tools/validate_pcap.py` (copy into the student repository).
 
@@ -147,10 +151,10 @@ These criteria are **deterministic** and can be verified automatically with `tsh
 |---:|---|---:|---|
 | R1 | `tcp.dstport==5000 && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | Connection initiation to the server (SYN). |
 | R2 | `tcp.srcport==5000 && tcp.flags.syn==1 && tcp.flags.ack==1` | `>= 1` | SYN‑ACK response from the server. |
-| R3 | `tcp.port==5000 && frame contains "LOGIN"` | `>= 1` | A LOGIN command is transmitted (correct framing). |
-| R4 | `tcp.port==5000 && frame contains "MSG "` | `>= 1` | At least one MSG message is transmitted. |
-| R5 | `tcp.port==5000 && frame contains "EVENT "` | `>= 1` | The server sends at least one push event (presence). |
-| R6 | `tcp.port==5000 && (tcp.flags.fin==1 || tcp.flags.reset==1)` | `>= 1` | Session closure (FIN or documented RST). |
+| R3 | `tcp.port==5000 && frame contains "LOGIN"` | `>= 1` | A TCP/5000 frame contains LOGIN bytes; framing and authentication are checked by the application tests. |
+| R4 | `tcp.port==5000 && frame contains "MSG "` | `>= 1` | A TCP/5000 frame contains MSG bytes; verify the complete message and recipients separately. |
+| R5 | `tcp.port==5000 && frame contains "EVENT "` | `>= 1` | A TCP/5000 frame contains EVENT bytes; correlate its direction, event type and recipient. |
+| R6 | `tcp.port==5000 && (tcp.flags.fin==1 \|\| tcp.flags.reset==1)` | `>= 1` | Session closure (FIN or documented RST). |
 
 ### Deliverables
 - Functional Docker Compose with server and `tester`.

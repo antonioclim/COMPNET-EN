@@ -112,7 +112,7 @@ ARP spoofing detection starts from a simple laboratory assumption stated explici
 - Include ARP filters and a filter for diverted data traffic (for example ICMP between victim and gateway).
 
 ### Automatic PCAP criteria (E2)
-These criteria are **deterministic** and can be verified automatically with `tshark`.
+These capture checks are reproducible with `tshark`. Frame counts are smoke checks; they do not replace the application tests or prove complete project acceptance.
 - Official rules: `tools/pcap_rules/A04.json`
 - In the catalogue (template): `00_common/tools/pcap_rules/A04.json` and `00_common/tools/validate_pcap.py` (copy into the student repository).
 
@@ -121,8 +121,12 @@ These criteria are **deterministic** and can be verified automatically with `tsh
 | ID | tshark filter (`-Y`) | Condition | What it validates |
 |---:|---|---:|---|
 | R1 | `arp.opcode==1` | `>= 1` | ARP request present (context). |
-| R2 | `arp.opcode==2` | `>= 5` | At least 5 ARP replies (spoofing is possible). |
+| R2 | `arp.opcode==2` | `>= 5` | At least 5 ARP replies (potential spoofing). |
 | R3 | `arp` | `>= 10` | Sufficient ARP traffic for analysis. |
+
+### Interpretation and complementary evidence
+
+The [E2 capture and semantic-evidence matrix](../00_common/E2_CAPTURE_EVIDENCE_MATRIX.md#a04) maps every capture rule to its generating action and the complementary application evidence.
 
 ### Deliverables
 - Docker Compose with `arp_detector` and `tester` that run the scenario and write `artifacts/pcap/traffic_e2.pcap`.

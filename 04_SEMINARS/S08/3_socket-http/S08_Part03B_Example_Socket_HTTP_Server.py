@@ -3,6 +3,8 @@ import socket
 import sys
 import os
 import mimetypes
+from pathlib import Path
+from urllib.parse import unquote, urlsplit
 
 """
 Seminar 8 -- Minimal HTTP server implemented manually with sockets.
@@ -21,7 +23,8 @@ The student must complete the areas marked with:
 """
 
 BUFFER_SIZE = 4096
-STATIC_DIR = "static"
+STATIC_DIR = str(Path(__file__).resolve().parent / "static")
+MAX_HEADERS = 16384
 
 
 def build_http_response(status_code, content, content_type="text/plain"):
@@ -29,12 +32,12 @@ def build_http_response(status_code, content, content_type="text/plain"):
     Build a complete HTTP response as bytes.
     """
 
-    if status_code == 200:
-        status_line = "HTTP/1.1 200 OK"
-    elif status_code == 404:
-        status_line = "HTTP/1.1 404 Not Found"
-    else:
-        status_line = "HTTP/1.1 500 Internal Server Error"
+    reasons = {200: "OK", 400: "Bad Request", 403: "Forbidden", 404: "Not Found",
+               405: "Method Not Allowed", 408: "Request Timeout",
+               431: "Request Header Fields Too Large", 500: "Internal Server Error"}
+    status_line = f"HTTP/1.1 {status_code} {reasons[status_code]}"
+    if isinstance(content, str):
+        content = content.encode("utf-8")
 
     headers = [
         f"Content-Type: {content_type}",
@@ -48,78 +51,64 @@ def build_http_response(status_code, content, content_type="text/plain"):
 
 
 def handle_client(conn):
-    """
-    Receive the request, parse the first line, determine the requested file
-    and return the appropriate HTTP response.
-    """
+    """One bounded GET request per connection; no request body or persistent HTTP."""
     try:
-        data = conn.recv(BUFFER_SIZE)
-        if not data:
-            return
-
-        request_text = data.decode("utf-8", errors="replace")
-
-        # First request line (e.g. "GET /index.html HTTP/1.1")
-        first_line = request_text.split("\r\n")[0]
-
-        # >>> STUDENT TODO
-        # Parse the first line and extract the method and path.
-        # If something is invalid, return 400 Bad Request (optional).
-        #
-        # Example:
-        #   method, path, _ = first_line.split(" ")
-        #
-
+        conn.settimeout(5)
+        data = bytearray()
+        while b"\r\n\r\n" not in data:
+            part = conn.recv(min(BUFFER_SIZE, MAX_HEADERS + 1 - len(data)))
+            if not part:
+                if data:
+                    conn.sendall(build_http_response(400, b"Incomplete request headers"))
+                return
+            data.extend(part)
+            if len(data) > MAX_HEADERS:
+                conn.sendall(build_http_response(431, b"Headers too large"))
+                return
         try:
-            method, path, _ = first_line.split(" ")
-        except ValueError:
-            # invalid request
-            response = build_http_response(500, b"Error parsing request")
-            conn.sendall(response)
+            line = bytes(data).split(b"\r\n", 1)[0].decode("ascii")
+            method, target, version = line.split(" ")
+            if version not in {"HTTP/1.0", "HTTP/1.1"}:
+                raise ValueError("Unsupported HTTP version")
+            if not target.startswith("/") or target.startswith("//"):
+                raise ValueError("Expected an origin-form request target")
+            parsed = urlsplit(target)
+            path = unquote(parsed.path, errors="strict")
+            if parsed.fragment or "\x00" in path or "\\" in path:
+                raise ValueError("Invalid request target")
+        except (ValueError, UnicodeError):
+            conn.sendall(build_http_response(400, b"Invalid request line"))
             return
-
         if method != "GET":
-            response = build_http_response(500, b"Only GET is supported")
+            response = build_http_response(405, b"This teaching server supports GET only")
+            response = response.replace(b"Connection: close", b"Allow: GET\r\nConnection: close", 1)
             conn.sendall(response)
             return
-
-        # The path "/" must be mapped to the main page in the `static/` directory.
-        if path == "/":
+        if path in {"/", "/index.html"}:
             path = "/S08_Part03_Page_Index.html"
-
-        # Compatibility: if the browser explicitly requests /index.html, serve the same main page.
-        if path == "/index.html":
-            path = "/S08_Part03_Page_Index.html"
-        # Build the real path to the static file
-        # remove any ".." for safety
-        safe_path = os.path.normpath(path).lstrip("/")
-        file_path = os.path.join(STATIC_DIR, safe_path)
-
-        if not os.path.isfile(file_path):
-            # >>> STUDENT TODO
-            # Return a 404 Not Found response with a simple HTML message
-            not_found_body = b"<h1>404 Not Found</h1>"
-            response = build_http_response(404, not_found_body, "text/html")
-            conn.sendall(response)
+        root = Path(STATIC_DIR).resolve()
+        candidate = (root / path.lstrip("/")).resolve()
+        if not candidate.is_relative_to(root):
+            conn.sendall(build_http_response(403, b"Path is outside the static directory"))
             return
-
-        # If the file exists, read it
-        with open(file_path, "rb") as f:
-            content = f.read()
-
-        # Determine the MIME type (optional)
-        mime_type = mimetypes.guess_type(file_path)[0] or "application/octet-stream"
-
-        # >>> STUDENT TODO
-        # Return a 200 response with the file contents
-        response = build_http_response(200, content, mime_type)
-        conn.sendall(response)
-
-    except Exception as e:
-        error_msg = f"Internal error: {e}".encode("utf-8")
-        response = build_http_response(500, error_msg, "text/plain")
-        conn.sendall(response)
-
+        if not candidate.is_file():
+            # >>> STUDENT TODO: customise the 404 page, preserving its byte length.
+            conn.sendall(build_http_response(404, b"<h1>404 Not Found</h1>", "text/html"))
+            return
+        content = candidate.read_bytes()
+        mime_type = mimetypes.guess_type(str(candidate))[0] or "application/octet-stream"
+        # >>> STUDENT TODO: add a suitable extra response header and inspect it.
+        conn.sendall(build_http_response(200, content, mime_type))
+    except socket.timeout:
+        try:
+            conn.sendall(build_http_response(408, b"Request timed out"))
+        except OSError:
+            pass
+    except (OSError, ValueError):
+        try:
+            conn.sendall(build_http_response(500, b"Internal server error"))
+        except OSError:
+            pass
     finally:
         conn.close()
 

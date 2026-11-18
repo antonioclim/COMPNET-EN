@@ -56,7 +56,7 @@ Moving from unicast to broadcast, multicast and anycast within a single session 
 ```bash
 git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
 cd COMPNET-EN
-git sparse-checkout set 04_SEMINARS/S03
+git sparse-checkout set 04_SEMINARS/S03 00_TOOLS
 ```
 
 **Method B — Direct download**

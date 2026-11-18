@@ -112,7 +112,7 @@ A PCAP report generator is an exercise in measurement: define what a “flow” 
 - One concrete example is mentioned: a flow with RTT above a threshold.
 
 ### Automatic PCAP criteria (E2)
-These criteria are **deterministic** and can be verified automatically with `tshark`.
+These capture checks are reproducible with `tshark`. Frame counts are smoke checks; they do not replace the application tests or prove complete project acceptance.
 - Official rules: `tools/pcap_rules/A03.json`
 - In the catalogue (template): `00_common/tools/pcap_rules/A03.json` and `00_common/tools/validate_pcap.py` (copy into the student repository).
 
@@ -121,8 +121,14 @@ These criteria are **deterministic** and can be verified automatically with `tsh
 | ID | tshark filter (`-Y`) | Condition | What it validates |
 |---:|---|---:|---|
 | R1 | `tcp` | `>= 50` | At least 50 TCP packets for statistics (flows, retransmissions). |
-| R2 | `tcp.analysis.retransmission` | `>= 1` | At least one retransmission (TCP indicator). |
+| R2 | `tcp.analysis.retransmission` | `>= 0` | Report retransmission frames. Zero is valid for a delay-only profile; loss experiments must explain observed retransmissions separately. |
 | R3 | `ip` | `>= 50` | At least 50 IP packets (top talkers). |
+
+### Interpretation and complementary evidence
+
+The [E2 capture and semantic-evidence matrix](../00_common/E2_CAPTURE_EVIDENCE_MATRIX.md#a03) maps every capture rule to its generating action and the complementary application evidence.
+
+- Record the selected delay/loss profile and compare before/after timing or loss metrics. Random loss does not guarantee a retransmission in a finite capture.
 
 ### Deliverables
 - Docker Compose with `pcap_reporter` and `tester` that run the scenario and write artefacts.

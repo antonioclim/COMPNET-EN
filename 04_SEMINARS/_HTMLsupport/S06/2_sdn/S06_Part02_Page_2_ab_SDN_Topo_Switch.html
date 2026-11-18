@@ -264,7 +264,7 @@
                     </tbody>
                 </table>
                 <div id="empty-state" style="text-align: center; padding: 20px; color: #94a3b8; font-size: 0.8rem; font-style: italic;">
-                    Table Empty. Default behaviour: Send to Controller.
+                    No learned policy rules. The controller installs an explicit priority-0 table-miss rule: output CONTROLLER. An empty table alone does not imply Packet-In.
                 </div>
             </div>
         </div>
@@ -298,7 +298,7 @@
     };
 
     // State
-    let flows = [];
+    let flows = [{ priority: 0, match: '*', fields: {}, action: 'CONTROLLER', type: 'miss' }];
     let isAnimating = false;
 
     // DOM Elements
@@ -416,7 +416,8 @@
         const exists = flows.some(f => f.match === match);
         if (exists) return;
 
-        flows.push({ priority, match, action, type });
+        const fields = Object.fromEntries(match.split(',').map(term => term.trim().split('=')));
+        flows.push({ priority, match, fields, action, type });
         renderFlows();
 
         // Flash visualization on switch
@@ -453,8 +454,9 @@
     function resetSim() {
         if (isAnimating) return;
         flows = [];
+        addFlow(0, '*', 'CONTROLLER', 'miss');
         renderFlows();
-        log('Switch s1 flow table cleared.', 'info');
+        log('Learned rules cleared; explicit table-miss rule reinstalled.', 'info');
         explain('<strong>Reset:</strong> The switch has forgotten all learned paths. Next packet will trigger a Packet-In event.');
     }
 
@@ -472,7 +474,7 @@
         await movePacket('h1', 's1');
 
         // Check Flow Table
-        const hasFlow = flows.some(f => f.match.includes(target));
+        const hasFlow = flows.some(f => f.priority > 0 && f.fields.dst === targetIp && (!f.fields.in_port || f.fields.in_port === '1'));
 
         if (hasFlow) {
             // FAST PATH

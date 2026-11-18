@@ -35,7 +35,7 @@ import logging
 from typing import Optional
 from dataclasses import dataclass
 
-__all__ = ['IPHeader', 'TCPHeader', 'parse_ip_header', 'parse_tcp_header']
+__all__ = ['IPHeader', 'parse_ip_header', 'get_protocol_name', 'display_header']
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # LOGGING_CONFIGURATION

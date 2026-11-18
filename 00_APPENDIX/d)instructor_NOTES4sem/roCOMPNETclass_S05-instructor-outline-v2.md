@@ -394,7 +394,7 @@ Trei idei de fixat:
 | Mogul, J., & Postel, J. (1985). *Internet Standard Subnetting Procedure* (RFC 950). RFC Editor. | https://doi.org/10.17487/RFC0950 |
 | Fuller, V., & Li, T. (2006). *Classless Inter-domain Routing (CIDR): The Internet Address Assignment and Aggregation Plan* (RFC 4632). RFC Editor. | https://doi.org/10.17487/RFC4632 |
 | Deering, S., & Hinden, R. (2017). *Internet Protocol, Version 6 (IPv6) Specification* (RFC 8200). RFC Editor. | https://doi.org/10.17487/RFC8200 |
-| Deering, S., & Hinden, R. (2006). *IP Version 6 Addressing Architecture* (RFC 4291). RFC Editor. | https://doi.org/10.17487/RFC4291 |
+| Hinden, R., & Deering, S. (2006). *IP Version 6 Addressing Architecture* (RFC 4291). RFC Editor. | https://doi.org/10.17487/RFC4291 |
 | Kawamura, S., & Kawashima, M. (2010). *A Recommendation for IPv6 Address Text Representation* (RFC 5952). RFC Editor. | https://doi.org/10.17487/RFC5952 |
 | Lantz, B., Heller, B., & McKeown, N. (2010). A network in a laptop: Rapid prototyping for software-defined networks. *Proceedings of the 9th ACM SIGCOMM Workshop on Hot Topics in Networks.* | https://doi.org/10.1145/1868447.1868466 |
 

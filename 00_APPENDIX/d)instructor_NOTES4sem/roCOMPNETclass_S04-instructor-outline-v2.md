@@ -365,7 +365,7 @@ Deschizi captura, faci Follow TCP Stream. Payload-ul e un blob binar.
 
 **Punchline:**
 
-> *▸ „Vedeți bytes care sunt un obiect Python serializat cu `pickle`. Fără un dissector sau un decoder, traficul e opac. Asta e tipic pentru protocoale binare: compact și strict, dar necesită tooling dedicat."*
+> *▸ „Vedeți bytes care sunt un obiect Python serializat cu `pickle`. Unele şiruri rămân lizibile în bytes. Pickle nu criptează şi nu garantează compactarea: antetul are un octet, dar serializarea adaugă metadate. Comparăm lungimea totală capturată, apoi decodificăm numai date de laborator de încredere."*
 
 **Notă de igienă (15 sec):**
 

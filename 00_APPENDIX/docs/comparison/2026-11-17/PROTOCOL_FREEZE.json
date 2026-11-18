@@ -1,0 +1,12 @@
+{
+  "protocol_version": "1.0",
+  "frozen_at_utc": "2026-11-17T16:13:22.923724+00:00",
+  "before_external_collection": true,
+  "sha256": "a036146226cc907d48d4e450e20acf6fa287bedbac541a2eaf717b02b0aa8c21",
+  "source_candidate_commit": "8fb6afcd89eb3fa27b909941f96eff4276df8f29",
+  "external_unit_count": 17,
+  "anchor_units": 1,
+  "matrix_cells_planned": 180,
+  "numeric_ranking_planned": false,
+  "deviations": []
+}

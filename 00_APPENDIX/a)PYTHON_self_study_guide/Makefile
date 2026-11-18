@@ -25,7 +25,7 @@
 .DEFAULT_GOAL := help
 
 # Python interpreter
-PYTHON := python3
+PYTHON := $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 
 # Directories
 QUIZ_DIR := formative
@@ -224,14 +224,7 @@ test: test-all
 
 test-all:
 	@echo "$(COLOUR_BOLD)Running all tests...$(COLOUR_RESET)"
-	@if command -v pytest >/dev/null 2>&1; then \
-		pytest $(TESTS_DIR)/ -v; \
-	else \
-		$(PYTHON) -m pytest $(TESTS_DIR)/ -v 2>/dev/null || \
-		($(PYTHON) $(TESTS_DIR)/test_smoke.py && \
-		 $(PYTHON) $(TESTS_DIR)/test_bytes_vs_str.py && \
-		 $(PYTHON) $(TESTS_DIR)/test_struct_parsing.py); \
-	fi
+	@$(PYTHON) -m pytest $(TESTS_DIR)/ -v
 
 test-smoke:
 	@echo "$(COLOUR_BOLD)Running smoke tests...$(COLOUR_RESET)"
@@ -270,10 +263,11 @@ check:
 	@echo "$(COLOUR_GREEN)Environment check complete.$(COLOUR_RESET)"
 
 install:
-	@echo "$(COLOUR_BOLD)Installing dependencies...$(COLOUR_RESET)"
-	@pip install --user pyyaml pytest 2>/dev/null || \
-		pip install pyyaml pytest --break-system-packages || \
-		echo "$(COLOUR_YELLOW)Please install: pip install pyyaml pytest$(COLOUR_RESET)"
+	@echo "Creating a local virtual environment for this guide..."
+	@python3 -m venv .venv
+	@.venv/bin/python -m pip install 'PyYAML==6.0.3' 'pytest==8.4.2'
+	@echo "Done. Make targets now use .venv/bin/python; activate it with: source .venv/bin/activate"
+
 
 lint:
 	@echo "$(COLOUR_BOLD)Checking code style...$(COLOUR_RESET)"

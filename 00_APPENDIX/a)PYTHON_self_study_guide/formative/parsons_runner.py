@@ -318,9 +318,12 @@ def run_problems(
             if i < len(problems):
                 input(f"\n{c.DIM}Press Enter for next problem...{c.RESET}")
     
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, EOFError):
         print(f"\n\n{c.YELLOW}Interrupted.{c.RESET}")
-    
+
+    results['attempted'] = len(results['answers']) - results['skipped']
+    results['unattempted'] = results['total'] - len(results['answers'])
+    results['session_status'] = 'complete' if results['unattempted'] == 0 else 'incomplete'
     return results
 
 
@@ -328,17 +331,21 @@ def display_results(results: Dict[str, Any]) -> None:
     """Display final results summary."""
     c = Colours
     
-    answered = results['total'] - results['skipped']
-    if answered > 0:
-        percentage = (results['correct'] / answered) * 100
-    else:
-        percentage = 0
+    answered = results['attempted']
+    planned = results['total']
+    percentage = (results['correct'] / planned) * 100 if planned else 0
     
     print(f"\n{c.BOLD}{c.HEADER}{'═' * 70}{c.RESET}")
     print(f"{c.BOLD}{c.HEADER}  📊 Results{c.RESET}")
     print(f"{c.BOLD}{c.HEADER}{'═' * 70}{c.RESET}\n")
     
-    if percentage >= 80:
+    if results['session_status'] != 'complete':
+        emoji = '⏸'
+        message = 'Incomplete session: this is feedback on attempted items, not a readiness verdict.'
+    elif answered == 0:
+        emoji = '⏸'
+        message = 'No answers attempted; no achievement verdict is available.'
+    elif percentage >= 80:
         emoji = '🌟'
         message = "Excellent! You understand the code structure well."
     elif percentage >= 60:
@@ -348,8 +355,9 @@ def display_results(results: Dict[str, Any]) -> None:
         emoji = '📚'
         message = "Keep practising. Review the correct solutions carefully."
     
-    print(f"  {emoji} Score: {c.BOLD}{results['correct']}/{answered} ({percentage:.0f}%){c.RESET}")
-    print(f"  {c.DIM}Skipped: {results['skipped']}{c.RESET}")
+    print(f"  {emoji} Score over planned items: {c.BOLD}{results['correct']}/{planned} ({percentage:.0f}%){c.RESET}")
+    print(f"  {c.DIM}Attempted: {answered}; skipped items earn no credit.{c.RESET}")
+    print(f"  {c.DIM}Skipped: {results['skipped']}; unattempted: {results['unattempted']}; planned: {results['total']}{c.RESET}")
     print(f"\n  {message}\n")
 
 
@@ -384,6 +392,8 @@ Examples:
                         help='List available problem files')
     
     args = parser.parse_args()
+    if args.limit is not None and args.limit <= 0:
+        parser.error('--limit must be a positive integer')
     
     # Setup
     if args.no_colour or not sys.stdout.isatty():

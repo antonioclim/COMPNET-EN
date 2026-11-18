@@ -1,6 +1,9 @@
 # 🔍 Self-Check Checkpoints
 ## Quick Knowledge Verification for Each Learning Step
 
+The code-tracing examples are self-contained teaching scenarios. For files and wire protocols used in the actual COMPNET-EN seminars, use the unit README and the canonical Python lab map; a toy JSON or text example does not redefine the S04 protocol.
+
+
 > **How to use:** After completing each Step in PYTHON_NETWORKING_GUIDE.md, answer these questions without looking at the materials. If you struggle with more than one question per section, review that Step before continuing.
 
 ---

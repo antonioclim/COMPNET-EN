@@ -27,7 +27,7 @@ else (no)
 endif
 
 if (Path traversal attempt?) then (yes)
-    #FFCDD2:Send 403 Forbidden;
+    :Send 403 Forbidden; <<#FFCDD2>>
     stop
 else (no)
 endif
@@ -37,12 +37,12 @@ endif
 if (File exists?) then (yes)
     :Determine MIME type\nfrom extension;
     if (Method == HEAD?) then (yes)
-        #C8E6C9:Send 200 OK\n(headers only, no body);
+        :Send 200 OK\n(headers only, no body); <<#C8E6C9>>
     else (no)
-        #C8E6C9:Send 200 OK\n(headers + file body);
+        :Send 200 OK\n(headers + file body); <<#C8E6C9>>
     endif
 else (no)
-    #FFCDD2:Send 404 Not Found;
+    :Send 404 Not Found; <<#FFCDD2>>
 endif
 
 if (Connection: keep-alive\nand limit not reached?) then (yes)

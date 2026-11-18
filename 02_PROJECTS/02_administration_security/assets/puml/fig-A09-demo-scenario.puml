@@ -27,7 +27,7 @@ EX -> SH : ./run_attack.sh
 SH -> SW : h1 scans h2 (SYN to 50 ports)
 IDS -> IDS : threshold exceeded
 IDS -> C : block event (src=h1_ip, 30 s)
-C -> SW : flow-mod: drop h1_ip (priority 500)
+C -> SW : flow-mod: drop h1_ip (priority 500, hard_timeout=30)
 SH -> ART : alert.json + dump-flows (block rule visible)
 note right of ART #FFCDD2 : block rule installed
 
@@ -38,14 +38,14 @@ SH -> SW : ICMP from h1
 SW ->x SW : dropped
 note right of ART : no reply — blocking effective
 
-EX -> SH : ping h2 → h1
-SH -> SW : ICMP from h2 (not blocked)
+EX -> SH : ping h3 → h2
+SH -> SW : ICMP request from h3, reply from h2
 SW -> SW : forwarded
-note right of ART #E8F5E9 : legitimate traffic unaffected
+note right of ART #E8F5E9 : complete h3↔h2 exchange succeeds\nno packet has source h1
 
 == STEP 4 — EXPIRY AND RECOVERY ==
 
-EX -> SH : wait 30 s
+EX -> SH : wait 30 s while matching traffic continues
 SW -> SW : block rule expired
 EX -> SH : ping h1 → h2
 SH -> SW : ICMP from h1

@@ -2,7 +2,7 @@
 ## Side-by-Side Comparison with C, JavaScript, Java and Kotlin
 
 > **Purpose:** If you know one of these languages, you already know Python's networking logic.
-> **Format:** Same algorithm, five implementations.
+> **Format:** Echo each received byte until EOF. C, Java, Kotlin and Python below serve clients sequentially; the Node event loop can serve several clients. These are core fragments: supply imports, a main function where required and error handling appropriate to the full application.
 > **Version:** 4.1 — January 2026
 
 ---
@@ -35,15 +35,27 @@
 ```c
 int server_fd = socket(AF_INET, SOCK_STREAM, 0);
 setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
-struct sockaddr_in addr = {AF_INET, htons(8080), INADDR_ANY};
+struct sockaddr_in addr = {0};
+addr.sin_family = AF_INET;
+addr.sin_port = htons(8080);
+addr.sin_addr.s_addr = htonl(INADDR_ANY);
 bind(server_fd, (struct sockaddr*)&addr, sizeof(addr));
 listen(server_fd, 5);
 
 while (1) {
     int client_fd = accept(server_fd, NULL, NULL);
     char buffer[1024];
-    int n = recv(client_fd, buffer, 1024, 0);
-    send(client_fd, buffer, n, 0);  // Echo back
+    if (client_fd < 0) continue;
+    ssize_t n;
+    while ((n = recv(client_fd, buffer, sizeof buffer, 0)) > 0) {
+        ssize_t sent = 0;
+        while (sent < n) {
+            ssize_t part = send(client_fd, buffer + sent, (size_t)(n - sent), 0);
+            if (part <= 0) goto close_client;
+            sent += part;
+        }
+    }
+close_client:
     close(client_fd);
 }
 ```
@@ -52,6 +64,7 @@ while (1) {
 ```javascript
 const net = require('net');
 const server = net.createServer((socket) => {
+    socket.on('error', (error) => { console.error(error.message); socket.destroy(); });
     socket.on('data', (data) => {
         socket.write(data);  // Echo back
     });
@@ -65,8 +78,10 @@ try (ServerSocket serverSocket = new ServerSocket(8080)) {
     while (true) {
         try (Socket client = serverSocket.accept()) {
             byte[] buffer = new byte[1024];
-            int n = client.getInputStream().read(buffer);
-            client.getOutputStream().write(buffer, 0, n);  // Echo
+            int n;
+            while ((n = client.getInputStream().read(buffer)) != -1) {
+                client.getOutputStream().write(buffer, 0, n);
+            }
         }
     }
 }
@@ -78,8 +93,11 @@ ServerSocket(8080).use { server ->
     while (true) {
         server.accept().use { client ->
             val buffer = ByteArray(1024)
-            val n = client.getInputStream().read(buffer)
-            client.getOutputStream().write(buffer, 0, n)  // Echo
+            while (true) {
+                val n = client.getInputStream().read(buffer)
+                if (n == -1) break
+                client.getOutputStream().write(buffer, 0, n)
+            }
         }
     }
 }
@@ -97,18 +115,21 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server:
     while True:
         client, addr = server.accept()
         with client:
-            data = client.recv(1024)
-            client.sendall(data)  # Echo back
+            while True:
+                data = client.recv(1024)
+                if not data:
+                    break
+                client.sendall(data)  # Echo this chunk; TCP has no message boundary
 ```
 
 ### Key Observations
 
 | Aspect | C | JS | Java | Kotlin | Python |
 |--------|---|----|----|--------|--------|
-| Lines of code | ~15 | ~8 | ~12 | ~10 | ~10 |
+| Execution model | Blocking | Event-driven | Blocking | Blocking | Blocking |
 | Manual memory | ✅ Yes | ❌ No | ❌ No | ❌ No | ❌ No |
 | Resource cleanup | Manual close() | Callbacks | try-with-resources | .use {} | `with` statement |
-| Byte order | `htons()` | Automatic | Automatic | Automatic | Automatic |
+| Port in socket API | `htons()` in sockaddr | Host-order integer | Host-order integer | Host-order integer | Host-order integer |
 
 ---
 
@@ -133,8 +154,8 @@ const ip = view.getUint32(2, false);
 ### Java
 ```java
 ByteBuffer buf = ByteBuffer.wrap(data).order(ByteOrder.BIG_ENDIAN);
-short port = buf.getShort();
-int ip = buf.getInt();
+int port = Short.toUnsignedInt(buf.getShort());
+long ip = Integer.toUnsignedLong(buf.getInt());
 ```
 
 ### Python ✨
@@ -169,11 +190,23 @@ if (connect(sock, &addr, sizeof(addr)) < 0) {
 
 ### JavaScript
 ```javascript
-try {
-    await socket.connect(host, port);
-} catch (error) {
-    console.error('Connection failed:', error.message);
+const net = require('net');
+function connectTo(host, port) {
+    return new Promise((resolve, reject) => {
+        const socket = net.createConnection({host, port});
+        socket.once('error', reject);
+        socket.once('connect', () => resolve(socket));
+    });
 }
+(async () => {
+    try {
+        const socket = await connectTo('127.0.0.1', 8080);
+        // Perform the application exchange here; connect() itself is not a Promise.
+        socket.end();
+    } catch (error) {
+        console.error('Connection failed:', error.message);
+    }
+})();
 ```
 
 ### Java

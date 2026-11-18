@@ -42,9 +42,9 @@ Execute:
 
 ```
 
-curl -v [http://localhost:8000/](http://localhost:8000/)
-curl -v [http://localhost:8000/index.html](http://localhost:8000/index.html)
-curl -v [http://localhost:8000/doesnotexist](http://localhost:8000/doesnotexist)
+curl -v http://localhost:8000/
+curl -v http://localhost:8000/index.html
+curl -v http://localhost:8000/doesnotexist
 
 ```
 
@@ -64,7 +64,7 @@ Access:
 
 ```
 
-[http://localhost:8000/](http://localhost:8000/)
+http://localhost:8000/
 
 ```
 
@@ -78,7 +78,7 @@ In the same file, in 5–6 sentences explain:
 
 - how the server parses the request
 - how it decides which file to send
-- why `Content-Length` is necessary
+- why this server chooses `Content-Length` and which HTTP/1.1 alternatives delimit a body
 - what happens when the file does not exist
 
 ---

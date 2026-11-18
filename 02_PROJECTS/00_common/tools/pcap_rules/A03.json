@@ -12,8 +12,8 @@
     {
       "id": "R2",
       "filter": "tcp.analysis.retransmission",
-      "condition": ">= 1",
-      "description": "At least one retransmission (TCP indicator)."
+      "condition": ">= 0",
+      "description": "Report retransmission frames. Zero is valid for a delay-only profile; loss experiments must explain observed retransmissions separately."
     },
     {
       "id": "R3",
@@ -21,5 +21,9 @@
       "condition": ">= 50",
       "description": "At least 50 IP packets (top talkers)."
     }
+  ],
+  "manual_checks": [
+    "Record the selected delay/loss profile and compare before/after timing or loss metrics. Random loss does not guarantee a retransmission in a finite capture.",
+    "R1 R2 R3: Record the profile and before/after timing statistics. A delay-only run may have zero retransmissions."
   ]
 }

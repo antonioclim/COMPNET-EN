@@ -234,12 +234,12 @@ Reîmprospătează Wireshark (F5 sau re-open). Două handshake-uri cu porturi ef
 
 Arată zona `>>> STUDENT CODE STARTS HERE`:
 
-> *▸ „Trei lucruri de implementat: (1) log complet — IP, port, mesaj, lungime în bytes; (2) construiți răspunsul `b"OK: " + mesaj.upper()`; (3) trimiteți cu `sendall()`."*
+> *▸ „Trei lucruri de implementat: (1) log complet — IP, port, mesaj, lungime în bytes; (2) construiți răspunsul `b"OK: " + mesaj.upper()`; (3) trimiteți cu `sendall()`, incluzând LF (`b"\n"`) la final. Scaffold-ul citeşte repetat linii complete, nu fragmente arbitrare de recv()."*
 
 **Subliniază:**
 - `self.client_address` → `(ip, port)` — tuplu
 - `self.data` → bytes, decodați cu `.decode(errors='replace')` (misconception #10)
-- `sendall()` vs `send()` — `sendall` garantează trimiterea integrală
+- `sendall()` vs `send()` — `sendall` trimite până ce toate datele sunt acceptate de stiva locală sau apare o eroare; nu confirmă procesarea la aplicaţia peer
 
 > *▸ „Scenariul complet, pas cu pas: `S02_Part03_Scenario_TCP_Server_Netcat_Wireshark.md`. Citiți-l înainte de a începe — conține secvența exactă de testare și fișierele de încărcat."*
 
@@ -470,7 +470,7 @@ docker rm -f s02lab
 | Toll, W. E. (1995). Socket programming in the data communications laboratory. In *Proceedings of the 26th SIGCSE Technical Symposium on Computer Science Education* (pp. 39–43). ACM. | https://doi.org/10.1145/199688.199711 |
 | Postel, J. (1981). Transmission Control Protocol (RFC 793). Internet Engineering Task Force. | https://doi.org/10.17487/RFC0793 |
 | Postel, J. (1980). User Datagram Protocol (RFC 768). Internet Engineering Task Force. | https://doi.org/10.17487/RFC0768 |
-| Merkel, D. (2014). Docker: Lightweight Linux containers for consistent development and deployment. *Linux Journal, 2014*(239). | https://doi.org/10.5555/2600239.2600241 |
+| Merkel, D. (2014). Docker: Lightweight Linux containers for consistent development and deployment. *Linux Journal, 2014*(239). | https://www.linuxjournal.com/content/docker-lightweight-linux-containers-consistent-development-and-deployment |
 
 ---
 

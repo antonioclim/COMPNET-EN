@@ -337,9 +337,10 @@
         input.disabled = true;
 
         // 1. Client Framing Logic
-        // Formula: Total = len(cmd) + len(str(len(cmd))) + 1
-        const contentLen = rawCmd.length;
-        const totalLen = contentLen + String(contentLen).length + 1;
+        // Formula: Total = UTF8_bytes(payload) + digits(Total) + 1 (fixed point)
+        const contentLen = new TextEncoder().encode(rawCmd).length;
+        let totalLen = contentLen + 2;
+        while (totalLen !== contentLen + String(totalLen).length + 1) totalLen = contentLen + String(totalLen).length + 1;
         const framedMsg = `${totalLen} ${rawCmd}`;
 
         log(`[CLIENT] Input: "${rawCmd}"`, "log-client");
@@ -355,8 +356,9 @@
 
         // 4. Server Response Logic
         const responseText = executeCommand(rawCmd);
-        const respContentLen = responseText.length;
-        const respTotalLen = respContentLen + String(respContentLen).length + 1;
+        const respContentLen = new TextEncoder().encode(responseText).length;
+        let respTotalLen = respContentLen + 2;
+        while (respTotalLen !== respContentLen + String(respTotalLen).length + 1) respTotalLen = respContentLen + String(respTotalLen).length + 1;
         const framedResp = `${respTotalLen} ${responseText}`;
 
         log(`[SERVER] Sending Response: "${framedResp}"`, "log-server");
@@ -385,30 +387,16 @@
         const header = fullMsg.substring(0, firstSpace);
         const body = fullMsg.substring(firstSpace + 1);
 
-        // Animate Header Bytes
-        for(let char of (header + " ")) {
-            addByte(char, 'header');
-            await wait(50);
+        // One box is one actual UTF-8 byte, displayed in hexadecimal.
+        for (const byte of new TextEncoder().encode(header + ' ')) {
+            addByte(byte.toString(16).padStart(2, '0'), 'header'); await wait(50);
         }
-
-        log(`[SERVER] Read Header: Length=${header}`, "log-server");
-
-        // Animate Body Bytes
-        const parts = body.split(' ');
-        const cmd = parts[0];
-
-        // Cmd
-        for(let char of (cmd + " ")) {
-            addByte(char, 'cmd');
-            await wait(30);
+        log(`[SERVER] Read Header: Total bytes=${header}`, 'log-server');
+        const commandBytes = new TextEncoder().encode(body.split(' ')[0]).length;
+        let index = 0;
+        for (const byte of new TextEncoder().encode(body)) {
+            addByte(byte.toString(16).padStart(2, '0'), index++ < commandBytes ? 'cmd' : 'arg'); await wait(20);
         }
-
-        // Rest
-        for(let char of body.substring(cmd.length + 1)) {
-            addByte(char, 'arg');
-            await wait(20);
-        }
-
         log(`[SERVER] Parsed Payload: "${body}"`, "log-server");
     }
 
@@ -499,7 +487,9 @@
         if (!exists) {
             const tr = document.createElement('tr');
             tr.className = 'row-new';
-            tr.innerHTML = `<td>${key}</td><td>${serverState[key]}</td>`;
+            const keyCell = document.createElement("td"), valueCell = document.createElement("td");
+            keyCell.textContent = key; valueCell.textContent = serverState[key];
+            tr.append(keyCell, valueCell);
             tbody.appendChild(tr);
         }
     }

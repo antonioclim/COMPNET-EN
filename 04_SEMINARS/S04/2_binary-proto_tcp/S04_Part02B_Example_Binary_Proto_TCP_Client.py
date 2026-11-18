@@ -1,6 +1,7 @@
 import socket
 import pickle
 import io
+from binary_framing import encode_frame, read_frame
 
 HOST = "127.0.0.1"
 PORT = 3333
@@ -48,11 +49,11 @@ def get_command(command: str) -> bytes:
     items = c.split(" ")
 
     # We expect at least command and key.
-    if len(items) < 2:
+    if len(items) < 2 and items[0] != "keys":
         raise ValueError("Command must have at least: <command> <key>")
 
     cmd = items[0]
-    key = items[1]
+    key = items[1] if len(items) > 1 else None
     resource = " ".join(items[2:]) if len(items) > 2 else None
 
     request = Request(cmd, key, resource)
@@ -63,12 +64,7 @@ def get_command(command: str) -> bytes:
     serialized_payload = stream.getvalue()
 
     # Total message length (including LEN_BYTE).
-    payload_length = len(serialized_payload) + 1
-
-    # LEN_BYTE encoded as a single byte.
-    len_byte = payload_length.to_bytes(1, byteorder="big")
-
-    return len_byte + serialized_payload
+    return encode_frame(serialized_payload)
 
 
 def main():
@@ -80,6 +76,8 @@ def main():
         while command.strip() != "exit":
             command = input("connected(binaries)> ")
 
+            if command.strip() == "exit":
+                break
             if not command.strip():
                 continue
 
@@ -92,22 +90,14 @@ def main():
             # Send the serialised message.
             s.sendall(message)
 
-            # Read the first response fragment.
-            data = s.recv(BUFFER_SIZE)
-            if not data:
+            try:
+                full_data = read_frame(s)
+            except (OSError, EOFError, ValueError) as exc:
+                print(f"[ERROR] {exc}")
+                break
+            if full_data is None:
                 print("[INFO] Server closed connection.")
                 break
-
-            full_data = data
-            message_length = data[0]  # LEN_BYTE
-
-            remaining = message_length - len(full_data)
-            while remaining > 0:
-                chunk = s.recv(BUFFER_SIZE)
-                if not chunk:
-                    break
-                full_data += chunk
-                remaining -= len(chunk)
 
             # full_data = LEN_BYTE + PICKLED_RESPONSE
             response_payload = full_data[1:]  # ignore LEN_BYTE

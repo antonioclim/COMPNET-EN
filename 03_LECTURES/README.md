@@ -4,25 +4,28 @@
 
 Fourteen lecture units (C01–C14) provide the theoretical spine of COMPNET-EN. Each lecture directory pairs Markdown lecture notes (maintained as slide-like documents) with reproducible diagrams (PlantUML source in `assets/puml/`, rendered PNGs in `assets/images/`) and short runnable scenarios intended to generate observable artefacts such as packet captures, logs and protocol transcripts.
 
+Counts include source/configuration files and tracked placeholders. Generated images, captures, logs, PID files and Python caches are excluded; scenario counts refer to direct `assets/scenario-*` directories.
+
 ## File and Folder Index
 
 | Name | Description | Metric |
 |---|---|---:|
-| [`README.md`](README.md) | Lecture index, conventions and repository links for this section | 176 lines |
-| [`C01/`](C01/) | Week 01 lecture — Network Fundamentals: Concepts, Components and Classifications (canonical slides: `c1-network-fundamentals.md`) | 17 files, 2 scenarios, 9 puml |
-| [`C02/`](C02/) | Week 02 lecture — Architectural Models: OSI and TCP/IP (canonical slides: `c2-architectural-models.md`) | 17 files, 1 scenarios, 8 puml |
-| [`C03/`](C03/) | Week 03 lecture — Introduction to Network Application Programming (canonical slides: `c3-intro-network-programming.md`) | 22 files, 4 scenarios, 7 puml |
-| [`C04/`](C04/) | Week 04 lecture — The Physical Layer and the Data Link Layer (canonical slides: `c4-physical-and-data-link.md`) | 20 files, 2 scenarios, 13 puml |
-| [`C05/`](C05/) | Week 05 lecture — Network Layer: IP Addressing, Subnetting and VLSM (canonical slides: `c5-network-layer-addressing.md`) | 23 files, 5 scenarios, 10 puml |
-| [`C06/`](C06/) | Week 06 lecture — Network Layer Support: NAT, ARP, DHCP, NDP and ICMP (canonical slides: `c6-nat-arp-dhcp-ndp-icmp.md`) | 21 files, 5 scenarios, 11 puml |
-| [`C07/`](C07/) | Week 07 lecture — Routing Protocols (canonical slides: `c7-routing-protocols.md`) | 19 files, 3 scenarios, 9 puml |
-| [`C08/`](C08/) | Week 08 lecture — The Transport Layer: TCP, UDP, TLS and QUIC (canonical slides: `c8-transport-layer.md`) | 34 files, 3 scenarios, 12 puml |
-| [`C09/`](C09/) | Week 09 lecture — The Session Layer and the Presentation Layer (canonical slides: `c9-session-presentation.md`) | 19 files, 2 scenarios, 6 puml |
-| [`C10/`](C10/) | Week 10 lecture — Application Layer: HTTP(S), REST and WebSockets (canonical slides: `c10-http-application-layer.md`) | 38 files, 4 scenarios, 10 puml |
-| [`C11/`](C11/) | Week 11 lecture — Application Layer: FTP, DNS and SSH (canonical slides: `c11-ftp-dns-ssh.md`) | 36 files, 4 scenarios, 7 puml |
-| [`C12/`](C12/) | Week 12 lecture — Email Protocols: SMTP, POP3, IMAP and Webmail (canonical slides: `c12-email-protocols.md`) | 24 files, 1 scenarios, 10 puml |
-| [`C13/`](C13/) | Week 13 lecture — IoT and Network Security (canonical slides: `c13-iot-security.md`) | 24 files, 2 scenarios, 6 puml |
-| [`C14/`](C14/) | Week 14 lecture — Revision and Examination Preparation (canonical slides: `c14-revision-and-exam-prep.md`) | 5 files, 0 scenarios, 1 puml |
+| [`README.md`](README.md) | Lecture index, conventions and repository links for this section | — |
+| [`tests/`](tests/) | Bounded Python/loopback regressions and explicit transport models | see test module |
+| [`C01/`](C01/) | Week 01 lecture — Network Fundamentals: Concepts, Components and Classifications (canonical slides: `c1-network-fundamentals.md`) | 17 files, 2 scenarios, 9 PlantUML sources |
+| [`C02/`](C02/) | Week 02 lecture — Architectural Models: OSI and TCP/IP (canonical slides: `c2-architectural-models.md`) | 17 files, 1 scenario, 8 PlantUML sources |
+| [`C03/`](C03/) | Week 03 lecture — Introduction to Network Application Programming (canonical slides: `c3-intro-network-programming.md`) | 25 files, 5 scenarios, 7 PlantUML sources |
+| [`C04/`](C04/) | Week 04 lecture — The Physical Layer and the Data Link Layer (canonical slides: `c4-physical-and-data-link.md`) | 20 files, 2 scenarios, 13 PlantUML sources |
+| [`C05/`](C05/) | Week 05 lecture — Network Layer: IP Addressing, Subnetting and VLSM (canonical slides: `c5-network-layer-addressing.md`) | 23 files, 5 scenarios, 10 PlantUML sources |
+| [`C06/`](C06/) | Week 06 lecture — Network Layer Support: NAT, ARP, DHCP, NDP and ICMP (canonical slides: `c6-nat-arp-dhcp-ndp-icmp.md`) | 21 files, 5 scenarios, 11 PlantUML sources |
+| [`C07/`](C07/) | Week 07 lecture — Routing Protocols (canonical slides: `c7-routing-protocols.md`) | 19 files, 3 scenarios, 9 PlantUML sources |
+| [`C08/`](C08/) | Week 08 lecture — The Transport Layer: TCP, UDP, TLS and QUIC (canonical slides: `c8-transport-layer.md`) | 34 files, 3 scenarios, 12 PlantUML sources |
+| [`C09/`](C09/) | Week 09 lecture — The Session Layer and the Presentation Layer (canonical slides: `c9-session-presentation.md`) | 19 files, 2 scenarios, 6 PlantUML sources |
+| [`C10/`](C10/) | Week 10 lecture — Application Layer: HTTP(S), REST and WebSockets (canonical slides: `c10-http-application-layer.md`) | 46 files, 4 scenarios, 10 PlantUML sources |
+| [`C11/`](C11/) | Week 11 lecture — Application Layer: FTP, DNS and SSH (canonical slides: `c11-ftp-dns-ssh.md`) | 41 files, 4 scenarios, 7 PlantUML sources |
+| [`C12/`](C12/) | Week 12 lecture — Email Protocols: SMTP, POP3, IMAP and Webmail (canonical slides: `c12-email-protocols.md`) | 27 files, 1 scenario, 10 PlantUML sources |
+| [`C13/`](C13/) | Week 13 lecture — IoT and Network Security (canonical slides: `c13-iot-security.md`) | 32 files, 2 scenarios, 6 PlantUML sources |
+| [`C14/`](C14/) | Week 14 lecture — Revision and Examination Preparation (canonical slides: `c14-revision-and-exam-prep.md`) | 26 files, 1 scenario, 1 PlantUML sources |
 
 ## Visual Overview
 
@@ -156,7 +159,7 @@ Method A — Git sparse-checkout (requires Git 2.25+)
 ```bash
 git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
 cd COMPNET-EN
-git sparse-checkout set 03_LECTURES
+git sparse-checkout set 03_LECTURES 00_TOOLS
 ```
 
 To add the seminars and tooling alongside the lectures:

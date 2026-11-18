@@ -24,7 +24,7 @@ rectangle "Sniffer Application\n(packet_sniffer.py)" as sniffer #C8E6C9
 
 wire -down-> nic : frames arrive
 nic -down-> stack : deliver to stack
-nic -down-> afpkt : copy to raw\n(if promiscuous\nor ETH_P_ALL)
+nic -down-> afpkt : copy matching EtherTypes\n(ETH_P_ALL selects all types)
 stack -down-> normsock : filtered by\nport/connection
 afpkt -down-> rawsock : raw IP/Ethernet\nframes
 rawsock -down-> sniffer : recvfrom()\nreturns raw bytes
@@ -32,9 +32,9 @@ rawsock -down-> sniffer : recvfrom()\nreturns raw bytes
 legend right
   A RAW socket (AF_PACKET) receives copies
   of packets traversing the interface.
-  Requires root privileges (sudo).
-  Promiscuous mode captures all frames
-  on the medium, not just local traffic.
+  Requires CAP_NET_RAW in the relevant namespace; sudo is the lab method.
+  Promiscuous mode accepts frames delivered to the NIC for other MACs.
+  It cannot reveal unicast withheld by a switch; capture placement still matters.
   Normal sockets see only their own data.
 endlegend
 @enduml

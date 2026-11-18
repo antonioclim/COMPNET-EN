@@ -7,25 +7,28 @@
       "id": "R1",
       "filter": "tcp.dstport==3128 && tcp.flags.syn==1 && tcp.flags.ack==0",
       "condition": ">= 1",
-      "description": "Client → proxy handshake."
+      "description": "SYN attempt to the proxy."
     },
     {
       "id": "R2",
       "filter": "tcp.port==3128 && frame contains \"GET \"",
       "condition": ">= 1",
-      "description": "HTTP request to the proxy."
+      "description": "HTTP request-marker bytes are present on the proxy transport."
     },
     {
       "id": "R3",
       "filter": "tcp.dstport==8080 && tcp.flags.syn==1 && tcp.flags.ack==0",
       "condition": ">= 1",
-      "description": "Proxy initiates a connection to the origin server."
+      "description": "SYN attempt on an origin-service port; correlate the proxy source."
     },
     {
       "id": "R4",
       "filter": "tcp.port==3128 && frame contains \"HTTP/1.1 200\"",
       "condition": ">= 1",
-      "description": "Proxy forwards a 200 response to the client."
+      "description": "HTTP 200 marker bytes are present on the proxy transport; correlate the complete client response."
     }
+  ],
+  "manual_checks": [
+    "R1 R2 R3 R4: Correlate client/proxy/origin streams and verify the forwarded body, headers and log. Run the blocked-domain test separately."
   ]
 }

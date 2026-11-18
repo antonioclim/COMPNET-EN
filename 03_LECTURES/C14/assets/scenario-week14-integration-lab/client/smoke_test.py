@@ -29,10 +29,16 @@ def must_resolve(name: str) -> list[str]:
     return ips
 
 
+class NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
 def http_get(url: str, ctx: ssl.SSLContext | None = None, timeout: float = 3.0):
     req = urllib.request.Request(url, method="GET")
+    opener = urllib.request.build_opener(NoRedirect(), urllib.request.HTTPSHandler(context=ctx))
     try:
-        with urllib.request.urlopen(req, timeout=timeout, context=ctx) as resp:
+        with opener.open(req, timeout=timeout) as resp:
             body = resp.read()
             return resp.status, dict(resp.headers), body
     except urllib.error.HTTPError as e:
@@ -45,6 +51,8 @@ def main() -> int:
     ap.add_argument("--tls", action="store_true", help="Use HTTPS endpoints")
     ap.add_argument("--cafile", default=None, help="CA file for TLS verification")
     args = ap.parse_args()
+    if args.tls and not args.cafile:
+        ap.error("--tls requires --cafile (CA certificate)")
 
     failures: list[str] = []
 
@@ -55,11 +63,7 @@ def main() -> int:
 
     # 2) HTTP vs HTTPS mode
     if args.tls:
-        if not args.cafile:
-            failures.append("TLS mode requires --cafile (CA certificate)")
-            ctx = None
-        else:
-            ctx = ssl.create_default_context(cafile=args.cafile)
+        ctx = ssl.create_default_context(cafile=args.cafile)
         base = "https://www.week14.local"
     else:
         ctx = None
@@ -67,13 +71,8 @@ def main() -> int:
 
     # 3) Root redirect
     status, headers, _ = http_get(base + "/", ctx=ctx)
-    if args.tls:
-        # In TLS mode the HTTP listener redirects to HTTPS. On HTTPS itself we still do 302 to /app/.
-        if status not in (200, 301, 302):
-            failures.append(f"Unexpected status for / in TLS mode: {status}")
-    else:
-        if status != 302:
-            failures.append(f"Expected 302 for /, got {status}")
+    if status != 302 or headers.get("Location") != "/app/":
+        failures.append(f"Expected 302 Location /app/ for root, got {status} {headers.get('Location')!r}")
 
     # 4) /app/
     status, headers, body = http_get(base + "/app/", ctx=ctx)

@@ -76,7 +76,7 @@ An SDN firewall relies on a clear separation between decision and enforcement: t
 
 ### SHOULD (recommended)
 - L4 policies: allow/deny based on ports (HTTP, SSH, etc), not only on IPs.
-- Return-traffic rules so permitted flows are bidirectional.
+- Automated policy tests for several permitted bidirectional flows, beyond the mandatory return-traffic handling.
 - Automatically generated E2 report (Markdown) including a summary: rules applied, traffic allowed, traffic blocked.
 
 ### MAY (optional)
@@ -114,7 +114,7 @@ An SDN firewall relies on a clear separation between decision and enforcement: t
 - Include filters for OpenFlow (if captured) and for data-plane traffic.
 
 ### Automatic PCAP criteria (E2)
-These criteria are **deterministic** and can be verified automatically with `tshark`.
+These capture checks are reproducible with `tshark`. Frame counts are smoke checks; they do not replace the application tests or prove complete project acceptance.
 - Official rules: `tools/pcap_rules/A01.json`
 - In the catalogue (template): `00_common/tools/pcap_rules/A01.json` and `00_common/tools/validate_pcap.py` (copy into the student repository).
 
@@ -123,8 +123,14 @@ These criteria are **deterministic** and can be verified automatically with `tsh
 | ID | tshark filter (`-Y`) | Condition | What it validates |
 |---:|---|---:|---|
 | R1 | `tcp.port==6653` | `>= 1` | OpenFlow control-plane traffic (TCP/6653) is present. |
-| R2 | `tcp.port==6653 && tcp.len>0` | `>= 5` | At least 5 OpenFlow segments with payload (negotiation plus rule installation). |
-| R3 | `ip && (tcp || udp || icmp)` | `>= 5` | Sufficient data-plane traffic to demonstrate filtering. |
+| R2 | `tcp.port==6653 && tcp.len>0` | `>= 5` | At least five payload-bearing OpenFlow transport segments; decode their message types and inspect installed rules separately. |
+| R3 | `ip && (tcp \|\| udp \|\| icmp) && !(tcp.port==6653 \|\| tcp.port==6633)` | `>= 5` | Non-controller IP frames are present; this count does not prove firewall policy. |
+
+### Interpretation and complementary evidence
+
+The [E2 capture and semantic-evidence matrix](../00_common/E2_CAPTURE_EVIDENCE_MATRIX.md#a01) maps every capture rule to its generating action and the complementary application evidence.
+
+- Identify both data hosts and ingress/egress interfaces. Correlate allowed exchanges and blocked attempts with the installed rules and capture windows.
 
 ### Deliverables
 - Docker Compose with `tester` that runs checks and produces `artifacts/pcap/traffic_e2.pcap` (via volume).

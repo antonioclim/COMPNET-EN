@@ -27,7 +27,7 @@ docker compose up --build
 
 | Name | Lines |
 |------|-------|
-| `docker-compose.yml` | 20 |
+| `docker-compose.yml` | 31 |
 | `client/` | 1 files |
 | `data/` | 1 files |
 | `server/` | 2 files |

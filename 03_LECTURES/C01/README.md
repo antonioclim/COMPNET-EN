@@ -102,7 +102,7 @@ Seminars S01–S14 assume familiarity with the vocabulary established here (prot
 ```bash
 git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
 cd COMPNET-EN
-git sparse-checkout set 03_LECTURES/C01
+git sparse-checkout set 03_LECTURES/C01 00_TOOLS
 ```
 
 **Method B — Direct download**

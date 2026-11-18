@@ -47,5 +47,5 @@ If you kept the plain-text port (5002) for Phase 0 comparison, Portainer shows b
 |---|---|---|
 | Client gets "connection refused" | Server not binding to 0.0.0.0 or TLS context failed to initialise | Server **Logs**: startup traceback |
 | Handshake fails with "certificate verify" | CA certificate mismatch or self-signed cert not trusted | Verify client trusts the server's CA; check cert paths |
-| Messages encrypted but PCAP shows plaintext | tcpdump captured on loopback inside the container, not on the network interface | Verify capture interface in the tester config |
+| TLS was expected but readable application text appears | Wrong port, plaintext hop after TLS termination or active Wireshark decryption | Identify both endpoints and the TCP stream, TLS termination point and key-log settings. TLS remains encrypted on loopback; changing interface does not disable encryption. |
 | Authentication fails | Username/password or token not matching | Server **Logs**: authentication error details |

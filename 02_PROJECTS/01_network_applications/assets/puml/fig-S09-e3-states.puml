@@ -1,42 +1,31 @@
 @startuml fig-S09-e3-states
 skinparam backgroundColor white
 skinparam defaultFontName Arial
-skinparam defaultFontSize 10
+skinparam defaultFontSize 11
 skinparam shadowing false
-skinparam roundcorner 12
-left to right direction
 
-title S09 — Tunnel Frame Structure (Binary Protocol)
+title S09 — Tunnel Frame: Explicit Wire Order
 
-rectangle "TNL1 Frame" as frame #F5F5F5 {
-    together {
-        rectangle "Magic\n4 bytes\nTNL1" as magic #E1BEE7
-        rectangle "Type\n1 byte\nO / D / C / E" as type #90CAF9
-        rectangle "Session ID\n2 bytes\nuint16" as sid #BBDEFB
-        rectangle "Service ID\n1 byte\nuint8" as svcid #BBDEFB
-        rectangle "Payload Length\n4 bytes\nuint32" as plen #FFF9C4
-        rectangle "Payload\n0–MAX bytes" as payload #FFF9C4
-    }
+class "TNL1 frame (offsets in bytes)" as wire #F5F5F5 {
+  0..3: Magic = ASCII TNL1 (4 bytes)
+  4: Type = O / D / C / E (uint8)
+  5..6: Session ID (uint16, big-endian)
+  7: Service ID (uint8)
+  8..11: Payload Length N (uint32, big-endian)
+  12..(11+N): Payload (N bytes)
 }
 
-magic -right[hidden]-> type
-type -right[hidden]-> sid
-sid -right[hidden]-> svcid
-svcid -right[hidden]-> plen
-plen -right[hidden]-> payload
-
-rectangle "Frame Types" as ftypes #E8F5E9 {
-    rectangle "O — OPEN\nnew session" as ft_o #C8E6C9
-    rectangle "D — DATA\nsession payload" as ft_d #BBDEFB
-    rectangle "C — CLOSE\nend session" as ft_c #ECEFF1
-    rectangle "E — ERROR\nprotocol error" as ft_e #FFCDD2
-}
+note right of wire
+  Read the fixed 12-byte header first,
+  then exactly N payload bytes.
+  Reject N above the configured maximum.
+  Empty payload: N=0, frame ends at offset 11.
+end note
 
 legend bottom
-  Every frame begins with ASCII magic TNL1
-  Length-prefixed: receiver reads header then payload
-  Max payload configurable (reject oversized frames)
-  Session ID allows interleaved multiplexing
-  Service ID maps to internal backend via YAML config
+  Wire order is top to bottom, by increasing byte offset.
+  O = OPEN, D = DATA, C = CLOSE, E = ERROR.
+  Session ID identifies an interleaved tunnel session.
+  Service ID maps to an internal backend in YAML configuration.
 endlegend
 @enduml

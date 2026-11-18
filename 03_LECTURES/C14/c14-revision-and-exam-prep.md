@@ -131,7 +131,7 @@ Revision anchors:
 
 Common confusion to avoid:
 
-* DNS is not a database, it is a cache heavy hierarchy with distinct consistency rules
+* DNS is a distributed hierarchical database with caching and explicit TTL/negative-caching rules
 * REST is an architectural style, it is not a synonym for JSON over HTTP
 
 ---

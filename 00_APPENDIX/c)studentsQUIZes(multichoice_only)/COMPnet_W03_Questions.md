@@ -119,8 +119,7 @@ TCP connections can use broadcast addressing to reach all hosts on a local segme
 - **b)** false
 
 > 💡 **Feedback:**
-> *Broadcast operates exclusively with UDP (connectionless datagrams). TCP requires a dedicated connection between two endpoints and cannot establish sessions with "all hosts" — there is no TCP broadcast. [Broadcast-ul funcționează exclusiv cu UDP (datagrame fără conexiune). TCP necesită o conexiune dedicată între două puncte terminale și nu poate stabili sesiuni cu "toate gazdele" — nu există TCP broadcast.]*
-
+> *In these socket examples UDP supports broadcast, whereas TCP does not. Broadcast also exists below the transport layer, for example Ethernet ARP frames. TCP requires a dedicated connection between two endpoints and cannot establish sessions with "all hosts" — there is no TCP broadcast. [În aceste exemple de socket, UDP suportă broadcast, iar TCP nu. Broadcast există și sub stratul de transport, de exemplu în cadrele Ethernet ARP. TCP necesită o conexiune dedicată între două puncte terminale și nu poate stabili sesiuni cu "toate gazdele" — nu există TCP broadcast.]*
 
 ---
 
@@ -206,18 +205,21 @@ In the Week 3 Python exercises, what socket-level operation triggers the host's 
 
 ---
 
-### Q13.
+### Q13. — Explicit multicast membership / Apartenență multicast explicită
 
-*[True / False]*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-For a UDP socket to receive multicast traffic, it is sufficient to call bind(('', port)) on the correct port; no additional socket options are required. [Pentru ca un socket UDP să primească trafic multicast, este suficient să se apeleze bind(('', port)) pe portul corect; nu sunt necesare opțiuni suplimentare de socket.]
+The S03 receiver uses group 239.255.0.1. On Linux it sets IP_MULTICAST_ALL=0. Which additional step explicitly subscribes this socket on the selected interface? [Receptorul S03 folosește grupul 239.255.0.1. Pe Linux setează IP_MULTICAST_ALL=0. Ce pas suplimentar abonează explicit acest socket pe interfața aleasă?]
 
-- **a)** true
-- **b)** false
+- **a)** `setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)`
+- **b)** `setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)`
+- **c)** `setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 1)`
 
-> 💡 **Feedback:**
-> *Binding alone is insufficient for multicast reception. The socket must also call setsockopt() with IP_ADD_MEMBERSHIP to join the group. Without this call, the kernel simply ignores incoming multicast packets even if the port matches. This is the most common student error in the Week 3 exercises. [Legarea singură nu este suficientă pentru recepția multicast. Socket-ul trebuie să apeleze și setsockopt() cu IP_ADD_MEMBERSHIP pentru a se alătura grupului. Fără acest apel, nucleul pur și simplu ignoră pachetele multicast primite chiar dacă portul se potrivește. Aceasta este cea mai frecventă eroare a studenților în exercițiile din Săptămâna 3.]*
+<details><summary>💡 Feedback</summary>
 
+**Correct answer / Răspuns corect: a.** Join the application group using IP_ADD_MEMBERSHIP and the intended local interface. Binding selects a local endpoint. Linux IP_MULTICAST_ALL=1 can also deliver traffic for groups joined elsewhere on the host, and 224.0.0.1 is the special all-hosts group. Therefore “no explicit join always means no reception” is not a portable rule. Receipt still depends on reachability and filtering. [Aderați la grupul aplicației prin IP_ADD_MEMBERSHIP pe interfața locală dorită. Bind selectează endpointul local. Linux IP_MULTICAST_ALL=1 poate livra și trafic pentru grupuri la care s-a aderat în altă parte pe gazdă, iar 224.0.0.1 este grupul special al tuturor gazdelor. Prin urmare, lipsa aderării explicite nu implică universal lipsa recepției. Recepția depinde și de conectivitate și filtrare.]
+
+</details>
 
 ---
 
@@ -301,19 +303,21 @@ From a security perspective, what inherent risk does broadcast communication pos
 
 ---
 
-### Q19.
+### Q19. — Explicit multicast membership / Apartenență multicast explicită
 
-*[Multiple Choice]*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-A student writes a multicast receiver that binds to port 5001, sets SO_REUSEADDR, but forgets to call IP_ADD_MEMBERSHIP. The sender transmits to 224.0.0.1:5001. What is the observable result on the receiver? [Un student scrie un receptor multicast care se leagă la portul 5001, setează SO_REUSEADDR, dar uită să apeleze IP_ADD_MEMBERSHIP. Expeditorul transmite la 224.0.0.1:5001. Care este rezultatul observabil pe receptor?]
+The S03 receiver uses group 239.255.0.1. On Linux it sets IP_MULTICAST_ALL=0. Which additional step explicitly subscribes this socket on the selected interface? [Receptorul S03 folosește grupul 239.255.0.1. Pe Linux setează IP_MULTICAST_ALL=0. Ce pas suplimentar abonează explicit acest socket pe interfața aleasă?]
 
-- **a)** The bind succeeds but recvfrom() blocks indefinitely — multicast packets are silently ignored without group membership [Legarea reușește dar recvfrom() blochează indefinit — pachetele multicast sunt ignorate silențios fără apartenență la grup]
-- **b)** The kernel raises an OSError at bind time because the socket cannot listen on a multicast port without group join in practice [Nucleul ridică o eroare OSError la momentul legării deoarece socket-ul nu poate asculta pe un port multicast fără aderare în practică]
-- **c)** The receiver gets all multicast traffic on the subnet automatically because binding to the port is sufficient (default) [Receptorul primește automat tot traficul multicast din subrețea deoarece legarea la port este suficientă (implicit)]
+- **a)** `setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)`
+- **b)** `setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)`
+- **c)** `setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 1)`
 
-> 💡 **Feedback:**
-> *Without IP_ADD_MEMBERSHIP, the kernel does not subscribe to the multicast group via IGMP. The NIC and kernel silently discard incoming multicast packets for groups not joined. Binding to the port is necessary but not sufficient — it only determines which local port to listen on, not which multicast groups to receive. [Fără IP_ADD_MEMBERSHIP, nucleul nu se abonează la grupul multicast prin IGMP. Placa de rețea și nucleul descarcă silențios pachetele multicast primite pentru grupuri la care nu s-a aderat. Legarea la port este necesară dar nu suficientă — determină doar pe ce port local să asculte, nu ce grupuri multicast să primească.]*
+<details><summary>💡 Feedback</summary>
 
+**Correct answer / Răspuns corect: a.** Join the application group using IP_ADD_MEMBERSHIP and the intended local interface. Binding selects a local endpoint. Linux IP_MULTICAST_ALL=1 can also deliver traffic for groups joined elsewhere on the host, and 224.0.0.1 is the special all-hosts group. Therefore “no explicit join always means no reception” is not a portable rule. Receipt still depends on reachability and filtering. [Aderați la grupul aplicației prin IP_ADD_MEMBERSHIP pe interfața locală dorită. Bind selectează endpointul local. Linux IP_MULTICAST_ALL=1 poate livra și trafic pentru grupuri la care s-a aderat în altă parte pe gazdă, iar 224.0.0.1 este grupul special al tuturor gazdelor. Prin urmare, lipsa aderării explicite nu implică universal lipsa recepției. Recepția depinde și de conectivitate și filtrare.]
+
+</details>
 
 ---
 
@@ -329,8 +333,7 @@ A Python script creates a UDP socket and immediately calls sock.sendto(b"test", 
 - **d)** No exception — the send succeeds silently but the datagram is dropped before reaching the network interface [Nicio excepție — trimiterea reușește silențios dar datagrama este descărcată înainte de a ajunge la interfața de rețea]
 
 > 💡 **Feedback:**
-> *The kernel treats SO_BROADCAST as a mandatory permission flag, not a hint. Without it, sendto() to a broadcast address raises OSError (errno 101: Network is unreachable) or PermissionError. This is a deliberate safety mechanism — not a timeout, not a warning, not a DNS failure. [Nucleul tratează SO_BROADCAST ca un flag obligatoriu de permisiune, nu un indiciu. Fără acesta, sendto() la o adresă broadcast ridică OSError (errno 101: Rețeaua nu este accesibilă) sau PermissionError. Acesta este un mecanism de siguranță deliberat — nu timeout, nu avertisment, nu eșec DNS.]*
-
+> *The kernel treats SO_BROADCAST as a mandatory permission flag, not a hint. Without it, sendto() to a broadcast address normally fails with a permission error (for example EACCES on Linux); other routing errors can occur independently. This is a deliberate safety mechanism — not a timeout, not a warning, not a DNS failure. [Nucleul tratează SO_BROADCAST ca un flag obligatoriu de permisiune, nu un indiciu. Fără acesta, sendto() la o adresă broadcast eșuează de regulă cu o eroare de permisiune (de exemplu EACCES pe Linux); alte erori de rutare pot apărea independent. Acesta este un mecanism de siguranță deliberat — nu timeout, nu avertisment, nu eșec DNS.]*
 
 ---
 
@@ -369,18 +372,20 @@ In the Week 3 lab, the TCP tunnel on the router listens on port 12345 and forwar
 
 ### Q23.
 
-*[Multiple Choice]*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-The TCP tunnel in the Week 3 lab uses two threads per connection. Why is a single-threaded relay insufficient for full-duplex forwarding? [Tunelul TCP din laboratorul Săptămâna 3 folosește două fire de execuție per conexiune. De ce un releu cu un singur fir de execuție este insuficient pentru redirecționarea full-duplex?]
+Why can a single sequential relay loop that performs blocking recv() in one direction stall forwarding in the other direction? [De ce o singură buclă secvențială de releu cu recv() blocant pe o direcție poate bloca redirecționarea în cealaltă direcție?]
 
-- **a)** A blocking recv() on one direction would prevent the thread from forwarding data in the opposite direction [Un recv() blocant pe o direcție ar împiedica firul de execuție să redirecționeze date în direcția opusă]
-- **b)** TCP requires separate threads for sending and receiving on the same socket object [TCP necesită fire de execuție separate pentru trimitere și recepție pe același obiect socket]
-- **c)** Operating systems enforce a one-thread-per-socket limit for all network connections (default) [Sistemele de operare impun o limită de un fir de execuție per socket pentru toate conexiunile de rețea (implicit)]
-- **d)** Multiple threads are required to handle the three-way handshake on both tunnel sockets in practice [Fire de execuție multiple sunt necesare pentru a gestiona handshake-ul triplu pe ambele socket-uri ale tunelului în practică]
+- **a)** It cannot process the other direction while it waits in that blocking call. [Nu poate procesa cealaltă direcție cât timp așteaptă în acel apel blocant.]
+- **b)** TCP requires one operating-system thread per direction. [TCP impune un fir al sistemului de operare per direcție.]
+- **c)** Full-duplex forwarding cannot be implemented with one thread. [Redirecționarea full-duplex nu poate fi implementată cu un singur fir.]
+- **d)** The TCP handshake requires multiple application threads. [Handshake-ul TCP impune mai multe fire de aplicație.]
 
-> 💡 **Feedback:**
-> *A recv() call blocks until data arrives. A single thread handling client→server direction would be stuck waiting on recv() and unable to simultaneously forward server→client data. Two threads (one per direction) ensure that data flows concurrently in both directions without blocking. [Un apel recv() blochează până când ajung date. Un singur fir de execuție care gestionează direcția client→server ar fi blocat așteptând recv() și incapabil să redirecționeze simultan datele server→client. Două fire de execuție (unul per direcție) asigură că datele curg concomitent în ambele direcții fără blocare.]*
+<details><summary>💡 Feedback</summary>
 
+**Correct answer / Răspuns corect: a.** Two relay threads are the supplied design. A single thread can also provide full-duplex forwarding with select(), selectors or an asynchronous event loop. The limitation is this sequential blocking loop, not TCP or single-threaded programming in general. [Două fire de releu reprezintă proiectarea furnizată. Un singur fir poate asigura full-duplex cu select(), selectors sau o buclă asincronă. Limita aparține acestei bucle blocante secvențiale, nu TCP sau programării cu un singur fir în general.]
+
+</details>
 
 ---
 
@@ -390,13 +395,12 @@ The TCP tunnel in the Week 3 lab uses two threads per connection. Why is a singl
 
 The tunnel relay function uses sendall(data) rather than send(data) . What problem does sendall() solve that send() does not? [Funcția releu a tunelului folosește sendall(data) în loc de send(data) . Ce problemă rezolvă sendall() pe care send() nu o rezolvă?]
 
-- **a)** send() may perform a partial write, transmitting fewer bytes than provided; sendall() guarantees the complete buffer is sent [send() poate efectua o scriere parțială, transmițând mai puțini octeți decât s-a furnizat; sendall() garantează trimiterea completă a bufferului]
+- **a)** send() may perform a partial write, transmitting fewer bytes than provided; sendall() continues until the complete buffer is accepted by the local socket API or an error occurs [send() poate efectua o scriere parțială, transmițând mai puțini octeți decât s-a furnizat; sendall() continuă până când bufferul complet este acceptat de API-ul local de socket sau apare o eroare]
 - **b)** send() can only transmit strings, while sendall() also accepts bytes objects and memoryview buffers across all supported platforms [send() poate transmite doar șiruri de caractere, în timp ce sendall() acceptă și obiecte bytes și buffere memoryview pe toate platformele suportate]
 - **c)** send() uses UDP internally for performance, whereas sendall() maintains proper TCP semantics [send() folosește intern UDP pentru performanță, în timp ce sendall() menține semantica TCP corespunzătoare]
 
 > 💡 **Feedback:**
-> *The send() method may transmit fewer bytes than requested (partial send), returning the count actually sent. If the relay ignores this, data is silently lost. sendall() loops internally until all bytes are transmitted, guaranteeing complete delivery. [Metoda send() poate transmite mai puțini octeți decât s-a solicitat (trimitere parțială), returnând numărul efectiv trimis. Dacă releul ignoră acest lucru, datele se pierd silențios. sendall() iterează intern până când toți octeții sunt transmiși, garantând livrarea completă.]*
-
+> *The send() method may transmit fewer bytes than requested (partial send), returning the count actually sent. If the relay ignores this, data is silently lost. sendall() loops until the supplied bytes are accepted locally or an error occurs. A successful return is not proof that the peer application has read or processed them; that requires application-level acknowledgement. [Metoda send() poate transmite mai puțini octeți decât s-a solicitat (trimitere parțială), returnând numărul efectiv trimis. Dacă releul ignoră acest lucru, datele se pierd silențios. sendall() iterează până la acceptarea locală a octeților sau apariția unei erori. Succesul nu dovedește că aplicația corespondentă i-a citit sau procesat; pentru aceasta este necesară o confirmare la nivelul aplicației.]*
 
 ---
 
@@ -552,20 +556,22 @@ In the Week 3 exercises, broadcast receivers set SO_REUSEADDR before calling bin
 
 ---
 
-### Q34.
+### Q34. — Multicast membership structure size / Dimensiunea structurii de apartenență multicast
 
-*[Multiple Choice]*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-To join multicast group 224.0.0.1, the code constructs mreq = struct.pack("4sl", socket.inet_aton("224.0.0.1"), socket.INADDR_ANY) . What is the total size of this packed structure in bytes? [Pentru a se alătura grupului multicast 224.0.0.1, codul construiește mreq = struct.pack("4sl", socket.inet_aton("224.0.0.1"), socket.INADDR_ANY) . Care este dimensiunea totală a acestei structuri împachetate în octeți?]
+The receiver constructs `struct.pack("4s4s", socket.inet_aton("239.255.0.1"), socket.inet_aton("127.0.0.1"))`. How many bytes does this produce? [Receptorul construiește `struct.pack("4s4s", socket.inet_aton("239.255.0.1"), socket.inet_aton("127.0.0.1"))`. Câți octeți rezultă?]
 
-- **a)** 8 bytes — 4 bytes for group IP address plus 4 bytes for the local interface identifier [8 octeți — 4 octeți pentru adresa IP a grupului plus 4 octeți pentru identificatorul interfeței locale]
-- **b)** 16 bytes — 4 bytes group IP, 4 bytes interface IP, plus 8 bytes for a 64-bit alignment pad in practice [16 octeți — 4 octeți IP grup, 4 octeți IP interfață, plus 8 octeți pentru alinierea pe 64 de biți în practică]
-- **c)** 4 bytes — only the multicast group address is needed; the interface is implicit [4 octeți — este necesară doar adresa grupului multicast; interfața este implicită]
-- **d)** 12 bytes — 4 bytes group IP, 4 bytes interface IP, plus 4 bytes for a TTL field (default) [12 octeți — 4 octeți IP grup, 4 octeți IP interfață, plus 4 octeți pentru un câmp TTL (implicit)]
+- **a)** 8
+- **b)** 16
+- **c)** 4
+- **d)** 12
 
-> 💡 **Feedback:**
-> *The structure consists of 4 bytes for the multicast group IP address (inet_aton returns 4 bytes) plus 4 bytes for the interface address (INADDR_ANY as a 32-bit integer), totalling 8 bytes. This matches the ip_mreq C structure used by the kernel for multicast group management. [Structura constă din 4 octeți pentru adresa IP a grupului multicast (inet_aton returnează 4 octeți) plus 4 octeți pentru adresa interfeței (INADDR_ANY ca întreg pe 32 de biți), totalizând 8 octeți. Aceasta corespunde structurii C ip_mreq folosită de nucleu pentru gestionarea grupurilor multicast.]*
+<details><summary>💡 Feedback</summary>
 
+**Correct answer / Răspuns corect: a.** Each 4s field contains exactly four bytes, so the total is eight. The old native 4sl format is ABI-dependent: on LP64 it can occupy sixteen bytes because of alignment and an eight-byte long. Use two IPv4 address fields for this membership request. [Fiecare câmp 4s conține exact patru octeți, deci totalul este opt. Formatul nativ 4sl depinde de ABI: pe LP64 poate ocupa șaisprezece octeți din cauza alinierii și a unui long pe opt octeți. Cererea de apartenență folosește două câmpuri de adresă IPv4.]
+
+</details>
 
 ---
 
@@ -573,7 +579,7 @@ To join multicast group 224.0.0.1, the code constructs mreq = struct.pack("4sl",
 
 *[Multiple Choice]*
 
-In Exercise 2, the multicast sender uses \--ttl 4 . Which Python setsockopt() call configures this TTL value? [În Exercițiul 2, expeditorul multicast folosește \--ttl 4 . Care apel Python setsockopt() configurează această valoare TTL?]
+For an independent multicast example, set the IPv4 multicast TTL to 4. Which Python setsockopt() call does this? [Într-un exemplu multicast independent, setați TTL-ul IPv4 multicast la 4. Ce apel Python setsockopt() realizează aceasta?]
 
 - **a)** sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 4)
 - **b)** sock.setsockopt(socket.SOL_SOCKET, socket.IP_MULTICAST_TTL, 4)
@@ -582,7 +588,6 @@ In Exercise 2, the multicast sender uses \--ttl 4 . Which Python setsockopt() ca
 
 > 💡 **Feedback:**
 > *IP_MULTICAST_TTL is set at the IPPROTO_IP level, not SOL_SOCKET. The TTL value of 4 allows the packet to cross 3 routers before being discarded. This is separate from the unicast IP TTL which is set differently. [IP_MULTICAST_TTL este setat la nivelul IPPROTO_IP, nu SOL_SOCKET. Valoarea TTL de 4 permite pachetului să traverseze 3 rutere înainte de a fi eliminat. Aceasta este separată de TTL-ul IP unicast care este setat diferit.]*
-
 
 ---
 
@@ -604,17 +609,20 @@ The socket option IP_MULTICAST_LOOP controls whether a multicast sender receives
 
 ### Q37.
 
-*[Multiple Choice]*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-In code tracing exercise T2, the final line calls setsockopt(IPPROTO_IP, IP_DROP_MEMBERSHIP, mreq) . What network protocol message does this trigger? [În exercițiul de urmărire a codului T2, ultima linie apelează setsockopt(IPPROTO_IP, IP_DROP_MEMBERSHIP, mreq) . Ce mesaj de protocol de rețea declanșează aceasta?]
+A socket drops its membership of an IPv4 multicast group. Which statement about network signalling is valid? [Un socket renunță la apartenența la un grup multicast IPv4. Ce afirmație despre semnalizarea în rețea este corectă?]
 
-- **a)** An IGMPv2 Leave Group message informing the router to stop forwarding this group's traffic [Un mesaj IGMPv2 Leave Group care informează ruterul să oprească redirecționarea traficului acestui grup]
-- **b)** A TCP FIN segment that gracefully terminates the multicast session with the router [Un segment TCP FIN care termină grațios sesiunea multicast cu ruterul]
-- **c)** An ICMP Destination Unreachable message blocking further packets to the group address in practice [Un mesaj ICMP Destination Unreachable care blochează pachete ulterioare la adresa grupului în practică]
+- **a)** The OS updates membership state; any IGMP report depends on IGMP version, interface and remaining host memberships. [Sistemul actualizează apartenența; mesajul IGMP depinde de versiune, interfață și abonamentele rămase pe host.]
+- **b)** Every call always emits exactly one IGMPv2 Leave Group packet. [Orice apel emite întotdeauna exact un pachet IGMPv2 Leave Group.]
+- **c)** It sends a TCP FIN to the multicast router. [Trimite un TCP FIN către ruterul multicast.]
+- **d)** It guarantees that the switch stops forwarding all frames for the group. [Garantează că switch-ul oprește toate cadrele grupului.]
 
-> 💡 **Feedback:**
-> *IP_DROP_MEMBERSHIP causes the kernel to send an IGMPv2 Leave Group message (type 0x17), informing the local router that this host no longer wants traffic for the specified group. The router can then stop forwarding if no other members remain. [IP_DROP_MEMBERSHIP determină nucleul să trimită un mesaj IGMPv2 Leave Group (tip 0x17), informând ruterul local că această gazdă nu mai dorește trafic pentru grupul specificat. Ruterul poate apoi să oprească redirecționarea dacă nu mai rămân alți membri.]*
+<details><summary>💡 Feedback</summary>
 
+**Correct answer / Răspuns corect: a.** Dropping one socket membership is not identical to the host leaving a group. Other sockets can retain membership; IGMP versions and loopback have different signalling behaviour. [Renunțarea unui socket nu este identică cu părăsirea grupului de către host. Alte socketuri pot rămâne membre; versiunile IGMP și loopback au comportamente de semnalizare diferite.]
+
+</details>
 
 ---
 
@@ -689,16 +697,22 @@ Complete the Python statement that enables broadcast on a UDP socket. [Completa�
 
 ### Q42.
 
-*[Drag and Drop]*
+*Drag and Drop / Trageți și plasați*
 
-Complete the Python code that constructs the mreq structure and joins a multicast group. [Completați codul Python care construiește structura mreq și aderă la un grup multicast.] mreq = socket.inet_aton("[[1]]") + struct.pack('=I', socket.INADDR_ANY)sock.setsockopt(socket.[[2]], socket.[[3]], mreq)
+Complete the two separate Python statements for the same-VM multicast baseline. [Completați cele două instrucțiuni Python distincte pentru multicast în aceeași VM.]
 
-> *Available items / Elemente disponibile:*
-[ 224.0.0.1 ] [ IPPROTO_IP ] [ IP_ADD_MEMBERSHIP ] [ 224.0.0.1 ] [ SOL_SOCKET ] [ IP_MULTICAST_TTL ]
+```python
+mreq = struct.pack("4s4s", socket.inet_aton("[[1]]"), socket.inet_aton("127.0.0.1"))
+sock.setsockopt(socket.[[2]], socket.[[3]], mreq)
+```
 
-> 💡 **Feedback:**
-> *The group address 224.0.0.1 is packed with INADDR_ANY into mreq. The setsockopt call uses IPPROTO_IP level and IP_ADD_MEMBERSHIP option. [Adresa de grup 224.0.0.1 este împachetată cu INADDR_ANY în mreq. Apelul setsockopt folosește nivelul IPPROTO_IP și opțiunea IP_ADD_MEMBERSHIP.]*
+Available items / Elemente disponibile: `239.255.0.1`, `IPPROTO_IP`, `IP_ADD_MEMBERSHIP`, `SOL_SOCKET`, `IP_MULTICAST_TTL`.
 
+<details><summary>💡 Feedback</summary>
+
+1 = `239.255.0.1`; 2 = `IPPROTO_IP`; 3 = `IP_ADD_MEMBERSHIP`. The two statements must be separated by a newline. Use the selected local interface address instead of loopback for a different topology. [Cele două instrucțiuni trebuie separate printr-o linie nouă. Pentru altă topologie folosiți adresa interfeței locale alese în locul loopback.]
+
+</details>
 
 ---
 
@@ -774,20 +788,21 @@ Broadcast is supported only over [[1]] because [[2]] requires a dedicated connec
 
 ---
 
-### Q47.
+### Q47. — Explicit multicast membership / Apartenență multicast explicită
 
-*[Gap Select]*
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-To receive multicast traffic, a socket must call [[1]] at the [[2]] protocol level. Without this call, the kernel [[3]] incoming multicast packets. [Pentru a primi trafic multicast, un socket trebuie să apeleze ___ la nivelul de protocol ___. Fără acest apel, nucleul ___ pachetele multicast primite.]
+The S03 receiver uses group 239.255.0.1. On Linux it sets IP_MULTICAST_ALL=0. Which additional step explicitly subscribes this socket on the selected interface? [Receptorul S03 folosește grupul 239.255.0.1. Pe Linux setează IP_MULTICAST_ALL=0. Ce pas suplimentar abonează explicit acest socket pe interfața aleasă?]
 
-> *Options per gap / Opțiuni pentru fiecare spațiu:*
-> **Gap [[1]]:** [ IP_ADD_MEMBERSHIP ] [ SO_BROADCAST ] [ IP_MULTICAST_TTL ]
-> **Gap [[2]]:** [ IPPROTO_IP ] [ SOL_SOCKET ] [ IPPROTO_TCP ]
-> **Gap [[3]]:** [ silently ignores ] [ queues indefinitely ] [ forwards to broadcast ]
+- **a)** `setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)`
+- **b)** `setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)`
+- **c)** `setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 1)`
 
-> 💡 **Feedback:**
-> *IP_ADD_MEMBERSHIP at IPPROTO_IP level is mandatory. The kernel silently ignores multicast packets for groups the host has not joined. Binding to a port alone is necessary but not sufficient. [IP_ADD_MEMBERSHIP la nivelul IPPROTO_IP este obligatoriu. Nucleul ignoră silențios pachetele multicast pentru grupuri la care gazda nu a aderat. Legarea la un port singură este necesară dar nu suficientă.]*
+<details><summary>💡 Feedback</summary>
 
+**Correct answer / Răspuns corect: a.** Join the application group using IP_ADD_MEMBERSHIP and the intended local interface. Binding selects a local endpoint. Linux IP_MULTICAST_ALL=1 can also deliver traffic for groups joined elsewhere on the host, and 224.0.0.1 is the special all-hosts group. Therefore “no explicit join always means no reception” is not a portable rule. Receipt still depends on reachability and filtering. [Aderați la grupul aplicației prin IP_ADD_MEMBERSHIP pe interfața locală dorită. Bind selectează endpointul local. Linux IP_MULTICAST_ALL=1 poate livra și trafic pentru grupuri la care s-a aderat în altă parte pe gazdă, iar 224.0.0.1 este grupul special al tuturor gazdelor. Prin urmare, lipsa aderării explicite nu implică universal lipsa recepției. Recepția depinde și de conectivitate și filtrare.]
+
+</details>
 
 ---
 

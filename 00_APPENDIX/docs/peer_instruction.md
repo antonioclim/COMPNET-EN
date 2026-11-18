@@ -38,11 +38,11 @@ Which statement about the differences between these two configurations is **CORR
 ### Options
 - **A)** WSL2 emulates hardware, VirtualBox runs a real Linux kernel
 - **B)** WSL2 runs a real Linux kernel, VirtualBox emulates a Linux kernel
-- **C)** Both run real Linux kernels, but WSL2 shares resources more efficiently with Windows
+- **C)** Both run real Linux kernels; WSL2 provides a managed VM with Windows integration
 - **D)** WSL2 and VirtualBox are technically identical, only the interface differs
 
 ### Correct Answer
-**C** — WSL2 runs a complete Linux kernel (not emulated) in a lightweight VM optimised for Windows integration. VirtualBox also runs a real kernel but with more overhead and complete isolation.
+**C** — Both run a real Linux kernel in a virtual machine. WSL2 provides managed Windows integration. Performance and isolation depend on configuration; this question does not claim a universal speed advantage.
 
 ### Targeted Misconception
 Many students confuse WSL1 (which translated system calls) with WSL2 (which runs a real Linux kernel).
@@ -66,7 +66,7 @@ docker run -d --name web2 nginx:latest
 ```
 
 ### Question
-After executing the commands above, how many **images** and how many **containers** will exist?
+Assume an initially empty Docker image/container inventory and successful commands. How many **images** and **containers** do these commands create?
 
 ### Options
 - **A)** 2 images, 2 containers — each `run` creates a new image
@@ -99,7 +99,7 @@ docker run -d --name nginx2 -p 8081:80 nginx
 ```
 
 ### Question
-Which URLs will work to access the two nginx servers from the Windows browser?
+Assume both services are ready and the browser runs on the Docker daemon host (or Docker Desktop forwards published ports to Windows). Which URLs access the two nginx servers?
 
 ### Options
 - **A)** `localhost:80` for nginx1, `localhost:80` for nginx2
@@ -122,24 +122,24 @@ Confusion between internal (container) and external (host) ports. Students belie
 
 ## Question 4: Localhost in Container vs Host
 
-> 💭 **PREDICTION:** If you run `curl localhost:9000` from inside a container, will you access Portainer?
+> 💭 **PREDICTION:** If you run `curl localhost:9050` from inside a container, will you access Portainer?
 
 ### Scenario
 ```bash
 # On host (Ubuntu WSL):
-docker run -d --name portainer -p 9000:9000 portainer/portainer-ce
+docker run -d --name portainer -p 127.0.0.1:9050:9000 portainer/portainer-ce
 
 # Verification from host:
-curl localhost:9000  # ✓ Works
+curl localhost:9050  # ✓ Works
 
 # Enter another container:
 docker run -it --rm alpine sh
 # From inside the alpine container:
-wget -qO- localhost:9000  # ???
+wget -qO- localhost:9050  # ???
 ```
 
 ### Question
-What happens when you try to access `localhost:9000` from inside the Alpine container?
+What happens when you try to access `localhost:9050` from inside the Alpine container?
 
 ### Options
 - **A)** Works — `localhost` is the same for all containers
@@ -148,7 +148,7 @@ What happens when you try to access `localhost:9000` from inside the Alpine cont
 - **D)** Fails — containers have no network access
 
 ### Correct Answer
-**B** — `localhost` (127.0.0.1) inside a container refers to that container's loopback interface, not the host. To access host services, you need `host.docker.internal` or the host's IP.
+**B** — `localhost` (127.0.0.1) inside a container refers to that container's loopback interface, not the host. The portable demonstration is the host browser accessing its published loopback port. A host service bound only to `127.0.0.1` is not automatically reachable through a bridge gateway. Docker Desktop supplies `host.docker.internal`; native Engine requires explicit host-gateway configuration and a service bound to an address reachable from the container. See [environment routes](environment_routes.md).
 
 ### Targeted Misconception
 This is one of the most common confusions: assuming `localhost` is global. In reality, each container has its own network namespace.
@@ -166,7 +166,7 @@ This is one of the most common confusions: assuming `localhost` is global. In re
 
 ### Scenario
 ```
-1. You configure the complete environment (WSL + Docker + Portainer)
+1. You use native Docker Engine in a WSL distribution configured for manual service start (no enabled systemd Docker service and no Docker Desktop integration)
 2. Everything works perfectly
 3. You restart the computer
 4. You open WSL and run: docker ps
@@ -182,14 +182,14 @@ What will the `docker ps` command display immediately after restarting Windows?
 - **D)** Error "docker: command not found" — Docker needs to be reinstalled
 
 ### Correct Answer
-**B** — In WSL2, the Docker service does not start automatically at boot (unlike Docker Desktop). You must run `sudo service docker start` manually or configure auto-start.
+**B under the stated manual-start WSL configuration.** A distribution with systemd and an enabled Docker service may start it automatically. Inspect the selected environment before predicting the result.
 
 ### Targeted Misconception
-Students who have used Docker Desktop expect Docker to start automatically. In native WSL, services must be started manually or explicitly configured.
+Students who have used Docker Desktop expect Docker to start automatically. WSL startup depends on whether systemd is enabled and the service is enabled; manual startup is one supported configuration.
 
 ### Instructor Notes
 - **Target accuracy:** ~45% on first vote
-- **Key concept:** WSL doesn't have a traditional init system (systemd) by default
+- **Key concept:** WSL supports systemd; automatic service start is a configuration choice.
 - **After discussion:** Show the auto-start configuration from Prerequisites (section 10)
 - **In previous years, students often missed this step and thought their Docker installation was broken**
 

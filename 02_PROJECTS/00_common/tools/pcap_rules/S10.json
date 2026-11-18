@@ -7,31 +7,35 @@
       "id": "R1",
       "filter": "tcp.dstport==5010 && tcp.flags.syn==1 && tcp.flags.ack==0",
       "condition": ">= 1",
-      "description": "Handshake to the synchronisation service."
+      "description": "SYN connection attempt to the synchronisation service."
     },
     {
       "id": "R2",
       "filter": "tcp.port==5010 && frame contains \"MANIFEST\"",
       "condition": ">= 1",
-      "description": "Manifest transfer/request."
+      "description": "Manifest marker bytes are present; decode and correlate the complete manifest separately."
     },
     {
       "id": "R3",
       "filter": "tcp.port==5010 && (frame contains \"SHA256\" || frame contains \"sha256\")",
       "condition": ">= 1",
-      "description": "A SHA-256 hash appears in the manifest or response."
+      "description": "SHA-256 marker bytes are present; verify the full digest and file contents separately."
     },
     {
       "id": "R4",
       "filter": "tcp.port==5010 && (frame contains \"PUSH\" || frame contains \"PULL\" || frame contains \"GET\" || frame contains \"PUT\")",
       "condition": ">= 1",
-      "description": "At least one synchronisation operation (push/pull)."
+      "description": "Push/pull operation marker bytes are present; assert the actual synchronisation result."
     },
     {
       "id": "R5",
       "filter": "tcp.port==5010 && (tcp.flags.fin==1 || tcp.flags.reset==1)",
       "condition": ">= 1",
-      "description": "Controlled session closure."
+      "description": "FIN/RST transport-closure frames are present; verify the application closure reason."
     }
+  ],
+  "manual_checks": [
+    "R1 R2 R3: Decode the selected framing and compare paths, sizes and complete hashes.",
+    "R4 R5: Assert final contents and the chosen conflict policy, including the explicitly permitted handling of the losing version."
   ]
 }

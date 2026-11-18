@@ -15,7 +15,7 @@ Core lesson:
 Run:
 - python -m venv .venv
 - source .venv/bin/activate
-- pip install flask flask-sock
+- python -m pip install -r requirements.txt
 - python server.py
 - open http://127.0.0.1:9000 in two tabs
 
@@ -29,9 +29,9 @@ Exercises:
 
 | Name | Lines |
 |------|-------|
-| `index.html` | 65 |
-| `protocol.md` | 28 |
-| `server.py` | 102 |
+| `index.html` | 67 |
+| `protocol.md` | 41 |
+| `server.py` | 114 |
 
 ## Cross-References
 

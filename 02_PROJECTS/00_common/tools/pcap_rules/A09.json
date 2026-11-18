@@ -13,19 +13,25 @@
       "id": "R2",
       "filter": "tcp.port==6653 && tcp.len>0",
       "condition": ">= 5",
-      "description": "At least 5 OpenFlow segments with payload (block installation)."
+      "description": "At least five payload-bearing OpenFlow transport segments; the actual drop-rule installation must be shown separately."
     },
     {
       "id": "R3",
       "filter": "tcp.flags.syn==1 && tcp.flags.ack==0",
       "condition": ">= 10",
-      "description": "Scan/attack traffic (SYN)."
+      "description": "SYN attempt frames are present; identify the scanning endpoint and window separately."
     },
     {
       "id": "R4",
-      "filter": "icmp || tcp",
+      "filter": "icmp.type==0 && ip.src==10.0.0.2 && ip.dst==10.0.0.3",
       "condition": ">= 1",
-      "description": "Legitimate traffic (for comparison) in the same capture."
+      "description": "Echo reply for the separate legitimate h3-to-h2 exchange. Adapt the addresses explicitly if E1 uses another topology."
     }
+  ],
+  "manual_checks": [
+    "Correlate the blocked h1 source with the installed flow and verify a complete h3-to-h2 ping during blocking.",
+    "Measure expiry under continuous matching traffic: hard_timeout implements the fixed API duration; idle_timeout measures inactivity.",
+    "R1 R2 R3: Correlate the alert, block request and actual installed drop flow. Capture before/after at the declared switch ports.",
+    "R4: Verify a full request/reply pair and measure hard_timeout expiry under continuous h1 traffic."
   ]
 }

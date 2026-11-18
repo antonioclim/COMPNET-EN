@@ -47,6 +47,10 @@ A single-port tunnel forces design of a multiplexing protocol: several logical f
 - **Protocol/default ports (E2):** TCP: 9000/TCP.
 - The Flex component must work with the default values (without manual reconfiguration) so that it can be integrated into automated tests.
 
+### Interpretation and complementary evidence
+
+The [E2 capture and semantic-evidence matrix](../00_common/E2_CAPTURE_EVIDENCE_MATRIX.md#s09) maps every capture rule to its generating action and the complementary application evidence.
+
 ### Deliverables
 - `flex/` directory with sources plus build/run instructions (avoid exotic dependencies where possible).
 - `docs/FLEX.md` with:
@@ -134,7 +138,7 @@ A single-port tunnel forces design of a multiplexing protocol: several logical f
 - Filters that isolate the stream and the payload-bearing segments are provided.
 
 ### Automatic PCAP criteria (E2)
-These criteria are **deterministic** and can be verified automatically with `tshark`.
+These capture checks are reproducible with `tshark`. Frame counts are smoke checks; they do not replace the application tests or prove complete project acceptance.
 - Official rules: `tools/pcap_rules/S09.json`
 - In the catalogue (template): `00_common/tools/pcap_rules/S09.json` and `00_common/tools/validate_pcap.py` (copy into the student repository).
 
@@ -142,11 +146,11 @@ These criteria are **deterministic** and can be verified automatically with `tsh
 
 | ID | tshark filter (`-Y`) | Condition | What it validates |
 |---:|---|---:|---|
-| R1 | `tcp.dstport==9000 && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | Handshake to the tunnel. |
-| R2 | `tcp.port==9000 && frame contains "TNL1O"` | `>= 1` | OPEN frame (magic TNL1 plus type O). |
-| R3 | `tcp.port==9000 && frame contains "TNL1D"` | `>= 1` | DATA frame (magic TNL1 plus type D). |
-| R4 | `tcp.port==9000 && frame contains "TNL1C"` | `>= 1` | CLOSE frame (magic TNL1 plus type C). |
-| R5 | `tcp.port==9000 && tcp.len>0` | `>= 5` | Sufficient payload traffic for multiplexing (at least 5 data-bearing segments). |
+| R1 | `tcp.dstport==9000 && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | SYN connection attempt to the tunnel. |
+| R2 | `tcp.port==9000 && frame contains "TNL1O"` | `>= 1` | TNL1O marker bytes are present in a captured frame; decode the full OPEN message separately. |
+| R3 | `tcp.port==9000 && frame contains "TNL1D"` | `>= 1` | TNL1D marker bytes are present in a captured frame; decode session and length separately. |
+| R4 | `tcp.port==9000 && frame contains "TNL1C"` | `>= 1` | TNL1C marker bytes are present in a captured frame; correlate the closed session. |
+| R5 | `tcp.port==9000 && tcp.len>0` | `>= 5` | At least five payload-bearing TCP segments are present; segment count does not establish multiplexing. |
 
 ### Deliverables
 - Docker Compose with `tunnel_server`, two internal services and `tester`.

@@ -33,18 +33,18 @@ note right of ART #E8F5E9 : connectivity confirmed\nVNI=1010 visible in capture
 
 EX -> SH : ./test_mtu_break.sh
 SH -> VTEP : set underlay MTU to 1400
-SH -> DATA : ping -s 1400 h1 → h2
-DATA -[#E53935]> DATA : fragmentation or drop
-note right of ART #FFCDD2 : inner 1400 + 50 overhead\nexceeds 1400 MTU → failure
+SH -> DATA : ping -M do -s 1400 h1 → h2
+DATA -[#E53935]> DATA : packet-too-big / drop with DF enforced
+note right of ART #FFCDD2 : ICMP payload 1400 + ICMP 8 + IPv4 20 = 1428\nouter IPv4 length 1428 + VXLAN overhead 50 = 1478\nunderlay MTU 1400 is too small
 
 == STEP 4 — MTU FIX ==
 
 EX -> SH : ./fix_mtu.sh
-SH -> VTEP : set underlay MTU to 1550\nor set overlay MTU to 1350
-SH -> DATA : ping -s 1400 h1 → h2
+SH -> VTEP : set underlay MTU to at least 1478\nand overlay MTU to at least 1428
+SH -> DATA : ping -M do -s 1400 h1 → h2
 DATA -[#43A047]> DATA : replies received
 SH -> ART : PCAP showing successful transfer
-note right of ART #E8F5E9 : MTU adjusted for\nVXLAN overhead
+note right of ART #E8F5E9 : IPv4 without options, untagged inner Ethernet\nAlternative: underlay 1400 / overlay 1350\nrequires ping payload <=1322 with DF
 
 == STEP 5 — EVIDENCE AND CLEANUP ==
 

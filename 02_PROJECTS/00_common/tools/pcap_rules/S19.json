@@ -7,31 +7,55 @@
       "id": "R1",
       "filter": "tcp.dstport==5019 && tcp.flags.syn==1 && tcp.flags.ack==0",
       "condition": ">= 1",
-      "description": "Handshake to the auction service."
+      "description": "SYN connection attempt to the auction service."
     },
     {
       "id": "R2",
-      "filter": "tcp.port==5019 && (frame contains \"SELL\" || frame contains \"OPEN\")",
+      "filter": "tcp.dstport==5019 && tcp.len>0",
       "condition": ">= 1",
-      "description": "Auction creation or open-state announcement is visible."
+      "description": "Complete SELL command lines in the request direction after TCP reassembly and retransmission removal.",
+      "measurement": "tcp_commands",
+      "commands": [
+        "SELL"
+      ]
     },
     {
       "id": "R3",
-      "filter": "tcp.port==5019 && frame contains \"BID\"",
+      "filter": "tcp.dstport==5019 && tcp.len>0",
       "condition": ">= 2",
-      "description": "At least two bids are visible in payload."
+      "description": "Complete BID command lines in the request direction after TCP reassembly and retransmission removal.",
+      "measurement": "tcp_commands",
+      "commands": [
+        "BID"
+      ]
     },
     {
       "id": "R4",
-      "filter": "tcp.port==5019 && (frame contains \"OUTBID\" || frame contains \"TOP_BID\")",
+      "filter": "tcp.srcport==5019 && tcp.len>0",
       "condition": ">= 1",
-      "description": "Competitive update to the highest bid is visible."
+      "description": "Complete OUTBID/TOP_BID command lines in the response direction after TCP reassembly and retransmission removal.",
+      "measurement": "tcp_commands",
+      "commands": [
+        "OUTBID",
+        "TOP_BID"
+      ]
     },
     {
       "id": "R5",
-      "filter": "tcp.port==5019 && (frame contains \"CLOSED\" || frame contains \"WINNER\")",
+      "filter": "tcp.srcport==5019 && tcp.len>0",
       "condition": ">= 1",
-      "description": "Automatic closure and winner reporting are observable."
+      "description": "Complete CLOSED/WINNER command lines in the response direction after TCP reassembly and retransmission removal.",
+      "measurement": "tcp_commands",
+      "commands": [
+        "CLOSED",
+        "WINNER"
+      ]
     }
+  ],
+  "manual_checks": [
+    "The supplied command counter uses LF/CRLF framing. If E1 selects JSON or binary framing, supply and test the corresponding decoder in the student validator; do not replace logical counts with frame counts.",
+    "Correlate client identities, topics/keys and request IDs with pytest assertions to prove the required application behaviour.",
+    "R1 R2 R3 R4: Decode the command framing and assert bidder identity, monotonic top bid and outbid notification.",
+    "R5: Assert the correct winner and closing time; reject bids after closure."
   ]
 }

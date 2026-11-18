@@ -30,29 +30,32 @@ def handle_client(client_socket, client_address):
     ip, port = client_address
     print(f"[THREAD START] Client {ip}:{port} connected")
 
-    with client_socket:
-        while True:
-            # Wait until we receive up to 1024 bytes from the client.
-            data = client_socket.recv(1024)
+    try:
+        with client_socket:
+            while True:
+                # Wait until we receive up to 1024 bytes from the client.
+                data = client_socket.recv(1024)
 
-            # If data is an empty byte string (b""), the client has closed the connection.
-            if not data:
-                print(f"[DISCONNECT] Client {ip}:{port} closed the connection")
-                break
+                # If data is an empty byte string (b""), the client has closed the connection.
+                if not data:
+                    print(f"[DISCONNECT] Client {ip}:{port} closed the connection")
+                    break
 
-            print(f"[RECV] From {ip}:{port} -> {data!r}")
+                print(f"[RECV] From {ip}:{port} -> {data!r}")
 
-            # Process the message: .capitalize() makes the first letter upper-case.
-            response = data.capitalize()
+                # Process the message: .capitalize() makes the first letter upper-case.
+                response = data.capitalize()
 
-            # Send the response back to the same client.
-            client_socket.sendall(response)
-            print(f"[SEND] To   {ip}:{port} -> {response!r}")
-
-    # Remove the client from the list when the thread finishes.
-    with clients_lock:
-        if client_socket in clients:
-            clients.remove(client_socket)
+                # Send the response back to the same client.
+                client_socket.sendall(response)
+                print(f"[SEND] To   {ip}:{port} -> {response!r}")
+    except OSError as exc:
+        print(f"[DISCONNECT] {ip}:{port}: {exc}")
+    finally:
+        # Remove the client from the list when the thread finishes.
+        with clients_lock:
+            if client_socket in clients:
+                clients.remove(client_socket)
 
     print(f"[THREAD END] Client {ip}:{port} handler finished\n")
 

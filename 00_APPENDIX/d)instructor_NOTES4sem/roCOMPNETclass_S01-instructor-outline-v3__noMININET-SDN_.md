@@ -494,13 +494,13 @@ Postel, J. (Ed.). (1981). Transmission Control Protocol. RFC 793. Internet Engin
 
 Postel, J. (1980). User Datagram Protocol. RFC 768. Internet Engineering Task Force. https://doi.org/10.17487/RFC0768
 
-McCanne, S. & Jacobson, V. (1993). The BSD packet filter: A new architecture for user-level packet capture. In *Proceedings of the USENIX Winter 1993 Conference* (pp. 259–270). USENIX Association. https://doi.org/10.5555/1267303.1267305
+McCanne, S. & Jacobson, V. (1993). The BSD packet filter: A new architecture for user-level packet capture. In *Proceedings of the USENIX Winter 1993 Conference* (pp. 259–270). USENIX Association. https://www.usenix.org/conference/usenix-winter-1993-conference/bsd-packet-filter-new-architecture-user-level-packet
 
 Matthews, J. N. (2005). Hands-on approach to teaching computer networking using packet traces. In *Proceedings of the 6th Conference on Information Technology Education* (pp. 361–367). ACM. https://doi.org/10.1145/1095714.1095777
 
 Driver, R., Asoko, H., Leach, J., Mortimer, E. & Scott, P. (1994). Constructing scientific knowledge in the classroom. *Educational Researcher, 23*(7), 5–12. https://doi.org/10.3102/0013189X023007005
 
-Merkel, D. (2014). Docker: Lightweight Linux containers for consistent development and deployment. *Linux Journal, 2014*(239). https://doi.org/10.5555/2600239.2600241
+Merkel, D. (2014). Docker: Lightweight Linux containers for consistent development and deployment. *Linux Journal, 2014*(239). https://www.linuxjournal.com/content/docker-lightweight-linux-containers-consistent-development-and-deployment
 
 ---
 

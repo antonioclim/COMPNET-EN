@@ -16,7 +16,7 @@ Live coding is a teaching technique where the instructor **writes code in real t
 
 ---
 
-## 2. Session Structure (15-20 minutess)
+## 2. Session Structure (15-20 minutes)
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -134,13 +134,20 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # STEP 1: "Let's see if Docker responds"
 import subprocess
 
-# QUESTION: "What command checks if Docker is running?"
-result = subprocess.run(['docker', '--version'], capture_output=True, text=True)
-print(f"Docker version: {result.stdout.strip()}")
+# QUESTION: "Which command contacts the Docker daemon rather than only the CLI?"
+try:
+    result = subprocess.run(['docker', 'info'], capture_output=True, text=True, timeout=15)
+    print("Daemon accessible" if result.returncode == 0 else "Daemon inaccessible")
+    if result.returncode:
+        print(result.stderr.strip())
+except FileNotFoundError:
+    print("Docker CLI is not installed")
+except subprocess.TimeoutExpired:
+    print("Docker daemon check timed out")
 
-# PLANNED MISTAKE: Run without sudo service docker start
-# "Cannot connect to Docker daemon"
-# "What do we need to do after restarting Windows?"
+# PLANNED MISTAKE: use an explicitly manual-start WSL setup with Docker stopped.
+# A systemd-enabled distribution or Docker Desktop may start its daemon automatically.
+# Inspect docker context, service state and access permissions before changing them.
 
 # STEP 2: "Let's run a simple container"
 # QUESTION: "What does 'docker run --rm' do?"
@@ -164,8 +171,10 @@ def check_port(host, port):
         return False
 
 # QUESTION: "What port does Portainer listen on?"
-portainer_ok = check_port('localhost', 9000)
-print(f"Portainer accessible: {portainer_ok}")
+portainer_ok = check_port('localhost', 9050)
+print(f"TCP listener on the configured Portainer port: {portainer_ok}")
+# A TCP connection does not establish HTTP readiness or successful authentication.
+# Open the configured URL and verify the Portainer page separately.
 
 # RECAP
 # "We verified: Docker installed, daemon running, container functional, Portainer up"
@@ -265,7 +274,7 @@ server.listen(1)
 - "What happens if the client disconnects?"
 
 ### Questions requiring postponement:
-- "How does TLS work?" → "Excelslow question! We'll cover it in Week 10."
+- "How does TLS work?" → "Excellent question! We'll cover it in Week 10."
 
 ### Off-topic questions:
 - "Can we do this in Rust?" → "Interesting, but let's focus on Python now. We'll chat at break."
@@ -313,7 +322,7 @@ server.listen(1)
 
 ### Before next session
 - [ ] Have I published code for students?
-- [ ] Have I updatad slides with clarifications?
+- [ ] Have I updated slides with clarifications?
 - [ ] Have I prepared supplementary exercises for difficult concepts?
 - [ ] Have I reviewed timing (too fast / too slow)?
 
@@ -339,7 +348,7 @@ server.listen(1)
 ### "A student asks questions continuously and derails the course"
 
 ```
-- "Excelslow question, but let's discuss at break to not lose the thread"
+- "Excellent question, but let's discuss at break to not lose the thread"
 - Visibly note the question on the board
 - Return to it if relevant later
 ```

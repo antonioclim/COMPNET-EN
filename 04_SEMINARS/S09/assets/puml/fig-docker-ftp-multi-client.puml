@@ -30,11 +30,11 @@ package "Docker network: ftpnet (bridge)" as net #F5F5F5 {
   }
 }
 
-c1 -right-> ftp : <color:#1565C0>FTP (STOR / RETR)\nuser: test / 12345</color>
-c2 -left-> ftp : <color:#43A047>FTP (STOR / RETR)\nuser: test / 12345</color>
+c1 -right-> ftp : FTP (STOR / RETR)\nuser: test / 12345
+c2 -left-> ftp : FTP (STOR / RETR)\nuser: test / 12345
 
 card "Host machine\n(port 2121 mapped)" as host #ECEFF1
-host -up-> ftp : <color:#FF9800>optional: ftp 127.0.0.1 2121</color>
+host -up-> ftp : optional: ftp 127.0.0.1 2121
 
 legend bottom
   Three containers share the ftpnet bridge network.

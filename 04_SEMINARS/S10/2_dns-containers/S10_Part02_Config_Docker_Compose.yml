@@ -1,4 +1,3 @@
-version: '3.9'
 services:
   web:
     image: python:3
@@ -17,10 +16,10 @@ services:
     - python3
     - S10_Part02_Script_DNS_Server.py
     ports:
-    - 5353:5353/udp
+    - 127.0.0.1:5353:5353/udp
   debug:
-    image: busybox
-    command:
-    - sh
+    build:
+      context: .
+      dockerfile: S10_Part02_Config_Dockerfile_Debug
     stdin_open: true
     tty: true

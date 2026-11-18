@@ -18,9 +18,7 @@
 ## Description
 You will implement a minimal email system composed of two services: an SMTP server that accepts messages and stores them and a POP3 server that provides mailbox access. The aim is not full compatibility with the entire email ecosystem but understanding application protocols with state machines and response codes.
 
-SMTP enforces a strict sequence of commands (HELO, MAIL FROM, RCPT TO, DATA) while POP3 uses a session model and operations on stored messages (LIST, RETR, DELE). The implementation must handle SMTP body delimitation (`
-.
-` terminator) and apply limits on size and recipient count.
+SMTP enforces a strict sequence of commands (HELO, MAIL FROM, RCPT TO, DATA) while POP3 uses a session model and operations on stored messages (LIST, RETR, DELE). The implementation must handle SMTP body delimitation (`\r\n.\r\n` terminator) and apply limits on size and recipient count.
 
 In the demonstration, one client sends a message to a local user and another client downloads it via POP3. The PCAP capture must show state transitions, the DATA command and message payload as well as the deletion operation.
 
@@ -48,6 +46,10 @@ The system is centred on two state machines: one for SMTP (sequential commands, 
 ### Contract (interface) — fixed for assessment
 - **Protocol/default ports (E2):** TCP: SMTP 2525/TCP; POP3 2110/TCP (POP3 is assessed in E3).
 - The Flex component must work with the default values (without manual reconfiguration) so that it can be integrated into automated tests.
+
+### Interpretation and complementary evidence
+
+The [E2 capture and semantic-evidence matrix](../00_common/E2_CAPTURE_EVIDENCE_MATRIX.md#s08) maps every capture rule to its generating action and the complementary application evidence.
 
 ### Deliverables
 - `flex/` directory with sources plus build/run instructions (avoid exotic dependencies where possible).
@@ -136,7 +138,7 @@ The system is centred on two state machines: one for SMTP (sequential commands, 
 - Filters to isolate SMTP in the capture are provided.
 
 ### Automatic PCAP criteria (E2)
-These criteria are **deterministic** and can be verified automatically with `tshark`.
+These capture checks are reproducible with `tshark`. Frame counts are smoke checks; they do not replace the application tests or prove complete project acceptance.
 - Official rules: `tools/pcap_rules/S08.json`
 - In the catalogue (template): `00_common/tools/pcap_rules/S08.json` and `00_common/tools/validate_pcap.py` (copy into the student repository).
 
@@ -144,12 +146,12 @@ These criteria are **deterministic** and can be verified automatically with `tsh
 
 | ID | tshark filter (`-Y`) | Condition | What it validates |
 |---:|---|---:|---|
-| R1 | `tcp.dstport==2525 && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | Client → SMTP handshake. |
-| R2 | `tcp.port==2525 && (frame contains "EHLO" || frame contains "HELO")` | `>= 1` | SMTP greeting (EHLO/HELO). |
-| R3 | `tcp.port==2525 && frame contains "MAIL FROM"` | `>= 1` | MAIL FROM present. |
-| R4 | `tcp.port==2525 && frame contains "RCPT TO"` | `>= 1` | RCPT TO present. |
-| R5 | `tcp.port==2525 && frame contains "DATA"` | `>= 1` | DATA command present. |
-| R6 | `tcp.port==2525 && (frame contains "\r\n.\r\n" || frame contains "\n.\n")` | `>= 1` | The data terminator (dot) appears in the payload (dot-stuffing is demonstrable). |
+| R1 | `tcp.dstport==2525 && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | SYN attempt to the SMTP service. |
+| R2 | `tcp.port==2525 && (frame contains "EHLO" \|\| frame contains "HELO")` | `>= 1` | HELO/EHLO marker bytes are present on the SMTP transport. |
+| R3 | `tcp.port==2525 && frame contains "MAIL FROM"` | `>= 1` | MAIL FROM marker bytes are present. |
+| R4 | `tcp.port==2525 && frame contains "RCPT TO"` | `>= 1` | RCPT TO marker bytes are present. |
+| R5 | `tcp.port==2525 && frame contains "DATA"` | `>= 1` | DATA marker bytes are present; verify the SMTP state and response. |
+| R6 | `tcp.port==2525 && (frame contains "\r\n.\r\n" \|\| frame contains "\n.\n")` | `>= 1` | The SMTP terminator byte pattern occurs in a captured frame; reassembly and a dot-stuffing test establish correct message framing. |
 
 ### Deliverables
 - Smoke tests (`pytest -m e2`) that send a message and verify storage plus validate one error case.

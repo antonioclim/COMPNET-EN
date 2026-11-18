@@ -43,7 +43,7 @@ def main() -> int:
 
     pcap = args.pcap
     sections: list[tuple[str, list[str]]] = [
-        ("Capture metadata (capinfos)", ["tshark", "-r", pcap, "-q", "-z", "io,stat,0"]),
+        ("Capture traffic summary", ["tshark", "-r", pcap, "-q", "-z", "io,stat,0"]),
         ("Endpoints (IP)", ["tshark", "-r", pcap, "-q", "-z", "endpoints,ip"]),
         ("Conversations (TCP)", ["tshark", "-r", pcap, "-q", "-z", "conv,tcp"]),
         ("Conversations (UDP)", ["tshark", "-r", pcap, "-q", "-z", "conv,udp"]),
@@ -57,27 +57,30 @@ def main() -> int:
     out_lines.append(f"File: {pcap}")
     out_lines.append("")
 
+    failures = 0
     for title, cmd in sections:
         out_lines.append("-" * 72)
         out_lines.append(title)
         out_lines.append("-" * 72)
         rc, stdout = run(cmd)
         if rc != 0:
+            failures += 1
             out_lines.append(f"[WARN] Command failed (rc={rc}): {' '.join(cmd)}")
         out_lines.append(stdout.rstrip())
         out_lines.append("")
 
+    out_lines.append(f"Completed {len(sections) - failures}/{len(sections)} requested analyses.")
     result = "\n".join(out_lines).rstrip() + "\n"
 
     if args.out:
         out_path = Path(args.out)
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(result, encoding="utf-8")
-        print(f"[OK] Wrote: {out_path}")
-        return 0
+        print(f"[{'INCOMPLETE' if failures else 'OK'}] Wrote: {out_path}")
+        return 1 if failures else 0
 
     print(result)
-    return 0
+    return 1 if failures else 0
 
 
 if __name__ == "__main__":

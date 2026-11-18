@@ -13,6 +13,11 @@ participant "registry\n:8500" as REG #FFF9C4
 participant "service_a\n:5101" as A #C8E6C9
 participant "service_b\n:5102" as B #C8E6C9
 
+== MULTICAST DISCOVERY (R1) ==
+C -> REG : UDP multicast to 239.10.11.12:5111
+REG --> C : Discovery reply with registry endpoint
+note over C, REG : Capture UDP discovery in addition to the HTTP hops.
+
 == SERVICE REGISTRATION ==
 A -> REG : POST /register\n{name: "svc", port: 5101, id: "a"}
 REG -[#43A047]-> A : 200 OK

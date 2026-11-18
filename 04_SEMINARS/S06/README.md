@@ -96,7 +96,7 @@ The seminar makes the control plane visible. Traditional routing is experienced 
 ```bash
 git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
 cd COMPNET-EN
-git sparse-checkout set 04_SEMINARS/S06
+git sparse-checkout set 04_SEMINARS/S06 00_TOOLS
 ```
 
 To include the Mininet guide:

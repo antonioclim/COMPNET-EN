@@ -11,7 +11,8 @@ services:
       - ./server-anon:/app/nobody
     command: sh -c "pip install pyftpdlib && python S09_Part03_Script_Pyftpd_Server.py"
     ports:
-      - "2121:2121"   # expose FTP control port on host
+      - "127.0.0.1:2121:2121"   # FTP control on host loopback
+      - "127.0.0.1:30000-30009:30000-30009" # passive data ports
     networks:
       - ftpnet
 

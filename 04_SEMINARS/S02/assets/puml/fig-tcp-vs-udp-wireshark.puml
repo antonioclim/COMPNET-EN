@@ -36,9 +36,9 @@ UC -> US : "hello" (single datagram)
 US --> UC : "HELLO" (single datagram)
 
 legend bottom
-  TCP: minimum 8 packets for one request–response.
-  UDP: exactly 2 packets for one request–response.
+  TCP packet count depends on ACK coalescing, segmentation and teardown.
+  UDP: one request and one reply datagram in this successful example.
   TCP groups packets into a stream (tcp.stream).
-  UDP has no stream concept — each datagram is standalone.
+  UDP preserves datagrams; Wireshark can assign udp.stream indices.
 endlegend
 @enduml

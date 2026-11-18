@@ -1,5 +1,21 @@
 # S10 — Portainer Integration (Instructor Notes)
 
+> **Execution route:** PowerShell commands in this guide use Docker Desktop on
+> Windows. With the primary MININET-SDN OVA, run the Compose commands in the Linux
+> guest and test guest endpoints there; translate `..\folder` to `../folder`.
+> Windows `127.0.0.1:2222` is the OVA SSH forward, not automatically an S10
+> container endpoint. Use the [environment routes](../../../00_APPENDIX/docs/environment_routes.md)
+> and the canonical seminar README for the chosen route.
+
+**Reading the dashboard:** a port mapping is configuration, a running container is
+process state and a successful application request is service evidence. Record
+these separately. `EXPOSE`/Compose `expose` documents a container port; it does not
+create an access-control boundary. On normal Linux bridge networks the daemon
+host can reach container addresses even without published ports. Docker Desktop's
+Windows host normally accesses them through published ports. See
+[Docker port publishing](https://docs.docker.com/engine/network/port-publishing/).
+
+
 ## Context
 
 Seminar 10 is the most fragmented Docker session in the course: three separate Compose stacks started and torn down one after another (DNS containers → SSH with Paramiko → SSH port forwarding). Each stack has its own network and its own set of containers. The most common problem is not conceptual — it is operational. Students forget to stop the previous stack before starting the next one, leaving orphan containers that silently occupy ports. The resulting errors ("address already in use") derail the exercise and waste time.
@@ -27,7 +43,7 @@ This reinforces a point that students sometimes struggle with: port numbers are 
 | Understand Docker DNS (service name → IP) | Networks view shows the IP alongside the name — students verify resolution results against the dashboard |
 | Work with multiple Compose stacks in sequence | Containers view acts as a "clean slate" checkpoint between exercises |
 | Distinguish published ports from internal exposure | Part 4's `web` container has **no published ports** — visually obvious in Portainer's empty "Ports" column |
-| SSH tunnelling as a bypass for network isolation | Logs view on the `web` container shows HTTP requests arriving through the tunnel, despite no direct host access |
+| SSH tunnelling as a bypass for network isolation | Logs view on the `web` container shows HTTP requests arriving through the tunnel, without publishing the web service on a host port |
 
 The between-exercise checkpoint alone is worth the Portainer investment here. It catches a class of bug that would otherwise cost five to ten minutes per affected student.
 
@@ -54,7 +70,7 @@ Start the DNS stack:
 
 ```powershell
 cd 2_dns-containers
-docker compose -f S10_Part02_Config_Docker_Compose.yml up -d
+docker compose -f S10_Part02_Config_Docker_Compose.yml up -d --build
 ```
 
 Switch to Portainer → refresh. Three containers appear: `web`, `dns-server`, `debug`.
@@ -105,7 +121,7 @@ In Portainer, two containers appear: `ssh-bastion` (published port `2222:22`) an
 
 This is the key observation. Draw attention to the empty "Published Ports" column on `web`:
 
-> *▸ "Notice: `web` has no published ports. You cannot access it directly from the browser — port 8000 is only `expose`d, visible only inside the Docker network. The only route is through the SSH tunnel."*
+> *▸ "Notice: `web` has no published host port. In this Windows/Docker Desktop route, use the SSH tunnel to reach it from the host browser. A process on the Linux daemon host can normally reach the container IP directly. `expose` is metadata, not a firewall."*
 
 Establish the tunnel:
 

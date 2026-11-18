@@ -39,7 +39,7 @@ No specific prerequisites beyond having completed or substantially progressed th
 ```bash
 git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
 cd COMPNET-EN
-git sparse-checkout set 04_SEMINARS/S14
+git sparse-checkout set 04_SEMINARS/S14 00_TOOLS
 ```
 
 To include the project standards:

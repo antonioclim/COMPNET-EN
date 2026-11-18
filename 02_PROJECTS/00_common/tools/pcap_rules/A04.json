@@ -21,5 +21,8 @@
       "condition": ">= 10",
       "description": "Sufficient ARP traffic for analysis."
     }
+  ],
+  "manual_checks": [
+    "R1 R2 R3: Compare IP/MAC mappings and detector alerts, then verify the repaired victim cache and restored ping separately."
   ]
 }

@@ -16,7 +16,7 @@ In this stage you will:
 1. Start the example server:
 
 ```bash
-python3 index_tcp-multiclient-server_example.py
+python3 S03_Part01_Example_TCP_Multi_client_Server.py
 ````
 
 You should see:
@@ -47,15 +47,12 @@ Type messages and press Enter. In the server terminal you should observe:
 * `[CONNECT] New client ...` appearing for each client;
 * `[RECV]` and `[SEND]` appearing for each message.
 
-#### Option B – Python client from the previous tutorial
+#### Optional extension — a concurrent Python chat client
 
-Use the TCP client with the port adjusted to 3333 (if necessary, change `PORT = 3333`):
-
-```bash
-python3 index_tcp-client_template.py
-```
-
-Send messages from 2 client instances.
+Use `nc 127.0.0.1 3333` for the baseline activity. The S02 client is a synchronous
+request/reply client and cannot receive unsolicited chat messages simply by changing
+its port. As an extension, build a client with a separate receive loop and document
+EOF and thread cleanup. Test that a participant receives a message without typing first.
 
 ---
 
@@ -92,7 +89,7 @@ Observe:
 
 ### 5. Student task – implementing the mini "chat"
 
-1. Open the file `index_tcp-multiclient-server_template.py`.
+1. Open the file `S03_Part02_Template_TCP_Multi_client_Server.py`.
 
 2. Complete the marked section:
 
@@ -111,13 +108,13 @@ Following the requirements in the comments:
 3. Run the template server:
 
 ```bash
-python3 index_tcp-multiclient-server_template.py
+python3 S03_Part02_Template_TCP_Multi_client_Server.py
 ```
 
 4. Open at least **3 clients**:
 
 * either with `nc 127.0.0.1 3333`,
-* or with the Python client (modified to use port 3333).
+* or with your concurrent chat client from the optional extension.
 
 5. Send messages from one client and verify that:
 

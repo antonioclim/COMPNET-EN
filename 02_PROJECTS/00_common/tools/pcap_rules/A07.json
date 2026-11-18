@@ -13,13 +13,18 @@
       "id": "R2",
       "filter": "tcp.port==6653 && tcp.len>0",
       "condition": ">= 5",
-      "description": "At least 5 OpenFlow segments with payload (learning plus flow installation)."
+      "description": "At least five payload-bearing OpenFlow transport segments; learning and FlowMod installation require correlated evidence."
     },
     {
       "id": "R3",
-      "filter": "arp || icmp || ip",
+      "filter": "(arp || icmp || ip) && !(tcp.port==6653 || tcp.port==6633)",
       "condition": ">= 5",
-      "description": "L2/L3 traffic in the network (to trigger learning)."
+      "description": "Data-network frames excluding OpenFlow transport; confirm endpoint roles and learned entries separately."
     }
+  ],
+  "manual_checks": [
+    "Correlate host MAC addresses, switch ports, PacketIn events and installed flow entries. Control traffic alone cannot establish forwarding.",
+    "R1 R2: Identify PacketIn/FlowMod messages and inspect learned MAC-to-port entries.",
+    "R3: Show initial broadcast resolution, subsequent unicast forwarding and flow-table counters."
   ]
 }

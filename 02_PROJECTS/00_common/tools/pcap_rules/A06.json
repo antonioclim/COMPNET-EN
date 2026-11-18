@@ -32,9 +32,14 @@
     },
     {
       "id": "R5",
-      "filter": "ip && (tcp || udp || icmp)",
+      "filter": "ip && (tcp || udp || icmp) && !(udp.port==67 || udp.port==68)",
       "condition": ">= 10",
-      "description": "Post-DHCP IP traffic (NAT test)."
+      "description": "Non-DHCP IP traffic is present; verify that it follows the ACK and crosses the NAT boundary in the analysis."
     }
+  ],
+  "manual_checks": [
+    "Correlate the DHCP lease with the client address and timestamps. Compare internal/external capture points for address translation and return traffic.",
+    "R1 R2 R3 R4: Correlate transaction/client identity and the Discover–Offer–Request–ACK order.",
+    "R5: Compare internal and external source addresses, routes, NAT/FORWARD rules and the complete reply path."
   ]
 }

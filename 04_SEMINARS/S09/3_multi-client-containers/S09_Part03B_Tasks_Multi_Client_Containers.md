@@ -37,7 +37,7 @@ echo "Hello from client1" > client1-data/from_client1.txt
 Run:
 
 ```bash
-docker compose up -d
+docker compose -f S09_Part03_Config_Docker_Compose.yml up -d
 ```
 
 Verify:

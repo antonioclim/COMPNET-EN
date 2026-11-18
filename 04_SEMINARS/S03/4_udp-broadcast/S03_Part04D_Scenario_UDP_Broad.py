@@ -17,7 +17,7 @@ In this stage you will:
 In a terminal:
 
 ```bash
-python3 index_udp-broadcast_receiver_example.py
+python3 S03_Part04B_Example_UDP_Broad_Receiver.py
 ````
 
 You should see:
@@ -35,7 +35,7 @@ Leave the programme running.
 In another terminal:
 
 ```bash
-python3 index_udp-broadcast_sender_example.py "Hello, broadcast"
+python3 S03_Part04A_Example_UDP_Broad_Sender.py "Hello, broadcast"
 ```
 
 You should see in the sender:
@@ -91,7 +91,7 @@ Observe:
 
 ### 5. Student task – receiver with filtering
 
-1. Open `index_udp-broadcast_receiver_template.py`.
+1. Open `S03_Part04C_Template_UDP_Broad_Receiver.py`.
 
 2. Complete the `TODO` section so that the receiver:
 
@@ -102,13 +102,13 @@ Observe:
 3. Run the template receiver:
 
 ```bash
-python3 index_udp-broadcast_receiver_template.py
+python3 S03_Part04C_Template_UDP_Broad_Receiver.py
 ```
 
 4. Run the sender:
 
 ```bash
-python3 index_udp-broadcast_sender_example.py "Hello, broadcast"
+python3 S03_Part04A_Example_UDP_Broad_Sender.py "Hello, broadcast"
 ```
 
 5. Also send a few manual test messages, for example with `netcat`:

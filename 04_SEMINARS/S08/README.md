@@ -77,7 +77,7 @@ The four-stage progression ensures students understand HTTP at every abstraction
 ```bash
 git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
 cd COMPNET-EN
-git sparse-checkout set 04_SEMINARS/S08
+git sparse-checkout set 04_SEMINARS/S08 00_TOOLS
 ```
 
 **Method B — Direct download**

@@ -83,7 +83,7 @@ By the end of the lecture, students should be able to:
 ### TCP at a high level
 - Sends data as a stream
 - Segments the data
-- Numbers each segment
+- Sequence numbers identify byte positions in the stream
 
 ---
 
@@ -125,7 +125,7 @@ By the end of the lecture, students should be able to:
 
 ### TCP flags (2)
 - RST – forced closure
-- PSH – immediate delivery
+- PSH – requests prompt delivery of queued data; does not define message boundaries or guarantee application scheduling
 - URG – urgent data
 
 ---
@@ -239,7 +239,7 @@ By the end of the lecture, students should be able to:
 ---
 
 ### Reliability in TCP
-- Each segment is acknowledged
+- Acknowledgements are cumulative byte positions; delayed ACK and SACK can change acknowledgement patterns
 - Retransmissions on loss
 - Reordering based on sequence numbers
 

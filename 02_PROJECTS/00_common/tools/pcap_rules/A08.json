@@ -11,9 +11,13 @@
     },
     {
       "id": "R2",
-      "filter": "arp || icmp",
+      "filter": "vxlan && (arp || icmp)",
       "condition": ">= 1",
-      "description": "Tunnelled L2/L3 traffic (ARP/ICMP) is observable."
+      "description": "ARP/ICMP is decoded inside VXLAN; underlay-only ARP does not satisfy this rule."
     }
+  ],
+  "manual_checks": [
+    "Identify outer/inner endpoint addresses and VNI and compare inner/outer IP lengths under the declared MTU settings.",
+    "R1 R2: Decode outer/inner endpoint pairs and VNI; repeat the documented DF/MTU experiment and compare IP lengths."
   ]
 }

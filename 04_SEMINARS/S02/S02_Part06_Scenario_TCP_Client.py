@@ -5,7 +5,7 @@
 
 In this stage you will:
 - start the TCP Python server from the previous stage;
-- run a simple TCP client (`index_tcp-client_example.py`);
+- run a simple TCP client (`S02_Part04_Example_TCP_Client.py`);
 - modify a client template to send messages in a loop and measure RTT;
 - analyse the traffic in Wireshark and correlate packets with client/server logs.
 
@@ -16,7 +16,7 @@ In this stage you will:
 Ensure that the server from the previous stage is running (e.g. the completed template variant):
 
 ```bash
-python3 index_tcp-server_template.py
+python3 S02_Part02_Template_TCP_Server.py
 ````
 
 You should see:
@@ -32,7 +32,7 @@ You should see:
 1. In a separate terminal, run:
 
 ```bash
-python3 index_tcp-client_example.py
+python3 S02_Part04_Example_TCP_Client.py
 ```
 
 2. Observe:
@@ -59,7 +59,7 @@ tcp port 12345
 4. Run the example client again:
 
 ```bash
-python3 index_tcp-client_example.py
+python3 S02_Part04_Example_TCP_Client.py
 ```
 
 5. Stop the capture after the client has sent and received the message.
@@ -80,7 +80,7 @@ Analyse:
 
 ### 5. Student task – interactive client + RTT
 
-1. Open the file `index_tcp-client_template.py`.
+1. Open the file `S02_Part05_Template_TCP_Client.py`.
 
 2. Complete the marked section:
 
@@ -100,7 +100,7 @@ following the requirements in the comments:
 3. Run the modified client:
 
 ```bash
-python3 index_tcp-client_template.py
+python3 S02_Part05_Template_TCP_Client.py
 ```
 
 Send at least 5 different messages (of varying lengths).

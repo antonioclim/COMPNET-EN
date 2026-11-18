@@ -31,13 +31,13 @@ GW -> SRV : HTTP GET h4:80\nsrc=192.168.1.1 (MASQUERADE)
 note right of GW : external capture:\nsrc = 192.168.1.1 (rewritten)
 SRV -[#43A047]-> GW : HTTP 200 OK
 GW -[#43A047]-> C : HTTP 200 OK
-note right of CAP : R5: ip && (tcp||udp||icmp) >= 10
+note right of CAP : R5: >=10 non-DHCP IP frames\ncorrelate timestamps with DHCP ACK
 
 == INBOUND BLOCK ==
 
 SRV -[#E53935]> GW : SYN → 10.0.1.10:22
-GW -[#E53935]>x GW : dropped (no DNAT rule)
-note right of GW #FFCDD2 : inbound blocked by default
+GW -[#E53935]>x GW : dropped by FORWARD policy for NEW inbound
+note right of GW #FFCDD2 : Routing and explicit FORWARD rules determine the result;\nabsence of DNAT is not a DROP action.
 
 legend right
   PCAP on gateway (interface any) shows

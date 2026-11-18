@@ -2,9 +2,10 @@
 # Computer Networks — ASE, CSIE | by ing. dr. Antonio Clim
 # Version: 1.6.0 | Date: 2026-01-25
 #
-# This quiz is also exported to quiz.json for LMS compatibility (Moodle/Canvas)
+# YAML is the canonical question bank; quiz.json is its reviewed question mirror.
+# JSON is a repository interchange format; LMS imports require separate acceptance.
 # Run with: python run_quiz.py
-# Export to JSON: python run_quiz.py --export-json
+# Export to JSON: python run_quiz.py --export json
 
 metadata:
   week: 0
@@ -18,8 +19,8 @@ metadata:
   language: "en-GB"
   
   # LMS export settings
-  lms_compatible: true
-  supported_formats: ["yaml", "json", "moodle_xml", "qti"]
+  lms_import_acceptance: "pending native target-LMS import"
+  supported_formats: ["yaml", "json", "moodle_gift", "qti"]
 
 questions:
   # ═══════════════════════════════════════════════════════════════
@@ -32,17 +33,17 @@ questions:
     lo_ref: "LO0.1"
     difficulty: basic
     points: 1
-    stem: "What is the default port for the Portainer web interface?"
+    stem: "With the course mapping 127.0.0.1:9050:9000, which host port serves the Portainer HTTP interface?"
     options:
       a: "8080"
-      b: "9000"
+      b: "9050"
       c: "443"
       d: "3000"
     correct: b
-    explanation: "Portainer uses port 9000 for HTTP access and 9443 for HTTPS."
+    explanation: "The course publishes host TCP 9050 to the container HTTP listener on 9000. HTTPS 9443 is a different endpoint and is not implied by this mapping."
     misconception_ref: "docs/misconceptions.md#portainer"
     feedback:
-      correct: "Well done! Portainer defaults to port 9000."
+      correct: "Correct: 9050 is the published host port in the course configuration."
       incorrect: "Review the Portainer setup section in Prerequisites.md"
 
   - id: q02
@@ -78,7 +79,7 @@ questions:
     options:
       a: "They are the same thing with different names"
       b: "An image is a running instance of a container"
-      c: "A container is a running instance created from an image"
+      c: "A container is an instance created from an image and may be running or stopped"
       d: "Images are created by stopping containers"
     correct: c
     explanation: "An image is a read-only template (like a mould); a container is a runnable instance created from that image."
@@ -112,14 +113,14 @@ questions:
     lo_ref: "LO0.3"
     difficulty: intermediate
     points: 1
-    stem: "Why does 'curl localhost:9000' fail when run from inside an Alpine container, even though Portainer is running on the host at port 9000?"
+    stem: "Assume curl is installed in a normal bridge-network Alpine container and nothing listens on its port 9050. Why does 'curl localhost:9050' fail although Portainer is published on the host at 9050?"
     options:
       a: "Alpine containers don't support the curl command"
       b: "Portainer blocks access from other containers"
       c: "localhost inside a container refers to that container, not the host"
-      d: "Port 9000 is reserved for system processes"
+      d: "Port 9050 is reserved for system processes"
     correct: c
-    explanation: "Each container has its own network namespace. 'localhost' refers to the container's own loopback. Use 'host.docker.internal' to reach the host."
+    explanation: "A normal bridge-network container has its own loopback. Host access depends on Docker Desktop/native Engine routing and the service bind address; a host loopback-only listener is not automatically reachable via a bridge gateway."
     misconception_ref: "docs/misconceptions.md#localhost-container"
     feedback:
       correct: "Exactly! Each container has its own localhost."
@@ -165,14 +166,14 @@ questions:
     lo_ref: "LO0.5"
     difficulty: advanced
     points: 1
-    stem: "To allow immediate port reuse after a server restart (avoiding 'Address already in use'), add before bind(): sock.setsockopt(socket.SOL_SOCKET, socket.___, 1)"
+    stem: "On the Linux teaching server, which option is set before bind() to permit address reuse under the OS rules after a previous connection, without allowing takeover of an active conflicting listener? sock.setsockopt(socket.SOL_SOCKET, socket.___, 1)"
     correct: ["SO_REUSEADDR"]
     hint: "This socket option allows reusing the address"
-    explanation: "SO_REUSEADDR allows binding to a port in TIME_WAIT state, which is useful during development when restarting servers frequently."
+    explanation: "SO_REUSEADDR changes the OS address-reuse checks and can help a server restart after prior TCP connections. It does not bypass an active conflicting listener; behaviour is platform-dependent."
     misconception_ref: "docs/troubleshooting.md#address-in-use"
     feedback:
-      correct: "Correct! SO_REUSEADDR is essential for development servers."
-      incorrect: "The option is SO_REUSEADDR — it allows binding to ports in TIME_WAIT."
+      correct: "Correct: SO_REUSEADDR is useful for this Linux development-server pattern."
+      incorrect: "The option is SO_REUSEADDR; its effect is subject to the operating system’s address-reuse rules."
 
   - id: q09
     type: multiple_choice
@@ -190,7 +191,7 @@ questions:
     explanation: "The '!' prefix specifies network byte order (big-endian). 'H' is an unsigned short (2 bytes). Without '!', native byte order is used, which may be wrong."
     misconception_ref: "docs/parsons_problems.md#struct-format"
     feedback:
-      correct: "Excellent! Always use '!' for network protocols."
+      correct: "Correct: !H gives this protocol an explicitly big-endian unsigned 16-bit field. Other protocols may specify a different byte order."
       incorrect: "The '!' prefix is essential for network byte order. 'H' = unsigned short."
 
   - id: q10
@@ -199,7 +200,7 @@ questions:
     lo_ref: "LO0.2"
     difficulty: basic
     points: 1
-    stem: "After running 'docker stop mycontainer', what happens to the container and its data?"
+    stem: "Assume mycontainer was created without --rm and uses a normal writable layer (no tmpfs). After 'docker stop mycontainer' completes, what happens to its container object and writable-layer data?"
     options:
       a: "The container and all its data are permanently deleted"
       b: "The container enters 'Exited' state; data is preserved"

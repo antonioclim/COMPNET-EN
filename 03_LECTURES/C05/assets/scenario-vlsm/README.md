@@ -13,7 +13,7 @@ Allocate subnets of different sizes within a given IPv4 address block.
 
 | Name | Lines |
 |------|-------|
-| `vlsm-alloc.py` | 51 |
+| `vlsm-alloc.py` | 58 |
 
 ## Cross-References
 

@@ -1546,9 +1546,9 @@ If B learned about X through C, B does not advertise X back to C.</p>
 rather than simply removing it. This explicitly tells neighbours to discard it.</p>
 </div>
 <div class="card card-purple">
-<h4>Holddown Timer</h4>
-<p>After a route is poisoned, ignore new information about it for a set period.
-This prevents stale updates from resurrecting a dead route.</p>
+<h4>Implementation-specific Holddown</h4>
+<p>Some implementations temporarily restrict which updates can restore a failed route.
+The exact acceptance rules and timer are vendor-specific; a holddown timer is not required by RFC 2453.</p>
 </div>
 <div class="card card-secondary">
 <h4>Triggered Updates</h4>
@@ -1568,7 +1568,7 @@ for predicting convergence behaviour.</p>
 <div class="grid-2 fade-up delay-1">
 <div class="card card-success">
 <h4>Update Timer (30 s)</h4>
-<p>Every 30 seconds, the router broadcasts its entire routing table
+<p>Approximately every 30 seconds, the router sends a periodic routing update
 to all neighbours. This is the heartbeat of the protocol.</p>
 </div>
 <div class="card card-accent">
@@ -1577,14 +1577,12 @@ to all neighbours. This is the heartbeat of the protocol.</p>
 potentially invalid (metric set to 16). The route is <em>not yet removed</em>.</p>
 </div>
 <div class="card card-danger">
-<h4>Flush Timer (240 s)</h4>
-<p>If the route remains invalid for an additional 60 seconds (total 240 s from
-last valid update), it is permanently removed from the table.</p>
+<h4>Garbage Collection (120 s)</h4>
+<p>In RFC 2453, a route expires after 180 seconds without a valid refresh and then remains advertised with metric 16 during a 120-second garbage-collection interval before deletion.</p>
 </div>
 <div class="card card-purple">
-<h4>Holddown Timer (180 s)</h4>
-<p>After a route is poisoned, the router ignores new information about that
-destination for 180 seconds. This prevents routing loops from stale data.</p>
+<h4>Implementation-specific timers</h4>
+<p>Some router implementations add holddown and use different flush conventions. These are vendor policies, not the RFC 2453 180 + 120 second expiry sequence; consult the implementation before calculating a timeline.</p>
 </div>
 </div>
 <div class="insight-box fade-up delay-2">
@@ -1660,15 +1658,14 @@ for non-negative weights, but simpler and naturally distributed.</p>
   <text x="480" y="135" font-size="13" font-weight="600" fill="#0284c7">dist[B] = 1 (A&rarr;B)</text>
   <text x="480" y="160" font-size="13" font-weight="600" fill="#0284c7">dist[C] = 4 (A&rarr;C)</text>
   <text x="480" y="185" font-size="13" font-weight="600" fill="#991b1b">dist[D] = 3 (A&rarr;B&rarr;D)</text>
-  <text x="480" y="220" font-size="12" font-weight="600" fill="#64748b">3 iterations needed</text>
+  <text x="480" y="220" font-size="12" font-weight="600" fill="#64748b">Pass 1 obtains final distances</text>
 </svg>
 </div>
 <button class="reveal-btn fade-up delay-2" onclick="toggleReveal(this)">&#128269; Reveal: Step-by-step iterations</button>
 <div class="reveal-content">
 <p><strong>Init:</strong> dist = [A:0, B:&infin;, C:&infin;, D:&infin;]</p>
-<p><strong>Iteration 1:</strong> Relax A&rarr;B (1), A&rarr;C (4), A&rarr;D (5) &rArr; [A:0, B:1, C:4, D:5]</p>
-<p><strong>Iteration 2:</strong> Relax B&rarr;D (1+2=3 &lt; 5) &rArr; [A:0, B:1, C:4, D:3]</p>
-<p><strong>Iteration 3:</strong> No changes &mdash; converged.</p>
+<p><strong>Pass 1 (in-place code below):</strong> A&rarr;B gives 1, A&rarr;C gives 4, then B&rarr;D gives 3. C&rarr;D and A&rarr;D do not improve D. Result: [A:0, B:1, C:4, D:3].</p>
+<p><strong>Passes 2 and 3:</strong> No changes. The provided implementation executes all |V|&minus;1 passes; an early-stop variant could finish after pass 2.</p>
 </div>
 </div>
 
@@ -1972,7 +1969,7 @@ Faster than Bellman&ndash;Ford for non-negative weights.</p>
   <text x="480" y="130" font-size="13" font-weight="700" fill="#0284c7">Step 2: Visit B (dist=1)</text>
   <text x="480" y="155" font-size="12" font-weight="600" fill="#1e293b">Update D=1+2=3 &lt; 5 &rArr; D=3</text>
   <text x="480" y="185" font-size="13" font-weight="700" fill="#991b1b">Step 3: Visit D (dist=3)</text>
-  <text x="480" y="210" font-size="12" font-weight="600" fill="#1e293b">C: 3+3=6 &gt; 4 &rArr; no change</text>
+  <text x="480" y="210" font-size="12" font-weight="600" fill="#1e293b">D has no outgoing edge in this directed graph</text>
   <text x="480" y="240" font-size="13" font-weight="700" fill="#0284c7">Step 4: Visit C (dist=4)</text>
   <text x="480" y="260" font-size="12" font-weight="600" fill="#1e293b">Done. All visited.</text>
 </svg>
@@ -2236,7 +2233,7 @@ vulnerability when misconfigured.
 <div class="slide" data-slide="41">
 <h2 class="slide-title">Synthesis Question</h2>
 <div class="quiz-container">
-<h4>A company has 50 routers in a single site, all connected via Ethernet.
+<h4>A company connects 50 routers in a linear chain, with no shorter alternative paths.
 An engineer proposes using RIP for routing. Which is the <strong>strongest</strong>
 argument against this choice?</h4>
 <div class="quiz-option" onclick="checkQuiz(this, false, 'fb40')">
@@ -2246,7 +2243,7 @@ A) RIP uses too much bandwidth for updates
 B) RIP does not support Ethernet networks
 </div>
 <div class="quiz-option" onclick="checkQuiz(this, true, 'fb40')">
-C) With 50 routers, some paths will exceed 15 hops, making portions of the network unreachable
+C) In this chain, the end-to-end shortest paths exceed 15 hops, making distant networks unreachable via RIP
 </div>
 <div class="quiz-option" onclick="checkQuiz(this, false, 'fb40')">
 D) RIP cannot operate without a designated router
@@ -2254,13 +2251,13 @@ D) RIP cannot operate without a designated router
 <div class="quiz-feedback" id="fb40">
 <div class="correct-msg">
 &#10004; Correct. The 15-hop ceiling is the fundamental scalability limit of RIP. In a
-network of 50 routers, the diameter (longest shortest path) can easily exceed 15 hops,
+linear 50-router chain, the diameter (longest shortest path) exceeds 15 hops,
 rendering portions of the network unreachable. OSPF, with its area hierarchy and no
 hop limit, is the appropriate choice here.
 </div>
 <div class="incorrect-msg">
 &#10008; While RIP&rsquo;s periodic broadcasts do consume some bandwidth, the primary
-issue with 50 routers is the <strong>15-hop limit</strong>. Paths longer than 15 hops
+issue with the stated linear topology is the <strong>15-hop limit</strong>. Paths longer than 15 hops
 are treated as unreachable (metric 16 = infinity). RIP works fine on Ethernet, and
 the DR/BDR concept belongs to OSPF, not RIP. The hop limit is the decisive factor.
 </div>
@@ -2366,7 +2363,7 @@ Algorithm demos: <code>assets/scenario-bellman-ford/</code>, <code>assets/scenar
 <div class="card card-purple">
 <h4>Self-assessment</h4>
 <p>Can you trace Dijkstra by hand on a 5-node graph?<br/>
-Can you explain why RIP fails in a 20-router network?<br/>
+Can you explain why RIP cannot reach end-to-end networks in a 20-router chain, while 20 routers in a shallow topology need not exceed its hop limit?<br/>
 Can you calculate the OSPF cost of a path with mixed-speed links?</p>
 </div>
 </div>
@@ -2519,6 +2516,7 @@ Press <kbd>T</kbd> to toggle &bull; <kbd>Esc</kbd> to close
 
   // ==================== KEYBOARD NAVIGATION ====================
   document.addEventListener('keydown', (e) => {
+      if (e.target && e.target.closest && e.target.closest('input, textarea, select, button, [contenteditable="true"]')) return;
     if (e.key === 'ArrowRight' || e.key === ' ') {
       e.preventDefault();
       nextSlide();

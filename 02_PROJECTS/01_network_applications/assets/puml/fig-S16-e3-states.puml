@@ -13,16 +13,16 @@ state Unlocked {
 }
 
 Unlocked --> Locked : LOCK(doc) accepted
-Locked --> Locked : VIEW / WATCH / LIST
+Locked : VIEW / WATCH / LIST do not change lock ownership
 Locked --> Saved : SAVE(doc, version, payload)
 Saved --> Locked : ACK to owner\nnotify watchers
 Locked --> Unlocked : UNLOCK(doc)
 Locked --> Unlocked : owner disconnect\nautomatic release
-Unlocked --> Conflict : LOCK by second client when owner exists
-Conflict --> Locked : ERR_LOCKED sent
+Locked --> Locked : LOCK by another client\nERR_LOCKED; current owner unchanged
 Saved --> Unlocked : owner releases lock
 
 legend right
+  State is per document; only the owner may SAVE/UNLOCK
   Single-writer semantics
   Version number increases only on SAVE
   Disconnect triggers lock cleanup

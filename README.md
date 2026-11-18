@@ -1,6 +1,6 @@
 # Computer Networks — Course Kit (EN)
 
-![Version](https://img.shields.io/badge/version-v13.05.00-informational)
+![Version](https://img.shields.io/badge/version-v1.5.0_candidate-orange)
 ![Language](https://img.shields.io/badge/language-English%20(British)-blue)
 ![Diagrams](https://img.shields.io/badge/diagrams-PlantUML-success)
 ![Labs](https://img.shields.io/badge/labs-Python%20and%20Docker-orange)
@@ -15,6 +15,10 @@ The pedagogical intent is to move from declarative claims to defensible explanat
 > Some files are intentionally bilingual (EN + RO) and Romanian instructor materials remain in Romanian.
 
 ---
+
+## Version status
+
+This branch prepares **v1.5.0**. The preserved pre-remediation release is [v1.4.0](https://github.com/antonioclim/COMPNET-EN/releases/tag/v1.4.0). Historical v13.05.00 references remain historical, and the MININET-SDN OVA retains its independent version 1.0.0 and Zenodo DOI. Candidate checks are documented in [the remediation record](00_TOOLS/qa/REMEDIATION_v1.5.0.md); this branch is not a declaration of full VM or browser acceptance.
 
 ## Start here
 
@@ -300,7 +304,7 @@ A pragmatic workflow is:
    - `.pcapng` packet captures
    - Docker logs
 5. Clean up between attempts.
-   If a seminar uses Docker Compose, prefer `docker compose down -v`.
+   For a Compose seminar, use its documented `docker compose -f <file> down` command. Add `-v` only when the exercise explicitly calls for deleting that project’s persisted data and you have saved the required evidence.
 
 ---
 
@@ -323,6 +327,7 @@ This is both a navigation tool and a dependency map.
 | 11 | [C11 FTP, DNS and SSH](03_LECTURES/C11/) | [S11 load balancing](04_SEMINARS/S11/) | reverse proxies and failure modes | Docker |
 | 12 | [C12 SMTP, POP3 and IMAP](03_LECTURES/C12/) | [S12 JSON-RPC, Protobuf and gRPC](04_SEMINARS/S12/) | structured APIs | Python, Docker |
 | 13 | [C13 IoT and network security](03_LECTURES/C13/) | [S13 scanning and vulnerability reasoning](04_SEMINARS/S13/) | security literacy | Docker, Wireshark |
+| 14 | [C14 revision and integration](03_LECTURES/C14/) | [S14 recap and assessment](04_SEMINARS/S14/) | integrate evidence, explain behaviour and prepare for assessment | Python, Docker, Wireshark |
 
 <details>
 <summary>Course coverage: lecture and seminar indices</summary>
@@ -330,8 +335,8 @@ This is both a navigation tool and a dependency map.
 Lecture index is maintained in `03_LECTURES/README.md`.
 Seminar index is maintained in `04_SEMINARS/README.md`.
 
-- Lectures: `03_LECTURES/C01/` … `03_LECTURES/C13/`
-- Seminars: `04_SEMINARS/S01/` … `04_SEMINARS/S13/`
+- Lectures: `03_LECTURES/C01/` … `03_LECTURES/C14/`
+- Seminars: `04_SEMINARS/S01/` … `04_SEMINARS/S14/`
 
 </details>
 
@@ -380,7 +385,7 @@ The value of Portainer is observability for beginners and rapid inspection durin
 | view logs | container logs panel | `docker logs -f <container>` |
 | inspect networks | Networks view | `docker network ls` and `docker network inspect <net>` |
 | bring up a stack | Stacks feature (if enabled) | `docker compose up -d` |
-| stop and clean | container stop and remove | `docker compose down -v` |
+| stop and clean | container stop and remove | `docker compose down` (add `-v` only for an intended data reset) |
 
 ---
 
@@ -407,8 +412,10 @@ If you change the repository you should keep it deterministic.
 The following checks are safe to run locally from the repository root.
 
 ```bash
-python 00_TOOLS/qa/check_markdown_links.py
-python 00_TOOLS/qa/check_integrity.py
+python3 -m venv .venv-qa
+source .venv-qa/bin/activate
+python -m pip install -r 00_TOOLS/qa/requirements.txt
+python 00_TOOLS/qa/run_checks.py
 ```
 
 If you edit Markdown or HTML, run formatting:
@@ -417,8 +424,9 @@ If you edit Markdown or HTML, run formatting:
 npm install
 npm run format:check
 
-# or offline
-node format-offline.js --write
+# or check line endings and final newlines without installing npm packages
+node format-offline.js --check
+# Use --write only when you intend to apply those limited formatting changes.
 ```
 
 ---
@@ -433,18 +441,17 @@ Do not point these exercises at public infrastructure.
 
 ## Licence and permitted use
 
-This repository is distributed under a **Restrictive Educational Licence**.
-You should read `LICENCE.md` before reuse.
+The author approved Option A for the v1.5.0 candidate on 17 November 2026.
+[LICENCE.md](LICENCE.md) defines Category A educational content under CC BY-NC-SA
+4.0, Category B source code and configuration under GPL-3.0-or-later and the
+reserved Category C paths in [LICENCE_CATEGORY_C.txt](LICENCE_CATEGORY_C.txt).
+Component-specific third-party terms and permissions already granted take
+precedence. The applicable licence governs attribution and reuse; the policy
+adds no commercial restriction, research-citation condition or automatic
+co-authorship obligation to GPL-covered material. See the
+[author decision and application record](00_TOOLS/qa/LICENCE_DECISION_PENDING.md).
 
-In practical terms:
-
-| Allowed without additional permission | Not allowed without explicit written permission |
-| --- | --- |
-| personal study, local execution and local modification | redistribution, mirroring and organised teaching outside ASE-CSIE |
-| personal notes for private reference | commercial use and paid training |
-| citation as required by the licence | publishing derivative works without meeting the licence conditions |
-
-### Citation format (required by the licence)
+### Suggested academic citation
 
 ```text
 Clim, A. (2025). Computer Networks — Course Kit (EN). Bucharest University of Economic Studies (ASE), Faculty of Economic Cybernetics, Statistics and Informatics (CSIE). https://github.com/antonioclim/COMPNET-EN

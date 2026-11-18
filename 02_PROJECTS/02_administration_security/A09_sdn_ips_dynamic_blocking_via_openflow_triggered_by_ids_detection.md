@@ -22,9 +22,9 @@ This project combines detection with active response: an IDS sensor identifies s
 
 The IDS operates on thresholds (many SYN packets to different ports within a time window) and emits a block event. The controller receives the event via a simple interface (for example local HTTP) and installs an OpenFlow rule that blocks traffic from the attacker source for a configured interval.
 
-In the demo, the attack begins, the IDS alerts, then traffic is blocked. The PCAP must show the before/after difference and the flow dump must include the installed rule. Expiry (unblock) is also observed if a temporary-block policy is chosen.
+In the demo, the attack begins, the IDS alerts, then traffic is blocked. The PCAP must show the before/after difference and the flow dump must include the installed rule. Automatic expiry (unblock) is mandatory and must be observed.
 
-An SDN IPS ties detection to enforcement: an IDS module produces an event and the controller installs temporary drop rules for the suspect source or flow. To prevent accidental blocking, E1 defines an expiry policy (hard/idle timeout) and a whitelisting mechanism for management traffic. In E2, the demonstration must include: detection, flow insertion, effect on traffic in PCAP and recovery after expiry, with complete logs.
+An SDN IPS ties detection to enforcement: an IDS module produces an event and the controller installs temporary drop rules for the suspect source or flow. To prevent accidental blocking, E1 defines the fixed blocking duration, implemented by hard_timeout (idle_timeout would instead measure inactivity) and a whitelisting mechanism for management traffic. In E2, the demonstration must include: detection, flow insertion, effect on traffic in PCAP and recovery after expiry, with complete logs.
 
 ## Learning objectives
 - Integrate IDS detection with an SDN enforcement mechanism (OpenFlow)
@@ -75,7 +75,7 @@ An SDN IPS ties detection to enforcement: an IDS module produces an event and th
 - Define a block timeout (e.g. 30 s) and an automatic unblocking mechanism.
 
 ### SHOULD (recommended)
-- Temporary blocking with automatic expiry and an unblock log.
+- An explicit expiry log in addition to mandatory temporary blocking and automatic unblocking.
 - Whitelist for management traffic (for example controller access) that cannot be blocked accidentally.
 - Rate limiting as an alternative to drop, configurable per rule.
 
@@ -114,7 +114,7 @@ An SDN IPS ties detection to enforcement: an IDS module produces an event and th
 - Include filters for SYN, for `/block` API (if present) and for control plane (optional).
 
 ### Automatic PCAP criteria (E2)
-These criteria are **deterministic** and can be verified automatically with `tshark`.
+These capture checks are reproducible with `tshark`. Frame counts are smoke checks; they do not replace the application tests or prove complete project acceptance.
 - Official rules: `tools/pcap_rules/A09.json`
 - In the catalogue (template): `00_common/tools/pcap_rules/A09.json` and `00_common/tools/validate_pcap.py` (copy into the student repository).
 
@@ -122,10 +122,17 @@ These criteria are **deterministic** and can be verified automatically with `tsh
 
 | ID | tshark filter (`-Y`) | Condition | What it validates |
 |---:|---|---:|---|
-| R1 | `tcp.port==6653` | `>= 1` | OpenFlow control-plane traffic present. |
-| R2 | `tcp.port==6653 && tcp.len>0` | `>= 5` | At least 5 OpenFlow segments with payload (blocking installation). |
-| R3 | `tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 10` | Scan/attack traffic (SYN). |
-| R4 | `icmp || tcp` | `>= 1` | Legitimate traffic (contrast) in the same capture. |
+| R1 | `tcp.port==6653` | `>= 1` | OpenFlow control-plane traffic is present. |
+| R2 | `tcp.port==6653 && tcp.len>0` | `>= 5` | At least five payload-bearing OpenFlow transport segments; the actual drop-rule installation must be shown separately. |
+| R3 | `tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 10` | SYN attempt frames are present; identify the scanning endpoint and window separately. |
+| R4 | `icmp.type==0 && ip.src==10.0.0.2 && ip.dst==10.0.0.3` | `>= 1` | Echo reply for the separate legitimate h3-to-h2 exchange. Adapt the addresses explicitly if E1 uses another topology. |
+
+### Interpretation and complementary evidence
+
+The [E2 capture and semantic-evidence matrix](../00_common/E2_CAPTURE_EVIDENCE_MATRIX.md#a09) maps every capture rule to its generating action and the complementary application evidence.
+
+- Correlate the blocked h1 source with the installed flow and verify a complete h3-to-h2 ping during blocking.
+- Measure expiry under continuous matching traffic: hard_timeout implements the fixed API duration; idle_timeout measures inactivity.
 
 ### Deliverables
 - Docker Compose with `ids_sensor`, `controller` and `tester`.
@@ -180,7 +187,7 @@ The catalogue includes a reference template: `00_common/docker/tester_base/`.
 ## Notes
 - The project is laboratory-only. It must not be used on real networks.
 - The blocking rule should be as specific as possible to minimise impact.
-- Temporary blocking is recommended to demonstrate expiry and to avoid persistent disruption in demo.
+- Temporary blocking and automatic expiry are mandatory. Use hard_timeout for a fixed duration even while matching traffic continues.
 
 ### Typical pitfalls
 - Blocking is too general (global `ip.src`) and affects management traffic or legitimate tests.

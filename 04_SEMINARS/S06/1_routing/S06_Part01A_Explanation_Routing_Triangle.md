@@ -4,15 +4,15 @@ The following materials make up **the first part of the seminar**:
 
 As in earlier seminars, the deliverables consist of:
 
-1. **`index_routing-triangle_explanation.md`**
-2. **`index_routing-triangle_topology.py`** – complete, annotated Mininet code
-3. **`index_routing-triangle_tasks.md`** – student exercises + deliverable
+1. **`S06_Part01A_Explanation_Routing_Triangle.md`**
+2. **`S06_Part01B_Script_Routing_Triangle_Topology.py`** – complete, annotated Mininet code
+3. **`S06_Part01C_Tasks_Routing_Triangle.md`** – student exercises + deliverable
 
 Once this part is complete, the SDN section follows.
 
 ---
 
-# 1. `index_routing-triangle_explanation.md`
+# 1. `S06_Part01A_Explanation_Routing_Triangle.md`
 
 ```markdown
 ### Introduction: Routing across Three Routers (Triangle Topology)

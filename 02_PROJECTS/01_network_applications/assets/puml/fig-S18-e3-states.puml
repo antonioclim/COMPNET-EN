@@ -16,10 +16,11 @@ Held --> Available : client disconnect\nautomatic release
 Reserved --> Reserved : MODIFY
 Reserved --> Available : DELETE
 Reserved --> Available : admin release\n(if documented)
-Available --> Conflict : overlapping HOLD
-Conflict --> Available : OVERLAP / REJECT
+Held --> Held : overlapping HOLD rejected\ncurrent hold and expiry unchanged
+Reserved --> Reserved : overlapping HOLD rejected\nreservation unchanged
 
 legend right
+  State is per resource interval
   Hold lifetime is finite
   Server clock decides expiry
   Only non-overlapping intervals become RESERVED

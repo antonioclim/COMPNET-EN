@@ -34,7 +34,7 @@ IGNORED_DIRS = {
     "__pycache__",
     ".mypy_cache",
     ".pytest_cache",
-    ".venv",
+    ".venv", ".venv-qa",
     "venv",
     "node_modules",
     "dist",

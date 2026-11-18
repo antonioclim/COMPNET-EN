@@ -9,6 +9,7 @@ title S13 — E2 Path: Unary Call, Server Streaming and Deadline
 
 participant "tester" as C #FFE0B2
 participant "grpc_server\n:50051 (HTTP/2)" as S #C8E6C9
+participant "raw protobuf\n:50052/TCP" as PB #BBDEFB
 
 == HTTP/2 CONNECTION ==
 C -> S : HTTP/2 Preface\n(PRI * HTTP/2.0)
@@ -30,16 +31,23 @@ S -[#1565C0]-> C : DATA (stream 3) msg #3
 S -> C : HEADERS (trailers)\ngrpc-status: 0
 
 == DEADLINE EXCEEDED ==
-C -> S : HEADERS (stream 5)\n:path /service/SlowMethod\ngrpc-timeout: 100ms
+C -> S : HEADERS (stream 5)\n:path /service/SlowMethod\ngrpc-timeout: 100m
 C -> S : DATA (stream 5)
 ...
 note right of S : Processing exceeds deadline
 S -[#E53935]-> C : HEADERS (trailers)\ngrpc-status: 4 (DEADLINE_EXCEEDED)
 
+== RAW PROTOBUF ENDPOINT (R4/R5) ==
+C -> PB : TCP connect to :50052
+C -> PB : PB1 + framed protobuf request
+PB --> C : PB1 + framed protobuf response
+
 legend right
   HTTP/2 frames visible in PCAP:
   HEADERS (:path, content-type), DATA (binary)
   grpc-status in trailers (0=OK, 4=DEADLINE)
-  Validates R1–R5 in S13.json
+  PB1 exchange supplies the separate raw-endpoint evidence
+  DATA arrows are logical messages: frame boundaries may differ
+  Together these scenarios supply R1–R5 in S13.json
 endlegend
 @enduml

@@ -277,7 +277,7 @@ docker compose -f S10_Part04_Config_Docker_Compose.yml exec ssh-bastion \
 
 **🔵 Terminal A (sesiunea rămâne activă):**
 ```bash
-ssh -o StrictHostKeyChecking=no -p 2222 -L 9000:web:8000 labuser@localhost
+ssh -N -p 2222 -L 127.0.0.1:9000:web:8000 labuser@localhost
 # parolă: labpass
 ```
 
@@ -297,7 +297,7 @@ Output așteptat: HTML cu „If you can see this page through an SSH tunnel, the
 sudo tshark -i lo -f "tcp port 9000" -a duration:8 -w /tmp/s10_http_9000.pcapng
 ```
 
-**🟢 Terminal A (generează trafic în timpul capturii):**
+**🟢 Terminal C local în VM (generează trafic în timpul capturii; A rămâne ocupat de ssh -N):**
 ```bash
 curl http://localhost:9000/ > /dev/null
 ```

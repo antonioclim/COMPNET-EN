@@ -36,27 +36,27 @@ Pair programming is a technique where **two students work together** at the same
 
 ---
 
-## Session Structure (75-90 minutess)
+## Session Structure (75-90 minutes)
 
-### Phase 1: Preparation (5 minutess)
+### Phase 1: Preparation (5 minutes)
 - [ ] Both partners have access to a Windows 11 computer
 - [ ] Decide who is Driver first
 - [ ] Read the session objectives together
 - [ ] Navigator opens the Prerequisites documentation
 
-### Phase 2: Implementation (60-70 minutess)
+### Phase 2: Implementation (60-70 minutes)
 - Driver types, Navigator verifies
-- **Swap roles every 15 minutess** (use a timer!)
+- **Swap roles every 15 minutes** (use a timer!)
 - Navigator asks "what are we doing?" before new commands
 - Both confirm output before continuing
 
-### Phase 3: Verification (10 minutess)
+### Phase 3: Verification (10 minutes)
 - [ ] Run the verification script together
 - [ ] Both can access Portainer from browser
 - [ ] Both understand the commands executed
 - [ ] Document any problems encountered and solutions
 
-### Phase 4: Retrospective (5 minutess)
+### Phase 4: Retrospective (5 minutes)
 - What went well?
 - What did we learn?
 - What would we do differently next time?
@@ -66,7 +66,7 @@ Pair programming is a technique where **two students work together** at the same
 ## Pair Programming Exercises for Week 0
 
 ### Exercise P1: Install WSL2 and Ubuntu
-**Estimated time:** 20 minutess
+**Estimated time:** 20 minutes
 **Objective:** Enable WSL2 and install Ubuntu 22.04
 
 **Specific roles:**
@@ -106,7 +106,7 @@ Pair programming is a technique where **two students work together** at the same
 ---
 
 ### Exercise P2: Install Docker in WSL
-**Estimated time:** 25 minutess
+**Estimated time:** 25 minutes
 **Objective:** Install and configure Docker natively in WSL2
 
 **Steps with role swapping:**
@@ -115,8 +115,8 @@ Pair programming is a technique where **two students work together** at the same
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │ DRIVER A (0-12 min)                                                         │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│ 1. sudo apt updata && sudo apt upgrade -y                                   │
-│    Navigator: "How long do you estimate for updata?"                       │
+│ 1. sudo apt update && sudo apt upgrade -y                                   │
+│    Navigator: "How long do you estimate for update?"                       │
 │                                                                             │
 │ 2. sudo apt install -y apt-transport-https ca-certificates curl            │
 │    Navigator: "Check there are no red errors"                              │
@@ -144,7 +144,7 @@ Pair programming is a technique where **two students work together** at the same
 ---
 
 ### Exercise P3: Install and Configure Portainer
-**Estimated time:** 15 minutess
+**Estimated time:** 15 minutes
 **Objective:** Deploy Portainer CE and configure admin
 
 ```
@@ -154,7 +154,7 @@ Pair programming is a technique where **two students work together** at the same
 │ 1. docker volume create portainer_data                                      │
 │    Navigator: "Verify with: docker volume ls"                              │
 │                                                                             │
-│ 2. docker run -d -p 9000:9000 --name portainer --restart=always \          │
+│ 2. docker run -d -p 127.0.0.1:9050:9000 --name portainer --restart=always \          │
 │      -v /var/run/docker.sock:/var/run/docker.sock \                        │
 │      -v portainer_data:/data \                                             │
 │      portainer/portainer-ce:latest                                         │
@@ -165,7 +165,7 @@ Pair programming is a technique where **two students work together** at the same
 ├─────────────────────────────────────────────────────────────────────────────┤
 │ DRIVER B (8-15 min) — Browser                                               │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│ 3. Open http://localhost:9000                                              │
+│ 3. Open http://localhost:9050                                              │
 │    Navigator: "Does it work? If not, check: docker ps"                     │
 │                                                                             │
 │ 4. Username: stud                                                          │
@@ -246,7 +246,7 @@ When you encounter a problem:
 - [ ] `wsl --status` shows WSL2 as default
 - [ ] `docker --version` displays version
 - [ ] `docker ps` works without sudo
-- [ ] Portainer accessible at http://localhost:9000
+- [ ] Portainer accessible at http://localhost:9050
 - [ ] Credentials: stud / studstudstud work
 
 ### Collaboration:
@@ -258,7 +258,7 @@ When you encounter a problem:
 ### Learning:
 - [ ] Both can explain the difference between container and image
 - [ ] Both know why we use WSL2 and not Docker Desktop
-- [ ] Both understand port mapping (-p 9000:9000)
+- [ ] Both understand port mapping (-p 127.0.0.1:9050:9000)
 
 ---
 

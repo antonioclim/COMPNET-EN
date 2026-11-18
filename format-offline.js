@@ -3,8 +3,8 @@
  * format-offline.js
  *
  * Deterministic formatting pass for Markdown and HTML files.
- * Replicates the subset of Prettier behaviour configured in .prettierrc
- * (proseWrap: preserve, printWidth: 120, endOfLine: lf, tabWidth: 2).
+ * Preserves significant whitespace; only converts CRLF line endings and adds
+ * a missing final newline. Syntax-aware formatting remains a separate task.
  *
  * Usage:
  *   node format-offline.js --check   # exit 1 if any file would change
@@ -57,47 +57,24 @@ function collectFiles(root) {
 }
 
 // ── Markdown formatter ────────────────────────────────────────────────
-function formatMarkdown(src) {
-  let out = src;
-
-  // 1. Normalise line endings to LF
-  out = out.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
-
-  // 2. Trim trailing whitespace on every line
-  out = out.replace(/[ \t]+$/gm, "");
-
-  // 3. Collapse runs of 3+ blank lines into exactly 2 newlines (one blank line)
-  out = out.replace(/\n{3,}/g, "\n\n");
-
-  // 4. Ensure single trailing newline
-  out = out.trimEnd() + "\n";
-
-  return out;
+// This conservative pass deliberately preserves whitespace inside Markdown code,
+// hard line breaks and HTML pre/script/style content. It is not a Prettier clone.
+function normaliseText(src) {
+  const out = src.replace(/\r\n/g, "\n");
+  return out.endsWith("\n") || out.length === 0 ? out : out + "\n";
 }
-
-// ── HTML formatter ────────────────────────────────────────────────────
-function formatHTML(src) {
-  let out = src;
-
-  // 1. Normalise line endings to LF
-  out = out.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
-
-  // 2. Trim trailing whitespace per line
-  out = out.replace(/[ \t]+$/gm, "");
-
-  // 3. Collapse runs of 3+ blank lines into 2 newlines
-  out = out.replace(/\n{3,}/g, "\n\n");
-
-  // 4. Ensure single trailing newline
-  out = out.trimEnd() + "\n";
-
-  return out;
-}
+function formatMarkdown(src) { return normaliseText(src); }
+function formatHTML(src) { return normaliseText(src); }
 
 // ── Main ──────────────────────────────────────────────────────────────
 function main() {
   const args = process.argv.slice(2);
   const mode = args[0] || "--check";
+  if (!["--check", "--write", "--list"].includes(mode)) {
+    console.error("Usage: node format-offline.js --check|--write|--list");
+    process.exitCode = 2;
+    return;
+  }
   const root = path.resolve(__dirname);
   const files = collectFiles(root);
 
@@ -134,4 +111,5 @@ function main() {
   }
 }
 
-main();
+module.exports = { formatMarkdown, formatHTML };
+if (require.main === module) main();

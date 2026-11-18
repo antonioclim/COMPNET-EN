@@ -1402,6 +1402,7 @@ $ sudo tcpdump -i eth0     'tcp[tcpflags] &amp; tcp-syn != 0'
     }
 
     document.addEventListener('keydown', (e) => {
+      if (e.target && e.target.closest && e.target.closest('input, textarea, select, button, [contenteditable="true"]')) return;
       if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); changeSlide(1); }
       if (e.key === 'ArrowLeft') { e.preventDefault(); changeSlide(-1); }
       if (e.key === 'f' || e.key === 'F') toggleFullscreen();

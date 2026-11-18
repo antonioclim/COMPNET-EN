@@ -40,12 +40,12 @@ nic -down-> parser : raw frames
 tcp -down-> scaneng : SYN without ACK
 tcp -down-> floodeng : all TCP packets
 udp -down-> sprayeng : all UDP packets
-scaneng -right-> tscan : track ports
-sprayeng -right-> uspray : track ports
-floodeng -right-> tflood : track timestamps
-scaneng -down-> logger : threshold alert
-sprayeng -down-> logger : threshold alert
-floodeng -down-> logger : threshold alert
+scaneng -down-> tscan : track ports
+sprayeng -down-> uspray : track ports
+floodeng -down-> tflood : track timestamps
+tscan -down-> logger : threshold alert
+uspray -down-> logger : threshold alert
+tflood -down-> logger : threshold alert
 logger -down-> logfile : append
 logger -down-> console : print
 

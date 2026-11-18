@@ -20,16 +20,17 @@ state VALID #C8E6C9 {
     VALID : Refreshed by periodic updates
 }
 
-VALID --> VALID : update with\nsame or better cost
+VALID --> VALID : finite update from current next hop\naccept increased, equal or lower cost
+VALID --> VALID : better finite route from another neighbour
 VALID --> POSSIBLY_DOWN : neighbour timeout\nor cost = INF
 
 state POSSIBLY_DOWN #FFF9C4 {
-    POSSIBLY_DOWN : Hold-down timer started
-    POSSIBLY_DOWN : Forwarding suspended
+    POSSIBLY_DOWN : Route not used for forwarding
+    POSSIBLY_DOWN : Optional hold-down policy fixed in E1
 }
 
 POSSIBLY_DOWN --> VALID : alternative route\nfrom another neighbour
-POSSIBLY_DOWN --> INVALID : hold-down expires\nno alternative
+POSSIBLY_DOWN --> INVALID : invalidation policy expires\nno alternative
 
 state INVALID #FFCDD2 {
     INVALID : Route removed
@@ -51,6 +52,7 @@ legend right
   Split horizon: do not advertise route
   back to the neighbour it was learned from.
   Poison reverse: advertise INF to that neighbour.
-  Hold-down prevents oscillation during convergence.
+  Hold-down behaviour, if used, is fixed in E1;
+  all finite costs from the chosen next hop must update the route.
 endlegend
 @enduml

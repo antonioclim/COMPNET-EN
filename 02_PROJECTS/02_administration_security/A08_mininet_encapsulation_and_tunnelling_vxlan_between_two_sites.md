@@ -114,7 +114,7 @@ VXLAN in Mininet is an infrastructure laboratory project: two separate L2 “sit
 - Include filters `vxlan` and `vxlan.vni` to isolate overlay traffic.
 
 ### Automatic PCAP criteria (E2)
-These criteria are **deterministic** and can be verified automatically with `tshark`.
+These capture checks are reproducible with `tshark`. Frame counts are smoke checks; they do not replace the application tests or prove complete project acceptance.
 - Official rules: `tools/pcap_rules/A08.json`
 - In the catalogue (template): `00_common/tools/pcap_rules/A08.json` and `00_common/tools/validate_pcap.py` (copy into the student repository).
 
@@ -123,7 +123,13 @@ These criteria are **deterministic** and can be verified automatically with `tsh
 | ID | tshark filter (`-Y`) | Condition | What it validates |
 |---:|---|---:|---|
 | R1 | `udp.port==4789` | `>= 5` | VXLAN traffic (UDP/4789) is present. |
-| R2 | `arp || icmp` | `>= 1` | L2/L3 traffic transported through the tunnel (ARP/ICMP) is observable. |
+| R2 | `vxlan && (arp \|\| icmp)` | `>= 1` | ARP/ICMP is decoded inside VXLAN; underlay-only ARP does not satisfy this rule. |
+
+### Interpretation and complementary evidence
+
+The [E2 capture and semantic-evidence matrix](../00_common/E2_CAPTURE_EVIDENCE_MATRIX.md#a08) maps every capture rule to its generating action and the complementary application evidence.
+
+- Identify outer/inner endpoint addresses and VNI and compare inner/outer IP lengths under the declared MTU settings.
 
 ### Deliverables
 - Docker Compose with `tester` that runs scripts and produces `artifacts/pcap/traffic_e2.pcap`.

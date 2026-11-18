@@ -74,7 +74,9 @@ If Part 1 containers are still visible, you likely forgot the `-f` flag.
 
 ## Part 2 — Custom Python LB
 
-### P5 — Build Status
+### P5 — Build and Runtime Status
+
+First record whether `docker compose ... up --build` succeeded. If it failed, save the build output; a failed build may create no container. Only continue to the container-state questions when a container was created. Complete the deliberate backend-name correction in the canonical Part 2 task before testing successful balancing.
 
 After starting the custom LB stack:
 
@@ -130,7 +132,7 @@ Mark each statement as true or false:
 | Statement | T / F |
 |---|:---:|
 | A reverse proxy terminates the client connection and opens a new one to the backend | |
-| Backends with no published ports are unreachable from the host browser | |
+| Backends have no host-port mapping; direct container-IP access depends on the Linux-host/Docker-Desktop route | |
 | `docker compose down` removes both containers and the Compose network | |
 | Round-robin distributes requests equally regardless of backend load | |
 | Docker DNS inside a Compose network resolves container names to IPs | |

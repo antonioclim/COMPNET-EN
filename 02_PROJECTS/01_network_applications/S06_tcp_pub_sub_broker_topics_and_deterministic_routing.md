@@ -22,7 +22,7 @@ The application protocol is defined by the team and must include framing, acknow
 
 In the demo you focus on role separation: a publisher sends messages at a controlled frequency and two subscribers receive the same sequence, including behaviour on disconnect. The PCAP must contain SUBSCRIBE and PUBLISH commands plus identifiable payload.
 
-The pub/sub broker must implement deterministic routing: a message published on a topic reaches all subscribed connections in the order received by the broker with no duplication. To keep the project testable, E1 must fix the delivery semantics (at least once versus exactly once, with justification) and reconnection behaviour. A typical source of defects is mixing framing with topic semantics: parsing must first extract the complete message then apply rules (authorisation, valid topic, payload limits).
+The pub/sub broker must implement deterministic routing: a message published on a topic reaches all subscribed connections in the order received by the broker. Retry and duplicate handling follow the guarantee fixed in E1. To keep the project testable, E1 must fix the delivery semantics (at most once or at least once, with justification) and reconnection behaviour. A typical source of defects is mixing framing with topic semantics: parsing must first extract the complete message then apply rules (authorisation, valid topic, payload limits).
 
 ## Learning objectives
 - Define a pub/sub protocol with framing and acknowledgements
@@ -47,6 +47,13 @@ The pub/sub broker must implement deterministic routing: a message published on 
 - **Protocol/default ports (E2):** TCP: 5006/TCP.
 - The Flex component must work with the default values (without manual reconfiguration) so that it can be integrated into automated tests.
 
+### Interpretation and complementary evidence
+
+The [E2 capture and semantic-evidence matrix](../00_common/E2_CAPTURE_EVIDENCE_MATRIX.md#s06) maps every capture rule to its generating action and the complementary application evidence.
+
+- The supplied command counter uses LF/CRLF framing. If E1 selects JSON or binary framing, supply and test the corresponding decoder in the student validator; do not replace logical counts with frame counts.
+- Correlate client identities, topics/keys and request IDs with pytest assertions to prove the required application behaviour.
+
 ### Deliverables
 - `flex/` directory with sources plus build/run instructions (avoid exotic dependencies where possible).
 - `docs/FLEX.md` with:
@@ -68,11 +75,11 @@ The pub/sub broker must implement deterministic routing: a message published on 
 - Note the difference between control messages (subscribe) and data messages (publish).
 
 ### Recommended Wireshark filters
-- `frame contains "SUBSCRIBE"` — identify a subscribe command in text protocols or in interpretable payload
-- `frame contains "PUBLISH"` — identify publication and topic in payload
+- `mqtt.msgtype == 8` — MQTT SUBSCRIBE control packet
+- `mqtt.msgtype == 3` — MQTT PUBLISH control packet; inspect `mqtt.topic`
 - `tcp.len > 0` — segments carrying commands and messages
 - `tcp.analysis.out_of_order` — reordering that may appear on lossy links
-- `frame contains "topic"` — generic marker for topic fields in JSON payload
+- `mqtt.topic` — decoded MQTT topic. ASCII command searches apply only to a separately specified text protocol, not MQTT control types.
 
 ### Guiding questions
 - What minimal message sequence appears between client and broker during subscription
@@ -96,7 +103,7 @@ The pub/sub broker must implement deterministic routing: a message published on 
 
 ### SHOULD (recommended)
 - Topic wildcard support (e.g. `sensors/*`) with documented matching rules.
-- Backpressure: queue limit per subscriber and a deterministic overflow policy (drop or disconnect).
+- Queue occupancy metrics and backpressure notifications in addition to the mandatory bounded queues and overflow policy.
 - Keepalive messages and timeouts for inactive sessions.
 
 ### MAY (optional)
@@ -134,7 +141,7 @@ The pub/sub broker must implement deterministic routing: a message published on 
 - A filter that isolates a subscribe or publish command is stated.
 
 ### Automatic PCAP criteria (E2)
-These criteria are **deterministic** and can be verified automatically with `tshark`.
+These capture checks are reproducible with `tshark`. Frame counts are smoke checks; they do not replace the application tests or prove complete project acceptance.
 - Official rules: `tools/pcap_rules/S06.json`
 - In the catalogue (template): `00_common/tools/pcap_rules/S06.json` and `00_common/tools/validate_pcap.py` (copy into the student repository).
 
@@ -142,11 +149,11 @@ These criteria are **deterministic** and can be verified automatically with `tsh
 
 | ID | tshark filter (`-Y`) | Condition | What it validates |
 |---:|---|---:|---|
-| R1 | `tcp.dstport==5006 && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | Handshake to the broker. |
-| R2 | `tcp.port==5006 && (frame contains "HELLO" || frame contains "AUTH")` | `>= 1` | Client registration (HELLO/AUTH). |
-| R3 | `tcp.port==5006 && (frame contains "SUBSCRIBE" || frame contains "SUB ")` | `>= 1` | At least one SUBSCRIBE. |
-| R4 | `tcp.port==5006 && (frame contains "PUBLISH" || frame contains "PUB ")` | `>= 1` | At least one PUBLISH. |
-| R5 | `tcp.port==5006 && (frame contains "DELIVER" || frame contains "MSG ")` | `>= 1` | The broker delivers at least one message to a subscriber (push). |
+| R1 | `tcp.dstport==5006 && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | SYN connection attempt to the broker. |
+| R2 | `tcp.dstport==5006 && tcp.len>0` | `>= 1` | Complete HELLO/AUTH command lines in the request direction after TCP reassembly and retransmission removal. Measurement: `tcp_commands`. |
+| R3 | `tcp.dstport==5006 && tcp.len>0` | `>= 1` | Complete SUBSCRIBE/SUB command lines in the request direction after TCP reassembly and retransmission removal. Measurement: `tcp_commands`. |
+| R4 | `tcp.dstport==5006 && tcp.len>0` | `>= 1` | Complete PUBLISH/PUB command lines in the request direction after TCP reassembly and retransmission removal. Measurement: `tcp_commands`. |
+| R5 | `tcp.srcport==5006 && tcp.len>0` | `>= 1` | Complete DELIVER/MSG command lines in the response direction after TCP reassembly and retransmission removal. Measurement: `tcp_commands`. |
 
 ### Deliverables
 - Docker Compose with `broker` and `tester` (which plays publisher and subscriber roles).

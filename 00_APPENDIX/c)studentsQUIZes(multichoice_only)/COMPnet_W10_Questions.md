@@ -48,17 +48,22 @@
 
 ---
 
-### 4. `Multiple Choice – Alegere multiplă`
-**N10.C01.Q05: TLS handshake step ordering / Ordinea pașilor handshake-ului TLS**
+### Q4. `N10.C01.Q05` — TLS handshake step ordering / Ordinea pașilor handshake-ului TLS
 
-> Which sequence correctly describes the TLS handshake steps? [Care secvență descrie corect pașii handshake-ului TLS?]
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-- **a) Client Hello → Server Hello + Certificate → Key Exchange → Encrypted Data [Client Hello → Server Hello + Certificat → Schimb de chei → Date criptate]**
-- **b) Key Exchange → Client Hello → Server Hello → Encrypted Data — an assertion that does not align with the actual specification requirements [Schimb de chei → Client Hello → Server Hello → Date criptate — o afirmație ce nu corespunde cerințelor reale ale specificației]**
-- **c) Server Hello → Client Hello → Encrypted Data → Key Exchange [Server Hello → Client Hello → Date criptate → Schimb de chei]**
-- **d) Client Hello → Encrypted Data → Server Hello → Key Exchange [Client Hello → Date criptate → Server Hello → Schimb de chei]**
+Which simplified message ordering is valid for a full, server-authenticated TLS 1.3 handshake with no resumption, HelloRetryRequest, client certificate or 0-RTT? Application data is omitted. [Ce ordine simplificată este validă pentru un handshake TLS 1.3 complet, cu autentificarea serverului, fără reluare, HelloRetryRequest, certificat client sau 0-RTT? Datele aplicației sunt omise.]
 
-> 💡 **Feedback:** The TLS handshake proceeds: Client Hello (offering cipher suites) → Server Hello (choosing cipher suite and sending certificate) → Key exchange (deriving symmetric key) → Encrypted data begins. A common misconception is that encryption starts immediately or that the key exchange occurs before the hello messages, but the hello phase must first negotiate parameters before any cryptographic material is exchanged. [Handshake-ul TLS se desfășoară astfel: Client Hello (propunând suite de cifrare) → Server Hello (alegând suita de cifrare și trimițând certificatul) → Schimb de chei (derivând cheia simetrică) → Încep datele criptate. O concepție greșită frecventă este că criptarea începe imediat sau că schimbul de chei are loc înaintea mesajelor hello, dar faza hello trebuie să negocieze mai întâi parametrii înainte de schimbul oricărui material criptografic.]
+- **a)** ClientHello (key_share) → ServerHello (key_share) → encrypted EncryptedExtensions, Certificate, CertificateVerify, Finished → client Finished
+- **b)** ServerHello → ClientHello → client Finished → Certificate
+- **c)** ClientHello → plaintext Certificate → ServerHello → ClientKeyExchange
+- **d)** ClientHello → application plaintext → ServerHello → Finished
+
+<details><summary>💡 Feedback</summary>
+
+**Correct answer / Răspuns corect: a.** TLS 1.3 exchanges ephemeral key shares in the hello messages. Handshake messages after ServerHello are encrypted; CertificateVerify authenticates the server signature and Finished authenticates the handshake transcript. ClientKeyExchange is a TLS 1.2 message, not a TLS 1.3 step. See RFC 9846 §2 (which supersedes RFC 8446). [TLS 1.3 schimbă componentele efemere de cheie în mesajele hello. Mesajele handshake după ServerHello sunt criptate; CertificateVerify autentifică semnătura serverului, iar Finished autentifică transcrierea handshake-ului. ClientKeyExchange aparține TLS 1.2, nu TLS 1.3. Vezi RFC 9846 §2, care înlocuiește RFC 8446.]
+
+</details>
 
 ---
 
@@ -100,31 +105,41 @@
 
 ---
 
-### 8. `Multiple Choice – Alegere multiplă`
-**N10.C02.Q02: Identifying Richardson Maturity Level for action-style endpoints / Identificarea nivelului de maturitate Richardson pentru endpoint-uri cu acțiuni în cale**
+### Q8. `N10.C02.Q02` — Identifying Richardson Maturity Level for action-style endpoints / Identificarea nivelului de maturitate Richardson pentru endpoint-uri cu acțiuni în cale
 
-> An API exposes the endpoint POST /api/users/123/delete. According to the Richardson Maturity Model, which level does this represent? [Un API expune endpoint-ul POST /api/users/123/delete. Conform Modelului de Maturitate Richardson, ce nivel reprezintă?]
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-- **a) Level 1 — Resources with URIs but action-style naming [Nivelul 1 — Resurse cu URI-uri, dar denumire de tip acțiune]**
-- **b) Level 0 — RPC-style single endpoint [Nivelul 0 — Endpoint unic în stil RPC]**
-- **c) Level 2 — Proper HTTP verbs with semantic status codes and resource-oriented URIs [Nivelul 2 — Verbe HTTP corecte cu coduri de stare semantice și URI-uri orientate pe resurse]**
-- **d) Level 3 — Full HATEOAS compliance [Nivelul 3 — Conformitate HATEOAS completă]**
+An API has distinct resource URIs such as /users/123 and /orders/7. Every operation uses POST and successful or failed application outcomes are returned inside 200 bodies. There are no hypermedia controls. What Richardson level is demonstrated? [Un API are URI-uri distincte pentru resurse, precum /users/123 și /orders/7. Toate operațiile folosesc POST, iar succesul sau eșecul aplicației sunt în corpuri 200. Nu există controale hypermedia. Ce nivel Richardson este demonstrat?]
 
-> 💡 **Feedback:** The endpoint uses resource URIs (/api/users/123) but encodes the action in the URL path (/delete) instead of using the HTTP DELETE verb. This is characteristic of Level 1, where resources are identified but HTTP verbs are not used semantically. A common misconception is placing this at Level 2, but Level 2 requires proper use of HTTP verbs (DELETE instead of POST with /delete in the path). [Endpoint-ul folosește URI-uri de resurse (/api/users/123), dar codifică acțiunea în calea URL (/delete) în loc să utilizeze verbul HTTP DELETE. Aceasta este caracteristic Nivelului 1, unde resursele sunt identificate, dar verbele HTTP nu sunt utilizate semantic. O concepție greșită frecventă este plasarea acestuia la Nivelul 2, dar Nivelul 2 necesită utilizarea corectă a verbelor HTTP (DELETE în loc de POST cu /delete în cale).]
+- **a)** Level 1: resource identities, without the method/status semantics of Level 2 [Nivelul1: identitatea resurselor, fără semantica metodelor/codurilor de la nivelul 2]
+- **b)** Level 0 because every URI is identical [Nivelul0 deoarece toate URI-urile sunt identice]
+- **c)** Level 2 because any use of POST proves correct HTTP semantics [Nivelul2 deoarece orice folosire POST dovedește semantica HTTP corectă]
+- **d)** Level 3 because numeric IDs are hypermedia [Nivelul3 deoarece ID-urile numerice sunt hypermedia]
+
+<details><summary>💡 Feedback</summary>
+
+**Correct answer / Răspuns corect: a.** The complete API description supports Level 1. A single action-like path does not establish a maturity level; HTTP POST can legitimately perform application-specific actions. Level 2 adds meaningful HTTP methods/statuses and Level 3 adds hypermedia controls. [Descrierea completă a API-ului susține nivelul 1. O singură cale denumită ca acțiune nu stabilește nivelul; POST poate efectua legitim acțiuni specifice aplicației. Nivelul2 adaugă semantica HTTP a metodelor/codurilor, iar nivelul 3 controale hypermedia.]
+
+</details>
 
 ---
 
-### 9. `Multiple Choice – Alegere multiplă`
-**N10.C02.Q03: HTTP status code for successful resource creation / Codul de stare HTTP pentru crearea cu succes a unei resurse**
+### Q9. `N10.C02.Q03` — HTTP status code for successful resource creation / Codul de stare HTTP pentru crearea cu succes a unei resurse
 
-> In a REST Level 2 API, a client sends POST /api/resources with a valid JSON body and a new resource is created. What HTTP status code should the server return? [Într-un API REST de Nivelul 2, un client trimite POST /api/resources cu un corp JSON valid și o nouă resursă este creată. Ce cod de stare HTTP ar trebui să returneze serverul?]
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-- **a) 201 Created**
-- **b) 200 OK**
-- **c) 204 No Content**
-- **d) 301 Moved Permanently**
+A request has completed and created a new resource. Which status explicitly communicates that outcome? [O cerere s-a încheiat și a creat o resursă nouă. Ce cod comunică explicit acest rezultat?]
 
-> 💡 **Feedback:** HTTP 201 Created is the semantically correct status code for successful resource creation. 200 OK is used for successful GET/PUT, and 204 No Content is typically used for DELETE. A common misconception is using 200 OK for all successful operations, but REST Level 2 requires using specific status codes that convey precise semantics about the outcome. [HTTP 201 Created este codul de stare semantic corect pentru crearea cu succes a unei resurse. 200 OK se folosește pentru GET/PUT reușite, iar 204 No Content se folosește de obicei pentru DELETE. O concepție greșită frecventă este utilizarea 200 OK pentru toate operațiunile reușite, dar REST de Nivelul 2 necesită utilizarea codurilor de stare specifice care transmit semantici precise despre rezultat.]
+- **a)** 201 Created
+- **b)** 200 OK
+- **c)** 204 No Content
+- **d)** 301 Moved Permanently
+
+<details><summary>💡 Feedback</summary>
+
+**Correct answer / Răspuns corect: a.** 201 identifies successful creation. Location can identify the primary new resource.200 is general success and 204 is success without response content; neither is universally tied to GET/PUT or DELETE. Status choice follows the actual outcome, not a rigid one-method/one-code mapping. [201 identifică o creare reușită. Location poate identifica resursa principală nouă.200 reprezintă succes general, iar 204 succes fără conținut în răspuns; acestea nu sunt legate universal de GET/PUT sau DELETE. Codul se alege după rezultat, nu printr-o corespondență rigidă metodă/cod.]
+
+</details>
 
 ---
 
@@ -138,21 +153,26 @@
 - **c) All endpoints require OAuth 2.0 authentication [Toate endpoint-urile necesită autentificare OAuth 2.0]**
 - **d) The API supports real-time WebSocket push connections alongside standard request-response patterns [API-ul acceptă conexiuni WebSocket în timp real alături de modelele standard cerere-răspuns]**
 
-> 💡 **Feedback:** Level 3 adds HATEOAS — responses include hypermedia links (e.g., _links) that tell the client what actions and related resources are available, enabling discovery without hardcoded URLs. A common misconception is that using JSON as the response format or adding authentication qualifies as Level 3, but HATEOAS specifically requires navigable hypermedia links in every response. [Nivelul 3 adaugă HATEOAS — răspunsurile includ legături hypermedia (de ex., _links) care informează clientul despre acțiunile și resursele asociate disponibile, permițând descoperirea fără URL-uri codificate fix. O concepție greșită frecventă este că utilizarea JSON ca format de răspuns sau adăugarea autentificării califică un API la Nivelul 3, dar HATEOAS necesită în mod specific legături hypermedia navigabile în fiecare răspuns.]
+> 💡 **Feedback:** Richardson Level 3 adds hypermedia controls describing available transitions and related resources. Clients still need an entry point and knowledge of media types/link relations. It does not require a body containing links in literally every response: for example,204 has no content. JSON or authentication alone does not establish Level 3. [Nivelul Richardson3 adaugă controale hypermedia care descriu tranzițiile disponibile și resursele asociate. Clienții au nevoie în continuare de un punct de intrare și de semantica tipurilor media/relațiilor. Nu cere un corp cu legături în absolut fiecare răspuns: de exemplu 204 nu are conținut. JSON sau autentificarea singure nu stabilesc nivelul 3.]
 
 ---
 
-### 11. `Multiple Choice – Alegere multiplă`
-**N10.C02.Q05: Idempotency of HTTP methods / Idempotența metodelor HTTP**
+### Q11. `N10.C02.Q05` — Idempotency of HTTP methods / Idempotența metodelor HTTP
 
-> Which HTTP method is not idempotent, meaning multiple identical requests may produce different results each time? [Care metodă HTTP nu este idempotentă, ceea ce înseamnă că mai multe cereri identice pot produce rezultate diferite de fiecare dată?]
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-- **a) POST**
-- **b) GET**
-- **c) PUT**
-- **d) DELETE**
+Which method does HTTP not guarantee to be idempotent: repeated identical requests need not have the same intended server effect as one request? [Pentru care metodă HTTP nu garantează idempotența: cererile identice repetate nu trebuie să aibă același efect intenționat ca una singură?]
 
-> 💡 **Feedback:** POST is not idempotent — sending the same POST request twice creates two separate resources. GET, PUT, and DELETE are all idempotent: repeating them yields the same outcome. A common misconception is that PUT and POST are interchangeable, but PUT is idempotent (replacing a resource at a specific URI produces the same result regardless of repetition) while POST is not. [POST nu este idempotent — trimiterea aceleiași cereri POST de două ori creează două resurse separate. GET, PUT și DELETE sunt toate idempotente: repetarea lor produce același rezultat. O concepție greșită frecventă este că PUT și POST sunt interschimbabile, dar PUT este idempotent (înlocuirea unei resurse la un URI specific produce același rezultat indiferent de repetare), în timp ce POST nu este.]
+- **a)** POST
+- **b)** GET
+- **c)** PUT
+- **d)** DELETE
+
+<details><summary>💡 Feedback</summary>
+
+**Correct answer / Răspuns corect: a.** POST is not guaranteed idempotent by its method semantics, although an application may provide idempotent operations or an idempotency-key contract. GET, PUT and DELETE are idempotent in intended effect. Responses, timestamps and incidental logging can differ across repetitions. [POST nu garantează idempotența prin semantica metodei, deși aplicația poate oferi operații idempotente sau un contract cu cheie de idempotență. GET, PUT și DELETE sunt idempotente ca efect intenționat. Răspunsurile, marcajele de timp și jurnalizarea incidentală pot diferi între repetări.]
+
+</details>
 
 ---
 
@@ -182,17 +202,22 @@
 
 ---
 
-### 14. `Multiple Choice – Alegere multiplă`
-**N10.C02.Q09: CRUD to HTTP verb mapping / Corespondența CRUD cu verbele HTTP**
+### Q14. `N10.C02.Q09` — CRUD to HTTP verb mapping / Corespondența CRUD cu verbele HTTP
 
-> In a RESTful API, the CRUD operations map to HTTP verbs. Which mapping is correct? [Într-un API RESTful, operațiunile CRUD corespund verbelor HTTP. Care corespondență este corectă?]
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-- **a) Create → POST, Read → GET, Update → PUT, Delete → DELETE**
-- **b) Create → PUT, Read → GET, Update → POST, Delete → DELETE**
-- **c) Create → POST, Read → HEAD, Update → PATCH, Delete → OPTIONS**
-- **d) Create → GET, Read → POST, Update → DELETE, Delete → PUT**
+For an API that creates a resource at a server-selected URI, retrieves a representation, fully replaces a resource at a known URI and removes that resource, which conventional mapping fits? [Pentru un API care creează o resursă la un URI ales de server, citește reprezentarea, înlocuiește complet resursa de la un URI cunoscut și o elimină, ce corespondență convențională este adecvată?]
 
-> 💡 **Feedback:** The standard CRUD-to-HTTP mapping is: Create → POST, Read → GET, Update → PUT (full replacement) or PATCH (partial), Delete → DELETE. A common misconception is reversing Create and Update verbs or confusing PUT with POST, but POST creates new resources (non-idempotent) while PUT replaces an entire resource at a specific URI (idempotent). [Corespondența standard CRUD-HTTP este: Create → POST, Read → GET, Update → PUT (înlocuire completă) sau PATCH (parțial), Delete → DELETE. O concepție greșită frecventă este inversarea verbelor Create și Update sau confundarea PUT cu POST, dar POST creează resurse noi (non-idempotent), în timp ce PUT înlocuiește o resursă întreagă la un URI specific (idempotent).]
+- **a)** Create via collection POST; read via GET; full replacement via PUT; remove via DELETE
+- **b)** Create via GET; read via POST; replace via DELETE; remove via PUT
+- **c)** Create via HEAD; read via OPTIONS; replace via GET; remove via PATCH
+- **d)** Use GET for every state-changing operation
+
+<details><summary>💡 Feedback</summary>
+
+**Correct answer / Răspuns corect: a.** These assumptions make the mapping unambiguous. PUT may also create a resource at a client-chosen URI; POST is a general processing method, not a synonym for create. PATCH applies partial modification instructions and is not guaranteed idempotent. [Ipotezele fac corespondența neambiguă. PUT poate și crea o resursă la un URI ales de client; POST este o metodă generală de procesare, nu un sinonim pentru creare. PATCH aplică instrucțiuni de modificare parțială și nu garantează idempotența.]
+
+</details>
 
 ---
 
@@ -206,7 +231,7 @@
 - **c) TCP only for reliability [Doar TCP pentru fiabilitate]**
 - **d) UDP on port 53 for standard queries with TCP on port 80 for larger responses [UDP pe portul 53 pentru interogări standard cu TCP pe portul 80 pentru răspunsuri mai mari]**
 
-> 💡 **Feedback:** DNS uses both UDP (for standard queries, efficient for small responses) and TCP (for large responses exceeding 512 bytes, zone transfers via AXFR/IXFR, and when the TC bit is set). A common misconception is that DNS uses only UDP, but TCP is essential for zone transfers and large responses such as those with DNSSEC records. [DNS folosește atât UDP (pentru interogări standard, eficient pentru răspunsuri mici), cât și TCP (pentru răspunsuri mari care depășesc 512 de octeți, transferuri de zonă prin AXFR/IXFR și când bitul TC este setat). O concepție greșită frecventă este că DNS folosește doar UDP, dar TCP este esențial pentru transferurile de zonă și răspunsurile mari, precum cele cu înregistrări DNSSEC.]
+> 💡 **Feedback:** Conventional DNS supports UDP and TCP on port 53. 512 octets is the historical UDP limit without EDNS; EDNS can advertise larger UDP messages. A truncated UDP response normally triggers TCP retry. AXFR uses TCP; an IXFR response may fit in UDP. TCP can also be chosen without prior truncation. [DNS convențional acceptă UDP și TCP pe portul 53. 512 octeți este limita istorică UDP fără EDNS; EDNS poate anunța mesaje UDP mai mari. Un răspuns UDP trunchiat determină în mod normal reîncercarea TCP. AXFR folosește TCP; un răspuns IXFR poate încăpea în UDP. TCP poate fi ales și fără trunchiere prealabilă.]
 
 ---
 
@@ -220,7 +245,7 @@
 - **c) Switch to a different DNS server [Schimbarea la un alt server DNS]**
 - **d) Increase the local UDP buffer size and retry over UDP [Mărirea dimensiunii buffer-ului UDP local și reîncercarea prin UDP]**
 
-> 💡 **Feedback:** The TC bit signals that the UDP response was too large and was truncated. The client should retry the same query over TCP, which has no practical size limit for DNS responses. A common misconception is that the truncated response should be accepted as-is or that changing the DNS server resolves the issue, but the correct procedure is to retry via TCP to receive the complete response. [Bitul TC semnalează că răspunsul UDP a fost prea mare și a fost trunchiat. Clientul trebuie să reîncerce aceeași interogare prin TCP, care nu are o limită practică de dimensiune pentru răspunsurile DNS. O concepție greșită frecventă este că răspunsul trunchiat ar trebui acceptat ca atare sau că schimbarea serverului DNS rezolvă problema, dar procedura corectă este reîncercarea prin TCP pentru a primi răspunsul complet.]
+> 💡 **Feedback:** TC in the UDP response indicates truncation, so a conventional client normally retries over TCP for the complete answer. DNS over TCP uses a two-byte length prefix and supports at most 65535 octets per DNS message; a zone transfer can contain multiple messages. EDNS permits UDP payloads above the old 512-octet limit. [TC în răspunsul UDP indică trunchiere, deci un client convențional reîncearcă în mod normal prin TCP pentru răspunsul complet. DNS prin TCP folosește un prefix de lungime pe doi octeți și permite cel mult 65535 de octeți pe mesaj DNS; un transfer de zonă poate conține mai multe mesaje. EDNS permite payload-uri UDP peste vechea limită de 512 octeți.]
 
 ---
 
@@ -255,26 +280,31 @@
 ### 19. `True/False – Adevărat/Fals`
 **N10.C03.Q05: DNS caching improves privacy / Memorarea în cache DNS îmbunătățește confidențialitatea**
 
-> Using a local DNS cache protects user privacy because queries are answered locally. [Utilizarea unui cache DNS local protejează confidențialitatea utilizatorului deoarece interogările primesc răspuns local.]
+> A local DNS cache alone guarantees that an upstream resolver or network observer cannot learn any queried domain. [Un cache DNS local singur garantează că un resolver din amonte sau observator de rețea nu poate afla niciun domeniu interogat.]
 
-- **a) True / Adevărat**
-- **b) False / Fals**
+- **a) true**
+- **b) false**
 
-> 💡 **Feedback:** DNS caching reduces query frequency but does not improve privacy. Initial queries still go to upstream resolvers in plaintext, and cached results reveal browsing patterns if examined. Actual DNS privacy requires DoH (DNS over HTTPS) or DoT (DNS over TLS). A common misconception is that fewer queries mean better privacy, but the initial lookup still exposes the domain name to the upstream resolver. [Memorarea în cache DNS reduce frecvența interogărilor, dar nu îmbunătățește confidențialitatea. Interogările inițiale ajung în continuare la rezolvoarele din amonte în text clar, iar rezultatele din cache dezvăluie tiparele de navigare dacă sunt examinate. Confidențialitatea DNS reală necesită DoH (DNS over HTTPS) sau DoT (DNS over TLS). O concepție greșită frecventă este că mai puține interogări înseamnă confidențialitate mai bună, dar interogarea inițială expune în continuare numele de domeniu către rezolvorul din amonte.]
+> 💡 **Feedback:** False. Cache hits reduce repeated upstream queries and can therefore reduce exposure, but cache misses still require resolution. DoT/DoH protect the client-to-resolver transport against passive observers; the selected resolver still sees the queries it handles. Cache contents themselves also need appropriate access controls. [Fals. Răspunsurile din cache reduc interogările repetate în amonte și pot reduce expunerea, dar cazurile absente cer rezolvare. DoT/DoH protejează transportul client-resolver față de observatori pasivi; resolverul ales vede interogările pe care le gestionează. Și conținutul cache-ului necesită control adecvat al accesului.]
 
 ---
 
-### 20. `Multiple Choice – Alegere multiplă`
-**N10.C04.Q03: SSH key authentication versus password authentication / Autentificarea SSH prin chei versus autentificarea prin parolă**
+### Q20. `N10.C04.Q03` — SSH key authentication versus password authentication / Autentificarea SSH prin chei versus autentificarea prin parolă
 
-> Why is SSH key authentication considered more secure than password authentication? [De ce este autentificarea SSH prin chei considerată mai sigură decât autentificarea prin parolă?]
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-- **a) SSH keys are much longer (2048+ bits) and the private key is never sent to the server [Cheile SSH sunt mult mai lungi (2048+ biți) și cheia privată nu este niciodată trimisă serverului]**
-- **b) SSH keys use symmetric encryption exclusively throughout the session, which provides inherently greater computational security [Cheile SSH folosesc criptare simetrică exclusiv pe parcursul întregii sesiuni, ceea ce oferă o securitate computațională inerent mai mare]**
-- **c) SSH keys automatically expire after 30 days, reducing exposure [Cheile SSH expiră automat după 30 de zile, reducând expunerea]**
-- **d) SSH keys encrypt the entire session including all commands, while passwords only protect the initial authentication exchange [Cheile SSH criptează întreaga sesiune inclusiv toate comenzile, în timp ce parolele protejează doar schimbul inițial de autentificare]**
+What is a security advantage of correctly configured SSH public-key authentication compared with a reusable password? [Care este un avantaj de securitate al autentificării SSH cu cheie publică configurate corect față de o parolă reutilizabilă?]
 
-> 💡 **Feedback:** SSH keys provide 2048+ bits of entropy, are resistant to brute-force attacks, and the private key never leaves the client machine — eliminating phishing and network-exposure risks inherent to passwords. A common misconception is that SSH key authentication is less secure than passwords because keys can be copied, but the private key is protected locally and never transmitted over the network, unlike passwords. [Cheile SSH oferă peste 2048 de biți de entropie, sunt rezistente la atacuri de tip forță brută, iar cheia privată nu părăsește niciodată mașina clientului — eliminând riscurile de phishing și de expunere în rețea inerente parolelor. O concepție greșită frecventă este că autentificarea prin chei SSH este mai puțin sigură decât parolele deoarece cheile pot fi copiate, dar cheia privată este protejată local și nu este niciodată transmisă prin rețea, spre deosebire de parole.]
+- **a)** The authentication exchange sends a signature proving possession of the private key, not the private key itself [Schimbul de autentificare trimite o semnătură care demonstrează posesia cheii private, nu cheia privată]
+- **b)** Every SSH key has 2048 bits of security regardless of algorithm [Orice cheie SSH are 2048 de biți de securitate indiferent de algoritm]
+- **c)** A private key cannot be stolen or copied [O cheie privată nu poate fi furată sau copiată]
+- **d)** Host-key verification is unnecessary when public keys are used [Verificarea cheii gazdei nu este necesară când se folosesc chei publice]
+
+<details><summary>💡 Feedback</summary>
+
+**Correct answer / Răspuns corect: a.** The private key is not transmitted by SSH authentication; the client signs session-bound authentication data. Key length depends on the algorithm and is not equivalent to security strength. Protect private keys/agents and verify host keys: endpoint compromise, malicious hosts and agent misuse remain risks. Password authentication also uses the encrypted SSH transport. [Cheia privată nu este transmisă de autentificarea SSH; clientul semnează date de autentificare legate de sesiune. Lungimea cheii depinde de algoritm și nu este echivalentă cu rezistența criptografică. Protejați cheile/agenții și verificați cheile gazdei: compromiterea endpoint-ului, gazdele malițioase și utilizarea abuzivă a agentului rămân riscuri. Și autentificarea cu parolă folosește transportul SSH criptat.]
+
+</details>
 
 ---
 
@@ -398,35 +428,40 @@
 - **c) The query contained an error; the client should reformulate with a different record type [Interogarea conținea o eroare; clientul ar trebui să reformuleze cu un alt tip de înregistrare]**
 - **d) The response was corrupted in transit; the client should query a different DNS server [Răspunsul a fost corupt în tranzit; clientul ar trebui să interogheze un alt server DNS]**
 
-> 💡 **Feedback:** The TC bit indicates the response was too large for a single UDP datagram. The client should retry the same query using TCP, which has no message size limit. This is specified in RFC 1035 and is standard DNS behaviour. A common error is thinking DNS always uses UDP — TCP is essential for large responses (DNSSEC, many records) and zone transfers. [Bitul TC indică faptul că răspunsul a fost prea mare pentru o singură datagramă UDP. Clientul ar trebui să reîncerce aceeași interogare folosind TCP, care nu are limită de dimensiune a mesajului. Aceasta este specificată în RFC 1035 și este un comportament DNS standard. O eroare frecventă este credința că DNS folosește întotdeauna UDP — TCP este esențial pentru răspunsuri mari (DNSSEC, multe înregistrări) și transferuri de zonă.]
+> 💡 **Feedback:** TC in the UDP response indicates truncation, so a conventional client normally retries over TCP for the complete answer. DNS over TCP uses a two-byte length prefix and supports at most 65535 octets per DNS message; a zone transfer can contain multiple messages. EDNS permits UDP payloads above the old 512-octet limit. [TC în răspunsul UDP indică trunchiere, deci un client convențional reîncearcă în mod normal prin TCP pentru răspunsul complet. DNS prin TCP folosește un prefix de lungime pe doi octeți și permite cel mult 65535 de octeți pe mesaj DNS; un transfer de zonă poate conține mai multe mesaje. EDNS permite payload-uri UDP peste vechea limită de 512 octeți.]
 
 ---
 
-### 30. `Multiple Choice – Alegere multiplă`
-**N10.T00.Q05: HTTPS padlock misconception / Concepția greșită despre lacătul HTTPS**
+### Q30. `N10.T00.Q05` — HTTPS padlock misconception / Concepția greșită despre lacătul HTTPS
 
-> A user sees a padlock icon in their browser when visiting https://totally-legit-bank.com. Which statement most accurately describes what the padlock guarantees? [Un utilizator vede o pictogramă de lacăt în browser când vizitează https://totally-legit-bank.com. Care afirmație descrie cel mai exact ce garantează lacătul?]
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-- **a) The connection is encrypted and the server has a valid TLS certificate, but the site could still be malicious [Conexiunea este criptată și serverul are un certificat TLS valid, dar site-ul ar putea fi în continuare malițios]**
-- **b) The website has been verified as safe and legitimate by a trusted authority [Site-ul web a fost verificat ca sigur și legitim de o autoritate de încredere]**
-- **c) The website operator's identity and business practices have been thoroughly verified by the certificate authority that issued the TLS certificate [Identitatea și practicile comerciale ale operatorului site-ului web au fost verificate amănunțit de autoritatea de certificare care a emis certificatul TLS]**
-- **d) The website's data storage practices comply with privacy regulations [Practicile de stocare a datelor ale site-ului sunt conforme cu reglementările de confidențialitate]**
+A browser reports a successfully validated HTTPS connection to bank.example. What can be concluded from that connection indicator alone? [Un browser raportează o conexiune HTTPS validată reușit către bank.example. Ce se poate deduce doar din indicatorul conexiunii?]
 
-> 💡 **Feedback:** The HTTPS padlock only means the connection between the browser and server is encrypted and the server presented a valid certificate. It says nothing about the trustworthiness, safety, or legitimacy of the website itself. Phishing sites routinely obtain valid HTTPS certificates from free CAs like Let's Encrypt. Equating the padlock with website safety is one of the most dangerous misconceptions in web security. [Lacătul HTTPS înseamnă doar că conexiunea dintre browser și server este criptată și serverul a prezentat un certificat valid. Nu spune nimic despre încrederea, siguranța sau legitimitatea site-ului web în sine. Site-urile de phishing obțin în mod curent certificate HTTPS valide de la CA-uri gratuite precum Let's Encrypt. Echivalarea lacătului cu siguranța site-ului este una dintre cele mai periculoase concepții greșite în securitatea web.]
+- **a)** The connection has TLS protection and certificate identity validation for that hostname; the site may still be deceptive or harmful [Conexiunea are protecție TLS și validarea identității certificatului pentru acel nume; site-ul poate fi totuși înșelător sau dăunător]
+- **b)** The operator's business practices have been audited [Practicile comerciale ale operatorului au fost auditate]
+- **c)** All downloads are harmless [Toate descărcările sunt inofensive]
+- **d)** The site cannot be used for phishing [Site-ul nu poate fi folosit pentru phishing]
+
+<details><summary>💡 Feedback</summary>
+
+**Correct answer / Răspuns corect: a.** TLS authenticates the endpoint identity according to the certificate trust model and protects the connection. It does not certify honesty, application security or data-storage practices. Browser icon designs vary, so reason from the validated connection, not a particular padlock graphic. [TLS autentifică identitatea endpoint-ului conform modelului de încredere al certificatelor și protejează conexiunea. Nu certifică onestitatea, securitatea aplicației sau practicile de stocare. Grafica indicatoarelor diferă între browsere, deci raționați pornind de la conexiunea validată, nu de la un anumit lacăt.]
+
+</details>
 
 ---
 
 ### 31. `Multiple Choice – Alegere multiplă`
 **N10.T00.Q06: HTTP idempotency and method semantics / Idempotența HTTP și semantica metodelor**
 
-> A developer accidentally sends the same PUT /api/users/10 request three times due to a network retry. A second developer sends the same POST /api/users request three times. What is the most likely outcome for each? [Un dezvoltator trimite accidental aceeași cerere PUT /api/users/10 de trei ori din cauza unei reîncercări de rețea. Un al doilea dezvoltator trimite aceeași cerere POST /api/users de trei ori. Care este rezultatul cel mai probabil pentru fiecare?]
+> Assume each successful POST creates a fresh user and there is no application deduplication or idempotency key. A developer accidentally sends the same PUT /api/users/10 request three times due to a network retry. A second developer sends the same POST /api/users request three times. What is the most likely outcome for each? [Presupuneți că fiecare POST reușit creează un utilizator nou și nu există deduplicare sau cheie de idempotență. Un dezvoltator trimite accidental aceeași cerere PUT /api/users/10 de trei ori din cauza unei reîncercări de rețea. Un al doilea dezvoltator trimite aceeași cerere POST /api/users de trei ori. Care este rezultatul cel mai probabil pentru fiecare?]
 
 - **a) PUT: user 10 is updated to the same state (one user); POST: three new users are created [PUT: utilizatorul 10 este actualizat la aceeași stare (un utilizator); POST: trei utilizatori noi sunt creați]**
 - **b) Both create three separate entries because HTTP has no built-in duplicate detection [Ambele creează trei intrări separate deoarece HTTP nu are detecție de duplicate integrată]**
 - **c) PUT: three versions of user 10 are stored; POST: only one user is created [PUT: trei versiuni ale utilizatorului 10 sunt stocate; POST: doar un utilizator este creat]**
 - **d) Both update a single record because the server detects identical request bodies, which does not accurately reflect how modern implementations handle the key exchange procedure [Ambele actualizează o singură înregistrare deoarece serverul detectează corpuri de cerere identice, ceea ce nu reflectă cu acuratețe modul în care implementările moderne gestionează procedura de schimb de chei]**
 
-> 💡 **Feedback:** PUT is idempotent — sending the same PUT to the same URI multiple times produces the same result (user 10 is updated once). POST is not idempotent — each POST creates a new resource, resulting in three separate users. This semantic distinction is fundamental to REST Level 2 and affects how clients handle retries. [PUT este idempotent — trimiterea aceluiași PUT la același URI de mai multe ori produce același rezultat (utilizatorul 10 este actualizat o singură dată). POST nu este idempotent — fiecare POST creează o resursă nouă, rezultând în trei utilizatori separați. Această distincție semantică este fundamentală pentru Nivelul 2 REST și afectează modul în care clienții gestionează reîncercările.]
+> 💡 **Feedback:** Under the stated application contract, the three PUTs leave user 10 with the same intended state and the three POSTs create three users. Idempotence concerns intended state, not identical response bodies or the absence of logging. POST behaviour is application-defined, so the creation/deduplication assumptions are necessary. [Conform contractului aplicației, cele trei PUT-uri lasă utilizatorul 10 în aceeași stare intenționată, iar cele trei POST-uri creează trei utilizatori. Idempotența privește starea intenționată, nu identitatea răspunsurilor sau absența jurnalizării. Comportamentul POST este definit de aplicație, deci ipotezele despre creare/deduplicare sunt necesare.]
 
 ---
 
@@ -458,31 +493,41 @@
 
 ---
 
-### 34. `Multiple Choice – Alegere multiplă`
-**N10.T00.Q09: SSH key authentication security / Securitatea autentificării SSH bazate pe chei**
+### Q34. `N10.T00.Q09` — SSH key authentication security / Securitatea autentificării SSH bazate pe chei
 
-> In the context of SSH authentication, what is the primary security advantage of public-key authentication over password authentication? [În contextul autentificării SSH, care este principalul avantaj de securitate al autentificării bazate pe cheie publică față de autentificarea cu parolă?]
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-- **a) The private key never leaves the client; the server only verifies a cryptographic proof of possession [Cheia privată nu părăsește niciodată clientul; serverul verifică doar o dovadă criptografică a posesiei]**
-- **b) SSH keys use stronger encryption algorithms than password-based authentication [Cheile SSH folosesc algoritmi de criptare mai puternici decât autentificarea bazată pe parole]**
-- **c) SSH keys automatically expire after a set period, forcing regular rotation [Cheile SSH expiră automat după o perioadă stabilită, forțând rotația regulată]**
-- **d) SSH keys encrypt the entire session with the user's public key for end-to-end security — a formulation that incorrectly suggests a synchronous process where the standard defines asynchronous operation [Cheile SSH criptează întreaga sesiune cu cheia publică a utilizatorului pentru securitate capăt-la-capăt — o formulare ce sugerează incorect un proces sincron unde standardul definește operare asincronă]**
+In SSH public-key authentication, what does the client prove without transmitting the reusable private key? [În autentificarea SSH cu cheie publică, ce dovedește clientul fără transmiterea cheii private reutilizabile?]
 
-> 💡 **Feedback:** With SSH key authentication, the private key never leaves the client machine. The server only stores the public key. Authentication uses a challenge-response mechanism where the client proves possession of the private key without transmitting it. This eliminates phishing, brute-force (2048+ bit keys), and credential reuse risks. Passwords, by contrast, are sent to the server and can be captured, guessed, or reused. [Cu autentificarea SSH bazată pe chei, cheia privată nu părăsește niciodată mașina client. Serverul stochează doar cheia publică. Autentificarea folosește un mecanism provocare-răspuns prin care clientul dovedește posesia cheii private fără a o transmite. Aceasta elimină riscurile de phishing, brute-force (chei de 2048+ biți) și reutilizare a datelor de autentificare. Parolele, în schimb, sunt trimise serverului și pot fi capturate, ghicite sau reutilizate.]
+- **a)** Possession of the signing key through a signature bound to the SSH session [Posesia cheii de semnare printr-o semnătură legată de sesiunea SSH]
+- **b)** That the server is honest without checking its host key [Că serverul este onest fără verificarea cheii gazdei]
+- **c)** That its private key cannot exist on another computer [Că cheia privată nu poate exista pe alt calculator]
+- **d)** That all SSH algorithms have the same key length [Că toți algoritmii SSH au aceeași lungime a cheii]
+
+<details><summary>💡 Feedback</summary>
+
+**Correct answer / Răspuns corect: a.** The signature proof is the authentication mechanism. It does not eliminate credential theft, unsafe agent forwarding or malicious-server risks. Host-key verification and local private-key protection remain necessary;2048-bit RSA is not 2048-bit security and other SSH algorithms use different sizes. [Dovada prin semnătură este mecanismul de autentificare. Nu elimină furtul de credențiale, redirecționarea nesigură a agentului sau riscurile serverelor malițioase. Verificarea cheii gazdei și protecția locală a cheii private rămân necesare; RSA pe 2048 de biți nu înseamnă 2048 de biți de securitate, iar alți algoritmi SSH folosesc alte dimensiuni.]
+
+</details>
 
 ---
 
-### 35. `Multiple Choice – Alegere multiplă`
-**N10.T00.Q10: DNS record type selection / Selectarea tipului de înregistrare DNS**
+### Q35. `N10.T00.Q10` — DNS record type selection / Selectarea tipului de înregistrare DNS
 
-> A company wants to redirect www.example.com to example.com at the DNS level so both names resolve to the same IP address. Which DNS record type is most appropriate? [O companie dorește să redirecționeze www.example.com către example.com la nivel DNS astfel încât ambele nume să se rezolve la aceeași adresă IP. Ce tip de înregistrare DNS este cel mai potrivit?]
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-- **a) CNAME — creates an alias so www.example.com resolves to whatever example.com resolves to [CNAME — creează un alias astfel încât www.example.com se rezolvă la orice se rezolvă example.com]**
-- **b) A — maps www.example.com directly to the same IPv4 address [A — mapează www.example.com direct la aceeași adresă IPv4]**
-- **c) MX — redirects traffic between domain names for any protocol [MX — redirecționează traficul între numele de domeniu pentru orice protocol]**
-- **d) NS — delegates www.example.com to the same authoritative name server that handles the example.com zone [NS — deleghează www.example.com către același server de nume autoritativ care gestionează zona example.com]**
+www.example.com has no other ordinary records and must follow the address records of example.com automatically when they change. Which DNS record expresses that alias? [www.example.com nu are alte înregistrări obișnuite și trebuie să urmeze automat înregistrările de adresă pentru example.com când acestea se schimbă. Ce înregistrare DNS exprimă aliasul?]
 
-> 💡 **Feedback:** A CNAME (Canonical Name) record creates an alias from one domain to another. Setting www.example.com CNAME example.com makes www resolve to wherever example.com points. An A record maps directly to an IP address (requires updating both if IP changes). MX is for mail routing, and NS delegates DNS authority — neither serves as a domain alias. [O înregistrare CNAME (Canonical Name) creează un alias de la un domeniu la altul. Setarea www.example.com CNAME example.com face ca www să se rezolve la orice adresă indică example.com. O înregistrare A mapează direct la o adresă IP (necesită actualizarea ambelor dacă IP-ul se schimbă). MX este pentru rutarea e-mailului, iar NS deleagă autoritatea DNS — niciunul nu servește ca alias de domeniu.]
+- **a)** www.example.com. CNAME example.com.
+- **b)** A second A record whose address must be edited separately
+- **c)** An MX record naming an email destination
+- **d)** An NS record delegating a child zone
+
+<details><summary>💡 Feedback</summary>
+
+**Correct answer / Răspuns corect: a.** CNAME makes the owner name an alias. Duplicating an A value could produce the same address now but would not encode the requested alias relationship. DNS aliasing is not an HTTP redirect and does not change the URL displayed by a browser. [CNAME face din numele proprietar un alias. Duplicarea unei valori A poate produce aceeași adresă acum, dar nu exprimă relația de alias cerută. Aliasul DNS nu este o redirecționare HTTP și nu modifică URL-ul afișat de browser.]
+
+</details>
 
 ---
 
@@ -545,31 +590,54 @@
 
 ## Lab Questions / Întrebări de laborator
 
-### 40. `Multiple Choice – Alegere multiplă`
-**N10.S01.Q03: TLS state machine — calling server_hello before client_hello / Mașina de stări TLS — apelarea server_hello înainte de client_hello**
+### Q40. `N10.S01.Q03` — TLS state machine — calling server_hello before client_hello / Mașina de stări TLS — apelarea server_hello înainte de client_hello
 
-> In the code-tracing exercise modelling a TLS connection as a state machine, what happens if server_hello() is called immediately after object initialisation (state = INIT)? [În exercițiul de trasare a codului care modelează o conexiune TLS ca mașină de stări, ce se întâmplă dacă server_hello() este apelat imediat după inițializarea obiectului (state = INIT)?]
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-- **a) It returns an error string indicating invalid state INIT [Returnează un șir de eroare indicând starea invalidă INIT]**
-- **b) It proceeds normally and transitions to SERVER_HELLO, which incorrectly implies a capability that the protocol was deliberately designed not to provide [Continuă normal și trece la SERVER_HELLO, ceea ce implică incorect o capacitate pe care protocolul a fost proiectat în mod deliberat să nu o ofere]**
-- **c) It raises a Python exception and crashes [Aruncă o excepție Python și se oprește]**
-- **d) It automatically calls client_hello() first [Apelează automat client_hello() mai întâi]**
+Run this independent state-machine illustration. What does the final call return? It is not a TLS implementation. [Rulați această ilustrare independentă de mașină de stări. Ce returnează ultimul apel? Nu este o implementare TLS.]
 
-> 💡 **Feedback:** The state machine enforces strict ordering. server_hello() expects state CLIENT_HELLO, so calling it from state INIT returns an error because the handshake steps must proceed in order. A common misconception is that the state machine automatically corrects the sequence, but enforcing strict ordering mirrors the real TLS protocol where steps cannot be skipped. [Mașina de stări impune o ordine strictă. server_hello() așteaptă starea CLIENT_HELLO, deci apelarea din starea INIT returnează o eroare deoarece pașii handshake-ului trebuie să se desfășoare în ordine. O concepție greșită frecventă este că mașina de stări corectează automat secvența, dar impunerea ordinii stricte reflectă protocolul TLS real, unde pașii nu pot fi omisi.]
+```python
+class HandshakeModel:
+    def __init__(self):
+        self.state = "INIT"
+    def server_hello(self):
+        if self.state != "CLIENT_HELLO":
+            return f"error: invalid state {self.state}"
+        self.state = "SERVER_HELLO"
+        return self.state
+
+print(HandshakeModel().server_hello())
+```
+
+- **a)** "error: invalid state INIT"
+- **b)** "SERVER_HELLO"
+- **c)** None
+- **d)** An automatic call to client_hello()
+
+<details><summary>💡 Feedback</summary>
+
+**Correct answer / Răspuns corect: a.** The guard requires CLIENT_HELLO; the new object is in INIT, so the stated error string is returned. This is a deliberately small code-tracing contract, not a claim about all TLS states or wire messages. [Garda cere CLIENT_HELLO; obiectul nou este în INIT, deci returnează șirul de eroare indicat. Este un contract mic pentru trasarea codului, nu o afirmație despre toate stările sau mesajele TLS.]
+
+</details>
 
 ---
 
-### 41. `Multiple Choice – Alegere multiplă`
-**N10.S01.Q04: SSL context wrap_socket and server_hostname parameter / Contextul SSL wrap_socket și parametrul server_hostname**
+### Q41. `N10.S01.Q04` — SSL context wrap_socket and server_hostname parameter / Contextul SSL wrap_socket și parametrul server_hostname
 
-> In the Parsons problem for certificate verification, the call context.wrap_socket(sock, server_hostname=hostname) is used. What is the purpose of the server_hostname parameter? [În problema Parsons pentru verificarea certificatului, se folosește apelul context.wrap_socket(sock, server_hostname=hostname). Care este scopul parametrului server_hostname?]
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-- **a) It enables SNI so the server knows which certificate to present [Activează SNI astfel încât serverul să știe ce certificat să prezinte]**
-- **b) It sets the DNS server to use for hostname resolution [Setează serverul DNS utilizat pentru rezoluția numelor de gazdă]**
-- **c) It specifies the encryption algorithm to use [Specifică algoritmul de criptare de utilizat]**
-- **d) It disables certificate verification for self-signed certificates [Dezactivează verificarea certificatului pentru certificatele auto-semnate]**
+Assume sock is connected and context = ssl.create_default_context(). What does context.wrap_socket(sock, server_hostname="www.example.test") use that DNS hostname for? [Presupuneți că sock este conectat și context = ssl.create_default_context(). La ce folosește context.wrap_socket(sock, server_hostname="www.example.test") acel nume DNS?]
 
-> 💡 **Feedback:** The server_hostname parameter enables SNI (Server Name Indication), telling the server which hostname the client is connecting to so it can present the correct certificate. This is essential for virtual hosting where multiple domains share the same IP address. A common misconception is that this parameter sets the DNS server or controls encryption, but it specifically enables the SNI extension in the TLS handshake. [Parametrul server_hostname activează SNI (Server Name Indication), informând serverul la ce nume de gazdă se conectează clientul, astfel încât acesta să poată prezenta certificatul corect. Acest lucru este esențial pentru găzduirea virtuală, unde mai multe domenii partajează aceeași adresă IP. O concepție greșită frecventă este că acest parametru setează serverul DNS sau controlează criptarea, dar el activează specific extensia SNI în handshake-ul TLS.]
+- **a)** Certificate hostname verification and SNI for the requested DNS hostname [Verificarea numelui din certificat și SNI pentru numele DNS cerut]
+- **b)** Choosing a DNS resolver address [Alegerea adresei resolverului DNS]
+- **c)** Disabling certificate-chain validation [Dezactivarea validării lanțului certificatului]
+- **d)** Selecting an encryption algorithm by hostname spelling [Alegerea algoritmului de criptare după forma numelui]
+
+<details><summary>💡 Feedback</summary>
+
+**Correct answer / Răspuns corect: a.** With the validating default client context, server_hostname supplies the reference identity for hostname verification. A DNS name also enables SNI so a virtual-host server can select a certificate. It does not resolve the name or make an untrusted certificate trustworthy. [Cu contextul client implicit care validează, server_hostname furnizează identitatea de referință pentru verificarea numelui. Un nume DNS permite și SNI pentru selectarea certificatului pe serverul virtual. Nu rezolvă numele și nu transformă un certificat neacceptat într-unul de încredere.]
+
+</details>
 
 ---
 
@@ -587,17 +655,42 @@
 
 ---
 
-### 43. `Multiple Choice – Alegere multiplă`
-**N10.S02.Q02: Code tracing — route_request output for non-numeric user ID / Trasarea codului — rezultatul route_request pentru un ID de utilizator non-numeric**
+### Q43. `N10.S02.Q02` — Code tracing — route_request output for non-numeric user ID / Trasarea codului — rezultatul route_request pentru un ID de utilizator non-numeric
 
-> In the code-tracing exercise, the function route_request parses URL paths and checks if a user ID segment is numeric using isdigit(). What does route_request("GET", "/api/users/abc") return? [În exercițiul de trasare a codului, funcția route_request parsează căile URL și verifică dacă segmentul ID de utilizator este numeric folosind isdigit(). Ce returnează route_request("GET", "/api/users/abc")?]
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-- **a) ("Not found", 404)**
-- **b) ("Get user abc", 200)**
-- **c) ("Method not allowed", 405)**
-- **d) A ValueError exception is raised [Se aruncă o excepție ValueError]**
+In this self-contained dispatcher example, what does route_request('GET','/api/users/abc') return? [În acest dispatcher autonom, ce returnează route_request('GET','/api/users/abc')?]
 
-> 💡 **Feedback:** The path splits into ['&apos;, 'api', 'users', 'abc']. Since 'abc'.isdigit() returns False, the request falls through to the default return: ("Not found", 404). A common misconception is that the router would return a 405 Method Not Allowed, but the issue is not the method — it is the non-numeric ID segment failing the isdigit() check. [Calea se împarte în ['&apos;, 'api', 'users', 'abc']. Deoarece 'abc'.isdigit() returnează False, cererea cade la returnarea implicită: ("Not found", 404). O concepție greșită frecventă este că routerul ar returna un 405 Method Not Allowed, dar problema nu este metoda — ci segmentul ID non-numeric care nu trece verificarea isdigit().]
+```python
+def route_request(method, path):
+    if path == "/api/users":
+        if method == "GET":
+            return "List all users", 200
+        if method == "POST":
+            return "Create user", 201
+        return "Method not allowed", 405
+    parts = path.split("/")
+    if len(parts) == 4 and parts[1:3] == ["api", "users"] and parts[3].isdigit():
+        if method == "GET":
+            return f"Get user {parts[3]}", 200
+        if method in ("PUT", "DELETE"):
+            return "Updated or deleted", 200
+        return "Method not allowed", 405
+    return "Not found", 404
+
+print(route_request('GET', '/api/users/abc'))
+```
+
+- **a)** ("Not found",404)
+- **b)** ("List all users",200)
+- **c)** ("Create user",201)
+- **d)** A ValueError exception
+
+<details><summary>💡 Feedback</summary>
+
+**Correct answer / Răspuns corect: a.** Follow the explicit path and method guards. This function returns a teaching tuple, not a complete HTTP response; a real 405 response must also include Allow. No omitted repository exercise is needed to determine the answer. [Urmăriți gărzile explicite pentru cale și metodă. Funcția returnează un tuplu didactic, nu un răspuns HTTP complet; un răspuns 405 real trebuie să includă și Allow. Răspunsul nu depinde de un exercițiu omis din repository.]
+
+</details>
 
 ---
 
@@ -615,59 +708,108 @@
 
 ---
 
-### 45. `Multiple Choice – Alegere multiplă`
-**N10.S02.Q04: Code tracing — route_request output for PATCH on /api/users / Trasarea codului — rezultatul route_request pentru PATCH pe /api/users**
+### Q45. `N10.S02.Q04` — Code tracing — route_request output for PATCH on /api/users / Trasarea codului — rezultatul route_request pentru PATCH pe /api/users
 
-> In the code-tracing exercise, the function route_request handles GET, POST, PUT, and DELETE for user resources. A client sends PATCH /api/users. What does route_request("PATCH", "/api/users") return? [În exercițiul de trasare a codului, funcția route_request gestionează GET, POST, PUT și DELETE pentru resursele utilizatorilor. Un client trimite PATCH /api/users. Ce returnează route_request("PATCH", "/api/users")?]
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-- **a) ("Method not allowed", 405)**
-- **b) ("Not found", 404)**
-- **c) ("List all users", 200)**
-- **d) ("Create user", 201)**
+In this self-contained dispatcher example, what does route_request('PATCH','/api/users') return? [În acest dispatcher autonom, ce returnează route_request('PATCH','/api/users')?]
 
-> 💡 **Feedback:** The routing function checks if path == "/api/users", then only matches GET and POST methods. Since PATCH does not match either branch, execution falls to the else clause which returns ("Method not allowed", 405). This demonstrates that the router only implements a subset of HTTP verbs for the collection endpoint. A common misconception is confusing 404 (resource not found) with 405 (method not allowed) — the path exists but the method is not supported. [Funcția de rutare verifică dacă path == "/api/users", apoi potrivește doar metodele GET și POST. Deoarece PATCH nu se potrivește cu niciuna dintre ramuri, execuția cade la clauza else care returnează ("Method not allowed", 405). Aceasta demonstrează că routerul implementează doar un subset de verbe HTTP pentru endpoint-ul de colecție. O concepție greșită frecventă este confundarea 404 (resursă negăsită) cu 405 (metodă nepermisă) — calea există, dar metoda nu este acceptată.]
+```python
+def route_request(method, path):
+    if path == "/api/users":
+        if method == "GET":
+            return "List all users", 200
+        if method == "POST":
+            return "Create user", 201
+        return "Method not allowed", 405
+    parts = path.split("/")
+    if len(parts) == 4 and parts[1:3] == ["api", "users"] and parts[3].isdigit():
+        if method == "GET":
+            return f"Get user {parts[3]}", 200
+        if method in ("PUT", "DELETE"):
+            return "Updated or deleted", 200
+        return "Method not allowed", 405
+    return "Not found", 404
 
----
+print(route_request('PATCH', '/api/users'))
+```
 
-### 46. `Multiple Choice – Alegere multiplă`
-**N10.S03.Q03: Code tracing — DNS resolver with trailing dot / Trasarea codului — rezolvor DNS cu punct final**
+- **a)** ("Method not allowed",405)
+- **b)** ("List all users",200)
+- **c)** ("Create user",201)
+- **d)** A ValueError exception
 
-> In the DNS code-tracing exercise, the function resolve_dns calls query_name.rstrip(".") before looking up the record. What does resolve_dns("web.lab.local.") return for the status field? [În exercițiul de trasare a codului DNS, funcția resolve_dns apelează query_name.rstrip(".") înainte de căutarea înregistrării. Ce returnează resolve_dns("web.lab.local.") pentru câmpul status?]
+<details><summary>💡 Feedback</summary>
 
-- **a) "NOERROR" — the trailing dot is removed before lookup [punctul final este eliminat înainte de căutare]**
-- **b) "NXDOMAIN" — the dot makes it a different domain [punctul îl face un domeniu diferit]**
-- **c) An exception is raised because of the trailing dot — this confuses the purpose of the handshake mechanism with that of the data transfer phase [Se aruncă o excepție din cauza punctului final — aceasta confundă scopul mecanismului de handshake cu cel al fazei de transfer de date]**
-- **d) None — the function cannot handle FQDNs [funcția nu poate gestiona FQDN-uri]**
+**Correct answer / Răspuns corect: a.** Follow the explicit path and method guards. This function returns a teaching tuple, not a complete HTTP response; a real 405 response must also include Allow. No omitted repository exercise is needed to determine the answer. [Urmăriți gărzile explicite pentru cale și metodă. Funcția returnează un tuplu didactic, nu un răspuns HTTP complet; un răspuns 405 real trebuie să includă și Allow. Răspunsul nu depinde de un exercițiu omis din repository.]
 
-> 💡 **Feedback:** The trailing dot is stripped by rstrip("."), making "web.lab.local." resolve identically to "web.lab.local", returning status "NOERROR". A common misconception is that the trailing dot makes it a different, non-existent domain, but in DNS the trailing dot denotes the FQDN (Fully Qualified Domain Name) root and the code normalises this. [Punctul final este eliminat de rstrip("."), făcând "web.lab.local." să se rezolve identic cu "web.lab.local", returnând statusul "NOERROR". O concepție greșită frecventă este că punctul final face din acesta un domeniu diferit, inexistent, dar în DNS punctul final denotă rădăcina FQDN (Fully Qualified Domain Name), iar codul normalizează acest lucru.]
-
----
-
-### 47. `Multiple Choice – Alegere multiplă`
-**N10.S03.Q05: Socket type for UDP DNS queries in Python / Tipul de socket pentru interogări DNS UDP în Python**
-
-> In the Parsons problem for building a DNS query function, what socket type constant is used to create a UDP socket? [În problema Parsons pentru construirea unei funcții de interogare DNS, ce constantă de tip socket se folosește pentru a crea un socket UDP?]
-
-- **a) socket.SOCK_DGRAM**
-- **b) socket.SOCK_STREAM**
-- **c) socket.SOCK_RAW**
-- **d) socket.SOCK_SEQPACKET**
-
-> 💡 **Feedback:** socket.SOCK_DGRAM creates a UDP datagram socket, appropriate for DNS queries. SOCK_STREAM would create a TCP socket instead. A common misconception is confusing SOCK_DGRAM (datagrame — connectionless, UDP) with SOCK_STREAM (flux de octeți — orientat pe conexiune, TCP). The naming reflects the underlying transport: datagrams are discrete message units while streams are continuous byte flows. [socket.SOCK_DGRAM creează un socket de datagramă UDP, potrivit pentru interogările DNS. SOCK_STREAM ar crea în schimb un socket TCP. O concepție greșită frecventă este confundarea SOCK_DGRAM (datagrame — fără conexiune, UDP) cu SOCK_STREAM (flux de octeți — orientat pe conexiune, TCP). Denumirea reflectă transportul subiacent: datagramele sunt unități de mesaje discrete, în timp ce fluxurile sunt fluxuri continue de octeți.]
+</details>
 
 ---
 
-### 48. `Multiple Choice – Alegere multiplă`
-**N10.S04.Q02: Python library for SSH automation / Biblioteca Python pentru automatizarea SSH**
+### Q46. `N10.S03.Q03` — Code tracing — DNS resolver with trailing dot / Trasarea codului — rezolvor DNS cu punct final
 
-> Which Python library is used in the lab exercises to establish SSH connections and execute remote commands? [Ce bibliotecă Python este folosită în exercițiile de laborator pentru a stabili conexiuni SSH și a executa comenzi la distanță?]
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
 
-- **a) paramiko**
-- **b) pexpect**
-- **c) fabric**
-- **d) subprocess**
+In this standalone dictionary model, which status does the final call produce? [În acest model autonom bazat pe dicționar, ce status produce ultimul apel?]
 
-> 💡 **Feedback:** Paramiko is the Python library used in the exercises for SSH operations. It provides an SSHClient class for connecting, authenticating, and running remote commands. A common misconception is confusing Paramiko (dedicated SSH library) with subprocess (local process execution) — subprocess can invoke the ssh command but does not provide native SSH protocol support. [Paramiko este biblioteca Python folosită în exerciții pentru operațiunile SSH. Oferă o clasă SSHClient pentru conectare, autentificare și executarea comenzilor la distanță. O concepție greșită frecventă este confundarea Paramiko (bibliotecă SSH dedicată) cu subprocess (execuția proceselor locale) — subprocess poate invoca comanda ssh, dar nu oferă suport nativ pentru protocolul SSH.]
+```python
+records = {"web.lab.local": "192.0.2.10"}
+def resolve_dns(query_name):
+    key = query_name.rstrip(".").lower()
+    return {"status": "NOERROR" if key in records else "NXDOMAIN"}
+
+print(resolve_dns("web.lab.local.")["status"])
+```
+
+- **a)** NOERROR
+- **b)** NXDOMAIN
+- **c)** SERVFAIL
+- **d)** None
+
+<details><summary>💡 Feedback</summary>
+
+**Correct answer / Răspuns corect: a.** rstrip removes the trailing dot before dictionary lookup, so the key exists. The terminal dot represents the DNS root in an absolute name. This toy model does not perform DNS traffic, implement delegation or model every DNS response case. [rstrip elimină punctul final înaintea căutării în dicționar, deci cheia există. Punctul terminal reprezintă rădăcina DNS într-un nume absolut. Modelul simplificat nu generează trafic DNS, nu implementează delegare și nu acoperă toate răspunsurile DNS.]
+
+</details>
+
+---
+
+### Q47. `N10.S03.Q05` — Socket type for UDP DNS queries in Python / Tipul de socket pentru interogări DNS UDP în Python
+
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
+
+Which type creates a UDP/IPv4 socket in socket.socket(socket.AF_INET, type)? [Ce tip creează un socket UDP/IPv4 în socket.socket(socket.AF_INET, type)?]
+
+- **a)** socket.SOCK_DGRAM
+- **b)** socket.SOCK_STREAM
+- **c)** socket.SOCK_RAW
+- **d)** socket.SOCK_SEQPACKET
+
+<details><summary>💡 Feedback</summary>
+
+**Correct answer / Răspuns corect: a.** For AF_INET with the default protocol, SOCK_DGRAM selects UDP. The address family matters: datagram sockets also exist for other families. Conventional DNS can use both UDP and TCP; this question explicitly asks for UDP. [Pentru AF_INET cu protocolul implicit, SOCK_DGRAM selectează UDP. Familia de adrese contează: există socket-uri de datagramă și pentru alte familii. DNS convențional poate folosi UDP și TCP; aici se cere explicit UDP.]
+
+</details>
+
+---
+
+### Q48. `N10.S04.Q02` — Python library for SSH automation / Biblioteca Python pentru automatizarea SSH
+
+*Multiple Choice — one correct answer / Alegere multiplă — un singur răspuns corect*
+
+Which library does 04_SEMINARS/S10/3_ssh/ssh-client/S10_Part03_Script_Paramiko_Client.py import for SSHClient? [Ce bibliotecă importă 04_SEMINARS/S10/3_ssh/ssh-client/S10_Part03_Script_Paramiko_Client.py pentru SSHClient?]
+
+- **a)** paramiko
+- **b)** pexpect
+- **c)** fabric
+- **d)** subprocess
+
+<details><summary>💡 Feedback</summary>
+
+**Correct answer / Răspuns corect: a.** The canonical S10 client imports Paramiko and creates paramiko.SSHClient(). subprocess could run an external ssh executable, but it is not the library used by this file. [Clientul canonic S10 importă Paramiko și creează paramiko.SSHClient(). subprocess ar putea lansa un executabil ssh extern, dar nu este biblioteca utilizată de acest fișier.]
+
+</details>
 
 ---
 
@@ -726,3 +868,12 @@
 > 💡 **Feedback:** Standard FTP (port 21) transmits all data in plaintext, including USER and PASS commands. FTPS or SFTP should be used for sensitive data. This is inherent to the FTP protocol, not a misconfiguration. A common misconception is that visible credentials indicate a server misconfiguration, but plaintext transmission is the fundamental design of the FTP protocol — encryption was never part of the original specification. [FTP standard (portul 21) transmite toate datele în text clar, inclusiv comenzile USER și PASS. FTPS sau SFTP trebuie utilizate pentru date sensibile. Aceasta este o caracteristică inerentă protocolului FTP, nu o eroare de configurare. O concepție greșită frecventă este că datele de autentificare vizibile indică o eroare de configurare a serverului, dar transmisia în text clar este designul fundamental al protocolului FTP — criptarea nu a fost niciodată parte din specificația originală.]
 
 ---
+
+
+## Repository context and reference points
+
+Canonical practical material: [S10](../../04_SEMINARS/S10/README.md) — DNS, SSH automation and forwarding. Code-tracing models explicitly introduced in this question pool are self-contained exercises, not promises of additional files or features in that seminar. [Material practic canonic: S10. Modelele de trasare introduse explicit sunt exerciții autonome, nu promisiuni de fișiere sau funcții suplimentare în seminar.]
+
+Protocol semantics: RFC 9110, *HTTP Semantics*. https://doi.org/10.17487/RFC9110
+
+TLS 1.3: [RFC 9846](https://www.rfc-editor.org/rfc/rfc9846), superseding RFC 8446. SSH authentication: RFC 4252. https://doi.org/10.17487/RFC4252

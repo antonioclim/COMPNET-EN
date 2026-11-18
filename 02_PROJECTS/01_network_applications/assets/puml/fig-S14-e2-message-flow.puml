@@ -32,8 +32,9 @@ note over R1, R2 #FFCDD2 : Link r1↔r2 fails
 |||
 
 == TRIGGERED UPDATE (anti-loop) ==
-R1 -[#E53935]-> R3 : DV1 {r2:INF}\n(POISON reverse)
+R1 -[#E53935]-> R3 : DV1 {r2:INF}\n(route poisoning after failure)
 R3 -[#1565C0]-> R1 : DV1 {r2:1, hB:1}
+R1 -[#E53935]-> R3 : DV1 {hB:INF} POISON\n(poisoned reverse: route learned via r3)
 
 note over R1, R3 : Reconverged\nhA→r1→r3→hB (cost via backup)
 
@@ -43,7 +44,7 @@ note right of R3 : Delivered to hB via backup
 
 legend right
   DV1: periodic updates with distance vectors
-  POISON/SPLITH: anti-loop evidence in PCAP
+  POISON/SPLITH: explicit anti-loop marker as specified in E1
   DATA1: overlay forwarding hop-by-hop
   Validates R1–R4 in S14.json
 endlegend

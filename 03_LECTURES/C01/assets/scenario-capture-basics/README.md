@@ -12,13 +12,15 @@ Select one of the following:
 
 ---
 
-### Variant A: tcpdump (Linux/macOS)
+### Common setup: start the local HTTP server
 
 #### 1) Start a local HTTP server
 From within the scenario folder, run:
 - python3 start-http-server.py
 
 The server starts at http://127.0.0.1:8000
+
+### Variant A: tcpdump (Linux)
 
 #### 2) Capture DNS + ICMP + HTTP
 In a second terminal, run:
@@ -38,9 +40,13 @@ Expected observations:
 
 ### Variant B: Wireshark (any OS)
 
-#### 1) Start capture on the active interface (Wi-Fi/Ethernet)
-Use either a capture filter or a display filter:
-- icmp or dns or tcp.port == 8000
+#### 1) Start the server above, then select the correct capture interfaces
+Select loopback for http://127.0.0.1:8000 (`lo` on Linux, `lo0` on macOS or the Npcap loopback adapter on Windows). Also select the active Ethernet/Wi-Fi interface for external ping and DNS traffic. Capture location must match where each packet travels.
+
+- Capture filter (before starting): `icmp or port 53 or tcp port 8000`
+- Display filter (after capture): `icmp or dns or tcp.port == 8000`
+
+The two filter languages are different. On macOS, capture `lo0` for local HTTP and the active interface separately for external traffic; Linux's `any` pseudo-interface is not portable.
 
 #### 2) Generate traffic
 - ping 1.1.1.1

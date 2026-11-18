@@ -195,7 +195,7 @@
 <div>
 <div class="story-box">
 <h4>21 October 2016</h4>
-<p>At 07:10 EDT, the DNS provider <strong>Dyn</strong> began receiving an unprecedented flood of traffic — over <strong>1.2 Tbit/s</strong> from roughly 100,000 compromised IoT devices. Within minutes, DNS resolution for major websites stopped working. Twitter, Netflix, Reddit, GitHub, Spotify and dozens of other services became unreachable for millions of users across North America and Europe.</p>
+<p>At 07:10 EDT, the DNS provider <strong>Dyn</strong> began receiving an unprecedented flood of traffic — from a large botnet of compromised IoT devices. Within minutes, DNS resolution for major websites stopped working. Twitter, Netflix, Reddit, GitHub, Spotify and dozens of other services became unreachable for millions of users across North America and Europe.</p>
 </div>
 <div class="warning-box" style="margin-top: 1rem;">
 <h4>The Paradox</h4>
@@ -580,13 +580,13 @@
 <h4>Protocol Details</h4>
 <ul>
 <li>Primary transport: <strong>UDP port 53</strong></li>
-<li>TCP for zone transfers and large responses (&gt; 512 bytes)</li>
+<li>TCP for AXFR and for truncated responses; EDNS permits UDP payloads above the historical 512-byte limit</li>
 <li>Specified in <strong>RFC 1034/1035</strong> (1987)</li>
 </ul>
 </div>
 <div class="warning-box" style="margin-top: 1rem;">
 <h4>Why UDP?</h4>
-<p>DNS queries are typically small (&lt; 512 bytes) and need low latency. A UDP round-trip completes in one request–response exchange. If the response is truncated (the TC flag is set), the client retries over TCP.</p>
+<p>DNS queries are typically small and benefit from low latency. The original UDP limit was 512 bytes; EDNS negotiates a larger supported UDP payload. A UDP round-trip completes in one request–response exchange. If the response is truncated (the TC flag is set), the client retries over TCP.</p>
 </div>
 </div>
 </div>
@@ -685,7 +685,7 @@
 </div>
 <div class="highlight-box fade-up delay-2">
 <h4>Iterative vs Recursive</h4>
-<p>The <strong>recursive resolver</strong> does the heavy lifting — querying root, TLD and authoritative servers in sequence. The client's <strong>stub resolver</strong> simply sends one query to the recursive resolver and waits for the final answer. This is why attacking the recursive resolver (as in the Dyn incident) has such catastrophic effects.</p>
+<p>The <strong>recursive resolver</strong> does the heavy lifting — querying root, TLD and authoritative servers in sequence. The client's <strong>stub resolver</strong> simply sends one query to the recursive resolver and waits for the final answer. This is why attacking a critical DNS dependency (the Dyn incident targeted authoritative infrastructure) has such catastrophic effects.</p>
 </div>
 </div>
 
@@ -1255,7 +1255,7 @@
 <div class="fade-up delay-1">
 <div class="story-box">
 <h4>Now We Can Explain It</h4>
-<p>The Mirai botnet directed 1.2 Tbit/s of traffic at Dyn, a major <strong>recursive DNS resolver</strong> provider. Because millions of clients depended on Dyn to translate domain names into IP addresses, the attack did not need to touch Twitter, Netflix or GitHub at all.</p>
+<p>The Mirai botnet contributed to the attack on Dyn, a major <strong>authoritative DNS</strong> provider. Because millions of clients depended on Dyn to translate domain names into IP addresses, the attack did not need to touch Twitter, Netflix or GitHub at all.</p>
 <p style="margin-top:0.5rem;">With the resolver overwhelmed, stub resolvers received no answers. Browsers displayed "DNS_PROBE_FINISHED_NXDOMAIN" — the sites appeared to not exist, even though their servers were fully operational.</p>
 </div>
 </div>
@@ -1473,15 +1473,15 @@ ftp || ftp-data
 <div class="slide" data-slide="42">
 <h2>Synthesis Question</h2>
 <div class="quiz-container fade-up delay-1">
-<p class="quiz-question">A company's website became unreachable for 45 minutes, but their server logs show zero downtime during this period. The engineering team discovered that their DNS provider experienced an outage. Why did the outage persist for exactly 45 minutes after the provider recovered?</p>
+<p class="quiz-question">During a DNS configuration error, a resolver cached an authoritative NXDOMAIN answer with a 2,700-second negative TTL. The correct record was restored immediately afterwards. Why might that resolver still report NXDOMAIN for almost 45 minutes?</p>
 <div class="quiz-options">
 <div class="quiz-option" onclick="checkQuiz(this, false)">DNS servers take 45 minutes to restart after a crash</div>
 <div class="quiz-option" onclick="checkQuiz(this, false)">TCP connections to DNS servers have a 45-minute timeout</div>
-<div class="quiz-option" onclick="checkQuiz(this, true)">Negative responses (NXDOMAIN/SERVFAIL) were cached by resolvers with a TTL that had not yet expired</div>
+<div class="quiz-option" onclick="checkQuiz(this, true)">The authoritative NXDOMAIN answer remains in this resolver’s negative cache until its 2,700-second TTL expires</div>
 <div class="quiz-option" onclick="checkQuiz(this, false)">The company's firewall blocked DNS traffic for 45 minutes</div>
 </div>
-<div class="quiz-feedback correct">&#10003; Correct. During the outage, resolvers received error responses (SERVFAIL or NXDOMAIN) and cached them according to the SOA record's minimum TTL or the resolver's negative caching policy. Even after the DNS provider recovered, these cached negative answers continued to be served until the negative cache TTL expired. This is why DNS TTL configuration matters for both positive <em>and</em> negative responses.</div>
-<div class="quiz-feedback incorrect">&#10007; The key is <strong>negative caching</strong>. When DNS resolution fails, resolvers do not simply forget — they cache the failure for a period defined by the SOA minimum TTL. After recovery, these stale "this domain does not exist" answers persist in caches until the negative TTL expires.</div>
+<div class="quiz-feedback correct">&#10003; Correct. RFC 2308 negative caching uses the lower of the SOA TTL and SOA MINIMUM. The stated NXDOMAIN and TTL explain this observation. SERVFAIL is a resolution failure, not proof of nonexistence; RFC 9520 limits resolution-failure caching to five minutes.</div>
+<div class="quiz-feedback incorrect">&#10007; The question specifies a cached authoritative NXDOMAIN and its TTL. An outage alone would not determine a 45-minute delay, and SERVFAIL must not be interpreted as a nonexistent name.</div>
 </div>
 </div>
 
@@ -1669,6 +1669,7 @@ ftp || ftp-data
     }
 
     document.addEventListener('keydown', function(e) {
+      if (e.target && e.target.closest && e.target.closest('input, textarea, select, button, [contenteditable="true"]')) return;
       switch(e.key) {
         case 'ArrowRight': case ' ': nextSlide(); e.preventDefault(); break;
         case 'ArrowLeft': prevSlide(); e.preventDefault(); break;
@@ -1774,39 +1775,31 @@ ftp || ftp-data
     // Interactive: DNS Resolution Simulator
     // ═══════════════════════════════════════════
     function simulateDNS() {
-      var input = document.getElementById('dnsInput');
-      var result = document.getElementById('dnsSimResult');
-      if (!input || !result) return;
-
-      var domain = input.value.trim().toLowerCase();
-      if (!domain || domain.indexOf('.') === -1) {
-        result.innerHTML = '<p style="color:#f87171;">Please enter a valid domain name (e.g. www.ase.ro)</p>';
+      const domain = document.getElementById('dnsInput').value.trim().toLowerCase();
+      const result = document.getElementById('dnsSimResult');
+      result.replaceChildren();
+      if (!/^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9-]{2,63}$/.test(domain)) {
+        result.textContent = 'Enter a DNS name such as www.example.test.';
         return;
       }
-
-      var parts = domain.split('.');
-      var tld = '.' + parts[parts.length - 1];
-      var sld = parts.length >= 2 ? parts[parts.length - 2] : '';
-      var sub = parts.length >= 3 ? parts.slice(0, parts.length - 2).join('.') : '';
-      var fakeIP = (Math.floor(Math.random() * 200) + 10) + '.' +
-                   (Math.floor(Math.random() * 255)) + '.' +
-                   (Math.floor(Math.random() * 255)) + '.' +
-                   (Math.floor(Math.random() * 254) + 1);
-
-      var steps = [
-        '1. Stub resolver queries recursive resolver: "What is the A record for <strong>' + domain + '</strong>?"',
-        '2. Recursive resolver queries <strong>root server</strong>: "Who handles <strong>' + tld + '</strong>?"',
-        '   → Root responds: "Ask <strong>' + tld.slice(1) + '.ns.example</strong> (TLD server)"',
-        '3. Recursive resolver queries <strong>' + tld + ' TLD server</strong>: "Who handles <strong>' + sld + tld + '</strong>?"',
-        '   → TLD responds: "Ask <strong>ns1.' + sld + tld + '</strong> (authoritative)"',
-        '4. Recursive resolver queries <strong>authoritative server</strong>: "What is <strong>' + domain + '</strong>?"',
-        '   → Authoritative responds: "<strong>' + domain + ' = ' + fakeIP + '</strong>" (TTL: 3600)',
-        '5. Recursive resolver returns answer to client and <strong>caches</strong> the result.'
+      const parts = domain.split('.');
+      const tld = parts.at(-1);
+      const zone = parts.slice(-2).join('.');
+      const lines = [
+        'Illustrative simulation only: no DNS lookup is performed.',
+        '1. Stub resolver asks its recursive resolver for ' + domain,
+        '2. With an empty cache, the resolver obtains a referral from the root for .' + tld,
+        '3. A TLD server refers it towards the authoritative servers for ' + zone + ' (simplified delegation).',
+        '4. An authoritative server returns the illustrative A record 192.0.2.42 with TTL 3600.',
+        '5. The resolver caches the answer and returns it to the client.'
       ];
-
-      result.innerHTML = '<p style="margin-bottom:0.5rem;"><strong>Resolving: ' + domain + '</strong></p>' +
-        steps.map(function(s) { return '<p style="margin:0.2rem 0; font-size:0.85rem;">' + s + '</p>'; }).join('');
+      for (const line of lines) {
+        const paragraph = document.createElement('p');
+        paragraph.textContent = line;
+        result.append(paragraph);
+      }
     }
+
   </script>
 </body>
 </html>

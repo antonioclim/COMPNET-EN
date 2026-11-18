@@ -11,7 +11,7 @@ For the WSL alternative, Docker Engine and the course Python environment run ins
 | [`Prerequisites.md`](Prerequisites.md) | Full installation guide — WSL2, Ubuntu, Docker, Portainer, Wireshark, Python packages and auto-start configuration |
 | [`Prerequisites_CHECKS.md`](Prerequisites_CHECKS.md) | Self-assessment questions per section of the main guide — understanding checks with expandable answers |
 | [`verify_lab_environment.sh`](verify_lab_environment.sh) | Local prerequisite checks for WSL2, Docker, optional Portainer and Linux Python; no package installation or image pull |
-| `wireshark_capture_example.png` | Screenshot used within the prerequisites guide |
+| `wireshark_capture_example.webp` | Screenshot used within the prerequisites guide |
 
 ## Usage
 

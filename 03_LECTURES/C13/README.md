@@ -11,7 +11,7 @@ Week 13 combines two topics that share a common thread: constrained environments
 | [`assets/puml/`](assets/puml/) | PlantUML diagram sources | 6 files |
 | [`assets/images/`](assets/images/) | Rendered PNG output | .gitkeep |
 | [`assets/render.sh`](assets/render.sh) | Diagram rendering script | — |
-| [`assets/scenario-iot-basic/`](assets/scenario-iot-basic/) | MQTT sensor → broker → actuator (Docker Compose) | 7 files |
+| [`assets/scenario-iot-basic/`](assets/scenario-iot-basic/) | MQTT sensor → broker → actuator (Docker Compose) | 15 files |
 | [`assets/scenario-vulnerability-lab/`](assets/scenario-vulnerability-lab/) | Vulnerable and hardened Flask apps (Docker Compose) | 6 files |
 
 ## Visual Overview
@@ -111,7 +111,7 @@ Security concepts are assessed in the final quiz (W14) and in multiple administr
 ```bash
 git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
 cd COMPNET-EN
-git sparse-checkout set 03_LECTURES/C13
+git sparse-checkout set 03_LECTURES/C13 00_TOOLS
 ```
 
 **Method B — Direct download**

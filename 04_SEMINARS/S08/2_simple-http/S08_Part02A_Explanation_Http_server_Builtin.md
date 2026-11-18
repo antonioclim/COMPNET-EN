@@ -2,9 +2,9 @@ We now move on to **Stage 2: Basic HTTP Server with `http.server` (Python)**.
 
 This stage provides:
 
-1. **Explanation file** – `index_httpserver_builtin_explanation.md`
+1. **Explanation file** – `S08_Part02A_Explanation_Http_server_Builtin.md`
 2. **Fully commented code** – `simple_http_builtin.py`
-3. **Task file** – `index_httpserver_builtin_tasks.md`
+3. **Task file** – `S08_Part02C_Tasks_Http_server_Builtin.md`
 
 ---
 
@@ -48,9 +48,9 @@ Then test:
 
 ```
 
-curl -v [http://localhost:8000/](http://localhost:8000/)
-curl -v [http://localhost:8000/hello](http://localhost:8000/hello)
-curl -v [http://localhost:8000/api/time](http://localhost:8000/api/time)
+curl -v http://localhost:8000/
+curl -v http://localhost:8000/hello
+curl -v http://localhost:8000/api/time
 
 ```
 

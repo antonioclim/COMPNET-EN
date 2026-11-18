@@ -189,10 +189,10 @@
                     <div :class="{'highlight-line text-white': activeStep === 6}" class="pl-2 transition-all mt-2">
                         &nbsp;&nbsp;<span class="text-purple-400">if</span> os.path.exists(filepath):<br>
                         &nbsp;&nbsp;&nbsp;&nbsp;status = <span class="text-green-300">'200 OK'</span><br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;content = open(filepath).read()<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;content = open(filepath, "rb").read()<br>
                         &nbsp;&nbsp;<span class="text-purple-400">else</span>:<br>
                         &nbsp;&nbsp;&nbsp;&nbsp;status = <span class="text-green-300">'404 Not Found'</span><br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;content = <span class="text-green-300">'&lt;h1&gt;404 Not Found&lt;/h1&gt;'</span>
+                        &nbsp;&nbsp;&nbsp;&nbsp;content = <span class="text-green-300">b'&lt;h1&gt;404 Not Found&lt;/h1&gt;'</span>
                     </div>
 
                     <div :class="{'highlight-line text-white': activeStep === 7}" class="pl-2 transition-all mt-2">

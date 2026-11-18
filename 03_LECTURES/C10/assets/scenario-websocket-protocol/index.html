@@ -33,7 +33,9 @@
       document.addEventListener('DOMContentLoaded', () => {
         const logEl = document.getElementById('log')
         const log = (msg) => {
-          logEl.innerHTML += msg + '<br>'
+          const line = document.createElement('div')
+          line.textContent = String(msg)
+          logEl.appendChild(line)
           logEl.scrollTop = logEl.scrollHeight
         }
 

@@ -49,6 +49,10 @@ Distance-vector is one of the classical routing families. In this didactic varia
 - **Protocol/default ports (E2):** UDP: DV updates 5014/UDP; overlay data 5015/UDP.
 - The Flex component must work with the default values (without manual reconfiguration) so that it can be integrated into automated tests.
 
+### Interpretation and complementary evidence
+
+The [E2 capture and semantic-evidence matrix](../00_common/E2_CAPTURE_EVIDENCE_MATRIX.md#s14) maps every capture rule to its generating action and the complementary application evidence.
+
 ### Deliverables
 - `flex/` directory with sources plus build/run instructions (avoid exotic dependencies where possible).
 - `docs/FLEX.md` with:
@@ -136,7 +140,7 @@ Distance-vector is one of the classical routing families. In this didactic varia
 - Loop-prevention evidence is shown (poison reverse or split horizon marker).
 
 ### Automatic PCAP criteria (E2)
-These criteria are **deterministic** and can be verified automatically with `tshark`.
+These capture checks are reproducible with `tshark`. Frame counts are smoke checks; they do not replace the application tests or prove complete project acceptance.
 - Official rules: `tools/pcap_rules/S14.json`
 - In the catalogue (template): `00_common/tools/pcap_rules/S14.json` and `00_common/tools/validate_pcap.py` (copy into the student repository).
 
@@ -144,10 +148,10 @@ These criteria are **deterministic** and can be verified automatically with `tsh
 
 | ID | tshark filter (`-Y`) | Condition | What it validates |
 |---:|---|---:|---|
-| R1 | `udp.port==5014 && frame contains "DV1"` | `>= 3` | At least 3 DV messages (magic DV1), periodic updates. |
-| R2 | `udp.port==5015 && frame contains "DATA1"` | `>= 1` | At least one forwarded overlay data packet (magic DATA1). |
-| R3 | `udp.port==5014 && (frame contains "POISON" || frame contains "SPLITH")` | `>= 1` | Anti-loop evidence (poison reverse/split horizon) in the payload or logs. |
-| R4 | `icmp || udp.port==5015` | `>= 1` | Demonstrative end-to-end traffic (data/ping) in the topology. |
+| R1 | `udp.port==5014 && frame contains "DV1"` | `>= 3` | At least three UDP/5014 frames contain DV1 marker bytes. |
+| R2 | `udp.port==5015 && frame contains "DATA1"` | `>= 1` | A UDP/5015 frame contains DATA1 marker bytes; verify forwarding hops separately. |
+| R3 | `udp.port==5014 && (frame contains "POISON" \|\| frame contains "SPLITH")` | `>= 1` | A POISON/SPLITH marker is present in UDP/5014 payload; inspect recipient, metric and routing effect separately. |
+| R4 | `icmp \|\| udp.port==5015` | `>= 1` | ICMP or UDP/5015 frames are present; correlate an end-to-end request and result. |
 
 ### Deliverables
 - Mininet script (`topology.py`) plus automation script to start, run scenario and stop.
@@ -155,7 +159,7 @@ These criteria are **deterministic** and can be verified automatically with `tsh
 - `artifacts/pcap/traffic_e2.pcap` and a completed `docs/E2_pcap_analysis.md`.
 
 ## E3 — Completion plus demo plus testing
-- All MUST requirements implemented plus support for configurable link weights and more complex topology.
+- All MUST requirements implemented in the declared topology. If the optional configurable-link-weight extension is selected, also demonstrate its effect on route selection.
 - Tests for multiple failure scenarios and prevention of count-to-infinity under a loop condition.
 - Mininet demo with a link failure and recovery, with routing-table prints and PCAP evidence.
 - Documented refactoring and a mini security audit for untrusted DV updates (validation, length limits).

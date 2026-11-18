@@ -273,7 +273,7 @@
             const [mode, setMode] = useState('64');
             const prefix = "2001:db8:10";
             const subnetHex = subnetDec.toString(16).padStart(4, '0');
-            const split50Values = [0, 4, 8, 12];
+            const split50Values = [0, 0x4000, 0x8000, 0xc000];
 
             return (
                 <div className="card rounded-2xl p-6 mb-8 border-l-4 border-l-purple-500">
@@ -394,7 +394,10 @@
             const validate = (input) => {
                 const clean = input.toLowerCase().trim();
                 const regex = /^2001:db8:1234:[0-9a-f]{1,4}::(\/64)?$/;
-                return regex.test(clean);
+                if (!regex.test(clean)) return false;
+                const id = parseInt(clean.split(':')[3], 16);
+                const peers = [server, lan, iot, router].filter(value => regex.test(value.toLowerCase().trim()));
+                return peers.filter(value => parseInt(value.toLowerCase().trim().split(':')[3], 16) === id).length === 1;
             };
 
             return (
@@ -422,7 +425,7 @@
                             </div>
                         ))}
                     </div>
-                    <p className="text-xs text-slate-500 mt-2 italic">Tip: Use the 4th hextet for the Subnet ID. Format: 2001:db8:1234:X::/64</p>
+                    <p className="text-xs text-slate-500 mt-2 italic">Tip: Use four different 4th-hextet values; leading zeroes do not create a different subnet. Format: 2001:db8:1234:X::/64</p>
                 </div>
             );
         };
@@ -494,7 +497,10 @@
                 // Must have content after the 4th colon group
                 // Regex: Starts with prefix, then a subnet hextet, then colon, then non-empty
                 const regex = /^2001:db8:1234:[0-9a-f]{1,4}:.+/;
-                return regex.test(clean);
+                if (!regex.test(clean)) return false;
+                const id = parseInt(clean.split(':')[3], 16);
+                const peers = [server, lan, iot, router].filter(value => regex.test(value.toLowerCase().trim()));
+                return peers.filter(value => parseInt(value.toLowerCase().trim().split(':')[3], 16) === id).length === 1;
             };
 
             return (

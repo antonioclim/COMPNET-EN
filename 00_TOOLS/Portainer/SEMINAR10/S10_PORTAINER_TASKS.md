@@ -95,5 +95,5 @@ Explain in one sentence how this is possible, given that `web` has no published 
 | Docker internal DNS resolves service names to IPs | Task P1 |
 | Clean transitions between stacks prevent port conflicts | Tasks P2, P4 |
 | Port mapping is explicit — not automatic | Task P3 |
-| No published port means no direct host access | Task P5 |
+| No published port means no host-port mapping; direct container-IP access depends on the execution route | Task P5 |
 | SSH tunnelling bypasses port isolation | Task P6 |

@@ -284,7 +284,7 @@
             <span>Filter:</span>
             <input type="text" class="ws-filter-box" value="tcp.port == 12345" readonly>
             <span style="flex:1;"></span>
-            <span style="font-size:0.75rem; color:#666;">Interface: Loopback: lo0</span>
+            <span style="font-size:0.75rem; color:#666;">Interface: Linux loopback: lo</span>
         </div>
         <div class="ws-table-container">
             <table id="wsTable">
@@ -464,7 +464,7 @@
 
         async runExampleClient() {
             this.badge.innerText = "Step 2: Basic Connection";
-            this.text.innerText = "Running 'python3 S02_Part04_Example_TCP_Client.py'. Watch Wireshark capture the 3-Way Handshake, one Data packet, and the Connection Teardown.";
+            this.text.innerText = "Running 'python3 S02_Part04_Example_TCP_Client.py'. Watch Wireshark capture the 3-Way Handshake, one LF-delimited request and reply, followed by an illustrative connection teardown. Actual packet boundaries and timing may differ.";
 
             await this.termClient.typeCommand("python3 S02_Part04_Example_TCP_Client.py");
 
@@ -482,19 +482,20 @@
 
             // Data
             await wait(300);
-            this.wireshark.addPacket("54321", "12345", "54321 → 12345 [PSH, ACK] Seq=1 Ack=1 Len=12", 12, t0 + 0.3); // "Hello, world"
+            this.wireshark.addPacket("54321", "12345", "54321 → 12345 [PSH, ACK] Seq=1 Ack=1 Len=13", 13, t0 + 0.3); // "Hello, world" + LF
 
-            this.termServer.output("[CLIENT] Sent 12 bytes: b'Hello, world'");
+            this.termServer.output("[CLIENT] Sent 13 bytes: b'Hello, world\\n'");
 
             await wait(100);
-            this.wireshark.addPacket("12345", "54321", "12345 → 54321 [PSH, ACK] Seq=1 Ack=13 Len=16", 16, t0 + 0.4); // "OK: HELLO, WORLD"
+            this.wireshark.addPacket("12345", "54321", "12345 → 54321 [PSH, ACK] Seq=1 Ack=14 Len=17", 17, t0 + 0.4); // "OK: HELLO, WORLD" + LF
 
-            this.termClient.output("[INFO] Received b'OK: HELLO, WORLD' from server");
+            this.termClient.output("[INFO] Received b'OK: HELLO, WORLD\\n' from server");
             this.termClient.output("[INFO] Connection closed.");
 
             // Teardown
-            this.wireshark.addPacket("54321", "12345", "54321 → 12345 [FIN, ACK] Seq=13 Ack=17", 0);
-            this.wireshark.addPacket("12345", "54321", "12345 → 54321 [FIN, ACK] Seq=17 Ack=14", 0);
+            this.wireshark.addPacket("54321", "12345", "54321 → 12345 [FIN, ACK] Seq=14 Ack=18", 0);
+            this.wireshark.addPacket("12345", "54321", "12345 → 54321 [FIN, ACK] Seq=18 Ack=15", 0);
+            this.wireshark.addPacket("54321", "12345", "54321 → 12345 [ACK] Seq=15 Ack=19", 0);
 
             this.termClient.newPrompt();
 
@@ -533,21 +534,25 @@
 
             const tSend = (Date.now() - this.wireshark.startTime) / 1000;
 
-            // Request Packet
-            this.wireshark.addPacket("54322", "12345", `54322 → 12345 [PSH, ACK] Len=${msg.length}`, msg.length, tSend);
+            // TCP carries UTF-8 bytes, including the LF frame delimiter.
+            const requestLen = new TextEncoder().encode(msg + "\n").length;
+            const response = "OK: " + msg.toUpperCase() + "\n";
 
-            this.termServer.output(`[CLIENT] Sent ${msg.length} bytes: b'${msg}'`);
+            // Request Packet
+            this.wireshark.addPacket("54322", "12345", `54322 → 12345 [PSH, ACK] Len=${requestLen}`, requestLen, tSend);
+
+            this.termServer.output(`[CLIENT] Sent ${requestLen} bytes: ${JSON.stringify(msg + '\n')}`);
 
             // Simulate delay
             await wait(rtt * 1000); // Visual wait
 
             // Response Packet
-            const respLen = msg.length + 4; // "OK: " + msg
+            const respLen = new TextEncoder().encode(response).length;
             this.wireshark.addPacket("12345", "54322", `12345 → 54322 [PSH, ACK] Len=${respLen}`, respLen, tSend + rtt);
 
             // Client Log
             this.termClient.output(`Sent: '${msg}'`);
-            this.termClient.output(`Received: b'OK: ${msg.toUpperCase()}'`);
+            this.termClient.output(`Received: ${JSON.stringify(response)}`);
             this.termClient.output(`[STATS] RTT: ${rttMs} ms`, 'log-rtt');
 
             this.termClient.newPrompt("Message (or 'exit'): ");
@@ -568,6 +573,7 @@
             const tEnd = (Date.now() - this.wireshark.startTime) / 1000;
             this.wireshark.addPacket("54322", "12345", "54322 → 12345 [FIN, ACK]", 0, tEnd);
             this.wireshark.addPacket("12345", "54322", "12345 → 54322 [FIN, ACK]", 0, tEnd + 0.001);
+            this.wireshark.addPacket("54322", "12345", "54322 → 12345 [ACK] (acknowledges server FIN)", 0, tEnd + 0.002);
 
             this.badge.innerText = "Lab Complete";
             this.badge.style.background = "#4ec9b0";

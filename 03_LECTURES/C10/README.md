@@ -11,10 +11,10 @@ Week 10 covers the dominant application-layer protocol family. The lecture exami
 | [`assets/puml/`](assets/puml/) | PlantUML diagram sources | 10 files |
 | [`assets/images/`](assets/images/) | Rendered PNG output | .gitkeep |
 | [`assets/render.sh`](assets/render.sh) | Diagram rendering script | — |
-| [`assets/scenario-custom-http-semantics/`](assets/scenario-custom-http-semantics/) | Raw HTTP server and client (Python sockets) | 3 files |
-| [`assets/scenario-http-compose/`](assets/scenario-http-compose/) | Nginx + Flask + static site (Docker Compose) | 8 files |
-| [`assets/scenario-rest-maturity/`](assets/scenario-rest-maturity/) | REST levels 0–3 servers with test client | 6 files |
-| [`assets/scenario-websocket-protocol/`](assets/scenario-websocket-protocol/) | WebSocket server, client and protocol spec | 4 files |
+| [`assets/scenario-custom-http-semantics/`](assets/scenario-custom-http-semantics/) | Asynchronous HTTP jobs with a Flask server and requests client | 4 files |
+| [`assets/scenario-http-compose/`](assets/scenario-http-compose/) | Nginx + Flask + static site (Docker Compose) | 14 files |
+| [`assets/scenario-rest-maturity/`](assets/scenario-rest-maturity/) | REST levels 0–3 servers with test client | 8 files |
+| [`assets/scenario-websocket-protocol/`](assets/scenario-websocket-protocol/) | WebSocket server, client and protocol spec | 5 files |
 
 ## Visual Overview
 
@@ -47,44 +47,60 @@ graph LR
 
 ## Usage
 
-Custom HTTP from sockets:
+Activate the course Python environment first. Each block below starts from this
+`C10` directory; subshells keep that directory unchanged. Run one scenario at a
+time. Stop a foreground server with Ctrl+C in the terminal that started it.
+
+Custom HTTP application semantics (terminal 1):
 
 ```bash
-cd assets/scenario-custom-http-semantics
-python3 server.py &
-python3 client.py
+(cd assets/scenario-custom-http-semantics && python3 -m pip install -r requirements.txt && python3 server.py)
 ```
 
-Docker Compose stack (requires Docker):
+In terminal 2, also starting in `C10`:
 
 ```bash
-cd assets/scenario-http-compose
-docker compose up --build
+(cd assets/scenario-custom-http-semantics && python3 client.py)
 ```
 
-This starts Nginx (port 80) proxying to a Flask API and a static web server.
-
-REST maturity progression:
+Docker Compose stack:
 
 ```bash
-cd assets/scenario-rest-maturity
-python3 server-level0.py &  # then test with:
-python3 client-test.py
+(cd assets/scenario-http-compose && docker compose up --build)
 ```
 
-Repeat for `server-level1.py` through `server-level3.py` to see the progression.
-
-WebSocket demo:
+Open http://localhost:8080. Nginx listens on container port 80 and proxies to the
+Flask API and static web server. Afterwards, from `C10`:
 
 ```bash
-cd assets/scenario-websocket-protocol
-python3 server.py &
-# Open index.html in a browser, or use a WebSocket client
+(cd assets/scenario-http-compose && docker compose down)
 ```
+
+REST maturity progression (terminal 1):
+
+```bash
+(cd assets/scenario-rest-maturity && python3 -m pip install -r requirements.txt && python3 server-level0.py)
+```
+
+Terminal 2:
+
+```bash
+(cd assets/scenario-rest-maturity && python3 client-test.py --level 0)
+```
+
+Repeat with matching server-level1/2/3 and --level 1/2/3. Stop each server before
+moving on. WebSocket demonstration:
+
+```bash
+(cd assets/scenario-websocket-protocol && python3 -m pip install -r requirements.txt && python3 server.py)
+```
+
+Open http://127.0.0.1:9000/ in a browser: the application serves index.html and its
+WebSocket endpoint from the same origin. Do not open the HTML file directly.
 
 ## Pedagogical Context
 
-HTTP is the most widely encountered application protocol. The four scenarios move from understanding HTTP at the byte level (raw sockets) through production-style deployment (Docker Compose with reverse proxy) to API design patterns (REST levels) and bidirectional communication (WebSockets). This progression ensures students can both construct and operate HTTP-based systems.
+HTTP is the most widely encountered application protocol. The four scenarios move from reasoning about application-specific HTTP contracts through production-style deployment (Docker Compose with reverse proxy) to API design patterns (REST levels) and bidirectional communication (WebSockets). This progression ensures students can both construct and operate HTTP-based systems.
 
 ## Cross-References
 
@@ -128,7 +144,7 @@ HTTP knowledge is assumed by FTP comparisons in C11, email protocol discussions 
 ```bash
 git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
 cd COMPNET-EN
-git sparse-checkout set 03_LECTURES/C10
+git sparse-checkout set 03_LECTURES/C10 00_TOOLS
 ```
 
 **Method B — Direct download**

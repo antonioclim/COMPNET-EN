@@ -1,7 +1,7 @@
 # RC2026 — Standardisation, automation and common criteria (for all projects)
 
 This directory contains **common templates and tools** that make projects:
-- automatically verifiable (deterministic PCAP plus smoke tests)
+- verifiable through automatic capture checks, behaviour tests and explicit semantic evidence
 - reproducible (Docker Compose or scripts)
 - consistent across the catalogue (standard repository structure, standard names)
 
@@ -39,6 +39,16 @@ This directory contains **common templates and tools** that make projects:
 - Run:
   - `python tools/validate_pcap.py --project S01 --pcap artifacts/pcap/traffic_e2.pcap`
 
+### What a successful capture check means
+
+The JSON manifest labels each measurement as frame presence/count, decoded field occurrences, distinct field values or reassembled TCP command lines. A zero exit status means these checks passed. It does not establish the complete application contract, network policy or assessment result: provide the required pytest assertions and complementary evidence listed in the brief.
+
+For S06, S19 and S20 the provided logical command counter assumes LF/CRLF-delimited command tokens. It reassembles sequence numbers, removes identical retransmissions and rejects gaps or conflicting bytes. If E1 defines JSON or binary framing, adapt the decoder to that specification and include segmentation, coalescing, retransmission and negative-token tests. Do not change the rule into a substring search over packets.
+
+For S12, encrypted TLS 1.3 handshake records cannot prove application delivery. Use client certificate-validation tests and application assertions. An optional `--tls-keylog PATH` uses secrets from the local test session to assist analysis; the secrets must remain outside Git.
+
+The validator exits 0 for passed capture checks, 1 for an unmet criterion and 2 for missing/invalid input or a tool error. Empty rule lists and duplicate IDs are errors.
+
 ## Tester template (Docker)
 
 In `docker/tester_base/` there is a starting point for a `tester` service that:
@@ -68,4 +78,8 @@ with a table where **every ID** from the project checklist (e.g. `M01..`, `NF01.
 
 **Rule:** if an ID is missing from the table or the evidence is not reproducible, the criterion is marked **NO**.
 
-> The complete checklist (per project, E1/E2/E3) is in the file `RC2026_VERIFICATION_INDEX.xlsx`.
+> The checklist covers all 30 projects (A01–A10 and S01–S20) in [`RC2026_VERIFICATION_INDEX.xlsx`](../RC2026_VERIFICATION_INDEX.xlsx). MUST/NF identifiers follow the order in each canonical brief.
+
+### E2 scenario traceability
+
+Use the [capture and semantic-evidence matrix](E2_CAPTURE_EVIDENCE_MATRIX.md) to identify the action that produces every rule for all 30 projects. Record the actual test and capture references in `docs/E2_pcap_analysis.md`.

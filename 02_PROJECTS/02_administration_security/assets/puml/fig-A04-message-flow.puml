@@ -39,7 +39,9 @@ note right of ATK #FFCDD2 : MITM: packets transit\nthrough attacker
 
 == PHASE 3 — MITIGATION ==
 
-DET -[#1565C0]> SW : block MAC cc:cc\n(OVS rule or static ARP)
+DET -[#1565C0]> SW : block attacker MAC cc:cc (OVS rule)
+DET -> V : install verified static gateway mapping\n10.0.0.254 → bb:bb
+V -> V : confirm neighbour table before retry
 V -> SW : ICMP to gateway
 SW -[#43A047]> GW : traffic restored to gateway
 note right of GW #E8F5E9 : diversion stopped

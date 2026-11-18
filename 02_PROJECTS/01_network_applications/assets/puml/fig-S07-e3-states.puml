@@ -15,25 +15,25 @@ start
 if (Valid DNS query format?) then (yes)
     :Extract question\n(name, type, class);
 else (no)
-    #FFCDD2:Send FORMERR response;
+    :Send FORMERR response; <<#FFCDD2>>
     stop
 endif
 
 if (Opcode supported?\n(QUERY only)) then (yes)
 else (no)
-    #FFCDD2:Send NOTIMP response;
+    :Send NOTIMP response; <<#FFCDD2>>
     stop
 endif
 
 if (Name in local zone?) then (yes)
-    #C8E6C9:Build authoritative response\nfrom zone file;
+    :Build authoritative response\nfrom zone file; <<#C8E6C9>>
     :Send response to client;
     stop
 else (no)
 endif
 
 if (Name in TTL cache\nand not expired?) then (hit)
-    #C8E6C9:Build response from cache;
+    :Build response from cache; <<#C8E6C9>>
     :Send response to client;
     stop
 else (miss)
@@ -45,7 +45,7 @@ if (Upstream responds\nwithin timeout?) then (yes)
     :Cache response with TTL;
     :Send response to client;
 else (timeout)
-    #FFCDD2:Send SERVFAIL response;
+    :Send SERVFAIL response; <<#FFCDD2>>
 endif
 
 stop

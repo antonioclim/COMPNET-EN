@@ -7,31 +7,35 @@
       "id": "R1",
       "filter": "tcp.dstport==5017 && tcp.flags.syn==1 && tcp.flags.ack==0",
       "condition": ">= 1",
-      "description": "Handshake to the object-store service."
+      "description": "SYN connection attempt to the object-store service."
     },
     {
       "id": "R2",
       "filter": "tcp.port==5017 && frame contains \"PUBLISH\"",
       "condition": ">= 1",
-      "description": "Publication of a keyed object."
+      "description": "PUBLISH marker bytes are present; assert the keyed object state."
     },
     {
       "id": "R3",
       "filter": "tcp.port==5017 && frame contains \"GET\"",
       "condition": ">= 1",
-      "description": "Retrieval request for a key."
+      "description": "GET marker bytes are present; decode the requested key."
     },
     {
       "id": "R4",
       "filter": "tcp.port==5017 && (frame contains \"OBJECT\" || frame contains \"FETCH\" || frame contains \"VALUE\")",
       "condition": ">= 1",
-      "description": "Brokered retrieval result appears in payload."
+      "description": "An OBJECT/FETCH/VALUE marker is present; verify the brokered result."
     },
     {
       "id": "R5",
       "filter": "tcp.port==5017 && (frame contains \"LEASE\" || frame contains \"HEARTBEAT\" || frame contains \"EXPIRED\" || frame contains \"REMOVED\")",
       "condition": ">= 1",
-      "description": "Lease or cleanup semantics are observable."
+      "description": "A lease/heartbeat/expiry/removal marker is present; assert timing, cleanup and notification separately."
     }
+  ],
+  "manual_checks": [
+    "R1 R2 R3 R4: Assert ownership, key and exact brokered result.",
+    "R5: Measure the E1 lease interval and assert cleanup plus watcher notification; a LEASE/HEARTBEAT word alone is insufficient."
   ]
 }

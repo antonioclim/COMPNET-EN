@@ -66,7 +66,7 @@ Subnetting is presented as a design skill rather than a rote calculation exercis
 ```bash
 git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
 cd COMPNET-EN
-git sparse-checkout set 04_SEMINARS/S05
+git sparse-checkout set 04_SEMINARS/S05 00_TOOLS
 ```
 
 To include the Mininet guide:

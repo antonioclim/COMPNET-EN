@@ -26,6 +26,7 @@ def main():
     PORT = int(PORT)
 
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as client_socket:
+        client_socket.settimeout(5)
         print(f"[INFO] UDP client (template) sending to {HOST}:{PORT}")
 
         while True:
@@ -66,7 +67,7 @@ def main():
                "[WARN] unknown command" and continue.
 
             3. After sending the request, receive a response with
-               recvfrom(1024), deserialise it and print it.
+               recvfrom(65535), deserialise it and print it.
             """
 
             # Example: minimal skeleton
@@ -95,11 +96,25 @@ def main():
                 continue
 
             # Send the request and receive the response.
-            message_bytes = serialize(request)
+            try:
+                message_bytes = serialize(request)
+            except ValueError as exc:
+                print(f"[ERROR] {exc}")
+                continue
             client_socket.sendto(message_bytes, (HOST, PORT))
 
-            response_bytes, _ = client_socket.recvfrom(1024)
-            response: ResponseMessage = deserialize(response_bytes)
+            try:
+                response_bytes, _ = client_socket.recvfrom(65535)
+            except socket.timeout:
+                print("[TIMEOUT] No reply within 5 s; UDP does not guarantee delivery.")
+                continue
+            try:
+                response: ResponseMessage = deserialize(response_bytes)
+                if not isinstance(response, ResponseMessage):
+                    raise ValueError("Unexpected response type")
+            except Exception as exc:
+                print(f"[ERROR] Invalid response: {type(exc).__name__}")
+                continue
             print(response)
             # <<< STUDENT CODE ENDS HERE
 

@@ -1,4 +1,4 @@
-#### `index_udp-multicast_scenario.md`
+#### `S03_Part05D_Scenario_UDP_Multicast.md`
 
 ````markdown
 ### Scenario: UDP multicast sender + receiver + Wireshark
@@ -19,13 +19,13 @@ You will:
 In a terminal:
 
 ```bash
-python3 index_udp-multicast_receiver_example.py
+python3 S03_Part05B_Example_UDP_Multicast_Receiver.py
 ````
 
 You should see:
 
 ```text
-[INFO] UDP multicast receiver joined group 224.0.0.1 on port 5001
+[INFO] UDP multicast receiver joined group 239.255.0.1 on port 5001
 ```
 
 Leave the programme running.
@@ -39,7 +39,7 @@ Leave the programme running.
 In another terminal:
 
 ```bash
-python3 index_udp-multicast_sender_example.py "Hello, multicast group!"
+python3 S03_Part05A_Example_UDP_Multicast_Sender.py "Hello, multicast group!"
 ```
 
 In the receiver:
@@ -67,8 +67,8 @@ udp port 5001
 4. Send a few multicast messages:
 
 ```bash
-python3 index_udp-multicast_sender_example.py "m1"
-python3 index_udp-multicast_sender_example.py "m2"
+python3 S03_Part05A_Example_UDP_Multicast_Sender.py "m1"
+python3 S03_Part05A_Example_UDP_Multicast_Sender.py "m2"
 ```
 
 5. Stop the capture and apply a **display filter**:
@@ -80,19 +80,19 @@ udp.port == 5001
 Or, to see only multicast traffic:
 
 ```text
-ip.dst == 224.0.0.1 and udp.port == 5001
+ip.dst == 239.255.0.1 and udp.port == 5001
 ```
 
 Observe:
 
-* the destination address is 224.0.0.1;
+* the destination address is 239.255.0.1;
 * the packet reaches all processes subscribed to the group.
 
 ---
 
 ### 5. Student task – multicast receiver with timestamp
 
-1. Open `index_udp-multicast_receiver_template.py`.
+1. Open `S03_Part05C_Template_UDP_Multicast_Receiver.py`.
 
 2. Complete the `TODO` section to add:
 
@@ -103,7 +103,7 @@ Observe:
 3. Run the template receiver:
 
 ```bash
-python3 index_udp-multicast_receiver_template.py
+python3 S03_Part05C_Template_UDP_Multicast_Receiver.py
 ```
 
 4. Send 3–5 multicast messages.
@@ -123,3 +123,21 @@ Prepare the following:
     * who receives the message,
     * how each appears in Wireshark;
 * `udp_multicast_capture.pcapng`: the Wireshark capture for the multicast traffic.
+
+### Interface and membership controls
+
+Use the dedicated laboratory group `239.255.0.1`, not the all-hosts group 224.0.0.1.
+For a reproducible same-VM Linux exercise, use two terminals in the same network
+namespace and select loopback in both:
+
+```bash
+export MCAST_INTERFACE_IP=127.0.0.1
+```
+
+Then run the receiver in one terminal and sender in the other using the commands
+above. For separate lab nodes, select each node's actual address on their common
+interface instead. The default `0.0.0.0` delegates interface selection to the OS.
+Linux receivers set `IP_MULTICAST_ALL=0` so only memberships of that socket qualify.
+When comparing with a receiver without membership, keep group, interface and socket
+binding identical. Other operating systems may have different delivery rules; record
+the OS and pre-existing memberships. Group membership is not a delivery guarantee.

@@ -18,7 +18,7 @@
 | `ModuleNotFoundError: yaml` | PyYAML not installed | `pip install pyyaml` |
 | `SyntaxError` on `{` | Using braces instead of colon | Use `:` and indentation |
 | `IndentationError` | Mixed tabs and spaces | Use spaces only (4 per level) |
-| `NameError: 'const'` | Using JS/Kotlin keywords | Just assign: `PORT = 8080` |
+| `SyntaxError: invalid syntax` | Using JS/Kotlin keywords | Just assign: `PORT = 8080` |
 | `AttributeError` on dict | Using dot notation | Use brackets: `d["key"]` |
 | `UnicodeDecodeError` | Wrong encoding | Specify encoding or use `errors='replace'` |
 
@@ -66,21 +66,18 @@ ConnectionRefusedError: [Errno 111] Connection refused
 **Cause:** The server is not running or is listening on a different port/address.
 
 **Fix:**
-```python
-# 1. Start the server FIRST in one terminal:
-python server.py
+Run these commands from the repository root in Linux/WSL, using two terminals:
 
-# 2. Then run the client in another terminal:
-python client.py
+```bash
+# Terminal 1: start the canonical example server and leave it running.
+python3 "00_APPENDIX/a)PYTHON_self_study_guide/examples/01_socket_tcp.py" server 9090
 
-# 3. Verify server is listening:
-# Linux/WSL:
-netstat -tlnp | grep 8080
-# or
-ss -tlnp | grep 8080
+# Terminal 2: confirm the listener, then run the client.
+ss -tlnp 'sport = :9090'
+python3 "00_APPENDIX/a)PYTHON_self_study_guide/examples/01_socket_tcp.py" client 127.0.0.1 9090 "Hello"
 ```
 
-**Verify:** `netstat` shows the server listening on the expected port.
+**Verify:** `ss` shows the example listening on TCP port 9090 and the client prints its response. Stop the server with Ctrl+C when finished.
 
 **Common mistakes:**
 - Server bound to `127.0.0.1` but client connecting to `0.0.0.0`
@@ -248,13 +245,13 @@ expand -t 4 script.py > script_fixed.py
 
 ---
 
-### 8. NameError: name 'const' is not defined
+### 8. SyntaxError: invalid syntax
 
 **When it appears:** Using JavaScript or Kotlin keywords in Python
 
 **Error example:**
 ```
-NameError: name 'const' is not defined
+SyntaxError: invalid syntax
 ```
 
 **Cause:** Python does not have `const`, `let`, `var`, `val` keywords.
@@ -272,7 +269,7 @@ counter = 0        # All variables are reassignable
 host = "localhost"
 ```
 
-**Verify:** No NameError on execution.
+**Verify:** No SyntaxError when using PORT = 8080.
 
 ---
 
@@ -481,9 +478,11 @@ value, = struct.unpack(fmt, data[:expected_size])
 Cannot connect to the Docker daemon at unix:///var/run/docker.sock
 ```
 
-**Cause:** Docker Desktop is not running or WSL integration is disabled.
+**Cause:** The selected Docker daemon is stopped or inaccessible. Use `docker context show` and `docker info`; follow the route actually installed.
 
 **Fix:**
+For Docker Desktop only:
+
 1. Start Docker Desktop on Windows
 2. Wait for it to fully start (whale icon stable in system tray)
 3. Check WSL integration: Docker Desktop → Settings → Resources → WSL Integration → Enable for your distro
@@ -533,3 +532,5 @@ If your issue is not listed here:
 *Troubleshooting Guide — Python for Networking*
 *Computer Networks Course — ASE Bucharest, CSIE*
 *Version 5.0 — January 2026*
+
+For the primary VM and native WSL Engine routes, follow [environment routes](../../docs/environment_routes.md); Docker Desktop settings do not manage those daemons.

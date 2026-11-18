@@ -7,31 +7,35 @@
       "id": "R1",
       "filter": "udp.dstport==5111 && ip.dst==239.10.11.12",
       "condition": ">= 1",
-      "description": "At least one UDP multicast announcement (service discovery)."
+      "description": "A UDP frame addressed to the discovery multicast group is present; decode its service announcement."
     },
     {
       "id": "R2",
       "filter": "tcp.dstport==8080 && tcp.flags.syn==1 && tcp.flags.ack==0",
       "condition": ">= 1",
-      "description": "Handshake to the API Gateway."
+      "description": "SYN connection attempt to the API Gateway."
     },
     {
       "id": "R3",
       "filter": "tcp.port==8080 && frame contains \"GET \"",
       "condition": ">= 1",
-      "description": "HTTP request to the gateway."
+      "description": "HTTP request-marker bytes are present on the gateway transport."
     },
     {
       "id": "R4",
       "filter": "tcp.port==8080 && frame contains \"HTTP/1.1 200\"",
       "condition": ">= 1",
-      "description": "200 response through the gateway."
+      "description": "HTTP 200 marker bytes are present on the gateway transport."
     },
     {
       "id": "R5",
       "filter": "(tcp.port==5101 || tcp.port==5102) && frame contains \"HTTP/1.1\"",
       "condition": ">= 1",
-      "description": "The gateway communicates with at least one microservice (HTTP upstream)."
+      "description": "A payload-bearing frame on a microservice port is present; correlate the gateway-to-service exchange."
     }
+  ],
+  "manual_checks": [
+    "R1: Decode the announcement and correlate it with the registry entry; see the discovery subscenario in the E2 figure.",
+    "R2 R3 R4 R5: Trace both HTTP legs and service identity. Stop an instance and assert the E1 reroute/503 policy separately."
   ]
 }

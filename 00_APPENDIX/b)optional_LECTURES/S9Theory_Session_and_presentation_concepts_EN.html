@@ -472,9 +472,9 @@
 <div>
 <h3>Practical connections:</h3>
 <div class="card success" style="margin-bottom: 1rem;">
-<h4>🔧 Starterkit Exercises</h4>
-<p><code>ex_9_01_endianness.py</code> — Binary framing</p>
-<p><code>ex_9_02_pseudo_ftp.py</code> — Session management</p>
+<h4>🔧 Canonical COMPNET-EN activities</h4>
+<p><a href="../../04_SEMINARS/S04/2_binary-proto_tcp/">S04 binary protocol</a> — inspect the actual framing contract.</p>
+<p><a href="../../04_SEMINARS/S09/2_custom-pseudo-ftp/">S09 pseudo-FTP</a> — separate control/data channels.</p>
 </div>
 <div class="card accent">
 <h4>🌐 Real-World Skills</h4>
@@ -664,7 +664,7 @@
 </div>
 <div class="card accent">
 <h4>Python Session Class</h4>
-<p>See <code>ex_9_02_pseudo_ftp.py</code> — the <code>Session</code> class maintains <code>authenticated</code>, <code>username</code>, and <code>cwd</code> state across commands.</p>
+<p>The illustrative <code>Session</code> class on slide 29 maintains authentication, username and directory state. The repository’s S09 pseudo-FTP implements a different, explicitly documented teaching protocol; do not assume this class or authentication exchange is present there.</p>
 </div>
 </div>
 <div class="slide-footer">by Revolvix</div>
@@ -896,7 +896,7 @@ Header.Payload.Signature
 </div>
 <div class="two-col">
 <div class="warning-box">
-<strong>The Rule:</strong> Network protocols use <strong>Big-Endian</strong> (Network Byte Order). Always convert before sending!
+<strong>The Rule:</strong> Use the byte order specified by the protocol. TCP/IP integer header fields use big-endian; application formats may differ (for example Protobuf fixed32/fixed64 use little-endian).
   </div>
 <div class="code-block" data-lang="python">
 <span class="keyword">import</span> struct
@@ -987,7 +987,9 @@ magic, msg_type, flags, length, crc = struct.unpack(
 </div>
 <div>
 <div class="code-block" data-lang="python">
-<span class="comment"># From ex_9_01_endianness.py</span>
+<span class="comment"># Standalone illustrative format, not the canonical S04 or S09 wire protocol
+import struct
+import zlib</span>
 HEADER_FORMAT = <span class="string">"!2sBBII"</span>
 MAGIC = <span class="string">b"S9"</span>
 
@@ -1067,8 +1069,8 @@ MAGIC = <span class="string">b"S9"</span>
 <thead><tr><th>Encoding</th><th>"Ș" (Romanian)</th><th>Notes</th></tr></thead>
 <tbody>
 <tr><td>UTF-8</td><td><code>C8 98</code></td><td>Variable width, ASCII-compat</td></tr>
-<tr><td>UTF-16</td><td><code>01 98</code></td><td>2-4 bytes per char</td></tr>
-<tr><td>ISO-8859-2</td><td><code>AA</code></td><td>Latin-2, limited</td></tr>
+<tr><td>UTF-16BE</td><td><code>02 18</code></td><td>U+0218 Ș; UTF-16LE is 18 02</td></tr><!-- qa:allow-ro: Unicode encoding example -->
+<tr><td>ISO-8859-2</td><td>Not representable</td><td>AA encodes Ş (U+015E), not Ș (U+0218)</td></tr><!-- qa:allow-ro: Unicode encoding example -->
 </tbody>
 </table>
 </div>
@@ -1310,8 +1312,8 @@ restored = wire_bytes.decode(<span class="string">"utf-8"</span>)
 </div>
 <!-- SLIDE 29: Pseudo-FTP Implementation -->
 <div class="slide" data-slide="29">
-<h2>🛠️ Starterkit: Pseudo-FTP Implementation</h2>
-<p>The <code>ex_9_02_pseudo_ftp.py</code> implements simplified FTP demonstratification L5/L6 concepts:</p>
+<h2>🛠️ Illustrative Session and Framing Design</h2>
+<p>These self-contained design fragments illustrate session state and a custom 12-byte header. They are not an implementation of standard FTP or the repository’s S09 one-byte data-length protocol. For the runnable activity, follow the canonical S09 README.</p>
 <div class="two-col">
 <div>
 <h3>Session Layer (L5) Features</h3>
@@ -1365,7 +1367,7 @@ FLAG_GZIP = <span class="number">0x01</span>
 </div>
 </div>
 <div class="highlight-box" style="margin-top: 1rem;">
-<strong>Try it:</strong> <code>make server</code> in one terminal, <code>make client-list</code> in another. Use <code>make capture</code> to see traffic in Wireshark.
+<strong>Try the canonical activity:</strong> open <a href="../../04_SEMINARS/S09/2_custom-pseudo-ftp/S09_Part02A_Explanation_Pseudo_FTP.md">S09 pseudo-FTP instructions</a>. Start its supplied server and client in separate terminals and capture the actual control/data exchanges. Its framing differs from the illustrative header above.
   </div>
 <div class="slide-footer">by Revolvix</div>
 </div>
@@ -1425,17 +1427,19 @@ tcp.port == <span class="number">3333</span>
 </div>
 <div>
 <div class="card purple">
-<h4>Starterkit Helper</h4>
+<h4>Local capture</h4>
 <div class="code-block" data-lang="bash" style="margin-top: 0.5rem;">
 <span class="comment"># Automated capture</span>
-make capture-save
-<span class="comment"># Output: artifacts/demo.pcap</span>
+mkdir -p captures
+sudo tcpdump -i lo -w "captures/s09-$(date +%Y%m%dT%H%M%S).pcap" \
+    'tcp and host 127.0.0.1'
+<span class="comment"># Run the local S09 client in another terminal, then Ctrl+C.</span>
 </div>
 </div>
 </div>
 </div>
 <div class="warning-box" style="margin-top: 1rem;">
-<strong>Lab Deliverable:</strong> A <code>.pcap</code> file demonstratification control/data separation with correctly interpreted binary headers.
+<strong>Lab Deliverable:</strong> A <code>.pcap</code> file demonstrating control/data separation with correctly interpreted binary headers.
   </div>
 <div class="slide-footer">by Revolvix</div>
 </div>
@@ -1456,7 +1460,7 @@ make capture-save
 <ul>
 <li><strong>Handshake:</strong> Establishing secure connection</li>
 <li><strong>Session resumption:</strong> Tickets, session IDs</li>
-<li><strong>Renegotiation:</strong> Updating keys mid-connection</li>
+<li><strong>Key updates:</strong> TLS 1.3 uses KeyUpdate; older TLS renegotiation is a different mechanism.</li>
 <li><strong>Alert protocol:</strong> Error signalling</li>
 </ul>
 </div>
@@ -1490,7 +1494,7 @@ make capture-save
 <div class="reveal-content">
 <div class="definition-box">
 <div class="term">Answer: B</div>
-<p>The <code>!</code> prefix specifies network byte order (big-endian), and <code>I</code> means unsigned int (4 bytes). This is the standard format for transmitting integers in network protocols.</p>
+<p>The <code>!</code> prefix specifies network byte order (big-endian), and <code>I</code> means unsigned int (4 bytes). Use this format when the application protocol specifies an unsigned 32-bit big-endian field.</p>
 </div>
 </div>
 <div class="slide-footer">by Revolvix</div>
@@ -1762,12 +1766,12 @@ Content-Language: en-GB
 <li>Python socket HOWTO: <code>docs.python.org/3/howto/sockets</code></li>
 <li>MDN Web Docs: <code>developer.mozilla.org</code></li>
 </ul>
-<h3 style="margin-top: 1.5rem;">Starterkit Files</h3>
+<h3 style="margin-top: 1.5rem;">Canonical repository activities</h3>
 <ul>
-<li><code>python/exercises/ex_9_01_endianness.py</code></li>
-<li><code>python/exercises/ex_9_02_pseudo_ftp.py</code></li>
-<li><code>python/utils/net_utils.py</code></li>
-<li><code>Makefile</code> — all useful commands</li>
+<li><a href="../../04_SEMINARS/S04/README.md">S04 — framing and protocol contracts</a></li>
+<li><a href="../../04_SEMINARS/S09/README.md">S09 — FTP and pseudo-FTP</a></li>
+<li><a href="../../03_LECTURES/C09/README.md">C09 — encoding and MIME scenarios</a></li>
+<li>Each scenario README gives its working directory, launch commands and cleanup.</li>
 </ul>
 </div>
 </div>
@@ -1799,10 +1803,11 @@ Content-Language: en-GB
 <p>Questions?</p>
 <p class="subtitle" style="margin-top: 2rem;">See you at the seminar for hands-on implementation!</p>
 <div class="code-block" style="background: rgba(0,0,0,0.3); max-width: 500px; margin: 2rem auto; text-align: left;">
-cd ~/WEEK9
-make setup
-make server <span class="comment"># Terminal 1</span>
-make client-list <span class="comment"># Terminal 2</span>
+cd ~/COMPNET-EN
+cd 04_SEMINARS/S09/2_custom-pseudo-ftp
+python3 S09_Part02B_Script_Pseudo_FTP_Server.py
+<span class="comment"># Terminal 2, in the same directory:</span>
+python3 S09_Part02C_Script_Pseudo_FTP_Client.py
 </div>
 <p class="subtitle" style="margin-top: 1.5rem; font-size: 0.9rem;">ASE-CSIE 2025 | Computer Networks | Collective teaching staff</p>
 <div class="slide-footer" style="color: rgba(255,255,255,0.5);">by Revolvix</div>
@@ -1939,8 +1944,8 @@ make client-list <span class="comment"># Terminal 2</span>
           incorrect: '<strong>✗ Not quite.</strong> Compression is a <em>Presentation Layer (L6)</em> function — it transforms data representation. The Session Layer (L5) handles dialogue management: establishing/terminating sessions, synchronisation checkpoints, and dialogue control modes. Think of L5 as the "conversation manager" and L6 as the "translator".'
         },
         2: {
-          correct: '<strong>✓ Correct!</strong> The <code>!</code> prefix means network byte order (big-endian), and <code>I</code> means unsigned 32-bit integer (4 bytes). This is the standard for sending multi-byte integers across networks — recall from Week 8 that TCP/IP uses big-endian for all protocol fields.',
-          incorrect: '<strong>✗ Not quite.</strong> In Python\'s struct module, <code>!</code> specifies <em>network byte order</em> (big-endian), and <code>I</code> means unsigned 32-bit integer (4 bytes). The <code>!</code> prefix is shorthand for <code>&gt;</code> and is the correct choice for any value transmitted over a network. Signed integers use lowercase <code>i</code>; floating-point uses <code>f</code> or <code>d</code>.'
+          correct: '<strong>✓ Correct!</strong> The <code>!</code> prefix means network byte order (big-endian), and <code>I</code> means unsigned 32-bit integer (4 bytes). This is appropriate for the specified big-endian field; application protocols may specify different encodings.',
+          incorrect: '<strong>✗ Not quite.</strong> In Python\'s struct module, <code>!</code> specifies <em>network byte order</em> (big-endian), and <code>I</code> means unsigned 32-bit integer (4 bytes). The <code>!</code> prefix is shorthand for <code>&gt;</code> and is appropriate when the protocol specifies big-endian standard-width fields. Signed integers use lowercase <code>i</code>; floating-point uses <code>f</code> or <code>d</code>.'
         },
         3: {
           correct: '<strong>✓ Correct!</strong> In passive mode (PASV), the server opens a dynamic port and tells the client its number. The client then initiates the data connection — this works through NAT and firewalls because outbound connections from the client are typically permitted. Control commands (USER, PASS, LIST) are text-based, not binary.',
@@ -2003,6 +2008,7 @@ make client-list <span class="comment"># Terminal 2</span>
     }
 
     document.addEventListener('keydown', (e) => {
+      if (e.target && e.target.closest && e.target.closest('input, textarea, select, button, [contenteditable="true"]')) return;
       if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
       else if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
       else if (e.key === 'Home') { e.preventDefault(); showSlide(1); }

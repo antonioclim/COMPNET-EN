@@ -1,4 +1,5 @@
 import argparse
+import ssl
 import imaplib
 from email.parser import BytesParser
 from email.policy import default
@@ -11,13 +12,16 @@ def main():
     p.add_argument("--user", required=True)
     p.add_argument("--password", required=True)
     p.add_argument("--mailbox", default="INBOX")
+    p.add_argument("--cafile", default="tls/ca.crt", help="Trusted CA certificate for this local lab")
     args = p.parse_args()
+    context = ssl.create_default_context(cafile=args.cafile)
 
     # Use SSL if common SSL port:
     if args.imap_port == 993:
-        imap = imaplib.IMAP4_SSL(args.imap_host, args.imap_port)
+        imap = imaplib.IMAP4_SSL(args.imap_host, args.imap_port, ssl_context=context)
     else:
         imap = imaplib.IMAP4(args.imap_host, args.imap_port)
+        imap.starttls(ssl_context=context)
 
     try:
         imap.login(args.user, args.password)

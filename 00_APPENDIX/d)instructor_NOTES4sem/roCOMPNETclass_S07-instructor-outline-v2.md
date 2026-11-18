@@ -130,7 +130,7 @@ Output așteptat (aproximativ):
 Acum generezi trafic TCP — pornești server pe h2, trimiți din h1:
 ```text
 mininet> h2 python3 ../S06/3_sdn-app-traffic/S06_Part03_Script_TCP_Server.py 5000 &
-mininet> h1 bash -c "echo 'hello_s07' | nc 10.0.10.2 5000"
+mininet> h1 bash -c "echo 'hello_s07' | nc -N 10.0.10.2 5000"
 ```
 
 **Micro-întrebare (10 sec):** „Sniffer-ul arată `proto=TCP` dar nu arată porturile. Ce ar trebui să decodăm în plus?" (Răspuns: header-ul TCP, primii 4 bytes — porturile sursă și destinație.)
@@ -184,7 +184,7 @@ mininet> h2 python3 2_packet-filter/S07_Part02A_Script_Packet_Filter.py h2-eth0 
 
 Generezi trafic:
 ```text
-mininet> h1 bash -c "echo 'again' | nc 10.0.10.2 5000"
+mininet> h1 bash -c "echo 'again' | nc -N 10.0.10.2 5000"
 ```
 
 **Ce apare:** linii de forma `10.0.10.1:<port_efemer> -> 10.0.10.2:5000  proto=TCP`
@@ -255,7 +255,7 @@ Re-scanezi portul 5001 din h1 și observi `FILTERED`. Apoi cureți:
 mininet> h2 iptables -D INPUT -p tcp --dport 5001 -j DROP
 ```
 
-> *▸ „DROP → timeout → FILTERED. Dacă ar fi fost REJECT, vedeai RST → CLOSED."*
+> *▸ „DROP poate produce timeout, raportat FILTERED de această probă; tăcerea nu dovedeşte cauza. Pentru RST folosiţi explicit REJECT --reject-with tcp-reset; REJECT implicit poate trimite ICMP."*
 
 ---
 

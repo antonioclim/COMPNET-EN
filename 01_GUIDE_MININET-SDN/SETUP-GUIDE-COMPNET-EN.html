@@ -801,6 +801,7 @@ body {
   .hero h1 { font-size: 1.7rem; }
   .substep { font-size: 1rem; }
 }
+[hidden] { display:none !important; }
 </style>
 </head>
 
@@ -810,7 +811,7 @@ body {
 <nav class="nav" id="nav">
   <div class="nav-inner">
     <div class="nav-logo">compnet<span>@ase-csie</span> ~$ <span class="blink">_</span></div>
-    <button class="nav-toc-btn" onclick="toggleToc()">
+    <button class="nav-toc-btn" id="tocTrigger" aria-expanded="false" aria-controls="tocPanel" onclick="toggleToc()">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="18" y2="18"/></svg>
       Contents
     </button>
@@ -819,10 +820,10 @@ body {
 </nav>
 
 <!-- TOC Panel -->
-<div class="toc-overlay" id="tocOverlay" onclick="toggleToc()"></div>
-<div class="toc-panel" id="tocPanel">
+<div class="toc-overlay" id="tocOverlay" hidden onclick="toggleToc()"></div>
+<div class="toc-panel" id="tocPanel" role="dialog" aria-modal="true" aria-label="Contents" hidden inert>
   <button class="toc-close" onclick="toggleToc()">✕</button>
-  <div class="toc-title">Contents — 15 steps</div>
+  <div class="toc-title">Contents — 16 steps</div>
   <ol class="toc-list">
 <li><a href="#intro" onclick="toggleToc()"><span class="toc-step-num">01</span> What runs where</a></li>
 <li><a href="#reqs" onclick="toggleToc()"><span class="toc-step-num">02</span> Hardware and software requirements</a></li>
@@ -1257,10 +1258,18 @@ async function copyCode(btn) {
   setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = original; }, 2000);
 }
 
-function toggleToc() {
-  document.getElementById('tocOverlay').classList.toggle('active');
-  document.getElementById('tocPanel').classList.toggle('active');
+function setToc(open) {
+  const panel = document.getElementById('tocPanel');
+  const overlay = document.getElementById('tocOverlay');
+  panel.hidden = overlay.hidden = !open;
+  panel.inert = !open;
+  panel.classList.toggle('active', open);
+  overlay.classList.toggle('active', open);
+  document.getElementById('tocTrigger').setAttribute('aria-expanded', String(open));
+  if (open) panel.querySelector('button').focus();
+  else document.getElementById('tocTrigger').focus();
 }
+function toggleToc() { setToc(document.getElementById('tocPanel').hidden); }
 
 const progress = document.getElementById('progress');
 const btt = document.getElementById('btt');
@@ -1284,9 +1293,15 @@ style.textContent = `.blink { animation: blink 1s step-end infinite; } @keyframe
 document.head.appendChild(style);
 
 document.addEventListener('keydown', (e) => {
+  const panel = document.getElementById('tocPanel');
+  if (e.key === 'Tab' && !panel.hidden) {
+    const controls = [...panel.querySelectorAll('a,button')];
+    const first = controls[0], last = controls[controls.length - 1];
+    if (e.shiftKey && (document.activeElement === first || !panel.contains(document.activeElement))) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && (document.activeElement === last || !panel.contains(document.activeElement))) { e.preventDefault(); first.focus(); }
+  }
   if (e.key === 'Escape') {
-    document.getElementById('tocOverlay').classList.remove('active');
-    document.getElementById('tocPanel').classList.remove('active');
+    if (!document.getElementById('tocPanel').hidden) setToc(false);
   }
 });
 </script>

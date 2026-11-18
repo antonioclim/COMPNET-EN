@@ -13,7 +13,7 @@ Week 8 is the largest lecture by line count (464 lines) and covers the transport
 | [`assets/render.sh`](assets/render.sh) | Diagram rendering script | — |
 | [`assets/scenario-tcp-handshake-tcpdump/`](assets/scenario-tcp-handshake-tcpdump/) | TCP three-way handshake capture | 5 files |
 | [`assets/scenario-tls-openssl/`](assets/scenario-tls-openssl/) | TLS 1.3 with OpenSSL s_server/s_client | 5 files |
-| [`assets/scenario-udp-vs-tcp-loss/`](assets/scenario-udp-vs-tcp-loss/) | UDP vs. TCP under Mininet packet loss | 6 files |
+| [`assets/scenario-udp-vs-tcp-loss/`](assets/scenario-udp-vs-tcp-loss/) | UDP vs. TCP under Mininet packet loss | 7 files |
 
 ## Visual Overview
 
@@ -74,7 +74,7 @@ TLS demonstration:
 
 ```bash
 cd assets/scenario-tls-openssl
-bash gen_certs.sh    # generate CA + server certificate
+bash gen_certs.sh    # generate a self-signed server certificate for the local demo
 bash run_server.sh & # start OpenSSL s_server
 bash run_client.sh   # connect with s_client
 ```
@@ -126,7 +126,7 @@ TCP state knowledge is assumed by every application-layer lecture (C10–C12). T
 ```bash
 git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
 cd COMPNET-EN
-git sparse-checkout set 03_LECTURES/C08
+git sparse-checkout set 03_LECTURES/C08 00_TOOLS
 ```
 
 **Method B — Direct download**

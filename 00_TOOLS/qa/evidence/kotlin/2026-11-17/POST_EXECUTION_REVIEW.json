@@ -1,0 +1,334 @@
+{
+  "schema_version": 1,
+  "reviewer": "/root/kotlin_toolchain_inventory",
+  "reviewed_at_utc": "2026-11-17T19:19:09.840751+00:00",
+  "verdict": "PASS_RETAINED_EVIDENCE_REVIEW",
+  "report_path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/N08_KOTLIN_RESULTS.json",
+  "report_sha256": "0949411bb81912cc5baecde2c7bd7fd50bd9f790679131105090519bc7c1721c",
+  "candidate_commit": "7c79582c5750e9b94b1d7d34d269f080e91a32d3",
+  "candidate_tree": "355b2399aec344c63be855cf800c901c92ec4677",
+  "checks": [
+    {
+      "id": "RAW-REPORT-IDENTITY",
+      "status": "PASS",
+      "detail": {
+        "report_sha256": "0949411bb81912cc5baecde2c7bd7fd50bd9f790679131105090519bc7c1721c",
+        "git": {
+          "commit": "7c79582c5750e9b94b1d7d34d269f080e91a32d3",
+          "tree": "355b2399aec344c63be855cf800c901c92ec4677",
+          "status": ""
+        }
+      }
+    },
+    {
+      "id": "REFERENCED-FILE-HASHES",
+      "status": "PASS",
+      "detail": {
+        "unique_referenced_files_verified": 23,
+        "all_bytes_and_sha256_match": true
+      }
+    },
+    {
+      "id": "FROZEN-ARTIFACT-CONTINUITY",
+      "status": "PASS",
+      "detail": {
+        "probe_kotlin.py": "fc90a248212151d4bcdfd7380f2488909f88481c612a4e5b893478a4acd0574e",
+        "PROTOCOL_N08.md": "7befb3aeecb21edf245482f67bae258d7ff88a89ee48aa871b5cc88f2c6ed306",
+        "PROTOCOL_FREEZE.json": "3c7316616aaa3bdc73b53de4c5fa8fc5dc058e14791fedfe9d2d71fb74561ff8"
+      }
+    },
+    {
+      "id": "SOURCE-EXTRACTION-AND-WRAPPERS",
+      "status": "PASS",
+      "detail": {
+        "source_sha256": "7e83baf7bdced69fce7db7d1ec74fee4742fbbcbc1b07eb6d0f4ee906acb1b5f",
+        "original_body_bytes": 351,
+        "original_body_sha256": "4339065722c25a414bd1f106d282221ee847aa07aa907102491a1161176fe4fc",
+        "original_port": 8080,
+        "derived_port": 50081,
+        "wrapper_additions": "Only declared import and main-function delimiters"
+      }
+    },
+    {
+      "id": "COMMAND-AND-VARIANT-RECEIPTS",
+      "status": "PASS",
+      "detail": {
+        "command_receipts": [
+          {
+            "path": "execution/git_commit.command.json",
+            "sha256": "217b1d43613861474ae6bd1f5a0544b3928229af3c2063d69c6f0cce4605a21e",
+            "returncode": 0,
+            "cleanup": "PASS"
+          },
+          {
+            "path": "execution/java_version.command.json",
+            "sha256": "0c5a2b923dd3fbc3990eff121be3c21d02ca2b5908796e3e9b6ced45cfbd3dfb",
+            "returncode": 0,
+            "cleanup": "PASS"
+          },
+          {
+            "path": "execution/kotlinc_version.command.json",
+            "sha256": "729083eb0ca16d8e10e86b6cf468e1bf2084aac20ffe7e6b566cfa3d36c74add",
+            "returncode": 0,
+            "cleanup": "PASS"
+          },
+          {
+            "path": "execution/git_tree.command.json",
+            "sha256": "a1bfeed30bd3bab218526c0ea8382a4039a2427ae45ca360720160aad3cfe29a",
+            "returncode": 0,
+            "cleanup": "PASS"
+          },
+          {
+            "path": "execution/git_status.command.json",
+            "sha256": "bd53a965ea299b2551217018a8d66e8db2fa2a508529b832df0d464270efb7d9",
+            "returncode": 0,
+            "cleanup": "PASS"
+          },
+          {
+            "path": "execution/derived_50081/compile.command.json",
+            "sha256": "7b053eb1b7aeecd99b98672ed515633289098cbc4187b08cb60c5da65c378fc2",
+            "returncode": 0,
+            "cleanup": "PASS"
+          },
+          {
+            "path": "execution/exact_8080/compile.command.json",
+            "sha256": "adbc688b439b1350ac2cf7f0713a880eddbb16834e81cba4e4ee1d23c7d5ea64",
+            "returncode": 0,
+            "cleanup": "PASS"
+          }
+        ],
+        "version_text_and_nested_receipts_identical": true
+      }
+    },
+    {
+      "id": "COMPILED-JAR-INTEGRITY",
+      "status": "PASS",
+      "detail": [
+        {
+          "variant": "exact_8080",
+          "jar_sha256": "59a5cec8cb0088f43092aeb3b6d8cf48baf3afac9083ba061eb14e93002e24a5",
+          "jar_crc": "PASS",
+          "main_class": "RosettaKotlinAuditKt",
+          "main_class_sha256": "becdd408e8058770545600849cf0e15dabe0a000aec0d4f17761e52d3e989e49",
+          "main_class_major_version": 52
+        },
+        {
+          "variant": "derived_50081",
+          "jar_sha256": "820619a94eee355bbb49cbb8f6d63aa69b84a73f2789de0461a36e6f129d1a76",
+          "jar_crc": "PASS",
+          "main_class": "RosettaKotlinAuditKt",
+          "main_class_sha256": "3b72de5c92e1d90316cd78a3c83900f193f3a295731f16b5484eada1acc0c458",
+          "main_class_major_version": 52
+        }
+      ]
+    },
+    {
+      "id": "SIX-SCENARIO-CONSISTENCY",
+      "status": "PASS",
+      "detail": {
+        "compiled_variants": 2,
+        "recorded_client_scenarios": 6,
+        "payload_bytes_per_variant": 6144,
+        "following_client_bytes_per_variant": 22,
+        "review_method": "Recompute declared payload hashes and compare retained scenario records; no TCP replay or recapture."
+      }
+    },
+    {
+      "id": "OWNERSHIP-AND-CLEANUP-RECEIPTS",
+      "status": "PASS",
+      "detail": {
+        "variants": [
+          {
+            "variant": "exact_8080",
+            "pid_recorded": 143,
+            "port": 8080,
+            "ownership_records": 4,
+            "foreign_listener_recorded": false,
+            "cleanup": "PASS",
+            "active_members_after_recorded": 0
+          },
+          {
+            "variant": "derived_50081",
+            "pid_recorded": 216,
+            "port": 50081,
+            "ownership_records": 4,
+            "foreign_listener_recorded": false,
+            "cleanup": "PASS",
+            "active_members_after_recorded": 0
+          }
+        ],
+        "current_procfs_reinspection_performed": false,
+        "reason": "This is review of retained execution receipts, not a new observation of terminated PIDs."
+      }
+    },
+    {
+      "id": "MATRIX-VERDICT-AND-LIMITS",
+      "status": "PASS",
+      "detail": {
+        "criteria_PASS": 7,
+        "execution_duration_seconds": 13.17905,
+        "native_release_gates_all_passed": false,
+        "scope": "Kotlin/JVM wrapped Rosetta TCP echo fragment only"
+      }
+    }
+  ],
+  "unique_hashed_reference_files": 29,
+  "hashed_reference_files": [
+    {
+      "path": "/usr/lib/jvm/java-21-openjdk-amd64/bin/java",
+      "bytes": 14384,
+      "sha256": "1a7e0b17c39003c75b457d686775ccb032e56fa9c8afe3c492d8eb3715e8951a"
+    },
+    {
+      "path": "/workspace/scratch/7cc3f017cace/F3_R15_INTEGRATION/repository/00_APPENDIX/a)PYTHON_self_study_guide/comparisons/ROSETTA_STONE.md",
+      "bytes": 7606,
+      "sha256": "7e83baf7bdced69fce7db7d1ec74fee4742fbbcbc1b07eb6d0f4ee906acb1b5f"
+    },
+    {
+      "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/PROTOCOL_FREEZE.json",
+      "bytes": 2925,
+      "sha256": "3c7316616aaa3bdc73b53de4c5fa8fc5dc058e14791fedfe9d2d71fb74561ff8"
+    },
+    {
+      "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/PROTOCOL_N08.md",
+      "bytes": 10410,
+      "sha256": "7befb3aeecb21edf245482f67bae258d7ff88a89ee48aa871b5cc88f2c6ed306"
+    },
+    {
+      "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/EXTRACTED_KOTLIN_BODY.kt",
+      "bytes": 351,
+      "sha256": "4339065722c25a414bd1f106d282221ee847aa07aa907102491a1161176fe4fc"
+    },
+    {
+      "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/derived_50081/RosettaKotlinAudit.kt",
+      "bytes": 397,
+      "sha256": "d2b1e8fdee7896ceae1c1184c445ea5dac0041a735d3e52d1135adf3c9ff9e3a"
+    },
+    {
+      "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/derived_50081/compile.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/derived_50081/compile.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/derived_50081/rosetta-kotlin.jar",
+      "bytes": 5679796,
+      "sha256": "820619a94eee355bbb49cbb8f6d63aa69b84a73f2789de0461a36e6f129d1a76"
+    },
+    {
+      "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/derived_50081/runtime.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/derived_50081/runtime.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/exact_8080/RosettaKotlinAudit.kt",
+      "bytes": 396,
+      "sha256": "7db14d004dd18a82f3326f74d9e36c9dd5013b03c1af02c4294db2c7a766aefd"
+    },
+    {
+      "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/exact_8080/compile.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/exact_8080/compile.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/exact_8080/rosetta-kotlin.jar",
+      "bytes": 5679794,
+      "sha256": "59a5cec8cb0088f43092aeb3b6d8cf48baf3afac9083ba061eb14e93002e24a5"
+    },
+    {
+      "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/exact_8080/runtime.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/exact_8080/runtime.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/git_commit.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/git_commit.stdout.log",
+      "bytes": 41,
+      "sha256": "028ca967a048f56f8601926c969637b60c686d4e68701d5db84b79ab75b91ff1"
+    },
+    {
+      "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/git_status.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/git_status.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/git_tree.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/git_tree.stdout.log",
+      "bytes": 41,
+      "sha256": "34992683680f1af23e3ec4608d608ea5dc804d468da427d74b855b9c6202803c"
+    },
+    {
+      "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/java_version.stderr.log",
+      "bytes": 181,
+      "sha256": "0fc83381287ccbc8623d257bce2b0d03997ba0e85ff4492d38b409aea37a8aa9"
+    },
+    {
+      "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/java_version.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/kotlinc_version.stderr.log",
+      "bytes": 58,
+      "sha256": "8b9433e04ce88a8a4fedbf6ee1c7ba746af3202394a977225fe2e19aad89845d"
+    },
+    {
+      "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/execution/kotlinc_version.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/toolchain/kotlinc/bin/kotlinc",
+      "bytes": 3120,
+      "sha256": "7082c4cdf466d4a8c0879eccd2bbd0011204ff10267a7eba921c08982201ec92"
+    },
+    {
+      "path": "/workspace/scratch/7cc3f017cace/N08_KOTLIN/toolchain/kotlinc/lib/kotlin-compiler.jar",
+      "bytes": 60184521,
+      "sha256": "dc96436fac5160a39a071f3b82d7683f2912bbbf19fe7e26be66533c045a824e"
+    }
+  ],
+  "limits": {
+    "probe_rerun": false,
+    "harness_imported_or_functions_executed": false,
+    "compilation_performed_by_reviewer": false,
+    "network_used": false,
+    "raw_artifacts_modified": false,
+    "OVA_accessed": false,
+    "review_scope": "Read/hash retained files, compare JSON receipts and deterministic expected payloads, inspect compiled JAR ZIP structures; no independent replay of observed TCP or procfs events.",
+    "coordinator_checkout_clean_confirmation": "Accepted from coordinator; actual source bytes verified independently here.",
+    "single_execution_claim": "The reviewed dossier contains the one reported execution interval; this review does not prove the absence of all possible unrecorded executions."
+  }
+}

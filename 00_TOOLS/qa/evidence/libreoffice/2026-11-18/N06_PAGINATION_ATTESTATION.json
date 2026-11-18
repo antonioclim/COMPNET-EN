@@ -1,0 +1,632 @@
+{
+  "schema_version": "1.0",
+  "recorded_at_utc": "2026-11-18T05:32:30.203183+00:00",
+  "date": "2026-11-18",
+  "timezone": "Europe/Bucharest",
+  "repository": "antonioclim/COMPNET-EN",
+  "candidate_branch": "audit/v1.5.0-remediation",
+  "source_base_commit": "7753beb88a9f8589b34b92070d9737ecd4583dbd",
+  "source_base_tree": "098e63f085b78be4f1ab97e159e963243f3a4e35",
+  "status": "PASS_NATIVE_DEFAULT_PDF_LAYOUT_FULL_WORKBOOK_ACCEPTANCE_OPEN",
+  "user_confirmation_verbatim": "confirm paginarea ... next",
+  "authority": {
+    "print_configuration": "Explicit confirmation of the preceding complete proposal and its narrow openpyxl authoring route.",
+    "candidate_branch_integration": "Existing original continuation prompt section 4, preserved in the earlier F6 PHASE_PROTOCOL_AMENDMENT; next is not treated as a new external-action grant.",
+    "original_prompt_sha256": "accf46ae1759bcf10080e2a7ba088fe79edcec44048f6d518cd3b0f7600a4c0a"
+  },
+  "workbook": {
+    "path": "02_PROJECTS/RC2026_VERIFICATION_INDEX.xlsx",
+    "before_sha256": "08128be05a3860c0e60661f271b6b1790a0ecfeb3237e38f894cf4c544970e67",
+    "after_sha256": "5d6685976a6022890ee45de9ed5bd9733e3711ed51f234b6e90350a987b4982c",
+    "before_bytes": 191657,
+    "after_bytes": 194766,
+    "tested_identity": "Exact corrected workbook bytes tested before their integration commit; published-byte equivalence must be verified separately."
+  },
+  "authoring": {
+    "engine": "openpyxl 3.1.5 public print-setting APIs on an empty settings-only skeleton",
+    "application": "Only the generated pageSetUpPr, pageMargins, pageSetup and print defined names were transplanted into the original OOXML. The source workbook was not roundtripped or recalculated.",
+    "print_area_count": 32,
+    "print_title_count": 31,
+    "paper": "RULES A4 portrait; INDEX and all 30 projects A3 landscape",
+    "fit_to_width": 1,
+    "fit_to_height": 0,
+    "fit_to_page": true,
+    "outer_margins_mm": 10,
+    "header_footer_offsets_inches_preserved": 0.3,
+    "print_titles": {
+      "RULES": null,
+      "INDEX": "1:1",
+      "project_sheets": "1:3"
+    },
+    "approved_per_sheet_settings_sha256": "38f57fb6278058cbbd54e585e6b7f1bb7bcdad5c3aac88d3abb66d798b85bb64"
+  },
+  "preservation": {
+    "status": "PASS_INDEPENDENT_PRINT_ONLY_SOURCE_PRESERVATION",
+    "parts": 42,
+    "print_only_changed_parts": 33,
+    "other_parts_byte_identical": 9,
+    "all_changed_parts_reverse_to_exact_original_bytes": true,
+    "cell_records": 8669,
+    "nonempty_values": 7290,
+    "criterion_IDs": 1102,
+    "status_validation_records_and_memberships": 1102,
+    "formulas_and_original_cached_Open_values": 5,
+    "relationship_hyperlinks": 25,
+    "merged_ranges": 270,
+    "styles_row_heights_column_widths_panes_and_provenance_preserved": true
+  },
+  "native_execution": {
+    "engine": "LibreOfficeDev 26.8.0.0.alpha0",
+    "build": "2c87e51eeaa2b413ff4ae097b2705eea1995d8e5",
+    "route": "Native Linux headless default Calc PDF export in an isolated disposable profile",
+    "argv": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/override/soffice",
+      "-env:UserInstallation=file:///workspace/scratch/7cc3f017cace/F6_PAGINATION/private/native_profile",
+      "--headless",
+      "--nologo",
+      "--norestore",
+      "--convert-to",
+      "pdf:calc_pdf_Export",
+      "--outdir",
+      "/workspace/scratch/7cc3f017cace/F6_PAGINATION/native/pdf",
+      "/workspace/scratch/7cc3f017cace/F6_PAGINATION/native/input/RC2026_VERIFICATION_INDEX_PRINT.xlsx"
+    ],
+    "timeout_seconds": 90,
+    "started_at_utc": "2026-11-18T05:22:08.196891+00:00",
+    "finished_at_utc": "2026-11-18T05:22:20.504779+00:00",
+    "native_export_count_this_phase": 1,
+    "SinglePageSheets_used": false,
+    "exit_code": 0,
+    "stderr_bytes": 0,
+    "source_and_disposable_copy_unchanged": true,
+    "cleanup": {
+      "active_owned_group_members_initial": [],
+      "active_owned_group_members_final": [],
+      "direct_child_reaped": true
+    },
+    "XLSX_roundtrip_this_phase": false
+  },
+  "native_pdf": {
+    "sha256": "ffbefa4d3121f27cc2ec107e69ca69e24d82e69f99c57a20d77b344aa49a3c6e",
+    "bytes": 2653269,
+    "pages": 125,
+    "sheet_bookmarks": 32,
+    "header": "%PDF-1.7",
+    "postprocessed": false,
+    "page_map": {
+      "RULES": [
+        1
+      ],
+      "INDEX": [
+        2,
+        3
+      ],
+      "A01": [
+        4,
+        5,
+        6,
+        7
+      ],
+      "A02": [
+        8,
+        9,
+        10,
+        11
+      ],
+      "A03": [
+        12,
+        13,
+        14,
+        15
+      ],
+      "A04": [
+        16,
+        17,
+        18,
+        19
+      ],
+      "A05": [
+        20,
+        21,
+        22,
+        23
+      ],
+      "A06": [
+        24,
+        25,
+        26,
+        27
+      ],
+      "A07": [
+        28,
+        29,
+        30,
+        31
+      ],
+      "A08": [
+        32,
+        33,
+        34,
+        35
+      ],
+      "A09": [
+        36,
+        37,
+        38,
+        39
+      ],
+      "A10": [
+        40,
+        41,
+        42,
+        43
+      ],
+      "S01": [
+        44,
+        45,
+        46,
+        47,
+        48
+      ],
+      "S02": [
+        49,
+        50,
+        51,
+        52,
+        53
+      ],
+      "S03": [
+        54,
+        55,
+        56,
+        57
+      ],
+      "S04": [
+        58,
+        59,
+        60,
+        61
+      ],
+      "S05": [
+        62,
+        63,
+        64,
+        65
+      ],
+      "S06": [
+        66,
+        67,
+        68,
+        69
+      ],
+      "S07": [
+        70,
+        71,
+        72,
+        73
+      ],
+      "S08": [
+        74,
+        75,
+        76,
+        77
+      ],
+      "S09": [
+        78,
+        79,
+        80,
+        81
+      ],
+      "S10": [
+        82,
+        83,
+        84,
+        85
+      ],
+      "S11": [
+        86,
+        87,
+        88,
+        89
+      ],
+      "S12": [
+        90,
+        91,
+        92,
+        93
+      ],
+      "S13": [
+        94,
+        95,
+        96,
+        97
+      ],
+      "S14": [
+        98,
+        99,
+        100,
+        101
+      ],
+      "S15": [
+        102,
+        103,
+        104,
+        105
+      ],
+      "S16": [
+        106,
+        107,
+        108,
+        109
+      ],
+      "S17": [
+        110,
+        111,
+        112,
+        113
+      ],
+      "S18": [
+        114,
+        115,
+        116,
+        117
+      ],
+      "S19": [
+        118,
+        119,
+        120,
+        121
+      ],
+      "S20": [
+        122,
+        123,
+        124,
+        125
+      ]
+    },
+    "strict_objects_read": 18861,
+    "strict_object_errors": 0,
+    "strict_warnings": 0
+  },
+  "text_and_geometry": {
+    "sheets": 32,
+    "source_nonempty_values": 7290,
+    "unresolved_source_values": 0,
+    "criterion_IDs_expected": 1102,
+    "criterion_ID_occurrences_observed": 1102,
+    "all_ID_sequences_exact": true,
+    "critical_C_to_F_nonempty_expected": 4398,
+    "critical_region_result_counts": {
+      "PASS_LITERAL_NORMALISED": 4393,
+      "SOURCE_BLANK_NOT_COUNTED": 10,
+      "PASS_COORDINATE_GLYPH_ORDER": 5
+    },
+    "all_required_repeated_headers_pass": true,
+    "all_Status_cell_boundaries_pass": true,
+    "all_paper_sizes_match": true,
+    "all_pages_checked_for_text_geometry": 125,
+    "annotation_count_observed": 30
+  },
+  "visual_review": {
+    "status": "PASS_ALL_125_PAGES_ACTUALLY_VIEWED",
+    "pages_actually_viewed": 125,
+    "raster_dpi": 96,
+    "full_pages": true,
+    "minor_pagination_observations": [
+      {
+        "source_report": "review/VISUAL_A01_A10.json",
+        "field": "nonblocking_layout_observations",
+        "observations": [
+          {
+            "observation": "A section band appears alone at the page foot, with its criteria continuing on the following page under the repeated project/table header.",
+            "pages": [
+              4,
+              8,
+              12,
+              16,
+              20,
+              22,
+              28,
+              32,
+              36,
+              38,
+              40
+            ],
+            "impact": "Observed pagination choice; no clipped content or lost row-to-column relationship. This review does not claim that section bands are kept together with their first criterion."
+          },
+          {
+            "observation": "Some fourth pages contain only two to five final criteria and substantial blank space below the complete table.",
+            "pages": [
+              7,
+              11,
+              15,
+              19,
+              23,
+              31,
+              35,
+              39,
+              43
+            ],
+            "impact": "No content loss observed; the review does not claim minimum page count or optimised paper utilisation."
+          }
+        ]
+      },
+      {
+        "source_report": "review/VISUAL_S01_S10.json",
+        "field": "minor_pagination_notes",
+        "observations": [
+          {
+            "page": 52,
+            "sheet": "S02",
+            "observation": "Orphan non-functional section heading at the bottom of page 52; related rows begin on page 53.",
+            "severity": "MINOR_PAGINATION_NOTE",
+            "blocks_scoped_visual_verdict": false
+          },
+          {
+            "page": 54,
+            "sheet": "S03",
+            "observation": "Orphan minimum-outcome section heading at the bottom of page 54; rows begin on page 55.",
+            "severity": "MINOR_PAGINATION_NOTE",
+            "blocks_scoped_visual_verdict": false
+          },
+          {
+            "page": 58,
+            "sheet": "S04",
+            "observation": "Orphan minimum-outcome section heading at the bottom of page 58; rows begin on page 59.",
+            "severity": "MINOR_PAGINATION_NOTE",
+            "blocks_scoped_visual_verdict": false
+          },
+          {
+            "page": 62,
+            "sheet": "S05",
+            "observation": "Orphan minimum-outcome section heading at the bottom of page 62; rows begin on page 63.",
+            "severity": "MINOR_PAGINATION_NOTE",
+            "blocks_scoped_visual_verdict": false
+          },
+          {
+            "page": 66,
+            "sheet": "S06",
+            "observation": "Orphan minimum-outcome section heading at the bottom of page 66; rows begin on page 67.",
+            "severity": "MINOR_PAGINATION_NOTE",
+            "blocks_scoped_visual_verdict": false
+          },
+          {
+            "page": 70,
+            "sheet": "S07",
+            "observation": "Orphan minimum-outcome section heading at the bottom of page 70; rows begin on page 71.",
+            "severity": "MINOR_PAGINATION_NOTE",
+            "blocks_scoped_visual_verdict": false
+          },
+          {
+            "page": 74,
+            "sheet": "S08",
+            "observation": "Orphan minimum-outcome section heading at the bottom of page 74; rows begin on page 75.",
+            "severity": "MINOR_PAGINATION_NOTE",
+            "blocks_scoped_visual_verdict": false
+          },
+          {
+            "page": 78,
+            "sheet": "S09",
+            "observation": "Orphan minimum-outcome section heading at the bottom of page 78; rows begin on page 79.",
+            "severity": "MINOR_PAGINATION_NOTE",
+            "blocks_scoped_visual_verdict": false
+          },
+          {
+            "page": 82,
+            "sheet": "S10",
+            "observation": "Orphan minimum-outcome section heading at the bottom of page 82; rows begin on page 83.",
+            "severity": "MINOR_PAGINATION_NOTE",
+            "blocks_scoped_visual_verdict": false
+          }
+        ]
+      },
+      {
+        "source_report": "review/VISUAL_S11_S20.json",
+        "field": "presentation_notes",
+        "observations": [
+          {
+            "id": "PDF_SECTION_HEADING_AT_PAGE_END",
+            "severity": "PRESENTATION_NOTE",
+            "pages": [
+              94,
+              98,
+              102,
+              106,
+              110,
+              114,
+              118,
+              122
+            ],
+            "sheets": [
+              "S13",
+              "S14",
+              "S15",
+              "S16",
+              "S17",
+              "S18",
+              "S19",
+              "S20"
+            ],
+            "observation": "The E2 minimum-demonstrable-outcome section heading appears as the final band on the first page of each listed sheet. Its first criterion row begins on the following page beneath the repeated title, metadata and table-column headers.",
+            "impact": "This separates the section label from its first row. No criterion row is truncated or lost; the following E2-M rows and all seven columns remain visible and associated.",
+            "gate_interpretation": "Recorded as a presentation limitation. It is not evidence of missing content or a broken ID-to-criterion relationship; this report makes no wider gate-closure decision."
+          }
+        ]
+      }
+    ],
+    "native_GUI_review": false
+  },
+  "adverse_export_link_observation": {
+    "annotation_count": 30,
+    "misplaced_worksheet_fragment_links": 25,
+    "empty_URI_links": 5,
+    "navigation_executed": false,
+    "acceptance": "NOT_ACCEPTED",
+    "original_native_PDF_retained_unmodified": true,
+    "workbook_hyperlink_targets_changed": false
+  },
+  "acceptance_statuses": {
+    "X01": "PARTIAL",
+    "X02": "NOT_RUN",
+    "X03": "PARTIAL",
+    "X04": "NOT_RUN",
+    "X05": "NOT_RUN",
+    "X06": "NOT_RUN"
+  },
+  "X03_components": {
+    "native_default_PDF_content_and_layout": "PASS_ALL_125_PAGES",
+    "native_GUI_Print_Preview": "NOT_RUN",
+    "Microsoft_Excel": "NOT_RUN",
+    "complete_X03": "PARTIAL_REMAINING_GUI_AND_EXCEL_ACCEPTANCE"
+  },
+  "blank_successor_forms": {
+    "browser_rows": 101,
+    "workbook_rows": 32,
+    "status": "NOT_RUN"
+  },
+  "prior_failed_native_evidence_retained": {
+    "date": "2026-11-17",
+    "original_PDF_pages": 231,
+    "row_height_repaired_PDF_pages": 419,
+    "prior_X03_status": "FAIL",
+    "prior_attestation": "00_TOOLS/qa/evidence/libreoffice/2026-11-17/N06_ATTESTATION.json",
+    "prior_attestation_sha256": "768e6c8a300ce0a26e554b0a72412c9e41372172b20f87212ef32dbf1168c0ed"
+  },
+  "evidence_files_in_F6_PAGINATION_dossier": {
+    "input/USER_CONFIRMATION.txt": {
+      "sha256": "fb669bd1bcd7f13ac78f8818586d5c6d1b451b6d741e36b088b26e9e347563a5",
+      "bytes": 27
+    },
+    "input/APPROVED_PRINT_SETTINGS.json": {
+      "sha256": "38f57fb6278058cbbd54e585e6b7f1bb7bcdad5c3aac88d3abb66d798b85bb64",
+      "bytes": 13770
+    },
+    "input/PRIOR_PHASE_PROTOCOL_AMENDMENT.json": {
+      "sha256": "114c836aba605d22e083c605e63b861326a6bcbee3819706583a6865a5ab434c",
+      "bytes": 3164
+    },
+    "apply_print_settings.py": {
+      "sha256": "f70a37e6a6557f37d1a03d04c5789a211e718481279ea8cec13fc44e98b8f18b",
+      "bytes": 9222
+    },
+    "review/AUTHORING_RECEIPT.json": {
+      "sha256": "eb81485530b0bd5d9cc2733dcca7df47221479576983e9d7616003f4197e7866",
+      "bytes": 34660
+    },
+    "review/validate_pagination.py": {
+      "sha256": "c3dbac86ea6f0e893505d18646eef0ca6d600ff0000354d011733d88ad305dbb",
+      "bytes": 19112
+    },
+    "review/INDEPENDENT_PAGINATION_PRESERVATION.json": {
+      "sha256": "a0c24014f7db3ffd0ca97ff2b5e5a8dc8807470cf051434eafc36f2fe4310446",
+      "bytes": 164191
+    },
+    "protocol/EXPORT_PROTOCOL.json": {
+      "sha256": "318a324be7bd51e444373f76fb1a0c0ae12ee41018e310bd93e9d61077100319",
+      "bytes": 3833
+    },
+    "protocol/FREEZE.json": {
+      "sha256": "7ac4e1864075f58b4acfd9c3b941403e95aaac12442b5e711a05669f4a417fec",
+      "bytes": 395
+    },
+    "run_export.py": {
+      "sha256": "1552fdfc914b746364c28b9bdb24879ccf562f11f28a1673c73472a3bd37ddfc",
+      "bytes": 4594
+    },
+    "review/RUNTIME_IDENTITY.json": {
+      "sha256": "1f2f9fb2c7274be25367fc3e428322662f5e97607daff144b45b5981d510ae69",
+      "bytes": 441
+    },
+    "native/logs/export.json": {
+      "sha256": "46e4c9a4ef8d7012d6829afd0d1f959530fbabc4c930bab20760488524046016",
+      "bytes": 1871
+    },
+    "native/logs/export.stdout.txt": {
+      "sha256": "2e6259f11326c81ae223fd823f7f2d70d953f54de85ca5216d890aea7db3c73f",
+      "bytes": 250
+    },
+    "native/logs/export.stderr.txt": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "native/pdf/RC2026_VERIFICATION_INDEX_PRINT.pdf": {
+      "sha256": "ffbefa4d3121f27cc2ec107e69ca69e24d82e69f99c57a20d77b344aa49a3c6e",
+      "bytes": 2653269
+    },
+    "review/analyse_paginated_pdf.py": {
+      "sha256": "aa1c0411235f2780b7248ee2f3e209c1289a772964088b2597d9b04deb201d9e",
+      "bytes": 27488
+    },
+    "review/pdf_readonly_common.py": {
+      "sha256": "0528d53c4ec6d8aa00b5295151519ba4a8978753e7ebed3fc11ae917c669b429",
+      "bytes": 7116
+    },
+    "review/TEXT_ANALYSIS_FREEZE.json": {
+      "sha256": "2a84ac7ac88d9cb1ce53734281915cb8b79023379758cad823a7b521956152ef",
+      "bytes": 1527
+    },
+    "review/text_analysis/PAGINATED_PDF_ANALYSIS.json": {
+      "sha256": "5e38ead00203c862e2c694fc8efa4cfd5b4f963e38fef2c7644f1902b1994302",
+      "bytes": 6578314
+    },
+    "render_paginated_pdf.py": {
+      "sha256": "99801ab20b672f090b09265d50c29b77800ecb83ff7fb3686f0c482cefbb036b",
+      "bytes": 2771
+    },
+    "review/RASTER_MANIFEST.json": {
+      "sha256": "56fcbc704b9955cf8f320a59d366b6284581bdcfea94e88e6add67c507cccc92",
+      "bytes": 68753
+    },
+    "review/VISUAL_ALL_125.json": {
+      "sha256": "2cece529a05806e5ef5d094fe7b4a5b4cf2581afb560dd30db630714f337576c",
+      "bytes": 45105
+    },
+    "review/VISUAL_RULES_INDEX.json": {
+      "sha256": "aedfe9ce5ef839ee5b0016503756be733d757e12f3cd2bf4162d08b6326725a4",
+      "bytes": 2314
+    },
+    "review/VISUAL_A01_A10.json": {
+      "sha256": "afcdda4aafef97e9c547395fad21f5cec8883052d0240dc6595eaf1d138a03fb",
+      "bytes": 84496
+    },
+    "review/VISUAL_S01_S10.json": {
+      "sha256": "bb8bab2593149f671ae9dfd5e22706b954f807f9a18036226977c363534b859f",
+      "bytes": 71991
+    },
+    "review/VISUAL_S11_S20.json": {
+      "sha256": "671409b947fe49a372aa13b5f2e4f13ea796686c96b34aec668f92da0c661d4f",
+      "bytes": 53268
+    },
+    "review_pdf_structure.py": {
+      "sha256": "682db1bfdc8ca996e4f9875866efe1d1f528627940d714141eb7715d47bf0914",
+      "bytes": 5649
+    },
+    "review/PDF_STRUCTURE_AND_LINKS.json": {
+      "sha256": "bd5437e604742c8d38a4e4b509ac2dfb7a2edcc4f223d5752f9d041704490e02",
+      "bytes": 18584
+    }
+  },
+  "rights_and_history": {
+    "licence_and_exact_C84_membership_unchanged": true,
+    "category_C_workbook_print_settings_only": true,
+    "other_C_paths_byte_identical": 83,
+    "current_administrative_inventory": {
+      "A": 945,
+      "B": 320,
+      "C": 84
+    },
+    "approved_snapshot_preserved": {
+      "A": 939,
+      "B": 320,
+      "C": 84
+    },
+    "all_203_finding_statuses_and_historical_owner_records_preserved": true,
+    "F3_R14_complete_record_preserved": true,
+    "F3_R15_unchanged": true,
+    "N08_rerun": false
+  },
+  "all_native_release_gates_passed": false,
+  "unexecuted_native_gates_closed": 0,
+  "OVA_requested_accessed_or_downloaded": false,
+  "merge_main_tag_release_or_Zenodo_action": false
+}

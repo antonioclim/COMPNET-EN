@@ -7,31 +7,35 @@
       "id": "R1",
       "filter": "tcp.dstport==8080 && tcp.flags.syn==1 && tcp.flags.ack==0",
       "condition": ">= 1",
-      "description": "Client → load balancer handshake."
+      "description": "SYN attempt to the load balancer."
     },
     {
       "id": "R2",
       "filter": "tcp.port==8080 && frame contains \"GET \"",
       "condition": ">= 1",
-      "description": "HTTP request to the load balancer."
+      "description": "HTTP request-marker bytes are present on the load-balancer transport."
     },
     {
       "id": "R3",
       "filter": "(tcp.dstport==8081 || tcp.dstport==8082 || tcp.dstport==8083) && tcp.flags.syn==1 && tcp.flags.ack==0",
       "condition": ">= 1",
-      "description": "The load balancer initiates a connection to at least one backend."
+      "description": "SYN attempt on a backend port; correlate the selected backend."
     },
     {
       "id": "R4",
       "filter": "(tcp.port==8081 || tcp.port==8082 || tcp.port==8083) && frame contains \"/health\"",
       "condition": ">= 1",
-      "description": "At least one health check (/health) to a backend exists."
+      "description": "/health bytes are present on a backend transport; verify the health-check outcome separately."
     },
     {
       "id": "R5",
       "filter": "tcp.port==8080 && frame contains \"HTTP/1.1 200\"",
       "condition": ">= 1",
-      "description": "Final 200 response to the client."
+      "description": "HTTP 200 marker bytes are present on the client-facing transport; verify the complete response."
     }
+  ],
+  "manual_checks": [
+    "R1 R2 R3 R5: Correlate both legs and the returned body; assert the declared selection policy.",
+    "R4: Show health-state transition and exclusion of the failed backend; a /health substring alone does not establish it."
   ]
 }

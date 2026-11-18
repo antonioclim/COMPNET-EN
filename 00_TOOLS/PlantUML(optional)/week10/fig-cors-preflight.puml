@@ -12,7 +12,7 @@ participant "API Server\n(origin: api.com)" as S #C8E6C9
 
 == Preflight (automatic OPTIONS request) ==
 
-B -[#FF9800]> S : OPTIONS /api/users\nOrigin: https://app.com\nAccess-Control-Request-Method: PUT\nAccess-Control-Request-Headers: Authorization
+B -[#FF9800]> S : OPTIONS /api/users/3\nOrigin: https://app.com\nAccess-Control-Request-Method: PUT\nAccess-Control-Request-Headers: Authorization
 
 alt Server allows the origin
   S -[#43A047]-> B : 204 No Content\nAccess-Control-Allow-Origin: https://app.com\nAccess-Control-Allow-Methods: GET, PUT, DELETE\nAccess-Control-Allow-Headers: Authorization\nAccess-Control-Max-Age: 3600

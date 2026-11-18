@@ -99,27 +99,33 @@ Here we see the first major difference from Nginx:
 
 ## **6. Test: slow backend**
 
-Make web3 slow (quick edit):
+Create `slow_backend.py` in the Part02 directory:
 
-In `web3/index.html`, add a Python script in Compose:
+```python
+import time
+from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
-Change the web3 command:
+class SlowHandler(SimpleHTTPRequestHandler):
+    def do_GET(self):
+        time.sleep(5)
+        super().do_GET()
 
-```yaml
-command: ["python3", "-u", "-c", "import time, http.server; time.sleep(5); http.server.test(port=8000)"]
+ThreadingHTTPServer(("0.0.0.0", 8000), SlowHandler).serve_forever()
 ```
 
-Restart only web3:
+Mount this file read-only into the `web3-lb` service at `/slow_backend.py`, retaining
+its existing document-root working directory. Set its command to
+`["python3", "-u", "/slow_backend.py"]`. Apply the changed configuration:
 
+```bash
+docker compose -f S11_Part02_Config_Docker_Compose_Lb_Custom.yml up -d --force-recreate web3-lb
+curl -o /dev/null -s -w '%{time_total}\n' http://localhost:8080/
 ```
-docker compose restart web3
-```
 
-What happens?
-
-* The custom LB **will block the thread** for that request for 5 seconds
-* Nginx would have handled this more gracefully
-* this is an important lesson about non-blocking I/O and event loops
+Measure several requests and identify which backend handled each one. This server
+delays each GET, including concurrent requests. Proxy timeouts, retry settings and
+threading determine the observed client result; do not assume Nginx hides every delay.
+`restart` alone does not apply a changed Compose command.
 
 ---
 

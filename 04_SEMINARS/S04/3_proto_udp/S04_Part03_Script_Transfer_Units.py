@@ -31,6 +31,7 @@ class ResponseMessageType(Enum):
     OK = 1
     ERR_CONNECTED = 2
     ERR_UNKNOWN = 3  # for explicitly uncovered cases
+    ERR_TOO_LARGE = 4  # response cannot fit in one IPv4 UDP datagram
 
 
 class RequestMessage:

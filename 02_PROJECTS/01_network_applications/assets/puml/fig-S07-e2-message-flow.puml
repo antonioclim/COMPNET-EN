@@ -5,7 +5,7 @@ skinparam defaultFontSize 11
 skinparam shadowing false
 skinparam sequenceMessageAlign center
 
-title S07 — E2 Path: Local Hit, Forwarded Query and Cache Hit
+title S07 — E2 Path: Local Hit, Forwarded Query, Cache Hit and NXDOMAIN
 
 participant "tester" as C #FFE0B2
 participant "dns_resolver\n:5300/UDP" as R #C8E6C9
@@ -32,11 +32,17 @@ R -[#43A047]-> C : Response: 93.184.216.34
 
 note over U : No packet sent\nto upstream
 
+== NEGATIVE ANSWER ==
+C -> R : Query A: missing.lab.local (ID=0x04)
+R -[#E53935]-> C : Response: NXDOMAIN (rcode=3)
+note right of R : Local-zone name is absent
+
 legend right
-  Three scenarios demonstrable in PCAP:
+  Four scenarios demonstrable in PCAP:
   1. Local zone answer (no upstream)
   2. Forwarded to upstream (two UDP pairs)
   3. Cache hit (single UDP pair, no upstream)
-  Validates R1–R5 in S07.json
+  4. NXDOMAIN response for an absent local name
+  These scenarios supply the R1–R5 capture checks
 endlegend
 @enduml

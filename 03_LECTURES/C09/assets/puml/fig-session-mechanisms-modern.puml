@@ -15,14 +15,14 @@ package "Session-layer responsibility (L5 concept)" as l5pkg #FFF3E0 {
 
 package "Application-layer implementations (L7 reality)" as l7pkg #E3F2FD {
   card "HTTP cookies\n(Set-Cookie / Cookie)" as cookies #BBDEFB
-  card "Tokens\n(JWT, OAuth 2.0)" as tokens #BBDEFB
+  card "Tokens\nJWT or opaque references" as tokens #BBDEFB
   card "Server-side sessions\n(Redis, database)" as server_sess #BBDEFB
   card "TLS session\nresumption" as tls #E1BEE7
   card "WebSocket\nconnections" as ws #BBDEFB
 }
 
 id -down-> cookies : session ID
-id -down-> tokens : signed claim
+id -down-> tokens : identity or claims reference
 state -down-> server_sess : key-value store
 expiry -down-> tls : session tickets
 expiry -down-> ws : persistent channel

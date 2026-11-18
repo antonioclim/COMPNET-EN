@@ -30,7 +30,7 @@ Run:
 
 | Name | Lines |
 |------|-------|
-| `client.py` | 26 |
+| `client.py` | 37 |
 | `server.py` | 92 |
 
 ## Cross-References

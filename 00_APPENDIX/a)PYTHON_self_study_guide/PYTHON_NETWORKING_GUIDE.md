@@ -2,9 +2,9 @@
 ## Complete Self-Study Guide
 
 > **Supplementary material** for the Computer Networks course
-> **Repository:** [github.com/antonioclim/netROwsl](https://github.com/antonioclim/netROwsl)
+> **Repository:** [github.com/antonioclim/COMPNET-EN](https://github.com/antonioclim/COMPNET-EN)
 > **Status:** Optional, not assessed
-> **Environment:** WSL2 + Ubuntu 22.04 + Docker + Portainer
+> **Environment:** MININET-SDN in VirtualBox (primary), or the separate WSL2 route; see [environment routes](../docs/environment_routes.md).
 > **Version:** 3.0 — January 2025 (with CPA, PI and CREATE pedagogical enhancements)
 
 ---
@@ -24,8 +24,8 @@
    - [Step 8: HTTP and Application Protocols](#step-8-http-and-application-protocols)
    - [Step 9: Best Practices and Debugging](#step-9-best-practices-and-debugging)
 4. [CREATE Exercises — Independent Design](#create-exercises--independent-design)
-5. [Aderstanding Check (Peer Instruction)](#understanding-check-peer-instruction)
-6. [Pair Programming Exercise](#pair-programming-exercise)
+5. [Understanding Check (Peer Instruction)](#understanding-check-peer-instruction)
+6. [Pair Programming Exercise](../docs/pair_programming_guide.md)
 7. [Parsons Exercises (Code Rearrangement)](#parsons-exercises-code-rearrangement)
 8. [Code Tracing Exercises](#code-tracing-exercises-execution-tracking)
 9. [EVALUATE Exercise: Choose the Architecture](#evaluate-exercise-choose-the-architecture)
@@ -54,14 +54,14 @@ The Computer Networks lab exercises use **Python** as the primary implementation
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │  LAB WEEK                                                                   │
 │  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │ Mandatory exercises (weekly kit from XXroWSL/)                      │   │
+│  │ Mandatory exercises (weekly kit from 04_SEMINARS/Sxx/)                      │   │
 │  │ → Run the scripts, complete the TODOs                               │   │
 │  └─────────────────────────────────────────────────────────────────────┘   │
 │                              │                                              │
 │                              ▼                                              │
 │  ┌─────────────────────────────────────────────────────────────────────┐   │
 │  │ OPTIONAL: Corresponding step from this guide                        │   │
-│  │ → Aderstand the Python concepts behind the code                    │   │
+│  │ → Understand the Python concepts behind the code                    │   │
 │  │ → Explore additional deepening exercises                            │   │
 │  └─────────────────────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────────────────────┘
@@ -71,44 +71,36 @@ The Computer Networks lab exercises use **Python** as the primary implementation
 
 ## Repository Structure
 
-The `netROwsl` repository has a consistent structure for each week:
+The canonical course repository is **COMPNET-EN**. Earlier editions used a different weekly kit; the paths below now refer to this repository.
 
-```
-netROwsl/
-├── 01roWSL/                          # Week 1
-│   ├── src/
-│   │   ├── exercises/                # ← MAIN EXERCISES
-│   │   │   ├── ex_1_01_latency_ping.py
-│   │   │   ├── ex_1_02_tcp_server_client.py
-│   │   │   └── ...
-│   │   ├── apps/                     # Complete demo applications
-│   │   └── utils/                    # Reusable helper functions
-│   ├── scripts/                      # Orchestration scripts
-│   ├── docker/                       # Docker configurations
-│   ├── docs/                         # Documentation
-│   ├── tests/                        # Automated tests
-│   └── README.md
-├── 02roWSL/ ... 14roWSL/
-```
+| Directory | Material |
+|---|---|
+| `03_LECTURES/C01/` through `C14/` | Lecture notes, diagrams and scenarios |
+| `04_SEMINARS/S01/` through `S14/` | Practical tasks, examples and templates |
+| `02_PROJECTS/` | Project specifications and evidence criteria |
+| `00_TOOLS/` | Shared setup, capture, rendering and validation tools |
+| `00_APPENDIX/a)PYTHON_self_study_guide/examples/` | Optional runnable Python examples |
+
+Read the [canonical lab map](CANONICAL_LAB_MAP.md) before copying commands. Commands below assume the **repository root** unless a preceding `cd` changes it. Generic module/package sketches are explicitly illustrative, not exact excerpts of seminar source.
 
 ### Week Correspondence Table
 
 | Folder | Week | Networking Theme | Correlated Python Step |
 |--------|------|------------------|------------------------|
-| `01roWSL` | W1-2 | Network fundamentals | Step 1: Reading code |
-| `02roWSL` | W2-3 | TCP/UDP socket programming | Step 2 + Step 3 |
-| `03roWSL` | W3 | Broadcast, Multicast, Tunnel | Step 3: Advanced sockets |
-| `04roWSL` | W4 | Physical/Data Link Layer | Step 4: Code organisation |
-| `05roWSL` | W5 | Network Layer, IP, Subnetting | Step 5: CLI argparse |
-| `06roWSL` | W6 | NAT/PAT, SDN | Step 6: Packet analysis |
-| `07roWSL` | W7 | Packet filtering, Firewall | Step 6: Analysis (continued) |
-| `08roWSL` | W8 | Transport Layer, HTTP | Step 7 + Step 8 |
-| `09roWSL` | W9 | Session/Presentation Layer | Step 8: HTTP |
-| `10roWSL` | W10 | Application Layer protocols | Step 8: Application protocols |
-| `11roWSL` | W11 | Load balancing, DNS | Step 8: REST, DNS |
-| `12roWSL` | W12 | Email, RPC | Step 8: Application protocols |
-| `13roWSL` | W13 | IoT, Security | Step 7 + Step 9 |
-| `14roWSL` | W14 | Recap, Projects | Step 9: Best practices |
+| `04_SEMINARS/S01` | W1-2 | Network fundamentals | Step 1: Reading code |
+| `04_SEMINARS/S02` | W2-3 | TCP/UDP socket programming | Step 2 + Step 3 |
+| `04_SEMINARS/S03` | W3 | Broadcast, Multicast, Tunnel | Step 3: Advanced sockets |
+| `04_SEMINARS/S04` | W4 | Text/binary protocols over TCP and UDP | Step 4: Code organisation |
+| `04_SEMINARS/S05` | W5 | Network Layer, IP, Subnetting | Step 5: CLI argparse |
+| `04_SEMINARS/S06` | W6 | NAT/PAT, SDN | Step 6: Packet analysis |
+| `04_SEMINARS/S07` | W7 | Packet filtering, Firewall | Step 6: Analysis (continued) |
+| `04_SEMINARS/S08` | W8 | Transport Layer, HTTP | Step 7 + Step 8 |
+| `04_SEMINARS/S09` | W9 | FTP and file transfer | Step 8: HTTP |
+| `04_SEMINARS/S10` | W10 | DNS, SSH and tunnels | Step 8: Application protocols |
+| `04_SEMINARS/S11` | W11 | Load balancing, DNS | Step 8: REST, DNS |
+| `04_SEMINARS/S12` | W12 | JSON-RPC, XML-RPC and gRPC | Step 8: Application protocols |
+| `04_SEMINARS/S13` | W13 | IoT, Security | Step 7 + Step 9 |
+| `04_SEMINARS/S14` | W14 | Recap, Projects | Step 9: Best practices |
 
 ---
 
@@ -116,7 +108,7 @@ netROwsl/
 
 ### Step 1: Reading Python Code
 
-**📅 Correlated with:** Weeks 1-2 (`01roWSL`, `02roWSL`)
+**📅 Correlated with:** Weeks 1-2 (`04_SEMINARS/S01`, `04_SEMINARS/S02`)
 
 #### ═══════════════════════════════════════════════════════════════
 #### 📋 CONTEXT_AND_ANALOGY
@@ -126,7 +118,7 @@ netROwsl/
 
 Reading Python code is like reading a recipe before cooking:
 
-| Code Element | Recipe Equivaslow |
+| Code Element | Recipe Equivalent |
 |--------------|-------------------|
 | **Imports** (`import socket`) | Ingredient list — what you need before starting |
 | **Functions** (`def server():`) | Recipe steps — instructions to follow in order |
@@ -147,8 +139,8 @@ Before modifying the lab scripts, you need to be able to read and understand the
 #### Reference Files
 
 Open and study the structure of these files:
-- `01roWSL/src/exercises/ex_1_01_latency_ping.py`
-- `01roWSL/src/exercises/ex_1_02_tcp_server_client.py`
+- `00_APPENDIX/a)PYTHON_self_study_guide/examples/05_ping_latency.py`
+- `00_APPENDIX/a)PYTHON_self_study_guide/examples/01_socket_tcp.py`
 
 #### ═══════════════════════════════════════════════════════════════
 #### 📖 KEY_CONCEPTS
@@ -185,7 +177,7 @@ class PingResult:
 
 Compare with `struct` in C:
 ```c
-// C equivaslow
+// C equivalent
 typedef struct {
     int sequence;
     float rtt_ms;  // can be NULL?
@@ -239,8 +231,8 @@ Before running the command below, answer:
 2. What happens if the host doesn't exist?
 
 ```bash
-cd /mnt/d/NETWORKING/netROwsl/01roWSL
-python3 src/exercises/ex_1_01_latency_ping.py --host 127.0.0.1 --count 5
+cd $HOME/COMPNET-EN
+python3 "00_APPENDIX/a)PYTHON_self_study_guide/examples/05_ping_latency.py" --host 127.0.0.1 --count 5
 ```
 
 <details>
@@ -261,7 +253,7 @@ python3 src/exercises/ex_1_01_latency_ping.py --host 127.0.0.1 --count 5
 
 ### Step 2: Data Types for Networking
 
-**📅 Correlated with:** Weeks 2-3 (`02roWSL`, `03roWSL`)
+**📅 Correlated with:** Weeks 2-3 (`04_SEMINARS/S02`, `04_SEMINARS/S03`)
 
 #### ═══════════════════════════════════════════════════════════════
 #### 📋 CONTEXT_AND_ANALOGY
@@ -269,7 +261,7 @@ python3 src/exercises/ex_1_01_latency_ping.py --host 127.0.0.1 --count 5
 
 #### 💡 Analogy: Bytes and Strings as Letters and Telegrams
 
-| Concept | Real Life Equivaslow |
+| Concept | Real Life Equivalent |
 |---------|----------------------|
 | **String** (`str`) | Letter in your language that you read directly |
 | **Bytes** (`bytes`) | Telegram encoded in Morse — needs decoding |
@@ -284,8 +276,8 @@ Networks transport **bytes**, not text. Python makes an explicit distinction bet
 
 #### Reference Files
 
-- `02roWSL/src/exercises/ex_2_01_tcp.py`
-- `02roWSL/src/exercises/ex_2_02_udp.py`
+- `00_APPENDIX/a)PYTHON_self_study_guide/examples/01_socket_tcp.py`
+- `04_SEMINARS/S02/S02_Part07_Example_UDP_Server.py`
 
 #### ═══════════════════════════════════════════════════════════════
 #### 📖 KEY_CONCEPTS
@@ -360,7 +352,7 @@ headers = {
 
 #### 🔮 PREDICTION: Practical Exploration
 
-In `02roWSL/src/exercises/ex_2_01_tcp.py`:
+Illustrative byte conversion used with a connected TCP socket:
 
 **Before looking at the code, predict:**
 1. Where is the `encode()` conversion done?
@@ -378,7 +370,7 @@ In `02roWSL/src/exercises/ex_2_01_tcp.py`:
 
 ### Step 3: Socket Programming
 
-**📅 Correlated with:** Weeks 2-4 (`02roWSL`, `03roWSL`, `04roWSL`)
+**📅 Correlated with:** Weeks 2-4 (`04_SEMINARS/S02`, `04_SEMINARS/S03`, `04_SEMINARS/S04`)
 
 #### ═══════════════════════════════════════════════════════════════
 #### 📋 CONTEXT_AND_ANALOGY
@@ -386,7 +378,7 @@ In `02roWSL/src/exercises/ex_2_01_tcp.py`:
 
 #### 💡 Analogy: Socket as a Landline Telephone
 
-| Socket Operation | Telephone Equivaslow |
+| Socket Operation | Telephone Equivalent |
 |------------------|---------------------|
 | `socket()` | You buy a new telephone |
 | `bind()` | You get assigned a phone number (port) |
@@ -406,9 +398,9 @@ Sockets are the foundation of network communication. The exercises implement TCP
 
 #### Reference Files
 
-- `02roWSL/src/exercises/ex_2_01_tcp.py` — TCP Server/Client
-- `02roWSL/src/exercises/ex_2_02_udp.py` — UDP Server/Client
-- `03roWSL/src/exercises/ex_3_01_udp_broadcast.py` — UDP Broadcast
+- `00_APPENDIX/a)PYTHON_self_study_guide/examples/01_socket_tcp.py` — TCP Server/Client
+- `04_SEMINARS/S02/S02_Part07_Example_UDP_Server.py` — UDP Server/Client
+- `04_SEMINARS/S03/4_udp-broadcast/S03_Part04A_Example_UDP_Broad_Sender.py` — UDP Broadcast
 
 #### ═══════════════════════════════════════════════════════════════
 #### 📖 KEY_CONCEPTS
@@ -445,7 +437,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
 
 **Question:** Why do we need `SO_REUSEADDR`?
 
-**Explanation:** When a server stops, the operating system keeps the port "reserved" for ~60 seconds (TIME_WAIT). Without `SO_REUSEADDR`, you cannot restart the server immediately — you get "Address already in use".
+**Explanation:** A recently closed TCP connection can remain in `TIME_WAIT`; this is connection state, not a universal reservation of every use of that port. Rebinding depends on the OS, addresses and reuse settings. On Linux, set `SO_REUSEADDR` before `bind()` when restart-friendly reuse is intended, including on the previous socket. It does not take over an address still used by an active conflicting listener. First check for an existing server with `ss -ltnp`.
 
 **Practical consequence:** Always add this line before `bind()`:
 ```python
@@ -503,8 +495,8 @@ def run_server(host: str, port: int):
 #### 🔮 PREDICTION: Practical Exploration
 
 ```bash
-cd /mnt/d/NETWORKING/netROwsl/02roWSL
-python3 src/exercises/ex_2_01_tcp.py --mode server --port 9090
+cd $HOME/COMPNET-EN
+python3 "00_APPENDIX/a)PYTHON_self_study_guide/examples/01_socket_tcp.py" server 9090
 ```
 
 **Predict:**
@@ -525,7 +517,7 @@ python3 src/exercises/ex_2_01_tcp.py --mode server --port 9090
 
 ### Step 4: Code Organisation
 
-**📅 Correlated with:** Week 4 (`04roWSL`)
+**📅 Correlated with:** Week 4 (`04_SEMINARS/S04`)
 
 #### ═══════════════════════════════════════════════════════════════
 #### 📋 CONTEXT_AND_ANALOGY
@@ -533,7 +525,7 @@ python3 src/exercises/ex_2_01_tcp.py --mode server --port 9090
 
 #### 💡 Analogy: Python Modules as Drawers in a Cabinet
 
-| Code Element | Cabinet Equivaslow |
+| Code Element | Cabinet Equivalent |
 |--------------|-------------------|
 | **`.py` file** | A drawer with a specific purpose |
 | **`import`** | You open the drawer and take what you need |
@@ -546,7 +538,7 @@ python3 src/exercises/ex_2_01_tcp.py --mode server --port 9090
 
 #### Why It Matters
 
-The kits have a consistent structure: `src/`, `scripts/`, `utils/`. Aderstanding the organisation helps you navigate and reuse code.
+The following `src/`, `scripts/`, `utils/` layout is an illustrative project design. COMPNET-EN units use their own README, scenario directories and explicitly named scripts; consult the canonical map for runnable files.
 
 #### ═══════════════════════════════════════════════════════════════
 #### 📖 KEY_CONCEPTS
@@ -555,7 +547,7 @@ The kits have a consistent structure: `src/`, `scripts/`, `utils/`. Aderstanding
 #### Modular Structure
 
 ```
-04roWSL/src/
+example_project/src/
 ├── __init__.py          # Makes src/ a Python "package"
 ├── exercises/
 │   ├── __init__.py
@@ -596,7 +588,7 @@ from src.utils import calculate_crc
 
 ### Step 5: CLI Interfaces
 
-**📅 Correlated with:** Week 5 (`05roWSL`)
+**📅 Correlated with:** Week 5 (`04_SEMINARS/S05`)
 
 #### ═══════════════════════════════════════════════════════════════
 #### 📋 CONTEXT_AND_ANALOGY
@@ -604,7 +596,7 @@ from src.utils import calculate_crc
 
 #### 💡 Analogy: argparse as a Restaurant Menu
 
-| CLI Element | Restaurant Equivaslow |
+| CLI Element | Restaurant Equivalent |
 |-------------|----------------------|
 | **Command** (`python script.py`) | You enter the restaurant |
 | **Positional arguments** (`192.168.1.0`) | Main order (mandatory) |
@@ -636,7 +628,7 @@ args = parser.parse_args()
 
 print(f"Dividing {args.network} into {args.subnets} subnets")
 if args.verbose:
-    print("Detailed mode activeated")
+    print("Detailed mode activated")
 ```
 
 Usage:
@@ -648,7 +640,7 @@ python calculator.py 192.168.1.0/24 --subnets 8 -v
 
 **Before running:**
 ```bash
-python3 ex_5_01_cidr_flsm.py --help
+python3 "00_APPENDIX/a)PYTHON_self_study_guide/examples/05_ping_latency.py" --help
 ```
 
 **Predict:** What sections will the output have?
@@ -667,7 +659,7 @@ python3 ex_5_01_cidr_flsm.py --help
 
 ### Step 6: Packet Analysis
 
-**📅 Correlated with:** Weeks 6-7 (`06roWSL`, `07roWSL`)
+**📅 Correlated with:** Weeks 6-7 (`04_SEMINARS/S06`, `04_SEMINARS/S07`)
 
 #### ═══════════════════════════════════════════════════════════════
 #### 📋 CONTEXT_AND_ANALOGY
@@ -747,7 +739,7 @@ header = struct.pack('!HH', 8080, 443)
 
 #### 💡 Analogy: Threading as Chefs in a Kitchen
 
-| Concurrency Element | Kitchen Equivaslow |
+| Concurrency Element | Kitchen Equivalent |
 |--------------------|-------------------|
 | **Thread** | An individual chef |
 | **ThreadPool** | Team of chefs |
@@ -815,7 +807,7 @@ def scan_ports(host: str, ports: list[int], workers: int = 100) -> list[int]:
 
 #### 💡 Analogy: HTTP as a Bank Conversation
 
-| HTTP Element | Bank Equivaslow |
+| HTTP Element | Bank Equivalent |
 |--------------|-----------------|
 | **Request** | You fill in a request form |
 | **GET** | "I want to see my balance" (read only) |
@@ -859,7 +851,7 @@ def http_get(host: str, path: str, port: int = 80) -> str:
 
 ### Step 9: Best Practices and Debugging
 
-**📅 Correlated with:** Week 14 (`14roWSL`)
+**📅 Correlated with:** Week 14 (`04_SEMINARS/S14`)
 
 #### ═══════════════════════════════════════════════════════════════
 #### 📋 CONTEXT_AND_ANALOGY
@@ -867,13 +859,13 @@ def http_get(host: str, path: str, port: int = 80) -> str:
 
 #### 💡 Analogy: Debugging as Detective Work
 
-| Debug Technique | Detective Equivaslow |
+| Debug Technique | Detective Equivalent |
 |-----------------|---------------------|
 | **print()** | You leave notes in key places |
 | **logging** | CCTV camera recording everything |
 | **breakpoint()** | You stop time and examine the scene |
 | **Stack trace** | Timeline of events |
-| **Ait tests** | You verify each suspect's alibi |
+| **Unit tests** | You verify each suspect's alibi |
 
 #### ═══════════════════════════════════════════════════════════════
 #### 📖 KEY_CONCEPTS
@@ -929,7 +921,7 @@ Design and implement a simple binary protocol for a messaging system.
 | Version | 1 byte | Protocol version (0x01) |
 | Message type | 1 byte | 0x01=text, 0x02=image, 0x03=status |
 | Length | 2 bytes | Payload length (big-endian) |
-| Timestamp | 4 bytes | Aix timestamp (seconds) |
+| Timestamp | 4 bytes | Unix timestamp (seconds) |
 | Payload | variable | Message content |
 
 #### Protocol Diagram
@@ -1116,7 +1108,7 @@ Functional `load_balancer.py` file with:
 
 ---
 
-## Aderstanding Check (Peer Instruction)
+## Understanding Check (Peer Instruction)
 
 ### 🗳️ PI #1: Bytes vs Strings
 
@@ -1279,7 +1271,7 @@ sock.close()
 `sock.close()` never executes because of the exception.
 
 **Why not A:** Exception occurs before close()
-**Why not C:** Python has no garbage collection for sockets
+**Why not C:** Garbage collection may close a socket, but its timing is not portable or deterministic. Use `with` or explicit `close()` for resource ownership.
 **Why not D:** OS closes it eventually, but not immediately
 
 **Solution:** Use `with socket.socket(...) as sock:`
@@ -1335,11 +1327,11 @@ data = sock.recv(10)
 print(data)
 ```
 
-**Question:** What does the client display?
+**Question:** On a connected blocking TCP socket, assuming non-empty data arrives and no error occurs, which statement is guaranteed by recv(10)?
 
 **Options:**
 - A) `b'HELLO WORLD FROM SERVER!'`
-- B) `b'HELLO WORL'`
+- B) A non-empty prefix of the stream containing at most 10 bytes
 - C) Error — buffer too small
 - D) Nothing — recv() waits for 24 bytes
 
@@ -1350,9 +1342,9 @@ print(data)
 
 `recv(10)` returns **at most** 10 bytes, not exactly 10 and not the entire message.
 
-**Why not A:** recv() doesn't wait for the whole message
+**Why not A:** The supplied buffer size limits this call to 10 bytes, so the whole longer literal cannot be returned.
 **Why not C:** Buffer is only the upper limit, not requirement
-**Why not D:** recv() returns what's available, doesn't wait for more
+**Why not D:** recv(10) does not wait for a 24-byte application message. EOF or an exception are separate outcomes excluded by the question assumptions.
 
 **Implication:** For longer messages, you need to call recv() in a loop or use a protocol with length prefix.
 
@@ -1977,17 +1969,17 @@ LEGEND: 8080 = HOST port (Windows sees this)
 
 | File | What to explore | Python concept |
 |------|-----------------|----------------|
-| `ex_1_01_latency_ping.py` | `@dataclass`, `subprocess.run()` | Dataclasses, subprocesses |
-| `ex_1_02_tcp_server_client.py` | `socket`, `threading` | Basic sockets |
-| `ex_1_03_csv_parsing.py` | `csv` module, comprehensions | Data processing |
+| `00_APPENDIX/a)PYTHON_self_study_guide/examples/05_ping_latency.py` | `@dataclass`, `subprocess.run()` | Dataclasses, subprocesses |
+| `00_APPENDIX/a)PYTHON_self_study_guide/examples/01_socket_tcp.py` | `socket`, `threading` | Basic sockets |
+| Python standard-library `csv` module (optional exercise design) | `csv.reader`, comprehensions | Data processing |
 
 ### Weeks 2-3: Sockets
 
 | File | What to explore | Python concept |
 |------|-----------------|----------------|
-| `ex_2_01_tcp.py` | `SOCK_STREAM`, `accept()` | TCP sockets |
-| `ex_2_02_udp.py` | `SOCK_DGRAM`, `sendto()` | UDP sockets |
-| `ex_3_01_udp_broadcast.py` | `SO_BROADCAST` | Socket options |
+| `00_APPENDIX/a)PYTHON_self_study_guide/examples/01_socket_tcp.py` | `SOCK_STREAM`, `accept()` | TCP sockets |
+| `04_SEMINARS/S02/S02_Part07_Example_UDP_Server.py` | `SOCK_DGRAM`, `sendto()` | UDP sockets |
+| `04_SEMINARS/S03/4_udp-broadcast/S03_Part04A_Example_UDP_Broad_Sender.py` | `SO_BROADCAST` | Socket options |
 
 ### Weeks 4-14: Advanced
 
@@ -2114,13 +2106,13 @@ docker ps -a | grep portainer
 If stopped: `docker start portainer`. If doesn't exist, recreate it.
 
 **Q: How do I reset the Portainer password if I forgot it?**
-A: Delete the data volume and recreate:
+A: Preserve the data volume and use the [official password helper](https://docs.portainer.io/advanced/reset-admin). First confirm the container name and `/data` mount with `docker inspect portainer`. If they are `portainer` and `portainer_data`, use:
 ```bash
 docker stop portainer
-docker rm portainer
-docker volume rm portainer_data
-# Then recreate the container
+docker run --rm -v portainer_data:/data portainer/helper-reset-password
+docker start portainer
 ```
+Use the account and new password printed by the helper. This recovers the initial administrator account; another administrator can reset other users. See [environment routes](../docs/environment_routes.md).
 
 **Q: Why does my socket "block" at recv()?**
 A: `recv()` is blocking by default — it waits for data. Solutions:
@@ -2131,16 +2123,14 @@ sock.setblocking(False)  # non-blocking (with select/poll)
 ```
 
 **Q: Can I run GUI applications from WSL?**
-A: Yes, WSL2 on Windows 11 supports WSLg natively. On Windows 10 you need an X server (VcXsrv). But for this course, Wireshark runs natively on Windows, not in WSL.
+A: Current Store WSL supports WSLg on supported Windows 10 and Windows 11 installations. Check the installed WSL version; an external X server is only a fallback. The course also supports capturing inside Linux and opening the saved capture in Windows Wireshark.
 
 **Q: Why do I get "Address already in use" when restarting the server?**
-A: The port is still in TIME_WAIT. Solutions:
-1. Wait ~60 seconds
-2. Add before bind():
+A: Check for an active listener first with `ss -ltnp`; another process may still own the address. A closed connection in `TIME_WAIT` can also affect rebinding, depending on the OS and socket options. For the Linux examples, set the intended reuse option before `bind()`:
 ```python
 server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 ```
-3. Use a different port temporarily
+Apply this to the earlier socket as well when testing Linux restart behaviour. It does not displace an active listener. Stop only your own old server, or select a different free port. Any wait for `TIME_WAIT` expiry is platform-dependent, not a guaranteed 60-second remedy.
 
 **Q: How do I see which ports are occupied?**
 A:
@@ -2218,5 +2208,5 @@ Before considering this guide complete, check your progress:
 ---
 
 *Material created as optional support for the Computer Networks course.*
-*Repository: [github.com/antonioclim/netROwsl](https://github.com/antonioclim/netROwsl)*
+*Repository: [github.com/antonioclim/COMPNET-EN](https://github.com/antonioclim/COMPNET-EN)*
 *Version: 3.1 — January 2025 (with Parsons Problems, Code Tracing and self-assessment Checklist)*

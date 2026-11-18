@@ -10,31 +10,36 @@
       "id": "R1",
       "filter": "udp.dstport==5300 && dns.flags.response==0",
       "condition": ">= 3",
-      "description": "At least 3 client → resolver queries (local zone plus forwarding plus cache)."
+      "description": "At least three decoded DNS query frames to resolver UDP/5300."
     },
     {
       "id": "R2",
       "filter": "udp.srcport==5300 && dns.flags.response==1",
       "condition": ">= 3",
-      "description": "At least 3 resolver → client responses."
+      "description": "At least three decoded DNS response frames from resolver UDP/5300."
     },
     {
       "id": "R3",
       "filter": "udp.dstport==53 && dns.flags.response==0",
       "condition": ">= 1",
-      "description": "At least one query forwarded to upstream (port 53)."
+      "description": "At least one decoded DNS query to upstream UDP/53."
     },
     {
       "id": "R4",
       "filter": "udp.dstport==53 && dns.qry.name",
       "condition": "<= 2",
-      "description": "A limited number of upstream queries (cache demonstration)."
+      "description": "Upstream DNS query-frame count is within the declared bound; correlate repeated names and TTL to establish caching."
     },
     {
       "id": "R5",
       "filter": "dns.flags.rcode==3",
       "condition": ">= 1",
-      "description": "At least one NXDOMAIN response (negative caching)."
+      "description": "A decoded NXDOMAIN response is present; negative caching is not established by this check."
     }
+  ],
+  "manual_checks": [
+    "R1 R2: Use decoded dns.qry.name and answers; DNS wire names contain length octets.",
+    "R1 R2 R3 R4: Match query names/types and transaction IDs. Demonstrate that the repeated response is a cache hit within TTL, with no corresponding upstream query.",
+    "R1 R2 R5: Assert NXDOMAIN. Repeating and caching this failure is optional unless selected in E1."
   ]
 }

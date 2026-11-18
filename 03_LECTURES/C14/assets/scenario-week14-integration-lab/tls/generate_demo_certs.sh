@@ -52,6 +52,8 @@ subjectAltName = @alt_names
 [ alt_names ]
 DNS.1 = www.week14.local
 DNS.2 = api.week14.local
+DNS.3 = localhost
+IP.1 = 127.0.0.1
 CONF
 
 echo "[2/3] Generating server key + CSR"

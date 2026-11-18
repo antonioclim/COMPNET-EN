@@ -37,7 +37,7 @@
 |------|-------|
 | `cleanup.sh` | 17 |
 | `client.py` | 20 |
-| `run.sh` | 39 |
+| `run.sh` | 40 |
 | `server.py` | 29 |
 
 ## Cross-References

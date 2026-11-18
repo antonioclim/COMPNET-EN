@@ -77,7 +77,7 @@ Comparing a production-grade reverse proxy (Nginx) with a hand-written load bala
 ```bash
 git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
 cd COMPNET-EN
-git sparse-checkout set 04_SEMINARS/S11
+git sparse-checkout set 04_SEMINARS/S11 00_TOOLS
 ```
 
 **Method B — Direct download**

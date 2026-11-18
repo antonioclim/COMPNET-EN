@@ -138,7 +138,11 @@
         .python-logo { font-size: 4rem; margin-bottom: 1rem; }
         .hex-display { font-family: var(--font-mono); background: var(--code-bg); padding: 0.5rem 1rem; border-radius: 8px; display: inline-block; margin: 0.5rem; }
         .hex-byte { color: var(--accent-primary); margin: 0 2px; }
-    </style>
+    button.quiz-option {width:100%;color:inherit;font:inherit;text-align:left;}
+button.quiz-option:focus-visible,.page-dot:focus-visible {outline:3px solid var(--accent-primary);outline-offset:3px;}
+button.page-dot {border:0;padding:0;}
+code,.file-name {overflow-wrap:anywhere;}
+</style>
 </head>
 <body>
     <div class="progress-container"><div class="progress-bar" role="progressbar" id="progressBar"></div></div>
@@ -152,6 +156,7 @@
         <!-- Slide 1: Title -->
         <div class="slide active title-slide" data-slide="1">
             <div class="slide-content">
+                <p class="simulation-note">Interactive outputs are prewritten demonstrations. Run the canonical scripts in the VM or supported Linux environment using <a href="../CANONICAL_LAB_MAP.md">the lab map</a>.</p>
                 <div class="python-logo">🔤</div>
                 <h1>Data Types for Networking</h1>
                 <p class="lead">bytes vs str — The Critical Distinction</p>
@@ -200,7 +205,7 @@
                         <div class="objective-icon">🌐</div>
                         <div class="objective-text">
                             <strong>Applications in Networking</strong>
-                            <span>How these concepts are used in the actual exercises from 02roWSL and 03roWSL</span>
+                            <span>How these concepts are used in the actual exercises from 04_SEMINARS/S02 and 04_SEMINARS/S03</span>
                         </div>
                     </div>
                 </div>
@@ -268,7 +273,7 @@
                     <div class="code-header">
                         <span class="code-filename">🐍 conversion_demo.py</span>
                         <div class="code-actions">
-                            <button class="btn-code btn-run" onclick="simulateRun(this, 'output1')">▶ Run</button>
+                            <button class="btn-code btn-run" onclick="simulateRun(this, 'output1')">▶ Simulate</button>
                         </div>
                     </div>
                     <div class="code-body">
@@ -327,7 +332,7 @@ Decoded text:  HTTP/1.1 200 OK</pre>
                     <div class="code-header">
                         <span class="code-filename">🐍 bytes_literal.py</span>
                         <div class="code-actions">
-                            <button class="btn-code btn-run" onclick="simulateRun(this, 'output2')">▶ Run</button>
+                            <button class="btn-code btn-run" onclick="simulateRun(this, 'output2')">▶ Simulate</button>
                         </div>
                     </div>
                     <div class="code-body">
@@ -359,7 +364,7 @@ IP as bytes: b'\xc0\xa8\x01\x01'
 IP as hex:   c0a80101
 IP decoded:  192.168.1.1
 
-Request length: 37 bytes
+Request length: 35 bytes
 IP length:      4 bytes</pre>
                     </div>
                 </div>
@@ -455,7 +460,7 @@ sock.<span class="fn">send</span>(<span class="bytes">b"Hello Server"</span>)  <
                     <div class="code-header">
                         <span class="code-filename">🐍 comprehensions_networking.py</span>
                         <div class="code-actions">
-                            <button class="btn-code btn-run" onclick="simulateRun(this, 'output3')">▶ Run</button>
+                            <button class="btn-code btn-run" onclick="simulateRun(this, 'output3')">▶ Simulate</button>
                         </div>
                     </div>
                     <div class="code-body">
@@ -513,7 +518,7 @@ Extracted IPs: ['192.168.1.1', '10.0.0.1', '8.8.8.8', '172.16.0.1']</pre>
                     <div class="code-header">
                         <span class="code-filename">🐍 dict_comprehension_http.py</span>
                         <div class="code-actions">
-                            <button class="btn-code btn-run" onclick="simulateRun(this, 'output4')">▶ Run</button>
+                            <button class="btn-code btn-run" onclick="simulateRun(this, 'output4')">▶ Simulate</button>
                         </div>
                     </div>
                     <div class="code-body">
@@ -566,7 +571,7 @@ Host: localhost</pre>
                     <span class="callout-icon">🌐</span>
                     <div class="callout-content">
                         <h4>Where will you use this?</h4>
-                        <p>In <code>08roWSL/src/exercises/ex_8_01_server_http.py</code> you will need to parse exactly this kind of headers!</p>
+                        <p>In <code>04_SEMINARS/S08/3_socket-http/S08_Part03B_Example_Socket_HTTP_Server.py</code> you will need to parse exactly this kind of headers!</p>
                     </div>
                 </div>
             </div>
@@ -580,7 +585,7 @@ Host: localhost</pre>
                 <div class="experiment-box">
                     <div class="experiment-header">
                         <span class="experiment-icon">🔬</span>
-                        <span class="experiment-title">Explore Conversion in ex_2_01_tcp.py</span>
+                        <span class="experiment-title">Explore Conversion in 00_APPENDIX/a)PYTHON_self_study_guide/examples/01_socket_tcp.py</span>
                     </div>
 
                     <div class="experiment-steps">
@@ -588,7 +593,7 @@ Host: localhost</pre>
                             <div class="step-number">1</div>
                             <div class="step-content">
                                 <h4>Open the TCP exercise</h4>
-                                <p><code>code 02roWSL/src/exercises/ex_2_01_tcp.py</code></p>
+                                <p><code>code "00_APPENDIX/a)PYTHON_self_study_guide/examples/01_socket_tcp.py"</code></p>
                                 <p class="step-why">🎯 Purpose: This file implements a complete TCP server and client</p>
                             </div>
                         </div>
@@ -642,22 +647,22 @@ Host: localhost</pre>
                     </div>
 
                     <div class="quiz-options">
-                        <div class="quiz-option" onclick="selectOption(this, 'quiz1')">
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this, 'quiz1')">
                             <span class="option-marker">A</span>
                             <span><code>str.bytes()</code></span>
-                        </div>
-                        <div class="quiz-option" onclick="selectOption(this, 'quiz1')" data-correct="true">
+                        </button>
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this, 'quiz1')" data-correct="true">
                             <span class="option-marker">B</span>
                             <span><code>str.encode('utf-8')</code></span>
-                        </div>
-                        <div class="quiz-option" onclick="selectOption(this, 'quiz1')">
+                        </button>
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this, 'quiz1')">
                             <span class="option-marker">C</span>
                             <span><code>bytes(str)</code></span>
-                        </div>
-                        <div class="quiz-option" onclick="selectOption(this, 'quiz1')">
+                        </button>
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this, 'quiz1')">
                             <span class="option-marker">D</span>
                             <span><code>str.tobytes()</code></span>
-                        </div>
+                        </button>
                     </div>
 
                     <div class="quiz-actions">
@@ -678,7 +683,7 @@ Host: localhost</pre>
                         <p>Option B: <code>"text".encode('utf-8')</code> returns <code>b'text'</code></p>
                     </div>
 
-                    <div class="feedback-box" id="quiz1-feedback"></div>
+                    <div class="feedback-box" role="status" aria-live="polite" id="quiz1-feedback"></div>
                 </div>
             </div>
         </div>
@@ -700,22 +705,22 @@ Host: localhost</pre>
                     </div>
 
                     <div class="quiz-options">
-                        <div class="quiz-option" onclick="selectOption(this, 'quiz2')">
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this, 'quiz2')">
                             <span class="option-marker">A</span>
                             <span><code>[2, 4, 6, 8]</code></span>
-                        </div>
-                        <div class="quiz-option" onclick="selectOption(this, 'quiz2')">
+                        </button>
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this, 'quiz2')">
                             <span class="option-marker">B</span>
                             <span><code>[3, 4]</code></span>
-                        </div>
-                        <div class="quiz-option" onclick="selectOption(this, 'quiz2')" data-correct="true">
+                        </button>
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this, 'quiz2')" data-correct="true">
                             <span class="option-marker">C</span>
                             <span><code>[6, 8]</code></span>
-                        </div>
-                        <div class="quiz-option" onclick="selectOption(this, 'quiz2')">
+                        </button>
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this, 'quiz2')">
                             <span class="option-marker">D</span>
                             <span><code>[1, 2, 6, 8]</code></span>
-                        </div>
+                        </button>
                     </div>
 
                     <div class="quiz-actions">
@@ -736,7 +741,7 @@ Host: localhost</pre>
                         <p>3 * 2 = 6, 4 * 2 = 8 → Result: [6, 8]</p>
                     </div>
 
-                    <div class="feedback-box" id="quiz2-feedback"></div>
+                    <div class="feedback-box" role="status" aria-live="polite" id="quiz2-feedback"></div>
                 </div>
 
                 <div class="quiz-container" id="quiz3" style="margin-top: 2rem;">
@@ -752,22 +757,22 @@ Host: localhost</pre>
                     </div>
 
                     <div class="quiz-options">
-                        <div class="quiz-option" onclick="selectOption(this, 'quiz3')">
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this, 'quiz3')">
                             <span class="option-marker">A</span>
                             <span>12</span>
-                        </div>
-                        <div class="quiz-option" onclick="selectOption(this, 'quiz3')">
+                        </button>
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this, 'quiz3')">
                             <span class="option-marker">B</span>
                             <span>160</span>
-                        </div>
-                        <div class="quiz-option" onclick="selectOption(this, 'quiz3')" data-correct="true">
+                        </button>
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this, 'quiz3')" data-correct="true">
                             <span class="option-marker">C</span>
                             <span>192</span>
-                        </div>
-                        <div class="quiz-option" onclick="selectOption(this, 'quiz3')">
+                        </button>
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this, 'quiz3')">
                             <span class="option-marker">D</span>
                             <span>255</span>
-                        </div>
+                        </button>
                     </div>
 
                     <div class="quiz-actions">
@@ -788,7 +793,7 @@ Host: localhost</pre>
                         <p>12 × 16 = 192. This is the first octet of the IP address 192.168.x.x!</p>
                     </div>
 
-                    <div class="feedback-box" id="quiz3-feedback"></div>
+                    <div class="feedback-box" role="status" aria-live="polite" id="quiz3-feedback"></div>
                 </div>
             </div>
         </div>
@@ -802,7 +807,7 @@ Host: localhost</pre>
                     <div class="code-header">
                         <span class="code-filename">🐍 sandbox_bytes.py</span>
                         <div class="code-actions">
-                            <button class="btn-code btn-run" onclick="simulateRun(this, 'sandbox-output')">▶ Run</button>
+                            <button class="btn-code btn-run" onclick="simulateRun(this, 'sandbox-output')">▶ Simulate</button>
                         </div>
                     </div>
                     <div class="code-body">
@@ -840,8 +845,8 @@ As hex:       c0a80164
 Reconstructed:  192.168.1.100
 
 --- HTTP Request ---
-Text length:  46 characters
-Bytes length: 46 bytes
+Text length:  47 characters
+Bytes length: 47 bytes
 Request bytes: b'GET /api/data HTTP/1.1\r\nHost: 192.168.1.100\r\n'...</pre>
                     </div>
                 </div>
@@ -864,14 +869,14 @@ Request bytes: b'GET /api/data HTTP/1.1\r\nHost: 192.168.1.100\r\n'...</pre>
 
                 <div class="grid-2">
                     <div class="card">
-                        <h3>📁 02roWSL</h3>
-                        <p><strong>ex_2_01_tcp.py</strong></p>
+                        <h3>📁 04_SEMINARS/S02</h3>
+                        <p><strong>00_APPENDIX/a)PYTHON_self_study_guide/examples/01_socket_tcp.py</strong></p>
                         <ul style="color: var(--text-secondary); font-size: 0.95rem; margin-left: 1rem;">
                             <li><code>encode()</code> when sending messages</li>
                             <li><code>decode()</code> when receiving responses</li>
                             <li>TCP client-server pattern</li>
                         </ul>
-                        <p style="margin-top: 1rem;"><strong>ex_2_02_udp.py</strong></p>
+                        <p style="margin-top: 1rem;"><strong>04_SEMINARS/S02/S02_Part07_Example_UDP_Server.py</strong></p>
                         <ul style="color: var(--text-secondary); font-size: 0.95rem; margin-left: 1rem;">
                             <li>Same pattern for UDP</li>
                             <li><code>sendto()</code> and <code>recvfrom()</code></li>
@@ -879,13 +884,13 @@ Request bytes: b'GET /api/data HTTP/1.1\r\nHost: 192.168.1.100\r\n'...</pre>
                     </div>
 
                     <div class="card">
-                        <h3>📁 03roWSL</h3>
-                        <p><strong>ex_3_01_udp_broadcast.py</strong></p>
+                        <h3>📁 04_SEMINARS/S03</h3>
+                        <p><strong>04_SEMINARS/S03/4_udp-broadcast/S03_Part04A_Example_UDP_Broad_Sender.py</strong></p>
                         <ul style="color: var(--text-secondary); font-size: 0.95rem; margin-left: 1rem;">
                             <li>Bytes for UDP broadcast</li>
                             <li>SO_BROADCAST socket option</li>
                         </ul>
-                        <p style="margin-top: 1rem;"><strong>ex_3_03_tcp_tunnel.py</strong></p>
+                        <p style="margin-top: 1rem;"><strong>03_LECTURES/C03/assets/scenario-tcp-tunnel/tunnel.py</strong></p>
                         <ul style="color: var(--text-secondary); font-size: 0.95rem; margin-left: 1rem;">
                             <li>Forwarding bytes between connections</li>
                             <li>Without encode/decode (binary data!)</li>
@@ -968,9 +973,11 @@ Request bytes: b'GET /api/data HTTP/1.1\r\nHost: 192.168.1.100\r\n'...</pre>
         const quizHintCounts = {};
 
         document.addEventListener('DOMContentLoaded', () => {
-            updataUI();
+            updateUI();
             createPageDots();
+            goToSlide(currentSlide);
             document.addEventListener('keydown', (e) => {
+                if (e.target.closest('input, textarea, select, button, a, [contenteditable=true]')) return;
                 if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
                 else if (e.key === 'ArrowLeft') { prevSlide(); }
             });
@@ -979,14 +986,16 @@ Request bytes: b'GET /api/data HTTP/1.1\r\nHost: 192.168.1.100\r\n'...</pre>
         function createPageDots() {
             const container = document.getElementById('pageDots');
             for (let i = 1; i <= totalSlides; i++) {
-                const dot = document.createElement('div');
+                const dot = document.createElement('button');
+                dot.type = 'button';
+                dot.setAttribute('aria-label', `Go to slide ${i}`);
                 dot.className = 'page-dot' + (i === 1 ? ' active' : '');
                 dot.onclick = () => goToSlide(i);
                 container.appendChild(dot);
             }
         }
 
-        function updataUI() {
+        function updateUI() {
             document.getElementById('progressBar').style.width = `${(currentSlide / totalSlides) * 100}%`;
             document.getElementById('slideCounter').textContent = `${currentSlide} / ${totalSlides}`;
             document.getElementById('btnPrev').disabled = currentSlide === 1;
@@ -995,11 +1004,16 @@ Request bytes: b'GET /api/data HTTP/1.1\r\nHost: 192.168.1.100\r\n'...</pre>
         }
 
         function goToSlide(n) {
-            if (n < 1 || n > totalSlides || n === currentSlide) return;
-            const currentEl = document.querySelector(`.slide[data-slide="${currentSlide}"]`);
-            const nextEl = document.querySelector(`.slide[data-slide="${n}"]`);
-            currentEl.classList.remove('active'); currentEl.classList.add('exit');
-            setTimeout(() => { currentEl.classList.remove('exit'); nextEl.classList.add('active'); currentSlide = n; updataUI(); }, 100);
+            if (!Number.isInteger(n) || n < 1 || n > totalSlides) return;
+            currentSlide = n;
+            document.querySelectorAll('.slide').forEach(slide => {
+                const active = Number(slide.dataset.slide) === n;
+                slide.classList.remove('exit');
+                slide.classList.toggle('active', active);
+                slide.inert = !active;
+                slide.setAttribute('aria-hidden', String(!active));
+            });
+            updateUI();
         }
 
         function nextSlide() { if (currentSlide < totalSlides) goToSlide(currentSlide + 1); }
@@ -1008,18 +1022,34 @@ Request bytes: b'GET /api/data HTTP/1.1\r\nHost: 192.168.1.100\r\n'...</pre>
         function simulateRun(btn, outputId) {
             const output = document.getElementById(outputId);
             btn.textContent = '⏳ Run...'; btn.disabled = true;
-            setTimeout(() => { output.classList.add('visible'); btn.textContent = '▶ Run'; btn.disabled = false; }, 800);
+            setTimeout(() => { output.classList.add('visible'); btn.textContent = '▶ Simulate'; btn.disabled = false; }, 800);
         }
 
-        function copyCode(btn) {
-            const code = btn.closest('.code-container').querySelector('pre').textContent;
-            navigator.clipboard.writeText(code);
-            const orig = btn.textContent; btn.textContent = '✓ Copied!'; setTimeout(() => btn.textContent = orig, 1500);
+        async function copyCode(btn) {
+            const pre = btn.closest('.code-container').querySelector('pre');
+            const original = btn.textContent;
+            try {
+                await navigator.clipboard.writeText(pre.textContent);
+                btn.textContent = 'Copied!';
+            } catch (_) {
+                const range = document.createRange();
+                range.selectNodeContents(pre);
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+                btn.textContent = 'Selected: copy manually';
+            }
+            setTimeout(() => { btn.textContent = original; }, 2000);
         }
 
         function selectOption(el, quizId) {
-            document.getElementById(quizId).querySelectorAll('.quiz-option').forEach(o => o.classList.remove('selected','correct','incorrect'));
+            const container = document.getElementById(quizId);
+            container.querySelectorAll('.quiz-option').forEach(option => {
+                option.classList.remove('selected', 'correct', 'incorrect');
+                option.setAttribute('aria-pressed', 'false');
+            });
             el.classList.add('selected');
+            el.setAttribute('aria-pressed', 'true');
             document.getElementById(`${quizId}-feedback`).classList.remove('visible');
         }
 

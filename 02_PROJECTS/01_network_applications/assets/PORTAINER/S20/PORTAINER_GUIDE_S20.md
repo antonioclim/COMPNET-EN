@@ -30,7 +30,9 @@ Verify that the service notifies only the interested client and that the reporte
 
 ### Persistence Check
 
-Restart `object-db-service` from Portainer after the scripted E2 flow or during an auxiliary manual run. The retained dataset should remain available if persistence is part of the chosen baseline. If everything disappears, the data path is probably inside the ephemeral container filesystem.
+Restart `object-db-service` from Portainer after committing a known update. Query it again after startup: persistence across service restart is mandatory. A normal container writable layer survives stop/start/restart, whereas memory and tmpfs do not. If the value disappears, check transaction commits, the database path and startup code that may reseed or overwrite it.
+
+A separate remove/recreate test checks a stronger lifecycle boundary. Use a named volume or bind mount for database state that must survive replacement of the container. Record the original container ID, storage mount and database hash before recreating it; do not delete the volume during this test.
 
 ### Quick Inspection
 
@@ -51,4 +53,4 @@ Use these commands to confirm where durable state lives and whether the expected
 | Client B never receives a change notification | Watch state is not stored per session or is dropped too early | Trace watch registration and fan-out selection |
 | UPDATE succeeds but a later GET shows stale data | The in-memory index and the persistent store are updated in different orders | Define one authoritative commit order and document it |
 | DELETE removes the row but leaves watch state corrupted | Session watch cleanup is coupled incorrectly to object lifetime | Separate session cleanup from persistent object deletion |
-| Data disappears after restart | The database file is written inside a non-persistent layer | Mount a persistent path or place the file under the intended durable directory |
+| Data disappears after restart | Uncommitted writes, in-memory/tmpfs storage or startup reinitialisation | Inspect the actual database path and commit/reload logic. A normal writable-layer file survives restart; a volume is needed to survive container removal/recreation. |

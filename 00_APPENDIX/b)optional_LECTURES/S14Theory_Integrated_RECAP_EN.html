@@ -1034,7 +1034,7 @@
 <p><strong>Predict:</strong> minimum overhead for 1 byte of TCP payload over Ethernet?</p>
 <button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer</button>
 <div class="reveal-content">
-<p><strong>14 (Eth) + 20 (IP) + 20 (TCP) = 54 bytes overhead for 1 byte of data ≈ 98% overhead.</strong></p>
+<p><strong>For one byte of TCP data over IPv4/Ethernet: 14-byte MAC header + 20-byte IP header + 20-byte TCP header + 1-byte data + 5-byte pad + 4-byte FCS = 64-byte MAC frame; 63/64 ≈ 98.4% is overhead/padding. Preamble/SFD and inter-frame gap are excluded.</strong></p>
 <p>This is why Nagle's algorithm coalesces small writes.</p>
 </div>
 </div>
@@ -1641,6 +1641,7 @@ function toggleFullscreen() {
   else document.exitFullscreen();
 }
 document.addEventListener('keydown', (e) => {
+      if (e.target && e.target.closest && e.target.closest('input, textarea, select, button, [contenteditable="true"]')) return;
   if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
   else if (e.key === 'ArrowLeft') prevSlide();
   else if (e.key === 'f' || e.key === 'F') toggleFullscreen();

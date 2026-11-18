@@ -1,5 +1,6 @@
 import socket
 import threading
+from text_framing import encode_frame, read_frame
 
 # IP address on which the server will listen.
 # "127.0.0.1" = localhost (only connections from the same machine).
@@ -58,7 +59,7 @@ def process_command(data: str) -> str:
         "<MESSAGE_LENGTH> <COMMAND> <KEY> [RESOURCE...]"
 
     Example:
-        "20 add user1 Alice"
+        "18 add user1 Alice"
 
     Steps:
       1. Parse the command and arguments.
@@ -76,6 +77,8 @@ def process_command(data: str) -> str:
 
     # items[1] = command, items[2] = key.
     # The remaining elements form the resource (if present).
+    if len(items) < 3:
+        return encode_frame("ERR missing command or key").decode("utf-8")
     command, key = items[1:3]
 
     resource = ""
@@ -96,71 +99,22 @@ def process_command(data: str) -> str:
         if not payload:
             payload = "key was not found"
 
-    # Calculate the payload length as a character count.
-    payload_length = len(payload)
-
-    # MESSAGE_LENGTH = total:
-    #   len(str(payload_length)) + 1 (space) + payload_length,
-    # NOTE: a different design was chosen here:
-    # the response is sent as "MESSAGE_LENGTH PAYLOAD",
-    # where MESSAGE_LENGTH represents the TOTAL length of the resulting string.
-    #
-    # Here we keep the existing convention:
-    message_length = len(str(payload_length)) + 1 + payload_length
-
-    # Final response: "<message_length> <payload>"
-    return f"{message_length} {payload}"
+    return encode_frame(payload).decode("utf-8")
 
 
 def handle_client(client: socket.socket):
-    """
-    Handler for a single client (runs in a separate thread).
-
-    Steps:
-      - read the first data fragment (max BUFFER_SIZE bytes)
-      - extract MESSAGE_LENGTH from the textual header
-      - continue reading until the entire message is received
-      - call process_command() and send the response
-      - repeat until the client closes the connection
-    """
-
+    """Read complete frames as bytes, then decode once; accept pipelined frames."""
     with client:
-        while True:
-            # If client is None (defensive) or no longer exists, exit.
-            if client is None:
-                break
-
-            # Read the first fragment of the message.
-            data = client.recv(BUFFER_SIZE)
-            if not data:
-                # The client has closed the connection.
-                break
-
-            # Convert bytes to string (UTF-8).
-            string_data = data.decode("utf-8")
-            full_data = string_data
-
-            # The header has the form "<MESSAGE_LENGTH> ".
-            # Take the first token and convert it to int.
-            message_length = int(string_data.split(" ")[0])
-
-            # How many more characters do we need to receive the full message?
-            remaining = message_length - len(string_data)
-
-            # As long as we do not have the entire message, keep reading.
-            while remaining > 0:
-                data = client.recv(BUFFER_SIZE)
-                if not data:
+        try:
+            while True:
+                frame = read_frame(client)
+                if frame is None:
                     break
-                string_data = data.decode("utf-8")
-                full_data += string_data
-                remaining -= len(string_data)
+                response = process_command(frame.decode("utf-8"))
+                client.sendall(response.encode("utf-8"))
+        except (OSError, EOFError, ValueError) as exc:
+            print(f"[PROTOCOL ERROR] {exc}")
 
-            # At this point, full_data should contain the complete message.
-            response = process_command(full_data)
-
-            # Send the response, encoded in UTF-8.
-            client.sendall(response.encode("utf-8"))
 
 
 def accept_loop(server: socket.socket):
@@ -173,7 +127,7 @@ def accept_loop(server: socket.socket):
     while is_running:
         client, addr = server.accept()
         print(f"[CONNECT] {addr} has connected")
-        client_thread = threading.Thread(target=handle_client, args=(client,))
+        client_thread = threading.Thread(target=handle_client, args=(client,), daemon=True)
         client_thread.start()
 
 

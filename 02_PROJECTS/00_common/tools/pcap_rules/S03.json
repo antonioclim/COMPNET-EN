@@ -1,37 +1,46 @@
 {
   "project": "S03",
   "pcap_relpath": "artifacts/pcap/traffic_e2.pcap",
-  "decode_as": [],
+  "decode_as": [
+    "tcp.port==8080,http"
+  ],
   "rules": [
     {
       "id": "R1",
       "filter": "tcp.dstport==8080 && tcp.flags.syn==1 && tcp.flags.ack==0",
       "condition": ">= 1",
-      "description": "Handshake to the HTTP server."
+      "description": "SYN connection attempt to the HTTP server."
     },
     {
       "id": "R2",
-      "filter": "tcp.port==8080 && frame contains \"GET \"",
+      "filter": "tcp.dstport==8080 && http.request.method==\"GET\" && !tcp.analysis.retransmission",
       "condition": ">= 2",
-      "description": "At least 2 GET requests (keep-alive/pipelining test)."
+      "description": "At least two decoded GET requests in one TCP stream; count HTTP messages, not frames.",
+      "measurement": "field_occurrences",
+      "field": "http.request.method",
+      "value": "GET",
+      "aggregation": "max_per_stream"
     },
     {
       "id": "R3",
-      "filter": "tcp.port==8080 && frame contains \"HTTP/1.1 200\"",
+      "filter": "tcp.srcport==8080 && http.response.code==200",
       "condition": ">= 1",
-      "description": "200 OK response for an existing file."
+      "description": "Decoded HTTP 200 response."
     },
     {
       "id": "R4",
-      "filter": "tcp.port==8080 && frame contains \"HTTP/1.1 404\"",
+      "filter": "tcp.srcport==8080 && http.response.code==404",
       "condition": ">= 1",
-      "description": "404 response for a missing resource."
+      "description": "Decoded HTTP 404 response."
     },
     {
       "id": "R5",
-      "filter": "tcp.port==8080 && frame contains \"Content-Type:\"",
+      "filter": "tcp.srcport==8080 && http.content_type",
       "condition": ">= 1",
-      "description": "Content-Type header present in the response."
+      "description": "Decoded Content-Type response header."
     }
+  ],
+  "manual_checks": [
+    "R1 R2 R3 R4 R5: Assert both decoded responses, Content-Type, Content-Length/body framing and reuse of the same TCP stream. Test HEAD separately as required by the brief."
   ]
 }

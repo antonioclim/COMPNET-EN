@@ -18,9 +18,9 @@ note right of C
   Server initiates the
   data connection back.
 end note
-S -> C : <color:#1565C0>data connection (server → client)</color>
+S -> C : data connection (server → client)
 S --> C : file content
-C -> S : ACK (transfer complete)
+S --> C : 226 Transfer complete (control channel)
 
 == Passive mode ==
 
@@ -31,13 +31,13 @@ note right of S
   Client initiates the
   data connection forward.
 end note
-C -> S : <color:#43A047>data connection (client → server)</color>
+C -> S : data connection (client → server)
 S --> C : file content
-C -> S : ACK (transfer complete)
+S --> C : 226 Transfer complete (control channel)
 
 legend bottom
-  Active mode fails behind NAT/firewalls (server cannot reach client).
-  Passive mode works because the client initiates both connections.
+  Active mode requires the server to reach the client data listener.
+  Passive mode requires a reachable advertised server data address and port.
   Passive mode is the default in virtually all modern FTP clients.
 endlegend
 @enduml

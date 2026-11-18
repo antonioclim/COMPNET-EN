@@ -15,40 +15,40 @@ start
 if (Valid IOT1 magic?) then (yes)
     :Parse payload\n(sensor_id, seq, value, timestamp);
 else (no)
-    #FFCDD2:Discard (invalid format);
+    :Discard (invalid format); <<#FFCDD2>>
     :Log: DROPPED (bad magic);
     stop
 endif
 
 if (All mandatory fields\npresent?) then (yes)
 else (no)
-    #FFCDD2:Discard (missing fields);
+    :Discard (missing fields); <<#FFCDD2>>
     :Log: DROPPED (incomplete);
     stop
 endif
 
 if (Value in valid range?\n(per-sensor config)) then (yes)
 else (out of range)
-    #FFCDD2:Discard (out of range);
+    :Discard (out of range); <<#FFCDD2>>
     :Log: DROPPED (range);
     stop
 endif
 
 if (Datagram size ≤ limit?) then (yes)
 else (too large)
-    #FFCDD2:Discard (oversized);
+    :Discard (oversized); <<#FFCDD2>>
     stop
 endif
 
 :Check deduplication\n(sensor_id + seq);
 
 if (Duplicate?) then (yes)
-    #FFF9C4:Discard (already seen);
+    :Discard (already seen); <<#FFF9C4>>
     stop
 else (new)
 endif
 
-#C8E6C9:Store in ring buffer\n(sensor_id → latest N readings);
+:Store in ring buffer\n(sensor_id → latest N readings); <<#C8E6C9>>
 
 if (Buffer full?) then (yes)
     :Evict oldest reading;

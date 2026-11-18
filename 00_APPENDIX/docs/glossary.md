@@ -74,7 +74,7 @@
 
 **Port** — 16-bit number (0-65535) identifying a service or application. Well-known ports: 0-1023.
 
-**Portainer** — Web interface for managing Docker containers. Default port: 9000.
+**Portainer** — Web interface for managing Docker containers. Course mapping: host loopback 9050 to HTTP container port 9000; product HTTPS 9443 is separate.
 
 ---
 
@@ -89,9 +89,9 @@
 
 **sudo** — Command for executing with administrator (root) privileges. "Superuser do".
 
-**systemd** — Modern init system for Linux. Manages services with `systemctl`. WSL2 by default does not use systemd.
+**systemd** — Modern init system for Linux. Manages services with `systemctl`. Current WSL supports systemd; inspect PID 1 and the distribution configuration.
 
-**TCP (Transmission Control Protocol)** — Connection-oriented transport protocol with guaranteed ordered delivery without loss. HTTP, HTTPS and SSH use TCP.
+**TCP (Transmission Control Protocol)** — Connection-oriented transport protocol that delivers an ordered byte stream or reports a connection failure. Successful local sending does not prove remote application processing. HTTP/1.1, HTTP/2 and SSH commonly use TCP; HTTP/3 uses QUIC over UDP.
 
 **TTL (Time To Live)** — Field in IP header limiting packet lifetime (number of hops). Decremented by each router.
 
@@ -135,9 +135,9 @@
 |--------|--------|------------|
 | **Container** | **Image** | Image is read-only template, container is runnable instance |
 | **WSL1** | **WSL2** | WSL1 translates syscalls, WSL2 runs real Linux kernel |
-| **send()** | **sendall()** | send() may send partially, sendall() sends everything |
+| **send()** | **sendall()** | send() may accept fewer bytes; sendall() continues until all bytes are accepted locally or an error occurs |
 | **localhost** | **0.0.0.0** | localhost = local only, 0.0.0.0 = all interfaces |
-| **TCP** | **UDP** | TCP = guaranteed delivery, UDP = best-effort |
+| **TCP** | **UDP** | TCP = ordered reliable byte stream with possible connection failure; UDP = datagrams without delivery guarantees |
 | **str** | **bytes** | str = Unicode text, bytes = binary data |
 | **apt** | **apt-get** | apt = modern interface, apt-get = classic |
 | **docker stop** | **docker rm** | stop preserves container, rm deletes it |

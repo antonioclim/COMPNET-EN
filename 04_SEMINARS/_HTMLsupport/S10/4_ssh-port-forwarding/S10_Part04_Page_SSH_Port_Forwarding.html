@@ -427,7 +427,7 @@
                     this.addLog("Creating container web ... done", false, "text-green-400");
                     this.addLog("Creating container ssh-bastion ... done", false, "text-green-400");
 
-                    this.description = "Infrastructure is ready. The 'web' container is hidden. We need SSH to access it.";
+                    this.description = "No host port is published for web:8000. This exercise reaches it through SSH; direct container-IP access depends on the daemon host and platform.";
                 },
 
                 async establishTunnel() {

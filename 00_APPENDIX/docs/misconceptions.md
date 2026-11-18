@@ -107,7 +107,7 @@ docker run -d -p 8080:80 nginx
 
 ### 🚫 Misconception 6: "Localhost is the same everywhere"
 
-**WRONG:** "If Portainer runs on `localhost:9000`, I can access `localhost:9000` from any container."
+**WRONG:** "If Portainer runs on `localhost:9050`, I can access `localhost:9050` from any container."
 
 **CORRECT:** Each container has its **own network namespace**. `localhost` in a container refers to the container itself, not the host.
 
@@ -119,7 +119,7 @@ docker run -d -p 8080:80 nginx
 
 **WRONG:** "I configured everything, after restart it will work the same."
 
-**CORRECT:** In native WSL2 (without Docker Desktop), the Docker service does **NOT start automatically**. WSL2 does not have systemd enabled by default, so services do not initialise at boot.
+**CORRECT:** Automatic start depends on the WSL/systemd configuration and whether Docker is enabled. Without that service setup, start Docker manually. Use `docker info` to verify daemon access; do not infer it from the client version.
 
 **Immediate solution:**
 ```bash

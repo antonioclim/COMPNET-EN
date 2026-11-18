@@ -1,12 +1,34 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+CAPTURE_PID=""
 cleanup() {
+  if [[ -n "$CAPTURE_PID" ]]; then
+    kill "$CAPTURE_PID" 2>/dev/null || true
+    wait "$CAPTURE_PID" 2>/dev/null || true
+    CAPTURE_PID=""
+  fi
   ip netns del ns_lan 2>/dev/null || true
   ip netns del ns_rtr 2>/dev/null || true
   ip netns del ns_wan 2>/dev/null || true
+  ip link del v_lan 2>/dev/null || true
+  ip link del v_wan 2>/dev/null || true
 }
-cleanup
+for ns in ns_lan ns_rtr ns_wan; do
+  if ip netns list | awk '{print $1}' | grep -Fxq "$ns"; then
+    echo "Namespace $ns already exists; stop its owner before running this demo." >&2
+    exit 1
+  fi
+done
+for link in v_lan v_wan v_rtr_lan v_rtr_wan; do
+  if ip link show "$link" >/dev/null 2>&1; then
+    echo "Interface $link already exists; refusing to remove another lab's interface." >&2
+    exit 1
+  fi
+done
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
 
 ip netns add ns_lan
 ip netns add ns_rtr
@@ -42,6 +64,7 @@ ip netns exec ns_rtr iptables -t nat -A POSTROUTING -o v_rtr_wan -j MASQUERADE
 
 echo "Starting tcpdump in ns_wan for ICMP..."
 ip netns exec ns_wan timeout 4 tcpdump -n -i v_wan icmp &
+CAPTURE_PID=$!
 sleep 1
 
 echo "Pinging from LAN host (192.168.10.2) to WAN host (203.0.113.2)..."
@@ -50,4 +73,3 @@ ip netns exec ns_lan ping -c 2 203.0.113.2 || true
 echo
 echo "You should see packets arrive in ns_wan with source rewritten to 203.0.113.1"
 echo "Cleaning up..."
-cleanup

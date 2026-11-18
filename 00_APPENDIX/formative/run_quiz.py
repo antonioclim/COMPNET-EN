@@ -6,7 +6,7 @@ Computer Networks — ASE, CSIE | by ing. dr. Antonio Clim
 
 A command-line tool for running interactive formative quizzes.
 Supports multiple question types, Bloom level filtering, review mode
-and LMS export (Moodle GIFT, Canvas QTI, JSON).
+and export (Moodle GIFT, QTI 1.2 packages and repository JSON).
 
 Usage:
     python run_quiz.py                    # Run full quiz
@@ -30,6 +30,10 @@ import json
 import random
 import sys
 import argparse
+import re
+import math
+import zipfile
+import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Optional, Dict, List, Any, Tuple
 from datetime import datetime
@@ -55,47 +59,77 @@ def load_quiz(path: Path) -> Dict[str, Any]:
 
 
 def validate_quiz_structure(quiz: Dict[str, Any]) -> Tuple[bool, List[str]]:
-    """Validate quiz has required structure.
-    
-    Returns:
-        Tuple of (is_valid, list_of_errors)
-    """
+    """Validate authoring contracts before running or exporting a bank."""
     errors = []
-    
-    if 'metadata' not in quiz:
-        errors.append("Missing 'metadata' section")
+    if not isinstance(quiz, dict):
+        return False, ["Quiz must be a mapping with metadata and questions"]
+    meta = quiz.get('metadata')
+    if not isinstance(meta, dict):
+        errors.append("metadata must be a mapping")
     else:
-        meta = quiz['metadata']
-        required_meta = ['week', 'topic', 'passing_score']
-        for field in required_meta:
+        for field in ('week', 'topic', 'passing_score'):
             if field not in meta:
                 errors.append(f"Missing metadata field: {field}")
-    
-    if 'questions' not in quiz:
-        errors.append("Missing 'questions' section")
-    elif not quiz['questions']:
-        errors.append("No questions defined")
+        passing = meta.get('passing_score')
+        if isinstance(passing, bool) or not isinstance(passing, (int, float)) or not 0 <= passing <= 100:
+            errors.append("metadata.passing_score must be between 0 and 100")
+        if not isinstance(meta.get('topic'), str) or not meta.get('topic', '').strip():
+            errors.append("metadata.topic must be non-empty text")
+        if not isinstance(meta.get('week'), int) or isinstance(meta.get('week'), bool) or meta['week'] < 0:
+            errors.append("metadata.week must be a non-negative integer")
+    questions = quiz.get('questions')
+    if not isinstance(questions, list) or not questions:
+        errors.append("questions must be a non-empty list")
     else:
-        for i, q in enumerate(quiz['questions']):
-            q_errors = _validate_question(q, i)
-            errors.extend(q_errors)
-    
-    return (len(errors) == 0, errors)
+        ids = set()
+        for i, q in enumerate(questions):
+            errors.extend(_validate_question(q, i))
+            ident = q.get('id') if isinstance(q, dict) else None
+            if isinstance(ident, str):
+                if ident in ids:
+                    errors.append(f"Q{i+1}: duplicate id {ident!r}")
+                ids.add(ident)
+    return not errors, errors
 
 
 def _validate_question(q: Dict[str, Any], index: int) -> List[str]:
-    """Validate a single question structure."""
+    prefix = f"Q{index+1}: "
+    if not isinstance(q, dict):
+        return [prefix + "question must be a mapping"]
     errors = []
-    required = ['id', 'type', 'stem', 'correct']
-    
-    for field in required:
+    points = q.get('points', 1)
+    if isinstance(points, bool) or not isinstance(points, (int, float)) or not math.isfinite(points) or points <= 0:
+        errors.append(prefix + "points must be a positive finite number")
+    for field in ('id', 'type', 'stem', 'correct'):
         if field not in q:
-            errors.append(f"Q{index+1}: Missing field '{field}'")
-    
-    if q.get('type') == 'multiple_choice' and 'options' not in q:
-        errors.append(f"Q{index+1}: MC question missing 'options'")
-    
+            errors.append(prefix + f"Missing field '{field}'")
+    for field in ('id', 'stem'):
+        if not isinstance(q.get(field), str) or not q.get(field, '').strip():
+            errors.append(prefix + f"{field} must be non-empty text")
+    if q.get('type') not in ('multiple_choice', 'fill_blank'):
+        errors.append(prefix + "unsupported question type")
+    elif q['type'] == 'multiple_choice':
+        opts = q.get('options')
+        if not isinstance(opts, dict) or len(opts) < 2:
+            errors.append(prefix + "options must be a mapping of at least two choices")
+        elif not all(isinstance(k, str) and k and isinstance(v, str) and v.strip() for k, v in opts.items()):
+            errors.append(prefix + "option identifiers and text must be non-empty strings")
+        elif not isinstance(q.get('correct'), str) or q['correct'] not in opts:
+            errors.append(prefix + "correct must name an existing option")
+    else:
+        answers = q.get('correct')
+        answers = answers if isinstance(answers, list) else [answers]
+        if not answers or not all(isinstance(a, str) and a.strip() for a in answers):
+            errors.append(prefix + "fill_blank correct must contain non-empty answer strings")
+        if isinstance(q.get('stem'), str) and q['stem'].count('___') != 1:
+            errors.append(prefix + "fill_blank stem must contain exactly one ___ marker")
     return errors
+
+
+def _require_valid(quiz: Dict[str, Any]) -> None:
+    valid, errors = validate_quiz_structure(quiz)
+    if not valid:
+        raise ValueError("Invalid quiz: " + "; ".join(errors))
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -332,26 +366,38 @@ def run_quiz(
     meta = quiz.get('metadata', {})
     _display_quiz_header(meta, len(questions), bloom_filter, show_answers)
     
-    input("\nPress Enter to start...")
-    
-    correct, answered, skipped = 0, 0, 0
-    
-    for i, q in enumerate(questions, 1):
-        result = display_question(q, i, show_answers)
-        if result is True:
-            correct += 1
-            answered += 1
-        elif result is False:
-            answered += 1
-        else:
-            skipped += 1
-    
-    score = (correct / answered) * 100 if answered > 0 else 0.0
+    correct, answered, skipped, visited = 0, 0, 0, 0
+    earned_points = 0.0
+    planned_points = sum(float(q.get('points', 1)) for q in questions)
+    try:
+        input("\nPress Enter to start...")
+        for i, q in enumerate(questions, 1):
+            result = display_question(q, i, show_answers)
+            visited += 1
+            if result is True:
+                correct += 1
+                answered += 1
+                earned_points += float(q.get('points', 1))
+            elif result is False:
+                answered += 1
+            elif not show_answers:
+                skipped += 1
+    except (KeyboardInterrupt, EOFError):
+        print("\nSession ended before all questions were visited.")
+
+    unattempted = len(questions) - visited
+    session_status = 'review' if show_answers else ('complete' if not unattempted else 'incomplete')
+    score = (earned_points / planned_points) * 100 if planned_points > 0 else 0.0
     passing_score = meta.get('passing_score', 70)
-    passed = score >= passing_score
+    passed = session_status == 'complete' and score >= passing_score
     
-    _display_quiz_results(correct, answered, skipped, score, 
-                          passing_score, passed, quiz.get('scoring', {}))
+    if session_status == 'complete':
+        _display_quiz_results(correct, answered, skipped, score,
+                              passing_score, passed, quiz.get('scoring', {}))
+        print(f"Points: {earned_points:g}/{planned_points:g}; skipped questions earn zero.")
+    else:
+        print(f"Session: {session_status.upper()} — no pass/readiness verdict.")
+        print(f"Answered: {answered}; skipped: {skipped}; unattempted: {unattempted}.")
     
     return {
         'score': score,
@@ -359,6 +405,10 @@ def run_quiz(
         'answered': answered,
         'skipped': skipped,
         'total': len(questions),
+        'earned_points': earned_points,
+        'planned_points': planned_points,
+        'unattempted': unattempted,
+        'session_status': session_status,
         'passed': passed
     }
 
@@ -398,7 +448,8 @@ def _build_json_question(q: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def export_to_json(quiz: Dict[str, Any], output_path: Path) -> None:
-    """Export quiz to JSON format for LMS import."""
+    """Export the repository JSON interchange format (not an LMS import package)."""
+    _require_valid(quiz)
     meta = quiz.get('metadata', {})
     
     export_data = {
@@ -420,44 +471,36 @@ def export_to_json(quiz: Dict[str, Any], output_path: Path) -> None:
 
 
 def _escape_gift_text(text: str) -> str:
-    """Escape special characters for GIFT format."""
-    return text.replace(':', '\\:').replace('~', '\\~').replace('=', '\\=')
+    """Escape GIFT controls, including literal backslashes and line breaks."""
+    return ''.join('\\' + c if c in '\\~=#{}:' else c for c in str(text)).replace('\n', '\\n')
 
 
 def _build_gift_mc(q: Dict[str, Any], category: str) -> List[str]:
-    """Build GIFT lines for multiple choice question."""
-    lines = [f"$CATEGORY: {category}", ""]
-    title = f"[{q.get('id', 'Q')}] {q.get('lo_ref', '')}"
-    stem = _escape_gift_text(q['stem'])
-    
-    lines.append(f"::{title}::{stem} {{")
+    lines = [f"$CATEGORY: {_escape_gift_text(category)}", ""]
+    title = _escape_gift_text(f"[{q.get('id', 'Q')}] {q.get('lo_ref', '')}")
+    lines.append(f"::{title}::[plain]{_escape_gift_text(q['stem'])} {{")
     for key, value in q['options'].items():
-        value_escaped = value.replace('~', '\\~').replace('=', '\\=')
         prefix = '=' if key == q['correct'] else '~'
-        lines.append(f"  {prefix}{value_escaped}")
-    lines.append("}")
-    lines.append("")
-    
+        lines.append(f"  {prefix}{_escape_gift_text(value)}")
+    lines.extend(["}", ""])
     return lines
 
 
 def _build_gift_fill(q: Dict[str, Any], category: str) -> List[str]:
-    """Build GIFT lines for fill-blank question."""
-    lines = [f"$CATEGORY: {category}", ""]
-    title = f"[{q.get('id', 'Q')}] {q.get('lo_ref', '')}"
-    stem = q['stem'].replace('___', '{')
+    if q['stem'].count('___') != 1:
+        raise ValueError("fill_blank requires exactly one ___ marker")
+    prefix, suffix = q['stem'].split('___')
     correct = q['correct']
-    correct_list = correct if isinstance(correct, list) else [correct]
-    answers = ' '.join(f"={ans}" for ans in correct_list)
-    
-    lines.append(f"::{title}::{stem}{answers}}}")
-    lines.append("")
-    
-    return lines
+    answers = correct if isinstance(correct, list) else [correct]
+    answer_block = ' '.join('=' + _escape_gift_text(a) for a in answers)
+    title = _escape_gift_text(f"[{q.get('id', 'Q')}] {q.get('lo_ref', '')}")
+    return [f"$CATEGORY: {_escape_gift_text(category)}", "",
+            f"::{title}::[plain]{_escape_gift_text(prefix)}{{{answer_block}}}{_escape_gift_text(suffix)}", ""]
 
 
 def export_to_moodle_gift(quiz: Dict[str, Any], output_path: Path) -> None:
     """Export quiz to Moodle GIFT format."""
+    _require_valid(quiz)
     meta = quiz.get('metadata', {})
     week = meta.get('week', 0)
     
@@ -482,34 +525,71 @@ def export_to_moodle_gift(quiz: Dict[str, Any], output_path: Path) -> None:
 
 
 def export_to_qti(quiz: Dict[str, Any], output_path: Path) -> None:
-    """Export quiz to QTI 1.2 format (Canvas compatible)."""
-    print("⚠️  QTI export is simplified. For full Canvas import, use quiz.json")
-    
-    meta = quiz.get('metadata', {})
-    xml_lines = [
-        '<?xml version="1.0" encoding="UTF-8"?>',
-        '<questestinterop xmlns="http://www.imsglobal.org/xsd/ims_qtiasiv1p2">',
-        f'  <assessment title="Week {meta.get("week", 0)} Quiz">',
-        '    <section>'
-    ]
-    
-    for q in quiz.get('questions', []):
-        xml_lines.append(f'      <item title="{q.get("id", "Q")}">')
-        xml_lines.append(f'        <presentation><material>')
-        xml_lines.append(f'          <mattext>{q["stem"]}</mattext>')
-        xml_lines.append(f'        </material></presentation>')
-        xml_lines.append('      </item>')
-    
-    xml_lines.extend([
-        '    </section>',
-        '  </assessment>',
-        '</questestinterop>'
-    ])
-    
-    with open(output_path, 'w', encoding='utf-8') as f:
-        f.write('\n'.join(xml_lines))
-    
-    print(f"✅ Exported to QTI: {output_path}")
+    """Write QTI 1.2 items, responses and scoring; .zip includes a manifest.
+
+    Native LMS import is a separate acceptance step. A .xml output contains
+    assessment XML only and is useful for inspection, not a packaged upload.
+    """
+    _require_valid(quiz)
+    ns = 'http://www.imsglobal.org/xsd/ims_qtiasiv1p2'
+    ET.register_namespace('', ns)
+    def sub(parent, tag, attrs=None, text=None):
+        child = ET.SubElement(parent, '{' + ns + '}' + tag, attrs or {})
+        child.text = text
+        return child
+    def material(parent, text):
+        sub(sub(parent, 'material'), 'mattext', {'texttype': 'text/plain'}, text)
+    root = ET.Element('{' + ns + '}questestinterop')
+    assessment = sub(root, 'assessment', {'ident': 'compnet_week0', 'title': quiz['metadata']['topic']})
+    section = sub(assessment, 'section', {'ident': 'main'})
+    for i, q in enumerate(quiz['questions'], 1):
+        item = sub(section, 'item', {'ident': f'item_{i}', 'title': q['id']})
+        metadata = sub(sub(item, 'itemmetadata'), 'qtimetadata')
+        for label, value in [('question_type', 'multiple_choice_question' if q['type'] == 'multiple_choice' else 'short_answer_question'), ('points_possible', '1')]:
+            field = sub(metadata, 'qtimetadatafield')
+            sub(field, 'fieldlabel', text=label)
+            sub(field, 'fieldentry', text=value)
+        presentation = sub(item, 'presentation')
+        if q['type'] == 'multiple_choice':
+            material(presentation, q['stem'])
+            response = sub(presentation, 'response_lid', {'ident': 'response1', 'rcardinality': 'Single'})
+            render = sub(response, 'render_choice', {'shuffle': 'No'})
+            option_ids = {key: f'choice_{j}' for j, key in enumerate(q['options'], 1)}
+            for key, value in q['options'].items():
+                material(sub(render, 'response_label', {'ident': option_ids[key]}), value)
+            correct = [option_ids[q['correct']]]
+        else:
+            prefix, suffix = q['stem'].split('___')
+            material(presentation, prefix)
+            response = sub(presentation, 'response_str', {'ident': 'response1', 'rcardinality': 'Single'})
+            render = sub(response, 'render_fib', {'fibtype': 'String', 'prompt': 'Box', 'rows': '1'})
+            sub(render, 'response_label', {'ident': 'blank1'})
+            material(presentation, suffix)
+            correct = q['correct'] if isinstance(q['correct'], list) else [q['correct']]
+        processing = sub(item, 'resprocessing')
+        sub(sub(processing, 'outcomes'), 'decvar', {'varname': 'SCORE', 'vartype': 'Decimal', 'defaultval': '0', 'minvalue': '0', 'maxvalue': '100'})
+        condition = sub(processing, 'respcondition', {'continue': 'No'})
+        conditionvar = sub(condition, 'conditionvar')
+        alternatives = sub(conditionvar, 'or') if len(correct) > 1 else conditionvar
+        for answer in correct:
+            sub(alternatives, 'varequal', {'respident': 'response1', 'case': 'No'}, answer)
+        sub(condition, 'setvar', {'varname': 'SCORE', 'action': 'Set'}, '100')
+    ET.indent(root)
+    assessment_bytes = ET.tostring(root, encoding='utf-8', xml_declaration=True)
+    if output_path.suffix.lower() == '.zip':
+        cp = 'http://www.imsglobal.org/xsd/imscp_v1p1'
+        manifest = ET.Element('{' + cp + '}manifest', {'identifier': 'compnet_week0_package'})
+        ET.SubElement(manifest, '{' + cp + '}organizations')
+        resources = ET.SubElement(manifest, '{' + cp + '}resources')
+        resource = ET.SubElement(resources, '{' + cp + '}resource', {'identifier': 'assessment', 'type': 'imsqti_xmlv1p2', 'href': 'assessment.xml'})
+        ET.SubElement(resource, '{' + cp + '}file', {'href': 'assessment.xml'})
+        ET.indent(manifest)
+        with zipfile.ZipFile(output_path, 'w', zipfile.ZIP_DEFLATED) as package:
+            package.writestr('assessment.xml', assessment_bytes)
+            package.writestr('imsmanifest.xml', ET.tostring(manifest, encoding='utf-8', xml_declaration=True))
+    else:
+        output_path.write_bytes(assessment_bytes)
+    print(f"Exported QTI 1.2: {output_path}; verify the imported quiz in your LMS before use.")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -589,7 +669,7 @@ def _handle_export(quiz: Dict[str, Any], args) -> int:
     output_path = args.output
     if not output_path:
         base = args.quiz.stem
-        ext_map = {'json': '_export.json', 'moodle': '_moodle.gift', 'qti': '_qti.xml'}
+        ext_map = {'json': '_export.json', 'moodle': '_moodle.gift', 'qti': '_qti.zip'}
         output_path = args.quiz.parent / f"{base}{ext_map[args.export]}"
     
     export_funcs = {
@@ -619,6 +699,16 @@ def main() -> int:
         print(f"Error loading quiz: {e}")
         return 1
     
+    # All modes reject malformed banks before consuming their contents.
+    is_valid, errors = validate_quiz_structure(quiz)
+    if not is_valid:
+        print("Quiz validation failed:")
+        for error in errors:
+            print(f"  - {error}")
+        return 1
+    if args.limit is not None and args.limit <= 0:
+        parser.error("--limit must be positive")
+
     # Validate mode
     if args.validate:
         is_valid, errors = validate_quiz_structure(quiz)

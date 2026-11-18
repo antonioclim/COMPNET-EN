@@ -16,12 +16,12 @@ package "Docker Network" as net #F5F5F5 {
     }
 
     rectangle "Python Client\n(grpc stub)" as pyc #FFE0B2
-    rectangle "Flex Client\n(other language, grpc stub)" as flex #E1BEE7
+    rectangle "Flex Client\n(other language, protobuf codec)" as flex #E1BEE7
     rectangle "tester\n(pytest -m e2)" as tester #FFF9C4
 }
 
 pyc --> grpc : "HTTP/2 gRPC\nunary + streaming"
-flex --> grpc : "(interoperable via .proto)"
+flex --> raw : "mandatory PB1 exchange\n(shared .proto messages)"
 tester --> raw : "raw protobuf\n(PB1 magic, :50052)"
 tester -up-> grpc : validates unary\nstreaming + deadline\n+ PCAP
 

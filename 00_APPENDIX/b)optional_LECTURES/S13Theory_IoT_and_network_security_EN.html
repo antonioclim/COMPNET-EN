@@ -368,7 +368,7 @@ ul.check-list li::before{content:"✓";color:var(--success);font-weight:bold;fle
 </div>
 <div class="story-box">
 <h4>Why "Message Queuing"?</h4>
-<p>Despite the name, MQTT is not a traditional message queue. Messages are not stored for retrieval by consumers (except retained messages). The broker routes in real time; it does not persist a backlog.</p>
+<p>MQTT is publish/subscribe. Retained messages store the last retained publication per topic. Persistent sessions can also queue QoS 1/2 publications for offline subscribers, subject to session expiry and broker limits; that queue is distinct from retained state.</p>
 </div>
 </div>
 </div>
@@ -601,15 +601,15 @@ ul.check-list li::before{content:"✓";color:var(--success);font-weight:bold;fle
 <div class="slide" data-slide="24">
 <h2 class="fade-up">Checkpoint: Scanning Concepts</h2>
 <div class="quiz-container fade-up delay-1">
-<div class="quiz-question">You run <code>nmap -sV -p 2121 172.20.0.12</code> against the lab's vsftpd container. Nmap reports the port as "open". What does this <em>technically</em> mean?</div>
+<div class="quiz-question">You run <code>nmap -sT -sV -p 2121 172.20.0.12</code> against the lab's vsftpd container. Nmap reports the port as "open". What does this <em>technically</em> mean?</div>
 <div class="quiz-options">
 <div class="quiz-option" onclick="checkQuiz(this, true)"><span class="option-marker">A</span><span>The TCP three-way handshake completed &mdash; a service is listening and accepted the connection</span></div>
 <div class="quiz-option" onclick="checkQuiz(this, false)"><span class="option-marker">B</span><span>The port responded with a SYN-ACK but no service banner was received</span></div>
 <div class="quiz-option" onclick="checkQuiz(this, false)"><span class="option-marker">C</span><span>The port is reachable but a firewall is inspecting the traffic before forwarding</span></div>
 <div class="quiz-option" onclick="checkQuiz(this, false)"><span class="option-marker">D</span><span>The service is running and does not require authentication</span></div>
 </div>
-<div class="quiz-feedback correct">Correct. In nmap terminology, "open" means the TCP handshake completed successfully: the target sent SYN-ACK and a connection was established. The <code>-sV</code> flag additionally probes for a version banner (e.g. "220 (vsFTPd 2.3.4)"). "Open" says nothing about authentication requirements &mdash; only that a process is listening.</div>
-<div class="quiz-feedback incorrect">Not quite. Nmap defines three port states: <strong>open</strong> (handshake completed, service listening), <strong>closed</strong> (target responded with RST &mdash; reachable but nothing listening) and <strong>filtered</strong> (no response at all, likely blocked by a firewall). "Open" specifically means the full TCP handshake succeeded.</div>
+<div class="quiz-feedback correct">Correct for the explicitly selected TCP connect scan (-sT): the connect operation succeeded. An SYN scan (-sS) instead infers open from SYN-ACK without completing the handshake. The <code>-sV</code> flag additionally probes for a version banner (e.g. "220 (vsFTPd 2.3.4)"). "Open" says nothing about authentication requirements &mdash; only that a process is listening.</div>
+<div class="quiz-feedback incorrect">Not quite. Nmap has several port states. Their evidence depends on scan type: -sT uses a completed connect, while -sS can infer open from SYN-ACK. RST and selected ICMP errors or silence support different conclusions; filtered does not identify one unique cause. The command here explicitly uses -sT.</div>
 </div>
 </div>
 
@@ -693,7 +693,7 @@ require_certificate false</div>
 </div>
 <div class="insight-box fade-up delay-3">
 <h4>Legal constraint</h4>
-<p>Penetration testing without explicit, written authorisation from the system owner is a criminal offence in most jurisdictions, including Romania (Legea 161/2003, art. 42&ndash;46). Our seminar lab runs entirely in local Docker containers to ensure legal compliance.</p>
+<p>Course rule: use only the specified local lab targets and obtain explicit written authorisation for any other assessment. In Romania, offences involving unauthorised access and interference are addressed by <a href="https://legislatie.just.ro/Public/DetaliiDocument/109855">Criminal Code arts 360–365</a>; the legal elements include acting without right, not simply ownership of a machine. Isolation and authorisation remain necessary operational controls.</p>
 </div>
 </div>
 
@@ -907,7 +907,7 @@ TIMEOUT = <span class="number">0.2</span>
 </div>
 <div class="warning-box fade-up delay-3">
 <h4>Ethical and legal reminder</h4>
-<p>All seminar activities run exclusively on <strong>local Docker containers</strong>. Running these techniques on networks or systems you do not own is a criminal offence (Romania: Legea 161/2003, art. 42&ndash;46).</p>
+<p>All seminar activities are restricted to the specified <strong>local lab containers</strong>. Do not scan or exploit other targets without explicit written authorisation. The relevant Romanian statutory provisions are Criminal Code arts 360–365; the older Legea 161/2003 arts 42–47 were repealed by Legea 187/2012 art. 130.</p>
 </div>
 </div>
 
@@ -1085,22 +1085,23 @@ function checkQuiz(el, correct) {
 function toggleReveal(btn) {
   const content = btn.nextElementSibling;
   if (content && content.classList.contains('reveal-content')) {
+    if (!btn.dataset.label) btn.dataset.label = btn.textContent;
     content.classList.toggle('show');
-    btn.textContent = content.classList.contains('show') ? 'Hide' : btn.dataset.label || btn.textContent;
-    if (content.classList.contains('show')) btn.dataset.label = btn.textContent;
+    btn.textContent = content.classList.contains('show') ? 'Hide' : btn.dataset.label;
   }
 }
 
 // MQTT Topic Matcher
 function matchMqttTopics() {
-  const topic = document.getElementById('mqttTopic').value.trim();
+  const topic = document.getElementById('mqttTopic').value;
   const filters = [
     ['sensor/#', 'Multi-level wildcard'],
     ['factory/floor1/sensor/+', 'Single-level wildcard'],
     ['factory/+/sensor/#', 'Mixed wildcards'],
     ['factory/floor1/sensor/temp', 'Exact match'],
     ['+/+/+/+', 'Four single-levels'],
-    ['#', 'Subscribe to everything'],
+    ['#', 'All ordinary topics; excludes leading $ system topics'],
+    ['$SYS/#', 'Explicit system-topic subscription'],
     ['factory/floor2/sensor/temp', 'Different floor']
   ];
   const parts = topic.split('/');
@@ -1123,6 +1124,8 @@ function matchMqttTopics() {
       if (fi < fp.length && fp[fi] !== '#') match = false;
       if (ti < parts.length && fi >= fp.length) match = false;
     }
+    if (!topic || topic.includes('+') || topic.includes('#')) match = false;
+    if (topic.startsWith('$') && (fp[0] === '#' || fp[0] === '+')) match = false;
     const color = match ? 'var(--success)' : 'var(--danger)';
     const icon = match ? '\u2705' : '\u274C';
     results.innerHTML += '<div style="font-weight:600;color:' + color + '">' + icon + ' ' + f + '</div><div style="color:var(--text-muted);font-size:0.85rem">' + desc + '</div>';
@@ -1148,6 +1151,7 @@ function updateAttackSurface() {
 }
 
 document.addEventListener('keydown', e => {
+      if (e.target && e.target.closest && e.target.closest('input, textarea, select, button, [contenteditable="true"]')) return;
   if (e.key === 'ArrowRight' || e.key === ' ') changeSlide(1);
   else if (e.key === 'ArrowLeft') changeSlide(-1);
   else if (e.key === 'Home') { currentSlide = 1; updateSlide(); }

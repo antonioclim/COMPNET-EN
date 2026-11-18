@@ -242,10 +242,10 @@
                         </div>
                     </div>
                     <div class="pl-6 space-y-1">
-                        <code class="block bg-slate-800 p-1.5 rounded text-xs text-indigo-300 cursor-pointer hover:bg-slate-700 border border-slate-700" onclick="app.typeCommand('r1 ip route add 10.0.3.0/30 via 10.0.12.2')">r1 ip route add ... via r2</code>
-                        <code class="block bg-slate-800 p-1.5 rounded text-xs text-indigo-300 cursor-pointer hover:bg-slate-700 border border-slate-700" onclick="app.typeCommand('r2 ip route add 10.0.3.0/30 via 10.0.23.2')">r2 ip route add ... via r3</code>
-                        <code class="block bg-slate-800 p-1.5 rounded text-xs text-indigo-300 cursor-pointer hover:bg-slate-700 border border-slate-700" onclick="app.typeCommand('r2 ip route add 10.0.1.0/30 via 10.0.12.1')">r2 return route to h1</code>
-                        <code class="block bg-slate-800 p-1.5 rounded text-xs text-indigo-300 cursor-pointer hover:bg-slate-700 border border-slate-700" onclick="app.typeCommand('r3 ip route add 10.0.1.0/30 via 10.0.23.1')">r3 return route via r2</code>
+                        <code class="block bg-slate-800 p-1.5 rounded text-xs text-indigo-300 cursor-pointer hover:bg-slate-700 border border-slate-700" onclick="app.typeCommand('r1 ip route replace 10.0.3.0/30 via 10.0.12.2')">r1 ip route replace ... via r2</code>
+                        <code class="block bg-slate-800 p-1.5 rounded text-xs text-indigo-300 cursor-pointer hover:bg-slate-700 border border-slate-700" onclick="app.typeCommand('r2 ip route replace 10.0.3.0/30 via 10.0.23.2')">r2 ip route replace ... via r3</code>
+                        <code class="block bg-slate-800 p-1.5 rounded text-xs text-indigo-300 cursor-pointer hover:bg-slate-700 border border-slate-700" onclick="app.typeCommand('r2 ip route replace 10.0.1.0/30 via 10.0.12.1')">r2 return route to h1</code>
+                        <code class="block bg-slate-800 p-1.5 rounded text-xs text-indigo-300 cursor-pointer hover:bg-slate-700 border border-slate-700" onclick="app.typeCommand('r3 ip route replace 10.0.1.0/30 via 10.0.23.1')">r3 return route via r2</code>
                     </div>
                 </div>
 
@@ -288,8 +288,8 @@
                     </div>
                     <div class="pl-6 space-y-1">
                         <code class="block bg-slate-800 p-1.5 rounded text-xs text-red-300 cursor-pointer hover:bg-slate-700 border border-slate-700" onclick="app.typeCommand('r1 ip route del 10.0.3.0/30')">Delete current route</code>
-                        <code class="block bg-slate-800 p-1.5 rounded text-xs text-indigo-300 cursor-pointer hover:bg-slate-700 border border-slate-700" onclick="app.typeCommand('r1 ip route add 10.0.3.0/30 via 10.0.13.2')">Add route via 10.0.13.2 (r3)</code>
-                        <code class="block bg-slate-800 p-1.5 rounded text-xs text-indigo-300 cursor-pointer hover:bg-slate-700 border border-slate-700" onclick="app.typeCommand('r3 ip route add 10.0.1.0/30 via 10.0.13.1')">Return path via r1 (Direct)</code>
+                        <code class="block bg-slate-800 p-1.5 rounded text-xs text-indigo-300 cursor-pointer hover:bg-slate-700 border border-slate-700" onclick="app.typeCommand('r1 ip route replace 10.0.3.0/30 via 10.0.13.2')">Add route via 10.0.13.2 (r3)</code>
+                        <code class="block bg-slate-800 p-1.5 rounded text-xs text-indigo-300 cursor-pointer hover:bg-slate-700 border border-slate-700" onclick="app.typeCommand('r3 ip route replace 10.0.1.0/30 via 10.0.13.1')">Return path via r1 (Direct)</code>
                     </div>
                 </div>
 
@@ -322,7 +322,7 @@
             }
 
             addRoute(dest, gw) {
-                // Simplification: Remove existing route to same dest to avoid complexity in this UI
+                // Internal replacement primitive; the command handler rejects duplicate ip route add.
                 this.routes = this.routes.filter(r => r.dest !== dest);
                 this.routes.push({ dest, gw });
             }
@@ -431,7 +431,7 @@
                         this.updateTaskUI();
                     }
                     else if (args[1] === 'route') {
-                        if (args[2] === 'add') this.handleAddRoute(node, args);
+                        if (['add', 'replace'].includes(args[2])) this.handleAddRoute(node, args);
                         else if (args[2] === 'del') this.handleDelRoute(node, args);
                         else this.showRoutes(node);
                     }
@@ -476,14 +476,17 @@
             },
 
             handleAddRoute(node, args) {
-                // r1 ip route add 10.0.3.0/30 via 10.0.12.2
+                // r1 ip route replace 10.0.3.0/30 via 10.0.12.2
                 const dest = args[3];
                 const via = args[4]; // 'via'
                 const gw = args[5];
 
-                if (via !== 'via' || !gw) {
-                    this.printToTerminal("Usage: ip route add <subnet> via <gateway>", "text-red-400");
+                if (via !== 'via' || !gw || !this.getNodeNameByIP(gw) || !this.isDirectlyConnected(node, gw)) {
+                    this.printToTerminal("Usage: ip route replace <subnet> via <gateway>", "text-red-400");
                     return;
+                }
+                if (args[2] === 'add' && node.routes.some(r => r.dest === dest)) {
+                    this.printToTerminal('RTNETLINK answers: File exists (use ip route replace).', 'text-red-400'); return;
                 }
                 node.addRoute(dest, gw);
                 this.renderRoutingTables();
@@ -504,27 +507,30 @@
                 const destIP = args[args.length - 1];
                 this.printToTerminal(`PING ${destIP} (${destIP}) 56(84) bytes of data.`);
 
-                let count = 3;
-                let seq = 1;
-                const interval = setInterval(() => {
-                    if (seq > count) {
-                        clearInterval(interval);
-                        this.printToTerminal(`--- ${destIP} ping statistics ---`);
-                        this.printToTerminal(`${count} packets transmitted, check log for loss`);
-                        return;
-                    }
-
-                    this.simulatePacket(srcName, destIP, 64, (success, trace) => {
+                const countFlag = args.indexOf('-c');
+                const requested = countFlag >= 0 ? Number(args[countFlag + 1]) : 3;
+                if (!Number.isInteger(requested) || requested < 1 || requested > 20) {
+                    this.printToTerminal('This model supports ping -c 1..20 DESTINATION.', 'text-red-400'); return;
+                }
+                let sequence = 1, received = 0;
+                const sendNext = () => {
+                    const packetSeq = sequence++;
+                    this.simulatePacket(srcName, destIP, 64, (success) => {
                         if (success) {
-                            this.printToTerminal(`64 bytes from ${destIP}: icmp_seq=${seq} ttl=64 time=${Math.floor(Math.random()*10)}ms`);
-                            this.tasksCompleted.add(3);
-                            this.updateTaskUI();
+                            received++;
+                            this.printToTerminal(`Simulated reply from ${destIP}: icmp_seq=${packetSeq}`);
+                            this.tasksCompleted.add(3); this.updateTaskUI();
                         } else {
-                            this.printToTerminal(`From ${trace[trace.length-1]}: icmp_seq=${seq} Destination Host Unreachable`, "text-red-400");
+                            this.printToTerminal(`No reply in this model: icmp_seq=${packetSeq}; check both routes and gateways.`, 'text-red-400');
+                        }
+                        if (sequence <= requested) { setTimeout(sendNext, 300); }
+                        else {
+                            this.printToTerminal(`--- ${destIP} simulated ping statistics ---`);
+                            this.printToTerminal(`${requested} packets transmitted, ${received} received, ${100 * (requested - received) / requested}% packet loss`);
                         }
                     });
-                    seq++;
-                }, 1500);
+                };
+                sendNext();
             },
 
             handleTraceroute(srcName, args) {
@@ -545,7 +551,7 @@
                         setTimeout(() => {
                             this.printToTerminal(` ${ttl}  ${hopName} (${hopIP})  ${Math.random().toFixed(3)} ms`);
 
-                            if (reachedDest) {
+                            if (reachedDest && success) {
                                 this.tasksCompleted.add(4);
                                 this.updateTaskUI();
                                 return; // Done
@@ -583,7 +589,8 @@
                     // Am I the destination? (Check all interfaces)
                     const myIPs = Object.values(currentNode.interfaces).map(i => i.ip);
                     if (myIPs.includes(destIP)) {
-                        callback(true, trace, true); // Reached dest
+                        const sourceIP = Object.values(this.nodes[srcName].interfaces)[0].ip;
+                        callback(this.returnPathExists(currentNode.name, sourceIP), trace, true); // Reply also needs a route
                         return;
                     }
 
@@ -626,7 +633,7 @@
                         }
                     }
 
-                    if (nextHopIP && nextNodeName) {
+                    if (nextHopIP && nextNodeName && this.isDirectlyConnected(currentNode, nextHopIP) && nextNodeName !== currentNode.name) {
                         // Animate
                         this.animatePacket(currentNode.name, nextNodeName, () => {
                             currentNode = this.nodes[nextNodeName];
@@ -644,6 +651,20 @@
                 };
 
                 step();
+            },
+
+            returnPathExists(startName, destination) {
+                let node = this.nodes[startName];
+                const visited = new Set();
+                while (node && !visited.has(node.name)) {
+                    visited.add(node.name);
+                    if (Object.values(node.interfaces).some(i => i.ip === destination)) return true;
+                    const route = node.routes.find(r => r.dest === this.getSubnet(destination)) || node.routes.find(r => r.dest === '0.0.0.0/0');
+                    const nextIP = this.isDirectlyConnected(node, destination) ? destination : route?.gw;
+                    if (!nextIP || !this.isDirectlyConnected(node, nextIP)) return false;
+                    node = this.nodes[this.getNodeNameByIP(nextIP)];
+                }
+                return false;
             },
 
             // --- Helpers ---

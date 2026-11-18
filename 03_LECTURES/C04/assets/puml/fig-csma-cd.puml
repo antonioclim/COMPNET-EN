@@ -1,46 +1,26 @@
 @startuml fig-csma-cd
 skinparam backgroundColor white
 skinparam defaultFontName Arial
-skinparam defaultFontSize 11
 skinparam shadowing false
-skinparam roundcorner 12
-
-title CSMA/CD — Ethernet Half-Duplex Collision Handling
-
+title CSMA/CD — half-duplex Ethernet only
 start
-
-:Frame ready to send;
-
-:Carrier Sense\n— listen to medium;
-
-if (Medium idle?) then (yes)
+:Attempts = 0;
+repeat
+  while (Medium busy?) is (yes)
+    :Defer and sense again;
+  endwhile (idle)
   :Begin transmitting frame;
-  if (Collision detected\nduring transmission?) then (yes)
-    #FFCDD2:Send jam signal\n(32-bit pattern);
-    :Increment attempt counter;
-    if (Attempts < 16?) then (yes)
-      #FFE0B2:Wait random backoff\n(exponential: 0..2^k -1 slot times);
-      -> retry;
-      :Carrier Sense\n— listen to medium;
-    else (no)
-      #FFCDD2:Abort — report failure\nto upper layer;
+  if (Collision detected?) then (yes)
+    :Send jam signal and stop transmission; <<#FFCDD2>>
+    :Attempts = attempts + 1;
+    if (Attempts >= 16?) then (yes)
+      :Abort and report failure; <<#FFCDD2>>
       stop
     endif
+    :Choose k = min(attempts, 10)\nWait random 0..(2^k - 1) slot times; <<#FFE0B2>>
   else (no)
-    #C8E6C9:Transmission successful;
+    :Complete transmission; <<#C8E6C9>>
     stop
   endif
-else (no)
-  :Defer — wait until\nmedium becomes idle;
-endif
-
-stop
-
-legend right
-  CSMA/CD applies to shared half-duplex Ethernet.
-  Modern full-duplex switched networks
-  eliminate collisions entirely.
-  The exponential backoff reduces the probability
-  of repeated collisions.
-endlegend
+repeat while (Retry frame?) is (yes)
 @enduml

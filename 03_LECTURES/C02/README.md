@@ -100,7 +100,7 @@ Every subsequent lecture (C03–C14) assumes the layered model vocabulary establ
 ```bash
 git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
 cd COMPNET-EN
-git sparse-checkout set 03_LECTURES/C02
+git sparse-checkout set 03_LECTURES/C02 00_TOOLS
 ```
 
 **Method B — Direct download**

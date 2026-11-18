@@ -7,7 +7,9 @@
       "id": "R1",
       "filter": "tcp.flags.syn==1 && tcp.flags.ack==0",
       "condition": ">= 10",
-      "description": "At least 10 SYN packets (scan) within the test window."
+      "description": "At least ten distinct destination ports have SYN attempts in this capture.",
+      "measurement": "distinct_values",
+      "field": "tcp.dstport"
     },
     {
       "id": "R2",
@@ -21,5 +23,10 @@
       "condition": ">= 1",
       "description": "Payload containing a pattern (e.g. HTTP GET) for a signature rule."
     }
+  ],
+  "manual_checks": [
+    "Identify the scanning source and target and calculate the event count within the detector window fixed in E1. A whole-capture count does not establish a rate threshold.",
+    "R1 R2: Correlate source, target, timestamps and generated scan alert; repeated SYNs to one port are not ten ports.",
+    "R3: Assert the signature alert and show the matching request; bytes alone do not establish detection."
   ]
 }

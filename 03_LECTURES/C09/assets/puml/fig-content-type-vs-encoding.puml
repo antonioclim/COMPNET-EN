@@ -32,7 +32,7 @@ end note
 
 legend bottom
   Content-Type describes the semantic meaning of the payload.
-  Content-Encoding describes the transfer-level transformation.
+  Content-Encoding describes the representation content coding (not Transfer-Encoding).
   The receiver must reverse the encoding before parsing the content type.
 endlegend
 @enduml

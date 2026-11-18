@@ -45,6 +45,13 @@ The recommended baseline is a custom TCP application protocol backed by SQLite f
 - **Protocol/default ports (E2):** TCP: 5020/TCP.
 - The Flex component must work with the default values without manual reconfiguration so that it can be integrated into automated tests.
 
+### Interpretation and complementary evidence
+
+The [E2 capture and semantic-evidence matrix](../00_common/E2_CAPTURE_EVIDENCE_MATRIX.md#s20) maps every capture rule to its generating action and the complementary application evidence.
+
+- The supplied command counter uses LF/CRLF framing. If E1 selects JSON or binary framing, supply and test the corresponding decoder in the student validator; do not replace logical counts with frame counts.
+- Correlate client identities, topics/keys and request IDs with pytest assertions to prove the required application behaviour.
+
 ### Deliverables
 - `flex/` directory with sources plus build and run instructions.
 - `docs/FLEX.md` with:
@@ -137,11 +144,11 @@ The recommended baseline is a custom TCP application protocol backed by SQLite f
 
 | ID | tshark filter (`-Y`) | Condition | What it validates |
 |---:|---|---:|---|
-| R1 | `tcp.dstport==5020 && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | Handshake to the object service. |
-| R2 | `tcp.port==5020 && (frame contains "QUERY" || frame contains "GET")` | `>= 1` | A selection or retrieval request appears in payload. |
-| R3 | `tcp.port==5020 && frame contains "UPDATE"` | `>= 1` | Update operation is visible in the session. |
-| R4 | `tcp.port==5020 && (frame contains "NOTIFY" || frame contains "CHANGED" || frame contains "UPDATED")` | `>= 1` | Change notification is visible to another client. |
-| R5 | `tcp.port==5020 && frame contains "DELETE"` | `>= 1` | Delete operation is visible in the session. |
+| R1 | `tcp.dstport==5020 && tcp.flags.syn==1 && tcp.flags.ack==0` | `>= 1` | SYN connection attempt to the object service. |
+| R2 | `tcp.dstport==5020 && tcp.len>0` | `>= 1` | Complete QUERY/GET command lines in the request direction after TCP reassembly and retransmission removal. Measurement: `tcp_commands`. |
+| R3 | `tcp.dstport==5020 && tcp.len>0` | `>= 1` | Complete UPDATE command lines in the request direction after TCP reassembly and retransmission removal. Measurement: `tcp_commands`. |
+| R4 | `tcp.srcport==5020 && tcp.len>0` | `>= 1` | Complete NOTIFY/CHANGED/UPDATED command lines in the response direction after TCP reassembly and retransmission removal. Measurement: `tcp_commands`. |
+| R5 | `tcp.dstport==5020 && tcp.len>0` | `>= 1` | Complete DELETE command lines in the request direction after TCP reassembly and retransmission removal. Measurement: `tcp_commands`. |
 
 ### Deliverables
 - Docker Compose with `object_db_service` and `tester` plus optional client containers.
@@ -165,7 +172,7 @@ h1 (client A) --- s1 --- h3 (object_db_service)
 - h1 queries an object and h2 watches the same key.
 - h1 updates the object and h2 receives a notification.
 - h1 deletes the object and both clients observe the resulting state.
-- The service restarts and the retained dataset is checked if persistence is part of the chosen design.
+- The service restarts and the retained dataset is checked to verify the mandatory persistence requirement.
 
 ## Docker scenario (E2)
 ### Mandatory requirements for `docker-compose.yml` (E2)

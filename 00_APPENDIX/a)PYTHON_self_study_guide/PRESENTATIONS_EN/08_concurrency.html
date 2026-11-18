@@ -7,7 +7,11 @@
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root{--bg-primary:#0a0e17;--bg-secondary:#121a2b;--bg-tertiary:#1a2438;--accent-primary:#00d4aa;--accent-secondary:#7c3aed;--accent-warning:#f59e0b;--accent-error:#ef4444;--accent-success:#10b981;--text-primary:#f1f5f9;--text-secondary:#94a3b8;--text-muted:#64748b;--border-color:#2d3a4f;--code-bg:#0d1117;--font-display:'Plus Jakarta Sans',sans-serif;--font-mono:'JetBrains Mono',monospace}*{margin:0;padding:0;box-sizing:border-box}body{font-family:var(--font-display);background:var(--bg-primary);color:var(--text-primary);min-height:100vh;overflow:hidden}.progress-container{position:fixed;top:0;left:0;right:0;height:4px;background:var(--bg-tertiary);z-index:1000}.progress-bar{height:100%;background:linear-gradient(90deg,var(--accent-primary),var(--accent-secondary));transition:width .3s ease}.nav-header{position:fixed;top:4px;left:0;right:0;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(180deg,var(--bg-primary) 0%,transparent 100%);z-index:100}.nav-title{font-size:.9rem;color:var(--text-secondary);display:flex;align-items:center;gap:.5rem}.nav-title .modulee{color:var(--accent-primary);font-weight:600}.slide-counter{font-family:var(--font-mono);font-size:.85rem;color:var(--text-muted);background:var(--bg-tertiary);padding:.4rem .8rem;border-radius:20px}.slides-container{height:100vh;overflow:hidden;position:relative}.slide{position:absolute;top:0;left:0;right:0;bottom:0;padding:5rem 2rem 6rem;display:flex;flex-direction:column;opacity:0;visibility:hidden;transform:translateX(100px);transition:all .5s cubic-bezier(.4,0,.2,1);overflow-y:auto}.slide.active{opacity:1;visibility:visible;transform:translateX(0)}.slide.exit{transform:translateX(-100px)}.slide-content{max-width:1200px;margin:0 auto;width:100%}h1{font-size:clamp(2rem,5vw,3.5rem);font-weight:800;line-height:1.1;margin-bottom:1.5rem;background:linear-gradient(135deg,var(--text-primary) 0%,var(--accent-primary) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}h2{font-size:clamp(1.5rem,3vw,2.2rem);font-weight:700;margin-bottom:1rem;color:var(--text-primary)}h3{font-size:1.3rem;font-weight:600;margin-bottom:.75rem;color:var(--accent-primary)}p{font-size:1.1rem;line-height:1.7;color:var(--text-secondary);margin-bottom:1rem}code{font-family:var(--font-mono);background:var(--bg-tertiary);padding:.2rem .5rem;border-radius:4px;font-size:.9em;color:var(--accent-primary)}.badge{display:inline-flex;align-items:center;gap:.4rem;padding:.4rem .8rem;border-radius:20px;font-size:.85rem;font-weight:600}.badge-time{background:rgba(0,212,170,.15);color:var(--accent-primary)}.badge-week{background:rgba(124,58,237,.15);color:var(--accent-secondary)}.card{background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:16px;padding:1.5rem;margin-bottom:1rem}.card-highlight{border-left:4px solid var(--accent-primary)}.card-warning{border-left:4px solid var(--accent-warning);background:rgba(245,158,11,.05)}.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem;margin:1.5rem 0}.objectives-box{background:linear-gradient(135deg,rgba(0,212,170,.1) 0%,rgba(124,58,237,.1) 100%);border:1px solid var(--border-color);border-radius:16px;padding:2rem;margin:1.5rem 0}.objective-item{display:flex;align-items:flex-start;gap:1rem;margin-bottom:1rem}.objective-icon{width:32px;height:32px;background:var(--accent-primary);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}.objective-text{flex:1}.objective-text strong{display:block;color:var(--text-primary);margin-bottom:.25rem}.objective-text span{font-size:.95rem;color:var(--text-secondary)}.code-container{background:var(--code-bg);border:1px solid var(--border-color);border-radius:12px;overflow:hidden;margin:1.5rem 0}.code-header{display:flex;justify-content:space-between;align-items:center;padding:.75rem 1rem;background:var(--bg-tertiary);border-bottom:1px solid var(--border-color)}.code-filename{font-family:var(--font-mono);font-size:.85rem;color:var(--text-secondary)}.btn-code{padding:.4rem .8rem;border-radius:6px;border:none;font-family:var(--font-mono);font-size:.8rem;cursor:pointer}.btn-run{background:var(--accent-primary);color:var(--bg-primary)}.code-body{padding:1rem;overflow-x:auto}.code-body pre{font-family:var(--font-mono);font-size:.9rem;line-height:1.6;color:var(--text-primary);margin:0}.code-output{padding:1rem;background:rgba(0,212,170,.05);border-top:1px solid var(--border-color);display:none}.code-output.visible{display:block}.code-output-header{font-family:var(--font-mono);font-size:.75rem;color:var(--accent-primary);margin-bottom:.5rem;text-transform:uppercase}.kw{color:#ff79c6}.fn{color:#50fa7b}.str{color:#f1fa8c}.num{color:#bd93f9}.cmt{color:#6272a4;font-style:italic}.cls{color:#8be9fd}.quiz-container{background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:16px;padding:2rem;margin:1.5rem 0}.quiz-header{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem}.quiz-icon{width:48px;height:48px;background:linear-gradient(135deg,var(--accent-secondary),var(--accent-primary));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.5rem}.quiz-question{font-size:1.15rem;color:var(--text-primary);margin-bottom:1.5rem}.quiz-options{display:flex;flex-direction:column;gap:.75rem}.quiz-option{display:flex;align-items:center;gap:1rem;padding:1rem 1.25rem;background:var(--bg-tertiary);border:2px solid var(--border-color);border-radius:12px;cursor:pointer}.quiz-option:hover{border-color:var(--accent-primary)}.quiz-option.selected{border-color:var(--accent-secondary);background:rgba(124,58,237,.1)}.quiz-option.correct{border-color:var(--accent-success);background:rgba(16,185,129,.1)}.quiz-option.incorrect{border-color:var(--accent-error);background:rgba(239,68,68,.1)}.option-marker{width:28px;height:28px;border-radius:50%;background:var(--bg-secondary);border:2px solid var(--border-color);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:.85rem}.quiz-option.selected .option-marker{background:var(--accent-secondary);border-color:var(--accent-secondary);color:#fff}.quiz-option.correct .option-marker{background:var(--accent-success)}.quiz-option.incorrect .option-marker{background:var(--accent-error)}.quiz-actions{display:flex;gap:1rem;margin-top:1.5rem}.btn-quiz{padding:.75rem 1.5rem;border-radius:8px;border:none;font-family:var(--font-display);font-size:.95rem;font-weight:600;cursor:pointer}.btn-check{background:var(--accent-primary);color:var(--bg-primary)}.btn-hint{background:transparent;color:var(--accent-warning);border:1px solid var(--accent-warning)}.hint-box{margin-top:1rem;padding:1rem 1.25rem;background:rgba(245,158,11,.1);border-left:4px solid var(--accent-warning);border-radius:0 8px 8px 0;display:none}.hint-box.visible{display:block}.hint-level{font-size:.8rem;color:var(--accent-warning);text-transform:uppercase;margin-bottom:.5rem}.feedback-box{margin-top:1rem;padding:1rem 1.25rem;border-radius:8px;display:none}.feedback-box.visible{display:block}.feedback-box.success{background:rgba(16,185,129,.1);border-left:4px solid var(--accent-success)}.feedback-box.error{background:rgba(239,68,68,.1);border-left:4px solid var(--accent-error)}.callout{display:flex;gap:1rem;padding:1.25rem;border-radius:12px;margin:1rem 0}.callout-networking{background:rgba(0,212,170,.1);border:1px solid rgba(0,212,170,.3)}.callout-icon{font-size:1.5rem}.callout-content h4{color:var(--accent-primary);margin-bottom:.5rem}.callout-content p{margin:0;font-size:.95rem}.nav-buttons{position:fixed;bottom:0;left:0;right:0;padding:1.5rem 2rem;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(0deg,var(--bg-primary) 0%,transparent 100%);z-index:100}.btn-nav{display:flex;align-items:center;gap:.5rem;padding:.75rem 1.5rem;border-radius:8px;border:none;font-family:var(--font-display);font-size:1rem;font-weight:600;cursor:pointer}.btn-prev{background:var(--bg-tertiary);color:var(--text-secondary);border:1px solid var(--border-color)}.btn-next{background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:#fff}.btn-nav:disabled{opacity:.5;cursor:not-allowed}.page-dots{display:flex;gap:.5rem}.page-dot{width:8px;height:8px;border-radius:50%;background:var(--border-color);cursor:pointer}.page-dot.active{background:var(--accent-primary);transform:scale(1.3)}@media(max-width:768px){.slide{padding:4rem 1rem 5rem}.grid-2{grid-template-columns:1fr}}.title-slide{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}.title-meta{display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;margin:2rem 0}.python-logo{font-size:4rem;margin-bottom:1rem}
-    </style>
+    button.quiz-option {width:100%;color:inherit;font:inherit;text-align:left;}
+button.quiz-option:focus-visible,.page-dot:focus-visible {outline:3px solid var(--accent-primary);outline-offset:3px;}
+button.page-dot {border:0;padding:0;}
+code,.file-name {overflow-wrap:anywhere;}
+</style>
 </head>
 <body>
     <div class="progress-container"><div class="progress-bar" role="progressbar" id="progressBar"></div></div>
@@ -20,6 +24,7 @@
         <!-- Slide 1: Title -->
         <div class="slide active title-slide" data-slide="1">
             <div class="slide-content">
+                <p class="simulation-note">Interactive outputs are prewritten demonstrations. Run the canonical scripts in the VM or supported Linux environment using <a href="../CANONICAL_LAB_MAP.md">the lab map</a>.</p>
                 <div class="python-logo">🔄</div>
                 <h1>Concurrency with threading</h1>
                 <p class="lead">Multi-Client Servers</p>
@@ -78,7 +83,7 @@
             <div class="slide-content">
                 <h2>🧵 The threading Module</h2>
                 <div class="code-container">
-                    <div class="code-header"><span class="code-filename">🐍 threading_basics.py</span><button class="btn-code btn-run" onclick="simulateRun(this,'out1')">▶ Run</button></div>
+                    <div class="code-header"><span class="code-filename">🐍 threading_basics.py</span><button class="btn-code btn-run" onclick="simulateRun(this,'out1')">▶ Simulate</button></div>
                     <div class="code-body">
 <pre><span class="kw">from</span> threading <span class="kw">import</span> Thread
 <span class="kw">import</span> time
@@ -326,23 +331,23 @@ client_thread.start()</pre>
                 <h2>📂 Files with Threading in Lab</h2>
                 <div class="grid-2">
                     <div class="card">
-                        <h3>📁 07-09roWSL</h3>
-                        <p><strong>ex_7_02_concurrent_server.py</strong></p>
+                        <h3>📁 S03 — TCP concurrency</h3>
+                        <p><strong>04_SEMINARS/S03/S03_Part01_Example_TCP_Multi_client_Server.py</strong></p>
                         <ul style="color:var(--text-secondary);font-size:.95rem">
                             <li>Multi-client TCP server</li>
                             <li>handle_client() pattern</li>
                         </ul>
-                        <p><strong>ex_9_01_proxy_server.py</strong></p>
+                        <p><strong>03_LECTURES/C03/assets/scenario-tcp-tunnel/tunnel.py</strong></p>
                         <ul style="color:var(--text-secondary);font-size:.95rem">
-                            <li>Proxy that forwards connections</li>
-                            <li>Thread per client↔server connection</li>
+                            <li>TCP tunnel forwarding bytes in both directions</li>
+                            <li>Per-connection relay threads; consult its README</li>
                         </ul>
                     </div>
                     <div class="card">
-                        <h3>📁 13roWSL</h3>
-                        <p><strong>ex_13_01_chat_server.py</strong></p>
+                        <h3>📁 Project S01 — implementation task</h3>
+                        <p><strong>02_PROJECTS/01_network_applications/S01_multi_client_tcp_chat_text_protocol_and_presence.md</strong></p>
                         <ul style="color:var(--text-secondary);font-size:.95rem">
-                            <li>Multi-user chat server</li>
+                            <li>Design and implement a multi-user chat server</li>
                             <li>Broadcast messages to all clients</li>
                             <li>Lock for client list</li>
                         </ul>
@@ -361,10 +366,10 @@ client_thread.start()</pre>
                         <div><h3 style="margin:0">What does <code>thread.join()</code> do?</h3></div>
                     </div>
                     <div class="quiz-options">
-                        <div class="quiz-option" onclick="selectOption(this,'quiz1')"><span class="option-marker">A</span><span>Starts the thread</span></div>
-                        <div class="quiz-option" onclick="selectOption(this,'quiz1')"><span class="option-marker">B</span><span>Forcefully stops the thread</span></div>
-                        <div class="quiz-option" onclick="selectOption(this,'quiz1')" data-correct="true"><span class="option-marker">C</span><span>Blocks until thread finishes</span></div>
-                        <div class="quiz-option" onclick="selectOption(this,'quiz1')"><span class="option-marker">D</span><span>Combines two threads</span></div>
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this,'quiz1')"><span class="option-marker">A</span><span>Starts the thread</span></button>
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this,'quiz1')"><span class="option-marker">B</span><span>Forcefully stops the thread</span></button>
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this,'quiz1')" data-correct="true"><span class="option-marker">C</span><span>Blocks until thread finishes</span></button>
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this,'quiz1')"><span class="option-marker">D</span><span>Combines two threads</span></button>
                     </div>
                     <div class="quiz-actions">
                         <button class="btn-quiz btn-check" onclick="checkAnswer('quiz1')">Check</button>
@@ -373,7 +378,7 @@ client_thread.start()</pre>
                     <div class="hint-box" id="quiz1-hint1"><div class="hint-level">Hint 1/3</div><p>join = "wait for it to join" (to finish)</p></div>
                     <div class="hint-box" id="quiz1-hint2"><div class="hint-level">Hint 2/3</div><p>After join(), you know for sure the thread has finished execution</p></div>
                     <div class="hint-box" id="quiz1-hint3"><div class="hint-level">Hint 3/3</div><p>join() blocks the current thread until the target thread finishes</p></div>
-                    <div class="feedback-box" id="quiz1-feedback"></div>
+                    <div class="feedback-box" role="status" aria-live="polite" id="quiz1-feedback"></div>
                 </div>
             </div>
         </div>
@@ -387,10 +392,10 @@ client_thread.start()</pre>
                         <div><h3 style="margin:0">Why do we use Lock?</h3></div>
                     </div>
                     <div class="quiz-options">
-                        <div class="quiz-option" onclick="selectOption(this,'quiz2')"><span class="option-marker">A</span><span>To stop a thread</span></div>
-                        <div class="quiz-option" onclick="selectOption(this,'quiz2')" data-correct="true"><span class="option-marker">B</span><span>To prevent race conditions on shared data</span></div>
-                        <div class="quiz-option" onclick="selectOption(this,'quiz2')"><span class="option-marker">C</span><span>To speed up execution</span></div>
-                        <div class="quiz-option" onclick="selectOption(this,'quiz2')"><span class="option-marker">D</span><span>To create new threads</span></div>
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this,'quiz2')"><span class="option-marker">A</span><span>To stop a thread</span></button>
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this,'quiz2')" data-correct="true"><span class="option-marker">B</span><span>To prevent race conditions on shared data</span></button>
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this,'quiz2')"><span class="option-marker">C</span><span>To speed up execution</span></button>
+                        <button type="button" class="quiz-option" aria-pressed="false" onclick="selectOption(this,'quiz2')"><span class="option-marker">D</span><span>To create new threads</span></button>
                     </div>
                     <div class="quiz-actions">
                         <button class="btn-quiz btn-check" onclick="checkAnswer('quiz2')">Check</button>
@@ -399,7 +404,7 @@ client_thread.start()</pre>
                     <div class="hint-box" id="quiz2-hint1"><div class="hint-level">Hint 1/3</div><p>What happens if 2 threads modify the same variable simultaneously?</p></div>
                     <div class="hint-box" id="quiz2-hint2"><div class="hint-level">Hint 2/3</div><p>Lock = "padlock". Only one thread can "enter" at a time.</p></div>
                     <div class="hint-box" id="quiz2-hint3"><div class="hint-level">Hint 3/3</div><p>Lock serialises access to shared resources, preventing data corruption.</p></div>
-                    <div class="feedback-box" id="quiz2-feedback"></div>
+                    <div class="feedback-box" role="status" aria-live="polite" id="quiz2-feedback"></div>
                 </div>
             </div>
         </div>
@@ -443,7 +448,9 @@ client_thread.start()</pre>
         document.addEventListener("DOMContentLoaded", () => {
             updateUI();
             createPageDots();
+            goToSlide(currentSlide);
             document.addEventListener("keydown", (e) => {
+                if (e.target.closest('input, textarea, select, button, a, [contenteditable=true]')) return;
                 if (e.key === "ArrowRight" || e.key === " ") {
                     e.preventDefault();
                     nextSlide();
@@ -456,7 +463,9 @@ client_thread.start()</pre>
         function createPageDots() {
             const container = document.getElementById("pageDots");
             for (let i = 1; i <= totalSlides; i++) {
-                const dot = document.createElement("div");
+                const dot = document.createElement("button");
+                dot.type = "button";
+                dot.setAttribute("aria-label", `Go to slide ${i}`);
                 dot.className = "page-dot" + (i === 1 ? " active" : "");
                 dot.onclick = () => goToSlide(i);
                 container.appendChild(dot);
@@ -477,17 +486,16 @@ client_thread.start()</pre>
         }
 
         function goToSlide(n) {
-            if (n < 1 || n > totalSlides || n === currentSlide) return;
-            const cur = document.querySelector(`.slide[data-slide="${currentSlide}"]`);
-            const nxt = document.querySelector(`.slide[data-slide="${n}"]`);
-            cur.classList.remove("active");
-            cur.classList.add("exit");
-            setTimeout(() => {
-                cur.classList.remove("exit");
-                nxt.classList.add("active");
-                currentSlide = n;
-                updateUI();
-            }, 100);
+            if (!Number.isInteger(n) || n < 1 || n > totalSlides) return;
+            currentSlide = n;
+            document.querySelectorAll('.slide').forEach(slide => {
+                const active = Number(slide.dataset.slide) === n;
+                slide.classList.remove('exit');
+                slide.classList.toggle('active', active);
+                slide.inert = !active;
+                slide.setAttribute('aria-hidden', String(!active));
+            });
+            updateUI();
         }
 
         function nextSlide() {
@@ -507,12 +515,15 @@ client_thread.start()</pre>
             }, 500);
         }
 
-        function selectOption(el, qid) {
-            document.getElementById(qid)
-                .querySelectorAll(".quiz-option")
-                .forEach((o) => o.classList.remove("selected", "correct", "incorrect"));
-            el.classList.add("selected");
-            document.getElementById(`${qid}-feedback`).classList.remove("visible");
+        function selectOption(el, quizId) {
+            const container = document.getElementById(quizId);
+            container.querySelectorAll('.quiz-option').forEach(option => {
+                option.classList.remove('selected', 'correct', 'incorrect');
+                option.setAttribute('aria-pressed', 'false');
+            });
+            el.classList.add('selected');
+            el.setAttribute('aria-pressed', 'true');
+            document.getElementById(`${quizId}-feedback`).classList.remove('visible');
         }
 
         function checkAnswer(qid) {

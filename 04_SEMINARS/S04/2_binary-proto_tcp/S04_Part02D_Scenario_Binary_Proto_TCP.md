@@ -18,13 +18,13 @@ Estimated duration: ~25 minutes.
 1. Start the example binary server:
 
 ```bash
-python3 index_binary-proto_tcp-server_example.py
+python3 S04_Part02A_Example_Binary_Proto_TCP_Server.py
 ````
 
 2. In another terminal, start the binary client:
 
 ```bash
-python3 index_binary-proto_tcp-client_example.py
+python3 S04_Part02B_Example_Binary_Proto_TCP_Client.py
 ```
 
 3. At the `connected(binaries)>` prompt, try:
@@ -39,7 +39,7 @@ exit
 
 Note the following:
 
-* you cannot see the command in clear text within the raw traffic (the payload is pickled);
+* pickle is serialisation, not encryption: strings such as commands and values can remain readable in the raw bytes;
 * the client displays only the `payload` from the Response.
 
 ---
@@ -83,7 +83,7 @@ Consider the following:
   * visible, human-readable.
 * Binary protocol:
 
-  * more compact (no spaces, no digits for large headers).
+  * a one-byte framing header, but pickle adds metadata: measure the complete frame before claiming it is smaller. This teaching format permits at most 255 total bytes.
   * harder to debug without tools that understand the format (pickle, protobuf, etc.).
 
 You will write a few observations about this in the activity file.
@@ -92,7 +92,7 @@ You will write a few observations about this in the activity file.
 
 ### 5. Student Task – the `keys` Command
 
-1. Open `index_binary-proto_tcp-server_template.py`.
+1. Open `S04_Part02C_Template_Binary_Proto_TCP_Server.py`.
 
 2. In `process_command()` implement the command:
 
@@ -121,13 +121,13 @@ Suggestion:
 3. Start the template server:
 
 ```bash
-python3 index_binary-proto_tcp-server_template.py
+python3 S04_Part02C_Template_Binary_Proto_TCP_Server.py
 ```
 
 4. Start the example binary client:
 
 ```bash
-python3 index_binary-proto_tcp-client_example.py
+python3 S04_Part02B_Example_Binary_Proto_TCP_Client.py
 ```
 
 5. Test:

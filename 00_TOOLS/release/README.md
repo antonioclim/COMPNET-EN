@@ -1,67 +1,48 @@
-# release — Course Kit Packaging
+# Course kit release packaging
 
-Maintainer-only helper for producing a distributable ZIP archive of the repository. The script runs the repository QA checks first, then builds a ZIP using the inclusion and exclusion rules encoded in `create_release_zip.sh`.
+This maintainer helper creates a ZIP from a **committed full Git checkout**.
+It uses the same `00_TOOLS/qa/run_checks.py` entry point as CI. It neither
+changes executable modes nor silently skips missing test dependencies.
 
-## File and Folder Index
+## Prepare and check
 
-| Name | Type | Description | Metric |
-|---|---|---|---|
-| [`README.md`](README.md) | Markdown | Orientation for release packaging (this file) | — |
-| [`create_release_zip.sh`](create_release_zip.sh) | Bash | Runs QA, then builds the release ZIP (path printed on success) | 60 lines |
-
-## Usage
-
-Run from the repository root:
+Run these commands from the repository root, in a Python environment used for QA:
 
 ```bash
-bash 00_TOOLS/release/create_release_zip.sh
+python3 -m pip install -r 00_TOOLS/qa/requirements.txt
+python3 00_TOOLS/qa/run_checks.py
 ```
 
-The script prints the output ZIP path and exits non-zero if a QA check fails.
+The shared gates check Python syntax, executable permissions, relative Markdown
+file targets, lexical integrity, lecture figure sources and pytest regressions.
+The historical root `CHANGELOG.md` is explicitly excluded from the language
+heuristic in both routes. This does not exclude it from the release archive.
+The conservative `format-offline.js` helper is optional and is not a CI gate.
 
-## Design Rationale
+## Build the archive
 
-Release creation is kept as a single script so that local packaging follows the same gates as CI. Packaging rules are kept next to the build logic to avoid divergence between documentation and what is actually shipped.
-
-## Cross-References and Contextual Connections
-
-### Prerequisites and Dependency Links
-
-| Prerequisite | Path | Why |
-|---|---|---|
-| QA checks pass | [`../qa/`](../qa/) | The release builder aborts on failing checks |
-| `zip` available | — | The script uses `zip` to produce the archive |
-
-### Lecture, Seminar, Project and Quiz Mapping
-
-| This folder | Lecture foundation | Seminar usage | Project usage | Quiz |
-|---|---|---|---|---|
-| Release packaging | — | — | — | — |
-
-### Downstream Dependencies
-
-No course content depends on this directory at runtime. It is referenced by tool documentation and by the executable permission manifest.
-
-### Suggested Learning Sequence
-
-**Suggested sequence:** run QA locally (`00_TOOLS/qa/`) → run this script → distribute the resulting ZIP through the course channel
-
-## Selective Clone Instructions
-
-**Method A — Git sparse-checkout (requires Git 2.25+)**
+Commit the reviewed changes first, then run:
 
 ```bash
-git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
-cd COMPNET-EN
-git sparse-checkout set 00_TOOLS/release
+bash 00_TOOLS/release/create_release_zip.sh ../COMPNET-EN-v1.5.0.zip
 ```
 
-**Method B — Direct download (no Git required)**
+The output must not already exist. The helper refuses tracked working-tree or
+index changes, runs the shared gates, archives `HEAD` with Git's recorded modes
+and checks the ZIP CRC before creating the final file. Untracked files and ignored
+results are not packaged. The default filename uses the current short commit ID.
+Set `COMP_NET_PYTHON` to the required interpreter if `python3` is not suitable.
 
-```
-https://github.com/antonioclim/COMPNET-EN/tree/main/00_TOOLS/release
-```
+A sparse checkout or a downloaded source ZIP is not the supported maintainer
+input. Use a full clone for QA and packaging. Students may use the GitHub release
+source archive directly; GitHub's automatic source archives are produced by GitHub,
+not by this helper.
 
-## Version and Provenance
+## Scope of a successful result
 
-The release builder is updated when the packaging exclusions change or when the QA checks gain new gates.
+Passing these gates verifies source and component properties. Docker start-up,
+Mininet/OpenFlow behaviour, Windows/VirtualBox, LMS import and browser/Excel use
+require their own acceptance evidence. The OVA is a separately versioned Zenodo
+asset and is never included or re-exported here.
+
+See [QA tools](../qa/) and the [main repository guide](../../README.md).

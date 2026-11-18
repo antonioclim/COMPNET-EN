@@ -52,7 +52,7 @@ If `Content-Length` is wrong, the browser:
 * or "waits" for the remaining data
 * or closes the connection prematurely
 
-**Therefore: Content-Length is mandatory.**
+**This teaching server sends an accurate Content-Length in bytes.** HTTP/1.1 also supports chunked framing or, where permitted, a connection-close-delimited response. Persistent connections need unambiguous message boundaries; Content-Length is not universally mandatory. See RFC 9112 §6.3: https://www.rfc-editor.org/rfc/rfc9112.html#section-6.3.
 
 ---
 

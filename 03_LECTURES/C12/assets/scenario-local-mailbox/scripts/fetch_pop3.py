@@ -1,4 +1,5 @@
 import argparse
+import ssl
 import poplib
 from email.parser import BytesParser
 from email.policy import default
@@ -10,12 +11,15 @@ def main():
     p.add_argument("--pop3-port", type=int, default=110)
     p.add_argument("--user", required=True)
     p.add_argument("--password", required=True)
+    p.add_argument("--cafile", default="tls/ca.crt", help="Trusted CA certificate for this local lab")
     args = p.parse_args()
+    context = ssl.create_default_context(cafile=args.cafile)
 
     if args.pop3_port == 995:
-        pop = poplib.POP3_SSL(args.pop3_host, args.pop3_port, timeout=10)
+        pop = poplib.POP3_SSL(args.pop3_host, args.pop3_port, timeout=10, context=context)
     else:
         pop = poplib.POP3(args.pop3_host, args.pop3_port, timeout=10)
+        pop.stls(context=context)
 
     try:
         pop.user(args.user)

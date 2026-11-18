@@ -74,7 +74,7 @@
 * Text-based
 * Request–response model
 * Runs over TCP
-* Stateless
+* Stateful SMTP transactions (greeting, envelope, recipients, DATA and reset)
 * Initially without authentication
 
 ---
@@ -375,7 +375,7 @@ The browser communicates only with the webmail server over HTTPS. The webmail se
 * Spam filtering
 * DKIM/SPF/DMARC (conceptual mention)
 
-Email security operates at multiple layers. STARTTLS and SMTPS protect the transport channel. SPF validates the sending server, DKIM signs the message content and DMARC defines the policy when either check fails.
+Email security operates at multiple layers. STARTTLS and SMTPS protect the transport channel. SPF validates the sending server, DKIM signs the message content and DMARC checks alignment with the visible From domain: one aligned successful SPF or DKIM mechanism is sufficient for a DMARC pass; the published policy applies when DMARC fails.
 
 [FIG] assets/images/fig-email-security-layers.png
 

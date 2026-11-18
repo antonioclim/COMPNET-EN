@@ -14,14 +14,21 @@ This scenario runs a fully local mail stack and demonstrates interaction from Py
 From this folder:
 
 ```bash
+bash scripts/generate_demo_certs.sh
+docker compose run --rm mail setup email add alice@example.test alicepw
 docker compose up -d
+docker compose logs --tail=50 mail
 ```
 
+Wait until the mail service is ready before sending messages. The generated CA
+certificate is trusted explicitly by the supplied clients. Do not commit private
+keys or reuse these classroom credentials on an Internet-facing server.
+
 #### 2) Create a mailbox
-Create a test user and password (example: alice@example.test / alicepw):
+The first account was created before startup above. To add another local test account:
 
 ```bash
-docker exec -it dms setup email add alice@example.test alicepw
+docker compose exec mail setup email add bob@example.test bobpw
 ```
 
 You can add more users in the same way.
@@ -42,10 +49,11 @@ python3 scripts/fetch_pop3.py --pop3-host localhost --pop3-port 110   --user ali
 ```
 
 #### 6) Send an attachment (MIME)
-Put an example file in this folder (e.g. assets/cat.jpg), then:
+Create a small attachment in this folder, then:
 
 ```bash
-python3 scripts/send_attachment_smtp.py --smtp-host localhost --smtp-port 587   --user alice@example.test --password alicepw   --to alice@example.test --file assets/cat.jpg
+printf 'Hello from the MIME attachment exercise.\n' > attachment.txt
+python3 scripts/send_attachment_smtp.py --smtp-host localhost --smtp-port 587   --user alice@example.test --password alicepw   --to alice@example.test --file attachment.txt
 ```
 
 #### 7) Webmail
@@ -53,19 +61,21 @@ Open http://localhost:8080 and log in:
 - user: alice@example.test
 - password: alicepw
 
-Note: For local demonstrations, TLS certificates are self-signed so clients may require explicit trust if you use ports 993 or 995.
+All supplied clients verify the local CA and the server name. SMTP 587, IMAP 143 and POP3 110 use STARTTLS; 993 and 995 use implicit TLS. Roundcube uses the same CA through its mounted configuration. Published ports bind only to 127.0.0.1. See the [Docker Mailserver TLS manual](https://docker-mailserver.github.io/docker-mailserver/latest/config/security/ssl/#bring-your-own-certificates).
 
 #### Clean up
 ```bash
-docker compose down -v
+docker compose down
+# Only when you intend to erase this lab's saved mail and state:
+# docker compose down -v
 ```
 
 ## Files
 
 | Name | Lines |
 |------|-------|
-| `docker-compose.yml` | 41 |
-| `mailserver.env` | 15 |
+| `docker-compose.yml` | 44 |
+| `mailserver.env` | 18 |
 | `requirements.txt` | 1 |
 | `docker-mailserver/` | 1 files |
 | `scripts/` | 4 files |

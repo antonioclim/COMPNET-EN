@@ -55,7 +55,7 @@ python advanced/tests/test_advanced_proxy.py
 
 | Name | Lines |
 |------|-------|
-| `docker-compose.yml` | 20 |
+| `docker-compose.yml` | 42 |
 | `api/` | 3 files |
 | `nginx/` | 1 file |
 | `web/` | 3 files |

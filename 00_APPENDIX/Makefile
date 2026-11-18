@@ -11,12 +11,12 @@
 #   make export    - Export quiz to all formats
 #   make clean     - Clean generated files
 
-.PHONY: help quiz test lint validate export clean verify all
+.PHONY: help quiz quiz-review quiz-random quiz-validate test test-verbose test-exports test-all lint lint-fix validate validate-python validate-yaml validate-json export export-json export-moodle export-qti clean verify all
 
 # Configuration
 PYTHON := python3
 QUIZ_DIR := formative
-EXAMPLES_DIR := PYTHON_self_study_guide/examples
+EXAMPLES_DIR := a)PYTHON_self_study_guide/examples
 TESTS_DIR := $(EXAMPLES_DIR)/tests
 
 # Colours for output
@@ -90,20 +90,20 @@ quiz-validate:
 
 test:
 	@echo "$(CYAN)Running smoke tests...$(NC)"
-	@$(PYTHON) $(TESTS_DIR)/test_smoke.py
+	@$(PYTHON) "$(TESTS_DIR)/test_smoke.py"
 	@echo "$(GREEN)✓ Smoke tests passed$(NC)"
 
 test-verbose:
 	@echo "$(CYAN)Running smoke tests (verbose)...$(NC)"
-	@$(PYTHON) -m pytest $(TESTS_DIR)/test_smoke.py -v 2>/dev/null || $(PYTHON) $(TESTS_DIR)/test_smoke.py
+	@$(PYTHON) -m pytest "$(TESTS_DIR)/test_smoke.py" -v
 
 test-exports:
 	@echo "$(CYAN)Running export function tests...$(NC)"
 	@if [ -f "$(QUIZ_DIR)/tests/test_quiz_exports.py" ]; then \
-		$(PYTHON) $(QUIZ_DIR)/tests/test_quiz_exports.py; \
+		$(PYTHON) $(QUIZ_DIR)/tests/test_quiz_exports.py || exit $$?; \
 		echo "$(GREEN)✓ Export tests passed$(NC)"; \
 	else \
-		echo "$(YELLOW)⚠ Export tests not found$(NC)"; \
+		echo "$(RED)Export tests not found$(NC)"; exit 1; \
 	fi
 
 test-all: test test-exports
@@ -116,19 +116,19 @@ test-all: test test-exports
 lint:
 	@echo "$(CYAN)Running linter...$(NC)"
 	@if command -v ruff >/dev/null 2>&1; then \
-		ruff check $(EXAMPLES_DIR)/*.py $(QUIZ_DIR)/*.py --ignore E501; \
+		ruff check "$(EXAMPLES_DIR)"/*.py $(QUIZ_DIR)/*.py --ignore E501; \
 	elif command -v flake8 >/dev/null 2>&1; then \
-		flake8 $(EXAMPLES_DIR)/*.py $(QUIZ_DIR)/*.py --max-line-length=120; \
+		flake8 "$(EXAMPLES_DIR)"/*.py $(QUIZ_DIR)/*.py --max-line-length=120; \
 	else \
 		echo "$(YELLOW)⚠ No linter found. Install with: pip install ruff$(NC)"; \
-		$(PYTHON) -m py_compile $(EXAMPLES_DIR)/*.py $(QUIZ_DIR)/*.py; \
+		$(PYTHON) -m py_compile "$(EXAMPLES_DIR)"/*.py $(QUIZ_DIR)/*.py || exit $$?; \
 		echo "$(GREEN)✓ Syntax check passed$(NC)"; \
 	fi
 
 lint-fix:
 	@echo "$(CYAN)Running linter with auto-fix...$(NC)"
 	@if command -v ruff >/dev/null 2>&1; then \
-		ruff check $(EXAMPLES_DIR)/*.py $(QUIZ_DIR)/*.py --fix --ignore E501; \
+		ruff check "$(EXAMPLES_DIR)"/*.py $(QUIZ_DIR)/*.py --fix --ignore E501; \
 	else \
 		echo "$(YELLOW)⚠ ruff not found. Install with: pip install ruff$(NC)"; \
 	fi
@@ -142,7 +142,7 @@ validate: validate-python validate-yaml validate-json
 
 validate-python:
 	@echo "$(CYAN)Validating Python syntax...$(NC)"
-	@find . -name "*.py" -type f -exec $(PYTHON) -m py_compile {} \;
+	@$(PYTHON) -m compileall -q .
 	@echo "$(GREEN)✓ Python syntax valid$(NC)"
 
 validate-yaml:
@@ -153,7 +153,7 @@ validate-yaml:
 validate-json:
 	@echo "$(CYAN)Validating JSON files...$(NC)"
 	@if [ -f "$(QUIZ_DIR)/quiz.json" ]; then \
-		$(PYTHON) -c "import json; json.load(open('$(QUIZ_DIR)/quiz.json'))"; \
+		$(PYTHON) -c "import json; json.load(open('$(QUIZ_DIR)/quiz.json'))" || exit $$?; \
 		echo "$(GREEN)✓ JSON valid$(NC)"; \
 	else \
 		echo "$(YELLOW)⚠ quiz.json not found (optional)$(NC)"; \
@@ -163,7 +163,7 @@ validate-json:
 # EXPORT TARGETS
 #═══════════════════════════════════════════════════════════════════════════════
 
-export: export-json export-moodle
+export: export-json export-moodle export-qti
 	@echo "$(GREEN)✓ All exports completed$(NC)"
 
 export-json:
@@ -204,7 +204,7 @@ clean:
 	@find . -type f -name "*.pyc" -delete 2>/dev/null || true
 	@find . -type f -name "*_export.json" -delete 2>/dev/null || true
 	@find . -type f -name "*_moodle.gift" -delete 2>/dev/null || true
-	@find . -type f -name "*_qti.xml" -delete 2>/dev/null || true
+	@find . -type f \( -name "*_qti.xml" -o -name "*_qti.zip" \) -delete 2>/dev/null || true
 	@echo "$(GREEN)✓ Clean completed$(NC)"
 
 #═══════════════════════════════════════════════════════════════════════════════

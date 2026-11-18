@@ -1,294 +1,62 @@
-# 🔄 CI/CD Setup Guide — Week 0
-## Computer Networks — ASE, CSIE | by ing. dr. Antonio Clim
+# Continuous integration and local checks
 
-> This guide explains how to set up and use the Continuous Integration pipeline for the Week 0 kit.
+Computer Networks — ASE, CSIE | ing. dr. Antonio Clim
 
----
+## The workflow in this repository
 
-## Overview
-
-The CI pipeline automatically validates:
-
-| Check | Description | Tool |
-|-------|-------------|------|
-| **Syntax** | Python files compile without errors | `py_compile` |
-| **Linting** | Code style and potential bugs | `ruff` |
-| **YAML** | Quiz and config files are valid | `pyyaml` |
-| **JSON** | LMS export files are valid | `json` |
-| **Tests** | Smoke tests pass | `pytest` |
-| **Docs** | Required documentation exists | `bash` |
-
----
-
-## Quick Start
-
-### Local Validation
-
-Run all checks locally before pushing:
+The authoritative workflow is [ci.yml](../../.github/workflows/ci.yml).
+It runs on pushes and pull requests, uses an Ubuntu runner and Python 3.11,
+installs the [QA requirements](../../00_TOOLS/qa/requirements.txt), then runs:
 
 ```bash
-# Using Make (recommended)
-make all
-
-# Or run individually
-make lint      # Code linting
-make test      # Smoke tests
-make validate  # YAML/JSON validation
+python 00_TOOLS/qa/run_checks.py
 ```
 
-### GitHub Actions
+The same command runs locally and inside the release helper. It performs:
 
-The CI pipeline runs automatically on:
-- Push to `main`, `develop`, or `master` branches
-- Pull requests to these branches
-- Manual trigger (workflow_dispatch)
+1. Python source syntax parsing without executing lab entry points.
+2. Executable permission checks before any repair.
+3. Relative Markdown file-target checks; external URLs and heading fragments are outside that check.
+4. Language and corrupted-token checks, with the historical root CHANGELOG explicitly excluded.
+5. Lecture figure-source checks (`--puml-only`).
+6. The pytest component regression suite with third-party plugin autoload disabled.
 
----
+A failure stops the run. Missing pytest or PyYAML is an error, not a skipped pass.
+pytest and PyYAML are pinned; the referenced lecture-test dependencies use bounded
+version ranges. This dependency list is not a full transitive lockfile.
+The workflow does not run Ruff, build/start containers, boot the OVA, start Mininet
+or perform browser, Excel or LMS acceptance. Check the actual run's commit SHA and
+log before attributing a CI result to a release candidate.
 
-## Pipeline Structure
+## Run locally
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        CI PIPELINE                               │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐  │
-│  │   Lint   │───▶│   Test   │    │   Quiz   │    │   Docs   │  │
-│  │          │    │          │    │Validation│    │  Check   │  │
-│  └──────────┘    └──────────┘    └──────────┘    └──────────┘  │
-│       │               │               │               │         │
-│       └───────────────┴───────────────┴───────────────┘         │
-│                              │                                   │
-│                       ┌──────────┐                              │
-│                       │ Summary  │                              │
-│                       └──────────┘                              │
-│                                                                  │
-└─────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## Configuration Files
-
-### Linting Configuration
-
-Create `ruff.toml` in the repository root:
-
-```toml
-# ruff.toml — Linting configuration
-# See: https://docs.astral.sh/ruff/configuration/
-
-[lint]
-# Enable rules
-select = [
-    "E",    # pycodestyle errors
-    "W",    # pycodestyle warnings
-    "F",    # pyflakes
-    "I",    # isort
-    "B",    # flake8-bugbear
-    "C4",   # flake8-comprehensions
-    "UP",   # pyupgrade
-]
-
-# Ignore specific rules
-ignore = [
-    "E501",  # Line too long (handled by formatter)
-    "E402",  # Module level import not at top of file
-    "B008",  # Do not perform function calls in argument defaults
-]
-
-# Allow fix for all enabled rules
-fixable = ["ALL"]
-unfixable = []
-
-[lint.per-file-ignores]
-# Tests can have more relaxed rules
-"**/tests/*.py" = ["B", "C4"]
-
-[format]
-# Use double quotes for strings
-quote-style = "double"
-
-# Indent with spaces
-indent-style = "space"
-
-# Target Python 3.11
-target-version = "py311"
-```
-
-### Alternative: flake8 Configuration
-
-Create `.flake8` in the repository root:
-
-```ini
-[flake8]
-max-line-length = 120
-extend-ignore = E501,E402
-exclude =
-    .git,
-    __pycache__,
-    .venv,
-    build,
-    dist
-per-file-ignores =
-    **/tests/*.py: B,C4
-```
-
----
-
-## Setting Up GitHub Actions
-
-### Step 1: Enable Actions
-
-1. Go to your repository on GitHub
-2. Navigate to **Settings** → **Actions** → **General**
-3. Select "Allow all actions and reusable workflows"
-4. Save changes
-
-### Step 2: Add Workflow File
-
-The workflow file is already at `.github/workflows/ci.yml`. Commit and push it:
+From the full repository root:
 
 ```bash
-git add .github/workflows/ci.yml
-git commit -m "ci: add GitHub Actions workflow"
-git push
+python3 -m venv .venv-qa
+. .venv-qa/bin/activate
+python -m pip install -r 00_TOOLS/qa/requirements.txt
+python 00_TOOLS/qa/run_checks.py
 ```
 
-### Step 3: View Results
+A full Git checkout records executable bits. If an extraction tool discarded
+permissions, `bash 00_TOOLS/qa/apply_permissions.sh` can repair that local copy;
+record this repair separately from a clean Git checkout check. CI does not run it.
 
-1. Go to the **Actions** tab in your repository
-2. Click on the latest workflow run
-3. View detailed logs for each job
+For appendix-only convenience targets, run `make -C 00_APPENDIX help`.
+`make -C 00_APPENDIX ci` is an appendix check, not an alias for the repository-wide
+workflow. Bash and GNU Make are used for these commands; a PowerShell session
+should enter the documented VM/WSL shell first.
 
----
+## Optional formatting
 
-## Adding Status Badge
+`node format-offline.js --check` checks only CRLF normalisation and a final newline.
+It preserves Markdown hard breaks, code indentation and HTML preformatted content.
+It is a conservative helper, not a substitute for a syntax-aware formatter.
 
-Add this badge to your README.md:
+## Release preparation
 
-```markdown
-![CI Status](https://github.com/YOUR_USERNAME/YOUR_REPO/actions/workflows/ci.yml/badge.svg)
-```
+Use the [release helper](../../00_TOOLS/release/README.md) after committing the
+reviewed source. Do not interpret passing source checks as native VM acceptance.
 
----
-
-## Troubleshooting CI Failures
-
-### Lint Failures
-
-```bash
-# Run linter locally to see issues
-ruff check . --output-format=full
-
-# Auto-fix issues
-ruff check . --fix
-```
-
-### Test Failures
-
-```bash
-# Run tests with verbose output
-python -m pytest PYTHON_self_study_guide/examples/tests/ -v
-
-# Or use the built-in runner
-python PYTHON_self_study_guide/examples/tests/test_smoke.py
-```
-
-### YAML Validation Failures
-
-```bash
-# Check specific file
-python -c "import yaml; yaml.safe_load(open('formative/quiz.yaml'))"
-
-# See detailed error
-python -c "
-import yaml
-try:
-    yaml.safe_load(open('formative/quiz.yaml'))
-    print('Valid')
-except yaml.YAMLError as e:
-    print(f'Error: {e}')
-"
-```
-
----
-
-## Local Development Setup
-
-### Install Development Dependencies
-
-```bash
-pip install ruff pyyaml pytest
-```
-
-### Pre-commit Hook (Optional)
-
-Create `.pre-commit-config.yaml`:
-
-```yaml
-repos:
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.1.6
-    hooks:
-      - id: ruff
-        args: [--fix]
-      - id: ruff-format
-```
-
-Install and activate:
-
-```bash
-pip install pre-commit
-pre-commit install
-```
-
----
-
-## CI Environment Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `PYTHON_VERSION` | Python version for tests | `3.11` |
-
----
-
-## Extending the Pipeline
-
-### Adding New Checks
-
-Edit `.github/workflows/ci.yml` and add a new job:
-
-```yaml
-  new-check:
-    name: My New Check
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run check
-        run: |
-          echo "Running my check..."
-          # Your commands here
-```
-
-### Adding to Makefile
-
-```makefile
-my-check:
-    @echo "Running my check..."
-    # Your commands here
-```
-
----
-
-## Resources
-
-- [GitHub Actions Documentation](https://docs.github.com/en/actions)
-- [Ruff Documentation](https://docs.astral.sh/ruff/)
-- [pytest Documentation](https://docs.pytest.org/)
-
----
-
-*CI/CD Setup Guide — Week 0 | Computer Networks | ASE-CSIE*
-*Version: 1.5.0 | Date: 2026-01-24*
+The shared gate also requires Node.js 24 for the Python-deck and setup-guide control-logic tests. CI installs it explicitly. Those tests execute actual inline JavaScript with limited DOM/timer/clipboard doubles; they do not establish native browser rendering or keyboard/accessibility acceptance.

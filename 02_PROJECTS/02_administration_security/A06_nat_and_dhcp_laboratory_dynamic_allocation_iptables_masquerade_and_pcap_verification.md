@@ -112,7 +112,7 @@ The NAT plus DHCP laboratory combines configuration (iptables, routing) with obs
 - Include BOOTP filters and a filter for traffic to the server (for example `http` or `icmp`).
 
 ### Automatic PCAP criteria (E2)
-These criteria are **deterministic** and can be verified automatically with `tshark`.
+These capture checks are reproducible with `tshark`. Frame counts are smoke checks; they do not replace the application tests or prove complete project acceptance.
 - Official rules: `tools/pcap_rules/A06.json`
 - In the catalogue (template): `00_common/tools/pcap_rules/A06.json` and `00_common/tools/validate_pcap.py` (copy into the student repository).
 
@@ -124,8 +124,14 @@ These criteria are **deterministic** and can be verified automatically with `tsh
 | R1 | `bootp.option.dhcp==1` | `>= 1` | DHCP Discover. |
 | R2 | `bootp.option.dhcp==2` | `>= 1` | DHCP Offer. |
 | R3 | `bootp.option.dhcp==3` | `>= 1` | DHCP Request. |
-| R4 | `bootp.option.dhcp==5` | `>= 1` | DHCP Ack. |
-| R5 | `ip && (tcp || udp || icmp)` | `>= 10` | IP traffic post-DHCP (NAT test). |
+| R4 | `bootp.option.dhcp==5` | `>= 1` | DHCP ACK. |
+| R5 | `ip && (tcp \|\| udp \|\| icmp) && !(udp.port==67 \|\| udp.port==68)` | `>= 10` | Non-DHCP IP traffic is present; verify that it follows the ACK and crosses the NAT boundary in the analysis. |
+
+### Interpretation and complementary evidence
+
+The [E2 capture and semantic-evidence matrix](../00_common/E2_CAPTURE_EVIDENCE_MATRIX.md#a06) maps every capture rule to its generating action and the complementary application evidence.
+
+- Correlate the DHCP lease with the client address and timestamps. Compare internal/external capture points for address translation and return traffic.
 
 ### Deliverables
 - Docker Compose with `tester` that runs the Bash scripts and produces `artifacts/pcap/traffic_e2.pcap`.

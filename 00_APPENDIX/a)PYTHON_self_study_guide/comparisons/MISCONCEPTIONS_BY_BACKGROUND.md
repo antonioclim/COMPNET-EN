@@ -63,7 +63,7 @@ packed = struct.pack('!H', 8080)  # '!' = network order
 ```
 ```python
 # Python: == is already strict (no coercion)
-if x == 5:  # Works like ===
+if x == 5:  # Value equality; numeric types can compare equal
 
 # For identity (same object):
 if x is None:  # Use 'is', not ==
@@ -219,7 +219,7 @@ server.bind(('0.0.0.0', 8080))    # All interfaces
 |-------|--------------|
 | `TypeError: a bytes-like object required` | Forgot `.encode()` |
 | `SyntaxError` on `{` | Using braces instead of `:` |
-| `NameError: 'const' not defined` | Using JS/Kotlin keywords |
+| `SyntaxError: invalid syntax not defined` | Using JS/Kotlin keywords |
 | `AttributeError: no attribute` | Using dot notation on dict |
 | `IndentationError` | Mixed tabs/spaces |
 

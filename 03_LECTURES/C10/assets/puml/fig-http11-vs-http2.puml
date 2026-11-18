@@ -20,8 +20,9 @@ C -> S : GET /app.js
 S --> C : 200 app.js
 
 note right of S
-  Each request must wait
-  for the previous response.
+  This example is sequential HTTP/1.1.
+  Pipelining permits outstanding requests,
+  but responses remain ordered on one connection.
 end note
 
 == HTTP/2 — Multiplexed Streams ==
@@ -36,7 +37,8 @@ S -[#43A047]-> C : Stream 1: index.html
 
 note right of S
   Responses arrive in any order.
-  No head-of-line blocking.
+  No HTTP/1.1 response-order blocking.
+  TCP loss can still block all streams on that connection.
 end note
 
 legend right

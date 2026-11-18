@@ -17,7 +17,7 @@ La finalul seminarului, studenții pot:
 1. Rula și explica un server TCP (Transmission Control Protocol) multi-client cu câte un thread per conexiune și să identifice stream-urile distincte în tshark/Wireshark.
 2. Completa un template de mini-chat în care serverul forward-ează mesajul unui client către toți ceilalți (fan-out la nivel de aplicație).
 3. Captura traficul TCP și filtra pe `tcp.stream` pentru a demonstra că fan-out-ul generează segmente separate.
-4. Rula exemplele UDP (User Datagram Protocol) broadcast și multicast și distinge în captură adresa destinație: `255.255.255.255` vs `224.0.0.1`.
+4. Rula exemplele UDP (User Datagram Protocol) broadcast și multicast și distinge în captură adresa destinație: `255.255.255.255` vs `239.255.0.1`.
 5. Formula conceptual diferența unicast / broadcast / multicast / anycast pe baza adresei destinație și a mecanismului de replicare.
 
 ---
@@ -304,7 +304,7 @@ Oprești captura după 1–2 mesaje.
 
 **Contrast direct (diagramă progresivă — mental):**
 
-> *▸ „Acum filtrăm: `ip.dst == 224.0.0.1 && udp.port == 5001`. Diferența față de broadcast: adresa destinație e un grup multicast (clasă D, 224.x.x.x). Primește doar cine s-a abonat cu `IP_ADD_MEMBERSHIP`. Broadcast trimite la toți indiferent; multicast trimite doar la abonați."*
+> *▸ „Acum filtrăm: `ip.dst == 239.255.0.1 && udp.port == 5001`. Diferența față de broadcast: adresa destinație e un grup multicast (clasă D, 224.x.x.x). Apartenenţa grupului la nivel de host şi livrarea către socket sunt distincte. Pentru Linux, IP_MULTICAST_ALL=0 limitează acest socket la abonamentele sale; altfel poate primi şi pentru grupuri înscrise global. Broadcast trimite la toți indiferent; multicast trimite doar la abonați."*
 
 ### Mini-sinteză tabelară (spusă verbal sau scrisă rapid pe tablă)
 
@@ -386,7 +386,7 @@ python3 6_udp-anycast/S03_Part06B_Example_UDP_Anycast_Client.py
 | Tot traficul TCP pe portul 3333 | `tcp.port == 3333` |
 | Un singur stream TCP | `tcp.stream eq 0` |
 | Broadcast UDP pe 5007 | `ip.dst == 255.255.255.255 && udp.port == 5007` |
-| Multicast UDP pe 5001 | `ip.dst == 224.0.0.1 && udp.port == 5001` |
+| Multicast UDP pe 5001 | `ip.dst == 239.255.0.1 && udp.port == 5001` |
 
 ### Porturi din seminar
 

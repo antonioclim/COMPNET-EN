@@ -386,6 +386,7 @@ networks:
 ### D1. Pornire topologie (1 min)
 
 ```powershell
+docker compose -f docker-compose.s06-triangle.yml down
 docker compose -f docker-compose.s06-policy.yml up -d
 docker ps --format "table {{.Names}}\t{{.Status}}"
 ```
@@ -407,7 +408,7 @@ docker exec -it s06p-gw iptables -L FORWARD -v -n --line-numbers
 
 | Ce cauți | Match | Target | Analog SDN |
 |---|---|---|---|
-| Regula conntrack | stare ESTABLISHED,RELATED | ACCEPT | — (implicit în OF) |
+| Regula conntrack | stare ESTABLISHED,RELATED | ACCEPT | Nu este implicit în OpenFlow; necesită extensie conntrack/reguli explicite |
 | Regula h1↔h2 | src=10.0.11.0/24, dst=10.0.12.0/24 | ACCEPT | flow: permit, OUTPUT:port |
 | Regula h1→h3 | src=10.0.11.0/24, dst=10.0.13.0/24 | DROP | flow: drop (acțiuni goale) |
 | Policy implicită | FORWARD | DROP | table-miss |
@@ -418,7 +419,7 @@ docker exec -it s06p-gw iptables -L FORWARD -v -n --line-numbers
 
 **Tab PowerShell separat — captură pe gw:**
 ```powershell
-docker exec -it s06p-gw tcpdump -i any -nn -w /work/s06_policy_demo.pcap "(host 10.0.12.10 or host 10.0.13.10)" &
+docker exec -it s06p-gw tcpdump -i any -nn -w /work/s06_policy_demo.pcap "(host 10.0.12.10 or host 10.0.13.10)"
 ```
 
 **În alt tab — generezi trafic:**
@@ -570,7 +571,7 @@ docker compose -f docker-compose.s06-policy.yml down
 | 3 | Client UDP rămâne blocat așteptând reply | Oprești cu Ctrl+C; revii după ce ai permis UDP în politica gw. Dacă persistă: verifici regulile cu `iptables -L -v -n`. |
 | 4 | Wireshark nu e instalat la toți | Deschizi pcap‑ul pe un singur ecran; discuți în plen. Analiza individuală devine temă. |
 | 5 | Docker Desktop nu pornește sau e instabil | Restart Docker Desktop; dacă continuă: studentul folosește Docker pe WSL2 nativ (dacă are) sau urmărește demo‑ul. |
-| 6 | Eroare la ștergerea regulii iptables (număr greșit de linie) | Relistezi cu `--line-numbers`. Dacă s‑a stricat totul: `docker compose -f docker-compose.s06-policy.yml down && up -d` repornește cu regulile inițiale. |
+| 6 | Eroare la ștergerea regulii iptables (număr greșit de linie) | Relistezi cu `--line-numbers`. Dacă s‑a stricat totul: `docker compose -f docker-compose.s06-policy.yml down`, apoi, numai după succes, `docker compose -f docker-compose.s06-policy.yml up -d` repornește cu regulile inițiale. |
 | 7 | Eroare „Address already in use" la server TCP/UDP | `docker exec -it s06p-h2 ss -tlnp` → identifici procesul → `kill <PID>` sau repornești containerul. |
 
 ---

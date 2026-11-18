@@ -124,11 +124,11 @@ In production, clients rarely connect directly to the origin server. A reverse p
 - 401 Unauthorized:
   - missing authentication
 - 403 Forbidden:
-  - authenticated, but access is denied
+  - the server understood the request but refuses it; authentication need not have succeeded
 - 404 Not Found:
-  - the resource does not exist
+  - no current representation was found, or the server does not wish to disclose one
 - 405 Method Not Allowed:
-  - the resource exists, the method does not
+  - the method is known but unsupported for this target; the response MUST include Allow
 - 415 Unsupported Media Type:
   - incorrect Content-Type
 - 422 Unprocessable Entity:
@@ -258,7 +258,7 @@ When a reverse proxy sits between the client and the server, it must forward the
 ---
 
 ### What HTTPS changes operationally
-- Traffic inspection becomes impossible without MITM
+- Passive packet capture does not reveal encrypted application payloads; authorised endpoint TLS key logging can enable decryption, while addressing, timing and sizes remain observable
 - Certificates define the server identity
 - Impact on:
   - proxies

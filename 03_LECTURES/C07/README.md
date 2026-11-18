@@ -53,7 +53,7 @@ Mininet scenario (requires Mininet and root privileges):
 
 ```bash
 cd assets/scenario-mininet-routing
-sudo python3 tringle-net.py
+sudo /usr/bin/python3 tringle-net.py link-down
 ```
 
 ## Pedagogical Context
@@ -97,7 +97,7 @@ Routing concepts are assumed by the Mininet-based seminars (S06) and by the SDN-
 ```bash
 git clone --filter=blob:none --sparse https://github.com/antonioclim/COMPNET-EN.git
 cd COMPNET-EN
-git sparse-checkout set 03_LECTURES/C07
+git sparse-checkout set 03_LECTURES/C07 00_TOOLS
 ```
 
 **Method B — Direct download**
