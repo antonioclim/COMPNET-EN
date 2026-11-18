@@ -1,4 +1,106 @@
-# N06 — partial native LibreOffice acceptance and workbook layout repair
+# N06 — native workbook pagination and remaining acceptance
+
+## Current record — 18 November 2026
+
+**The default native Calc PDF passes the exercised print-layout checks on all
+125 pages. Complete workbook acceptance remains open. X03 is PARTIAL:** GUI
+Print Preview and Microsoft Excel have not been executed.
+
+The [pagination attestation](evidence/libreoffice/2026-11-18/N06_PAGINATION_ATTESTATION.json)
+records the exact inputs, authoring controls, native command and evidence hashes.
+The base is `7753beb88a9f8589b34b92070d9737ecd4583dbd`, tree `098e63f085b78be4f1ab97e159e963243f3a4e35`. The tested workbook
+`02_PROJECTS/RC2026_VERIFICATION_INDEX.xlsx` changes from SHA-256 `08128be05a3860c0e60661f271b6b1790a0ecfeb3237e38f894cf4c544970e67` to `5d6685976a6022890ee45de9ed5bd9733e3711ed51f234b6e90350a987b4982c`.
+The native run preceded integration; the identity claim is the exact tested
+workbook bytes, not an execution of every file in the later commit.
+
+### Persistent print correction
+
+The user explicitly confirmed the proposed narrow openpyxl route. Public print
+APIs generated a settings-only skeleton; only its approved print nodes were
+transplanted into the original OOXML. The original workbook was not roundtripped,
+reserialised through a spreadsheet editor or recalculated.
+
+RULES uses A4 portrait. INDEX and the 30 project sheets use A3 landscape. All
+sheets fit one page wide with unrestricted vertical pagination and 10 mm outer
+margins; the existing 0.3-inch header/footer offsets are preserved. Print areas
+end at each sheet's last populated row. INDEX repeats row 1; projects repeat
+rows 1–3. RULES has no repeated heading.
+
+Independent read-only comparison confirms all 42 ZIP parts, 33 print-only changed
+XML parts and nine byte-identical other parts. Removing only the approved print
+insertions from every changed part recovers its exact prior bytes. All 8,669 cell
+records, 7,290 non-empty values, 1,102 criterion IDs and status validations, five
+formulas with their cached `Open` values, 25 relationship hyperlinks and 270 merged
+ranges are preserved, together with styles, dimensions, panes and provenance.
+
+### Native execution and complete PDF review
+
+One default `pdf:calc_pdf_Export` ran in an isolated native Linux profile using
+LibreOfficeDev 26.8.0.0.alpha0, build
+`2c87e51eeaa2b413ff4ae097b2705eea1995d8e5`. It exited 0 with empty stderr;
+the input and disposable copy remained unchanged and owned processes were reaped.
+No `SinglePageSheets` override or native XLSX roundtrip was used in this phase.
+
+The unmodified native PDF is 2,653,269 bytes, SHA-256
+`ffbefa4d3121f27cc2ec107e69ca69e24d82e69f99c57a20d77b344aa49a3c6e`. It has 125 pages and 32 sheet bookmarks:
+RULES one page, INDEX two, S01 and S02 five each, and every other project four.
+The previous default exports of 231 and 419 pages remain historical evidence.
+
+All 7,290 source values were reconciled with the PDF; all 1,102 criterion IDs
+occur in column B and in source order. All 4,398 non-empty C–F criterion cells
+were checked within their own row and column regions: 4,393 literal-normalised
+matches and five font-run/glyph-order cases resolved with symbols retained.
+Repeated headings, every Status cell boundary and A4/A3 dimensions pass.
+
+Every one of the 125 full-page 96 dpi images was actually opened and visually
+inspected. No material text clipping, overlap, missing column or split criterion
+row was observed. Some section bands fall at a page bottom, with their first
+criterion on the following page under repeated table headings; these presentation
+limitations are recorded individually and were not hidden or treated as lost
+content. Strict PDF reading covered 18,861 objects with no errors or warnings.
+
+### Exported links and acceptance limits
+
+The native PDF retains 30 unsuitable INDEX annotations: 25 worksheet-fragment
+URIs have misplaced hotspots, and five formula-derived links have empty URIs.
+The PDF is delivered byte-exact for printing, with its 32 native sheet bookmarks;
+its link navigation is not accepted. No link was activated, and no PDF repair is
+presented as native output. Workbook hyperlinks retain their original bytes.
+
+| Criterion | Current status | Actual boundary |
+|---|---|---|
+| X01: opening | PARTIAL | Native import/export executed; GUI repair dialogues and Excel opening untested |
+| X02: normal view | NOT_RUN | No native GUI sheet inspection |
+| X03: print/export layout | PARTIAL | All 125 default-export pages checked; GUI Print Preview and Excel remain untested |
+| X04: status and persistence | NOT_RUN | No dropdown selection, edited-status save/reopen or interactive validation |
+| X05: student evidence | NOT_RUN | No student submission assessed |
+| X06: navigation and instructions | NOT_RUN | No native link activation or complete instructional acceptance |
+
+The 101 browser and 32 workbook forms remain blank `NOT_RUN` future acceptance
+forms. This source correction does not establish VM, Windows/WSL, Docker,
+Mininet/OVS, packet capture, LMS or browser acceptance. The development-build
+result does not establish equivalence with other LibreOffice versions or Excel.
+
+### Decision and source continuity
+
+The patch changes the workbook and three concordant QA records, and adds this
+dated attestation. The current administrative inventory is A945/B320/C84.
+The approved A939/B320/C84 snapshot, intervening inventories, exact C84 list,
+licence texts and complete F3-R14 decision are preserved. Only the workbook's
+print bytes change among Category C; the other 83 paths remain byte-identical.
+All 203 finding statuses and owner records remain unchanged. The eight current
+workbook hashes are refreshed; the complete 17 November native receipt is kept
+in `native_workbook_acceptance_history`, and the current receipt records the new
+document identities. F3-R14's historical document hash is not rewritten.
+
+N08 was not rerun. No merge to `main`, v1.5.0 tag/release, Zenodo modification or
+closure of an unexecuted native gate is established by this record.
+
+## Preserved historical record — 17 November 2026
+
+The following earlier record retains its dated failures and limitations. Its
+then-current X03 FAIL is superseded only by the scoped 18 November evidence
+above; it is not rewritten into a historical PASS.
 
 Recorded on 17 November 2026 for the v1.5.0 candidate. **Native Calc import,
 PDF export and XLSX export were executed. Full workbook acceptance remains
@@ -9,7 +111,7 @@ records the actual inputs, outputs, command receipts and evidence hashes.
 The F6 continuation dossier retains the failed original export, corrected
 export, raw logs, structural comparisons and selected visual-review images.
 
-## Source and runtime identity
+### Source and runtime identity
 
 | Item | Identity |
 |---|---|
@@ -28,7 +130,7 @@ the tested workbook, not a native run of every file in the later commit. The
 engine is a development build; Microsoft Excel and other LibreOffice versions
 were not tested.
 
-## What actually ran
+### What actually ran
 
 Both the original workbook and the repaired copy were passed separately through
 the installed `soffice` executable with these native conversion filters:
@@ -55,7 +157,7 @@ images were rendered from actual Calc PDF output and visually inspected;
 extractable PDF text alone was not treated as proof of legibility. Neither PDF
 received an all-page visual acceptance review.
 
-## The source correction and its limits
+### The source correction and its limits
 
 The integrated workbook is the second layout correction, authored from the
 original candidate through the documented artifact-tool API. It changes
@@ -80,7 +182,7 @@ available authoring API did not expose documented paper, fit-to-page or
 repeated-print-heading controls; those settings were not invented or changed
 through undocumented interfaces.
 
-## Native roundtrip observation
+### Native roundtrip observation
 
 Both native XLSX outputs preserve the inspected cell values, formula text,
 criterion IDs and validation memberships. LibreOffice adds `aca=false` to the
@@ -93,7 +195,7 @@ unfavourable compatibility observation; link activation was not executed.
 source correction or committed to the repository. The integrated workbook
 retains the original 25 hyperlink targets and the five formula hyperlinks.
 
-## Acceptance status
+### Acceptance status
 
 | Criterion | Status | Boundary |
 |---|---|---|
@@ -110,7 +212,7 @@ those unexecuted complete acceptance forms. Browser preparation and synthetic
 navigation assertions are also separate; no candidate page was accepted in a
 native browser during F6.
 
-## Preserved decisions and remaining work
+### Preserved decisions and remaining work
 
 The workbook remains one of the exact 84 Category C paths. Its layout bytes
 change in this phase; the other 83 Category C files remain byte-identical to

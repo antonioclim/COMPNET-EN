@@ -53,7 +53,7 @@ the author can trace each correction to the agreed audit record.
 | Test doubles and DOM models | The explicitly modelled protocol/control contracts | Real SSH/MQTT service acceptance or native browser accessibility |
 | PlantUML generation and visual inspection | Renderability and reviewed diagram content | The network behaviour depicted in a diagram |
 | OOXML checks and workbook preview | Workbook structure, tables, values and inspected rendering | Excel/LibreOffice interaction, recalculation or dropdown acceptance |
-| Dated native LibreOffice import/export and PDF review | Actual Calc conversion and the observed layout repair on exact workbook bytes | Complete print-layout acceptance, GUI interaction or Microsoft Excel equivalence |
+| Dated native LibreOffice import/export and complete default-PDF review | Actual Calc conversion, all 125 print pages and exact workbook preservation in the recorded engine | GUI Print Preview, status/navigation interaction or Microsoft Excel equivalence |
 
 Run the same source gate as CI from a full checkout:
 
@@ -85,25 +85,36 @@ below. Earlier component results retain their recorded source identities.
 
 ## Partial native workbook acceptance
 
-The [N06 LibreOffice record](N06_LIBREOFFICE_ACCEPTANCE.md) documents actual
-native import, PDF export and XLSX export of both the `efe829c5` workbook and
-its layout correction. The first PDF exposed clipped text. The correction
-changes 1,330 row heights and the RULES column A width while preserving values,
-formulas, IDs, validations, link targets, styles and document provenance.
-Seventeen pages of the corrected native PDF were visually inspected.
+The [N06 LibreOffice record](N06_LIBREOFFICE_ACCEPTANCE.md) preserves the
+17 November failures and records the confirmed persistent pagination correction
+of 18 November. The earlier repair changed row heights and the RULES width;
+the new correction adds only paper, margins, fit-to-width, print areas and
+repeated headings. Independent byte-level comparison preserves all assessment
+content, styles, formulas and cached values, validations, hyperlinks and provenance.
 
-Previously clipped text is readable in those reviewed samples, but horizontal
-pagination and unrepeated headers remain: **X03 is still FAIL**, X01 is partial,
-and the other interactive workbook criteria remain unexecuted. The correction
-increases the native PDF from 231 to 419 pages. The native XLSX roundtrip also
-rewrites 25 hyperlinks to the disposable input-copy context; that output is
-retained as evidence and is not the integrated workbook.
+One native default PDF export now contains 125 pages. All pages were checked
+for text and geometry and actually inspected as full-page images: criteria and
+all seven columns stay together horizontally, and continuation headings repeat.
+All 7,290 values, 1,102 ordered criterion IDs and 4,398 non-empty C–F criterion
+cells were reconciled. Some section bands remain at a page bottom before their
+first criterion on the next page; the retained observations distinguish this
+presentation limitation from clipping or missing content.
 
-The workbook remains Category C. Only that one Category C file changes in this
-phase; the other 83 retain their bytes. The exact C84 membership, licence texts
-and F3-R14 decision remain unchanged. The two new QA documents bring the
-current administrative inventory to A944/B320/C84 without changing the approved
-A939/B320/C84 snapshot or the intervening A942/B320/C84 application record.
+**X03 is PARTIAL:** the exercised default-PDF layout component passes; GUI Print
+Preview and Microsoft Excel remain untested. X01 is PARTIAL; X02/X04/X05/X06
+remain NOT_RUN. The native PDF's 25 misplaced worksheet-link hotspots and five
+empty link destinations are retained as adverse evidence, not navigation
+acceptance. The old 231/419-page PDFs and the native XLSX hyperlink rewrite
+observation remain historical evidence; no native roundtrip output is integrated.
+
+The workbook remains Category C and only its print settings change among those
+84 paths. The other 83 paths, exact C84 membership, licence texts and full F3-R14
+record remain unchanged. The one new dated administrative attestation brings
+the current inventory to A945/B320/C84; the approved A939/B320/C84 snapshot and
+the A942/B320/C84 and A944/B320/C84 historical inventories retain their dates.
+All 203 finding statuses and owner records are preserved. Only eight current
+workbook hashes and the separately dated native-acceptance receipt are updated;
+the complete previous receipt is retained in the registry's history.
 
 ## Remaining release gates
 
@@ -117,9 +128,9 @@ A939/B320/C84 snapshot or the intervening A942/B320/C84 application record.
    their evidence; do not treat a parser or mock result as a substitute.
 3. **Student interfaces and exports.** Native browser keyboard/clipboard/layout
    checks, Moodle/QTI import and Excel/LibreOffice workbook interaction remain.
-   N06 records partial native Calc conversion and an observed layout repair;
-   the failed full print-layout gate and unexecuted interaction checks remain
-   open, as detailed above.
+   N06 records successful default-PDF layout checks on all 125 pages;
+   complete X03 remains partial because GUI Print Preview and Excel are untested.
+   Status, persistence and navigation checks remain open, as detailed above.
    The separate [N08 Kotlin/JVM record](N08_KOTLIN_ACCEPTANCE.md) now verifies
    compilation and the bounded Rosetta echo/EOF scenarios on its pinned
    Linux/JVM input. This result does not close the interface/export gates.
